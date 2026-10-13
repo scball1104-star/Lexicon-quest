@@ -1,0 +1,182 @@
+{
+  "arrivals": [
+    {
+      "taskId": "ae3003df-b0da-4300-ae4c-3511309cc8b8",
+      "prompt": "A tranquil enchanted village beside a canal at twilight. Preserve the detailed stylized pixel fantasy game art, architecture and composition. A slow gentle camera push toward the distant castle. Water actually flows and ripples beneath the bridge, willow branches sway softly, warm lantern flames flicker, fireflies drift across the foreground and delicate mist rolls over the canal. One continuous atmospheric establishing shot. No text, no interface, no cuts, no new characters. Keep buildings stable and the pixel illustration style consistent.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "31401a24-d1c1-4ec2-8a4f-d0e5383d1ed6",
+      "prompt": "An eerie ruined mirror city over still water at violet twilight. Reflections ripple independently, silvery mist drifts through arches, falling luminous motes and a faint shimmer move across the tall mirrors. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "8a4ba9fd-dec3-4767-b95b-3bf1a0578658",
+      "prompt": "A monumental forge citadel surrounded by rivers of molten lava. Lava streams actually flow and bubble, sparks rise from furnaces, smoke billows slowly upward and orange heat light dances on stone. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "53a05b1e-5672-4c34-8366-c13456798b89",
+      "prompt": "A moonlit ruined royal water city. Waterfalls pour from aqueducts into blue canals, ivy sways, moonlight reflections ripple and blue fireflies drift around the carved stone monuments. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "8ca8fb60-1ded-49d7-973c-fe227f26e755",
+      "prompt": "A desert astronomical observatory beneath a brilliant violet star sky. The armillary sphere rotates slowly, sand blows in gentle ribbons, lanterns flicker and distant stars shimmer. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "a9d52639-6f57-47e1-a4a7-12c745151ec2",
+      "prompt": "Floating islands with a harbor airship above the clouds. Clouds drift visibly between islands, waterfalls flow into the mist, small pennants flutter and the airship gently rocks in place. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "ec80471d-40a9-4066-9f1f-76793de3496a",
+      "prompt": "A snowy northern citadel beneath an emerald aurora. Snowflakes fall gently, the aurora moves in slow ribbons, icy mist drifts below the bridge and village windows glow warmly. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "9aaee4c5-3a7c-497b-99fd-c64de08dd58c",
+      "prompt": "A vast magical library with a luminous floating open book. Loose pages turn and drift, tiny violet particles orbit the book, magical rings rotate slowly and warm candlelight flickers among towering shelves. Preserve this original detailed stylized pixel fantasy illustration and exact architecture. A very slow gentle camera push inward. One continuous atmospheric game establishing shot. Animate environmental details with stable coherent buildings. No text, no interface, no scene cuts, no new characters.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    }
+  ],
+  "guardians": [
+    {
+      "taskId": "de9afe80-1088-49b1-89cf-12db52c7eebb",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "3d187805-8e65-486c-b7aa-b841a1ebe1fa",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "429329db-af23-400a-8364-02c873d54fa8",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "a005a78a-cf37-4683-9ab6-e541c42bf831",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "176ba31d-7aae-4ea6-b650-bbf883968033",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "ad648585-81b9-4a70-8c60-37d0295ba767",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "7622fe8e-9623-46d6-aefe-898ed66bcb50",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    },
+    {
+      "taskId": "d9802113-5903-4406-a9c1-96c2325e8299",
+      "prompt": "An imposing magical fantasy guardian appears in this enchanted realm. Preserve the creature's exact design, silhouette, colors, face, anatomy and original detailed pixel fantasy illustration. The guardian gently breathes and shifts its weight while magical energy pulses from its glowing details. Faint magical particles drift around it. Water, smoke or clouds in the environment move softly. A very slow cinematic push toward the guardian. One continuous atmospheric reveal shot, no fighting, no attacks, no text, no UI, no cuts. Keep all buildings and anatomy stable.",
+      "meta": {
+        "modelId": "gen-4-turbo",
+        "modelLabel": "Gen-4 Turbo",
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 10.083333
+      }
+    }
+  ]
+}

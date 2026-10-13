@@ -1,0 +1,215 @@
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#080d1b;color:#f1ebd6;font-family:ui-monospace,Menlo,Consolas,monospace}button,input{font:inherit}button{background:#203354;color:#f5efd9;border:1px solid #aab9d0;border-radius:5px;padding:11px;cursor:pointer;min-height:42px}button:disabled{opacity:.4}button:focus-visible,input:focus-visible{outline:3px solid #f0d47e;outline-offset:2px}#app{width:min(100%,700px);margin:0 auto;padding:9px}.panel{border:2px solid #9dadc6;border-radius:6px;background:#111d36;padding:10px;margin:7px 0}.title{font-size:clamp(28px,7vw,52px);color:#eed980;text-align:center;text-shadow:3px 3px #513a6a;line-height:1.1}.center{text-align:center}.muted{color:#c6d0de;font-size:12px}.gold{color:#efd37b}.good{color:#8de6a8}.bad{color:#ff9292}.row{display:flex;justify-content:space-between;align-items:center;gap:7px;flex-wrap:wrap}.stack{display:grid;gap:8px}.choices{display:grid;grid-template-columns:1fr 1fr;gap:7px}.hidden{display:none!important}.hud{display:grid;grid-template-columns:1.1fr .9fr;gap:7px;font-size:12px}.hud .panel{margin:0}.map{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));background:#111a2c;gap:1px;padding:2px;margin:9px auto;max-width:580px}.tile{aspect-ratio:1;min-width:0;display:grid;place-items:center;background:#456e4b;font-size:clamp(14px,3.6vw,26px)}.tile.wall{background:#1c2940}.tile.road{background:#897354}.tile.water{background:#36678b}.controls{display:flex;justify-content:space-between;gap:12px;align-items:end}.pad{display:grid;grid-template-columns:repeat(3,45px);grid-template-rows:repeat(2,45px);gap:3px}.pad button{padding:0;font-size:18px}.pad .up{grid-column:2}.pad .left{grid-row:2;grid-column:1}.pad .down{grid-row:2;grid-column:2}.pad .right{grid-row:2;grid-column:3}.sprite{font-size:58px;text-align:center;padding:10px}.party{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.member{border:1px solid #7082a4;padding:6px;min-width:0;font-size:11px}.member.active{border-color:#eecf6b;background:#32405e}.member.ko{opacity:.5}.answer{width:100%;padding:11px}input{background:#162640;color:white;border:1px solid #adbdd0;border-radius:5px;padding:11px;font-size:16px;min-width:0;text-transform:uppercase}.message{min-height:47px;display:flex;align-items:center}.bar{height:5px;background:#34415a;margin-top:5px}.bar i{display:block;height:100%;background:#90d7a2}.cross{display:grid;grid-template-columns:1fr .9fr;gap:10px;align-items:start}.crossgrid{display:grid;gap:1px;width:100%;background:#060b16;align-self:start}.sq{aspect-ratio:1;background:#eee9d5;color:#172139;font-weight:bold;display:grid;place-items:center;position:relative;font-size:clamp(10px,2vw,15px)}.sq.off{background:#111827}.sq.selected{background:#eacb7d}.sq small{position:absolute;top:0;left:2px;font-size:7px}.cluelist{display:grid;gap:5px;max-height:280px;overflow:auto}.cluelist button{padding:6px;text-align:left;font-size:11px}.pill{border:1px solid #7788a4;border-radius:3px;padding:3px 6px;font-size:11px}.quests{font-size:12px;line-height:1.65}.shoprow{padding:8px 0;border-bottom:1px solid #4a5872}.logoart{font-size:65px;margin:26px 0}.toast{background:#2d3956;border:1px solid #eecf6b;padding:8px;margin-top:6px;color:#f2d17c}@media(max-width:430px){#app{padding:5px}.panel{padding:7px}.hud{font-size:10px;gap:4px}.cross{grid-template-columns:1fr .95fr;gap:5px}.cluelist{max-height:220px}.tile{font-size:15px}.pad{grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,40px)}button{padding:8px}.member{padding:4px;font-size:9px}}/* Expanded Edition: region variations and richer landmarks */
+.tile.forest{background:#315944}
+.tile.road{background:#877451}
+.tile{transition:background-color .1s}
+.cluelist button{overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.tile{transition:none}}
+
+textarea{background:#162640;color:#f5efd9;border:1px solid #adbdd0;border-radius:5px;padding:11px;font-size:15px;max-width:100%}#quest .stack p{line-height:1.5}#transfer .choices button{min-width:0;overflow-wrap:anywhere}
+
+/* Polish pass: meaningful world regions, screen hierarchy, and retro battle arena. */
+:root{--region-ink:#cedce6;--gold:#f2d280}
+body{background:radial-gradient(ellipse at 50% -10%,#1d2b4b 0%,#080d1b 70%)}
+#app{max-width:740px}
+.panel{border-color:#b4c3d7;box-shadow:inset 0 0 0 2px #2c3d60}
+button{transition:transform .09s ease,background-color .12s ease;background:#243957}
+button:active{transform:translateY(2px);background:#344c70}
+.title{letter-spacing:2px;text-shadow:3px 3px 0 #4b345a,5px 5px 0 #091022}
+.map{border:3px solid #657d95;box-shadow:0 3px 0 #0b1426;overflow:hidden}
+.tile{position:relative;isolation:isolate;font-family:system-ui,sans-serif;overflow:hidden;text-shadow:0 1px 1px #102a24}
+.tile:not(.wall):not(.road){background-color:#426948;background-image:linear-gradient(155deg,transparent 48%,rgba(9,39,22,.12) 50%),linear-gradient(40deg,rgba(160,200,90,.08),transparent 65%)}
+.tile.wall{background:linear-gradient(135deg,#202c45,#152136);box-shadow:inset -3px -3px 0 #111a2d,inset 2px 2px 0 #3a4862}
+.tile.road{background-color:#8d7355;background-image:linear-gradient(135deg,rgba(230,196,132,.12) 25%,transparent 26%,transparent 70%,rgba(35,23,16,.10) 71%)}
+.tile[data-type="g"],.tile[data-type="t"]{text-shadow:2px 3px 0 #153b26}
+.tile[data-type="B"],.tile[data-type="P"]{box-shadow:inset 0 0 0 2px rgba(238,207,116,.28)}
+.map[data-biome="1"] .tile:not(.wall):not(.road){background-color:#486e6b}
+.map[data-biome="2"] .tile:not(.wall):not(.road){background-color:#714735}
+.map[data-biome="3"] .tile:not(.wall):not(.road){background-color:#51617c}
+.map[data-biome="4"] .tile:not(.wall):not(.road){background-color:#a28d59}
+.map[data-biome="5"] .tile:not(.wall):not(.road){background-color:#536e82}
+.map[data-biome="6"] .tile:not(.wall):not(.road){background-color:#6d8090}
+.map[data-biome="7"] .tile:not(.wall):not(.road){background-color:#62618e}
+.xp-track{height:4px;margin-top:4px;background:#364563;overflow:hidden}.xp-track i{height:100%;background:#e7ca69;display:block;width:0}
+.battle-arena{position:relative;overflow:hidden;min-height:134px;background:linear-gradient(#202f54,#2c4361 67%,#294e3d 68%,#193a32);margin:5px 0;border:1px solid #6b7895}
+.battle-sun{position:absolute;top:13px;right:22%;width:29px;height:29px;background:#c5b47c;box-shadow:0 0 0 5px rgba(236,209,142,.1);border-radius:50%}
+.battle-ground{position:absolute;bottom:12px;left:15%;right:15%;height:14px;background:rgba(7,25,29,.35);border-radius:50%;filter:blur(3px)}
+.battle-arena .sprite{position:relative;z-index:1;font-size:74px;padding:22px 0 12px;filter:drop-shadow(4px 5px 0 rgba(4,9,19,.65));animation:lexIdle 1.7s steps(4,end) infinite}
+.battle-status{border-top:1px solid #60748f;border-bottom:1px solid #60748f;padding:6px 0;margin-bottom:6px;font-size:11px}
+#foeIntent{font-weight:700}
+#crossgrid .sq{box-shadow:inset -1px -1px 0 #bab3a2}
+#clueList button:focus-visible{outline-color:#f2d280}
+@keyframes lexIdle{50%{transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){.battle-arena .sprite{animation:none}button{transition:none}}
+
+/* Production artwork: custom pixel-rendered character, NPC, landmark and foe sprites */
+.pixel-sprite{display:block;width:82%;height:82%;image-rendering:pixelated;object-fit:contain;filter:drop-shadow(1px 2px 0 rgba(5,13,22,.55))}
+#sprite{display:grid;place-items:center;min-height:130px}
+#sprite .pixel-sprite{width:128px;height:128px;max-width:75%;animation:lexIdle 1.7s steps(4,end) infinite}
+.map .tile{font-size:0}.map .tile:has(.pixel-sprite){padding:1px}
+#musicToggle{border-color:#ebd487;color:#f8e4a5}
+@media(prefers-reduced-motion:reduce){#sprite .pixel-sprite{animation:none}}
+
+/* Handcrafted dungeon exploration: fully operable with touch controls */
+.ruin-grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:2px;max-width:430px;margin:8px auto;background:#141b34;padding:3px}
+.ruin-cell{aspect-ratio:1;display:grid;place-items:center;background:#47536c;font-size:clamp(15px,3vw,25px);border:1px solid #69748f}
+.ruin-cell.wall{background:#152039;border-color:#24314a}.ruin-cell.floor{background:#56627b}.ruin-cell.path{background:#7f7668}
+.ruin-cell .pixel-sprite{width:68%;height:68%}
+.ruin-grid .ruin-cell.hero{outline:2px solid #f6dd88;outline-offset:-2px}
+#ruinStory{line-height:1.45;margin:7px 0}#ruinMessage{min-height:42px}
+#map .tile[data-type="D"]{background:#625d87}.map .tile[data-type="D"]::after{content:'⬇';font-size:16px;color:#f8dfa2}
+
+#ruinSigilBox{margin-top:8px}#ruinSigilBox[hidden]{display:none}#ruinSigilBox input{font-size:16px}
+.ruin-cell.hero{animation:lq-breathe 1s steps(2,end) infinite}@keyframes lq-breathe{50%{filter:brightness(1.3)}}
+@media(prefers-reduced-motion:reduce){.ruin-cell.hero{animation:none}}
+
+/* Cinematic boss encounter panels, accessible and self-contained. */
+.lq-cinematic[hidden]{display:none!important}
+.lq-cinematic{position:fixed;inset:0;z-index:1000;background:rgba(4,7,18,.96);display:flex;align-items:center;justify-content:center;padding:20px}
+.lq-cinema-frame{width:min(100%,480px);border:4px double #e1c782;padding:24px 17px;background:linear-gradient(160deg,#1d254b,#080f26);color:#f4efd9;text-align:center;box-shadow:inset 0 0 0 3px #3e4b70}
+.lq-cinema-kicker{font-size:11px;letter-spacing:2px;color:#aebbd4}.lq-cinema-frame h2{font-size:clamp(23px,6vw,35px);color:#f0d87f;margin:12px 0}.lq-cinema-mark{font-size:25px;color:#c9a5e6;margin:12px auto}.lq-cinema-frame p{line-height:1.6}.lq-cinema-frame button{min-height:45px;margin-top:12px;width:100%;max-width:260px}
+@keyframes lq-frenzy{0%,100%{filter:none}50%{filter:hue-rotate(65deg) brightness(1.25)}}
+.battle-arena.lq-frenzy{animation:lq-frenzy .9s steps(3,end) infinite}
+@media(prefers-reduced-motion:reduce){.battle-arena.lq-frenzy{animation:none;border:2px solid #d7b5e7}}
+
+/* Chapter-specific exploration mechanisms */
+.signature-trial{margin:12px 0;padding:12px;border-color:#c0ae74}
+.signature-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:12px 0}
+.signature-controls button{min-height:44px;flex:1 1 110px}
+.signature-controls label,.signature-controls input[type=range]{flex:1 1 100%;min-width:0}
+.signature-controls input:not([type=range]){min-width:0;flex:1 1 160px;padding:10px;font-size:16px}
+.signature-visual{width:100%;background:#141f3c;padding:12px;word-break:break-word;letter-spacing:1px}
+
+/* Spatial dungeon puzzles: phone-accessible adjustment controls. */
+.physical-mechanism{margin-top:12px;border:2px solid #c8ba8b;padding:12px;background:#121b33;color:#f6f0d8}
+.physical-display{padding:14px 8px;background:#263553;text-align:center;font-weight:800;letter-spacing:.04em;border:1px solid #8e9bb6;margin:10px 0}
+.physical-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.physical-actions button{min-height:44px;white-space:normal}
+#physicalFeedback{color:#efd58e;min-height:24px}
+
+/* Regional enemy art direction: color-scoped silhouettes and arena accent */
+.battle-arena[data-foe-biome="ink"]{background:linear-gradient(#202641,#403250 66%,#222e40 67%)}
+.battle-arena[data-foe-biome="glass"]{background:linear-gradient(#29445e,#466d86 66%,#203950 67%)}
+.battle-arena[data-foe-biome="ember"]{background:linear-gradient(#462c38,#9b5536 66%,#4d2b28 67%)}
+.battle-arena[data-foe-biome="tide"]{background:linear-gradient(#233f62,#4384a1 66%,#1c445a 67%)}
+.battle-arena[data-foe-biome="sand"]{background:linear-gradient(#5c4f55,#a98b64 66%,#6c553c 67%)}
+.battle-arena[data-foe-biome="sky"]{background:linear-gradient(#2b5282,#7aa3bf 66%,#536b94 67%)}
+.battle-arena[data-foe-biome="frost"]{background:linear-gradient(#283e59,#819eb4 66%,#3a546a 67%)}
+.battle-arena[data-foe-biome="void"]{background:linear-gradient(#18172e,#493858 66%,#171a38 67%)}
+.battle-arena[data-foe-biome] #sprite{filter:drop-shadow(0 7px 2px #11182a)}
+
+/* Story quests now have an explorable micro-location on every region. */
+.story-grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:2px;max-width:400px;margin:9px auto;padding:3px;background:#10192e}
+.story-cell{aspect-ratio:1;display:grid;place-items:center;border:1px solid #526180;background:#465875;font-size:clamp(14px,3.1vw,23px);min-width:0}
+.story-cell.wall{background:#1a2944;border-color:#253857}.story-cell.hero{outline:2px solid #f5d579;outline-offset:-2px;background:#756744}
+.story-pad{display:flex;flex-direction:column;align-items:center;gap:3px;margin:5px auto}.story-pad>div{display:flex;gap:4px;align-items:center}.story-pad button{min-height:38px;padding:6px 9px;touch-action:manipulation}
+@media(max-width:390px){.story-pad button{font-size:12px;padding:5px 7px}}
+
+/* Living World: environmental identity, motion, and restored-town celebrations */
+#map .tile[aria-label="Resident"]{background:linear-gradient(145deg,#69826b,#455e60)}
+#map .tile[aria-label="Resident"] .pixel-sprite{filter:hue-rotate(90deg)}
+.story-grid{background:linear-gradient(135deg,#222e50,#40506a);box-shadow:inset 0 0 0 3px #a99a66}
+.story-cell.floor{background-image:repeating-linear-gradient(45deg,transparent 0 9px,rgba(245,213,145,.07) 9px 11px)}
+.story-cell:not(.wall):not(.hero){animation:lq-world-glow 3s steps(4,end) infinite}
+.map .tile[data-type="g"]{animation:lq-wind 2.5s steps(3,end) infinite}
+.map .tile[data-type="H"],.map .tile[data-type="P"]{animation:lq-world-glow 2.2s steps(3,end) infinite}
+@keyframes lq-world-glow{50%{filter:brightness(1.18) saturate(1.18)}}
+@keyframes lq-wind{50%{filter:brightness(1.12)}}
+@media(prefers-reduced-motion:reduce){.story-cell,.map .tile{animation:none!important}}
+
+/* Willowmere interconnected town: consistent hit targets on phone */
+.willow-grid{display:grid;width:100%;max-width:490px;margin:10px auto;gap:1px;padding:4px;background:#17263b;border:3px solid #987c4c;border-radius:5px}.willow-cell{aspect-ratio:1;display:grid;place-items:center;min-width:0;background:#59684d;font-size:clamp(13px,3.4vw,23px);box-shadow:inset 0 0 0 1px #26352c}.willow-cell:nth-child(3n){background:#687659}.willow-cell.wall{background:#343944;border:1px solid #616679}.willow-cell.hero{background:#9c8d52;animation:lq-world-glow 1s steps(2,end) infinite}#willowTown h2{text-align:center}#willowMessage{min-height:3em;color:#f0dbad}@media(prefers-reduced-motion:reduce){.willow-cell{animation:none!important}}
+
+/* Willowmere art direction: each district has its own palette and surface texture */
+.willow-grid[data-room="square"] .willow-cell:not(.wall){background-color:#637b61;background-image:repeating-linear-gradient(90deg,transparent 0 10px,#ffffff0a 10px 11px)}
+.willow-grid[data-room="inn"] .willow-cell:not(.wall){background:#846449;box-shadow:inset 0 0 0 1px #4c3529;background-image:repeating-linear-gradient(0deg,transparent 0 8px,#39291e44 8px 9px)}
+.willow-grid[data-room="workshop"] .willow-cell:not(.wall){background:#7c6254;box-shadow:inset 0 0 0 1px #553d38}
+.willow-grid[data-room="archive"] .willow-cell:not(.wall){background:#56617a;box-shadow:inset 0 0 0 1px #343e5b}
+.willow-grid[data-room="garden"] .willow-cell:not(.wall){background:#456f64;box-shadow:inset 0 0 0 1px #2e4e45}
+.willow-grid .willow-cell.wall{background:#2d3544!important;border-color:#59667a!important}
+.willow-grid .willow-cell.hero{background:#c7aa57!important;outline:2px solid #ffecb6;outline-offset:-3px}
+.willow-grid .willow-cell.resident{background:#7494a3!important;animation:lq-resident-idle 1.4s steps(2,end) infinite}
+.willow-grid[data-restored="yes"] .willow-cell.lantern{background:#a07842!important;animation:lq-lantern 2.8s steps(3,end) infinite}
+@keyframes lq-resident-idle{50%{filter:brightness(1.17);transform:translateY(-1px)}}
+@keyframes lq-lantern{50%{filter:brightness(1.5);box-shadow:inset 0 0 0 1px #ffe1a2,0 0 9px #ffc86980}}
+@media(prefers-reduced-motion:reduce){.willow-grid .willow-cell.resident,.willow-grid .willow-cell.lantern{animation:none}}
+
+/* Willowmere: the Thirteenth Bell story aftermath and choice */
+.willow-grid[data-shadow="active"] .willow-cell:not(.wall):nth-child(7n){box-shadow:inset 0 0 0 2px #56436d,0 0 5px #4d3477}
+.willow-grid[data-shadow="saved"] .willow-cell:not(.wall):nth-child(7n){box-shadow:inset 0 0 0 2px #e1bf6e,0 0 8px #c79c45}
+.lq-choice{margin:10px 0;padding:12px;border:2px solid #c59e57;background:#232438}.lq-choice button{margin:5px 3px;white-space:normal}
+.willow-cell.hero{position:relative}.willow-cell.hero::after{content:'';position:absolute;bottom:0;left:25%;width:50%;height:16%;background:#261f28;border-radius:50%}
+@media(prefers-reduced-motion:reduce){.willow-grid[data-shadow] .willow-cell{animation:none!important}}
+
+/* Seven walkable regional hubs */
+.regional-grid{display:grid;width:100%;max-width:490px;margin:10px auto;gap:1px;padding:4px;background:#192239;border:3px solid #a18b68;border-radius:5px}.regional-cell{aspect-ratio:1;display:grid;place-items:center;min-width:0;background:#546276;font-size:clamp(13px,3.4vw,22px);box-shadow:inset 0 0 0 1px #263044}.regional-cell.wall{background:#262d3a}.regional-cell.hero{background:#b2a66c;animation:lq-world-glow 1s steps(2,end) infinite}.regional-cell.clue{background:#767858}.regional-grid[data-theme="ember"] .regional-cell:not(.wall){background:#725347}.regional-grid[data-theme="tide"] .regional-cell:not(.wall){background:#3b7082}.regional-grid[data-theme="sand"] .regional-cell:not(.wall){background:#98845e}.regional-grid[data-theme="sky"] .regional-cell:not(.wall){background:#597d9b}.regional-grid[data-theme="frost"] .regional-cell:not(.wall){background:#819bb2}.regional-grid[data-theme="violet"] .regional-cell:not(.wall){background:#6e5c88}.regional-grid[data-restored="yes"]{border-color:#dfbd62}.regional-grid .regional-cell.hero{background:#cab56c!important}#regionalTown h2{text-align:center}#regionalMessage{min-height:3em;color:#f0dbad}@media(prefers-reduced-motion:reduce){.regional-cell{animation:none!important}}
+
+/* Regional architecture and interactive environmental storytelling */
+.regional-cell.landmark{background:#283a50!important;box-shadow:inset 0 0 0 2px #deba6e,0 0 8px #e8c36b55;animation:lq-world-glow 2.6s steps(3,end) infinite}
+.regional-grid[data-room="mirror"]{background:repeating-linear-gradient(90deg,#a7bcc6 0 3px,#303c58 3px 7px)}
+.regional-grid[data-room="forge"],.regional-grid[data-room="coal"]{border-color:#cc7850;background:#39221c}
+.regional-grid[data-room="canal"]{border-color:#58b3cb;background:#183f53}
+.regional-grid[data-room="chapel"],.regional-grid[data-room="hearth"]{border-color:#d0bd88}
+.regional-grid[data-room="stars"],.regional-grid[data-room="wind"]{border-color:#97bbef}
+.regional-grid[data-room="snow"],.regional-grid[data-room="lamp"]{border-color:#cadff1}
+.regional-grid[data-room="books"],.regional-grid[data-room="vault"]{border-color:#bda3da}
+@media(prefers-reduced-motion:reduce){.regional-cell.landmark{animation:none}}
+
+/* Combat Depth & Forge edition: readable tactical states and battle pace. */
+.battle-arena[data-speed="fast"] #sprite .pixel-sprite{animation-duration:.42s!important}
+.battle-arena[data-speed="normal"] #sprite .pixel-sprite{animation-duration:.9s}
+#foeIntent{display:block;line-height:1.35;min-height:2.6em}
+#tempo{white-space:normal}
+#commands button{white-space:normal;min-height:44px}
+@media(max-width:390px){#commands{grid-template-columns:repeat(2,minmax(0,1fr))!important}#commands button{font-size:12px;padding:8px 5px}}
+
+/* Roadmap QA presentation pass: WCAG-style touch sizing and orientation resilience. */
+button,.answer{min-height:44px}input,textarea{min-height:44px}
+@media (orientation:landscape) and (max-height:520px){
+ #app{max-width:920px;padding:4px}.hud{grid-template-columns:1fr 1fr}.map{max-width:min(72vh,560px);margin:4px auto}.panel{margin:4px 0;padding:6px}.controls{position:relative}.logoart{margin:10px 0}.battle-arena{min-height:108px}#sprite .pixel-sprite{width:98px;height:98px}.cluelist{max-height:170px}
+}
+@media (orientation:portrait) and (max-width:430px){
+ .controls button,.story-pad button{min-height:44px}.party{gap:3px}.party-pixel{width:24px;height:24px}.party-pixel .pixel-sprite{width:24px;height:24px}
+}
+
+/* Desktop keyboard + mouse edition. Touch controls remain unchanged. */
+.desktop-help{display:none}
+@media (hover:hover) and (pointer:fine){
+  body{padding-right:0}
+  .desktop-help{display:block;position:fixed;right:12px;top:12px;z-index:9000;width:238px;background:#11182beF;border:2px solid #b99a5d;border-radius:7px;box-shadow:0 8px 26px #000a;color:#f2e3bd;font-size:12px;line-height:1.45;backdrop-filter:blur(4px)}
+  .desktop-help.collapsed{width:auto;background:transparent;border:0;box-shadow:none}
+  .desktop-help-toggle{width:100%;min-height:34px!important;padding:5px 8px;font-size:11px;letter-spacing:.08em;border-radius:5px}
+  .desktop-help.collapsed .desktop-help-toggle{width:auto;opacity:.72}
+  .desktop-help-body{padding:8px 10px 10px}
+  .desktop-help-body>div{margin:3px 0}
+  .desktop-help-body small{display:block;margin-top:7px;color:#b9c1d5}
+  kbd{display:inline-block;min-width:1.55em;padding:1px 4px;margin:0 1px;border:1px solid #8591aa;border-bottom-width:2px;border-radius:4px;background:#252e43;color:#fff;text-align:center;font:10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
+  button,.answer,#clueList button{cursor:pointer;transition:transform .06s ease,filter .12s ease,box-shadow .12s ease}
+  button:hover:not(:disabled),.answer:hover:not(:disabled),#clueList button:hover:not(:disabled){filter:brightness(1.13);box-shadow:0 0 0 2px #e1bf6e66}
+  button:active:not(:disabled),.answer:active:not(:disabled){transform:translateY(1px)}
+  button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f1ca68;outline-offset:2px}
+  .pc-hotkey{position:relative;padding-left:28px!important}
+  .pc-hotkey::before{content:attr(data-hotkey);position:absolute;left:6px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:16px;height:16px;border:1px solid #d6bf82;border-radius:3px;background:#131a2b;color:#ffe6a5;font:10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:none}
+  .map .tile,.ruin-cell,.story-cell,.willow-cell,.regional-cell{cursor:pointer}
+  .map .tile:hover,.ruin-cell:hover,.story-cell:hover,.willow-cell:hover,.regional-cell:hover{box-shadow:inset 0 0 0 2px #f0ca6b!important;filter:brightness(1.08)}
+  .controls{max-width:660px;margin-left:auto;margin-right:auto}
+}
+@media (min-width:900px) and (hover:hover) and (pointer:fine){
+  #app{max-width:980px}
+  .hud{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+  .map{max-width:720px}
+  .cross{grid-template-columns:minmax(420px,1.2fr) minmax(320px,.8fr);gap:14px}
+  .story-grid,.willow-grid,.regional-grid,.ruin-grid{max-width:620px}
+  .battle-arena{min-height:210px}
+}
+
+/* Character creation works with touch, mouse, or Enter on a keyboard. */
+.character-setup{max-width:460px;margin:24px auto;padding:24px}
+.character-setup .logoart{text-align:center;font-size:48px;margin:8px 0 20px}
+#heroNameInput{text-transform:none;width:100%}
+#heroNameError{color:#ffb8a9;min-height:1.4em;margin:0}
+#heroHudName,.member b{overflow-wrap:anywhere}
+
+/* Standard crossword grid and clue selection */
+#crossgrid button.sq{padding:0;min-height:0;border:0;border-radius:0;font:inherit;font-weight:bold;font-size:clamp(11px,2vw,19px);color:#172139}#crossgrid .sq small{font-size:clamp(7px,1vw,10px)}#crossgrid .sq.off{background:#080d16;box-shadow:none}#crossgrid .sq.selected{background:#f3d58c}.cluelist h3{margin:8px 0 2px;color:#efd37b}.cluelist .cross-clue-active{border-color:#f3d58c;background:#394b6a}@media(max-width:600px){.cross{grid-template-columns:1fr}.cluelist{max-height:240px}#crossgrid{max-width:480px;margin:auto}}
+
+#commands .battle-command{display:flex;flex-direction:column;gap:5px;text-align:left;height:100%}#commands .command-cost{color:#f1d68b;font-size:12px}#commands .battle-command small{font-size:12px;line-height:1.45;font-weight:normal;color:#dbe4f2}

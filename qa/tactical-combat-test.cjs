@@ -1,0 +1,38 @@
+'use strict';
+const assert=require('node:assert/strict');
+const L=require('../rpg-engine.js');
+let checks=0;
+const check=(v,msg)=>{assert.ok(v,msg);checks++;};
+const g=new L.Game();
+check(g.guide().label.includes('Elder Mael'),'initial compass locates Elder Mael');
+g.interact(g.map().objects.find(o=>o.type==='npc'));
+check(g.guide().label.includes('Gate'),'quest compass progresses to exit');
+g.enter('world');check(g.guide().label.includes('Rootbound'),'world compass finds current quest dungeon');
+g.enter('dungeon',0,0);check(g.guide().label.toLowerCase().includes('guardian key'),'dungeon compass seeks key first');
+g.s.flags.key0=true;check(g.guide().label.includes('lever')||g.guide().label.includes('Lever'),'dungeon compass seeks lever');
+g.startBattle({id:'combat',r:0,type:'enemy'});
+check(g.battle.focus===0,'starts with empty Focus');g.battle.enemies.forEach(e=>{e.hp=400;e.maxhp=400;});
+check(g.intent(g.battle.enemies[0])==='Standard strike','intent accurately forecasts ordinary attack');
+check(!g.abilities(g.s.party[0]).includes('resonance'),'team art locked until 100 Focus');
+const beforeHP=g.battle.enemies[0].hp;
+g.act('attack',0);check(g.battle.enemies[0].hp<beforeHP,'attack works');check(g.battle.focus===22,'attack builds 22 Focus');
+g.act('frost',0);check(g.battle.focus===52,'elemental weakness builds base 14 plus bonus 16 Focus');
+g.act('guard');check(g.battle.focus===70,'guard builds 18 Focus');
+const round=g.battle.round;check(round===2,'enemy turn advances round');
+check(g.intent(g.battle.enemies[0])==='Mana siphon','hunter role telegraphs mana siphon');
+g.battle.focus=100;check(g.abilities(g.s.party[0]).includes('resonance'),'team art unlocks at max Focus');
+const pre=g.battle.enemies.map(e=>e.hp),armor=g.battle.enemies.map(e=>e.armor);
+g.act('resonance');check(g.battle.focus===0,'team art consumes full gauge');check(g.battle.enemies.every((e,i)=>e.hp<pre[i]),'team art damages every living enemy');check(g.battle.enemies.every((e,i)=>pre[i]-e.hp>armor[i]),'team art bypasses armor');
+g.battle.focus=100;g.s.party[2].hp=0;check(!g.abilities(g.s.party[1]).includes('resonance'),'team art needs three living companions');
+const actor=g.battle.actor;check(!g.act('resonance'),'invalid team art rejected');check(g.battle.actor===actor,'invalid art spends no turn');
+g.battle=null;
+const h=new L.Game();h.startBattle({id:'warder',r:1,type:'enemy'});const warder=h.battle.enemies.find(e=>e.role==='warder');check(!!warder,'warder archetype generated');warder.hp=warder.maxhp-10;h.battle.round=2;check(h.intent(warder)==='Fortify companions','warder fortify preview');
+const q=h.battle.enemies.find(e=>e.role==='mender');if(q){q.hp-=15;check(h.intent(q)==='Restore wounded ally','mender previews heal');}
+const save=JSON.parse(JSON.stringify(g.s));check(L.validSave(save),'new mechanics preserve v3 save schema');
+console.log('PASS '+checks+' tactical RPG checks: Focus, weakness, team art, readable enemy intents, quest compass, v3 save compatibility.');
+// Mastery should unlock *meaningful* class traits instead of only scaling damage.
+const sword=new L.Game();sword.s.party[0].mastery.sword=500;sword.startBattle({id:'sword-trait',r:3,type:'enemy'});sword.battle.enemies[0].hp=999;sword.battle.enemies[0].maxhp=999;sword.act('attack',0);check(sword.battle.focus===28,'Rhythm Edge gives extra Focus at mastery 4');
+const staff=new L.Game();staff.s.party[0].weapon='staff';staff.s.party[0].mastery.staff=500;staff.s.party[0].mp=3;staff.startBattle({id:'staff-trait',r:3,type:'enemy'});staff.act('attack',0);check(staff.s.party[0].mp===5,'Mana Thread refunds 2 MP on basic staff strike');
+const axe=new L.Game();axe.s.party[0].weapon='axe';axe.s.party[0].mastery.axe=500;axe.startBattle({id:'axe-trait',r:3,type:'enemy'});axe.act('attack',0);check(axe.battle.enemies[0].broken>=2,'Shatterforce weakens enemy armor');
+check(L.weaponTraits.sword.length===2&&L.weaponTraits.staff.length===2,'each weapon has two signature traits');
+console.log('PASS '+(checks-25)+' signature mastery trait checks.');

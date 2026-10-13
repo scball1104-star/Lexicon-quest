@@ -1,0 +1,13 @@
+LEXICON QUEST: SHARE WITH FAMILY
+
+1. Download and unzip lexicon_quest_mobile_web.zip on a computer.
+2. Open https://app.netlify.com/drop and drag the unzipped lexicon_quest_web folder onto the page.
+3. Netlify will return an HTTPS URL. Open the URL in Safari on an iPhone or Chrome on Android.
+4. Share the URL by text or email. Each person starts their own chronicle, with 3 browser save slots.
+5. iPhone: Safari Share -> Add to Home Screen. Android: Chrome menu -> Add to Home screen / Install app.
+
+IMPORTANT
+- Browser saves remain on each device and browser; clearing website data deletes them. They do not sync across devices.
+- The ZIP itself is not an app-store package, and the file cannot be launched reliably in the iOS Files preview.
+- Publishing requires a Netlify account or another static hosting provider. The upload is not performed automatically by ChatGPT.
+- This is a playable eight-chapter campaign implementation, not a finished commercial 15-20 hour RPG; future production work is needed for art, music, content depth, cross-device sync, and comprehensive testing.

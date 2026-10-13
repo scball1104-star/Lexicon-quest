@@ -1,0 +1,51 @@
+'use strict';
+const assert=require('node:assert/strict'),L=require('../rpg-engine.js');let n=0;
+const ck=(v,label)=>{assert.ok(v,label);n++};
+const blocked=new Set(['wall','water','tree','mountain','house','dune','cloudbank','oasis','icewall','snowpine','ink','inkwall']);
+function flood(m,start,forbidden=[]){const q=[start],seen=new Set();while(q.length){const p=q.pop(),k=p.x+','+p.y;if(seen.has(k)||forbidden.includes(k)||!m.tiles[p.y]?.[p.x]||blocked.has(m.tiles[p.y][p.x]))continue;seen.add(k);for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]])q.push({x:p.x+dx,y:p.y+dy});}return seen;}
+const g=new L.Game();g.s.cleared=[0,1,2,3,4];g.enter('town',5);let m=g.map();const reachable=flood(m,{x:12,y:15});
+ck(m.title.includes('Zephyr'),'Zephyr town');
+const crew=m.objects.filter(o=>o.type==='skyWitness');ck(crew.length===3,'three crew witnesses');
+const beacon=m.objects.find(o=>o.type==='skyBeacon');ck(!!beacon,'signal beacon');
+for(const o of [...crew,beacon])ck(reachable.has(o.x+','+o.y),'town location reachable '+o.id);
+ck(g.interact(beacon).text.includes('0/3'),'beacon gated by crew');
+for(const o of crew)ck(g.interact(o).screen==='dialog','crew statement '+o.clue);
+const pots=g.s.potions,ethers=g.s.ethers;ck(g.interact(beacon).screen==='dialog','beacon activation');ck(g.s.flags['lq:sky:beacon'],'beacon active');ck(g.s.potions===pots+2&&g.s.ethers===ethers+2,'supplies granted');g.interact(beacon);ck(g.s.potions===pots+2&&g.s.ethers===ethers+2,'beacon not farmable');
+ck(g.objective().includes('Storm Observatory'),'sky town objective');ck(g.interact(m.objects.find(o=>o.type==='npc')).screen==='dialog','Captain Aeris story introduction');
+let memories=[];
+for(let f=0;f<3;f++){
+ m=L.dungeonMap(5,f);const start=m.objects.find(o=>o.type==='leave'||o.type==='up'),gate=m.objects.find(o=>o.type==='door'),end=m.objects.find(o=>o.type==='down'||o.type==='boss');
+ const all=flood(m,start),closed=flood(m,start,[gate.x+','+gate.y]);
+ ck(m.title.includes(['Windward','Orrery','Eye'][f]),'authored title '+f);ck(m.flavor.length>60,'authored flavor '+f);ck(m.objects.length>=12,'authored objects count '+f);
+ for(const o of m.objects)ck(all.has(o.x+','+o.y),'all objects reachable '+o.id);
+ ck(!closed.has(end.x+','+end.y),'no gate bypass floor '+f);
+ if(f===2){const keyhole=m.objects.find(o=>o.type==='keydoor');ck(!flood(m,start,[keyhole.x+','+keyhole.y]).has(end.x+','+end.y),'guardian key physically required');}
+ memories.push(m.objects.find(o=>o.type==='aerisMemory'));
+}
+g.enter('dungeon',5,0);m=g.map();let vanes=m.objects.filter(o=>o.type==='skyVane');ck(vanes.length===3,'three wind rudders');
+g.s.x=18;g.s.y=9;g.move(1,0);ck(g.s.x===18,'bridge closed before rudder tuning');
+g.s.x=10;g.s.y=11;const hp=g.s.party[0].hp;g.move(0,1);ck(g.s.party[0].hp===hp-2,'beacon gust mitigation');g.move(0,-1);g.move(0,1);ck(g.s.party[0].hp===hp-2,'gust once per tile');
+for(const o of vanes)for(let a=0;a<o.goal;a++)g.interact(o);
+ck(g.s.flags['5-0-rudders'],'rudders open crossing');ck(g.map().tiles[12][10]==='skywalk','wind hazard visually settles');g.s.x=18;g.s.y=9;g.move(1,0);ck(g.s.x===19,'stabilized bridge passable');
+g.interact(m.objects.find(o=>o.reward==='key'));ck(g.s.flags.key5,'sky compass key acquired');
+g.enter('dungeon',5,1);m=g.map();let relays=m.objects.filter(o=>o.type==='skyRelay');ck(relays.length===3,'three orrery signal relays');ck(m.tiles[12][10]==='gustlane','relay gust active');
+g.s.x=18;g.s.y=9;g.move(1,0);ck(g.s.x===18,'orrey gate locked');
+for(const o of relays)for(let a=0;a<o.goal;a++)g.interact(o);
+ck(g.s.flags['lq:sky:relaysReady']&&!g.s.flags['5-1-signals'],'relays not sufficient without crossword');
+for(const e of L.puzzle(5).entries)ck(g.solve(e.id,e.answer),'crossword '+e.id);
+ck(g.s.flags.seal5&&g.s.flags['5-1-signals'],'both unlock observatory gate');ck(g.map().tiles[12][10]==='stormglass','orrey tile visibly stabilizes');
+const alternative=new L.Game();alternative.s.cleared=[0,1,2,3,4];alternative.enter('dungeon',5,1);for(const e of L.puzzle(5).entries)alternative.solve(e.id,e.answer);ck(!alternative.s.flags['5-1-signals'],'crossword alone insufficient');for(const o of alternative.map().objects.filter(o=>o.type==='skyRelay'))for(let a=0;a<o.goal;a++)alternative.interact(o);ck(alternative.s.flags['5-1-signals'],'reverse completion order works');
+let records=m.objects.filter(o=>o.type==='skyRecord');g.interact(records.find(o=>o.order===3));ck(!g.s.flags['lq:sky:flightlog'],'misordered log rejected');for(const o of records.sort((a,b)=>a.order-b.order))g.interact(o);ck(g.s.flags['lq:sky:flightlog'],'logs restored in order');
+const locker=m.objects.find(o=>o.type==='skyCache'),before=g.s.gold;g.interact(locker);ck(g.s.gold===before+220,'optional emergency locker pays out');g.interact(locker);ck(g.s.gold===before+220,'locker not farmable');
+g.enter('dungeon',5,2);m=g.map();const vows=m.objects.filter(o=>o.type==='skyVow');g.interact(vows.find(o=>o.order===2));ck(!g.s.flags['5-2-vows'],'misordered pilot vow rejected');for(const o of vows.sort((a,b)=>a.order-b.order))g.interact(o);ck(g.s.flags['5-2-vows'],'pilot vows unlock bridge');
+g.s.x=18;g.s.y=9;g.move(1,0);ck(g.s.x===19,'oath bridge passable');
+for(const o of memories)ck(g.interact(o).screen==='dialog','Aeris memory '+o.scene);ck(g.s.flags['lq:sky:bond'],'Aeris Flight Oath remembered');
+const boss=m.objects.find(o=>o.type==='boss');g.startBattle(boss);const b=g.battle,scribe=b.enemies[0];ck(b.ward===2&&b.focus===55&&b.aerisIntervention,'beacon and memory combat rewards');ck(scribe.weak==='pierce','opening phase piercing weakness');
+scribe.hp=Math.floor(scribe.maxhp*.68)+1;g.act('attack',0);ck(b.phase===1&&b.skyShield,'storm ward phase');ck(b.enemies.length===3,'two distinct storm copies');
+b.actor=0;scribe.hp=Math.ceil(scribe.maxhp*.35);g.act('attack',0);ck(scribe.hp>=Math.ceil(scribe.maxhp*.33),'normal attacks cannot skip shield');
+b.actor=0;b.focus=100;g.act('resonance');ck(scribe.hp>=Math.ceil(scribe.maxhp*.33),'resonance cannot skip shield');
+for(let i=1;i<=2;i++){b.enemies[i].hp=1;b.actor=0;g.act('attack',i);}ck(b.phase===2&&!b.skyShield,'copies removed - shield down');ck(scribe.weak==='fire','true chart fire weakness');
+scribe.hp=Math.floor(scribe.maxhp*.28)+1;b.actor=0;g.act('attack',0);ck(b.phase===3&&scribe.charge,'charged lightning finale');
+b.actor=2;b.round=2;g.act('guard');ck(!b.aerisIntervention,'Aeris charges intervention spent');ck(b.log.some(t=>t.includes('RETURN SIGNAL')),'intervention logged');
+scribe.hp=1;b.actor=0;g.act('attack',0);ck(g.s.cleared.includes(5),'Storm Scribe defeated');ck(g.scene?.title.includes('Chapter VI Complete'),'chapter ending scene');ck(g.s.journal.some(t=>t.includes('Pippa Voss')),'lost crew member remembered');ck(g.s.journal.some(t=>t.includes('Frostbound Vault')),'chapter VII foreshadowed');ck(L.validSave(JSON.parse(JSON.stringify(g.s))),'save format v3 unchanged');
+console.log('PASS '+n+' Storm Observatory checks: Zephyr crew, signal beacon, three spatial floors, gusts, gates, dual relay/crossword, flight logs, pilot oaths, Aeris memory, boss phases, saves.');

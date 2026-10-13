@@ -1,0 +1,16 @@
+LEXICON QUEST - DESKTOP DEPLOY QUICK START
+
+1. Install GitHub Desktop: https://desktop.github.com/
+2. Sign into GitHub Desktop and clone scball1104-star/Lexicon-quest.
+3. Extract this ZIP to a separate folder.
+4. Copy everything FROM extracted ZIP folder INTO the GitHub Desktop local clone folder.
+   Do NOT overwrite/delete any hidden .git folder.
+5. GitHub Desktop: Commit to main -> Push origin.
+6. Netlify: open existing forgotten-words project, go to
+   Project configuration > Build & deploy (or Developer settings)
+   > Continuous deployment > Repository > Link repository.
+7. Choose GitHub, repository scball1104-star/Lexicon-quest, branch main.
+8. Verify Deploys shows Published, then open https://forgotten-words.netlify.app
+
+Do not create a NEW Netlify project.
+Full instructions: GITHUB_NETLIFY_SETUP.md

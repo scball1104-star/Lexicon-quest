@@ -1,0 +1,8 @@
+# Local development/runtime artifacts; ship the static game assets as usual
+node_modules/
+.netlify/
+.DS_Store
+Thumbs.db
+*.log
+playwright-report/
+test-results/

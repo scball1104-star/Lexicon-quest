@@ -1,0 +1,24 @@
+Region 1 complete at level 4
+Region 2 complete at level 6
+Region 3 complete at level 8
+Region 4 complete at level 10
+Region 5 complete at level 12
+Region 6 complete at level 13
+Region 7 complete at level 15
+Region 8 complete at level 17
+1061 checks passed: crossword geometry, 24 dungeon routes/gates, world connectivity, combat, progression, saves.
+UI smoke checks passed: title, new/continue, map, equipment, journal, menus, puzzle/hints, battle commands, retreat and save.
+PASS 89 Willowmere checks: authored map access, optional quest, prism, oath, boss phase, save persistence.
+PASS 25 tactical RPG checks: Focus, weakness, team art, readable enemy intents, quest compass, v3 save compatibility.
+PASS 4 signature mastery trait checks.
+PASS 120 Court of Mirrors checks: unique spatial routes, NPC mystery, mirror and portrait puzzles, vows, 3-part companion arc, staged boss, rewards, story conclusion, v3 save.
+PASS 129 Forge of Ash checks: town, spatial locks, heat, valves, fans/crossword in both orders, optional ledger/cache, oath, Bram, four boss phases, save.
+PASS 135 Sunken Keep checks: authored maps, spatial gates, flood hazard, civic decisions, sluices, crossword and pumps both orders, records, principles, Lyra, four boss phases, saves.
+PASS 130 Oracle Labyrinth checks: town quest, three maps, gate physics, quicksand, puzzle dual conditions, bonus cache, memory, boss phases, saves.
+PASS 127 Storm Observatory checks: Zephyr crew, signal beacon, three spatial floors, gusts, gates, dual relay/crossword, flight logs, pilot oaths, Aeris memory, boss phases, saves.
+PASS 123 Frostbound Vault checks: town, gating, hazards, rewards, memories, boss, endings and save compatibility.
+PASS 132 First Library checks: town, gates, damage, crossword, rewards, final boss, irreversible endings, saves.
+PASS 531 interior checks: 12 region-specific rooms, paths, fixtures, interaction reachability, upgrades and v3 save safety.
+PASS 67532 living-town checks: resident movement, dialogue, proximity, non-collision, v3 saves, and all interiors.
+PASS 4042 environmental town checks: 8 unique town maps, 4 authored new regions, service access, scenery renderer, citizen movement, and save-compatible geometry.
+PASS: all runtime assets precached, old game cache removed while other app cache retained, offline video ranges/open-ended/suffix, invalid ranges, full offline fallback, unavailable asset response.
