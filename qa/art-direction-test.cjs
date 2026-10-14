@@ -55,6 +55,7 @@ check(paintProp('lever').signature!==paintProp('lever',{'test-prop':true}).signa
 check(paintProp('spring').signature!==paintProp('spring',{'spring:test-prop':true}).signature,'spring quiets after use');
 check(paintProp('trial').signature!==paintProp('trial',{seal0:true}).signature,'Echo Warden altar changes after defeat');
 check(paintProp('chest').signature!==paintProp('door').signature,'treasure and gates never share placeholder art');
+check(paintProp('chest').signature!==paintProp('chest',{'done:test-prop':true}).signature,'collected treasure persists as visibly opened chest');
 check(JSON.stringify(game.s)===saved,'all rendering leaves game save unchanged');
 check(FX.classify('flare')==='fire','fire element');
 check(FX.classify('frost')==='ice','ice element');
@@ -76,6 +77,7 @@ for(let i=0;i<scripts.length-1;i++)check(html.indexOf(scripts[i])>=0&&html.index
 for(const asset of [...scripts.slice(1), 'rpg-battle-effects.css'])check(sw.includes(asset),'new gameplay art available offline: '+asset);
 new Function(ui);
 check(ui.includes('Sprites.draw')&&ui.includes('Props.draw'),'game uses new character and mechanism assets');
+check(ui.includes("s.flags['done:'+o.id]")&&ui.includes('m.objects.filter'),'spent chests rendered as non-interactable scenery');
 check(ui.includes('BattleEffects.make')&&ui.includes('combat-damage'),'damage read from actual combat engine');
 check(css.includes('prefers-reduced-motion'),'visual effects accessible');
 console.log('PASS '+checks+' visual RPG checks: 48 authored frames, distinct characters, 13 interactive object types, live state changes, true HP damage, offline asset wiring.');
