@@ -97,17 +97,17 @@ function enemies(g){
    defeated:e.hp<=0};
  });
 }
-function priority(g){return enemies(g).filter(e=>!e.defeated).sort((a,b)=>b.threat-a.threat||a.hp/b.maxhp-b.hp/b.maxhp)[0]||null;}
+function priority(g){return enemies(g).filter(e=>!e.defeated).sort((a,b)=>b.threat-a.threat||a.hp/a.maxhp-b.hp/b.maxhp)[0]||null;}
 function recommend(g){
  const b=g?.battle;if(!b)return null;
  const p=g.s.party[b.actor],abilities=g.abilities(p),charged=enemies(g).find(e=>!e.defeated&&e.threat===100);
  if(charged){
   if(abilities.includes('pierce'))return {title:'Interrupt the charged attack',description:'Target '+charged.name+' with Piercing Thrust.',action:'pierce',target:charged.index,level:'danger'};
-  if(abilities.includes('ward'))return {title:'Shield your companions',description:'Aegis can reduce the incoming burst.',action:'ward',target:0,level:'danger'};
+  if(abilities.includes('ward')&&p.mp>=(LQ.skills?.ward?.cost||0))return {title:'Shield your companions',description:'Aegis can reduce the incoming burst.',action:'ward',target:0,level:'danger'};
   return {title:'Defend this turn',description:'A heavy attack is coming. Guard to reduce damage.',action:'guard',target:0,level:'danger'};
  }
  const hurt=g.s.party.find(q=>q.hp>0&&q.hp/q.maxhp<.38);
- if(hurt&&abilities.includes('mend'))return {title:'Heal a wounded ally',description:hurt.name+' has low HP.',action:'mend',target:g.s.party.indexOf(hurt),level:'caution'};
+ if(hurt&&abilities.includes('mend')&&p.mp>=(LQ.skills?.mend?.cost||0))return {title:'Heal a wounded ally',description:hurt.name+' has low HP.',action:'mend',target:g.s.party.indexOf(hurt),level:'caution'};
  const e=priority(g);
  if(e){
   const match=[['flare','fire'],['frost','ice'],['pierce','pierce'],['crush','crush']].find(([skill,kind])=>e.weak===kind&&abilities.includes(skill));
