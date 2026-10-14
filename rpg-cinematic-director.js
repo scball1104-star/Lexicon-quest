@@ -199,5 +199,41 @@ Game.prototype.enemyTurn=function(){
  }
  return outcome;
 };
-LQ.cinematic={palettes,speeches,mechanismTypes,renderSignature,mechanismState,drawMechanism,architecture,companion,phaseCue,tone,soundFor};
+
+// A physical discovery rather than an abstract reward screen: once all three
+// Catalog mechanisms are aligned, ancient masonry retracts to reveal a
+// six-tile optional alcove. It never intersects the mandatory eastward gate.
+const baseMap=Game.prototype.map,baseInteract=Game.prototype.interact;
+const CACHE_ID='lq1-hidden-keeper-cache',CACHE_FLAG='lq:ch1:keeperCache';
+const secretRoom={x1:10,y1:7,x2:12,y2:8,x:11,y:7};
+Game.prototype.map=function(){
+ const m=baseMap.call(this),s=this.s;
+ if(s.region!==0||s.place!=='dungeon'||s.floor!==0||!s.flags['lq:ch1:catalog'])return m;
+ for(let y=secretRoom.y1;y<=secretRoom.y2;y++)for(let x=secretRoom.x1;x<=secretRoom.x2;x++){
+  // Only carve the preexisting solid wall; never overwrite any authored NPC,
+  // gate, lever, or exploration object.
+  if(m.tiles[y]?.[x]==='wall')m.tiles[y][x]=y===7?'rune':'stone';
+ }
+ if(!m.objects.some(o=>o.id===CACHE_ID))
+  m.objects.push({id:CACHE_ID,type:'chest',r:0,f:0,x:secretRoom.x,y:secretRoom.y,label:'The Forgotten Keeper’s Cache',reward:'keeperMemory'});
+ return m;
+};
+Game.prototype.interact=function(o){
+ o=o||this.nearby()[0];
+ if(o?.id!==CACHE_ID)return baseInteract.call(this,o);
+ const s=this.s;
+ if(s.region!==0||s.place!=='dungeon'||s.floor!==0||!s.flags['lq:ch1:catalog'])
+  return this.emit('The archive masonry is still sealed.');
+ if(s.flags['done:'+CACHE_ID])return this.emit('The Keeper’s cache is empty. Its memory has been recovered.');
+ LQ.loot?.ensureLoot?.(s);
+ if(s.loot?.length>=40)return {screen:'dialog',title:'Keeper’s Cache · Inventory Full',text:'Your pack cannot carry another charm. Return to a merchant and sell or equip unused gear, then come back to claim the cache.'};
+ const item={id:s.lootNextId++,rarity:2,region:0,stat:'focus',bonus:2,name:'Forgotten Keeper’s Sigil',source:'Hidden Rootbound Archive alcove'};
+ s.loot.push(item);s.flags['done:'+CACHE_ID]=true;s.flags[CACHE_FLAG]=true;
+ s.gold+=80;s.ethers++;
+ s.journal.push('Keeper’s Alcove: the three Catalog dials revealed a hidden passage. Found the Rare Forgotten Keeper’s Sigil, 80 gold and an Ether.');
+ this.emit('HIDDEN CHAMBER DISCOVERED: Keeper’s Sigil, +80 gold and +1 Ether. Equip the Focus charm in Gear & Loot.');
+ return {screen:'dialog',title:'The Forgotten Keeper’s Cache',text:'A forgotten passage opens behind the Catalog walls. Inside waits the Keeper’s Sigil, a rare charm granting additional Focus at the start of battle. You also recover 80 gold and an Ether. The chamber remains open for future visits.'};
+};
+
+LQ.cinematic={palettes,speeches,mechanismTypes,renderSignature,mechanismState,drawMechanism,architecture,companion,phaseCue,tone,soundFor,secretRoom,CACHE_ID,CACHE_FLAG};
 })(typeof window!=='undefined'?window:globalThis);
