@@ -1,0 +1,38 @@
+/* Reforged Realms: real-state combat impact presentation.
+ * One-shot CSS effects; no giant sprite sheets or extra download overhead. */
+.battle-stage{position:relative;isolation:isolate}
+.battle-stage .tactical-enemy{position:relative;isolation:isolate}
+.combat-impact{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:8;border-radius:inherit;animation:combat-wash .56s ease-out both;--impact:#e3f1e4;--impact-bright:#fafff6}
+.combat-impact.effect-fire{--impact:#fbb069;--impact-bright:#fff0a2}
+.combat-impact.effect-ice{--impact:#8ee2ff;--impact-bright:#d6f8ff}
+.combat-impact.effect-arcane{--impact:#bc9cf5;--impact-bright:#f2d4ff}
+.combat-impact.effect-resonance{--impact:#ffd489;--impact-bright:#fff8c6}
+.combat-impact.effect-heal,.combat-impact.effect-mana{--impact:#76dfad;--impact-bright:#d6ffe4}
+.combat-impact.effect-ward,.combat-impact.effect-guard{--impact:#81caff;--impact-bright:#c3eafc}
+.combat-impact.effect-physical{--impact:#ffdfac;--impact-bright:#fff4d8}
+.combat-impact>i{position:absolute;display:block;border:3px solid var(--impact);border-radius:50%;box-shadow:0 0 14px var(--impact),inset 0 0 14px var(--impact-bright);left:50%;top:49%;transform:translate(-50%,-50%) scale(.15);width:170px;height:170px;animation:combat-ring .5s ease-out both}
+.combat-impact>i:nth-child(2){width:88px;height:88px;border-width:5px;animation-delay:.065s;opacity:.85}
+.combat-impact>i:nth-child(3){width:230px;height:230px;border-width:2px;animation-delay:.09s;opacity:.6}
+.combat-impact.effect-physical>i,.combat-impact.effect-fire>i{border-radius:38% 58% 42% 57%;transform:translate(-50%,-50%) rotate(35deg) scale(.1)}
+.combat-impact.effect-physical::before,.combat-impact.effect-fire::before{content:"";position:absolute;left:49%;top:6%;width:15px;height:88%;transform:rotate(36deg);background:linear-gradient(90deg,transparent,var(--impact-bright),var(--impact),transparent);box-shadow:0 0 26px var(--impact);clip-path:polygon(48% 0,65% 18%,94% 46%,65% 100%,38% 100%,6% 48%,33% 18%);animation:combat-slash .38s ease-out both}
+.combat-damage{position:absolute;top:18%;left:50%;z-index:15;transform:translate(-50%,0);color:#fff1d5;background:#48262cca;border:1px solid #f6ce93;border-radius:5px;font:800 clamp(16px,2.7vw,23px)/1 system-ui,sans-serif;text-shadow:0 2px 3px #07151d;padding:5px 8px;white-space:nowrap;pointer-events:none;box-shadow:0 0 13px #090a0b99;animation:combat-number .82s ease-out both}
+.combat-damage.healing{color:#e3ffeb;background:#154237dd;border-color:#9de7c2}
+.battle-stage .tactical-enemy:has(.combat-damage.damage) .enemy-art{animation:combat-hit .42s ease-out both}
+.battle-stage .tactical-enemy:has(.combat-damage.healing) .enemy-art{animation:combat-healed .45s ease-out both}
+@keyframes combat-wash{0%{opacity:0}22%{opacity:.9}100%{opacity:0}}
+@keyframes combat-ring{0%{opacity:0;transform:translate(-50%,-50%) scale(.15)}30%{opacity:.8}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
+@keyframes combat-slash{0%{opacity:0;transform:rotate(15deg) scale(.15)}45%{opacity:.75}100%{opacity:0;transform:rotate(64deg) scale(1.35)}}
+@keyframes combat-number{0%{opacity:0;transform:translate(-50%,9px) scale(.7)}17%{opacity:1;transform:translate(-50%,-13px) scale(1.1)}55%{opacity:1}100%{opacity:0;transform:translate(-50%,-41px) scale(.95)}}
+@keyframes combat-hit{0%{filter:brightness(2.3) saturate(1.4);transform:translateX(-6px)}25%{transform:translateX(5px);filter:brightness(1.8)}65%{transform:translateX(-2px)}100%{filter:none;transform:translateX(0)}}
+@keyframes combat-healed{0%{filter:brightness(1.7) hue-rotate(45deg)}100%{filter:none}}
+@media(max-width:700px){
+ .combat-impact>i{width:110px;height:110px}
+ .combat-impact>i:nth-child(2){width:60px;height:60px}
+ .combat-impact>i:nth-child(3){width:160px;height:160px}
+ .combat-damage{top:23%;font-size:16px;padding:5px 7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .combat-impact{display:none}
+ .combat-damage{animation:none;opacity:1;transform:translate(-50%,0)}
+ .battle-stage .tactical-enemy:has(.combat-damage) .enemy-art{animation:none}
+}
