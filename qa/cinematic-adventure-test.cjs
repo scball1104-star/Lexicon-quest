@@ -111,7 +111,7 @@ new Function(ui);ok(true,'main game still parses');
 ok(page.indexOf('rpg-cinematic-director.js')>=0&&page.indexOf('rpg-cinematic-director.js')<page.indexOf('rpg-ui.js'),'director loads after engine but before UI');
 ok(page.includes('rpg-cinematic-director.css'),'cinematic styles load');
 ok(worker.includes('rpg-cinematic-director.js')&&worker.includes('rpg-cinematic-director.css'),'cinematic resources work offline');
-for(const marker of ['Cinematic.architecture','Cinematic.drawMechanism','Cinematic.phaseCue','lq-companion-cue','lq-enemy-tactic','lq-phase-cinematic'])
+for(const marker of ['Cinematic.architecture','Cinematic.drawMechanism','Cinematic?.phaseCue','lq-companion-cue','lq-enemy-tactic','lq-phase-cinematic'])
  ok(ui.includes(marker),'functional scene integration: '+marker);
 ok(style.includes('prefers-reduced-motion'),'cinematic sequences respect reduced motion');
 console.log('PASS '+n+' cinematic adventure checks: 8 architectural regions, mechanisms, real turn telegraphs, cinematic phases, party acting, audio and saves.');
