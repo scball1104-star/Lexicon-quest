@@ -193,9 +193,9 @@ Game.prototype.enemyTurn=function(){
   const hunter=b.enemies.find(e=>e.hp>0&&e.role==='hunter'&&!e.charge&&!e.silenced);
   if(hunter){hunter.charge=true;hunter.tactic='Ambush';this.log(hunter.name+' SIGNALS AN AMBUSH! A heavy attack is coming. Piercing Thrust interrupts; Aegis or Guard mitigates.');}
  }
- if(b.round>=4&&b.round%5===4){
-  const healer=b.enemies.find(e=>e.hp>0&&e.role==='mender'&&!e.silenced);
-  if(healer){healer.tactic='Restoration';this.log(healer.name+' prepares a restorative spell. Strike the healer before the next enemy turn.');}
+ if(b.round>=2&&b.round%4===2){
+  const healer=b.enemies.find(e=>e.hp>0&&e.role==='mender'&&!e.silenced)&&b.enemies.some(e=>e.hp>0&&e.hp<e.maxhp);
+  if(healer){const preparing=b.enemies.find(e=>e.hp>0&&e.role==='mender'&&!e.silenced);preparing.tactic='Restoration';this.log(healer.name+' prepares a restorative spell. Strike the healer before the next enemy turn.');}
  }
  return outcome;
 };
