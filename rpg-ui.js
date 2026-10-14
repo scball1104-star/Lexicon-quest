@@ -273,6 +273,9 @@ const obs=game.objects().filter(o=>o.x>=camera.x&&o.y>=camera.y&&o.x<camera.x+17
 if(SceneArt&&s.region===0&&(s.place==='town'||s.place==='dungeon'&&s.floor===0))SceneArt.overlay(c,m,camera,ambientTick,s.place,s.floor);
 if(Motion&&!reducedMotion())Motion.atmosphere(c,camera,s.place,ambientTick,{region:s.region});
 if((s.place==='town'||(s.place==='dungeon'&&(s.region===5||s.region===6)))&&m.decor)for(const d of m.decor)Art.prop(c,d,camera,s.region,ambientTick);
+if(Props&&s.place==='dungeon')m.objects.filter(o=>s.flags['done:'+o.id]&&['chest','prismChest'].includes(o.type)).forEach(o=>{
+ if(o.x>=Math.floor(camera.x)-1&&o.y>=Math.floor(camera.y)-1&&o.x<=camera.x+17&&o.y<=camera.y+13)Props.draw(c,(o.x-camera.x)*48,(o.y-camera.y)*48,o,s,ambientTick);
+});
 obs.forEach(o=>{const x=(o.x-camera.x)*48,y=(o.y-camera.y)*48;if(Props&&Props.draw(c,x,y,o,s,ambientTick)){}else if(SceneArt&&s.region===0&&SceneArt.object(c,x,y,o,ambientTick,s.place)){}else if(s.place==='town'&&['inn','shop','forge'].includes(o.type))Art.service(c,x,y,o,s.region,ambientTick);else objectArt(c,x,y,o);
 if(Motion&&['chest','trial','spring','lever','board','exit','down','up','town','dungeon'].includes(o.type)&&Math.abs(o.x-s.x)+Math.abs(o.y-s.y)<=2)Motion.signal(c,x,y,ambientTick,o.type==='trial'?'quest':'usable',true);});
 if(s.place==='town'&&Citizens){ensureCitizens();Citizens.draw(citizens,c,citizenArt,camera,s,ambientTick);}
