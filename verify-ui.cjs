@@ -10,8 +10,8 @@ const sandbox={LQ:require('./rpg-engine.js'),LQInteriors:require('./rpg-interior
 async function click(action,id,extra={}){const b={dataset:{action,id,...extra},disabled:false};await handlers.click({target:{closest:()=>b}});}
 (async()=>{
 assert.match(nodes.get('app').innerHTML,/Begin a new adventure/);
-await click('start');assert.match(nodes.get('app').innerHTML,/Willowmere/i);assert.ok(nodes.get('modal'));
-await click('close');assert.ok(nodes.get('field'));assert.equal(saves.size,1);
+await click('start');assert.match(nodes.get('app').innerHTML,/Willowmere/i);assert.ok(!nodes.get('modal'),'first launch goes straight into play');
+assert.ok(nodes.get('field'));assert.match(nodes.get('app').innerHTML,/mobile-game-hud/);assert.equal(saves.size,1);
 for(const action of ['equipment','relics','loot','atlas','journal','help','menu','transfer']){await click(action);assert.ok(nodes.get('modal'),action);await click('close');}
 const saved=JSON.parse(saves.values().next().value);saved.place='dungeon';saved.region=0;saved.floor=1;saved.x=14;saved.y=3;saves.set('lexicon-realms-v3-0',JSON.stringify(saved));
 await click('title');saves.set('lexicon-realms-v3-0',JSON.stringify(saved));await click('load','0');await click('interact');assert.match(nodes.get('app').innerHTML,/Echo Warden trial/i);assert.match(nodes.get('app').innerHTML,/Briar Sentinel/i);assert.doesNotMatch(nodes.get('app').innerHTML,/crossword|across|down clue/i);
