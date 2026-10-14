@@ -303,7 +303,7 @@ cv.onclick=e=>{if(modal)return;const r=cv.getBoundingClientRect(),x=Math.floor((
 cv.onmousemove=e=>{const b=cv.getBoundingClientRect(),x=Math.floor((e.clientX-b.left)/b.width*17+camera.x),y=Math.floor((e.clientY-b.top)/b.height*13+camera.y);cv.title=game.objects().find(o=>o.x===x&&o.y===y)?.label||citizenAt(x,y)?.name||m.tiles[y]?.[x]||'';if(!hoverTile||hoverTile.x!==x||hoverTile.y!==y){hoverTile={x,y};drawMap();updateFocusPanel();}};
 cv.onmouseleave=()=>{hoverTile=null;cv.title='';drawMap();updateFocusPanel();};}
 function stopWalk(){route=[];routeTarget=null;clearInterval(walking);walking=null;}
-function stopHeldMovement(){holdDirection=null;clearTimeout(holdDelay);clearInterval(holdRepeat);holdDelay=null;holdRepeat=null;}
+function stopHeldMovement(){holdDirection=null;if(holdDelay!==null&&typeof clearTimeout==='function')clearTimeout(holdDelay);if(holdRepeat!==null)clearInterval(holdRepeat);holdDelay=null;holdRepeat=null;}
 function walkTo(tx,ty,goal=null){
  stopWalk();if(!game||game.battle||modal)return;
  const state=game.s,place=state.place,region=state.region,obs=game.objects(),dirs=[[0,1],[1,0],[0,-1],[-1,0]];
