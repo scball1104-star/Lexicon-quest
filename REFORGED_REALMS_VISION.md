@@ -109,3 +109,22 @@ Original procedural visuals only, without copying art from the reference RPGs.
 2. Full multi-frame character sprites and individual companion/NPC animation.
 3. Animated doors, levers, pushable objects, hit reactions and impact feedback with sound.
 4. Roll the validated environmental art and character standards across the remaining realms.
+
+## Pixel-art identity and responsive combat milestone — 2026-10-13
+
+The next visual milestone is implemented on the existing main game, without changing chapter progression or version-3 saves:
+
+- **Original detailed party atlas.** Three distinct 20 x 24 native-resolution character silhouettes (sword-bearing hero, staff-bearing Mira, axe-bearing Bram), each authored in four directions and four frames, for a total of 48 unique cached character frames. The atlas is rendered crisply at a 40 x 48 game-world scale. Canvas caching limits repeated work on phones.
+- **Interactive environmental artwork.** Original distinct chest, lever, door, keydoor, worldgate, movable boulder, pressure plate, healing spring, stairs and Echo Warden altar. Visual states derive from existing flags (gate open, lever thrown, trial defeated, spring used). This renderer applies throughout the eight realms.
+- **Opened chest persistence.** Once the player collects treasure, an open empty chest stays drawn as scenery but cannot be looted or interacted with again.
+- **Battle feedback.** UI shows elemental impact rings, weapon slashes, actual target damage/healing numbers, and hit reactions based on the real before-and-after combat snapshot. Supports frost, fire, arcane, guard, healing and physical attacks. No invented damage and no balance change.
+- **Mobile and accessibility.** Effects are CSS-based and lightweight, with resized visuals on phone layouts. Reduced-motion mode removes flashes/movement while retaining short-lived damage labels.
+- **Quality controls.** New QA suite validates all character frames and distinct renderings, dungeon state changes, accurate battle HP deltas, runtime load order and offline cache coverage. Added to Netlify's existing build gate. The regular mobile UI smoke tests now load the new art modules.
+
+Developer reminder: this raises visual consistency and feedback, but these are still original programmatic pixel assets, not the fully illustrated character atlases, cinematics or hand-authored town environments needed for Final Fantasy / Chrono Trigger presentation parity. Real iPhone Safari performance and production Netlify deployment remain separate acceptance gates.
+
+### Next meaningful milestone
+1. Inspect real-device screenshots and animation timing, correct any issues in phone portrait/landscape and desktop layouts.
+2. Create authored, high-quality environmental tile atlases for distinct town/dungeon silhouettes in every realm.
+3. Add enemy-specific multi-frame attack animations, readable telegraphs, boss phase presentations and character-specific spell effects.
+4. Deepen dungeon object animation (gates sliding, switches turning), audio and tactile feedback. Avoid relying on generic icons to represent exploration objects.
