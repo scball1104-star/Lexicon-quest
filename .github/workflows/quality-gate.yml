@@ -1,0 +1,31 @@
+name: Lexicon Quest Quality Gate
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    name: Full RPG + mobile QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout game
+        uses: actions/checkout@v4
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run exact Netlify verification suite
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const cp = require('node:child_process');
+          const toml = fs.readFileSync('netlify.toml', 'utf8');
+          const match = toml.match(/^\s*command\s*=\s*"([^"]+)"/m);
+          if (!match) throw new Error('Netlify build command not found.');
+          console.log('Verifying the exact Netlify build command:', match[1]);
+          cp.execSync(match[1], { stdio: 'inherit', shell: '/bin/bash' });
+          NODE
