@@ -144,13 +144,13 @@ Game.prototype.act=function(action,target){
 const baseWin=Game.prototype.win;
 Game.prototype.win=function(){
  const origin=this.battle&&this.battle.origin,trial=origin&&origin.type==='trial',r=origin&&origin.r;
+ const first=trial&&!(this.s.relics||[]).includes(r);
  baseWin.call(this);
  if(!trial)return;
  finishSeal(this.s,r);
  ensureRelics(this.s);
- const first=!this.s.relics.includes(r);
  if(first){
-  this.s.relics.push(r);
+  if(!this.s.relics.includes(r))this.s.relics.push(r);
   if(this.s.equippedRelic===null)this.s.equippedRelic=r;
   this.s.gold+=75;
   this.s.journal.push('Relic trial: defeated '+trials[r].name+' and recovered the '+relics[r].name+'.');
