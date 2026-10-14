@@ -69,6 +69,36 @@ for(const type of ['catalogDial','lanternMemory','spring','trial','chest','tideP
  if(C.mechanismTypes.has(type))ok(typeof C.soundFor({type})==='string','mechanism '+type+' has sound mapping');
  ok(speech===null||speech.text.length>18,'event '+type+' has readable companion dialogue or intentionally none');
 }
+// The Catalog puzzle changes actual dungeon geometry, revealing a fully
+// reachable optional room with a unique equipment reward.
+const hidden=new LQ.Game(LQ.fresh('Hidden Keeper'));
+hidden.enter('dungeon',0,0);
+let hm=hidden.map();
+ok(hm.tiles[7][11]==='wall','secret chamber is solid before the Catalog puzzle');
+ok(!hm.objects.some(o=>o.id===C.CACHE_ID),'secret reward is not visible before solving puzzle');
+hidden.s.flags['lq:ch1:catalog']=true;
+hm=hidden.map();
+ok(hm.tiles[7][11]!=='wall'&&hm.tiles[8][12]!=='wall','solved puzzle opens a physical two-row side alcove');
+const treasure=hidden.objects().find(o=>o.id===C.CACHE_ID);
+ok(!!treasure&&treasure.type==='chest'&&!hidden.blocked(treasure.x,treasure.y),'hidden chest is a reachable, walkable map object');
+ok(hidden.s.flags['0-0-switch']!==true,'hidden shortcut does not auto-open main story gate');
+const goldBefore=hidden.s.gold,ethersBefore=hidden.s.ethers,lootBefore=hidden.s.loot.length;
+const discovered=hidden.interact(treasure);
+ok(discovered?.screen==='dialog'&&discovered.text.includes('Sigil'),'discovering chamber has original narrative');
+ok(hidden.s.gold===goldBefore+80&&hidden.s.ethers===ethersBefore+1,'secret rewards exact currency and resource amounts');
+ok(hidden.s.loot.length===lootBefore+1&&hidden.s.loot.at(-1).stat==='focus','unique keeper charm uses true equipment stat mechanics');
+ok(!hidden.objects().some(o=>o.id===C.CACHE_ID),'collected chest no longer interacts');
+hidden.interact(treasure);
+ok(hidden.s.gold===goldBefore+80&&hidden.s.loot.length===lootBefore+1,'revisits cannot duplicate secret rewards');
+ok(LQ.validSave(JSON.parse(JSON.stringify(hidden.s))),'hidden passage and charm preserve existing save version');
+const full=new LQ.Game(LQ.fresh('Full Pack'));
+full.enter('dungeon',0,0);full.s.flags['lq:ch1:catalog']=true;
+full.s.loot=Array.from({length:40},(_,i)=>({id:i+1,name:'Full Bag '+i,stat:'guard',rarity:0,bonus:1,region:0}));
+full.s.lootNextId=41;
+const fullReward=full.interact(full.map().objects.find(o=>o.id===C.CACHE_ID));
+ok(fullReward?.screen==='dialog'&&fullReward.text.includes('sell'),'full inventory warns player before losing the reward');
+ok(!full.s.flags['done:'+C.CACHE_ID]&&!full.s.flags[C.CACHE_FLAG],'full inventory retains uncollected treasure for later');
+
 const beforeAudio=audio.oscillators;
 ok(!C.tone('gate',false),'muted audio creates no sounds');
 ok(audio.oscillators===beforeAudio,'muted audio avoids WebAudio entirely');
