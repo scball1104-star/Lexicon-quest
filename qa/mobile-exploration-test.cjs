@@ -12,7 +12,7 @@ const paints=[];
 const canvas=new Proxy({measureText:t=>({width:String(t).length*7}),fillRect:(...args)=>paints.push(args)},{get:(o,k)=>k in o?o[k]:(()=>{}),set:(o,k,v)=>(o[k]=v,true)});
 function elem(id=''){
  return {id,tagName:'DIV',dataset:{},children:[],value:'',_html:'',style:{},
- get innerHTML(){return this._html;},set innerHTML(v){this._html=v;for(const m of v.matchAll(/id="([^"]+)"/g))if(!nodes.has(m[1]))nodes.set(m[1],elem(m[1]));const hero=/<input id="hero"[^>]*value="([^"]*)"/.exec(v);if(hero)nodes.get('hero').value=hero[1];},
+ get innerHTML(){return this._html;},set innerHTML(v){this._html=v;if(id==='app')nodes.delete('modal');for(const m of v.matchAll(/id="([^"]+)"/g))if(!nodes.has(m[1]))nodes.set(m[1],elem(m[1]));const hero=/<input id="hero"[^>]*value="([^"]*)"/.exec(v);if(hero)nodes.get('hero').value=hero[1];},
  appendChild(n){this.children.push(n);if(n.className==='modal-wrap')nodes.set('modal',n);},
  addEventListener(k,f){(events['app:'+k]??=[]).push(f);},
  querySelector(){return {focus(){}};},focus(){},remove(){nodes.delete('modal');},
