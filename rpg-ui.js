@@ -284,15 +284,49 @@ cv.onclick=e=>{if(modal)return;const r=cv.getBoundingClientRect(),x=Math.floor((
 cv.onmousemove=e=>{const b=cv.getBoundingClientRect(),x=Math.floor((e.clientX-b.left)/b.width*17)+camera.x,y=Math.floor((e.clientY-b.top)/b.height*13)+camera.y;cv.title=game.objects().find(o=>o.x===x&&o.y===y)?.label||citizenAt(x,y)?.name||m.tiles[y]?.[x]||'';if(!hoverTile||hoverTile.x!==x||hoverTile.y!==y){hoverTile={x,y};drawMap();updateFocusPanel();}};
 cv.onmouseleave=()=>{hoverTile=null;cv.title='';drawMap();updateFocusPanel();};}
 function stopWalk(){route=[];routeTarget=null;clearInterval(walking);walking=null;}
-function walkTo(tx,ty){stopWalk();const s=game.s,m=game.map(),queue=[[s.x,s.y,[]]],seen=new Set([s.x+','+s.y]),obs=game.objects();while(queue.length){const [x,y,path]=queue.shift();if(x===tx&&y===ty){route=path;routeTarget=obs.find(o=>o.x===tx&&o.y===ty)||{x:tx,y:ty,label:'Selected destination'};break;}for(const [dx,dy] of [[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(seen.has(k)||game.blocked(nx,ny)||s.place==='world'&&!game.available(LQ.regionAt(nx,ny)))continue;const o=obs.find(o=>o.x===nx&&o.y===ny);if(o&&['enemy','boss','boulder','obstacle'].includes(o.type)&&(nx!==tx||ny!==ty))continue;if(o?.type==='door'&&!s.flags[o.requires]||o?.type==='keydoor'&&!s.flags['key'+s.region]||o?.type==='worldgate'&&!s.cleared.includes(o.r))continue;seen.add(k);queue.push([nx,ny,[...path,[dx,dy]]]);}}
-if(!route.length){chatAfterWalk=null;game.emit('No open route. Move closer or open the gate first.');render();return;}walking=setInterval(()=>{
- if(!route.length||modal||game.battle){stopWalk();return;}
- const [dx,dy]=route.shift();move(dx,dy,true);
- if(!route.length){const id=chatAfterWalk;stopWalk();chatAfterWalk=null;
-  const actor=citizens?.people.find(o=>o.id===id);
+function stopHeldMovement(){holdDirection=null;clearTimeout(holdDelay);clearInterval(holdRepeat);holdDelay=null;holdRepeat=null;}
+function walkTo(tx,ty,goal=null){
+ stopWalk();if(!game||game.battle||modal)return;
+ const state=game.s,place=state.place,region=state.region,obs=game.objects(),dirs=[[0,1],[1,0],[0,-1],[-1,0]];
+ const candidates=goal?dirs.map(([dx,dy])=>[tx+dx,ty+dy]):[[tx,ty]];
+ const ends=new Set(candidates.filter(([x,y])=>!game.blocked(x,y)&&!(state.place==='world'&&!game.available(LQ.regionAt(x,y)))).map(([x,y])=>x+','+y));
+ if(!ends.size){game.emit('That destination has no accessible approach.');render();return;}
+ const previous=new Map(),startKey=state.x+','+state.y,queue=[[state.x,state.y]];
+ previous.set(startKey,null);
+ let found=null;
+ for(let i=0;i<queue.length;i++){
+  const [x,y]=queue[i],key=x+','+y;if(ends.has(key)){found=key;break;}
+  for(const [dx,dy] of dirs){
+   const nx=x+dx,ny=y+dy,next=nx+','+ny;
+   if(previous.has(next)||game.blocked(nx,ny)||state.place==='world'&&!game.available(LQ.regionAt(nx,ny)))continue;
+   const obstacle=obs.find(q=>q.x===nx&&q.y===ny);
+   if(obstacle&&['enemy','boss','boulder','obstacle'].includes(obstacle.type))continue;
+   if(obstacle?.type==='door'&&!state.flags[obstacle.requires]||obstacle?.type==='keydoor'&&!state.flags['key'+state.region]||obstacle?.type==='worldgate'&&!state.cleared.includes(obstacle.r))continue;
+   previous.set(next,{prev:key,dx,dy});queue.push([nx,ny]);
+  }
+ }
+ if(found===null){chatAfterWalk=null;game.emit('No open path yet. Follow the accessible corridors or release the gate.');render();return;}
+ const steps=[];
+ for(let key=found;key!==startKey;){const info=previous.get(key);if(!info)break;steps.push([info.dx,info.dy]);key=info.prev;}
+ route=steps.reverse();
+ routeTarget=goal||{x:tx,y:ty,label:'Selected destination'};
+ function arrived(){
+  stopWalk();
+  if(!game||modal||game.battle||game.s.place!==place||game.s.region!==region)return;
+  const target=goal&&game.objects().find(q=>q.id===goal.id);
+  if(target&&Math.abs(game.s.x-target.x)+Math.abs(game.s.y-target.y)<=1){chatAfterWalk=null;interact(target);return;}
+  const actor=citizens?.people.find(o=>o.id===chatAfterWalk);chatAfterWalk=null;
   if(actor&&Math.abs(actor.x-game.s.x)+Math.abs(actor.y-game.s.y)<=1)talkCitizen(actor);
  }
-},130);}
+ if(!route.length){arrived();return;}
+ walking=setInterval(()=>{
+  if(!route.length||modal||game.battle||game.s.place!==place||game.s.region!==region){stopWalk();return;}
+  const [dx,dy]=route.shift(),oldX=game.s.x,oldY=game.s.y;
+  move(dx,dy,true);
+  if(game.s.x===oldX&&game.s.y===oldY||game.battle){stopWalk();return;}
+  if(!route.length)arrived();
+ },125);
+}
 function move(dx,dy,auto=false){if(!game||modal||game.battle)return;if(!auto)stopWalk();store();game.move(dx,dy);chosen='attack';target=0;render();}
 function interact(o){if(!o&&!game.nearby().length&&citizenNear().length){talkCitizen(citizenNear()[0]);return;}stopWalk();store();const result=game.interact(o);if(result?.screen==='battle')battleReport=null;if(result&&typeof result==='object'&&['inn','shop','forge'].includes(result.screen)&&game.s.place==='town'){stopInteriorWalk();interior=Interiors.create(result.screen,game.s.region,result.label);interiorMessage='Welcome to '+result.label+'. Walk up to the counter to speak with the attendant.';modal=null;renderInterior();return;}if(result&&typeof result==='object'&&result.screen!=='battle'){modal=result;}render();}
 
