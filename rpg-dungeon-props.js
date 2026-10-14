@@ -19,7 +19,14 @@ function draw(c,x,y,o,s,tick=0){
  const gem=(cx,cy,col)=>{rect(c,x+cx,y+cy,8,9,col);rect(c,x+cx+2,y+cy+1,3,4,'#f6fff7');rect(c,x+cx+3,y+cy+7,2,2,p[1]);};
  if(type==='chest'||/Cache|Chest/.test(type)&&type!=='prismChest'||type==='prismChest'){
   const unlocked=type!=='prismChest'||!!flags['lq:prism:solved'];
+  const opened=!!flags['done:'+o.id];
   base();
+  if(opened){
+   rect(c,x+8,y+13,32,10,'#584239');rect(c,x+11,y+10,26,4,'#c5a16c');
+   rect(c,x+8,y+27,32,15,'#3c332e');rect(c,x+11,y+28,26,11,'#9b7450');
+   rect(c,x+13,y+31,22,7,'#242c31');rect(c,x+22,y+26,6,13,'#d2ae72');
+   return true;
+  }
   rect(c,x+9,y+20,30,23,'#483b36');rect(c,x+11,y+25,26,14,'#986c4c');
   rect(c,x+8,y+18,32,10,'#6d4e3d');rect(c,x+11,y+16,26,5,'#b28c61');
   rect(c,x+13,y+22,22,3,'#c9a16a');rect(c,x+16,y+27,3,12,'#d6b17c');
