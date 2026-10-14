@@ -73,3 +73,20 @@ The benchmark is not a cosmetic imitation of Final Fantasy, Lufia II, Chrono Tri
 Continue shipping incremental modules on the existing static HTML/JavaScript game so GitHub → Netlify deployment and old browser-origin saves remain intact. Keep save fields additive until a tested migration to a later format is justified. Keep every mechanical expansion covered by node QA and browser/smartphone testing before considering it production-quality.
 
 The next most valuable milestone after this release is a **hand-authored visual rebuild of the first explorable town, Willowmere, and Rootbound Archive Floor I**, establishing the art, movement, camera and interaction standards to propagate across the rest of the game.
+
+
+## Milestone update — 2026-10-13: Willowmere scene + mobile-native play
+- A dedicated first-region renderer now paints Willowmere's paths, hedgerows, flowers, river, cottage walls and roofs, lantern posts, and service façades as coherent 48-pixel scenery. Rootbound Archive Floor I uses a consistent stone, wood, carpet, shelf, brazier, pillar and interactable-object language. Renderer is deterministic and does not change collision data.
+- Phone portrait layouts enlarge the map camera to roughly 10–12 visible horizontal tiles, rather than shrinking all 17 desktop columns to fit, while keeping a three-person HP strip and current destination above the map.
+- Fixed, safe-area-aware touch controls include a directional pad with touch-and-hold repeat, contextual Interact, Quest, Map, and Menu. Mobile battles include a fixed Attack/Defend/Skills & Items quick-action bar and retain all advanced combat options.
+- Tap-to-move now routes to an accessible tile adjacent to interactive landmarks, automatically triggering their action upon arrival. Taps on visually large service façades target the service, rather than empty terrain.
+- New-game entry goes directly into Willowmere with concise contextual guidance; the full optional help guide is still available from the title and Field menu.
+- Responsive styles account for shorter phones, landscape orientation, dialogs above fixed controls, and reduced-motion preferences.
+- The milestone adds test coverage for touch repeat/cancel behavior, path-to-NPC arrival, one-tap combat, art determinism and mobile/offline assets.
+- This is the **first art and mobile UX pass**. Before claiming reference-game visual parity, implement animated four-direction sprites, scene transitions, deeper architectural atlases, environmental sound, all-region art consistency, and actual iPhone Safari/Android browser playtesting.
+
+### Next highest-value tasks
+1. Audit production Netlify build status and play the latest deployment on real phone devices; correct any touch, layout, save or scene regressions.
+2. Deepen Willowmere and Archive sprite animation, camera easing, town building collision/doors and contextual interaction feedback.
+3. Make the mobile battle turn chooser more compact without hiding targeting or tactical information.
+4. Roll the validated art and touch standards to the remaining seven regions.
