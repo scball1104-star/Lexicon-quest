@@ -128,3 +128,23 @@ Developer reminder: this raises visual consistency and feedback, but these are s
 2. Create authored, high-quality environmental tile atlases for distinct town/dungeon silhouettes in every realm.
 3. Add enemy-specific multi-frame attack animations, readable telegraphs, boss phase presentations and character-specific spell effects.
 4. Deepen dungeon object animation (gates sliding, switches turning), audio and tactile feedback. Avoid relying on generic icons to represent exploration objects.
+
+## Milestone v51 — The Complete First-Region Adventure (October 14, 2026)
+
+The Willowmere/Rootbound Archive opening chapter now includes a connected, optional three-area story, rather than isolated reward pickups:
+
+- **The Lanterns of Memory:** recover original narrative memories in Willowmere town, the Valley overworld and Archive Floor I. Memories explain the region's erased names and the Keepers' broken oath.
+- **Permanent party reward:** collecting all three strengthens all three party members by +8 Max HP and +2 Max MP, without stacking on repeat visits.
+- **Meaningful guardian preparation:** the recovered Lantern contributes +15 Focus when battling the Archivore, complementing existing relics and companion systems.
+- **Catalog Diagram mystery:** read the clue and orient three distinctive, visible dungeon mechanisms—Root EAST, Lantern SOUTH and Star WEST. The optional cache awards 135 gold, two potions and an Ether. Repeating the puzzle never duplicates rewards.
+- **Pilgrim Rest:** explore the Valley to find a one-use campfire recovering HP/MP and providing a spare potion, without reviving fallen heroes.
+- **Mobile chapter guidance:** in-world objects have bespoke pixel visuals and interaction signals. A compact field progress ticker, mobile Chapter I shortcut, dedicated chapter tracker, and integrated quest journal show the remaining tasks. Tracker links use existing tap-to-walk behavior.
+- **Save and progression safety:** all rewards use additive version-3 save flags; existing dungeons, Echo Warden seals, towns, storyline and chapter bosses remain unchanged.
+- **Quality gates:** new `qa/chapter-one-director-test.cjs` is added to the Netlify build command, and `verify-ui.cjs` tests the new chapter tracker. The GitHub Actions workflow under `.github/workflows/quality-gate.yml` runs the exact same build checks on pushes and PRs.
+- **Verification so far:** 27 direct chapter-engine assertions and nine simulated integrated UI checks passed in-session. The full Netlify/CI job and physical iPhone Safari/desktop browser visual QA remain separate release requirements.
+
+### Quality priorities for the next large iteration
+1. Complete real-device QA, especially tap-to-approach near the new props, safe-area layout, dialogue, and sustained animation performance.
+2. Build fully authored town interiors and scripted encounters with responsive character acting, original environmental sound, and genuine animation atlases.
+3. Expand tactical battles with boss phase choreography, readable elemental telegraphs and party synergy decisions.
+4. Extend fully tested, coherent story-and-puzzle loops into the remaining seven regions; never gate mandatory story progression behind optional content.
