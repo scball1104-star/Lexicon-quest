@@ -506,6 +506,27 @@ if(a==='enemyTarget'){if(!['mend','revive','potion','ether'].includes(chosen))ta
 if(a==='allyTarget'){if(['mend','revive','potion','ether'].includes(chosen))target=Number(id);renderBattle();return;}
 if(a==='confirmAction'||a==='run'){runCombatAction(a==='run'?'run':chosen,target);return;}
 });
+// Touch/pen/mouse D-pad: one step immediately, then repeat while held.
+// Bind at document level so controls can re-render while a finger remains down.
+document.addEventListener('pointerdown',e=>{
+ const btn=e.target?.closest?.('button[data-action="move"]');
+ if(!btn||btn.disabled||!game||game.battle||modal||interior)return;
+ if(!['touch','pen','mouse'].includes(e.pointerType))return;
+ e.preventDefault();
+ stopHeldMovement();
+ const dx=Number(btn.dataset.dx),dy=Number(btn.dataset.dy);
+ holdDirection=[dx,dy];blockMoveClickUntil=Date.now()+440;
+ move(dx,dy);
+ holdDelay=setTimeout(()=>{
+  if(!holdDirection)return;
+  holdRepeat=setInterval(()=>{
+   if(!holdDirection||!game||game.battle||modal||interior){stopHeldMovement();return;}
+   blockMoveClickUntil=Date.now()+440;
+   move(dx,dy);
+  },110);
+ },260);
+});
+for(const evt of ['pointerup','pointercancel','visibilitychange'])document.addEventListener(evt,stopHeldMovement);
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Tab'&&modal){const items=[...document.querySelectorAll('.modal button,.modal input,.modal select,.modal textarea')].filter(el=>!el.disabled);const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}return;}if(e.key==='Escape'){e.preventDefault();stopWalk();if(modal){modal=null;render();return;}if(interior){interiorLeave();return;}if(game&&!game.battle)modal={screen:'menu'};render();return;}if(!game||modal)return;if(interior){const dirs={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]};if(dirs[e.key]){e.preventDefault();interiorStep(...dirs[e.key]);}else if(['e','E',' '].includes(e.key)){e.preventDefault();interiorUse();}return;}if(game.battle){const b=game.battle,p=game.s.party[b.actor];if(/^[1-9]$/.test(e.key)){const a=game.abilities(p)[Number(e.key)-1];if(a){e.preventDefault();chosen=a;target=0;renderBattle();}return;}if(e.key==='g'||e.key==='G'){e.preventDefault();chosen='guard';renderBattle();return;}if(e.key==='Enter'){e.preventDefault();runCombatAction(chosen,target);return;}if(e.key==='r'||e.key==='R'){if(!b.boss&&b.origin.type!=='trial'){e.preventDefault();runCombatAction('run',target);}return;}if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const ally=['mend','revive','potion','ether'].includes(chosen),noTarget=['guard','ward','resonance'].includes(chosen);if(noTarget)return;const ts=ally?game.s.party:b.enemies;const choices=ts.map((q,i)=>chosen==='revive'?q.hp===0?i:-1:q.hp>0?i:-1).filter(i=>i>=0);if(!choices.length)return;const ix=choices.indexOf(target);target=choices[(Math.max(0,ix)+(e.key==='ArrowRight'?1:choices.length-1))%choices.length];renderBattle();return;}return;}const dirs={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]};if(dirs[e.key]){e.preventDefault();move(...dirs[e.key]);}else if(['e','E',' '].includes(e.key)){e.preventDefault();interact();}else if(['m','M'].includes(e.key)){modal={screen:'atlas'};renderModal();}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){stopWalk();audio.pause();store();}else music();});
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
