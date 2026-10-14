@@ -1,0 +1,32 @@
+/* Lexicon Quest cinematic adventure v52
+ * Original architectural overlays, reactive mechanisms, companion acting,
+ * guarded battle telegraphs and readable mobile stage. */
+.lq-companion-cue{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:13px;margin:3px 0 9px;padding:10px 14px;border:1px solid #b39b6c;border-radius:7px;background:linear-gradient(120deg,#304941,#172e38);box-shadow:0 3px 13px #08151a52;animation:lq-cue-arrive .3s ease-out,lq-cue-dismiss .7s ease-in 4.1s both;pointer-events:none}
+.lq-companion-cue span{color:#e9c88a;letter-spacing:.06em;font:800 11px/1.3 system-ui,sans-serif;white-space:nowrap}
+.lq-companion-cue p{color:#fff1d6;font:500 12px/1.4 Georgia,serif;margin:0;min-width:0}
+.lq-phase-cinematic{position:relative;overflow:hidden;text-align:center;margin:7px auto 12px;max-width:860px;padding:19px 24px 17px;background:linear-gradient(135deg,#35213e,#242e43 55%,#4e352e);border:1px solid #e9ba74;border-left:4px solid #e1cc97;box-shadow:0 7px 25px #060d17a6,inset 0 0 25px #eeb98918;border-radius:7px;animation:lq-phase-in .45s cubic-bezier(.16,.75,.3,1),lq-cue-dismiss .9s ease-in 4.4s both}
+.lq-phase-cinematic::before,.lq-phase-cinematic::after{content:"";position:absolute;width:160px;height:160px;top:50%;border:1px solid #f2d7a866;transform:translateY(-50%) rotate(45deg);pointer-events:none}
+.lq-phase-cinematic::before{left:-125px}.lq-phase-cinematic::after{right:-125px}
+.lq-phase-cinematic span{display:block;color:#d9bba4;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:.17em}
+.lq-phase-cinematic strong{display:block;color:#ffe7b0;font:700 clamp(20px,3vw,29px)/1.15 Georgia,serif;text-shadow:0 3px 14px #0009;margin:7px 0}
+.lq-phase-cinematic p{font-size:12px;line-height:1.45;color:#e7dce0;max-width:570px;margin:0 auto}
+.lq-enemy-tactic{position:absolute;z-index:5;left:8px;top:34px;max-width:calc(100% - 16px);padding:3px 6px;background:#6d3242;color:#ffe7be;border:1px solid #e7a678;border-radius:4px;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:.06em;box-shadow:0 0 10px #0008;animation:lq-tactic-heartbeat 1.8s ease-in-out infinite;pointer-events:none}
+.tactical-enemy:has(.lq-enemy-tactic){border-color:#e8b276!important;box-shadow:0 0 0 1px #ba775c,0 0 24px #ec8e5255}
+@keyframes lq-cue-arrive{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes lq-phase-in{0%{opacity:.1;transform:scale(.965);filter:brightness(.7)}65%{opacity:1;filter:brightness(1.25)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes lq-cue-dismiss{0%,65%{opacity:1}100%{opacity:0;visibility:hidden;max-height:0;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden}}
+@keyframes lq-tactic-heartbeat{0%,100%{background:#6d3242}50%{background:#9e4749}}
+@media(max-width:700px){
+ .lq-companion-cue{grid-template-columns:1fr;padding:7px 10px;row-gap:3px;margin:2px 0 5px}
+ .lq-companion-cue span{font-size:9px}
+ .lq-companion-cue p{font-size:11px;line-height:1.3}
+ .lq-phase-cinematic{margin:4px auto 6px;padding:9px 11px}
+ .lq-phase-cinematic span{font-size:8px}
+ .lq-phase-cinematic strong{font-size:18px;margin:4px 0}
+ .lq-phase-cinematic p{font-size:10px;line-height:1.3}
+ .lq-enemy-tactic{top:29px;left:3px;padding:2px 3px;font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .lq-companion-cue,.lq-phase-cinematic,.lq-enemy-tactic{animation:none!important}
+ .lq-enemy-tactic{background:#824049}
+}
