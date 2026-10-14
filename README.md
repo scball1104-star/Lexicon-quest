@@ -1,3 +1,5 @@
+> **Current direction (October 2026): The Reforged Realms.** The main playable RPG has dropped crossword gameplay. Dungeon seal encounters are now Echo Warden battles, with eight equipable relics, rare equipment drops, companion charm slots, and a restyled interface. Existing version-3 saves are supported. See [REFORGED_REALMS_VISION.md](REFORGED_REALMS_VISION.md) for the creative direction, work completed, next priorities, and quality gates.
+
 **Latest build: Tactical Presentation Edition (2026-10-13).** The eight-chapter campaign now has a redesigned battle interface with turn order, telegraphed threats, affinities, tactical recommendations, ability previews and post-action HP/Focus feedback. See [TACTICAL_PRESENTATION_RELEASE.md](TACTICAL_PRESENTATION_RELEASE.md). All version 3 saves remain compatible.
 
 # The Living Lexicon Edition — Chapter VIII Complete
