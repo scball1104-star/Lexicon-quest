@@ -1,0 +1,35 @@
+/* Chapter I: a polished optional adventure, designed for handheld RPG play. */
+.lq-chapter-ticker{display:flex;align-items:center;gap:8px;margin:7px 0 9px;padding:9px 12px;border:1px solid #aa956f;border-left:3px solid #e6c887;background:linear-gradient(95deg,#25443d,#1a3037);border-radius:5px;color:#eadfc5;font-size:12px;line-height:1.4;}
+.lq-chapter-ticker::before{content:"✦";font-size:18px;color:#f4d09a;flex-shrink:0;}
+.lq-chapter-tracker{border:1px solid #998565;border-radius:8px;background:linear-gradient(160deg,#223740,#142832);box-shadow:0 8px 20px #07111833;color:#e9e6d5;overflow:hidden;margin:10px 0 17px}
+.lq-chapter-head{padding:17px 18px 15px;background:linear-gradient(120deg,#305148,#253c46);border-bottom:1px solid #9e936b}
+.lq-chapter-head span{font:800 10px/1.3 system-ui,sans-serif;color:#e8cd99;letter-spacing:.15em}
+.lq-chapter-head h3{font:700 24px/1.2 Georgia,serif;color:#fff0c8;margin:5px 0}
+.lq-chapter-head p{line-height:1.55;font-size:13px;color:#e3e5d7;margin:0}
+.lq-track-block{padding:12px 17px 8px;border-top:1px solid #537064}
+.lq-track-block:first-of-type{border-top:0}
+.lq-track-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.lq-track-heading b{font:700 19px Georgia,serif;color:#eacf97}
+.lq-track-heading small{font-size:11px;color:#c0d0c5;text-align:right}
+.lq-quest-track-row{display:flex;align-items:center;gap:12px;padding:9px 5px;border-top:1px solid #40545a}
+.lq-quest-track-row>span{font:700 20px Georgia,serif;color:#d0ab81;width:25px;text-align:center;flex-shrink:0}
+.lq-quest-track-row>span.done{color:#a9d7b4}
+.lq-quest-track-row>div{min-width:0;flex:1}
+.lq-quest-track-row strong{display:block;font-size:13px;color:#f6e8c6}
+.lq-quest-track-row small{display:block;font-size:11px;color:#c2d5ce;line-height:1.4}
+.lq-quest-track-row button{min-height:41px;min-width:65px;border-radius:6px;padding:6px 11px;flex-shrink:0}
+.lq-track-reward{margin:0;padding:13px 17px 16px;background:#1a3135;color:#e4d4ab;font-size:12px;line-height:1.5;border-top:1px solid #8b835e}
+@media(max-width:700px){
+ .lq-chapter-ticker{padding:6px 8px;font-size:10px;margin:4px 0 6px;max-height:40px;overflow:hidden}
+ .lq-chapter-head{padding:12px 13px}
+ .lq-chapter-head h3{font-size:20px}
+ .lq-track-block{padding:10px 12px 6px}
+ .lq-track-heading b{font-size:17px}
+ .lq-quest-track-row{gap:8px}
+ .lq-quest-track-row strong{font-size:12px}
+ .lq-quest-track-row button{min-height:43px}
+ .lq-track-reward{padding:11px 12px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .lq-chapter-tracker,.lq-quest-track-row,.lq-chapter-ticker{animation:none;transition:none}
+}
