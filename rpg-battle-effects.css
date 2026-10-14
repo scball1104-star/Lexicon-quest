@@ -33,6 +33,8 @@
 }
 @media(prefers-reduced-motion:reduce){
  .combat-impact{display:none}
- .combat-damage{animation:none;opacity:1;transform:translate(-50%,0)}
+ .combat-damage{animation:combat-reduced .76s step-end both;transform:translate(-50%,0)}
  .battle-stage .tactical-enemy:has(.combat-damage) .enemy-art{animation:none}
 }
+
+@keyframes combat-reduced{0%,90%{opacity:1}100%{opacity:0}}
