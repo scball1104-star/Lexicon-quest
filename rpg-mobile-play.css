@@ -1,0 +1,99 @@
+/* Lexicon Quest mobile-native play layout.
+ * 2026-10: supports touch without altering desktop keyboard/mouse behavior.
+ */
+.mobile-game-hud{display:none}
+.mobile-extra{display:none}
+.mobile-action-buttons{display:flex;align-items:center;gap:8px}
+.mobile-action-buttons .primary{min-height:46px}
+@media (max-width:700px){
+ html,body{overflow-x:hidden}
+ body{overscroll-behavior-y:contain}
+ .topbar{min-height:53px;padding:7px 11px;gap:5px}
+ .topbar .brand{font-size:20px}
+ .topbar small{display:none}
+ .topbar .row{gap:5px}
+ .topbar button{min-height:41px;font-size:12px;padding:7px 9px}
+ .shell{display:block!important;padding:5px 6px 0!important;margin:0 auto;max-width:680px}
+ .shell>section{min-width:0}
+ .location{margin:0 2px 5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+ .location h2{font-size:clamp(20px,5.3vw,26px);line-height:1.07}
+ .location .eyebrow{font-size:9px}
+ .location .scene-flavor{display:none}
+ .location>small{font-size:10px;text-align:right;line-height:1.25;max-width:120px}
+ .mobile-game-hud{display:grid;grid-template-columns: minmax(0,1fr);gap:4px;background:linear-gradient(100deg,#193139,#101d27);border:1px solid #8b865f;border-radius:6px 6px 0 0;padding:7px 10px;margin-bottom:0;box-shadow:0 3px 12px #0006}
+ .mobile-next{display:flex;align-items:center;gap:8px;min-width:0}
+ .mobile-next span{font-size:9px;letter-spacing:.08em;font-weight:800;color:#e6c786;white-space:nowrap}
+ .mobile-next strong{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:12px;color:#fff0cc}
+ .mobile-party-hp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .mobile-party-hp span{display:flex;align-items:center;gap:4px;min-width:0}
+ .mobile-party-hp b{font-size:10px;max-width:38px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .mobile-party-hp i{height:6px;flex:1;min-width:12px;background:#07121c;border:1px solid #63786c;border-radius:3px;overflow:hidden}
+ .mobile-party-hp em{display:block;height:100%;background:linear-gradient(90deg,#56a179,#a3d9a7)}
+ .mapframe{border:2px solid #9c875d!important;border-top:0!important;border-radius:0 0 6px 6px!important;overflow:hidden!important;touch-action:none;position:relative;background:#1f3334}
+ .mapframe canvas#field{position:relative;left:50%;transform:translateX(-50%);width:165%!important;max-width:none!important;height:auto!important;aspect-ratio:17 / 13;display:block;touch-action:none;image-rendering:pixelated}
+ .mapframe .maphint{display:none!important}
+ .mapframe .mapbadge{font-size:9px;top:6px;left:6px;padding:2px 5px;pointer-events:none;max-width:58%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+ .mapframe::after{box-shadow:inset 0 0 25px #07121a55;pointer-events:none}
+ .message{padding:5px 9px!important;margin:5px 0!important;font-size:12px;line-height:1.25;min-height:32px;max-height:50px;overflow:hidden}
+ .nearby-strip{display:none!important}
+ .sidebar{display:none!important}
+ .controls{position:sticky;bottom:0;z-index:45;display:grid!important;grid-template-columns:174px minmax(0,1fr);align-items:center;gap:7px!important;margin:0 -6px;padding:7px max(7px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left));background:linear-gradient(180deg,#253e43f4,#0d1d27f9);border-top:2px solid #c8a86b;box-shadow:0 -8px 25px #0009;backdrop-filter:blur(12px)}
+ .controls .pad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:54px 54px;gap:4px}
+ .controls .pad button{width:54px;height:54px;min-height:54px;padding:0;font-size:26px;border-radius:12px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;background:linear-gradient(160deg,#53716d,#243c47);border:1px solid #ab9b79}
+ .controls .pad button:active{background:linear-gradient(160deg,#edce96,#9c9b81);color:#1c292c}
+ .controls>.stack{min-width:0;gap:2px}
+ .controls>.stack>small{display:none}
+ .controls .mobile-action-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .controls .mobile-action-buttons button{border-radius:9px;padding:5px 3px;min-width:0;min-height:51px;touch-action:manipulation;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .controls .mobile-action-buttons .primary{grid-column:1/-1;min-height:55px;font-size:15px;font-weight:800}
+ .controls .mobile-extra{display:block}
+ .town-guide-note{display:none}
+ .modal-wrap{padding:max(env(safe-area-inset-top),8px) 7px max(env(safe-area-inset-bottom),8px);align-items:center}
+ .modal{width:100%;max-height:calc(100dvh - 22px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+ .modal-head{position:sticky;top:0;z-index:1;background:#192c33;padding:7px 0;border-bottom:1px solid #827556}
+ .modal-head button{min-height:44px;min-width:44px}
+ .modal button:not(.sq),.modal select{min-height:43px}
+ .battle-shell{margin:0 auto!important;padding:6px!important}
+ .battle-heading{margin:4px 0 8px}
+ .battle-heading h2{font-size:24px}
+ .battle-heading-side{font-size:11px}
+ .battle-brief{padding:8px 10px;font-size:12px}
+ .battle-brief p{line-height:1.35;margin-bottom:0}
+ .battle-turn-order{overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+ .resonance-panel{padding:8px 10px}
+ .resonance-panel small{display:none}
+ .battle-stage{min-height:218px!important;height:230px!important;padding:6px!important;gap:4px}
+ .battle-stage .tactical-enemy{min-width:0;padding:5px!important;flex:1}
+ .battle-stage .enemy-art{width:76px!important;height:76px!important}
+ .battle-stage .enemy-name{font-size:12px!important}
+ .battle-stage .enemy-intent{font-size:9px!important}
+ .battle-stage .enemy-affinities,.battle-stage .intent-text{font-size:9px!important}
+ .battle-party{gap:4px!important}
+ .battle-party .combat-ally{padding:4px!important;min-width:0}
+ .battle-party .partycard{display:block}
+ .battle-party .portrait{display:none}
+ .battle-party .partycard small{font-size:9px}
+ .battle-bottom{gap:7px}
+ .battle-console{padding:9px}
+ .battle-console .commands{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .battle-console .command{min-height:60px;padding:8px}
+ .battle-confirm{position:sticky;bottom:0;z-index:20;background:#152831f5;border:1px solid #a98f5b;border-radius:6px;padding:8px;box-shadow:0 -5px 16px #000a}
+ .battle-confirm .primary{min-height:52px}
+ .battle-log{display:none}
+}
+@media (max-width:365px){
+ .controls{grid-template-columns:152px minmax(0,1fr)}
+ .controls .pad{grid-template-columns:repeat(3,47px);grid-template-rows:49px 49px;gap:3px}
+ .controls .pad button{width:47px;height:49px;min-height:49px}
+ .controls .mobile-action-buttons button{font-size:10px;min-height:46px}
+ .controls .mobile-action-buttons .primary{font-size:12px;min-height:49px}
+ .mobile-next span{font-size:8px}
+}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:510px){
+ .mapframe canvas#field{width:125%!important}
+ .controls{position:relative;bottom:auto;grid-template-columns:158px 1fr}
+ .controls .pad{grid-template-columns:repeat(3,47px);grid-template-rows:47px 47px}
+ .controls .pad button{height:47px;width:47px;min-height:47px}
+ .location .scene-flavor{display:none}
+}
+@media(prefers-reduced-motion:reduce){.controls button,.mapframe canvas{transition:none!important}}
