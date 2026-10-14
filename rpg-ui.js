@@ -5,7 +5,7 @@ const Art=typeof LQEnvironmentArt!=='undefined'?LQEnvironmentArt:{tile:()=>false
 const Interiors=LQInteriors;
 const Citizens=typeof LQTownsfolk!=='undefined'?LQTownsfolk:null;
 const BattleUX=typeof LQBattleUI!=='undefined'?LQBattleUI:null;
-const app=document.getElementById('app'),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app=document.getElementById('app'),esc=s=>String(LQ.cleanLore?LQ.cleanLore(s):s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let game=null,modal=null,slot=0,chosen='attack',target=0,route=[],walking=null,routeTarget=null,saveError='',titleNotice='',hoverTile=null,interior=null,interiorTimer=null,interiorRoute=[],interiorMessage='',citizens=null,citizenRegion=-1,chatAfterWalk=null,battleReport=null;
 const audio=new Audio();audio.loop=true;audio.volume=.24;let track='';
 const partyArt=typeof Image==='function'?new Image():null,worldArt=typeof Image==='function'?new Image():null,citizenArt=typeof Image==='function'?new Image():null;
