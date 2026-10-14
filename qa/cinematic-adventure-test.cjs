@@ -120,6 +120,8 @@ for(let r=0;r<8;r++){
   ok(next.battle.round===3&&hunter.charge,'realm '+r+' hunter warns before next heavy attack');
   ok(hunter.tactic==='Ambush','realm '+r+' enemy telegraph displays a named tactic');
   ok(next.intent(hunter).toLowerCase().includes('charged')||hunter.charge,'existing combat UI recognizes charge');
+  next.enemyTurn();
+  ok(!hunter.charge&&!hunter.tactic,'realm '+r+' resolved ambush clears its UI warning');
  }
  const healer=next.battle.enemies.find(e=>e.role==='mender');
  if(healer){
@@ -128,6 +130,8 @@ for(let r=0;r<8;r++){
   next.enemyTurn();
   ok(next.battle.round===2,'support round progresses correctly');
   ok(healer.tactic==='Restoration','restoration warning appears exactly before possible heal turn');
+  next.enemyTurn();
+  ok(!healer.tactic,'restoration warning disappears when support turn resolves');
  }
  ok(LQ.validSave(next.s),'realm '+r+' battle preserves saved game format');
 }
