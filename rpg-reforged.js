@@ -165,6 +165,13 @@ Game.prototype.equipRelic=function(id){
  this.s.equippedRelic=id;
  return this.emit('Equipped '+relics[id].name+'. '+relics[id].effect);
 };
+LQ.cleanLore=function(value){
+ return String(value)
+  .replace(/\bcrossed[- ]word\s+seals?\b/gi,'Echo Warden seals')
+  .replace(/\b(?:crossword|crosswords)\b/gi,'Echo Warden trial')
+  .replace(/\bintersecting words\b/gi,'ancient warding spirits')
+  .replace(/\bAcross\s*\/\s*Down\b/gi,'battle trials');
+};
 LQ.relics=relics;
 LQ.trials=trials;
 LQ.ensureRelics=ensureRelics;
