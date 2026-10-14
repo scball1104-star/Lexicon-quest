@@ -1,0 +1,36 @@
+/* The Reforged Realms | Motion & atmosphere milestone
+   Pure presentation. Never adjusts map collision, turn sequencing or game saves. */
+.scene-arrival .mapframe{animation:realm-arrival .48s cubic-bezier(.18,.67,.28,1) both}
+@keyframes realm-arrival{from{opacity:.38;filter:brightness(.44) saturate(.68)}to{opacity:1;filter:brightness(1) saturate(1)}}
+.scene-introduction{position:absolute;z-index:7;top:20%;left:50%;transform:translateX(-50%);width:min(82%,460px);padding:15px 23px;text-align:center;pointer-events:none;background:linear-gradient(90deg,transparent,#0b1e28dc 17%,#0b1e28ed 83%,transparent);border-top:1px solid #c6ab77a3;border-bottom:1px solid #c6ab77a3;animation:realm-introduction 1.6s ease-in-out both;text-shadow:0 2px 8px #000d}
+.scene-introduction span{display:block;margin-bottom:5px;font:700 10px/1.2 system-ui,sans-serif;color:#e7d6a9;text-transform:uppercase;letter-spacing:.22em}
+.scene-introduction strong{font:bold clamp(21px,2.8vw,32px)/1.15 Georgia,serif;color:#ffe9b6;display:block}
+@keyframes realm-introduction{0%{opacity:0;transform:translate(-50%,12px)}17%{opacity:1;transform:translate(-50%,0)}72%{opacity:1}100%{opacity:0}}
+.mapframe{isolation:isolate}
+.mapframe canvas#field{will-change:contents;image-rendering:pixelated}
+.mapbadge{z-index:8}
+.mapframe .scene-introduction{border-radius:2px;box-shadow:0 5px 20px #0004}
+.mapframe::after{z-index:6}
+.tactical-stage .tactical-enemy,.battle-stage .enemy{transform-origin:center bottom;animation:enemy-rise .3s ease-out both}
+@keyframes enemy-rise{0%{opacity:.5;transform:translateY(7px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.battle-stage .enemy.selected,.battle-stage .tactical-enemy.selected{outline:2px solid #f4d78a;outline-offset:2px;box-shadow:0 0 25px #f0c57825;transition:box-shadow .16s ease-out}
+.battle-stage .enemy.selected::after{content:"";position:absolute;inset:-3px;border:1px solid #e8c5839c;border-radius:inherit;pointer-events:none}
+.battle-console .command:active{transform:scale(.98)}
+.battle-console .command{transition:background-color .14s,border-color .14s,transform .1s}
+.nearby-link:focus-visible,.guide-link:focus-visible{outline:2px solid #ffe1a0;outline-offset:3px}
+.mobile-action-buttons button:active,.controls .pad button:active{filter:brightness(1.15)}
+@media(max-width:700px){
+ .scene-introduction{top:24%;width:88%;padding:11px 15px}
+ .scene-introduction span{font-size:9px}
+ .scene-introduction strong{font-size:clamp(18px,5vw,24px)}
+ .scene-arrival .mapframe{animation-duration:.32s}
+ .mapframe canvas#field{will-change:contents}
+ .mobile-next strong{line-height:1.28}
+ .mobile-game-hud{border-bottom:1px solid #c9a76d66}
+ .controls button{touch-action:manipulation}
+}
+@media(prefers-reduced-motion:reduce){
+ .scene-arrival .mapframe,.scene-introduction,.battle-stage .enemy,.battle-stage .tactical-enemy{animation:none!important}
+ .scene-introduction{opacity:1;position:static;transform:none;margin:0 auto}
+ .battle-console .command,.battle-stage .enemy,.battle-stage .tactical-enemy{transition:none!important}
+}
