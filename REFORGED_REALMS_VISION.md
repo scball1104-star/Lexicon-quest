@@ -148,3 +148,24 @@ The Willowmere/Rootbound Archive opening chapter now includes a connected, optio
 2. Build fully authored town interiors and scripted encounters with responsive character acting, original environmental sound, and genuine animation atlases.
 3. Expand tactical battles with boss phase choreography, readable elemental telegraphs and party synergy decisions.
 4. Extend fully tested, coherent story-and-puzzle loops into the remaining seven regions; never gate mandatory story progression behind optional content.
+
+## v52 — Cinematic Adventure & Tactical Dungeons (October 14, 2026)
+
+**Shipped to GitHub main; GitHub full quality gate passed.** This is an additive visual, tactical, and optional-dungeon milestone (no save version migration).
+
+- All eight dungeon realms gain palette-specific room edges, decorative floor etchings, reactive light cues and environmental dust; these overlays follow actual map tiles and never alter collisions.
+- Existing mechanical objects visually respond to their real flags, including opening portcullises, rotating Catalog dials, prisms, and glowing restorations. Effects are transient and respect reduced-motion settings.
+- Mira and Bram now offer short, region-sensitive, nonblocking field remarks when arriving in new areas or making meaningful discoveries.
+- Boss phase changes receive readable, cinematic phase headlines. Defeating an encounter triggers a party response and a victory cue.
+- Common enemy hunter archetypes gain a clearly telegraphed Ambush every few rounds; menders announce impending support in advance. Existing Defend, Aegis and Piercing Thrust counters remain available. Guardian boss mechanics and other encounter systems are preserved.
+- Web Audio synthesizes short event cues for mechanisms, discoveries, combat, and boss phase shifts when sound is enabled; no additional audio downloads or autoplay prerequisite.
+- **Actual hidden dungeon route:** finishing the Chapter I Catalog puzzle slides open a six-tile Keeper's Alcove in Rootbound Archive Floor I. The new route does not bypass the main story gate. A one-time hidden chest grants the Rare Forgotten Keeper's Sigil (a Focus charm), 80 gold and an Ether. A full inventory leaves the cache unclaimed for later.
+- The Chapter I tracker now explains the hidden passage and offers a nearby travel link, making optional discoveries navigable rather than opaque.
+- Added `qa/cinematic-adventure-test.cjs` (145 passed checks), updated `verify-ui.cjs` and the mobile exploration regression to load the director. Netlify's exact build command and the GitHub Actions gate include the new coverage. The full GitHub workflow passed at commit `3527d97` before this documentation update.
+- Real-device visual and frame-rate QA on iPhone and Android and an independent Netlify production-publish confirmation remain outstanding. Don't confuse passing CI with rendering parity to the benchmark RPGs.
+
+### Next production-quality gates
+1. Inspect phone screenshots and manually play the full Chapter I hidden-alcove route and Archive guardian battle on actual iPhone Safari / Android Chrome and desktop.
+2. Create professionally authored tile atlases and multi-frame boss/companion animation rather than relying on programmatic colored-rectangle visuals.
+3. Add encounter choreography (attack/recovery frames, screen space composition, camera staging) and a coherent sound mix.
+4. Expand each of the remaining seven chapters with optional discoveries and interconnected dungeon routes; preserve their established narrative and difficulty curves.
