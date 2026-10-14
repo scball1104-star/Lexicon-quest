@@ -1,0 +1,51 @@
+/* Lexicon Quest v50 — Complete Adventure Flow UI
+ * Designed mobile-first without competing with the playfield. */
+.lq-quest-read{display:flex;gap:10px;align-items:center;justify-content:space-between;background:linear-gradient(105deg,#213d42,#18282c);border:1px solid #b5a06e8c;border-left:3px solid #e8c783;border-radius:5px;padding:9px 12px;margin:9px 0 13px}
+.lq-quest-read>div{min-width:0}.lq-quest-read span,.lq-battle-read>span{font:800 9px/1.3 system-ui,sans-serif;letter-spacing:.12em;color:#e7c684;display:block}
+.lq-quest-read strong{font-size:13px;color:#faecd0;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lq-quest-read small{font-size:11px;line-height:1.4;color:#c1ddd2;text-align:right;flex-shrink:0}
+.lq-coach-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:10px;margin:12px 0}
+.lq-battle-read{display:grid;gap:3px;background:linear-gradient(125deg,#263b40,#172c33);border:1px solid #8a957e;border-left:4px solid #d8b478;border-radius:5px;padding:11px 15px;min-width:0}
+.lq-battle-read strong{font:700 18px/1.1 Georgia,serif;color:#fbeacb}
+.lq-battle-read small{font-size:12px;line-height:1.5;color:#d4dfdc}
+.lq-battle-read.is-danger{border-left-color:#f2a07f;background:linear-gradient(110deg,#5b3038,#1d2a32)}
+.lq-battle-read.is-advantage{border-left-color:#93cabb}.lq-battle-read.is-caution{border-left-color:#f3cc7d}
+.lq-coach-bar>button{min-width:190px;white-space:normal;font-weight:750;min-height:64px}
+.lq-foe-reading{display:flex;gap:5px;flex-direction:column;margin:8px 1px 1px;padding:7px 6px;background:#101f2abd;border-top:1px solid #738476;color:#cbdbd4;text-align:left;border-radius:3px}
+.lq-foe-reading b{font:800 9px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#e6cf96}
+.lq-foe-reading span{font:500 10px/1.3 system-ui,sans-serif;color:#d8e4df}
+.lq-loadout-guide{background:linear-gradient(145deg,#253a3d,#132831);border:1px solid #b49a66;border-radius:7px;padding:14px;margin:12px 0 20px}
+.lq-loadout-guide h3{margin:0 0 10px;color:#f7dda3;font:700 21px Georgia,serif}
+.lq-loadout-item{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid #5f7368;padding:11px 4px}
+.lq-loadout-item>div{min-width:0}.lq-loadout-item b,.lq-loadout-item small{display:block}
+.lq-loadout-item b{color:#f6e9c9}.lq-loadout-item small{font-size:12px;line-height:1.4;color:#cadbd5}
+.lq-loadout-item button{font-size:12px;min-height:42px;flex-shrink:0}
+.lq-up-to-date{font-size:11px;color:#a7d6b8}
+.lq-codex-overview{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px;background:#263f40;border:1px solid #a5916b;border-radius:6px;margin:4px 0 16px}
+.lq-codex-overview strong{font:700 21px Georgia,serif;color:#f9dda2}.lq-codex-overview span{font-size:12px;color:#d2e0d8}
+.lq-codex-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lq-codex-entry{background:#12252e;border:1px solid #657970;border-left:3px solid #a8997b;border-radius:5px;padding:15px;min-width:0}
+.lq-codex-region{text-transform:uppercase;letter-spacing:.1em;font:700 10px system-ui;color:#c7bd91}
+.lq-codex-entry h3{font:700 18px Georgia,serif;color:#f2d8aa;margin:6px 0}
+.lq-codex-stats{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.lq-codex-stats span{background:#31454b;padding:4px 7px;border-radius:3px;font-size:10px;color:#e0e9e2}
+.lq-codex-entry p{font-size:12px;line-height:1.5;color:#cbd7d2;margin:0}
+.mobile-next small{color:#e2c98b;margin-left:auto;flex-shrink:0;font-size:10px}
+@media(max-width:700px){
+ .lq-coach-bar{grid-template-columns:1fr;gap:6px;margin:8px 0}
+ .lq-battle-read{padding:9px 11px;gap:2px}
+ .lq-battle-read strong{font-size:15px}.lq-battle-read small{font-size:11px}
+ .lq-coach-bar>button{min-height:45px;font-size:12px}
+ .lq-foe-reading{margin:4px 0 0;padding:5px}
+ .lq-foe-reading span{font-size:9px;line-height:1.2}
+ .lq-codex-overview{align-items:start;flex-direction:column;gap:5px}
+ .lq-codex-list{grid-template-columns:1fr}
+ .lq-quest-read{padding:8px 9px}.lq-quest-read strong{font-size:12px}
+ .mobile-next{flex-wrap:nowrap}.mobile-next strong{flex:1}
+ .controls .mobile-action-buttons{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .controls .mobile-action-buttons button:not(.primary){font-size:10px;padding:5px 2px;min-height:48px}
+ .controls .mobile-action-buttons .primary{grid-column:1/-1}
+ .lq-loadout-item{gap:8px}.lq-loadout-item button{font-size:11px;padding:6px}
+}
+@media(max-width:370px){.lq-foe-reading span{font-size:8px}.lq-battle-read strong{font-size:14px}.controls .mobile-action-buttons button:not(.primary){font-size:9px}}
+@media(prefers-reduced-motion:reduce){.lq-coach-bar button{transition:none!important}}
