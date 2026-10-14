@@ -68,3 +68,25 @@ button:focus-visible{outline:2px solid #fcda91;outline-offset:3px}
 .relic-crest{width:38px;height:38px;display:grid;place-items:center;background:radial-gradient(circle,#a78cc2,#433d66);border:1px solid #ddc087;border-radius:50%;color:#ffecc2;font-size:24px;box-shadow:0 0 15px #9b77cc44}
 @media(max-width:950px){.shell{grid-template-columns:1fr;padding:12px}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.titleart{height:290px;border-radius:45px 45px 5px 5px}.battle-stage{height:280px}.battle-heading h2{font-size:29px}}
 @media(max-width:590px){.topbar{padding:10px 14px;min-height:66px}.brand{font-size:23px}.topbar small{font-size:8px;letter-spacing:.1em}.topbar button{padding:6px 8px;font-size:11px;min-height:38px}.shell{padding:8px;gap:10px}.location{align-items:start}.location h2{font-size:25px}.mapframe{border-width:2px}.mapbadge{top:6px;left:6px;padding:3px 5px;font-size:9px}.maphint{bottom:5px;right:5px;left:5px;font-size:9px;text-align:center}.sidebar{grid-template-columns:1fr;gap:9px}.sidebar .party-panel{grid-row:auto}.titlepage{padding:18px;gap:16px}.titlepage h1{font-size:44px}.titleart{height:200px;order:-1}.battle-shell{padding:0 9px}.battle-stage{height:250px;min-height:225px;padding:9px;gap:4px}.battle-stage .enemy{padding:5px;min-width:0}.battle-stage .enemy-art{width:84px;height:84px}.relic-grid{grid-template-columns:1fr}.modal{padding:16px}.commands{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Loot rarity language and companion equipment layout */
+.gear-party{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0 20px}
+.gear-member{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px;background:#13272d;border:1px solid #738071}
+.gear-member strong,.gear-member small{display:block}
+.gear-member strong{color:#ffe3a7}.gear-member small{font-size:11px;line-height:1.4;margin-top:4px}
+.gear-member button{font-size:11px;min-height:36px;padding:6px 8px}
+.gear-inventory-header{display:flex;justify-content:space-between;padding:11px 0;font-weight:700;color:#e8d49c;border-bottom:1px solid #687563}
+.gear-inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.gear-drop{display:flex;flex-direction:column;justify-content:space-between;gap:10px;padding:16px;background:linear-gradient(145deg,#1e3037,#0b1921);border:1px solid #788071;border-left-width:4px;border-radius:4px}
+.gear-drop h3{margin:4px 0;color:#f3eee0;font-size:19px}
+.gear-drop p{font-size:13px;color:#e9eee5;margin:4px 0}
+.gear-drop small{font-size:11px}
+.gear-rarity{text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:800}
+.gear-drop.quality-common{border-left-color:#a6afb3}.gear-drop.quality-common .gear-rarity{color:#c4cace}
+.gear-drop.quality-magic{border-left-color:#5c9fe4}.gear-drop.quality-magic .gear-rarity,.gear-drop.quality-magic h3{color:#8cc0ff}
+.gear-drop.quality-rare{border-left-color:#edd068}.gear-drop.quality-rare .gear-rarity,.gear-drop.quality-rare h3{color:#f6d978}
+.gear-drop.quality-legendary{border-left-color:#c68be9;box-shadow:inset 0 0 22px #ae74ce17,0 0 14px #9558bd1a}.gear-drop.quality-legendary .gear-rarity,.gear-drop.quality-legendary h3{color:#e0a7ff}
+.gear-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.gear-actions button{min-height:36px;padding:7px;font-size:11px}
+.gear-actions small{width:100%;color:#f1d8a7}
+@media(max-width:820px){.gear-party{grid-template-columns:1fr}.gear-inventory{grid-template-columns:1fr}}
