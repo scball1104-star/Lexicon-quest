@@ -30,7 +30,7 @@ const clear=id=>timers.delete(id);
 class Audio{play(){return Promise.resolve()}pause(){}}
 const sandbox={LQ,LQInteriors:Interiors,LQBattleUI:BattleUX,document,Audio,localStorage:{getItem:k=>saves.get(k)||null,setItem:(k,v)=>saves.set(k,v)},navigator:{},location:{protocol:'file:'},matchMedia:()=>({matches:true}),setInterval:timer,setTimeout:timer,clearInterval:clear,clearTimeout:clear,console,Image:undefined,prompt:()=>null};
 vm.createContext(sandbox);
-for(const script of ['rpg-reforged.js','rpg-loot.js','rpg-environment-art.js','rpg-willowmere-art.js','rpg-ui.js'])vm.runInContext(at(script),sandbox,{filename:script});
+for(const script of ['rpg-reforged.js','rpg-loot.js','rpg-environment-art.js','rpg-willowmere-art.js','rpg-motion.js','rpg-ui.js'])vm.runInContext(at(script),sandbox,{filename:script});
 async function click(action,id,extra={}){
  const btn={dataset:{action,id,...extra},disabled:false};for(const fn of events['app:click']||[])await fn({target:{closest:()=>btn}});
 }
@@ -54,6 +54,7 @@ function state(){const raw=saves.get('lexicon-realms-v3-0');return raw&&JSON.par
  check([...timers].some(([,t])=>t.ms===110),'hold repeat armed');
  tick(110);
  check(state().y===13,'held direction repeats without extra tapping');
+ check(paints.length>200,'walking movement renders scenery and animated companions');
  fire('pointerup');
  check(![...timers].some(([,t])=>t.ms===110),'lift finger stops movement');
  await click('move',undefined,{dx:'0',dy:'-1'});
@@ -95,5 +96,7 @@ function state(){const raw=saves.get('lexicon-realms-v3-0');return raw&&JSON.par
  for(const fragment of ['safe-area-inset-bottom','width:165%','position:fixed','touch-action:none','mobile-game-hud','mobile-battle-quickbar','z-index:100','battle-confirm'])check(css.includes(fragment),'mobile style '+fragment);
  check(html.includes('rpg-mobile-play.css')&&html.includes('rpg-willowmere-art.js'),'page includes milestone assets');
  check(sw.includes('rpg-mobile-play.css')&&sw.includes('rpg-willowmere-art.js'),'assets available offline');
+ check(sw.includes('rpg-motion.js')&&html.includes('rpg-motion.js'),'motion module is deployed and available offline');
+ check(at('rpg-motion.css').includes('prefers-reduced-motion'),'movement styling respects accessibility settings');
  console.log('PASS '+checks+' mobile exploration checks: hold-to-walk, one-step touch semantics, tap-to-approach NPC, one-tap mobile combat, readable HUD, chapter art, offline asset wiring.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
