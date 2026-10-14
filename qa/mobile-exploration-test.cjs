@@ -68,6 +68,21 @@ function state(){const raw=saves.get('lexicon-realms-v3-0');return raw&&JSON.par
  check(nodes.has('modal'),'dialog opens after arrival');
  await click('close');
  check(!nodes.has('modal'),'continue from quest conversation');
+ // One-tap combat is always accessible without scrolling to the command list.
+ await click('title');
+ const combatSave=state();
+ combatSave.place='dungeon';combatSave.region=0;combatSave.floor=0;combatSave.x=5;combatSave.y=12;
+ saves.set('lexicon-realms-v3-0',JSON.stringify(combatSave));
+ await click('load','0');
+ const combatCanvas=nodes.get('field');
+ combatCanvas.onclick({clientX:(5-(-3)+.5)*48,clientY:(11-6+.5)*48});
+ check(nodes.get('app').innerHTML.includes('mobile-battle-quickbar'),'battle presents mobile quick actions');
+ check(nodes.get('app').innerHTML.includes('Skills & items'),'skill access available without hidden desktop hotkeys');
+ await click('quickAttack');
+ check(nodes.get('app').innerHTML.includes('Mira'),'quick Attack advances to companion turn');
+ await click('quickGuard');
+ check(nodes.get('app').innerHTML.includes('Bram'),'quick Defend advances to next companion');
+
  const art=require('../rpg-willowmere-art.js'),chapter=require('../rpg-chapter1.js');
  const town=chapter.town(),floor=chapter.dungeon(0);
  const prior=JSON.stringify([town.tiles,floor.tiles]);
@@ -77,8 +92,8 @@ function state(){const raw=saves.get('lexicon-realms-v3-0');return raw&&JSON.par
  check(prior===JSON.stringify([town.tiles,floor.tiles]),'art does not modify collision or layout');
  check(paints.length>3000,'scene paints detailed pixel tiles');
  const css=at('rpg-mobile-play.css'),html=at('index.html'),sw=at('sw.js');
- for(const fragment of ['safe-area-inset-bottom','width:165%','position:sticky','touch-action:none','mobile-game-hud','battle-confirm'])check(css.includes(fragment),'mobile style '+fragment);
+ for(const fragment of ['safe-area-inset-bottom','width:165%','position:fixed','touch-action:none','mobile-game-hud','mobile-battle-quickbar','z-index:100','battle-confirm'])check(css.includes(fragment),'mobile style '+fragment);
  check(html.includes('rpg-mobile-play.css')&&html.includes('rpg-willowmere-art.js'),'page includes milestone assets');
  check(sw.includes('rpg-mobile-play.css')&&sw.includes('rpg-willowmere-art.js'),'assets available offline');
- console.log('PASS '+checks+' mobile exploration checks: hold-to-walk, one-step touch semantics, tap-to-approach NPC, readable HUD, chapter art, offline asset wiring.');
+ console.log('PASS '+checks+' mobile exploration checks: hold-to-walk, one-step touch semantics, tap-to-approach NPC, one-tap mobile combat, readable HUD, chapter art, offline asset wiring.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
