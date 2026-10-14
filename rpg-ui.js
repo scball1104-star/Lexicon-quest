@@ -4,6 +4,8 @@ const {Game,fresh,regions,dungeonNames,weapons,weaponTraits,skills,mastery,skill
 const Art=typeof LQEnvironmentArt!=='undefined'?LQEnvironmentArt:{tile:()=>false,prop:()=>{},service:(c,x,y,o)=>objectArt(c,x,y,o)};
 const SceneArt=typeof LQWillowmereArt!=='undefined'?LQWillowmereArt:null;
 const Motion=typeof LQMotion!=='undefined'?LQMotion:null;
+const Sprites=typeof LQSpriteAtlas!=='undefined'?LQSpriteAtlas:null;
+const Props=typeof LQDungeonProps!=='undefined'?LQDungeonProps:null;
 const reducedMotion=()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const compactMap=()=>typeof matchMedia==='function'&&matchMedia('(max-width:700px)').matches;
 const Interiors=LQInteriors;
@@ -186,6 +188,7 @@ app.innerHTML=header()+'<main class="shell '+(arrivedScene?'scene-arrival':'')+'
 drawMap();if(modal)renderModal();}
 function px(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
 function hero(c,x,y,id=0,player=false){
+ if(Sprites){const p=player&&walkAnimation?Motion?.position(walkAnimation,Date.now()):null;Sprites.draw(c,x,y,{id,dir:player?facing:'down',walking:player?!!p?.walking&&!reducedMotion():false,phase:Date.now()/480});return;}
  if(player&&Motion){const p=walkAnimation?Motion.position(walkAnimation,Date.now()):null;Motion.sprite(c,x,y,{id,dir:facing,walking:!!(p?.walking)&&!reducedMotion(),phase:Date.now()/480});return;}
  if(partyArt&&partyArt.complete&&partyArt.naturalWidth){const row=id===0?0:id===1?1:2;c.drawImage(partyArt,0,row*128,96,128,x+4,y-3,40,53);return;}
  const cloak=['#518cca','#aa80c0','#9faaa8'][id];px(c,x+15,y+37,20,5,'#14292899');px(c,x+19,y+9,13,6,'#3b2a26');px(c,x+18,y+15,14,10,'#e4b58a');px(c,x+15,y+24,20,13,cloak);px(c,x+17,y+37,6,7,'#213449');px(c,x+28,y+37,6,7,'#213449');px(c,x+12,y+26,5,9,'#e4b58a');px(c,x+35,y+24,3,18,'#d9ddcf');}
@@ -269,7 +272,7 @@ const obs=game.objects().filter(o=>o.x>=camera.x&&o.y>=camera.y&&o.x<camera.x+17
 if(SceneArt&&s.region===0&&(s.place==='town'||s.place==='dungeon'&&s.floor===0))SceneArt.overlay(c,m,camera,ambientTick,s.place,s.floor);
 if(Motion&&!reducedMotion())Motion.atmosphere(c,camera,s.place,ambientTick,{region:s.region});
 if((s.place==='town'||(s.place==='dungeon'&&(s.region===5||s.region===6)))&&m.decor)for(const d of m.decor)Art.prop(c,d,camera,s.region,ambientTick);
-obs.forEach(o=>{const x=(o.x-camera.x)*48,y=(o.y-camera.y)*48;if(SceneArt&&s.region===0&&SceneArt.object(c,x,y,o,ambientTick,s.place)){}else if(s.place==='town'&&['inn','shop','forge'].includes(o.type))Art.service(c,x,y,o,s.region,ambientTick);else objectArt(c,x,y,o);
+obs.forEach(o=>{const x=(o.x-camera.x)*48,y=(o.y-camera.y)*48;if(Props&&Props.draw(c,x,y,o,s,ambientTick)){}else if(SceneArt&&s.region===0&&SceneArt.object(c,x,y,o,ambientTick,s.place)){}else if(s.place==='town'&&['inn','shop','forge'].includes(o.type))Art.service(c,x,y,o,s.region,ambientTick);else objectArt(c,x,y,o);
 if(Motion&&['chest','trial','spring','lever','board','exit','down','up','town','dungeon'].includes(o.type)&&Math.abs(o.x-s.x)+Math.abs(o.y-s.y)<=2)Motion.signal(c,x,y,ambientTick,o.type==='trial'?'quest':'usable',true);});
 if(s.place==='town'&&Citizens){ensureCitizens();Citizens.draw(citizens,c,citizenArt,camera,s,ambientTick);}
 obs.filter(o=>o.type==='tideSluice'||o.type==='tidePump').forEach(o=>{const raw=s.flags[(o.type==='tideSluice'?'lq:vale:sluice:':'lq:vale:pump:')+o.id]||0,txt=o.type==='tideSluice'?['0','LO','HI','REL'][raw]:['×','IN','PUR'][raw],aligned=raw===o.goal,x=(o.x-camera.x)*48+31,y=(o.y-camera.y)*48+42;c.fillStyle=aligned?'#b6e4cf':'#f6cf8b';c.fillRect(x-13,y-16,27,20);c.fillStyle='#1a3644';c.font='bold 10px system-ui';c.textAlign='center';c.fillText(txt,x,y-2);});
@@ -283,8 +286,8 @@ const guide=game.guide(),beacon=obs.find(o=>o.id===guide?.id),hovered=hoverTile?
 if(beacon){const bx=(beacon.x-camera.x)*48+24,by=(beacon.y-camera.y)*48+24;c.strokeStyle='#f5d18c';c.lineWidth=3;c.strokeRect(bx-21,by-21,42,42);c.fillStyle='#fbe0a1';c.font='bold 22px Georgia';c.textAlign='center';c.fillText('◆',bx,by-25);} 
 drawRoute(c,s);
 if(Motion&&interactionFlash){if(!Motion.pulse(c,interactionFlash,camera,Date.now()))interactionFlash=null;}
-if(Motion&&partyTrail.length){partyTrail.slice(0,2).forEach((q,i)=>{const moving=followerMoves[i]&&!reducedMotion()?Motion.position(followerMoves[i],Date.now()):null;const fx=moving?moving.x:q.x,fy=moving?moving.y:q.y;
-Motion.sprite(c,(fx-camera.x)*48,(fy-camera.y)*48,{id:i+1,dir:q.dir||facing,walking:!!moving?.walking,phase:Date.now()/480});});}
+if((Sprites||Motion)&&partyTrail.length){partyTrail.slice(0,2).forEach((q,i)=>{const moving=followerMoves[i]&&!reducedMotion()?Motion?.position(followerMoves[i],Date.now()):null;const fx=moving?moving.x:q.x,fy=moving?moving.y:q.y;
+const options={id:i+1,dir:q.dir||facing,walking:!!moving?.walking,phase:Date.now()/480};if(Sprites)Sprites.draw(c,(fx-camera.x)*48,(fy-camera.y)*48,options);else Motion.sprite(c,(fx-camera.x)*48,(fy-camera.y)*48,options);});}
 hero(c,(pos.x-camera.x)*48,(pos.y-camera.y)*48,0,true);
 if(s.place==='town'){obs.filter(isTownLandmark).forEach(o=>{const mx=(o.x-camera.x)*48+24,my=(o.y-camera.y)*48+12;if((ambientTick+o.x+o.y)%5===0){c.strokeStyle=markerColor(o)+'66';c.strokeRect(mx-9,my-26,18,18);}drawMarker(c,mx,my,markerColor(o));const badge=townBadge(o);if(badge&&(Math.abs(o.x-s.x)+Math.abs(o.y-s.y)<=2||hovered?.id===o.id||beacon?.id===o.id)){drawBubble(c,mx,my-31,badge[0],badge[1], '#112029');}});if(!compactMap())drawMiniMap(c,m,s,obs,hovered||beacon);}
 if(hovered){const hx=(hovered.x-camera.x)*48,hy=(hovered.y-camera.y)*48;c.strokeStyle='#f2df9a';c.lineWidth=2;c.strokeRect(hx+2,hy+2,44,44);} 
