@@ -3,7 +3,7 @@
 # Netlify rebuilds and republishes on pushes to the connected production branch.
 [build]
   publish = "."
-  command = "node verify-rpg.cjs && node verify-ui.cjs && node qa/reforged-realms-test.cjs && node qa/loot-progression-test.cjs && node qa/willowmere-test.cjs && node qa/tactical-combat-test.cjs && node qa/combat-presentation-test.cjs && node qa/court-of-mirrors-test.cjs && node qa/forge-of-ash-test.cjs && node qa/sunken-keep-test.cjs && node qa/oracle-labyrinth-test.cjs && node qa/storm-observatory-test.cjs && node qa/frostbound-vault-test.cjs && node qa/first-library-test.cjs && node qa/interiors-test.cjs && node qa/townsfolk-test.cjs && node qa/environment-town-test.cjs && node qa/sw-test.cjs"
+  command = "node verify-rpg.cjs && node verify-ui.cjs && node qa/reforged-realms-test.cjs && node qa/loot-progression-test.cjs && node qa/mobile-exploration-test.cjs && node qa/willowmere-test.cjs && node qa/tactical-combat-test.cjs && node qa/combat-presentation-test.cjs && node qa/court-of-mirrors-test.cjs && node qa/forge-of-ash-test.cjs && node qa/sunken-keep-test.cjs && node qa/oracle-labyrinth-test.cjs && node qa/storm-observatory-test.cjs && node qa/frostbound-vault-test.cjs && node qa/first-library-test.cjs && node qa/interiors-test.cjs && node qa/townsfolk-test.cjs && node qa/environment-town-test.cjs && node qa/sw-test.cjs"
 
 [build.environment]
   NODE_VERSION = "22"
