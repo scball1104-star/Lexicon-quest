@@ -134,6 +134,6 @@ function overlay(c,m,cam,tick,place,floor){
   for(const [tx,ty] of l){if(tx<cam.x-1||tx>cam.x+17||ty<cam.y-1||ty>cam.y+13)continue;if(at(m,tx,ty)==='wall')continue;lamp(c,(tx-cam.x)*48,(ty-cam.y)*48,tick);}
  }
 }
-const api={tile,overlay,object,service,hash};
+const api={tile,overlay,object,service,hash:h};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LQWillowmereArt=api;
 })(typeof window!=='undefined'?window:globalThis);
