@@ -1,0 +1,70 @@
+/* Lexicon Quest — Reforged Realms visual system
+   Target: crisp authored pixel art and a readable console-style game HUD. */
+:root{--bg:#080f15;--panel:#101e29;--line:#50614f;--gold:#f0ca83;--text:#f5f0db;--muted:#b8c8c2;--green:#86cfa5}
+body{background:radial-gradient(ellipse at 40% -22%,#31504c 0%,transparent 48%),linear-gradient(#111c25,#070e15 70%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,#040a0e05 4px);opacity:.4}
+h1,h2,h3,.brand{font-family:Georgia,"Times New Roman",serif}
+.topbar{max-width:1560px;min-height:76px;background:linear-gradient(180deg,#223b39a6,#122326ad);border-bottom:2px solid #bd9d60;box-shadow:0 6px 26px #0008}
+.brand{font-size:clamp(21px,3vw,31px);letter-spacing:.055em;color:#f9e9c1;text-shadow:0 2px 10px #050d13}
+.topbar small{color:#bcb7a2;letter-spacing:.18em;text-transform:uppercase;font-size:9px}
+.shell{max-width:1520px;grid-template-columns:minmax(0,1fr) minmax(270px,310px);gap:17px}
+.panel,.objective,.battle-console,.battle-log{background:linear-gradient(146deg,#1b3039ed,#0c1b24fa 65%);border:1px solid #607464;border-top-color:#967e55;box-shadow:inset 0 1px #d8bc7a23,0 10px 23px #0004}
+button{border:1px solid #657b73;background:linear-gradient(180deg,#35504d,#192d33);border-radius:5px;box-shadow:inset 0 1px #e0dab022,0 3px 6px #0005;color:#fbf2dc}
+button:hover{background:linear-gradient(180deg,#587064,#243d43);border-color:#e0bf7a}
+button.primary,.primary{background:linear-gradient(180deg,#f8dd9d,#d8a85b);border-color:#ffeeae;color:#1a2a2b;text-shadow:none}
+button.primary:hover,.primary:hover{background:linear-gradient(180deg,#ffeab1,#efc077)}
+button:focus-visible{outline:2px solid #fcda91;outline-offset:3px}
+.location{margin-bottom:14px;gap:16px}
+.location h2{color:#f7e1ac;font-size:clamp(27px,3.2vw,39px);text-shadow:0 2px 4px #000c;line-height:1.1}
+.scene-flavor{color:#c4d1c2;max-width:68ch;line-height:1.4}
+.eyebrow{color:#eccc8b;font-size:10px;letter-spacing:.19em}
+.mapframe{border:3px ridge #978054;border-radius:5px;box-shadow:inset 0 0 0 2px #131c1b,0 20px 40px #0008;background:#101b21}
+.mapframe::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 50px #051015b0}
+.mapframe canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+.mapbadge,.maphint{z-index:1;background:#07151de8;color:#ffdfa2;border:1px solid #ae8a54;font-weight:700;letter-spacing:.05em;box-shadow:0 5px 10px #0008}
+.maphint{color:#e2ddc7;letter-spacing:0}
+.message{background:linear-gradient(90deg,#1d3238,#101e27);border-left:4px solid #d9b46f;border-radius:2px;box-shadow:inset 0 1px #ffffff10}
+.objective{border-top:3px solid #d8b66d}
+.objective p{color:#e9e3d2;line-height:1.55}
+.quest-compass,.quest-meter{background:#122932;border:1px solid #617568;padding:10px;border-radius:4px}
+.quest-compass b{color:#f3cf83}
+.progress-dots i.on{background:#ffde8d;box-shadow:0 0 8px #f4b8668c}
+.partycard{grid-template-columns:52px minmax(0,1fr)}
+.partycard b{color:#ffe8b0;font-weight:800;letter-spacing:.02em}
+.portrait{border:2px solid #948061;box-shadow:0 4px 7px #0009}
+.bar{height:7px;background:#061018;border:1px solid #435760;border-radius:2px}
+.bar i{background:linear-gradient(90deg,#3a8764,#a9e8ad)}
+.bar.mp i{background:linear-gradient(90deg,#426997,#b0cafa)}
+.titlepage{max-width:1380px;gap:40px}
+.titlepage h1{color:#f5ead0;text-shadow:0 4px 13px #000b;letter-spacing:-.028em}
+.titlepage h1 .gold{color:#f5c66c;text-shadow:0 0 15px #ba7c3850}
+.titleart{border-radius:130px 130px 6px 6px;border:3px ridge #b69664;box-shadow:0 25px 55px #000b,0 0 0 4px #1c2a2d}
+.titleart .panel{background:#0a161add;backdrop-filter:blur(3px)}
+.modal{border:2px ridge #ad8d5b;background:radial-gradient(circle at top right,#2c433e,#101e27 60%);box-shadow:0 25px 90px #000d}
+.modal h2{color:#f5dca0}
+.battle-shell{max-width:1350px}
+.battle-heading h2{font-size:36px;color:#f2d59e}
+.battle-stage{border:3px ridge #a38453;border-radius:4px;height:min(31vw,350px);min-height:255px;box-shadow:inset 0 -38px 40px #031117ab,0 14px 24px #0008}
+.battle-stage.echo-trial{border-color:#d6c28c;box-shadow:inset 0 0 60px #31305b,0 0 18px #947adf47,0 14px 24px #0009}
+.echo-trial .enemy-art{filter:drop-shadow(0 0 16px #d8b4ff80)}
+.battle-stage .enemy{background:#101a26bb;backdrop-filter:blur(2px)}
+.battle-stage .enemy.selected{border:2px solid #f6d78f;background:#1b2838d9;box-shadow:inset 0 0 20px #ccb16417}
+.enemy-name{color:#ffedbc;text-shadow:0 1px 5px #000}
+.battle-turn-order{background:#0d1b25;border:1px solid #647565}
+.battle-brief{border-left:4px solid #caa35e}
+.resonance-track{background:#07141e;border:1px solid #5c6656}
+.resonance-track i{background:linear-gradient(90deg,#7c75bb,#ecc97d)}
+.commands .command{background:linear-gradient(150deg,#243b45,#13232b);border:1px solid #63796d}
+.commands .command.chosen{background:linear-gradient(135deg,#647052,#293d3b);border-color:#ffd38b;box-shadow:0 0 0 1px #f9cb8247}
+.command kbd{color:#ebd396}
+.battle-log{border-top:2px solid #a78857}
+.relic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.relic-card{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start;padding:15px;border:1px solid #66786c;background:linear-gradient(160deg,#25363b,#152630);border-radius:5px}
+.relic-card.active{border-color:#edc87c;box-shadow:inset 0 0 0 1px #e6bd6959}
+.relic-card h3{color:#f5d69c;font-size:19px;margin-bottom:5px}
+.relic-card p{font-size:13px;margin-bottom:8px;line-height:1.45}
+.relic-card small{display:block}
+.relic-card button{grid-column:2;justify-self:start;min-height:40px}
+.relic-crest{width:38px;height:38px;display:grid;place-items:center;background:radial-gradient(circle,#a78cc2,#433d66);border:1px solid #ddc087;border-radius:50%;color:#ffecc2;font-size:24px;box-shadow:0 0 15px #9b77cc44}
+@media(max-width:950px){.shell{grid-template-columns:1fr;padding:12px}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.titleart{height:290px;border-radius:45px 45px 5px 5px}.battle-stage{height:280px}.battle-heading h2{font-size:29px}}
+@media(max-width:590px){.topbar{padding:10px 14px;min-height:66px}.brand{font-size:23px}.topbar small{font-size:8px;letter-spacing:.1em}.topbar button{padding:6px 8px;font-size:11px;min-height:38px}.shell{padding:8px;gap:10px}.location{align-items:start}.location h2{font-size:25px}.mapframe{border-width:2px}.mapbadge{top:6px;left:6px;padding:3px 5px;font-size:9px}.maphint{bottom:5px;right:5px;left:5px;font-size:9px;text-align:center}.sidebar{grid-template-columns:1fr;gap:9px}.sidebar .party-panel{grid-row:auto}.titlepage{padding:18px;gap:16px}.titlepage h1{font-size:44px}.titleart{height:200px;order:-1}.battle-shell{padding:0 9px}.battle-stage{height:250px;min-height:225px;padding:9px;gap:4px}.battle-stage .enemy{padding:5px;min-width:0}.battle-stage .enemy-art{width:84px;height:84px}.relic-grid{grid-template-columns:1fr}.modal{padding:16px}.commands{grid-template-columns:repeat(2,minmax(0,1fr))}}
