@@ -3,6 +3,7 @@
  */
 .mobile-game-hud{display:none}
 .mobile-extra{display:none}
+.mobile-battle-quickbar{display:none}
 .mobile-action-buttons{display:flex;align-items:center;gap:8px}
 .mobile-action-buttons .primary{min-height:46px}
 @media (max-width:700px){
@@ -53,7 +54,11 @@
  .modal-head{position:sticky;top:0;z-index:1;background:#192c33;padding:7px 0;border-bottom:1px solid #827556}
  .modal-head button{min-height:44px;min-width:44px}
  .modal button:not(.sq),.modal select{min-height:43px}
- .battle-shell{margin:0 auto!important;padding:6px!important}
+ .battle-shell{margin:0 auto!important;padding:6px 6px calc(86px + env(safe-area-inset-bottom))!important}
+ .mobile-battle-quickbar{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:7px;position:fixed;bottom:0;left:0;right:0;z-index:45;padding:10px max(8px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:linear-gradient(180deg,#26403ff4,#101f2afa);border-top:2px solid #c4a26b;box-shadow:0 -7px 21px #000a}
+ .mobile-battle-quickbar button{min-height:56px;border-radius:10px;font-size:15px;font-weight:750;touch-action:manipulation}
+ .battle-console{scroll-margin-top:12px}
+
  .battle-heading{margin:4px 0 8px}
  .battle-heading h2{font-size:24px}
  .battle-heading-side{font-size:11px}
