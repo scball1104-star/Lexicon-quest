@@ -30,7 +30,7 @@ const clear=id=>timers.delete(id);
 class Audio{play(){return Promise.resolve()}pause(){}}
 const sandbox={LQ,LQInteriors:Interiors,LQBattleUI:BattleUX,document,Audio,localStorage:{getItem:k=>saves.get(k)||null,setItem:(k,v)=>saves.set(k,v)},navigator:{},location:{protocol:'file:'},matchMedia:()=>({matches:true}),setInterval:timer,setTimeout:timer,clearInterval:clear,clearTimeout:clear,console,Image:undefined,prompt:()=>null};
 vm.createContext(sandbox);
-for(const script of ['rpg-reforged.js','rpg-loot.js','rpg-environment-art.js','rpg-willowmere-art.js','rpg-motion.js','rpg-sprite-atlas.js','rpg-dungeon-props.js','rpg-battle-effects.js','rpg-ui.js'])vm.runInContext(at(script),sandbox,{filename:script});
+for(const script of ['rpg-reforged.js','rpg-loot.js','rpg-environment-art.js','rpg-willowmere-art.js','rpg-motion.js','rpg-sprite-atlas.js','rpg-dungeon-props.js','rpg-battle-effects.js','rpg-cinematic-director.js','rpg-ui.js'])vm.runInContext(at(script),sandbox,{filename:script});
 async function click(action,id,extra={}){
  const btn={dataset:{action,id,...extra},disabled:false};for(const fn of events['app:click']||[])await fn({target:{closest:()=>btn}});
 }
@@ -42,6 +42,7 @@ function state(){const raw=saves.get('lexicon-realms-v3-0');return raw&&JSON.par
  await click('start');
  check(!nodes.has('modal'),'first launch does not obstruct play');
  check(nodes.get('app').innerHTML.includes('mobile-game-hud'),'compact quest and health HUD shown');
+ check(nodes.get('app').innerHTML.includes('lq-companion-cue'),'mobile party banter is visible but nonblocking');
  check(nodes.get('app').innerHTML.includes('mobile-action-buttons'),'mobile action dock shown');
  check(nodes.get('app').innerHTML.includes('Elder Mael'),'initial objective clear');
  check(state().y===15,'initial Willowmere entry correct');
