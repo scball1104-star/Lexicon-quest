@@ -36,7 +36,8 @@ function objective(s){
  }
  if(!st.lantern)return {title:'The Lanterns of Memory',body:'All three memories resonate. Examine any memory lantern to restore its blessing.',next:'Claim the lantern blessing'};
  if(st.dials<3)return {title:'The Catalog Mechanisms',body:'Read the Catalog Diagram and orient the Root EAST, Lantern SOUTH and Star WEST. '+st.dials+'/3 aligned.',next:'Root, Lantern and Star dials on Archive Floor I'};
- if(!st.catalog)return {title:'The Catalog Mechanisms',body:'The mechanism has awakened. Touch any aligned dial to claim the hidden cache.',next:'Claim the hidden cache'};
+ if(!st.catalog)return {title:'The Catalog Mechanisms',body:'Align the three mechanisms to uncover the hidden passage and its forgotten treasure.',next:'Align the Catalog mechanisms'};
+ if(!s.flags['lq:ch1:keeperCache'])return {title:'The Keeper’s Alcove',body:'A hidden passage has opened beyond the central gallery of Archive Floor I. Search the chamber for the Keeper’s lost sigil.',next:'Discover the Keeper’s Alcove · optional'};
  return {title:'Chapter I · Optional paths complete',body:'Lantern blessing recovered and catalog cache opened. Continue the Rootbound Archive story.',next:'Defeat the Archivore'};
 }
 function progressHTML(s,objects=[],place='town',floor=0){
@@ -51,7 +52,7 @@ function progressHTML(s,objects=[],place='town',floor=0){
   const accessible=place==='dungeon'&&floor===0;
   return '<div class="lq-quest-track-row"><span class="'+(done?'done':'pending')+'">'+(done?'✓':'◈')+'</span><div><strong>'+esc(o.name)+' dial</strong><small>'+(done?'Aligned':directions[value]+' · target '+directions[o.goal])+'</small></div>'+(accessible?'<button data-action="goto" data-id="'+esc(o.id)+'">Travel</button>':'')+'</div>';
  }).join('');
- return '<div class="lq-chapter-tracker"><div class="lq-chapter-head"><span>CHAPTER I · OPTIONAL ADVENTURE</span><h3>'+esc(goal.title)+'</h3><p>'+esc(goal.body)+'</p></div><div class="lq-track-block"><div class="lq-track-heading"><b>The Living Lantern</b><small>'+st.memories+'/3 memories '+(st.lantern?'· BLESSING ACTIVE':'')+'</small></div>'+records+'</div><div class="lq-track-block"><div class="lq-track-heading"><b>The Catalog Diagram</b><small>'+st.dials+'/3 mechanisms '+(st.catalog?'· CACHE CLAIMED':'')+'</small></div>'+dialRecords+'</div><p class="lq-track-reward">Rewards: a permanent +8 Max HP and +2 Max MP for each hero; a guardian-battle Focus bonus; and an optional cache of gold and restorative supplies.</p></div>';
+ return '<div class="lq-chapter-tracker"><div class="lq-chapter-head"><span>CHAPTER I · OPTIONAL ADVENTURE</span><h3>'+esc(goal.title)+'</h3><p>'+esc(goal.body)+'</p></div><div class="lq-track-block"><div class="lq-track-heading"><b>The Living Lantern</b><small>'+st.memories+'/3 memories '+(st.lantern?'· BLESSING ACTIVE':'')+'</small></div>'+records+'</div><div class="lq-track-block"><div class="lq-track-heading"><b>The Catalog Diagram</b><small>'+st.dials+'/3 mechanisms '+(st.catalog?'· CACHE CLAIMED':'')+'</small></div>'+dialRecords+'</div><div class="lq-track-block"><div class="lq-track-heading"><b>Hidden Keeper’s Alcove</b><small>'+(s.flags['lq:ch1:keeperCache']?'DISCOVERED':st.catalog?'PASSAGE REVEALED':'SEALED')+'</small></div><div class="lq-quest-track-row"><span class="'+(s.flags['lq:ch1:keeperCache']?'done':'pending')+'">'+(s.flags['lq:ch1:keeperCache']?'✓':'◇')+'</span><div><strong>Forgotten Keeper’s Sigil</strong><small>'+(s.flags['lq:ch1:keeperCache']?'Rare Focus charm recovered':st.catalog?'Search western Archive Floor I':'Complete the three Catalog mechanisms first')+'</small></div>'+(place==='dungeon'&&floor===0&&st.catalog&&!s.flags['lq:ch1:keeperCache']?'<button data-action="goto" data-id="lq1-hidden-keeper-cache">Travel</button>':'')+'</div></div><p class="lq-track-reward">Rewards: a permanent +8 Max HP and +2 Max MP for each hero; a guardian-battle Focus bonus; and an optional cache of gold and restorative supplies.</p></div>';
 }
 const baseMap=Game.prototype.map;
 Game.prototype.map=function(){
@@ -97,7 +98,7 @@ Game.prototype.interact=function(o){
   if(aligned(s)===3&&!s.flags['lq:ch1:catalog']){
    s.flags['lq:ch1:catalog']=true;s.gold+=135;s.potions+=2;s.ethers+=1;
    s.journal.push('The Catalog Mechanisms: all three dials aligned. Found 135 gold, two potions and an Ether.');
-   note+=' Hidden cache opened! Obtained 135 gold, 2 potions, and 1 Ether.';
+   note+=' The central gallery wall also opens a hidden alcove to the WEST, holding a Keeper’s sigil. Obtained 135 gold, 2 potions, and 1 Ether.';
   }else if(s.flags['lq:ch1:catalog'])note+=' The hidden cache has already been claimed.';
   this.emit('CATALOG ALIGNMENT · '+aligned(s)+'/3'+(s.flags['lq:ch1:catalog']?' · COMPLETE':''));
   return {screen:'dialog',title:d.label,text:note};
