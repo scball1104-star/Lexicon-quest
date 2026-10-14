@@ -34,3 +34,9 @@
  .scene-introduction{opacity:1;position:static;transform:none;margin:0 auto}
  .battle-console .command,.battle-stage .enemy,.battle-stage .tactical-enemy{transition:none!important}
 }
+
+/* Cross the threshold once; don't replay the animation on each walking step. */
+.interior-enter .interior-mapframe{animation:realm-arrival .38s ease-out both}
+.interior-enter .interior-heading h2{animation:interior-title .36s ease-out both}
+@keyframes interior-title{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.interior-enter .interior-mapframe,.interior-enter .interior-heading h2{animation:none!important}.scene-introduction{display:none}}
