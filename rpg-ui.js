@@ -371,7 +371,7 @@ else walkAnimation=null;
 interactionFlash=null;
 }else{if(Motion)facing=Motion.facing(dx,dy);interactionFlash={x:before.x+dx,y:before.y+dy,time:Date.now(),warning:true};}
 if(before.place!==game.s.place||before.r!==game.s.region||before.f!==game.s.floor){walkAnimation=null;camera={x:NaN,y:NaN};}render();}
-function interact(o){const chosenObject=o||game.nearby()[0];if(chosenObject&&Cinematic){cinematicTalk('interact',chosenObject);soundCue(Cinematic.soundFor(chosenObject));}if(chosenObject&&Motion){interactionFlash={x:chosenObject.x,y:chosenObject.y,time:Date.now(),warning:false};}if(!o&&!game.nearby().length&&citizenNear().length){talkCitizen(citizenNear()[0]);return;}stopWalk();store();const result=game.interact(o);if(result?.screen==='battle')battleReport=null;if(result&&typeof result==='object'&&['inn','shop','forge'].includes(result.screen)&&game.s.place==='town'){stopInteriorWalk();interior=Interiors.create(result.screen,game.s.region,result.label);interiorJustEntered=true;interiorMessage='Welcome to '+result.label+'. Walk up to the counter to speak with the attendant.';modal=null;renderInterior();return;}if(result&&typeof result==='object'&&result.screen!=='battle'){modal=result;}render();}
+function interact(o){const chosenObject=o||game.nearby()[0];if(chosenObject&&Cinematic){cinematicTalk('interact',chosenObject);soundCue(Cinematic.soundFor(chosenObject));}if(chosenObject&&Motion){interactionFlash={x:chosenObject.x,y:chosenObject.y,time:Date.now(),warning:false};}if(!o&&!game.nearby().length&&citizenNear().length){talkCitizen(citizenNear()[0]);return;}stopWalk();store();const result=game.interact(o);if(result?.screen==='battle'){battleReport=null;bossPhaseCue=null;}if(result&&typeof result==='object'&&['inn','shop','forge'].includes(result.screen)&&game.s.place==='town'){stopInteriorWalk();interior=Interiors.create(result.screen,game.s.region,result.label);interiorJustEntered=true;interiorMessage='Welcome to '+result.label+'. Walk up to the counter to speak with the attendant.';modal=null;renderInterior();return;}if(result&&typeof result==='object'&&result.screen!=='battle'){modal=result;}render();}
 
 function stopInteriorWalk(){interiorRoute=[];if(interiorTimer!==null)clearInterval(interiorTimer);interiorTimer=null;}
 function interiorLeave(){stopInteriorWalk();interior=null;interiorJustEntered=false;modal=null;interiorMessage='';walkAnimation=null;camera={x:NaN,y:NaN};game.emit('You step out into the town square.');render();}
@@ -438,6 +438,7 @@ function runCombatAction(action,tgt){
  combatImpact=BattleEffects&&game?.battle?BattleEffects.make(prev,BattleUX.snapshot(game),action,Date.now(),originId):null;
  const phase=Cinematic?.phaseCue(phaseBefore,game.battle);if(phase){bossPhaseCue={...phase,at:Date.now()};soundCue('phase');}else soundCue(combatImpact?.totalDamage>0?'hit':'step');
  }
+ if(ok&&prev&&!game.battle){cinematicTalk('victory');soundCue('victory');bossPhaseCue=null;}
  chosen='attack';target=0;render();
 }
 function renderBattle(){
