@@ -103,7 +103,7 @@ function draw(c,x,y,options={}){
  }
  return {id,dir,frame,walking};
 }
-function metrics(){return {cachedFrames:cache.size,maxFrames:CAST.length*DIRS.length*FRAMES.length,logicalWidth:W,logicalHeight:H};}
+function metrics(){return {cachedFrames:cache.size,maxFrames:CAST.length*DIRS.length*FRAMES,logicalWidth:W,logicalHeight:H};}
 const api={W,H,FRAMES,DIRS,CAST,draw,renderFrame,frameCanvas,metrics};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LQSpriteAtlas=api;
 })(typeof window!=='undefined'?window:globalThis);
