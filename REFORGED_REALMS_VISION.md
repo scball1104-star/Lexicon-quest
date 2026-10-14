@@ -90,3 +90,22 @@ The next most valuable milestone after this release is a **hand-authored visual 
 2. Deepen Willowmere and Archive sprite animation, camera easing, town building collision/doors and contextual interaction feedback.
 3. Make the mobile battle turn chooser more compact without hiding targeting or tactical information.
 4. Roll the validated art and touch standards to the remaining seven regions.
+
+## Animation and environmental polish milestone — 2026-10-13
+Implemented in the native-browser RPG with no version-3 save changes:
+- Four-facing animated playable hero: north/south/east/west appearance, walking stride, cloak/limb movement, idle breathing and ground shadows. NPCs retain their own presentation.
+- Visible party following: Mira and Bram follow the hero's recent steps. Trails are temporary and reset on map changes.
+- Smooth tile movement: valid steps interpolate between tiles; continued hold-to-walk moves connect without teleporting. Blocked moves never move the hero through obstacles.
+- Fractional camera: camera easing now follows the animated hero. World drawing covers partial edge tiles; tap hit-testing accounts for the current fractional camera.
+- Ambient environment: deterministic floating motes, landmark signals, visual object interaction pings and collision feedback.
+- Area transitions: once-per-entry location reveals/fades on towns, overworld and dungeon floors, plus service-interior entrance effects. Reduced-motion preferences are respected.
+- Mobile: existing enlarged map, touch D-pad, tap-to-approach, safe-area dock and one-tap combat actions remain intact.
+- Quality coverage: a new qa/motion-stage-test.cjs suite runs as part of the Netlify build. The mobile exploration suite now loads the animation module and exercises actual movement and tapping.
+
+Original procedural visuals only, without copying art from the reference RPGs.
+
+### Next priorities
+1. Real iPhone Safari and Android Chrome visual testing, including tap precision and sustained rendering frame rate.
+2. Full multi-frame character sprites and individual companion/NPC animation.
+3. Animated doors, levers, pushable objects, hit reactions and impact feedback with sound.
+4. Roll the validated environmental art and character standards across the remaining realms.
