@@ -74,7 +74,7 @@ function timeState(steps=(game?.s.steps||0)){
   {label:'Dusk',overlay:['#d39b6a22','#17294222'],mood:'Windows glow and townsfolk start gathering indoors.'},
   {label:'Night',overlay:['#0c163c55','#050d1f88'],mood:'The streets quiet down; lamps and guidance markers stand out.'}
  ];
- return phases[Math.floor((steps||0)/18)%4];
+ return phases[Math.floor((steps||0)/96)%4];
 }
 function focusObject(){
  if(!game)return null;
