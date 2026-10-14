@@ -188,6 +188,7 @@ Game.prototype.enemyTurn=function(){
  const b=this.battle;
  const before=b?b.round:null;
  const outcome=baseEnemyTurn.call(this);
+ if(b?.enemies)for(const e of b.enemies){if(e.tactic==='Restoration'||e.tactic==='Ambush'&&(!e.charge||e.hp<=0))delete e.tactic;}
  if(!this.battle||this.battle!==b||b.boss||b.round===before)return outcome;
  if(b.round>=3&&b.round%4===3){
   const hunter=b.enemies.find(e=>e.hp>0&&e.role==='hunter'&&!e.charge&&!e.silenced);
