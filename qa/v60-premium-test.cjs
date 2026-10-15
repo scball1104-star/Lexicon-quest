@@ -73,7 +73,7 @@ currentApp=fakeApp({
  '.battle-shell':element(),
  '.battle-stage':stage,
  '.battle-heading-side span':{textContent:'Hollow North'},
- '.battle-heading .eyebrow':{textContent:'Guardian battle · Round 1 · Phase 1'},
+ '.battle-heading .eyebrow':Object.assign(element(),{textContent:'Guardian battle · Round 1 · Phase 1'}),
  '.battle-heading h2':{textContent:'Mira’s turn'}
 });
 v60.decorate();
