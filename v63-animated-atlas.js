@@ -181,8 +181,35 @@ function drawHero(c,x,y,options={}){
  c.imageSmoothingEnabled=false;c.drawImage(art,Math.round(x+4),Math.round(y-1),40,48);
  return {id,dir,frame,walking:moving};
 }
+function animateEnemies(stage){
+ if(!stage?.querySelectorAll)return 0;
+ const canvases=Array.from(stage.querySelectorAll('.v63-enemy-canvas'));
+ if(!canvases.length)return 0;
+ const motion=typeof root.matchMedia==='function'?root.matchMedia('(prefers-reduced-motion: reduce)'):null;
+ if(motion?.matches||typeof root.requestAnimationFrame!=='function')return canvases.length;
+ let last=-1;
+ function frame(now){
+  if(!stage.isConnected)return;
+  const phase=Math.floor(now/185)%FRAMES;
+  if(phase!==last){
+   last=phase;
+   for(const canvas of canvases){
+    if(!canvas.isConnected)continue;
+    const element=canvas.parentElement;
+    const context=canvas.getContext?.('2d');if(!context)continue;
+    const card=element?.closest?.('.tactical-enemy');
+    if(card?.classList?.contains('dead'))continue;
+    context.clearRect(0,0,canvas.width,canvas.height);
+    drawEnemy(context,0,0,{realm:Number(element?.dataset.v63Realm),variant:Number(element?.dataset.v63Variant),boss:!!element?.classList?.contains('boss'),frame:phase});
+   }
+  }
+  root.requestAnimationFrame(frame);
+ }
+ root.requestAnimationFrame(frame);
+ return canvases.length;
+}
 function metrics(){return {heroFrames:3*DIRS.length*FRAMES,enemyFrames:8*3*FRAMES*2,cachedHeroes:cache.size,cachedEnemies:enemyCache.size,realms:REALMS.length,version:'v63'};}
-const api={W,H,FRAMES,DIRS,REALMS,renderHero,heroFrame,drawHero,enemyFrame,drawEnemy,metrics,pixels};
+const api={W,H,FRAMES,DIRS,REALMS,renderHero,heroFrame,drawHero,enemyFrame,drawEnemy,animateEnemies,metrics,pixels};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 if(root)root.LQV63Atlas=api;
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null);
