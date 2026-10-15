@@ -1,0 +1,137 @@
+/* Lexicon Quest v62 — Living Combat Studio
+   Motion primitives are additive to the verified v60/v61 layout. */
+.battle-shell .battle-heading .v62-actor-heading {
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  column-gap:13px;
+  align-items:center;
+  min-width:0;
+}
+.battle-shell .v62-actor-heading>.eyebrow{
+  grid-column:1/-1;
+  margin-bottom:3px;
+}
+.battle-shell .v62-actor-heading h2{
+  grid-column:2;
+  grid-row:2;
+  margin:0;
+}
+.battle-shell .v62-actor-avatar{
+  grid-column:1;
+  grid-row:2;
+  width:60px;
+  height:72px;
+  padding:3px;
+  image-rendering:pixelated;
+  border:1px solid #b9a47b99;
+  border-radius:9px;
+  background:linear-gradient(158deg,#415260c7,#112c37e8);
+  box-shadow:inset 0 1px #fff8ce23,0 5px 13px #0008;
+  filter:drop-shadow(0 1px 4px #8bb8c833);
+}
+.battle-stage .v62-vfx {
+  position:absolute;
+  z-index:14;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  border-radius:inherit;
+  overflow:hidden;
+  object-fit:fill;
+}
+.battle-stage.tactical-stage .tactical-enemy:not(.dead) .enemy-art{
+  transform-origin:center 85%;
+  animation:v62-foe-breathe 3.2s ease-in-out infinite;
+  will-change:transform;
+}
+.battle-stage.tactical-stage .tactical-enemy:nth-child(even):not(.dead) .enemy-art{
+  animation-duration:3.8s;
+  animation-delay:-1.3s;
+}
+.battle-stage.tactical-stage.v60-stage-enter .tactical-enemy .enemy-art{
+  animation-delay:0s;
+}
+.battle-stage.tactical-stage .tactical-enemy.threat-danger:not(.dead) .enemy-intent{
+  position:relative;
+  border-color:#ffb199;
+  box-shadow:0 0 0 1px #ffab8b22,inset 0 0 15px #d4554a19;
+}
+.battle-stage.tactical-stage .tactical-enemy.threat-danger:not(.dead) .enemy-intent::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  border:1px solid #ff9c7b;
+  opacity:.45;
+  animation:v62-danger-tell 1.8s ease-in-out infinite;
+  pointer-events:none;
+}
+.battle-stage.tactical-stage .tactical-enemy.threat-shield:not(.dead) .enemy-art{
+  filter:drop-shadow(0 0 14px #ab9ee773) drop-shadow(0 11px 8px #000a);
+}
+.battle-stage.tactical-stage .tactical-enemy.selected:not(.dead){
+  border-color:#ffe3a8;
+  background:linear-gradient(180deg,#233c4466,#1d353ce8);
+}
+.battle-shell .combat-ally.active{
+  box-shadow:0 0 0 1px #ffdf9678,0 0 24px #cbb66c23;
+}
+.battle-shell .combat-ally.active .bar i{
+  filter:brightness(1.16);
+}
+.battle-stage.tactical-stage .tactical-enemy .enemy-hp{
+  border-radius:99px;
+  box-shadow:0 0 0 1px #ffe6bc19;
+}
+.battle-stage .combat-impact{
+  opacity:.72;
+  z-index:9;
+}
+.battle-stage .combat-damage{
+  z-index:15;
+}
+.battle-stage.tactical-stage .v60-impact-glint{
+  display:none;
+}
+@keyframes v62-foe-breathe{
+  0%,100%{transform:translateY(0) scale(1);filter:brightness(1)}
+  50%{transform:translateY(-4px) scale(1.025);filter:brightness(1.12)}
+}
+@keyframes v62-danger-tell{
+  0%,100%{opacity:.12;transform:scale(.98)}
+  50%{opacity:.65;transform:scale(1.025)}
+}
+@media(max-width:700px){
+  .battle-shell .battle-heading .v62-actor-heading{
+    grid-template-columns:42px minmax(0,1fr);
+    column-gap:8px;
+    grid-template-rows:auto auto;
+  }
+  .battle-shell .v62-actor-heading>.eyebrow{
+    margin:0;
+    font-size:8px;
+    line-height:1.1;
+  }
+  .battle-shell .v62-actor-avatar{
+    width:40px;
+    height:48px;
+    padding:1px;
+    border-radius:7px;
+  }
+  .battle-shell .v62-actor-heading h2{
+    font-size:21px;
+  }
+  .battle-stage .v62-vfx{border-radius:10px;}
+}
+@media(max-width:360px){
+  .battle-shell .battle-heading .v62-actor-heading{grid-template-columns:34px 1fr;gap:5px;}
+  .battle-shell .v62-actor-avatar{width:34px;height:41px;}
+  .battle-shell .v62-actor-heading h2{font-size:19px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .battle-stage.tactical-stage .tactical-enemy:not(.dead) .enemy-art,
+  .battle-stage.tactical-stage .tactical-enemy.threat-danger .enemy-intent::after{animation:none!important;transform:none!important;}
+  .battle-stage .v62-vfx{display:none!important;}
+}
