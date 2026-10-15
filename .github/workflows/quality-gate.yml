@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild, feature/v64-architectural-world, feature/v65-art-direction-and-playtest]
+    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild, feature/v64-architectural-world, feature/v65-art-direction-and-playtest, feature/v66-release-candidate]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -32,7 +32,7 @@ jobs:
 
   browser-smoke:
     name: Feature Chromium visual smoke
-    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure' || github.ref == 'refs/heads/feature/v62-living-combat' || github.ref == 'refs/heads/feature/v63-art-rebuild' || github.ref == 'refs/heads/feature/v64-architectural-world' || github.ref == 'refs/heads/feature/v65-art-direction-and-playtest'
+    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure' || github.ref == 'refs/heads/feature/v62-living-combat' || github.ref == 'refs/heads/feature/v63-art-rebuild' || github.ref == 'refs/heads/feature/v64-architectural-world' || github.ref == 'refs/heads/feature/v65-art-direction-and-playtest' || github.ref == 'refs/heads/feature/v66-release-candidate'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -48,7 +48,10 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Exercise real desktop and mobile game
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/feature/v65-art-direction-and-playtest" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/feature/v66-release-candidate" ]; then
+            python qa/v66-browser-smoke.py
+            python qa/v66-campaign-browser.py
+          elif [ "${{ github.ref }}" = "refs/heads/feature/v65-art-direction-and-playtest" ]; then
             python qa/v65-browser-smoke.py
             python qa/v65-campaign-browser.py
           elif [ "${{ github.ref }}" = "refs/heads/feature/v64-architectural-world" ]; then
