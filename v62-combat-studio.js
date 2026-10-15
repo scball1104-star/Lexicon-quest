@@ -213,7 +213,7 @@ function decorate(stage,actor=0,fx=null){
  if(!stage)return false;
  portrait(stage,actor);
  // Only display an impact once per actual, committed combat action.
- const e=fx&&typeof root.LQBattleEffects?.alive==='function'&&root.LQBattleEffects.alive(fx)?cast(fx,actor):null;
+ const e=fx&&typeof root.LQBattleEffects?.alive==='function'&&root.LQBattleEffects.alive(fx)?cast(fx,fx.actor??actor):null;
  if(e&&e.key!==lastKey){lastKey=e.key;animate(stage,e);}
  return true;
 }
