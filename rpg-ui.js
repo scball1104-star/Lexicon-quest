@@ -14,6 +14,7 @@ const V65SceneArt=typeof LQV65SceneArt!=='undefined'?LQV65SceneArt:null;
 const Props=typeof LQDungeonProps!=='undefined'?LQDungeonProps:null;
 const BattleEffects=typeof LQBattleEffects!=='undefined'?LQBattleEffects:null;
 const CombatStudio=typeof LQCombatStudio!=='undefined'?LQCombatStudio:null;
+const V67Counterplay=typeof LQV67Counterplay!=='undefined'?LQV67Counterplay:null;
 const Polish=LQ.polish||null;
 const Wayfinder=typeof LQWayfinder!=='undefined'?LQWayfinder:null;
 const Chronicle=LQ.chronicle||null;
@@ -487,6 +488,7 @@ function renderBattle(){
  if(V63Atlas){app.querySelectorAll('.battle-stage .enemy-art[data-v63-realm]').forEach(el=>{const cv=document.createElement('canvas');cv.width=128;cv.height=144;cv.className='v63-enemy-canvas';cv.setAttribute('aria-hidden','true');const ctx=cv.getContext('2d');if(ctx){(V66Creatures?.draw||V63Atlas.drawEnemy)(ctx,0,0,{realm:Number(el.dataset.v63Realm),variant:Number(el.dataset.v63Variant),boss:b.boss,frame:(ambientTick%6)});el.appendChild(cv);}});V63Atlas.animateEnemies(app.querySelector('.battle-stage'));}
  if(CombatStudio)CombatStudio.decorate(app.querySelector('.battle-stage'),b.actor,fx);
  if(V64Performance)V64Performance.decorate(app.querySelector('.battle-stage'),b.actor,fx);
+ if(V67Counterplay)V67Counterplay.decorate(app.querySelector('.battle-shell'),fx,b.origin.r);
  if(V65SceneArt)V65SceneArt.mountBattle(app.querySelector('.battle-stage'),b.origin.r,b.boss);
 }
 
