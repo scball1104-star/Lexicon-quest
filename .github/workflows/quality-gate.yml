@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main, feature/v60-premium-rpg-foundation]
+    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -32,7 +32,7 @@ jobs:
 
   browser-smoke:
     name: v60 Chromium visual smoke
-    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation'
+    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,11 +47,16 @@ jobs:
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
       - name: Exercise real desktop and mobile game
-        run: python qa/v60-browser-smoke.py
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/feature/v61-guided-adventure" ]; then
+            python qa/v61-browser-smoke.py
+          else
+            python qa/v60-browser-smoke.py
+          fi
       - name: Preserve screenshots for art review
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lexicon-v60-browser-previews
-          path: previews/v60-*.png
+          name: lexicon-branch-browser-previews
+          path: previews/*.png
           if-no-files-found: ignore
