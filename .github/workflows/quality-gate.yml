@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild, feature/v64-architectural-world, feature/v65-art-direction-and-playtest, feature/v66-release-candidate]
+    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild, feature/v64-architectural-world, feature/v65-art-direction-and-playtest, feature/v66-release-candidate, feature/v67-battle-counterplay]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -48,7 +48,10 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Exercise real desktop and mobile game
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/feature/v66-release-candidate" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/feature/v67-battle-counterplay" ]; then
+            python qa/v67-browser-smoke.py
+            python qa/v66-campaign-browser.py
+          elif [ "${{ github.ref }}" = "refs/heads/feature/v66-release-candidate" ]; then
             python qa/v66-browser-smoke.py
             python qa/v66-campaign-browser.py
           elif [ "${{ github.ref }}" = "refs/heads/feature/v65-art-direction-and-playtest" ]; then
