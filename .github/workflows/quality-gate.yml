@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild]
+    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat, feature/v63-art-rebuild, feature/v64-architectural-world]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -32,7 +32,7 @@ jobs:
 
   browser-smoke:
     name: Feature Chromium visual smoke
-    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure' || github.ref == 'refs/heads/feature/v62-living-combat' || github.ref == 'refs/heads/feature/v63-art-rebuild'
+    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure' || github.ref == 'refs/heads/feature/v62-living-combat' || github.ref == 'refs/heads/feature/v63-art-rebuild' || github.ref == 'refs/heads/feature/v64-architectural-world'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -48,7 +48,9 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Exercise real desktop and mobile game
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/feature/v63-art-rebuild" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/feature/v64-architectural-world" ]; then
+            python qa/v64-browser-smoke.py
+          elif [ "${{ github.ref }}" = "refs/heads/feature/v63-art-rebuild" ]; then
             python qa/v63-browser-smoke.py
           elif [ "${{ github.ref }}" = "refs/heads/feature/v62-living-combat" ]; then
             python qa/v62-browser-smoke.py
