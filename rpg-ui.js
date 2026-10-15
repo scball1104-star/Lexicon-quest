@@ -9,6 +9,7 @@ const V63Atlas=typeof LQV63Atlas!=='undefined'?LQV63Atlas:null;
 const V63World=typeof LQV63World!=='undefined'?LQV63World:null;
 const V64Architecture=typeof LQV64Architecture!=='undefined'?LQV64Architecture:null;
 const V64Performance=typeof LQV64Performance!=='undefined'?LQV64Performance:null;
+const V65SceneArt=typeof LQV65SceneArt!=='undefined'?LQV65SceneArt:null;
 const Props=typeof LQDungeonProps!=='undefined'?LQDungeonProps:null;
 const BattleEffects=typeof LQBattleEffects!=='undefined'?LQBattleEffects:null;
 const CombatStudio=typeof LQCombatStudio!=='undefined'?LQCombatStudio:null;
@@ -293,6 +294,7 @@ if(Motion&&!reducedMotion())Motion.atmosphere(c,camera,s.place,ambientTick,{regi
 if(typeof LQV60WorldArt!=='undefined')LQV60WorldArt.draw(c,m,camera,s,ambientTick,reducedMotion());
 if(V63World)V63World.props(c,m,camera,s,ambientTick);
 if(V64Architecture){V64Architecture.dress(c,m,camera,s,ambientTick,reducedMotion());V64Architecture.light(c,m,camera,s,ambientTick,reducedMotion());}
+if(V65SceneArt)V65SceneArt.field(c,m,camera,s,ambientTick,reducedMotion(),game.guide());
 if((s.place==='town'||(s.place==='dungeon'&&(s.region===5||s.region===6)))&&m.decor)for(const d of m.decor)Art.prop(c,d,camera,s.region,ambientTick);
 if(Props&&s.place==='dungeon')m.objects.filter(o=>s.flags['done:'+o.id]&&['chest','prismChest'].includes(o.type)).forEach(o=>{
  if(o.x>=Math.floor(camera.x)-1&&o.y>=Math.floor(camera.y)-1&&o.x<=camera.x+17&&o.y<=camera.y+13)Props.draw(c,(o.x-camera.x)*48,(o.y-camera.y)*48,o,s,ambientTick);
@@ -484,6 +486,7 @@ function renderBattle(){
  if(V63Atlas){app.querySelectorAll('.battle-stage .enemy-art[data-v63-realm]').forEach(el=>{const cv=document.createElement('canvas');cv.width=128;cv.height=144;cv.className='v63-enemy-canvas';cv.setAttribute('aria-hidden','true');const ctx=cv.getContext('2d');if(ctx){V63Atlas.drawEnemy(ctx,0,0,{realm:Number(el.dataset.v63Realm),variant:Number(el.dataset.v63Variant),boss:b.boss,frame:(ambientTick%6)});el.appendChild(cv);}});V63Atlas.animateEnemies(app.querySelector('.battle-stage'));}
  if(CombatStudio)CombatStudio.decorate(app.querySelector('.battle-stage'),b.actor,fx);
  if(V64Performance)V64Performance.decorate(app.querySelector('.battle-stage'),b.actor,fx);
+ if(V65SceneArt)V65SceneArt.mountBattle(app.querySelector('.battle-stage'),b.origin.r,b.boss);
 }
 
 function regionServiceText(kind,r){
