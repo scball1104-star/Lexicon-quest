@@ -1,0 +1,61 @@
+/* Lexicon Quest v67 — counterplay, confirmed enemy damage only. */
+.battle-shell .v67-counterplay-report {
+ display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+ border:1px solid #d08f83a1;border-left:3px solid #e1a493;
+ background:linear-gradient(95deg,#473237f5,#2c3340ee);
+ padding:9px 13px;margin:0 0 10px;border-radius:9px;
+ color:#fff1e9;box-shadow:inset 0 1px #ffffff14,0 6px 16px #050c1760;
+}
+.battle-shell .v67-counterplay-report.heavy{border-color:#efb37a;border-left-color:#f8d194;background:linear-gradient(95deg,#583a33f5,#313044f3);}
+.v67-report-heading{
+ font:800 10px/1.3 system-ui,sans-serif;letter-spacing:.13em;color:#f9d2bb;
+}
+.v67-report-hits{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.v67-damage-item{
+ border-radius:6px;padding:4px 8px;background:#081d2b83;
+ color:#fff8e5;font-size:11px;white-space:nowrap;
+}
+.v67-damage-item strong{font-weight:650;}
+.v67-damage-item b{color:#ffd2ad;margin-left:3px;font-variant-numeric:tabular-nums;}
+.battle-shell .battle-stage{position:relative;isolation:isolate;}
+.battle-shell .battle-stage .v67-reaction-canvas{
+ position:absolute;inset:0;width:100%;height:100%;z-index:18;
+ pointer-events:none;object-fit:fill;image-rendering:auto;border-radius:inherit;
+}
+.battle-shell .battle-party .combat-ally.v67-ally-hit{
+ position:relative;isolation:isolate;
+ animation:v67-impact-shudder .65s ease-out 1;
+ border-color:#f2b89d;
+ box-shadow:0 0 0 2px #f7a5853b,0 0 28px #efb38b43;
+}
+.battle-shell .battle-party .v67-floating-damage{
+ position:absolute;right:6px;top:-11px;z-index:5;
+ border:1px solid #f3be9b;border-radius:6px;padding:3px 7px;
+ background:#482a36f2;color:#ffe5cc;font:900 13px/1.1 system-ui,sans-serif;
+ white-space:nowrap;box-shadow:0 5px 16px #000a;
+ animation:v67-damage-rise 1.1s ease-out both;pointer-events:none;
+}
+@keyframes v67-impact-shudder{
+ 0%,100%{transform:translateX(0)}
+ 15%{transform:translateX(-4px)}
+ 34%{transform:translateX(3px)}
+ 52%{transform:translateX(-2px)}
+}
+@keyframes v67-damage-rise{
+ 0%{opacity:0;transform:translateY(12px) scale(.84)}
+ 18%{opacity:1;transform:translateY(0) scale(1.12)}
+ 72%{opacity:1;transform:translateY(-12px)}
+ 100%{opacity:0;transform:translateY(-21px)}
+}
+@media(max-width:700px){
+ .battle-shell .v67-counterplay-report{margin:0 0 6px;gap:5px;padding:5px 8px;}
+ .v67-report-heading{font-size:9px;letter-spacing:.055em;}
+ .v67-report-hits{gap:3px;}
+ .v67-damage-item{font-size:9px;padding:3px 5px;}
+ .battle-shell .battle-party .v67-floating-damage{font-size:10px;right:1px;top:-6px;padding:2px 4px;}
+}
+@media(prefers-reduced-motion:reduce){
+ .battle-shell .battle-party .combat-ally.v67-ally-hit,.battle-shell .battle-party .v67-floating-damage{animation:none!important;}
+ .battle-shell .battle-party .v67-floating-damage{opacity:1!important;transform:none!important;}
+ .battle-stage .v67-reaction-canvas{display:none!important;}
+}
