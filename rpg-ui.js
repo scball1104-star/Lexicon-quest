@@ -280,6 +280,7 @@ const obs=game.objects().filter(o=>o.x>=camera.x&&o.y>=camera.y&&o.x<camera.x+17
 if(SceneArt&&s.region===0&&(s.place==='town'||s.place==='dungeon'&&s.floor===0))SceneArt.overlay(c,m,camera,ambientTick,s.place,s.floor);
 if(Cinematic)Cinematic.architecture(c,m,camera,s,ambientTick);
 if(Motion&&!reducedMotion())Motion.atmosphere(c,camera,s.place,ambientTick,{region:s.region});
+if(typeof LQV60WorldArt!=='undefined')LQV60WorldArt.draw(c,m,camera,s,ambientTick,reducedMotion());
 if((s.place==='town'||(s.place==='dungeon'&&(s.region===5||s.region===6)))&&m.decor)for(const d of m.decor)Art.prop(c,d,camera,s.region,ambientTick);
 if(Props&&s.place==='dungeon')m.objects.filter(o=>s.flags['done:'+o.id]&&['chest','prismChest'].includes(o.type)).forEach(o=>{
  if(o.x>=Math.floor(camera.x)-1&&o.y>=Math.floor(camera.y)-1&&o.x<=camera.x+17&&o.y<=camera.y+13)Props.draw(c,(o.x-camera.x)*48,(o.y-camera.y)*48,o,s,ambientTick);
