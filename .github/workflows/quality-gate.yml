@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main]
+    branches: [main, feature/v60-premium-rpg-foundation]
   pull_request:
   workflow_dispatch:
 permissions:
