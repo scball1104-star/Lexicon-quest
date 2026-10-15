@@ -1,0 +1,8 @@
+/* v65 scene direction: art behind interactive battle cards, never pointer targets */
+body .battle-stage.tactical-stage .v65-scene-scenery{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;image-rendering:pixelated;opacity:.82}
+body .battle-stage.tactical-stage>.tactical-enemy{z-index:2}
+body .battle-stage.tactical-stage>.v62-vfx{z-index:14}
+body .battle-stage.tactical-stage>.combat-impact{z-index:8}
+body .battle-stage.tactical-stage .v65-scene-scenery+button{isolation:isolate}
+@media(max-width:700px){body .battle-stage.tactical-stage .v65-scene-scenery{opacity:.58}}
+@media(prefers-reduced-motion:reduce){body .battle-stage.tactical-stage .v65-scene-scenery{animation:none!important}}
