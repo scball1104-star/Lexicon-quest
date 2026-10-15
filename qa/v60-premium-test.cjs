@@ -58,7 +58,7 @@ check(v60.realmFromText('Frostbound Vault')===6,'chapter 7 dungeon');
 check(v60.realmFromText('First Library')===7,'chapter 8 dungeon');
 check(v60.classifyReport('Last action +27 HP')==='heal','pure healing summary');
 check(v60.classifyReport('Last action −42 HP')==='damage','damage summary');
-function fakeApp(map){return{querySelector(selector){return map[selector]||null;}};}
+function fakeApp(map){return{querySelector(selector){return map[selector]||null;},querySelectorAll(selector){return map[selector]||[];}};}
 currentApp=fakeApp({'.titlepage':element()});
 v60.decorate();
 check(doc.body.dataset.lqScene==='title','title has dedicated visual scene');
