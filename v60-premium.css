@@ -782,3 +782,95 @@ body .lq-enemy-tactic {font-size:9px;letter-spacing:.03em;}
   animation:none!important;
  }
 }
+
+
+/* v60 final layout pass — battlefield and commands share the first desktop
+   viewport instead of forcing players through a tall stack of briefing cards. */
+@media(min-width:1000px){
+ body .battle-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(325px,355px);
+  grid-template-areas:
+   "boss boss"
+   "heading heading"
+   "order order"
+   "brief brief"
+   "focus coach"
+   "report report"
+   "stage console"
+   "party console"
+   "log log";
+  gap:10px 14px;
+  align-items:start;
+ }
+ body .battle-shell>.lq-phase-cinematic{grid-area:boss;margin-bottom:0;}
+ body .battle-heading{grid-area:heading;margin:0;}
+ body .battle-turn-order{grid-area:order;margin:0;}
+ body .battle-brief{grid-area:brief;margin:0;}
+ body .battle-shell>.resonance-panel{grid-area:focus;margin:0;min-height:65px;}
+ body .battle-shell>.battle-result-strip{grid-area:report;margin:0;}
+ body .battle-shell>.lq-coach-bar{grid-area:coach;margin:0;min-height:65px;grid-template-columns:minmax(0,1fr);}
+ body .battle-shell>.lq-coach-bar .lq-battle-read{padding:6px 10px;}
+ body .battle-shell>.lq-coach-bar .lq-battle-read>span,
+ body .battle-shell>.lq-coach-bar .lq-battle-read small{display:none;}
+ body .battle-shell>.lq-coach-bar .lq-battle-read strong{font-size:14px;}
+ body .battle-shell>.lq-coach-bar>button{min-height:0;min-width:0;padding:8px;font-size:11px;}
+ body .battle-stage.tactical-stage{grid-area:stage;margin:0;min-height:355px;padding:18px 12px;}
+ body .battle-stage .tactical-enemy{min-height:316px;}
+ body .battle-party{grid-area:party;margin:0;}
+ body .battle-bottom{display:contents;}
+ body .battle-console{grid-area:console;margin:0;align-self:stretch;padding:14px;}
+ body .battle-console .commands{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+ body .battle-console .command{min-height:81px;padding:10px;}
+ body .battle-console .command strong{font-size:12px;}
+ body .battle-console .command small{font-size:10px;}
+ body .battle-preview{display:block;padding:10px;font-size:11px;}
+ body .battle-preview b{display:block;margin-bottom:4px;}
+ body .battle-confirm{padding:10px;}
+ body .battle-confirm>.primary{width:100%;}
+ body .battle-log{grid-area:log;margin:0;max-height:155px;}
+}
+@media(max-width:700px){
+ body[data-lq-scene="battle"] .topbar [data-action="battleHelp"]{display:none;}
+ body[data-lq-scene="battle"] .topbar .row{flex-wrap:nowrap;}
+ body[data-lq-scene="battle"] .topbar{min-height:54px;}
+ body .battle-heading{margin:0 0 5px;}
+ body .battle-heading h2{font-size:23px;}
+ body .battle-brief{padding:7px 10px;margin-bottom:6px;gap:8px;}
+ body .battle-brief strong{font-size:13px;}
+ body .battle-brief p{display:none;}
+ body .battle-brief small{font-size:8px;}
+ body .battle-phase{font-size:9px;padding:4px 7px;}
+ body .battle-turn-order{margin-bottom:6px;}
+ body .battle-shell>.resonance-panel{padding:6px 9px;margin:0 0 6px;}
+ body .battle-shell>.resonance-panel strong{font-size:11px;}
+ body .battle-shell>.resonance-panel .resonance-track{margin-top:5px;}
+ body .battle-shell>.lq-coach-bar{
+  display:grid;grid-template-columns:minmax(0,1fr) 100px;
+  align-items:stretch;gap:5px;margin:0 0 7px;
+ }
+ body .battle-shell>.lq-coach-bar .lq-battle-read{
+  padding:7px 8px;
+  display:flex;align-items:center;
+ }
+ body .battle-shell>.lq-coach-bar .lq-battle-read>span,
+ body .battle-shell>.lq-coach-bar .lq-battle-read small{display:none;}
+ body .battle-shell>.lq-coach-bar .lq-battle-read strong{font:700 12px/1.2 system-ui,sans-serif;}
+ body .battle-shell>.lq-coach-bar>button{
+  min-height:42px;min-width:0;max-width:100%;padding:5px;
+  font-size:10px;line-height:1.2;white-space:normal;
+ }
+ body .battle-result-strip{padding:6px;gap:4px;margin:0 0 5px;}
+ body .battle-result{font-size:9px;padding:3px 5px;}
+ body .battle-stage.tactical-stage{min-height:227px!important;padding-top:18px!important;}
+ body .battle-stage .tactical-enemy{min-height:207px;gap:3px;}
+ body .battle-stage .tactical-enemy .lq-foe-reading{display:none;}
+ body .battle-stage .tactical-enemy .enemy-art{height:77px!important;}
+ body .battle-stage .enemy-affinities{gap:2px;}
+ body .battle-stage .enemy-affinities span{padding:1px 3px;}
+ body .battle-party .combat-ally{min-height:47px;}
+ body .battle-console .command:not(.chosen) small{display:none;}
+ body .battle-console .command.chosen{border-color:#f2ca82;}
+ body .battle-console .command{min-height:59px;}
+ body .mobile-battle-quickbar button{min-height:52px;font-size:13px;}
+}
