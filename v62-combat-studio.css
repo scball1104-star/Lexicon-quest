@@ -135,3 +135,35 @@
   .battle-stage.tactical-stage .tactical-enemy.threat-danger .enemy-intent::after{animation:none!important;transform:none!important;}
   .battle-stage .v62-vfx{display:none!important;}
 }
+
+/* Original bestiary: each realm is painted from local pixel primitives. */
+.battle-stage .tactical-enemy .enemy-art.v62-foe-painted{
+ position:relative;
+ isolation:isolate;
+ display:grid;
+ place-items:center;
+ background-image:none!important;
+ background-color:transparent!important;
+ background-size:auto!important;
+ overflow:visible;
+}
+.battle-stage .tactical-enemy .enemy-art .v62-foe-canvas{
+ display:block;
+ position:relative;
+ width:min(132px,100%);
+ height:100%;
+ object-fit:contain;
+ image-rendering:pixelated;
+ image-rendering:crisp-edges;
+ pointer-events:none;
+ filter:drop-shadow(0 5px 2px #07131da8) drop-shadow(0 0 8px #a0e7e425);
+}
+.battle-stage .tactical-enemy .enemy-art.boss .v62-foe-canvas{
+ filter:drop-shadow(0 7px 2px #07131dba) drop-shadow(0 0 11px #fbd39975);
+}
+@media(max-width:700px){
+ .battle-stage .tactical-enemy .enemy-art .v62-foe-canvas{width:min(83px,100%);}
+}
+@media(prefers-reduced-motion:reduce){
+ .battle-stage .tactical-enemy .enemy-art .v62-foe-canvas{filter:none;}
+}
