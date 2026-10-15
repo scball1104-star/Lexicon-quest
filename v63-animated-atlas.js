@@ -200,7 +200,7 @@ function animateEnemies(stage){
     const card=element?.closest?.('.tactical-enemy');
     if(card?.classList?.contains('dead'))continue;
     context.clearRect(0,0,canvas.width,canvas.height);
-    drawEnemy(context,0,0,{realm:Number(element?.dataset.v63Realm),variant:Number(element?.dataset.v63Variant),boss:!!element?.classList?.contains('boss'),frame:phase});
+    (root.LQV66Creatures?.draw||drawEnemy)(context,0,0,{realm:Number(element?.dataset.v63Realm),variant:Number(element?.dataset.v63Variant),boss:!!element?.classList?.contains('boss'),frame:phase});
    }
   }
   root.requestAnimationFrame(frame);
