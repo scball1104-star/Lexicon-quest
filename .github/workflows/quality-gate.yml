@@ -1,7 +1,7 @@
 name: Lexicon Quest Quality Gate
 on:
   push:
-    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure]
+    branches: [main, feature/v60-premium-rpg-foundation, feature/v61-guided-adventure, feature/v62-living-combat]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -31,8 +31,8 @@ jobs:
           NODE
 
   browser-smoke:
-    name: v60 Chromium visual smoke
-    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure'
+    name: Feature Chromium visual smoke
+    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation' || github.ref == 'refs/heads/feature/v61-guided-adventure' || github.ref == 'refs/heads/feature/v62-living-combat'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -48,7 +48,9 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Exercise real desktop and mobile game
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/feature/v61-guided-adventure" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/feature/v62-living-combat" ]; then
+            python qa/v62-browser-smoke.py
+          elif [ "${{ github.ref }}" = "refs/heads/feature/v61-guided-adventure" ]; then
             python qa/v61-browser-smoke.py
           else
             python qa/v60-browser-smoke.py
