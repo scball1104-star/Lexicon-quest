@@ -29,3 +29,29 @@ jobs:
           console.log('Verifying the exact Netlify build command:', match[1]);
           cp.execSync(match[1], { stdio: 'inherit', shell: '/bin/bash' });
           NODE
+
+  browser-smoke:
+    name: v60 Chromium visual smoke
+    if: github.ref == 'refs/heads/feature/v60-premium-rpg-foundation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout game
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium test runner
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Exercise real desktop and mobile game
+        run: python qa/v60-browser-smoke.py
+      - name: Preserve screenshots for art review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lexicon-v60-browser-previews
+          path: previews/v60-*.png
+          if-no-files-found: ignore
