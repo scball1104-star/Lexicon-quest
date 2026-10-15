@@ -1,0 +1,14 @@
+const assert=require('assert/strict'),fs=require('fs');
+const atlas=require('../v63-animated-atlas.js'),world=require('../v63-world-detail.js');
+assert.equal(atlas.metrics().realms,8);assert.equal(atlas.metrics().enemyFrames,288);assert.equal(atlas.metrics().heroFrames,72);
+assert.equal(world.THEMES.length,8);
+const colors=[];const c={set fillStyle(v){this.col=v;colors.push(v)},get fillStyle(){return this.col},fillRect(){},save(){},restore(){},translate(){},scale(){}};
+for(let i=0;i<8;i++)for(let j=0;j<3;j++)for(let f=0;f<6;f++)atlas.pixels(c,atlas.REALMS[i],f,j===2,j);
+assert(colors.length>2000);assert.equal(new Set(atlas.REALMS.map(x=>x.body)).size,8);
+for(let i=0;i<8;i++)assert(world.detail(c,0,0,'road',i,2,2,{tiles:[[],[],['road','road','road']]},'town',10));
+const html=fs.readFileSync('index.html','utf8'),ui=fs.readFileSync('rpg-ui.js','utf8'),sw=fs.readFileSync('sw.js','utf8');
+for(const p of ['v63-animated-atlas.js','v63-world-detail.js','v63-art.css'])assert(html.includes(p)&&sw.includes(p));
+assert(html.indexOf('v63-animated-atlas.js')<html.indexOf('rpg-ui.js'));
+assert(ui.includes('V63Atlas.drawHero')&&ui.includes('V63Atlas.drawEnemy')&&ui.includes('V63World.detail'));
+assert(!fs.readFileSync('v63-animated-atlas.js','utf8').includes('localStorage'));
+console.log('PASS v63: 8 biomes, 288 enemy frames, 72 hero frames, terrain layers, integration and save safety');
