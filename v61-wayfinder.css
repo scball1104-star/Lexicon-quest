@@ -1,0 +1,112 @@
+/* Lexicon Quest v61: adventure wayfinder. Loaded after premium CSS. */
+.v61-wayfinder {
+  --v61-edge: #bba56f;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:13px;
+  margin:0 0 11px;
+  padding:11px 14px;
+  border:1px solid #788a7c9c;
+  border-left:3px solid var(--v61-edge);
+  border-radius:12px;
+  color:#f2edde;
+  background:linear-gradient(110deg,#263c40f5,#122633f7 48%,#10212ef7);
+  box-shadow:0 6px 19px #05131c67,inset 0 1px #ffffff13;
+}
+.v61-wayfinder.blocked{--v61-edge:#e69e7e;background:linear-gradient(110deg,#422f32,#142935);}
+.v61-wayfinder.here{--v61-edge:#83d1aa;}
+.v61-wayfinder.explore{--v61-edge:#9ba9c5;}
+.v61-wayfinder-icon {
+  width:39px;
+  height:39px;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  border:1px solid #e6cd8ba8;
+  border-radius:11px;
+  background:radial-gradient(circle,#685d3e,#28353c 74%);
+  box-shadow:inset 0 1px #fff5c346,0 4px 13px #0005;
+  color:#ffe1a0;
+  font:700 23px/1 Georgia,serif;
+}
+.v61-wayfinder.blocked .v61-wayfinder-icon{color:#ffbaa1;border-color:#e69e7e;}
+.v61-wayfinder-copy{min-width:0;display:grid;gap:2px;}
+.v61-wayfinder-kicker {
+  color:#d9c79d;
+  font:750 9px/1.2 system-ui,sans-serif;
+  letter-spacing:.135em;
+}
+.v61-wayfinder-copy strong {
+  display:block;
+  min-width:0;
+  color:#fff3d6;
+  font-size:14px;
+  font-weight:740;
+  overflow-wrap:anywhere;
+}
+.v61-wayfinder-copy p {
+  margin:0;
+  color:#c8d8d4;
+  font-size:11px;
+  line-height:1.38;
+}
+.v61-wayfinder-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.v61-wayfinder-actions button {
+  min-height:40px;
+  padding:8px 12px;
+  border-radius:8px;
+  white-space:nowrap;
+  font-size:11px;
+}
+.v61-wayfinder-actions button:not(.primary) {
+  color:#ece5d0;
+  background:#203541;
+  border-color:#76877e;
+}
+.v61-wayfinder.blocked .v61-wayfinder-actions button.primary {
+  background:linear-gradient(180deg,#f3d5b5,#d5a179);
+  border-color:#eac9aa;
+  color:#30272c;
+}
+@media(max-width:1050px){
+ .v61-wayfinder{grid-template-columns:34px minmax(0,1fr);gap:9px;}
+ .v61-wayfinder-icon{width:34px;height:34px;font-size:20px;}
+ .v61-wayfinder-actions{grid-column:2;justify-content:start;}
+}
+@media(max-width:700px){
+ .v61-wayfinder {
+  grid-template-columns:25px minmax(0,1fr) auto;
+  align-items:center;
+  gap:6px;
+  margin:0 0 4px;
+  padding:6px 8px;
+  border-left-width:2px;
+  border-radius:8px;
+  box-shadow:none;
+ }
+ .v61-wayfinder-icon{width:24px;height:24px;font-size:17px;border-radius:6px;}
+ .v61-wayfinder-kicker{font-size:8px;letter-spacing:.045em;}
+ .v61-wayfinder-copy{gap:1px;}
+ .v61-wayfinder-copy strong{font-size:11px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+ .v61-wayfinder-copy p {font-size:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;}
+ .v61-wayfinder-actions {grid-column:auto;gap:3px;flex-direction:column;}
+ .v61-wayfinder-actions button{min-height:32px;padding:4px 7px;font-size:9px;}
+ .v61-wayfinder-actions button:not(.primary){min-height:27px;font-size:9px;}
+ .v61-wayfinder.explore{grid-template-columns:25px minmax(0,1fr);}
+}
+@media(max-width:370px){
+ .v61-wayfinder {grid-template-columns:20px minmax(0,1fr) auto;gap:4px;padding:5px;}
+ .v61-wayfinder-icon{width:19px;height:19px;font-size:14px;}
+ .v61-wayfinder-actions button{font-size:8px;padding:4px;}
+ .v61-wayfinder-copy strong{font-size:10px;}
+}
+@media(prefers-reduced-motion:reduce){
+ .v61-wayfinder,.v61-wayfinder button{animation:none;transition:none;}
+}
