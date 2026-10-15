@@ -1,0 +1,35 @@
+/* v67: Willowmere presentation layer. Preserves original desktop/mobile controls. */
+:root{--v67-panel:#132730;--v67-gold:#e8c88d;--v67-text:#f3e9d5;--v67-muted:#b9c9c6}
+body{background:radial-gradient(ellipse at 50% -10%,#2d49479c,transparent 48%),linear-gradient(180deg,#10242b,#07131b 72%);color:var(--v67-text)}
+body::before{opacity:0!important}
+body .topbar{border-color:#7a8c7f52;box-shadow:0 15px 38px #010c1375}
+body .brand{letter-spacing:-.025em}
+body button{border-radius:9px;box-shadow:inset 0 1px #ffffff16,0 3px 9px #0003}
+body button:focus-visible{outline:3px solid var(--v67-gold);outline-offset:2px}
+body .shell{max-width:1490px;grid-template-columns:minmax(0,1fr) minmax(275px,310px);gap:16px}
+body .shell>section{min-width:0}
+body .location{background:linear-gradient(90deg,#173038bb,transparent);border:1px solid #61776839;border-left:3px solid var(--v67-gold);padding:12px 16px;margin-bottom:10px;border-radius:10px;box-shadow:0 8px 20px #0002}
+body .location h2{color:#fff0d2;font-size:clamp(25px,2.6vw,36px)}
+body .location>small{color:#d4d6c7;max-width:210px;line-height:1.45}
+body .scene-flavor{max-width:75ch;line-height:1.35;color:#d4dcd0;font-size:12px}
+body .mapframe{border:1px solid #a5ad8d!important;border-radius:12px!important;box-shadow:0 0 0 3px #223c3f,0 18px 40px #0009!important;background:#173128}
+body .mapframe::after{box-shadow:inset 0 0 32px #04161770!important}
+body .mapbadge{font-size:10px;background:#0c2226dc;border-color:#d0bb8b93;color:#f7e5ba}
+body .message{border-left:3px solid var(--v67-gold);background:#142c34;color:#ebeee5;border-radius:8px;font-size:12px;line-height:1.4}
+body .sidebar .panel{border:1px solid #5d77707c;background:linear-gradient(150deg,#1b343bec,#0e222cef);box-shadow:0 9px 24px #0004;border-radius:11px}
+body .sidebar .objective{border-top:2px solid #dabd83}
+body .sidebar .objective h3{color:#f3e2bf;letter-spacing:0}
+body .sidebar .objective p{font-size:12px;line-height:1.45}
+body .sidebar .partycard{border-bottom:1px solid #6b82743c;padding-bottom:7px;margin-bottom:7px}
+body .side-actions button{border-color:#6f897c67;background:#1d3a40}
+body .titlepage h1{color:#f9f0de}
+body .battle-stage.tactical-stage{border:1px solid #c4ad83;box-shadow:0 18px 40px #0008}
+body .battle-stage .tactical-enemy{background:linear-gradient(180deg,#12232b52,#102530cc 58%,#0d1c27ef);border-color:#82978d99}
+body .battle-stage .tactical-enemy.selected{border-color:#ffe6a4;box-shadow:0 0 0 2px #ffd38a80,0 7px 24px #0009}
+body .battle-console{background:linear-gradient(150deg,#192f3b,#0c1e29)}
+body .battle-console .command{border-color:#5f7c7c;background:#203b45}
+body .battle-console .command.chosen{background:#405045;border-color:#f0d092}
+body .modal{border:1px solid #bbaa85;background:linear-gradient(160deg,#1f3840,#10242f 60%,#0a1a26);border-radius:15px}
+@media(max-width:950px){body .shell{grid-template-columns:1fr}body .sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){body .shell{display:block!important;padding:4px 6px calc(148px + env(safe-area-inset-bottom))!important}body .location{padding:7px 9px;margin:0 0 4px;border-left-width:2px}body .location h2{font-size:clamp(21px,5.5vw,26px)}body .scene-flavor{display:none}body .mapframe{border-radius:0 0 9px 9px!important;border-top:0!important}body .sidebar{display:none!important}body .controls{border-top:1px solid #cbad77;background:linear-gradient(180deg,#264146fa,#0c202afc)}body .battle-shell{width:100%;padding:4px 6px calc(92px + env(safe-area-inset-bottom))!important}body .battle-stage.tactical-stage{min-height:240px!important;border-radius:10px;padding:12px 5px 6px!important}body .battle-console .commands{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){body button,body .battle-stage .tactical-enemy{transition:none!important;animation:none!important}}

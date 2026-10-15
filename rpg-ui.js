@@ -3,6 +3,7 @@
 const {Game,fresh,regions,dungeonNames,weapons,weaponTraits,skills,mastery,skillRank,validSave,centers}=LQ;
 const Art=typeof LQEnvironmentArt!=='undefined'?LQEnvironmentArt:{tile:()=>false,prop:()=>{},service:(c,x,y,o)=>objectArt(c,x,y,o)};
 const SceneArt=typeof LQWillowmereArt!=='undefined'?LQWillowmereArt:null;
+const V67Village=typeof LQV67Willowmere!=='undefined'?LQV67Willowmere:null;
 const Motion=typeof LQMotion!=='undefined'?LQMotion:null;
 const Sprites=typeof LQSpriteAtlas!=='undefined'?LQSpriteAtlas:null;
 const V63Atlas=typeof LQV63Atlas!=='undefined'?LQV63Atlas:null;
@@ -280,16 +281,17 @@ camera=Motion&&!reducedMotion()?Motion.camera(camera,pos.x,pos.y,m.w,m.h,compact
 c.imageSmoothingEnabled=false;
 for(let ty=Math.floor(camera.y);ty<=Math.floor(camera.y)+13;ty++)for(let tx=Math.floor(camera.x);tx<=Math.floor(camera.x)+17;tx++){
 const tile=m.tiles[ty]?.[tx]||'wall',region=s.place==='world'?LQ.regionAt(tx,ty):s.region,x=Math.round((tx-camera.x)*48),y=Math.round((ty-camera.y)*48);
-const authored=(SceneArt&&SceneArt.tile(c,x,y,tile,region,tx,ty,ambientTick,m,s.place,s.floor))||(s.place==='town'&&Art.tile(c,x,y,tile,region,tx,ty,ambientTick,m));
+const authored=(V67Village&&V67Village.tile(c,x,y,tile,region,tx,ty,ambientTick,m,s.place,s.floor))||(SceneArt&&SceneArt.tile(c,x,y,tile,region,tx,ty,ambientTick,m,s.place,s.floor))||(s.place==='town'&&Art.tile(c,x,y,tile,region,tx,ty,ambientTick,m));
 if(!authored)terrainEnhanced(c,x,y,tile,region,tx,ty);
-if(V63World)V63World.detail(c,x,y,tile,region,tx,ty,m,s.place,ambientTick);
+if(V63World&&!(V67Village&&region===0&&(s.place==='town'||s.place==='world')))V63World.detail(c,x,y,tile,region,tx,ty,m,s.place,ambientTick);
 if(V64Architecture)V64Architecture.tile(c,x,y,tile,region,tx,ty,m,s.place);
 }
 if(typeof c.createLinearGradient==='function'&&(s.place==='town'||s.place==='world')){const haze=c.createLinearGradient(0,0,0,624),phase=timeState(s.steps);if(haze&&typeof haze.addColorStop==='function'){haze.addColorStop(0,phase.overlay[0]);haze.addColorStop(.62,'#00000000');haze.addColorStop(1,phase.overlay[1]);c.fillStyle=haze;c.fillRect(0,0,816,624);}}
 if(s.place==='dungeon'&&typeof c.createRadialGradient==='function'){const glow=c.createRadialGradient((s.x-camera.x)*48+24,(s.y-camera.y)*48+24,45,(s.x-camera.x)*48+24,(s.y-camera.y)*48+24,510);if(glow&&typeof glow.addColorStop==='function'){glow.addColorStop(0,'#00000000');glow.addColorStop(1,'#06132660');c.fillStyle=glow;c.fillRect(0,0,816,624);}}
 if(worldArt&&worldArt.complete&&worldArt.naturalWidth&&s.place==='world'){for(let ty=Math.floor(camera.y);ty<=Math.floor(camera.y)+13;ty++)for(let tx=Math.floor(camera.x);tx<=Math.floor(camera.x)+17;tx++){if(m.tiles[ty]?.[tx]!=='tree'||(tx*7+ty*11)%9!==0)continue;const x=(tx-camera.x)*48,y=(ty-camera.y)*48;c.drawImage(worldArt,256,256,256,256,x-14,y-37,77,86);}}
 const obs=game.objects().filter(o=>o.x>=camera.x&&o.y>=camera.y&&o.x<camera.x+17&&o.y<camera.y+13);
-if(SceneArt&&s.region===0&&(s.place==='town'||s.place==='dungeon'&&s.floor===0))SceneArt.overlay(c,m,camera,ambientTick,s.place,s.floor);
+if(V67Village&&s.region===0&&s.place==='town')V67Village.overlay(c,m,camera,ambientTick,s.place,s.floor);
+else if(SceneArt&&s.region===0&&(s.place==='town'||s.place==='dungeon'&&s.floor===0))SceneArt.overlay(c,m,camera,ambientTick,s.place,s.floor);
 if(Cinematic)Cinematic.architecture(c,m,camera,s,ambientTick);
 if(Motion&&!reducedMotion())Motion.atmosphere(c,camera,s.place,ambientTick,{region:s.region});
 if(typeof LQV60WorldArt!=='undefined')LQV60WorldArt.draw(c,m,camera,s,ambientTick,reducedMotion());
@@ -300,7 +302,7 @@ if((s.place==='town'||(s.place==='dungeon'&&(s.region===5||s.region===6)))&&m.de
 if(Props&&s.place==='dungeon')m.objects.filter(o=>s.flags['done:'+o.id]&&['chest','prismChest'].includes(o.type)).forEach(o=>{
  if(o.x>=Math.floor(camera.x)-1&&o.y>=Math.floor(camera.y)-1&&o.x<=camera.x+17&&o.y<=camera.y+13)Props.draw(c,(o.x-camera.x)*48,(o.y-camera.y)*48,o,s,ambientTick);
 });
-obs.forEach(o=>{const x=(o.x-camera.x)*48,y=(o.y-camera.y)*48;if(ChapterOne&&ChapterOne.draw(c,x,y,o,s,ambientTick)){}else if(Props&&Props.draw(c,x,y,o,s,ambientTick)){}else if(SceneArt&&s.region===0&&SceneArt.object(c,x,y,o,ambientTick,s.place)){}else if(s.place==='town'&&['inn','shop','forge'].includes(o.type))Art.service(c,x,y,o,s.region,ambientTick);else objectArt(c,x,y,o);
+obs.forEach(o=>{const x=(o.x-camera.x)*48,y=(o.y-camera.y)*48;if(ChapterOne&&ChapterOne.draw(c,x,y,o,s,ambientTick)){}else if(Props&&Props.draw(c,x,y,o,s,ambientTick)){}else if(s.place==='town'&&s.region===0&&V67Village&&V67Village.service(c,x,y,o,ambientTick)){}else if(SceneArt&&s.region===0&&SceneArt.object(c,x,y,o,ambientTick,s.place)){}else if(s.place==='town'&&['inn','shop','forge'].includes(o.type))Art.service(c,x,y,o,s.region,ambientTick);else objectArt(c,x,y,o);
 if(Cinematic)Cinematic.drawMechanism(c,x,y,o,s,ambientTick,Date.now(),reducedMotion());
 if(Motion&&['chest','trial','spring','lever','board','exit','down','up','town','dungeon','lanternMemory','catalogDial','catalogDiagram','trailCamp'].includes(o.type)&&Math.abs(o.x-s.x)+Math.abs(o.y-s.y)<=2)Motion.signal(c,x,y,ambientTick,o.type==='trial'?'quest':'usable',true);});
 if(s.place==='town'&&Citizens){ensureCitizens();Citizens.draw(citizens,c,citizenArt,camera,s,ambientTick);}
