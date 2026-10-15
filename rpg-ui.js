@@ -554,7 +554,16 @@ if(a==='goObjective'||a==='goSupport'){
  const p=Wayfinder?.plan(game);const q=a==='goSupport'?p?.support:p?.goal;
  if(q&&((a==='goSupport'&&p?.status==='blocked')||(a==='goObjective'&&['here','ready'].includes(p?.status)))){
   const o=game.objects().find(v=>v.id===q.id);
-  if(o){stopWalk();modal=null;walkTo(o.x,o.y,o);return;}
+  if(o){
+   stopWalk();modal=null;
+   // Guidance never activates a puzzle control automatically; walking beside it
+   // lets the player inspect the clues before deliberately using Interact.
+   if(a==='goSupport'){
+    const approach=p.support?.path?.at(-1);
+    if(approach){walkTo(approach.x,approach.y);game.emit('At the mechanism, choose Interact when you are ready.');return;}
+   }
+   walkTo(o.x,o.y,o);return;
+  }
  }
  game?.emit('This route is not open yet. Explore nearby switches and doors.');render();return;
 }
