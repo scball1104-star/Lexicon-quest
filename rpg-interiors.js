@@ -94,6 +94,8 @@ function draw(room,c,tick=0,citizenAtlas=null){
  // Player character, emphasizing direction by a blue cloak and bright head.
  const hx=room.x*40,hy=room.y*40;
  fill(c,hx+10,hy+33,22,5,'#10202b66');fill(c,hx+13,hy+17,16,19,'#4c82b8');fill(c,hx+16,hy+9,12,12,'#e4b98b');fill(c,hx+14,hy+7,16,6,'#3e332e');fill(c,hx+15,hy+34,5,5,'#233d58');fill(c,hx+24,hy+34,5,5,'#233d58');
+ // V64 architectural detailing is layered over existing floor/furnishing art.
+ if(root.LQV64Architecture)root.LQV64Architecture.interior(c,room,tick,false);
  // Signifier above the service point, not hovering over every furnishing.
  fill(c,9*40+14,5*40-10,12,12,'#10252a');fill(c,9*40+17,5*40-7,6,6,P.light);
  if(typeof c.createRadialGradient==='function'){
