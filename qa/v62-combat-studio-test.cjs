@@ -3,6 +3,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const Studio=require('../v62-combat-studio.js');
+const Foes=require('../v62-foe-atlas.js');
 const Effects=require('../rpg-battle-effects.js');
 const UI=require('../rpg-combat-ui.js');
 const RPG=require('../rpg-engine.js');
@@ -82,6 +83,31 @@ for(let region=0;region<8;region++){
  check(model.actor===actor,'region '+region+' preserves acting ally');
  check(model.targets.some(t=>t.delta<0),'region '+region+' contains real damage');
 }
+check(Foes.version==='v62','foe atlas version');
+check(Foes.REALMS.length===8,'eight handcrafted enemy families');
+check(Foes.SIZE===96,'pixel-perfect monster frame resolution');
+const arts=new Set();
+for(let region=0;region<8;region++){
+ for(const role of ['hunter','mender','warder','guardian']){
+  const commands=[],brush={
+   fillRect(...args){commands.push(['rect',...args,this.fillStyle]);},
+   beginPath(){commands.push('start');},moveTo(...args){commands.push(['move',...args]);},
+   lineTo(...args){commands.push(['line',...args]);},closePath(){commands.push('close');},
+   fill(){commands.push(['fill',this.fillStyle]);},save(){},restore(){},fillStyle:''
+  };
+  check(Foes.renderFrame(brush,region,role,role==='guardian',region)===true,'realm '+region+' '+role+' paints');
+  check(commands.length>=35,'realm '+region+' '+role+' has layered authored silhouette');
+  arts.add(JSON.stringify(commands));
+ }
+}
+check(arts.size===32,'all 32 realm/archetype frames are distinct');
+check(Foes.renderFrame(null,0,'hunter',false)===false,'art renderer tolerates missing canvas');
+check(read('index.html').includes('src="v62-foe-atlas.js"'),'foe painter linked into game');
+check(read('sw.js').includes("'./v62-foe-atlas.js'"),'bestiary art precached for offline play');
+check(read('v62-combat-studio.js').includes('root.LQFoeAtlas?.attach(stage)'),'bestiary art installed inside the battle director');
+check(read('v62-combat-studio.css').includes('.v62-foe-canvas'),'new pixel art gets dedicated battle styling');
+check(read('index.html').indexOf('v62-foe-atlas.js')<read('index.html').indexOf('v62-combat-studio.js'),'monster atlas precedes combat director');
+check(!read('v62-foe-atlas.js').includes('localStorage'),'pixel art cannot modify save data');
 const html=read('index.html'),sw=read('sw.js'),ui=read('rpg-ui.js'),css=read('v62-combat-studio.css'),netlify=read('netlify.toml');
 check(html.includes('src="v62-combat-studio.js"'),'studio file linked in playable entry');
 check(html.includes('href="v62-combat-studio.css"'),'studio stylesheet linked');
