@@ -78,6 +78,12 @@ try:
             page.locator('[data-action="confirmAction"]').click()
             assert page.evaluate("document.body.dataset.lqScene==='battle'"),(name,'combat continues after an action')
             assert page.locator('.battle-result-strip').count()==1,(name,'damage and focus report')
+            if name=='desktop':
+                page.emulate_media(reduced_motion='no-preference')
+                page.locator('[data-action="confirmAction"]').click()
+                page.wait_for_selector('.v62-vfx',timeout=2500)
+                assert page.locator('.v62-vfx').count()==1,(name,'single live canvas animation')
+                page.screenshot(path=str(PREVIEWS/'v62-desktop-action-vfx.png'),full_page=False)
             assert not errors,(name,'javascript errors',errors)
             print('PASS v62',name,'world canvas, menu, cinematic combat, saved input, overflow, visual screenshots')
             context.close()
