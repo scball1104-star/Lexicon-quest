@@ -1,0 +1,66 @@
+name: Netlify v66 Manual Upload Folder
+on:
+  push:
+    branches: [package/v66-netlify-manual-upload]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    name: Prepare Static Netlify Upload Folder
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout verified v66 production files
+        uses: actions/checkout@v4
+      - name: Assemble self-contained site folder
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p package/Lexicon-Quest-v66
+          rsync -a ./ package/Lexicon-Quest-v66/ \
+            --exclude '/.git/' \
+            --exclude '/.github/' \
+            --exclude '/qa/' \
+            --exclude '/package/' \
+            --exclude '/previews/' \
+            --exclude '*.md' \
+            --exclude '/netlify.toml' \
+            --exclude '/.gitignore' \
+            --exclude '/verify-rpg.cjs' \
+            --exclude '/verify-ui.cjs' \
+            --exclude '*.log' \
+            --exclude '/DEPLOY.txt' \
+            --exclude '/DESKTOP_QUICK_START.txt'
+          # Source PNGs duplicate optimized WebP images. Retain any original
+          # still referenced by code; remove only unreferenced originals.
+          for family in environments bosses portraits enemies; do
+            if ! grep -Rq -F "assets/art/${family}.png" \
+                --include='*.js' --include='*.css' --include='*.html' \
+                package/Lexicon-Quest-v66; then
+              rm -f "package/Lexicon-Quest-v66/assets/art/${family}.png"
+            fi
+          done
+          node <<'NODE'
+          const fs=require('node:fs');
+          const root='package/Lexicon-Quest-v66/';
+          const html=fs.readFileSync(root+'index.html','utf8');
+          const refs=[...html.matchAll(/<(?:link|script)\b[^>]*(?:href|src)="([^"]+)"/g)].map(m=>m[1]);
+          for(const ref of refs){
+            if(ref.startsWith('http')||ref.startsWith('data:'))continue;
+            if(!fs.existsSync(root+ref))throw new Error('Missing root asset: '+ref);
+          }
+          for(const f of ['rpg-ui.js','rpg-engine.js','v66-creatures.js','sw.js','manifest.webmanifest','assets/audio/battle.mp3','assets/art/environments.webp','assets/cinematics/chapter-1.mp4']){
+            if(!fs.existsSync(root+f))throw new Error('Missing required game file: '+f);
+          }
+          console.log('READY: index.html at folder root; '+refs.length+' asset references verified.');
+          NODE
+          du -sh package/Lexicon-Quest-v66
+          find package/Lexicon-Quest-v66 -maxdepth 2 -type f | sort | head -25
+      - name: Create downloadable Netlify folder ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lexicon-Quest-v66-Netlify-Upload
+          path: package/Lexicon-Quest-v66/
+          retention-days: 30
+          if-no-files-found: error
