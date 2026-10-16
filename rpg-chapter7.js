@@ -38,7 +38,7 @@ function dungeon(f){
   add('south','frostLens',14,14,'South Lens - Receive',{goal:1});
   add('chart','inscription',8,6,'Lightkeeper Refraction Record',{text:'The three glass lenses cycle DARK (0), RECEIVE (1), REFLECT (2). WEST receives, CROWN reflects, SOUTH receives. The crossed-word seal must ALSO be completed.'});
   add('memory','noxMemory',12,10,'The Name Left Outside',{scene:1});
-  add('crossword','trial',15,3,'Echo Warden Trial');
+  add('crossword','crossword',15,3,'The Frostbound Names Crossword');
   add('gate','door',19,9,'Borrowed Light Gate',{requires:'6-1-light'});
   add('down','down',24,3,'Stair - Stillheart Sanctum');
   add('record1','frostRecord',5,7,'Witness I - Open the Door',{order:1});

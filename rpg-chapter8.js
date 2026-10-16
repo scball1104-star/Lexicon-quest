@@ -38,7 +38,7 @@ function dungeon(f){
   add('south','printingPlate',14,14,'South Plate · OPEN',{goal:1});
   add('diagram','inscription',8,6,'The Printer’s Contract',{text:'The plates turn through BLANK (0), WITNESS (1), RESTORE (2). Set WEST to WITNESS, CROWN to RESTORE and SOUTH to WITNESS to set an honest text. Complete the crossword too.'});
   add('memory','keeperMemory',12,10,'The First Alteration',{scene:1});
-  add('crossword','trial',15,3,'Echo Warden Trial');
+  add('crossword','crossword',15,3,'The First Lexicon Crossword · Across & Down');
   add('gate','door',19,9,'Palimpsest Seal',{requires:'7-1-text'});
   add('down','down',24,3,'Stair · The Unwritten Page');
   add('record1','firstRecord',5,7,'Evidence I · The Names',{order:1});

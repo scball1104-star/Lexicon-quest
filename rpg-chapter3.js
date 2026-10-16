@@ -57,7 +57,7 @@ function dungeon(f){
   add(m,f,'fan-return','forgeFan',14,14,'Return Fan · South',{goal:1});
   add(m,f,'diagram','inscription',8,6,'The Ventilation Blueprint',{text:'Clear the furnace smoke with WEST FAN = INTAKE, CORE FAN = EXHAUST, SOUTH FAN = INTAKE. Each fan cycles: Still → Intake → Exhaust → Still. The crossword seal and fans must both be restored.'});
   add(m,f,'bram','bramMemory',12,10,'Bram · The Bell-Forging Oath',{scene:1});
-  add(m,f,'crossword','trial',15,3,'Echo Warden Trial');
+  add(m,f,'crossword','crossword',15,3,'The Smelter-Word Crossword');
   add(m,f,'gate','door',19,9,'Ventilation Pressure Door',{requires:'2-1-ventClear'});
   add(m,f,'down','down',24,3,'Ore Lift · Heartforge Crucible');
   add(m,f,'ledger1','oreLedger',5,7,'Foundry Ledger · The First Bell',{order:1});

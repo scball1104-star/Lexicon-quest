@@ -14,7 +14,7 @@ for(const o of m.objects)check(all.has(o.x+','+o.y),'Unreachable object '+o.id);
 const door=m.objects.find(o=>o.type==='door'),closed=flood(m,start,[door.x+','+door.y]);
 const end=m.objects.find(o=>o.type==='down'||o.type==='boss');
 check(!closed.has(end.x+','+end.y),'Gate bypass '+r+'/'+f);
-if(f===1){const seal=m.objects.find(o=>o.type==='trial'||o.type==='crossword');check(closed.has(seal.x+','+seal.y),'Echo Warden seal inaccessible');}
+if(f===1){const seal=m.objects.find(o=>o.type==='crossword');check(closed.has(seal.x+','+seal.y),'Crossword inaccessible');}
 if(f===2){const lock=m.objects.find(o=>o.type==='keydoor'),locked=flood(m,start,[lock.x+','+lock.y]);check(!locked.has(end.x+','+end.y),'Key bypass');}
 }
 }

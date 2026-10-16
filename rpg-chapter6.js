@@ -43,7 +43,7 @@ function dungeon(f){
   add('south','skyRelay',14,14,'South Relay - Receiver',{goal:1});
   add('chart','inscription',8,6,'Lost Signal Diagram',{text:'The three relays cycle OFF (0), RECEIVE (1), AMPLIFY (2). WEST receives, CROWN amplifies, SOUTH receives. The crossword must ALSO be restored.'});
   add('memory','aerisMemory',12,10,'The Name Removed From the Crew',{scene:1});
-  add('crossword','trial',15,3,'Echo Warden Trial');
+  add('crossword','crossword',15,3,'Crossword of the Broken Sky Chart');
   add('gate','door',19,9,'Orrery Signal Gate',{requires:'5-1-signals'});
   add('down','down',24,3,'Lift - The Eye of the Storm');
   add('log1','skyRecord',5,7,'Log I - Departure',{order:1});

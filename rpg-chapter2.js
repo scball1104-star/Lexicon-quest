@@ -60,7 +60,7 @@ function dungeon(f){
   add(m,f,'portrait3','hollowPortrait',14,14,'Portrait · A King Without a Crown',{order:3});
   add(m,f,'portrait-text','inscription',8,7,'Gallery inscription',{text:'A child crossed the river. A keeper opened the court. Only then did the king lay down his crown. Touch their portraits in that order to recover the gallery’s hidden memory.'});
   add(m,f,'mira','mirrorMemory',12,11,'Mira · The Forgotten Promise',{scene:1});
-  add(m,f,'seal','trial',15,3,'Echo Warden Trial');
+  add(m,f,'seal','crossword',15,3,'The Mirror-Word Crossword');
   add(m,f,'gate','door',19,9,'The Gate of True Names',{requires:'seal1'});
   add(m,f,'down','down',24,3,'Stairs · The Unnamed Throne');
   add(m,f,'gift','hollowCache',22,12,'Remembrance Cache');

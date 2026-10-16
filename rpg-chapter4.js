@@ -66,7 +66,7 @@ function dungeon(f){
   add(m,f,'pump-south','tidePump',14,14,'South Pump · Intake',{goal:1});
   add(m,f,'diagram','inscription',8,6,'The Archive Pump Blueprint',{text:'Restore both the crossword and the water routing. WEST PUMP: INTAKE. CENTRAL PUMP: PURGE. SOUTH PUMP: INTAKE. Pumps cycle: STOP → INTAKE → PURGE → STOP.'});
   add(m,f,'lyra','lyraMemory',12,10,'Lyra · The Altered Charter',{scene:1});
-  add(m,f,'crossword','trial',15,3,'Echo Warden Trial');
+  add(m,f,'crossword','crossword',15,3,'The Drowned Charter Crossword');
   add(m,f,'gate','door',19,9,'Archive Floodlock',{requires:'3-1-archive'});
   add(m,f,'down','down',24,3,'Royal Stair · Last Decree Chamber');
   add(m,f,'testimony1','royalRecord',5,7,'First Record · The Petition',{order:1});
