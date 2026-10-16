@@ -133,6 +133,13 @@ function battle(c,stage,region=0,boss=false){
  if(!stage||!c||!c.fillRect)return false;
  const p=realm(region),w=stage.width||816,h=stage.height||330;
  const rect0=(x,y,ww,hh,col)=>rect(c,x*w,y*h,ww*w,hh*h,col);
+ const art=root.LQArt&&root.LQArt.bg&&root.LQArt.bg(c,region,0,0,w,h);
+ if(art){
+  // Readability + depth wash over the painted region key-art.
+  if(c.createLinearGradient){const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(6,14,22,.42)');g.addColorStop(.52,'rgba(6,14,22,.10)');g.addColorStop(1,'rgba(4,9,15,.66)');c.save();c.fillStyle=g;c.fillRect(0,0,w,h);c.restore();}
+  else rect0(0,0,1,1,'#0a131c55');
+  rect0(0,.70,1,.01,p.accent+'4a'); // ground line to seat the enemy cards
+ }else{
  // Ground line and distant scene architecture behind all enemy cards.
  rect0(0,.69,1,.02,p.stem+'9c');
  rect0(0,.71,1,.29,'#07121a1c');
@@ -165,7 +172,8 @@ function battle(c,stage,region=0,boss=false){
    for(let j=0;j<3;j++)rect0(bx+.006,.7-height+j*.022,.025,.008,p.accent+'6e');
   }
  }
- // Two-stage arch overhead; silhouettes frame, rather than obscure, enemies.
+ }
+ // Two-stage arch overhead; frames, rather than obscures, the scene.
  rect0(.01,.09,.016,.60,p.stem+'9a');
  rect0(.974,.09,.016,.60,p.stem+'9a');
  rect0(0,.07,1,.018,p.silhouette+'84');
@@ -188,6 +196,7 @@ function mountBattle(stage,region=0,boss=false){
  if(!ctx)return false;
  battle(ctx,canvas,region,boss);
  stage.insertBefore(canvas,stage.firstChild);
+ if(root.LQArt&&!root.LQArt.ready('environments'))root.LQArt.whenReady('environments',()=>{try{battle(ctx,canvas,region,boss);}catch(e){}});
  return true;
 }
 const api=Object.freeze({version:'v65',regions:REGIONS,field,battle,mountBattle,detailOnObject,icon,hash,paintBudget:PAINT_BUDGET});
