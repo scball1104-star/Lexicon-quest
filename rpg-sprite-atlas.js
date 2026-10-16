@@ -92,6 +92,8 @@ function draw(c,x,y,options={}){
  c.fillStyle='#2d485452';c.fillRect(Math.round(x+15),Math.round(y+44),20,2);
  if(art&&typeof c.drawImage==='function'){
   c.imageSmoothingEnabled=false;
+  // Stronger silhouette: dark 1px outline rendered behind the sprite.
+  if('filter' in c){c.save();c.globalAlpha=0.72;c.filter='brightness(0)';for(const o of [[-1,0],[1,0],[0,-1],[0,1]])c.drawImage(art,sx+o[0],sy+o[1],40,48);c.restore();}
   c.drawImage(art,sx,sy,40,48);
  }else{
   // Node QA / older embedded WebViews can draw without an offscreen canvas.
