@@ -17,9 +17,10 @@ function tile(c,x,y,t,region,tx,ty,tick,m,place,floor){
    fill(c,x,y,S,S,t==='forest'?P.forest:t==='moss'?P.moss:t==='tree'?'#294f3b':t==='garden'?'#62824e':[P.grass,P.grassWarm,P.grassDark][v%3]);
    detail(c,x,y,tx,ty,10,[P.grassLight,P.leaf,'#8fb072','#3c6a49',P.grassWarm]);
    if(t==='forest'||t==='tree'){
-    fill(c,x+13,y+31,23,11,'#193e32');fill(c,x+21,y+22,9,23,P.woodDark);
-    fill(c,x+7,y+10,35,26,'#24583e');fill(c,x+11,y+3,27,25,'#346f4b');fill(c,x+16,y+8,11,8,'#569261');
-    fill(c,x+7,y+22,8,6,'#3b7d51');fill(c,x+30,y+17,11,8,'#417b50');
+    fill(c,x+12,y+33,25,9,'#14321f');fill(c,x+21,y+22,9,23,P.woodDark);fill(c,x+22,y+24,3,18,'#5e4830');
+    fill(c,x+6,y+9,37,28,'#1d4c34');fill(c,x+9,y+6,31,27,'#2a6042');fill(c,x+12,y+3,25,23,'#357150');
+    fill(c,x+15,y+6,13,9,'#57a068');fill(c,x+29,y+12,8,7,'#49895b');fill(c,x+9,y+19,7,6,'#39794f');
+    fill(c,x+14,y+4,9,4,'#8ac47c');
    }
    if(t==='flowers'||t==='garden'){
     for(let i=0;i<5;i++){const v=h(tx,ty,i),fx=x+(v%35)+6,fy=y+((v>>>9)%32)+6;fill(c,fx,fy,2,8,'#37674c');fill(c,fx-3,fy,8,3,['#f5d5a4','#f0adad','#dad0f0'][i%3]);fill(c,fx,fy-1,2,5,'#ffe9b3');}
@@ -30,7 +31,7 @@ function tile(c,x,y,t,region,tx,ty,tick,m,place,floor){
   }
   if(['road','bridge','plaza','stone','wood'].includes(t)){
    const paved=t==='plaza'||t==='stone'||t==='bridge';
-   fill(c,x,y,S,S,t==='wood'?'#886c52':paved?P.stone:P.road);
+   fill(c,x,y,S,S,t==='wood'?'#886c52':paved?['#a4ada1','#9ba499','#b1b5a7'][v%3]:P.road);
    if(t==='wood'){
     for(let i=0;i<4;i++){fill(c,x,y+i*12,48,2,P.woodDark);fill(c,x+((ty+i)%2?16:31),y+i*12,2,11,'#604933');fill(c,x+6,y+i*12+4,13,2,P.woodHi);}
    }else if(paved){
@@ -127,6 +128,9 @@ function overlay(c,m,cam,tick,place,floor){
   for(const [tx,ty] of lanterns){if(tx<cam.x-1||tx>cam.x+17||ty<cam.y-1||ty>cam.y+13)continue;const lx=(tx-cam.x)*48,ly=(ty-cam.y)*48,cx=lx+24,cy=ly+12,lit=tick%5<3,gr=c.createRadialGradient&&c.createRadialGradient(cx,cy,2,cx,cy,52);if(gr&&gr.addColorStop){gr.addColorStop(0,lit?'#ffdd99':'#ffce85');gr.addColorStop(1,'#ffd58c00');c.save();c.globalCompositeOperation='lighter';c.globalAlpha=lit?0.5:0.34;c.fillStyle=gr;c.beginPath();c.arc(cx,cy,52,0,6.3);c.fill();c.restore();}else{fill(c,cx-18,cy-14,36,30,lit?'#ffdb8f22':'#ffce8518');}lamp(c,lx,ly,tick);}
   // The square's own engraved stonework, visible before its interactable bell.
   const x=(12-cam.x)*48,y=(9-cam.y)*48;if(x>-60&&x<850&&y>-60&&y<700){fill(c,x+3,y+36,42,9,'#6d7166');fill(c,x+7,y+39,34,5,'#d9be83');}
+  const cw=(c.canvas&&c.canvas.width)||816,ch=(c.canvas&&c.canvas.height)||624;
+  if(c.createLinearGradient){const lg=c.createLinearGradient(0,0,cw*0.55,ch);if(lg&&lg.addColorStop){lg.addColorStop(0,'#ffd79a30');lg.addColorStop(0.45,'#ffcf8f12');lg.addColorStop(1,'#20304000');c.save();if('globalCompositeOperation'in c)c.globalCompositeOperation='lighter';c.fillStyle=lg;c.fillRect(0,0,cw,ch);c.restore();}}
+  if(c.createRadialGradient){const vg=c.createRadialGradient(cw/2,ch*0.46,ch*0.26,cw/2,ch*0.5,ch*0.85);if(vg&&vg.addColorStop){vg.addColorStop(0,'#0a141c00');vg.addColorStop(0.65,'#0a141c24');vg.addColorStop(1,'#060d1488');c.save();c.fillStyle=vg;c.fillRect(0,0,cw,ch);c.restore();}}
  }else if(place==='dungeon'&&floor===0){
   const a=[[11,9],[18,9],[11,15],[18,15],[2,14],[9,14],[20,1],[25,1]];
   const b=[[2,3],[7,3],[11,2],[17,2],[20,2],[25,2],[22,11]];
