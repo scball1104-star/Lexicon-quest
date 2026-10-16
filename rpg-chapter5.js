@@ -35,7 +35,7 @@ function map(f){const m={w:27,h:21,tiles:Array.from({length:21},()=>Array(27).fi
   add('south','mirageLens',14,14,'Lens of the Stars',{goal:1});
   add('diagram','inscription',8,6,'The Three Horizons',{text:'Each lens cycles BLANK (0), TRUE (1), FALSE (2). The Oasis is TRUE; the Sky is FALSE; the Stars are TRUE. Only when the lenses and the crossword agree does the eastern seal open.'});
   add('memory','oracleMemory',12,10,'The Map That Lied',{scene:1});
-  add('crossword','crossword',15,3,'Crossword of the Open Sky');
+  add('crossword','trial',15,3,'Echo Warden Trial');
   add('gate','door',19,9,'Gate of the True Horizon',{requires:'4-1-horizon'});
   add('down','down',24,3,'Spiral Stair - Well of Tomorrow');
   add('record1','oracleRecord',5,7,'First Chronicle - The Departure',{order:1});

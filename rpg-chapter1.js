@@ -88,7 +88,7 @@ function dungeon(f){
     add('heal','spring',7,18,'Memory Font');
     add('treasure','chest',3,3,'A sealed scholar’s chest',{reward:'gold'});
     add('enemy1','enemy',5,11,'Paper Wraith');add('enemy2','enemy',16,12,'Inkbound Sentinel');add('enemy3','enemy',23,8,'Paper Wraith');
-    add('seal','crossword',14,3,'Crossword Tablet · Eight Intersecting Names');
+    add('seal','trial',14,3,'Echo Warden Trial');
     add('sealdoor','door',19,9,'Gate of Intersecting Names',{requires:'seal0'});
     add('tool','obstacle',5,7,'Binding vines',{tool:'axe'});
     add('next','down',24,3,'Stairs · The Reliquary');

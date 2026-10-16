@@ -4,7 +4,7 @@
 (function(root){
 'use strict';
 const S=48;
-const P={leaf:'#396347',grass:'#547b4e',grassLight:'#7c9b67',forest:'#31593e',road:'#c2ae82',roadLight:'#dec99c',roadDark:'#89785d',water:'#397e94',waterLight:'#a7d6d3',stone:'#a4ada1',stoneLight:'#d1cfb6',mortar:'#697872',wood:'#87694c',woodHi:'#ba986d',woodDark:'#493c36',wall:'#465159',shadow:'#263440',gold:'#f0d39a',moss:'#62816c'};
+const P={leaf:'#3a6347',grass:'#4f7a46',grassLight:'#88aa6a',grassDark:'#3a5f3f',grassWarm:'#6c8f4e',forest:'#2f5a3c',road:'#c7b184',roadLight:'#e3cfa0',roadDark:'#89785d',water:'#357a90',waterDeep:'#2a5f73',waterLight:'#a7d6d3',stone:'#a4ada1',stoneLight:'#d1cfb6',mortar:'#697872',wood:'#87694c',woodHi:'#ba986d',woodDark:'#493c36',wall:'#465159',shadow:'#263440',gold:'#f0d39a',moss:'#62816c'};
 const fill=(c,x,y,w,h,v)=>{c.fillStyle=v;c.fillRect(Math.round(x),Math.round(y),Math.ceil(w),Math.ceil(h));};
 const h=(x,y,k=0)=>{let n=Math.imul(x+11,374761393)^Math.imul(y+17,668265263)^Math.imul(k+3,1274126177);n=Math.imul(n^(n>>>13),1274126177);return (n^(n>>>16))>>>0;};
 function detail(c,x,y,tx,ty,n,colors){for(let i=0;i<n;i++){const v=h(tx,ty,i),dx=v%41+3,dy=(v>>>9)%41+3;fill(c,x+dx,y+dy,2+v%3,1+(v>>>7)%2,colors[(v>>>15)%colors.length]);}}
@@ -14,8 +14,8 @@ function tile(c,x,y,t,region,tx,ty,tick,m,place,floor){
  const outdoor=place==='town',v=h(tx,ty),n=(tick+tx*5+ty*3)%11;
  if(outdoor){
   if(['grass','meadow','flowers','garden','forest','moss','tree'].includes(t)){
-   fill(c,x,y,S,S,t==='forest'?P.forest:t==='moss'?P.moss:t==='tree'?'#294f3b':t==='garden'?'#62824e':P.grass);
-   detail(c,x,y,tx,ty,7,[P.grassLight,P.leaf,'#87a56b','#3c6a49']);
+   fill(c,x,y,S,S,t==='forest'?P.forest:t==='moss'?P.moss:t==='tree'?'#294f3b':t==='garden'?'#62824e':[P.grass,P.grassWarm,P.grassDark][v%3]);
+   detail(c,x,y,tx,ty,10,[P.grassLight,P.leaf,'#8fb072','#3c6a49',P.grassWarm]);
    if(t==='forest'||t==='tree'){
     fill(c,x+13,y+31,23,11,'#193e32');fill(c,x+21,y+22,9,23,P.woodDark);
     fill(c,x+7,y+10,35,26,'#24583e');fill(c,x+11,y+3,27,25,'#346f4b');fill(c,x+16,y+8,11,8,'#569261');
@@ -24,6 +24,8 @@ function tile(c,x,y,t,region,tx,ty,tick,m,place,floor){
    if(t==='flowers'||t==='garden'){
     for(let i=0;i<5;i++){const v=h(tx,ty,i),fx=x+(v%35)+6,fy=y+((v>>>9)%32)+6;fill(c,fx,fy,2,8,'#37674c');fill(c,fx-3,fy,8,3,['#f5d5a4','#f0adad','#dad0f0'][i%3]);fill(c,fx,fy-1,2,5,'#ffe9b3');}
    }
+   if(['road','plaza','stone','bridge','house'].includes(at(m,tx,ty+1)))fill(c,x,y+44,S,4,'#24331f55');
+   if(['road','plaza','stone','bridge','house'].includes(at(m,tx+1,ty)))fill(c,x+44,y,4,S,'#24331f3a');
    return true;
   }
   if(['road','bridge','plaza','stone','wood'].includes(t)){
@@ -44,7 +46,7 @@ function tile(c,x,y,t,region,tx,ty,tick,m,place,floor){
    return true;
   }
   if(t==='water'){
-   fill(c,x,y,48,48,P.water);
+   fill(c,x,y,48,48,P.water);fill(c,x,y+26,48,22,P.waterDeep);
    for(let i=0;i<3;i++){const xx=x+((h(tx,ty,i)+n*5)%37)+3;fill(c,xx,y+9+i*13,11,2,i%2?'#75c6c7':P.waterLight);}
    for(const [dx,dy] of [[0,-1],[-1,0],[1,0],[0,1]])if(at(m,tx+dx,ty+dy)!=='water'&&at(m,tx+dx,ty+dy)!=='bridge'){if(dx===0)fill(c,x,y+(dy>0?42:1),48,3,'#c9c99e');else fill(c,x+(dx>0?44:1),y,3,48,'#a6bea1');}
    return true;
@@ -99,7 +101,7 @@ function pillar(c,x,y){fill(c,x+13,y+14,22,30,'#2b3539');fill(c,x+11,y+8,26,31,'
 function service(c,x,y,o,tick){
  const which=o.type,roof=which==='inn'?'#547b7f':which==='shop'?'#87765d':'#715765',wall=which==='inn'?'#c9b28c':which==='shop'?'#c7bea4':'#9e9b93';
  fill(c,x-28,y+34,107,17,'#162d3290');
- fill(c,x-24,y-10,98,54,wall);
+ fill(c,x-24,y-10,98,54,wall);fill(c,x-24,y-10,12,54,'#ffffff1e');fill(c,x+62,y-10,12,54,'#0000002e');
  fill(c,x-30,y-29,110,24,roof);fill(c,x-25,y-29,100,5,'#bac1a8');fill(c,x-27,y-12,104,6,'#393a3d');
  for(const dx of [-15,48]){fill(c,x+dx,y+4,17,20,'#684f43');fill(c,x+dx+3,y+7,11,13,which==='forge'?'#ef8b57':'#f2d08b');fill(c,x+dx+8,y+7,2,13,'#785d50');}
  fill(c,x+8,y+10,24,33,'#544334');fill(c,x+11,y+14,18,28,'#2f4544');fill(c,x+25,y+28,3,4,'#efcb85');
@@ -122,7 +124,7 @@ function object(c,x,y,o,tick,place){
 function overlay(c,m,cam,tick,place,floor){
  if(place==='town'){
   const lanterns=[[9,7],[15,7],[9,12],[15,12],[12,4],[12,16]];
-  for(const [tx,ty] of lanterns){if(tx<cam.x-1||tx>cam.x+17||ty<cam.y-1||ty>cam.y+13)continue;lamp(c,(tx-cam.x)*48,(ty-cam.y)*48,tick);}
+  for(const [tx,ty] of lanterns){if(tx<cam.x-1||tx>cam.x+17||ty<cam.y-1||ty>cam.y+13)continue;const lx=(tx-cam.x)*48,ly=(ty-cam.y)*48,cx=lx+24,cy=ly+12,lit=tick%5<3,gr=c.createRadialGradient&&c.createRadialGradient(cx,cy,2,cx,cy,52);if(gr&&gr.addColorStop){gr.addColorStop(0,lit?'#ffdd99':'#ffce85');gr.addColorStop(1,'#ffd58c00');c.save();c.globalCompositeOperation='lighter';c.globalAlpha=lit?0.5:0.34;c.fillStyle=gr;c.beginPath();c.arc(cx,cy,52,0,6.3);c.fill();c.restore();}else{fill(c,cx-18,cy-14,36,30,lit?'#ffdb8f22':'#ffce8518');}lamp(c,lx,ly,tick);}
   // The square's own engraved stonework, visible before its interactable bell.
   const x=(12-cam.x)*48,y=(9-cam.y)*48;if(x>-60&&x<850&&y>-60&&y<700){fill(c,x+3,y+36,42,9,'#6d7166');fill(c,x+7,y+39,34,5,'#d9be83');}
  }else if(place==='dungeon'&&floor===0){
