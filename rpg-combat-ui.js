@@ -2,7 +2,7 @@
 (function(root){
 'use strict';
 const ALLY_ACTIONS=new Set(['mend','revive','potion','ether']);
-const NO_TARGET=new Set(['guard','ward','resonance']);
+const NO_TARGET=new Set(['guard','ward','rally','resonance']);
 const WARD_STATES=['mirrorShield','royalWard','cinderWard','oracleVeil','skyShield','frostWard','erasureWard'];
 function shielded(b){return !!(b&&WARD_STATES.some(k=>b[k]));}
 function intentKind(text){const v=String(text||'').toLowerCase();if(/heavy|charging|blizzard|storm|silence|sandstorm|charged|final hammer|final edict|rapid/.test(v))return 'danger';if(/ward|shell|shield|veil|copies|shadows|reflection|rejected truth|false future|writ/.test(v))return 'shield';if(/fortif|restore|siphon/.test(v))return 'support';return 'basic';}
@@ -26,6 +26,8 @@ function actionPreview(g,action,target){const b=g.battle;if(!b)return '';
  if(!a.includes(action))return 'Choose an available action.';
  if(action==='attack')return 'Direct attack • +22 Focus • trains '+actor.weapon+' mastery.';
  if(action==='guard')return 'Guard • +18 Focus • restore 2 MP • halve incoming damage until your next turn.';
+ if(action==='venom')return 'Poison • three enemy phases of damage • refreshes rather than stacking.';
+ if(action==='rally')return 'Rally • +25% party weapon damage for two enemy phases.';
  if(action==='ward')return 'Aegis • protects the party for the next two enemy turns.';
  if(action==='resonance')return 'Team attack • strikes ALL living enemies • ignores armor • consumes 100 Focus.';
  if(action==='potion')return 'Potion • restore up to 65 HP to '+(ally?.name||'an ally')+' • '+g.s.potions+' remaining.';
@@ -44,7 +46,7 @@ function summary(before,g,action){if(!before)return null;const b=g.battle,lines=
  if(!b)lines.push({type:'victory',text:'Encounter resolved — exploration resumed'});
  const log=b?.log||[];const last=log[log.length-1];return {action,lines:lines.slice(0,6),round:b?.round||before.round,message:last||'Your turn is complete.'};
 }
-function timeline(g){const b=g.battle;if(!b)return [];return g.s.party.map((p,i)=>({name:p.name,active:i===b.actor,done:i<b.actor||p.hp<=0,down:p.hp<=0,id:i})).concat([{name:'Enemy phase',active:false,done:false,hostile:true}]);}
+function timeline(g){const b=g.battle;if(!b)return [];return (b.order||[0,1,2]).map(i=>{const p=g.s.party[i];return {name:p.name+' · SPD '+g.speed(p),active:i===b.actor,done:(b.acted||[]).includes(i)||p.hp<=0,down:p.hp<=0,id:i};}).concat([{name:'Enemy phase',active:false,done:false,hostile:true}]);}
 const api={ALLY_ACTIONS,NO_TARGET,shielded,intentKind,enemyIntel,suggest,actionPreview,snapshot,summary,timeline};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 if(root)root.LQBattleUI=api;

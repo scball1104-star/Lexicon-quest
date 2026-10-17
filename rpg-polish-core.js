@@ -64,7 +64,7 @@ function recommendations(s){
  if(!s?.party||!LQ.loot?.equippedItem)return [];
  return s.party.map((p,index)=>{
   const current=LQ.loot.equippedItem(s,p);
-  const items=(s.loot||[]).filter(i=>!s.party.some(q=>q!==p&&q.charmId===i.id));
+  const items=(s.loot||[]).filter(i=>(!i.slot||i.slot==='charm')&&!s.party.some(q=>q!==p&&q.charmId===i.id));
   const best=items.sort((a,b)=>score(b,p)-score(a,p))[0]||null;
   return {index,hero:p.name,current,best,comparison:best?compare(best,current,p):null,
    upgrade:!!best&&(!current||score(best,p)>score(current,p)+.15)&&best.id!==current?.id};

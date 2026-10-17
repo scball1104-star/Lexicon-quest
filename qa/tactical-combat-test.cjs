@@ -33,6 +33,6 @@ console.log('PASS '+checks+' tactical RPG checks: Focus, weakness, team art, rea
 // Mastery should unlock *meaningful* class traits instead of only scaling damage.
 const sword=new L.Game();sword.s.party[0].mastery.sword=500;sword.startBattle({id:'sword-trait',r:3,type:'enemy'});sword.battle.enemies[0].hp=999;sword.battle.enemies[0].maxhp=999;sword.act('attack',0);check(sword.battle.focus===28,'Rhythm Edge gives extra Focus at mastery 4');
 const staff=new L.Game();staff.s.party[0].weapon='staff';staff.s.party[0].mastery.staff=500;staff.s.party[0].mp=3;staff.startBattle({id:'staff-trait',r:3,type:'enemy'});staff.act('attack',0);check(staff.s.party[0].mp===5,'Mana Thread refunds 2 MP on basic staff strike');
-const axe=new L.Game();axe.s.party[0].weapon='axe';axe.s.party[0].mastery.axe=500;axe.startBattle({id:'axe-trait',r:3,type:'enemy'});axe.act('attack',0);check(axe.battle.enemies[0].broken>=2,'Shatterforce weakens enemy armor');
+const axe=new L.Game();axe.s.party[0].weapon='axe';axe.s.party[0].mastery.axe=500;axe.startBattle({id:'axe-trait',r:3,type:'enemy'});check(axe.battle.actor===1,'lighter staff acts before the heavy axe');axe.act('guard');axe.act('attack',0);check(axe.battle.enemies[0].broken>=2,'Shatterforce weakens enemy armor');
 check(L.weaponTraits.sword.length===2&&L.weaponTraits.staff.length===2,'each weapon has two signature traits');
 console.log('PASS '+(checks-25)+' signature mastery trait checks.');

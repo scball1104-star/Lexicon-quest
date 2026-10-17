@@ -23,6 +23,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pass the full deploy gate before publishing
+        run: node qa/run-gate.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site artifact

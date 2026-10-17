@@ -49,6 +49,9 @@ function town(){
  add(m,0,'pip','resident',7,10,'Pip the Bellringer',{clue:'pip',talk:'The Thirteenth Bell only rings when the town remembers who it rings for.'});
  add(m,0,'edda','resident',8,6,'Edda the Gardener',{clue:'edda',talk:'The elder says flowers keep names alive. I planted one for each family by the river.'});
  add(m,0,'iris','resident',19,13,'Iris the Archivist',{clue:'iris',talk:'The archive door only opens for a name spoken with care. We used to know them all.'});
+ add(m,0,'tess','resident',10,13,'Tess the Letter Carrier',{willowCourier:true,talk:'Three letters never came home from the Archive. Help me deliver them.'});
+ add(m,0,'oren','resident',3,9,'Oren the Baker',{ambientResident:true,talk:'I still set out four rolls for the miller, though nobody remembers his name. Habit is a stubborn kind of love.',after:'The miller came for his four rolls. He said his name was Hal. I wrote it on the flour bin before I could forget.'});
+ add(m,0,'nella','resident',17,6,'Nella the Ferrymender',{ambientResident:true,talk:'Hear the river under the bridge? I used to name each boat by the sound of its rope. The Archive swallowed those names before it took ours.',after:'Every boat has its name back. Tomorrow I will repaint them with my daughter. Today, I am listening.'});
  add(m,0,'bell','bell',12,9,'The Thirteenth Bell');add(m,0,'plaque','inscription',16,10,'Willowmere plaque',{text:'A bell remembers every hand that has ever rung it. When the final note sounds, forgotten names return.'});
  add(m,0,'garden','inscription',21,15,'Garden dedication',{text:'These beds honor the first caretakers of Willowmere, who planted lantern blossoms beside the river road.'});add(m,0,'lantern','lantern',9,10,'A memory lantern');
  return m;
@@ -115,6 +118,12 @@ function dungeon(f){
     add('oath3','wardstone',15,14,'Keeper’s Oath · The Future');
     add('lore','inscription',16,9,'Broken Chronicle',{text:'The Archivore was not born a monster. It was commanded to forget. Perhaps the one holding the list still walks free.'});
   }
+  const letters=[
+   {x:3,y:12,label:'Undelivered Letter · The Recipe',text:'Oren, I put too much honey in the rolls again. Keep one for me. I will be home before the bell. — Hal'},
+   {x:22,y:12,label:'Undelivered Letter · The Crossing',text:'Mother, the ferry rope held. You were right: make room for the river instead of fighting it. Let us mend the next boat together. — Nella'},
+   {x:4,y:8,label:'Undelivered Letter · The Return',text:'Tess, do not wait for a grand story. Bring the little ones home. A recipe, a crossing, a promise to return. That is a life worth keeping. — Your father'}
+  ];
+  const letter=letters[f];add('letter','inscription',letter.x,letter.y,letter.label,{text:letter.text,willowLetter:f+1});
   return m;
 }
 const api={world,town,dungeon,open};if(typeof module!=='undefined')module.exports=api;else root.LQChapter1=api;

@@ -46,6 +46,6 @@ b.actor=0;scribe.hp=Math.ceil(scribe.maxhp*.35);g.act('attack',0);ck(scribe.hp>=
 b.actor=0;b.focus=100;g.act('resonance');ck(scribe.hp>=Math.ceil(scribe.maxhp*.33),'resonance cannot skip shield');
 for(let i=1;i<=2;i++){b.enemies[i].hp=1;b.actor=0;g.act('attack',i);}ck(b.phase===2&&!b.skyShield,'copies removed - shield down');ck(scribe.weak==='fire','true chart fire weakness');
 scribe.hp=Math.floor(scribe.maxhp*.28)+1;b.actor=0;g.act('attack',0);ck(b.phase===3&&scribe.charge,'charged lightning finale');
-b.actor=2;b.round=2;g.act('guard');ck(!b.aerisIntervention,'Aeris charges intervention spent');ck(b.log.some(t=>t.includes('RETURN SIGNAL')),'intervention logged');
+b.actor=2;b.acted=[0,1];b.round=2;g.act('guard');ck(!b.aerisIntervention,'Aeris charges intervention spent');ck(b.log.some(t=>t.includes('RETURN SIGNAL')),'intervention logged');
 scribe.hp=1;b.actor=0;g.act('attack',0);ck(g.s.cleared.includes(5),'Storm Scribe defeated');ck(g.scene?.title.includes('Chapter VI Complete'),'chapter ending scene');ck(g.s.journal.some(t=>t.includes('Pippa Voss')),'lost crew member remembered');ck(g.s.journal.some(t=>t.includes('Frostbound Vault')),'chapter VII foreshadowed');ck(L.validSave(JSON.parse(JSON.stringify(g.s))),'save format v3 unchanged');
 console.log('PASS '+n+' Storm Observatory checks: Zephyr crew, signal beacon, three spatial floors, gusts, gates, dual relay/crossword, flight logs, pilot oaths, Aeris memory, boss phases, saves.');
