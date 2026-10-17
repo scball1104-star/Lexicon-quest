@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audio runtime check</title>
+<style>body{background:#14101e;color:#ddd;font:13px monospace;margin:16px}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+<pre id="log">loading...</pre>
+<script type="module">
+// Driven by tools/audio/browser_check.py (headless Chromium). Serves from the repo root.
+import { createAudio } from '/next/src/core/audio.js';
+
+const log = (...a) => { document.getElementById('log').textContent += '\n' + a.join(' '); };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+window.audioCheck = async function run() {
+  const out = { steps: [], decode: {}, errors: [] };
+  const step = (name, data) => { out.steps.push({ name, ...data }); log(name, JSON.stringify(data)); };
+  const audio = createAudio({ basePath: '/next/' });
+  window.LQ_AUDIO = audio;
+  await audio.init();
+  const man = audio.manifest;
+
+  // 1. every synthesized file decodes in this browser, with the duration the manifest says
+  const probe = new (window.AudioContext || window.webkitAudioContext)();
+  for (const kind of ['sfx', 'jingles', 'ambience', 'music']) {
+    for (const [id, e] of Object.entries(man[kind])) {
+      if (!e || !e.src || id.startsWith('_')) continue;
+      for (const src of Array.isArray(e.src) ? e.src : [e.src]) {
+        try {
+          const ab = await (await fetch('/next/' + src)).arrayBuffer();
+          const buf = await probe.decodeAudioData(ab);
+          const ch = buf.getChannelData(0);
+          let first = 0;
+          while (first < ch.length && Math.abs(ch[first]) < 1e-4) first++;
+          out.decode[kind + ':' + id + (Array.isArray(e.src) ? ':' + src.split('/').pop() : '')] = {
+            duration: +buf.duration.toFixed(3), manifest: e.duration ?? null, channels: buf.numberOfChannels,
+            leadMs: +(first / buf.sampleRate * 1000).toFixed(1),
+          };
+        } catch (err) {
+          out.errors.push(kind + ':' + id + ' ' + err.message);
+        }
+      }
+    }
+  }
+  await probe.close();
+
+  // 2. runtime: unlock, sfx, music streaming then buffer, push/pop, jingle, ambience
+  const ok = await audio.unlock();
+  step('unlock', { ok, state: audio.debugState().ctxState, sampleRate: audio.debugState().sampleRate });
+  await audio.preload(['sfx:cursor', 'sfx:hit_heavy', 'sfx:sword_slash']);
+  await sleep(300);
+  step('decoded after preload', { decoded: audio.debugState().decoded });
+  audio.meter();
+  let peak = -Infinity;
+  const h = audio.sfx('hit_heavy');
+  for (let i = 0; i < 12; i++) { await sleep(20); peak = Math.max(peak, audio.meter().peak); }
+  step('sfx hit_heavy', { handle: !!h, peakDb: +peak.toFixed(1) });
+  const n = [];
+  for (let i = 0; i < 20; i++) n.push(!!audio.sfx('sword_slash', { pitch: 1 + i * 0.01 }));
+  step('sfx burst 20x same id', { played: n.filter(Boolean).length, voices: audio.debugState().voices });
+
+  audio.music('willowmere');
+  await sleep(1500);
+  let st = audio.debugState();
+  step('music willowmere', { mode: st.musicMode, pos: st.musicPos, rms: +audio.meter().rms.toFixed(1) });
+  await audio.preload(['battle']);
+  audio.pushMusic('battle');
+  await sleep(1200);
+  st = audio.debugState();
+  step('pushMusic battle', { mode: st.musicMode, music: st.music, stack: st.stack, pos: st.musicPos, rms: +audio.meter().rms.toFixed(1) });
+  audio.popMusic(0.5);
+  await sleep(800);
+  st = audio.debugState();
+  step('popMusic', { music: st.music, mode: st.musicMode, pos: st.musicPos });
+
+  const t0 = performance.now();
+  await audio.jingle('item_get');
+  st = audio.debugState();
+  step('jingle item_get', { ms: Math.round(performance.now() - t0), manifest: man.jingles.item_get.duration, musicAfter: st.music });
+  await sleep(700);
+  step('music resumed after jingle', { pos: audio.debugState().musicPos, rms: +audio.meter().rms.toFixed(1) });
+
+  audio.stopMusic(0.3);
+  audio.ambience('river_birds', { fade: 0.2 });
+  await sleep(1200);
+  step('ambience river_birds', { rms: +audio.meter().rms.toFixed(1), amb: audio.debugState().ambience });
+  audio.ambience(null, { fade: 0.2 });
+  await sleep(600);
+  step('silence', { rms: +audio.meter().rms.toFixed(1) });
+  out.state = audio.debugState();
+  return out;
+};
+log('ready');
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{
+ "../assets/audio/title.mp3": {
+  "lufs": -14.86,
+  "duration": 178.774,
+  "sampleRate": 48000,
+  "contentEnd": 176.5,
+  "candidate": {
+   "loopStart": 126.6742,
+   "loopEnd": 166.0691,
+   "score": 0.579,
+   "xcorr": 0.461,
+   "spliceFluxPct": 94.2,
+   "bestAnywhere": {
+    "score": 0.837,
+    "a": 28.89,
+    "b": 97.06
+   }
+  },
+  "loopStart": 0.1265,
+  "loopEnd": 176.75,
+  "loopKind": "trimmed"
+ },
+ "../assets/audio/town.mp3": {
+  "lufs": -18.15,
+  "duration": 132.094,
+  "sampleRate": 44100,
+  "contentEnd": 131.5,
+  "candidate": {
+   "loopStart": 78.1329,
+   "loopEnd": 118.5146,
+   "score": 0.327,
+   "xcorr": 0.169,
+   "spliceFluxPct": 88.6,
+   "bestAnywhere": {
+    "score": 0.327,
+    "a": 78.11,
+    "b": 118.51
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 131.75,
+  "loopKind": "trimmed"
+ },
+ "../assets/audio/region-1.mp3": {
+  "lufs": -18.28,
+  "duration": 148.814,
+  "sampleRate": 44100,
+  "contentEnd": 148.5,
+  "candidate": {
+   "loopStart": 65.3876,
+   "loopEnd": 123.4373,
+   "score": 0.661,
+   "xcorr": 0.488,
+   "spliceFluxPct": 94.1,
+   "bestAnywhere": {
+    "score": 0.729,
+    "a": 63.81,
+    "b": 121.77
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 148.75,
+  "loopKind": "trimmed"
+ },
+ "assets/audio/music/archive.mp3": {
+  "lufs": -16.44,
+  "duration": 93.493,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "../assets/audio/battle.mp3": {
+  "lufs": -16.77,
+  "duration": 173.654,
+  "sampleRate": 44100,
+  "contentEnd": 170.5,
+  "candidate": {
+   "loopStart": 110.1561,
+   "loopEnd": 145.4498,
+   "score": 0.947,
+   "xcorr": 0.69,
+   "spliceFluxPct": 98.9,
+   "bestAnywhere": {
+    "score": 0.959,
+    "a": 41.05,
+    "b": 78.11
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 170.75,
+  "loopKind": "trimmed"
+ },
+ "../assets/audio/boss.mp3": {
+  "lufs": -17.58,
+  "duration": 139.614,
+  "sampleRate": 44100,
+  "contentEnd": 138.0,
+  "candidate": {
+   "loopStart": 17.129,
+   "loopEnd": 122.3227,
+   "score": 0.397,
+   "xcorr": 0.215,
+   "spliceFluxPct": 97.0,
+   "bestAnywhere": {
+    "score": 0.442,
+    "a": 13.56,
+    "b": 108.95
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 138.25,
+  "loopKind": "trimmed"
+ },
+ "assets/audio/music/mystery.mp3": {
+  "lufs": -16.44,
+  "duration": 45.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/sorrow.mp3": {
+  "lufs": -16.45,
+  "duration": 60.346,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/triumph.mp3": {
+  "lufs": -16.44,
+  "duration": 51.828,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ }
+}

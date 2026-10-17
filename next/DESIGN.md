@@ -116,7 +116,7 @@ next/
     tiles/              terrain + structure tilesets (.png) + tiles.json (tile ids, autotile groups, collision)
     sprites/            characters, npcs, props, enemies, bosses, portraits, fx (.png + .json atlases)
     ui/                 font.png font.json, windows, cursors, icons
-    audio/music/        .mp3 (Suno), audio/sfx/ .wav, audio/jingles/ .wav, audio/manifest.json
+    audio/music/        .mp3, audio/sfx/ .wav (exact timing), audio/jingles/ .mp3 (never loop), audio/manifest.json
   tools/                art/ and audio/ generators (Python), map preview renderer, contact sheets
   qa/
     run.mjs             discovers and runs every next/qa/**/*.test.mjs; exits non-zero on any failure
