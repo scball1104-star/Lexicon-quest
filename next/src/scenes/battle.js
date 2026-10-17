@@ -181,8 +181,9 @@ export class BattleScene {
   }
 
   // ---------------------------------------------------------------------------------------------- update
-  update(dt) {
+  update(dt, below) {
     const e = this.engine;
+    this.below = !!below;      // an overlay scene (dialog, choice) is on top: animate, but do not read input
     this.frame++;
     if (this.banner) { this.banner.t++; if (this.banner.t >= this.banner.frames) this.banner = null; }
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
@@ -216,6 +217,7 @@ export class BattleScene {
   updatePlay() {
     const e = this.engine;
     const { input, audio } = e;
+    if (this.below) { this.runOps(); return; }
     // Global toggles: start = Auto, pageR = speed (both persisted settings).
     if (input.pressed('start')) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
     if (input.pressed('pageR') || input.pressed('pageL')) { e.setSetting('battleSpeed', this.speed === 1 ? 2 : 1); audio.sfx('cursor'); }
@@ -441,7 +443,7 @@ export class BattleScene {
   updateRewards() {
     const e = this.engine, input = e.input, audio = e.audio;
     const R = this.rewards;
-    if (!R) return;
+    if (!R || this.below) return;
     const page = R.pages[R.index];
     R.t++;
     if (page.kind === 'main' && !R.dropsSpawned) {
@@ -487,7 +489,8 @@ export class BattleScene {
     this.menu.close();
     this.telegraphs.clear();
     e.audio.stopMusic(0.5);
-    e.audio.jingle('gameover_sting', { duckMusic: false });
+    // The gameover scene plays the sting itself; only a scripted loss (no gameover) needs it here.
+    if (this.data.gameover === false || this.data.scripted || !e.hasScene('gameover')) e.audio.jingle('gameover_sting', { duckMusic: false });
     this.finishOutcome();
     this.setHelp('{c:red}The party has fallen...{/c}');
     this.timer = this.fast ? 1 : this.scaled(DEFEAT_WAIT);

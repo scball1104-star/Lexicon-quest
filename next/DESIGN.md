@@ -126,7 +126,9 @@ next/
 **Pure modules** (`battle/rules.js`, `ctb.js`, `ai.js`, `loot.js`, everything in `data/`, `world/autotile.js`)
 must not touch the DOM, canvas or audio. They are imported directly by node tests.
 
-**Scene contract:** `enter(data)`, `exit()`, `update(dt)` (dt in seconds, fixed 1/60), `draw(r)`,
+**Scene contract:** `enter(data)`, `exit()`, `update(dt, below)` (dt in seconds, fixed 1/60; `below` is true when an
+`updateBelow` overlay such as a dialog sits on top: scenes under it update FIRST in the same frame, so a field or battle
+must not read confirm/cancel while `below` is true or the press that closes the dialog re-fires), `draw(r)`,
 optional `onResume(result)` when a pushed scene pops. Engine methods: `push(scene,data)`, `pop(result)`,
 `replace(scene,data)`, `fadeTo(fn,{color,duration})`.
 

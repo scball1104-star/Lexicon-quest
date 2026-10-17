@@ -16,7 +16,7 @@ import { CREDITS } from '../text.js';
 const PORTRAIT = {
   hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael', tess: 'tess', iris: 'iris', nella: 'nella', pell: 'pell',
   hazel: 'hazel', hob: 'hob', garrick: 'garrick', pip: 'pip',
-  garrick_g: 'garrick', iris_g: 'iris', hazel_g: 'hazel', mael_g: 'mael',
+  garrick_g: 'garrick', iris_g: 'iris', hazel_g: 'hazel',
 };
 
 const say = (s, who, text) => s.say(who, text, PORTRAIT[who] ? { portrait: PORTRAIT[who] } : {});
@@ -685,30 +685,29 @@ async function return_to_willowmere(s) {
   await say(s, 'hazel_g', 'Both boots. Ten fingers.');
   await s.emote('hazel_g', 'heart');
   await say(s, 'hazel_g', 'Good. Now I can breathe again.');
-  await s.spawn('mael_g', { sprite: 'npc_elder', name: 'Elder Mael', at: 'gather_mael', dir: 'down' });
-  await s.walk('mael_g', 'meet_mael', { speed: 'slow' });
-  await s.face('mael_g', 'hero');
-  await say(s, 'mael_g', 'You did it. Every sign in Willowmere has its name back. Every name in this book.');
+  await s.walk('mael', 'meet_mael', { speed: 'slow' });
+  await s.face('mael', 'hero');
+  await say(s, 'mael', 'You did it. Every sign in Willowmere has its name back. Every name in this book.');
   await narrate(s, 'Mael opens the Town Register. His finger stops near the bottom of the page.');
-  await s.emote('mael_g', '...');
-  await say(s, 'mael_g', 'Every name but one.');
-  await say(s, 'mael_g', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.');
-  await say(s, 'mael_g', 'I did not tell you. I was afraid that saying it aloud would make it true.');
+  await s.emote('mael', '...');
+  await say(s, 'mael', 'Every name but one.');
+  await say(s, 'mael', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.');
+  await say(s, 'mael', 'I did not tell you. I was afraid that saying it aloud would make it true.');
   const c = await s.choice(['Why my name?', 'You should have told me.']);
   if (c === 0) {
-    await say(s, 'mael_g', 'I do not know. I have read every page I own, and I do not know.');
+    await say(s, 'mael', 'I do not know. I have read every page I own, and I do not know.');
   } else {
-    await say(s, 'mael_g', 'Yes. I should have. An old man\'s fear is a poor excuse, and it is the only one I have.');
+    await say(s, 'mael', 'Yes. I should have. An old man\'s fear is a poor excuse, and it is the only one I have.');
   }
   await say(s, 'mira', "Someone put {hero}'s name on a list. We found it in the Archive, with all of yours crossed out.");
   await say(s, 'mira', 'Below the names, a place was scratched out so hard the pen tore through the paper.');
-  await s.emote('mael_g', '!');
-  await say(s, 'mael_g', 'East of the river there is a town no map remembers. Travelers call it the Nameless Hollow.');
-  await say(s, 'mael_g', 'They say its people cannot recall what their own home is called.');
+  await s.emote('mael', '!');
+  await say(s, 'mael', 'East of the river there is a town no map remembers. Travelers call it the Nameless Hollow.');
+  await say(s, 'mael', 'They say its people cannot recall what their own home is called.');
   await s.emote('mira', '...');
   await say(s, 'mira', "I came to Willowmere from the east, when I was small. I've never been able to say where from.");
   await say(s, 'bram', "Then that's where we go next. All three of us.");
-  await say(s, 'mael_g', 'Rest first. Tonight Willowmere rings its bells for every name that came home.');
+  await say(s, 'mael', 'Rest first. Tonight Willowmere rings its bells for every name that came home.');
   await s.setFlag('returned_home');
   await ending_hook(s);
 }
@@ -719,7 +718,7 @@ async function return_to_willowmere(s) {
 // ------------------------------------------------------------------------------------------------
 async function ending_hook(s) {
   await s.fade('out', 60);
-  for (const id of ['garrick_g', 'iris_g', 'oren_g', 'hazel_g', 'mael_g']) await s.despawn(id);
+  for (const id of ['garrick_g', 'iris_g', 'oren_g', 'hazel_g']) await s.despawn(id);
   await s.tint('night', 0);
   await s.music(null);
   await s.camera.panTo('bell_tower', 0);

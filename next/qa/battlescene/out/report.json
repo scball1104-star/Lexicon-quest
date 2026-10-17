@@ -1,12 +1,29 @@
 [
   {
     "device": "desktop",
-    "scenario": "combo",
+    "scenario": "command",
     "status": "ok",
     "detail": "",
-    "note": "combo cross_rend",
+    "note": "",
     "files": [
-      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-combo-cross_rend.png"
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-command-root.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-command-sub.png"
     ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "e2e_lose",
+    "status": "ok",
+    "detail": "",
+    "note": "scripted defeat in 1.9 s",
+    "files": []
+  },
+  {
+    "device": "desktop",
+    "scenario": "e2e_all",
+    "status": "ok",
+    "detail": "",
+    "note": "valley_wolves:win valley_slimes:win valley_scarab:win valley_mixed:win valley_pack:win f1_slimes:win f1_mites:win f1_wraith:win f1_mixed:win f2_golem:win f2_wraiths:win f2_mites:win f2_mixed:win echo_warden:win f3_ink:win f3_golem:win f3_wraiths:win f3_mixed:win archivore:win",
+    "files": []
   }
 ]

@@ -328,6 +328,10 @@
       "note": "title screen: logo, key art, menu (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "reset",
           "args": [
             "title"
@@ -342,6 +346,10 @@
       "name": "ui_name_entry",
       "note": "name entry grid with a typed name (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "reset",
           "args": [
@@ -378,6 +386,10 @@
       "note": "prologue card 2 (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -401,6 +413,10 @@
       "name": "ui_dialog",
       "note": "dialogue window with portrait, name tab, typewriter over the stage (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -435,6 +451,10 @@
       "note": "dialogue with a choice window (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -468,6 +488,10 @@
       "name": "ui_menu",
       "note": "field main menu (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -557,6 +581,10 @@
       "name": "ui_menu_member",
       "note": "menu: picking a member for Equip (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -659,6 +687,10 @@
       "note": "menu Items screen with the member picker (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -736,6 +768,10 @@
       "note": "menu Tech screen (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -802,6 +838,10 @@
       "name": "ui_magic",
       "note": "menu Magic screen for Mira (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -875,6 +915,10 @@
       "name": "ui_equip",
       "note": "menu Equip screen comparing a candidate (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -959,6 +1003,10 @@
       "note": "menu Status screen (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1026,6 +1074,10 @@
       "note": "menu Journal (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1092,6 +1144,10 @@
       "name": "ui_bestiary",
       "note": "menu Bestiary tab (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -1168,6 +1224,10 @@
       "name": "ui_config",
       "note": "config screen (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -1307,6 +1367,10 @@
       },
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1400,6 +1464,10 @@
       },
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "reset",
           "args": [
             "title"
@@ -1424,6 +1492,10 @@
       "name": "ui_shop",
       "note": "smithy shop, browsing a weapon (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -1509,6 +1581,10 @@
       "name": "ui_shop_qty",
       "note": "item shop quantity picker (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -1605,6 +1681,10 @@
       "note": "inn offer dialog (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1671,6 +1751,10 @@
       "name": "ui_gameover",
       "note": "game over with options (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -1739,6 +1823,10 @@
       "note": "credits scrolling (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1806,6 +1894,10 @@
       "note": "end-of-episode title card (W2-ui)",
       "steps": [
         {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
+        {
           "call": "newGame",
           "args": [
             "Arden",
@@ -1872,6 +1964,10 @@
       "name": "ui_toast",
       "note": "received item toast over the stage (W2-ui)",
       "steps": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 20000
+        },
         {
           "call": "newGame",
           "args": [
@@ -2171,6 +2267,247 @@
         {
           "assert": "LQ_DEBUG.state().battle.rewards && LQ_DEBUG.state().battle.rewards.page === 'level'",
           "message": "level-up page"
+        }
+      ]
+    },
+    {
+      "name": "field_town_morning",
+      "note": "Willowmere Lantern Square at map entry: banner, party of three, NPCs (W2-world)",
+      "steps": [
+        {
+          "call": "setFlag",
+          "args": [
+            "intro_done",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "willowmere",
+            22,
+            19,
+            "down"
+          ]
+        },
+        {
+          "frames": 10
+        },
+        {
+          "call": "party",
+          "args": [
+            "mira",
+            "bram"
+          ]
+        },
+        {
+          "call": "walk",
+          "args": [
+            "down,down,left"
+          ]
+        },
+        {
+          "frames": 30
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.map === 'willowmere'",
+          "message": "field shows willowmere"
+        }
+      ]
+    },
+    {
+      "name": "field_town_signs_fading",
+      "note": "the bakery sign washed blank while names fade (signs_fading)",
+      "steps": [
+        {
+          "call": "setFlag",
+          "args": [
+            "intro_done",
+            true
+          ]
+        },
+        {
+          "call": "setFlag",
+          "args": [
+            "saw_fading_sign",
+            true
+          ]
+        },
+        {
+          "call": "setFlag",
+          "args": [
+            "signs_fading",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "willowmere",
+            12,
+            16,
+            "up"
+          ]
+        },
+        {
+          "frames": 170
+        }
+      ]
+    },
+    {
+      "name": "field_valley_wildlife",
+      "note": "Willowmere Valley road with visible enemies wandering and leaves falling",
+      "steps": [
+        {
+          "call": "setFlag",
+          "args": [
+            "valley_arrived",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "valley",
+            10,
+            30,
+            "right"
+          ]
+        },
+        {
+          "frames": 170
+        }
+      ]
+    },
+    {
+      "name": "field_archive_dark_lantern",
+      "note": "dark Archive room, banded lights, the Lantern of Recall raised over hidden ink",
+      "steps": [
+        {
+          "call": "setFlag",
+          "args": [
+            "f1_arrived",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "_testdungeon",
+            12,
+            7,
+            "right"
+          ]
+        },
+        {
+          "frames": 170
+        },
+        {
+          "call": "give",
+          "args": [
+            "lantern_of_recall",
+            1
+          ]
+        },
+        {
+          "call": "lantern",
+          "args": []
+        },
+        {
+          "frames": 45
+        }
+      ]
+    },
+    {
+      "name": "field_cutscene_dialog",
+      "note": "mael_intro mid-dialogue: emote, portrait window, locked field",
+      "steps": [
+        {
+          "call": "setFlag",
+          "args": [
+            "intro_done",
+            true
+          ]
+        },
+        {
+          "call": "setFlag",
+          "args": [
+            "saw_fading_sign",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "willowmere",
+            24,
+            18,
+            "up"
+          ]
+        },
+        {
+          "frames": 170
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 90
+        },
+        {
+          "assert": "LQ_DEBUG.scene() === 'dialog'",
+          "message": "dialogue open over the field"
+        }
+      ]
+    },
+    {
+      "name": "field_chest_open",
+      "note": "chest opening with the received toast",
+      "steps": [
+        {
+          "call": "warp",
+          "args": [
+            "_testtown",
+            34,
+            7,
+            "up"
+          ]
+        },
+        {
+          "frames": 170
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 45
+        }
+      ]
+    },
+    {
+      "name": "field_push_block",
+      "note": "push-block puzzle mid-solve in the dark test archive",
+      "steps": [
+        {
+          "call": "warp",
+          "args": [
+            "_testdungeon",
+            9,
+            16,
+            "right"
+          ]
+        },
+        {
+          "frames": 170
+        },
+        {
+          "call": "walk",
+          "args": [
+            "right"
+          ]
+        },
+        {
+          "frames": 4
         }
       ]
     }

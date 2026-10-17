@@ -258,9 +258,9 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 - Camera pans to `town_sign`, then the party walks to mark **`return_spot`** (Lantern Square, south of the well).
 - Holt runs from his post to **`meet_holt`**. Then spawned townsfolk walk in from offscreen marks to their
   places around the party: `gather_garrick` to **`meet_garrick`**, `gather_iris` to **`meet_iris`**,
-  `gather_oren` to **`meet_oren`** (running), `gather_hazel` to **`meet_hazel`**, `gather_mael` to **`meet_mael`**
-  (slow). The `gather_*` marks are 6 to 10 tiles away up the side streets; the `meet_*` marks form a loose
-  semicircle around `return_spot`.
+  `gather_oren` to **`meet_oren`** (running), `gather_hazel` to **`meet_hazel`**. Mael is the real NPC: he walks
+  from his well spot to **`meet_mael`** (slow), so nothing spawns for him. The `gather_*` marks are 6 to 10 tiles
+  away up the side streets; the `meet_*` marks form a loose semicircle around `return_spot`.
 - Ending: fade out, the spawned townsfolk despawn, tint `night`, camera cuts to `bell_tower`, fade in, SFX
   `bell_peal` (the twelve bells), a pause, then `bell_toll` (the thirteenth). Music `mystery`. Two end cards.
 - Sets `returned_home`, then `ep1_complete`. **Integrator:** when `ep1_complete` is set, push the credits scene
@@ -285,7 +285,7 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | Map | Marks / named events |
 |---|---|
 | `hero_home` | `bed`, `bedside`; NPC `hazel` |
-| `willowmere` | `home_door`, `bakery_sign`, `bakery_door`, `well`, `bell_tower`, `gate_inner`, `town_sign`, `return_spot`, `meet_holt`, `gather_garrick`, `meet_garrick`, `gather_iris`, `meet_iris`, `gather_oren`, `meet_oren`, `gather_hazel`, `meet_hazel`, `gather_mael`, `meet_mael`; object `duck_nest`; NPCs `mael tess nella edda holt bram cobb henrietta bertha wick lark the_duke loaf` |
+| `willowmere` | `home_door`, `bakery_sign`, `bakery_door`, `well`, `bell_tower`, `gate_inner`, `town_sign`, `return_spot`, `meet_holt`, `gather_garrick`, `meet_garrick`, `gather_iris`, `meet_iris`, `gather_oren`, `meet_oren`, `gather_hazel`, `meet_hazel`, `meet_mael`; object `duck_nest`; NPCs `mael tess nella edda holt bram cobb henrietta bertha wick lark the_duke loaf` |
 | `library` | `mira_meet`; NPCs `mira iris` |
 | `smithy` | NPCs `garrick anvil starter_dough` |
 | `bakery` | NPCs `oren hal` |
