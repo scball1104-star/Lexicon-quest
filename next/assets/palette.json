@@ -1,0 +1,503 @@
+{
+ "version": 1,
+ "generator": "next/tools/art/tiles/palette_build.py",
+ "notes": "Master palette for Lexicon Quest NEXT. Ramps run dark to light and are hue-shifted (shadows toward indigo/violet, highlights toward warm yellow). Ramps share entries: each ramp is a path through the master list. Darkest color is #14101e (never pure black). Outline a material with its ramp outline entry (the darkest step), not a universal black. Built from k-means over ../assets/art sheets merged with hand-curated ramps.",
+ "darkest": "#14101e",
+ "count": 74,
+ "colors": [
+  "#14101e",
+  "#251d34",
+  "#2e2b4c",
+  "#4c445c",
+  "#1a1334",
+  "#292657",
+  "#3f4186",
+  "#7162bd",
+  "#66637f",
+  "#8e8997",
+  "#b3b6c4",
+  "#e2e0de",
+  "#f6f4ee",
+  "#584951",
+  "#7e6d6e",
+  "#a18f85",
+  "#cfb89c",
+  "#ebdfc8",
+  "#2d1b1f",
+  "#482826",
+  "#6e3d2c",
+  "#8f5533",
+  "#b87942",
+  "#d69c57",
+  "#6a4532",
+  "#896042",
+  "#ae8458",
+  "#c3a57c",
+  "#e4cb96",
+  "#f6e4b9",
+  "#1c3730",
+  "#2a532f",
+  "#427330",
+  "#5a9032",
+  "#84ad39",
+  "#b6cc58",
+  "#1b2332",
+  "#285743",
+  "#397951",
+  "#4f9e6e",
+  "#0e153b",
+  "#1d3775",
+  "#24559b",
+  "#3e88ca",
+  "#6ab3e4",
+  "#b4e4f2",
+  "#e8fffb",
+  "#1d2a67",
+  "#2c4797",
+  "#4064b9",
+  "#6891d9",
+  "#317aa1",
+  "#2ec4d0",
+  "#8af0e8",
+  "#36195a",
+  "#522a84",
+  "#7040aa",
+  "#9062c3",
+  "#bc94e2",
+  "#571f28",
+  "#87332e",
+  "#b34532",
+  "#e06b39",
+  "#eba14d",
+  "#f9d77a",
+  "#fff7d6",
+  "#c38334",
+  "#a83a6e",
+  "#e070a0",
+  "#fcc4dc",
+  "#a66142",
+  "#cc875b",
+  "#e8b585",
+  "#fae2cb"
+ ],
+ "ramps": {
+  "shadow": [
+   "#14101e",
+   "#251d34",
+   "#2e2b4c",
+   "#4c445c"
+  ],
+  "ink": [
+   "#14101e",
+   "#1a1334",
+   "#292657",
+   "#3f4186",
+   "#7162bd"
+  ],
+  "stone_cool": [
+   "#251d34",
+   "#2e2b4c",
+   "#4c445c",
+   "#66637f",
+   "#8e8997",
+   "#b3b6c4"
+  ],
+  "metal": [
+   "#2e2b4c",
+   "#66637f",
+   "#b3b6c4",
+   "#e2e0de",
+   "#f6f4ee"
+  ],
+  "stone_warm": [
+   "#2e2b4c",
+   "#584951",
+   "#7e6d6e",
+   "#a18f85",
+   "#cfb89c",
+   "#ebdfc8"
+  ],
+  "wood": [
+   "#2d1b1f",
+   "#482826",
+   "#6e3d2c",
+   "#8f5533",
+   "#b87942",
+   "#d69c57"
+  ],
+  "earth": [
+   "#2d1b1f",
+   "#482826",
+   "#6a4532",
+   "#896042",
+   "#ae8458"
+  ],
+  "path": [
+   "#6a4532",
+   "#896042",
+   "#ae8458",
+   "#c3a57c",
+   "#e4cb96"
+  ],
+  "sand": [
+   "#ae8458",
+   "#c3a57c",
+   "#e4cb96",
+   "#f6e4b9"
+  ],
+  "hair_brown": [
+   "#2d1b1f",
+   "#482826",
+   "#6e3d2c",
+   "#8f5533",
+   "#b87942"
+  ],
+  "grass": [
+   "#1c3730",
+   "#2a532f",
+   "#427330",
+   "#5a9032",
+   "#84ad39",
+   "#b6cc58"
+  ],
+  "foliage_dark": [
+   "#1b2332",
+   "#1c3730",
+   "#2a532f",
+   "#427330"
+  ],
+  "roof_green": [
+   "#1b2332",
+   "#1c3730",
+   "#285743",
+   "#397951",
+   "#4f9e6e"
+  ],
+  "water": [
+   "#0e153b",
+   "#1d3775",
+   "#24559b",
+   "#3e88ca",
+   "#6ab3e4",
+   "#b4e4f2"
+  ],
+  "ice": [
+   "#3e88ca",
+   "#6ab3e4",
+   "#b4e4f2",
+   "#e8fffb"
+  ],
+  "roof_blue": [
+   "#0e153b",
+   "#1d2a67",
+   "#2c4797",
+   "#4064b9",
+   "#6891d9"
+  ],
+  "cloth_blue": [
+   "#0e153b",
+   "#1d2a67",
+   "#2c4797",
+   "#4064b9",
+   "#6891d9"
+  ],
+  "ui_blue": [
+   "#0e153b",
+   "#1d2a67",
+   "#2c4797",
+   "#4064b9",
+   "#6891d9",
+   "#e2e0de"
+  ],
+  "magic_cyan": [
+   "#1d3775",
+   "#317aa1",
+   "#2ec4d0",
+   "#8af0e8",
+   "#e8fffb"
+  ],
+  "roof_purple": [
+   "#1a1334",
+   "#36195a",
+   "#522a84",
+   "#7040aa",
+   "#9062c3"
+  ],
+  "cloth_purple": [
+   "#1a1334",
+   "#36195a",
+   "#522a84",
+   "#7040aa",
+   "#9062c3",
+   "#bc94e2"
+  ],
+  "hair_violet": [
+   "#14101e",
+   "#1a1334",
+   "#36195a",
+   "#522a84",
+   "#7040aa"
+  ],
+  "magic_violet": [
+   "#522a84",
+   "#7040aa",
+   "#9062c3",
+   "#bc94e2",
+   "#f6f4ee"
+  ],
+  "roof_red": [
+   "#2d1b1f",
+   "#571f28",
+   "#87332e",
+   "#b34532",
+   "#e06b39",
+   "#eba14d"
+  ],
+  "fire": [
+   "#571f28",
+   "#b34532",
+   "#e06b39",
+   "#eba14d",
+   "#f9d77a",
+   "#fff7d6"
+  ],
+  "gold": [
+   "#482826",
+   "#8f5533",
+   "#c38334",
+   "#eba14d",
+   "#f9d77a",
+   "#fff7d6"
+  ],
+  "blossom": [
+   "#571f28",
+   "#a83a6e",
+   "#e070a0",
+   "#fcc4dc"
+  ],
+  "skin_dark": [
+   "#2d1b1f",
+   "#482826",
+   "#6e3d2c",
+   "#8f5533",
+   "#b87942"
+  ],
+  "skin_med": [
+   "#6e3d2c",
+   "#a66142",
+   "#cc875b",
+   "#e8b585"
+  ],
+  "skin_light": [
+   "#a66142",
+   "#cc875b",
+   "#e8b585",
+   "#fae2cb"
+  ]
+ },
+ "outline": {
+  "shadow": "#14101e",
+  "ink": "#14101e",
+  "stone_cool": "#251d34",
+  "metal": "#2e2b4c",
+  "stone_warm": "#2e2b4c",
+  "wood": "#2d1b1f",
+  "earth": "#2d1b1f",
+  "path": "#6a4532",
+  "sand": "#ae8458",
+  "hair_brown": "#2d1b1f",
+  "grass": "#1c3730",
+  "foliage_dark": "#1b2332",
+  "roof_green": "#1b2332",
+  "water": "#0e153b",
+  "ice": "#3e88ca",
+  "roof_blue": "#0e153b",
+  "cloth_blue": "#0e153b",
+  "ui_blue": "#0e153b",
+  "magic_cyan": "#1d3775",
+  "roof_purple": "#1a1334",
+  "cloth_purple": "#1a1334",
+  "hair_violet": "#14101e",
+  "magic_violet": "#522a84",
+  "roof_red": "#2d1b1f",
+  "fire": "#571f28",
+  "gold": "#482826",
+  "blossom": "#571f28",
+  "skin_dark": "#2d1b1f",
+  "skin_med": "#6e3d2c",
+  "skin_light": "#a66142"
+ },
+ "roles": {
+  "shadow_overlay": {
+   "color": "#14101e",
+   "alpha": 0.42,
+   "use": "cast shadows on ground; tiles bake this as alpha pixels"
+  },
+  "interact_accent_gold": "#f9d77a",
+  "interact_accent_cyan": "#8af0e8",
+  "white": "#f6f4ee"
+ },
+ "sourceClusters": [
+  {
+   "hex": "#09152e",
+   "share": 0.079
+  },
+  {
+   "hex": "#1e1212",
+   "share": 0.0598
+  },
+  {
+   "hex": "#351c15",
+   "share": 0.057
+  },
+  {
+   "hex": "#63321f",
+   "share": 0.0497
+  },
+  {
+   "hex": "#4c2619",
+   "share": 0.0494
+  },
+  {
+   "hex": "#784026",
+   "share": 0.0465
+  },
+  {
+   "hex": "#3a3238",
+   "share": 0.0362
+  },
+  {
+   "hex": "#8d5430",
+   "share": 0.0354
+  },
+  {
+   "hex": "#2d1f37",
+   "share": 0.0329
+  },
+  {
+   "hex": "#524245",
+   "share": 0.0309
+  },
+  {
+   "hex": "#a86739",
+   "share": 0.0296
+  },
+  {
+   "hex": "#4d2b5f",
+   "share": 0.0287
+  },
+  {
+   "hex": "#2d4e87",
+   "share": 0.0272
+  },
+  {
+   "hex": "#6a5754",
+   "share": 0.0267
+  },
+  {
+   "hex": "#826c69",
+   "share": 0.0267
+  },
+  {
+   "hex": "#c1804a",
+   "share": 0.0259
+  },
+  {
+   "hex": "#9b847a",
+   "share": 0.0248
+  },
+  {
+   "hex": "#1a2e23",
+   "share": 0.0236
+  },
+  {
+   "hex": "#273d6c",
+   "share": 0.0234
+  },
+  {
+   "hex": "#304e2b",
+   "share": 0.022
+  },
+  {
+   "hex": "#baa191",
+   "share": 0.0214
+  },
+  {
+   "hex": "#1d2a54",
+   "share": 0.0205
+  },
+  {
+   "hex": "#e2b883",
+   "share": 0.0203
+  },
+  {
+   "hex": "#6f4382",
+   "share": 0.0203
+  },
+  {
+   "hex": "#dd9753",
+   "share": 0.0188
+  },
+  {
+   "hex": "#eed495",
+   "share": 0.0185
+  },
+  {
+   "hex": "#f5e9d3",
+   "share": 0.0173
+  },
+  {
+   "hex": "#4763a3",
+   "share": 0.0149
+  },
+  {
+   "hex": "#507631",
+   "share": 0.0142
+  },
+  {
+   "hex": "#44586f",
+   "share": 0.0137
+  },
+  {
+   "hex": "#c8c9da",
+   "share": 0.0132
+  },
+  {
+   "hex": "#608dd1",
+   "share": 0.0121
+  },
+  {
+   "hex": "#8bafe2",
+   "share": 0.0109
+  },
+  {
+   "hex": "#5779a4",
+   "share": 0.0102
+  },
+  {
+   "hex": "#a63c27",
+   "share": 0.0084
+  },
+  {
+   "hex": "#88a937",
+   "share": 0.0083
+  },
+  {
+   "hex": "#835db3",
+   "share": 0.0075
+  },
+  {
+   "hex": "#af76cc",
+   "share": 0.0056
+  },
+  {
+   "hex": "#e05a37",
+   "share": 0.0047
+  },
+  {
+   "hex": "#e791d3",
+   "share": 0.0037
+  }
+ ],
+ "nudged": 55
+}

@@ -1,0 +1,188 @@
+{
+ "image": "window.png",
+ "frames": {
+  "std": {
+   "rect": [
+    1,
+    1,
+    12,
+    12
+   ],
+   "border": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "fillInset": 3
+  },
+  "field": {
+   "rect": [
+    15,
+    1,
+    12,
+    12
+   ],
+   "border": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "fillInset": 3
+  },
+  "thin": {
+   "rect": [
+    29,
+    1,
+    8,
+    8
+   ],
+   "border": [
+    3,
+    3,
+    3,
+    3
+   ],
+   "fillInset": 2
+  },
+  "tail_down": [
+   1,
+   16,
+   22,
+   15
+  ],
+  "tail_down_fill": [
+   1,
+   32,
+   22,
+   15
+  ],
+  "tail_up": [
+   25,
+   16,
+   22,
+   15
+  ],
+  "tail_up_fill": [
+   25,
+   32,
+   22,
+   15
+  ],
+  "tail_down_field": [
+   49,
+   16,
+   22,
+   15
+  ],
+  "tail_down_field_fill": [
+   49,
+   32,
+   22,
+   15
+  ],
+  "tail_up_field": [
+   73,
+   16,
+   22,
+   15
+  ],
+  "tail_up_field_fill": [
+   73,
+   32,
+   22,
+   15
+  ]
+ },
+ "tails": {
+  "tail_down": {
+   "frame": "tail_down",
+   "fill": "tail_down_fill",
+   "tipX": 11,
+   "w": 22,
+   "h": 15,
+   "joinRows": 4,
+   "place": "sprite top = window bottom - 4"
+  },
+  "tail_up": {
+   "frame": "tail_up",
+   "fill": "tail_up_fill",
+   "tipX": 11,
+   "w": 22,
+   "h": 15,
+   "joinRows": 4,
+   "place": "sprite bottom = window top + 4"
+  },
+  "tail_down_field": {
+   "frame": "tail_down_field",
+   "fill": "tail_down_field_fill",
+   "tipX": 11,
+   "w": 22,
+   "h": 15,
+   "joinRows": 4,
+   "place": "sprite top = window bottom - 4"
+  },
+  "tail_up_field": {
+   "frame": "tail_up_field",
+   "fill": "tail_up_field_fill",
+   "tipX": 11,
+   "w": 22,
+   "h": 15,
+   "joinRows": 4,
+   "place": "sprite bottom = window top + 4"
+  }
+ },
+ "colors": {
+  "blue": {
+   "top": "#4064b9",
+   "mid": "#2c4797",
+   "bottom": "#0e153b",
+   "highlight": "#6891d9",
+   "accent": "#f9d77a"
+  },
+  "crimson": {
+   "top": "#b34532",
+   "mid": "#87332e",
+   "bottom": "#2d1b1f",
+   "highlight": "#eba14d",
+   "accent": "#f9d77a"
+  },
+  "forest": {
+   "top": "#397951",
+   "mid": "#285743",
+   "bottom": "#1b2332",
+   "highlight": "#4f9e6e",
+   "accent": "#f9d77a"
+  },
+  "violet": {
+   "top": "#7040aa",
+   "mid": "#522a84",
+   "bottom": "#1a1334",
+   "highlight": "#bc94e2",
+   "accent": "#f9d77a"
+  },
+  "slate": {
+   "top": "#66637f",
+   "mid": "#4c445c",
+   "bottom": "#251d34",
+   "highlight": "#b3b6c4",
+   "accent": "#f9d77a"
+  },
+  "ember": {
+   "top": "#8f5533",
+   "mid": "#6e3d2c",
+   "bottom": "#2d1b1f",
+   "highlight": "#d69c57",
+   "accent": "#fff7d6"
+  }
+ },
+ "default": "blue",
+ "fieldAlpha": 0.92,
+ "gradient": "vertical: top at fill top, mid at 45%, bottom at fill bottom; 1 px rows, no dithering",
+ "draw": [
+  "fill rect inset by fillInset with the scheme gradient (alpha = fieldAlpha on the field)",
+  "nineSlice(frame) on top (edges stretch; they are uniform)",
+  "tail: tint *_fill with the gradient color at the join row, draw it, then draw the tail frame"
+ ]
+}

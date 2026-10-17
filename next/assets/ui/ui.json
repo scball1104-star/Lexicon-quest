@@ -1,0 +1,2689 @@
+{
+ "image": "ui.png",
+ "frames": {
+  "arrow_down": [
+   225,
+   230,
+   9,
+   6
+  ],
+  "arrow_left": [
+   91,
+   218,
+   6,
+   9
+  ],
+  "arrow_right": [
+   98,
+   218,
+   6,
+   9
+  ],
+  "arrow_up": [
+   235,
+   230,
+   9,
+   6
+  ],
+  "banner_l": [
+   209,
+   127,
+   18,
+   24
+  ],
+  "banner_m": [
+   228,
+   127,
+   1,
+   24
+  ],
+  "banner_r": [
+   230,
+   127,
+   18,
+   24
+  ],
+  "beam_common_0": [
+   1,
+   1,
+   15,
+   64
+  ],
+  "beam_common_1": [
+   17,
+   1,
+   15,
+   64
+  ],
+  "beam_common_2": [
+   33,
+   1,
+   15,
+   64
+  ],
+  "beam_common_3": [
+   49,
+   1,
+   15,
+   64
+  ],
+  "beam_legendary_0": [
+   65,
+   1,
+   15,
+   64
+  ],
+  "beam_legendary_1": [
+   81,
+   1,
+   15,
+   64
+  ],
+  "beam_legendary_2": [
+   97,
+   1,
+   15,
+   64
+  ],
+  "beam_legendary_3": [
+   113,
+   1,
+   15,
+   64
+  ],
+  "beam_magic_0": [
+   129,
+   1,
+   15,
+   64
+  ],
+  "beam_magic_1": [
+   145,
+   1,
+   15,
+   64
+  ],
+  "beam_magic_2": [
+   161,
+   1,
+   15,
+   64
+  ],
+  "beam_magic_3": [
+   177,
+   1,
+   15,
+   64
+  ],
+  "beam_rare_0": [
+   193,
+   1,
+   15,
+   64
+  ],
+  "beam_rare_1": [
+   209,
+   1,
+   15,
+   64
+  ],
+  "beam_rare_2": [
+   225,
+   1,
+   15,
+   64
+  ],
+  "beam_rare_3": [
+   241,
+   1,
+   15,
+   64
+  ],
+  "beam_set_0": [
+   257,
+   1,
+   15,
+   64
+  ],
+  "beam_set_1": [
+   273,
+   1,
+   15,
+   64
+  ],
+  "beam_set_2": [
+   289,
+   1,
+   15,
+   64
+  ],
+  "beam_set_3": [
+   305,
+   1,
+   15,
+   64
+  ],
+  "break_burst_0": [
+   321,
+   1,
+   96,
+   60
+  ],
+  "break_burst_1": [
+   1,
+   66,
+   96,
+   60
+  ],
+  "break_burst_2": [
+   98,
+   66,
+   96,
+   60
+  ],
+  "break_burst_3": [
+   195,
+   66,
+   96,
+   60
+  ],
+  "btn_key_c": [
+   349,
+   205,
+   11,
+   11
+  ],
+  "btn_key_e": [
+   361,
+   205,
+   11,
+   11
+  ],
+  "btn_key_enter": [
+   373,
+   205,
+   26,
+   11
+  ],
+  "btn_key_esc": [
+   400,
+   205,
+   17,
+   11
+  ],
+  "btn_key_q": [
+   418,
+   205,
+   11,
+   11
+  ],
+  "btn_key_shift": [
+   430,
+   205,
+   25,
+   11
+  ],
+  "btn_key_x": [
+   456,
+   205,
+   11,
+   11
+  ],
+  "btn_key_z": [
+   468,
+   205,
+   11,
+   11
+  ],
+  "btn_pad_a": [
+   480,
+   205,
+   11,
+   11
+  ],
+  "btn_pad_b": [
+   492,
+   205,
+   11,
+   11
+  ],
+  "btn_pad_lb": [
+   105,
+   218,
+   15,
+   9
+  ],
+  "btn_pad_rb": [
+   121,
+   218,
+   15,
+   9
+  ],
+  "btn_pad_x": [
+   1,
+   218,
+   11,
+   11
+  ],
+  "btn_pad_y": [
+   13,
+   218,
+   11,
+   11
+  ],
+  "btn_tap_a": [
+   25,
+   218,
+   11,
+   11
+  ],
+  "btn_tap_b": [
+   37,
+   218,
+   11,
+   11
+  ],
+  "cursor_0": [
+   171,
+   190,
+   18,
+   12
+  ],
+  "cursor_1": [
+   190,
+   190,
+   18,
+   12
+  ],
+  "delta_down": [
+   245,
+   230,
+   5,
+   6
+  ],
+  "delta_same": [
+   251,
+   230,
+   5,
+   6
+  ],
+  "delta_up": [
+   257,
+   230,
+   5,
+   6
+  ],
+  "elite_mark": [
+   263,
+   230,
+   11,
+   6
+  ],
+  "emote_anger_0": [
+   428,
+   127,
+   16,
+   16
+  ],
+  "emote_anger_1": [
+   445,
+   127,
+   16,
+   16
+  ],
+  "emote_dots_0": [
+   462,
+   127,
+   16,
+   16
+  ],
+  "emote_dots_1": [
+   479,
+   127,
+   16,
+   16
+  ],
+  "emote_exclaim_0": [
+   1,
+   173,
+   16,
+   16
+  ],
+  "emote_exclaim_1": [
+   18,
+   173,
+   16,
+   16
+  ],
+  "emote_heart_0": [
+   35,
+   173,
+   16,
+   16
+  ],
+  "emote_heart_1": [
+   52,
+   173,
+   16,
+   16
+  ],
+  "emote_idea_0": [
+   69,
+   173,
+   16,
+   16
+  ],
+  "emote_idea_1": [
+   86,
+   173,
+   16,
+   16
+  ],
+  "emote_music_0": [
+   103,
+   173,
+   16,
+   16
+  ],
+  "emote_music_1": [
+   120,
+   173,
+   16,
+   16
+  ],
+  "emote_pop_0": [
+   137,
+   173,
+   16,
+   16
+  ],
+  "emote_pop_1": [
+   154,
+   173,
+   16,
+   16
+  ],
+  "emote_question_0": [
+   171,
+   173,
+   16,
+   16
+  ],
+  "emote_question_1": [
+   188,
+   173,
+   16,
+   16
+  ],
+  "emote_sweat_0": [
+   205,
+   173,
+   16,
+   16
+  ],
+  "emote_sweat_1": [
+   222,
+   173,
+   16,
+   16
+  ],
+  "emote_zzz_0": [
+   239,
+   173,
+   16,
+   16
+  ],
+  "emote_zzz_1": [
+   256,
+   173,
+   16,
+   16
+  ],
+  "end_0": [
+   297,
+   230,
+   5,
+   5
+  ],
+  "end_1": [
+   303,
+   230,
+   5,
+   5
+  ],
+  "fury_shine_0": [
+   335,
+   230,
+   24,
+   3
+  ],
+  "fury_shine_1": [
+   360,
+   230,
+   24,
+   3
+  ],
+  "fury_shine_2": [
+   385,
+   230,
+   24,
+   3
+  ],
+  "fury_shine_3": [
+   410,
+   230,
+   24,
+   3
+  ],
+  "gauge_atb": [
+   435,
+   230,
+   1,
+   3
+  ],
+  "gauge_atb_thin": [
+   451,
+   230,
+   1,
+   2
+  ],
+  "gauge_exp": [
+   437,
+   230,
+   1,
+   3
+  ],
+  "gauge_exp_thin": [
+   453,
+   230,
+   1,
+   2
+  ],
+  "gauge_frame": [
+   275,
+   230,
+   5,
+   6
+  ],
+  "gauge_frame_thin": [
+   309,
+   230,
+   5,
+   5
+  ],
+  "gauge_fury": [
+   439,
+   230,
+   1,
+   3
+  ],
+  "gauge_fury_thin": [
+   455,
+   230,
+   1,
+   2
+  ],
+  "gauge_glow_0": [
+   49,
+   218,
+   11,
+   11
+  ],
+  "gauge_glow_1": [
+   61,
+   218,
+   11,
+   11
+  ],
+  "gauge_hp": [
+   441,
+   230,
+   1,
+   3
+  ],
+  "gauge_hp_low": [
+   443,
+   230,
+   1,
+   3
+  ],
+  "gauge_hp_low_thin": [
+   457,
+   230,
+   1,
+   2
+  ],
+  "gauge_hp_mid": [
+   445,
+   230,
+   1,
+   3
+  ],
+  "gauge_hp_mid_thin": [
+   459,
+   230,
+   1,
+   2
+  ],
+  "gauge_hp_thin": [
+   461,
+   230,
+   1,
+   2
+  ],
+  "gauge_lag": [
+   447,
+   230,
+   1,
+   3
+  ],
+  "gauge_lag_thin": [
+   463,
+   230,
+   1,
+   2
+  ],
+  "gauge_mp": [
+   449,
+   230,
+   1,
+   3
+  ],
+  "gauge_mp_thin": [
+   465,
+   230,
+   1,
+   2
+  ],
+  "icon16_axe": [
+   273,
+   173,
+   16,
+   16
+  ],
+  "icon16_book": [
+   290,
+   173,
+   16,
+   16
+  ],
+  "icon16_bow": [
+   307,
+   173,
+   16,
+   16
+  ],
+  "icon16_fire": [
+   324,
+   173,
+   16,
+   16
+  ],
+  "icon16_ice": [
+   341,
+   173,
+   16,
+   16
+  ],
+  "icon16_lantern": [
+   358,
+   173,
+   16,
+   16
+  ],
+  "icon16_letter": [
+   375,
+   173,
+   16,
+   16
+  ],
+  "icon16_light": [
+   392,
+   173,
+   16,
+   16
+  ],
+  "icon16_spear": [
+   409,
+   173,
+   16,
+   16
+  ],
+  "icon16_staff": [
+   426,
+   173,
+   16,
+   16
+  ],
+  "icon16_sword": [
+   443,
+   173,
+   16,
+   16
+  ],
+  "icon16_thunder": [
+   460,
+   173,
+   16,
+   16
+  ],
+  "icon_armor": [
+   209,
+   190,
+   12,
+   12
+  ],
+  "icon_axe": [
+   222,
+   190,
+   12,
+   12
+  ],
+  "icon_bag": [
+   235,
+   190,
+   12,
+   12
+  ],
+  "icon_blind": [
+   248,
+   190,
+   12,
+   12
+  ],
+  "icon_book": [
+   261,
+   190,
+   12,
+   12
+  ],
+  "icon_boots": [
+   274,
+   190,
+   12,
+   12
+  ],
+  "icon_bow": [
+   287,
+   190,
+   12,
+   12
+  ],
+  "icon_burn": [
+   300,
+   190,
+   12,
+   12
+  ],
+  "icon_charm": [
+   313,
+   190,
+   12,
+   12
+  ],
+  "icon_chest": [
+   326,
+   190,
+   12,
+   12
+  ],
+  "icon_chill": [
+   339,
+   190,
+   12,
+   12
+  ],
+  "icon_combo": [
+   352,
+   190,
+   12,
+   12
+  ],
+  "icon_ether": [
+   365,
+   190,
+   12,
+   12
+  ],
+  "icon_fire": [
+   378,
+   190,
+   12,
+   12
+  ],
+  "icon_flee": [
+   391,
+   190,
+   12,
+   12
+  ],
+  "icon_focus": [
+   404,
+   190,
+   12,
+   12
+  ],
+  "icon_fury": [
+   417,
+   190,
+   12,
+   12
+  ],
+  "icon_gear": [
+   430,
+   190,
+   12,
+   12
+  ],
+  "icon_gold": [
+   443,
+   190,
+   12,
+   12
+  ],
+  "icon_haste": [
+   456,
+   190,
+   12,
+   12
+  ],
+  "icon_helm": [
+   469,
+   190,
+   12,
+   12
+  ],
+  "icon_ice": [
+   482,
+   190,
+   12,
+   12
+  ],
+  "icon_key": [
+   495,
+   190,
+   12,
+   12
+  ],
+  "icon_lantern": [
+   1,
+   205,
+   12,
+   12
+  ],
+  "icon_letter": [
+   14,
+   205,
+   12,
+   12
+  ],
+  "icon_light": [
+   27,
+   205,
+   12,
+   12
+  ],
+  "icon_magic": [
+   40,
+   205,
+   12,
+   12
+  ],
+  "icon_mantle": [
+   53,
+   205,
+   12,
+   12
+  ],
+  "icon_nameless": [
+   66,
+   205,
+   12,
+   12
+  ],
+  "icon_phoenix": [
+   79,
+   205,
+   12,
+   12
+  ],
+  "icon_poison": [
+   92,
+   205,
+   12,
+   12
+  ],
+  "icon_potion": [
+   105,
+   205,
+   12,
+   12
+  ],
+  "icon_protect": [
+   118,
+   205,
+   12,
+   12
+  ],
+  "icon_quest": [
+   131,
+   205,
+   12,
+   12
+  ],
+  "icon_quill": [
+   144,
+   205,
+   12,
+   12
+  ],
+  "icon_regen": [
+   157,
+   205,
+   12,
+   12
+  ],
+  "icon_scroll": [
+   170,
+   205,
+   12,
+   12
+  ],
+  "icon_shield": [
+   183,
+   205,
+   12,
+   12
+  ],
+  "icon_silence": [
+   196,
+   205,
+   12,
+   12
+  ],
+  "icon_spear": [
+   209,
+   205,
+   12,
+   12
+  ],
+  "icon_staff": [
+   222,
+   205,
+   12,
+   12
+  ],
+  "icon_star": [
+   235,
+   205,
+   12,
+   12
+  ],
+  "icon_stun": [
+   248,
+   205,
+   12,
+   12
+  ],
+  "icon_swap": [
+   261,
+   205,
+   12,
+   12
+  ],
+  "icon_sword": [
+   274,
+   205,
+   12,
+   12
+  ],
+  "icon_taunt": [
+   287,
+   205,
+   12,
+   12
+  ],
+  "icon_thunder": [
+   300,
+   205,
+   12,
+   12
+  ],
+  "lbl_atk": [
+   337,
+   218,
+   13,
+   7
+  ],
+  "lbl_def": [
+   351,
+   218,
+   13,
+   7
+  ],
+  "lbl_exp": [
+   365,
+   218,
+   13,
+   7
+  ],
+  "lbl_fury": [
+   379,
+   218,
+   17,
+   7
+  ],
+  "lbl_hp": [
+   397,
+   218,
+   9,
+   7
+  ],
+  "lbl_ko": [
+   407,
+   218,
+   9,
+   7
+  ],
+  "lbl_lv": [
+   417,
+   218,
+   9,
+   7
+  ],
+  "lbl_mag": [
+   427,
+   218,
+   15,
+   7
+  ],
+  "lbl_mp": [
+   443,
+   218,
+   11,
+   7
+  ],
+  "lbl_next": [
+   455,
+   218,
+   18,
+   7
+  ],
+  "lbl_ready": [
+   474,
+   218,
+   21,
+   7
+  ],
+  "lbl_spd": [
+   496,
+   218,
+   13,
+   7
+  ],
+  "more_0": [
+   1,
+   230,
+   7,
+   7
+  ],
+  "more_1": [
+   9,
+   230,
+   7,
+   7
+  ],
+  "more_2": [
+   17,
+   230,
+   7,
+   7
+  ],
+  "more_3": [
+   25,
+   230,
+   7,
+   7
+  ],
+  "page_off": [
+   315,
+   230,
+   5,
+   5
+  ],
+  "page_on": [
+   321,
+   230,
+   5,
+   5
+  ],
+  "prompt_0": [
+   33,
+   230,
+   7,
+   7
+  ],
+  "prompt_1": [
+   41,
+   230,
+   7,
+   7
+  ],
+  "prompt_2": [
+   49,
+   230,
+   7,
+   7
+  ],
+  "prompt_3": [
+   57,
+   230,
+   7,
+   7
+  ],
+  "prompt_check_0": [
+   73,
+   218,
+   8,
+   11
+  ],
+  "prompt_check_1": [
+   82,
+   218,
+   8,
+   11
+  ],
+  "prompt_talk_0": [
+   137,
+   218,
+   11,
+   8
+  ],
+  "prompt_talk_1": [
+   149,
+   218,
+   11,
+   8
+  ],
+  "prompt_talk_2": [
+   161,
+   218,
+   11,
+   8
+  ],
+  "reticle_0": [
+   47,
+   127,
+   26,
+   26
+  ],
+  "reticle_1": [
+   74,
+   127,
+   26,
+   26
+  ],
+  "sel_bar": [
+   313,
+   205,
+   9,
+   12
+  ],
+  "shield_badge": [
+   145,
+   190,
+   12,
+   13
+  ],
+  "shield_badge_broken": [
+   158,
+   190,
+   12,
+   13
+  ],
+  "shield_broken": [
+   173,
+   218,
+   8,
+   8
+  ],
+  "shield_empty": [
+   182,
+   218,
+   8,
+   8
+  ],
+  "shield_full": [
+   191,
+   218,
+   8,
+   8
+  ],
+  "sparkle_common_0": [
+   65,
+   230,
+   7,
+   7
+  ],
+  "sparkle_common_1": [
+   73,
+   230,
+   7,
+   7
+  ],
+  "sparkle_common_2": [
+   81,
+   230,
+   7,
+   7
+  ],
+  "sparkle_common_3": [
+   89,
+   230,
+   7,
+   7
+  ],
+  "sparkle_legendary_0": [
+   97,
+   230,
+   7,
+   7
+  ],
+  "sparkle_legendary_1": [
+   105,
+   230,
+   7,
+   7
+  ],
+  "sparkle_legendary_2": [
+   113,
+   230,
+   7,
+   7
+  ],
+  "sparkle_legendary_3": [
+   121,
+   230,
+   7,
+   7
+  ],
+  "sparkle_magic_0": [
+   129,
+   230,
+   7,
+   7
+  ],
+  "sparkle_magic_1": [
+   137,
+   230,
+   7,
+   7
+  ],
+  "sparkle_magic_2": [
+   145,
+   230,
+   7,
+   7
+  ],
+  "sparkle_magic_3": [
+   153,
+   230,
+   7,
+   7
+  ],
+  "sparkle_rare_0": [
+   161,
+   230,
+   7,
+   7
+  ],
+  "sparkle_rare_1": [
+   169,
+   230,
+   7,
+   7
+  ],
+  "sparkle_rare_2": [
+   177,
+   230,
+   7,
+   7
+  ],
+  "sparkle_rare_3": [
+   185,
+   230,
+   7,
+   7
+  ],
+  "sparkle_set_0": [
+   193,
+   230,
+   7,
+   7
+  ],
+  "sparkle_set_1": [
+   201,
+   230,
+   7,
+   7
+  ],
+  "sparkle_set_2": [
+   209,
+   230,
+   7,
+   7
+  ],
+  "sparkle_set_3": [
+   217,
+   230,
+   7,
+   7
+  ],
+  "st8_blind": [
+   200,
+   218,
+   8,
+   8
+  ],
+  "st8_burn": [
+   209,
+   218,
+   8,
+   8
+  ],
+  "st8_chill": [
+   218,
+   218,
+   8,
+   8
+  ],
+  "st8_focus": [
+   227,
+   218,
+   8,
+   8
+  ],
+  "st8_fury": [
+   236,
+   218,
+   8,
+   8
+  ],
+  "st8_haste": [
+   245,
+   218,
+   8,
+   8
+  ],
+  "st8_nameless": [
+   254,
+   218,
+   8,
+   8
+  ],
+  "st8_poison": [
+   263,
+   218,
+   8,
+   8
+  ],
+  "st8_protect": [
+   272,
+   218,
+   8,
+   8
+  ],
+  "st8_regen": [
+   281,
+   218,
+   8,
+   8
+  ],
+  "st8_silence": [
+   290,
+   218,
+   8,
+   8
+  ],
+  "st8_stun": [
+   299,
+   218,
+   8,
+   8
+  ],
+  "st8_taunt": [
+   308,
+   218,
+   8,
+   8
+  ],
+  "target_arrow_0": [
+   317,
+   218,
+   9,
+   8
+  ],
+  "target_arrow_1": [
+   327,
+   218,
+   9,
+   8
+  ],
+  "tl_current": [
+   295,
+   127,
+   18,
+   18
+  ],
+  "tl_elite": [
+   314,
+   127,
+   18,
+   18
+  ],
+  "tl_enemy": [
+   333,
+   127,
+   18,
+   18
+  ],
+  "tl_glow_0": [
+   249,
+   127,
+   22,
+   22
+  ],
+  "tl_glow_1": [
+   272,
+   127,
+   22,
+   22
+  ],
+  "tl_party": [
+   352,
+   127,
+   18,
+   18
+  ],
+  "tl_preview": [
+   371,
+   127,
+   18,
+   18
+  ],
+  "tl_rail": [
+   327,
+   230,
+   7,
+   5
+  ],
+  "touch_a": [
+   101,
+   127,
+   26,
+   26
+  ],
+  "touch_a_pressed": [
+   128,
+   127,
+   26,
+   26
+  ],
+  "touch_b": [
+   155,
+   127,
+   26,
+   26
+  ],
+  "touch_b_pressed": [
+   182,
+   127,
+   26,
+   26
+  ],
+  "touch_dpad": [
+   292,
+   66,
+   45,
+   45
+  ],
+  "touch_dpad_down": [
+   338,
+   66,
+   45,
+   45
+  ],
+  "touch_dpad_left": [
+   384,
+   66,
+   45,
+   45
+  ],
+  "touch_dpad_right": [
+   430,
+   66,
+   45,
+   45
+  ],
+  "touch_dpad_up": [
+   1,
+   127,
+   45,
+   45
+  ],
+  "touch_fullscreen": [
+   390,
+   127,
+   18,
+   18
+  ],
+  "touch_fullscreen_pressed": [
+   409,
+   127,
+   18,
+   18
+  ],
+  "touch_menu": [
+   477,
+   173,
+   32,
+   14
+  ],
+  "touch_menu_pressed": [
+   1,
+   190,
+   32,
+   14
+  ],
+  "touch_run": [
+   34,
+   190,
+   32,
+   14
+  ],
+  "touch_run_pressed": [
+   67,
+   190,
+   32,
+   14
+  ],
+  "turn_marker_0": [
+   281,
+   230,
+   7,
+   6
+  ],
+  "turn_marker_1": [
+   289,
+   230,
+   7,
+   6
+  ],
+  "weak_frame": [
+   100,
+   190,
+   14,
+   14
+  ],
+  "weak_frame_hit": [
+   115,
+   190,
+   14,
+   14
+  ],
+  "weak_frame_resist": [
+   130,
+   190,
+   14,
+   14
+  ],
+  "weak_null": [
+   323,
+   205,
+   12,
+   12
+  ],
+  "weak_unknown": [
+   336,
+   205,
+   12,
+   12
+  ]
+ },
+ "origins": {
+  "cursor_0": [
+   16,
+   3
+  ],
+  "cursor_1": [
+   16,
+   3
+  ],
+  "break_burst_0": [
+   48,
+   30
+  ],
+  "break_burst_1": [
+   48,
+   30
+  ],
+  "break_burst_2": [
+   48,
+   30
+  ],
+  "break_burst_3": [
+   48,
+   30
+  ],
+  "reticle_0": [
+   13,
+   13
+  ],
+  "reticle_1": [
+   13,
+   13
+  ],
+  "target_arrow_0": [
+   4,
+   7
+  ],
+  "target_arrow_1": [
+   4,
+   7
+  ],
+  "turn_marker_0": [
+   3,
+   5
+  ],
+  "turn_marker_1": [
+   3,
+   5
+  ],
+  "emote_exclaim_0": [
+   4,
+   15
+  ],
+  "emote_exclaim_1": [
+   4,
+   15
+  ],
+  "emote_question_0": [
+   4,
+   15
+  ],
+  "emote_question_1": [
+   4,
+   15
+  ],
+  "emote_dots_0": [
+   4,
+   15
+  ],
+  "emote_dots_1": [
+   4,
+   15
+  ],
+  "emote_heart_0": [
+   4,
+   15
+  ],
+  "emote_heart_1": [
+   4,
+   15
+  ],
+  "emote_sweat_0": [
+   4,
+   15
+  ],
+  "emote_sweat_1": [
+   4,
+   15
+  ],
+  "emote_anger_0": [
+   4,
+   15
+  ],
+  "emote_anger_1": [
+   4,
+   15
+  ],
+  "emote_music_0": [
+   4,
+   15
+  ],
+  "emote_music_1": [
+   4,
+   15
+  ],
+  "emote_zzz_0": [
+   4,
+   15
+  ],
+  "emote_zzz_1": [
+   4,
+   15
+  ],
+  "emote_idea_0": [
+   4,
+   15
+  ],
+  "emote_idea_1": [
+   4,
+   15
+  ],
+  "emote_pop_0": [
+   4,
+   15
+  ],
+  "emote_pop_1": [
+   4,
+   15
+  ],
+  "prompt_0": [
+   3,
+   6
+  ],
+  "prompt_1": [
+   3,
+   6
+  ],
+  "prompt_2": [
+   3,
+   6
+  ],
+  "prompt_3": [
+   3,
+   6
+  ],
+  "prompt_talk_0": [
+   4,
+   7
+  ],
+  "prompt_talk_1": [
+   4,
+   7
+  ],
+  "prompt_talk_2": [
+   4,
+   7
+  ],
+  "prompt_check_0": [
+   3,
+   10
+  ],
+  "prompt_check_1": [
+   3,
+   10
+  ],
+  "beam_common_0": [
+   7,
+   63
+  ],
+  "beam_common_1": [
+   7,
+   63
+  ],
+  "beam_common_2": [
+   7,
+   63
+  ],
+  "beam_common_3": [
+   7,
+   63
+  ],
+  "sparkle_common_0": [
+   3,
+   3
+  ],
+  "sparkle_common_1": [
+   3,
+   3
+  ],
+  "sparkle_common_2": [
+   3,
+   3
+  ],
+  "sparkle_common_3": [
+   3,
+   3
+  ],
+  "beam_magic_0": [
+   7,
+   63
+  ],
+  "beam_magic_1": [
+   7,
+   63
+  ],
+  "beam_magic_2": [
+   7,
+   63
+  ],
+  "beam_magic_3": [
+   7,
+   63
+  ],
+  "sparkle_magic_0": [
+   3,
+   3
+  ],
+  "sparkle_magic_1": [
+   3,
+   3
+  ],
+  "sparkle_magic_2": [
+   3,
+   3
+  ],
+  "sparkle_magic_3": [
+   3,
+   3
+  ],
+  "beam_rare_0": [
+   7,
+   63
+  ],
+  "beam_rare_1": [
+   7,
+   63
+  ],
+  "beam_rare_2": [
+   7,
+   63
+  ],
+  "beam_rare_3": [
+   7,
+   63
+  ],
+  "sparkle_rare_0": [
+   3,
+   3
+  ],
+  "sparkle_rare_1": [
+   3,
+   3
+  ],
+  "sparkle_rare_2": [
+   3,
+   3
+  ],
+  "sparkle_rare_3": [
+   3,
+   3
+  ],
+  "beam_legendary_0": [
+   7,
+   63
+  ],
+  "beam_legendary_1": [
+   7,
+   63
+  ],
+  "beam_legendary_2": [
+   7,
+   63
+  ],
+  "beam_legendary_3": [
+   7,
+   63
+  ],
+  "sparkle_legendary_0": [
+   3,
+   3
+  ],
+  "sparkle_legendary_1": [
+   3,
+   3
+  ],
+  "sparkle_legendary_2": [
+   3,
+   3
+  ],
+  "sparkle_legendary_3": [
+   3,
+   3
+  ],
+  "beam_set_0": [
+   7,
+   63
+  ],
+  "beam_set_1": [
+   7,
+   63
+  ],
+  "beam_set_2": [
+   7,
+   63
+  ],
+  "beam_set_3": [
+   7,
+   63
+  ],
+  "sparkle_set_0": [
+   3,
+   3
+  ],
+  "sparkle_set_1": [
+   3,
+   3
+  ],
+  "sparkle_set_2": [
+   3,
+   3
+  ],
+  "sparkle_set_3": [
+   3,
+   3
+  ]
+ },
+ "anims": {
+  "cursor": {
+   "frames": [
+    "cursor_0",
+    "cursor_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "more": {
+   "frames": [
+    "more_0",
+    "more_1",
+    "more_2",
+    "more_1"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "end": {
+   "frames": [
+    "end_0",
+    "end_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "fury_shine": {
+   "frames": [
+    "fury_shine_0",
+    "fury_shine_1",
+    "fury_shine_2",
+    "fury_shine_3"
+   ],
+   "fps": 10,
+   "loop": true
+  },
+  "gauge_glow": {
+   "frames": [
+    "gauge_glow_0",
+    "gauge_glow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "tl_glow": {
+   "frames": [
+    "tl_glow_0",
+    "tl_glow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "break_burst": {
+   "frames": [
+    "break_burst_0",
+    "break_burst_1",
+    "break_burst_2",
+    "break_burst_3"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "reticle": {
+   "frames": [
+    "reticle_0",
+    "reticle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "target_arrow": {
+   "frames": [
+    "target_arrow_0",
+    "target_arrow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "turn_marker": {
+   "frames": [
+    "turn_marker_0",
+    "turn_marker_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "emote_exclaim": {
+   "frames": [
+    "emote_exclaim_0",
+    "emote_exclaim_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_question": {
+   "frames": [
+    "emote_question_0",
+    "emote_question_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_dots": {
+   "frames": [
+    "emote_dots_0",
+    "emote_dots_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_heart": {
+   "frames": [
+    "emote_heart_0",
+    "emote_heart_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_sweat": {
+   "frames": [
+    "emote_sweat_0",
+    "emote_sweat_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_anger": {
+   "frames": [
+    "emote_anger_0",
+    "emote_anger_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_music": {
+   "frames": [
+    "emote_music_0",
+    "emote_music_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_zzz": {
+   "frames": [
+    "emote_zzz_0",
+    "emote_zzz_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "emote_idea": {
+   "frames": [
+    "emote_idea_0",
+    "emote_idea_1"
+   ],
+   "fps": 3,
+   "loop": true,
+   "intro": [
+    "emote_pop_0",
+    "emote_pop_1"
+   ],
+   "introFps": 15
+  },
+  "prompt": {
+   "frames": [
+    "prompt_0",
+    "prompt_1",
+    "prompt_2",
+    "prompt_3"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "prompt_talk": {
+   "frames": [
+    "prompt_talk_0",
+    "prompt_talk_1",
+    "prompt_talk_2"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "prompt_check": {
+   "frames": [
+    "prompt_check_0",
+    "prompt_check_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "beam_common": {
+   "frames": [
+    "beam_common_0",
+    "beam_common_1",
+    "beam_common_2",
+    "beam_common_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "sparkle_common": {
+   "frames": [
+    "sparkle_common_0",
+    "sparkle_common_1",
+    "sparkle_common_2",
+    "sparkle_common_3"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "beam_magic": {
+   "frames": [
+    "beam_magic_0",
+    "beam_magic_1",
+    "beam_magic_2",
+    "beam_magic_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "sparkle_magic": {
+   "frames": [
+    "sparkle_magic_0",
+    "sparkle_magic_1",
+    "sparkle_magic_2",
+    "sparkle_magic_3"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "beam_rare": {
+   "frames": [
+    "beam_rare_0",
+    "beam_rare_1",
+    "beam_rare_2",
+    "beam_rare_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "sparkle_rare": {
+   "frames": [
+    "sparkle_rare_0",
+    "sparkle_rare_1",
+    "sparkle_rare_2",
+    "sparkle_rare_3"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "beam_legendary": {
+   "frames": [
+    "beam_legendary_0",
+    "beam_legendary_1",
+    "beam_legendary_2",
+    "beam_legendary_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "sparkle_legendary": {
+   "frames": [
+    "sparkle_legendary_0",
+    "sparkle_legendary_1",
+    "sparkle_legendary_2",
+    "sparkle_legendary_3"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "beam_set": {
+   "frames": [
+    "beam_set_0",
+    "beam_set_1",
+    "beam_set_2",
+    "beam_set_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "sparkle_set": {
+   "frames": [
+    "sparkle_set_0",
+    "sparkle_set_1",
+    "sparkle_set_2",
+    "sparkle_set_3"
+   ],
+   "fps": 10,
+   "loop": false
+  }
+ },
+ "slices": {
+  "sel_bar": {
+   "border": [
+    3,
+    0,
+    3,
+    0
+   ],
+   "note": "3-slice; white+alpha, tint with scheme highlight"
+  },
+  "gauge_frame": {
+   "border": [
+    2,
+    0,
+    2,
+    0
+   ],
+   "fillInset": [
+    1,
+    1
+   ],
+   "fillHeight": 3
+  },
+  "gauge_frame_thin": {
+   "border": [
+    2,
+    0,
+    2,
+    0
+   ],
+   "fillInset": [
+    1,
+    1
+   ],
+   "fillHeight": 2
+  },
+  "gauge_glow_0": {
+   "border": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "place": "around gauge rect: x-2, y-2, w+4, h+4"
+  },
+  "gauge_glow_1": {
+   "border": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "place": "around gauge rect: x-2, y-2, w+4, h+4"
+  },
+  "tl_rail": {
+   "border": [
+    2,
+    0,
+    2,
+    0
+   ]
+  },
+  "banner": {
+   "left": "banner_l",
+   "mid": "banner_m",
+   "right": "banner_r",
+   "height": 24,
+   "textInset": 18,
+   "note": "stretch banner_m; text (font_large) centered, baseline y=17"
+  }
+ },
+ "groups": {
+  "cursor": [
+   "cursor_0",
+   "cursor_1",
+   "sel_bar",
+   "arrow_up",
+   "arrow_down",
+   "arrow_left",
+   "arrow_right",
+   "more_0",
+   "more_1",
+   "more_2",
+   "more_3",
+   "end_0",
+   "end_1",
+   "delta_up",
+   "delta_down",
+   "delta_same",
+   "page_on",
+   "page_off"
+  ],
+  "icons": [
+   "icon_sword",
+   "icon_spear",
+   "icon_staff",
+   "icon_axe",
+   "icon_bow",
+   "icon_shield",
+   "icon_armor",
+   "icon_helm",
+   "icon_charm",
+   "icon_boots",
+   "icon_mantle",
+   "icon_potion",
+   "icon_ether",
+   "icon_phoenix",
+   "icon_key",
+   "icon_letter",
+   "icon_gold",
+   "icon_star",
+   "icon_fire",
+   "icon_ice",
+   "icon_thunder",
+   "icon_light",
+   "icon_book",
+   "icon_lantern",
+   "icon_bag",
+   "icon_chest",
+   "icon_scroll",
+   "icon_magic",
+   "icon_gear",
+   "icon_quill",
+   "icon_quest",
+   "icon_flee",
+   "icon_swap",
+   "icon_combo",
+   "icon_poison",
+   "icon_burn",
+   "icon_chill",
+   "icon_stun",
+   "icon_silence",
+   "icon_blind",
+   "icon_regen",
+   "icon_protect",
+   "icon_haste",
+   "icon_focus",
+   "icon_fury",
+   "icon_taunt",
+   "icon_nameless",
+   "st8_poison",
+   "st8_burn",
+   "st8_chill",
+   "st8_stun",
+   "st8_silence",
+   "st8_blind",
+   "st8_regen",
+   "st8_protect",
+   "st8_haste",
+   "st8_focus",
+   "st8_fury",
+   "st8_taunt",
+   "st8_nameless"
+  ],
+  "icons16": [
+   "icon16_sword",
+   "icon16_spear",
+   "icon16_staff",
+   "icon16_axe",
+   "icon16_bow",
+   "icon16_fire",
+   "icon16_ice",
+   "icon16_thunder",
+   "icon16_light",
+   "icon16_lantern",
+   "icon16_book",
+   "icon16_letter"
+  ],
+  "battle": [
+   "gauge_frame",
+   "gauge_frame_thin",
+   "gauge_hp",
+   "gauge_hp_thin",
+   "gauge_hp_mid",
+   "gauge_hp_mid_thin",
+   "gauge_hp_low",
+   "gauge_hp_low_thin",
+   "gauge_mp",
+   "gauge_mp_thin",
+   "gauge_fury",
+   "gauge_fury_thin",
+   "gauge_lag",
+   "gauge_lag_thin",
+   "gauge_atb",
+   "gauge_atb_thin",
+   "gauge_exp",
+   "gauge_exp_thin",
+   "fury_shine_0",
+   "fury_shine_1",
+   "fury_shine_2",
+   "fury_shine_3",
+   "gauge_glow_0",
+   "gauge_glow_1",
+   "tl_party",
+   "tl_enemy",
+   "tl_current",
+   "tl_preview",
+   "tl_elite",
+   "tl_glow_0",
+   "tl_glow_1",
+   "tl_rail",
+   "shield_full",
+   "shield_empty",
+   "shield_broken",
+   "shield_badge",
+   "shield_badge_broken",
+   "weak_frame",
+   "weak_frame_hit",
+   "weak_frame_resist",
+   "weak_unknown",
+   "weak_null",
+   "break_burst_0",
+   "break_burst_1",
+   "break_burst_2",
+   "break_burst_3",
+   "reticle_0",
+   "reticle_1",
+   "target_arrow_0",
+   "target_arrow_1",
+   "turn_marker_0",
+   "turn_marker_1",
+   "elite_mark",
+   "lbl_hp",
+   "lbl_mp",
+   "lbl_fury",
+   "lbl_lv",
+   "lbl_exp",
+   "lbl_next",
+   "lbl_atk",
+   "lbl_def",
+   "lbl_mag",
+   "lbl_spd",
+   "lbl_ready",
+   "lbl_ko"
+  ],
+  "emotes": [
+   "emote_exclaim_0",
+   "emote_exclaim_1",
+   "emote_question_0",
+   "emote_question_1",
+   "emote_dots_0",
+   "emote_dots_1",
+   "emote_heart_0",
+   "emote_heart_1",
+   "emote_sweat_0",
+   "emote_sweat_1",
+   "emote_anger_0",
+   "emote_anger_1",
+   "emote_music_0",
+   "emote_music_1",
+   "emote_zzz_0",
+   "emote_zzz_1",
+   "emote_idea_0",
+   "emote_idea_1",
+   "emote_pop_0",
+   "emote_pop_1",
+   "prompt_0",
+   "prompt_1",
+   "prompt_2",
+   "prompt_3",
+   "prompt_talk_0",
+   "prompt_talk_1",
+   "prompt_talk_2",
+   "prompt_check_0",
+   "prompt_check_1",
+   "banner_l",
+   "banner_m",
+   "banner_r"
+  ],
+  "touch": [
+   "touch_dpad",
+   "touch_dpad_up",
+   "touch_dpad_down",
+   "touch_dpad_left",
+   "touch_dpad_right",
+   "touch_a",
+   "touch_a_pressed",
+   "touch_b",
+   "touch_b_pressed",
+   "touch_menu",
+   "touch_menu_pressed",
+   "touch_run",
+   "touch_run_pressed",
+   "touch_fullscreen",
+   "touch_fullscreen_pressed",
+   "btn_key_z",
+   "btn_key_x",
+   "btn_key_c",
+   "btn_key_enter",
+   "btn_key_esc",
+   "btn_key_shift",
+   "btn_key_q",
+   "btn_key_e",
+   "btn_pad_a",
+   "btn_pad_b",
+   "btn_pad_x",
+   "btn_pad_y",
+   "btn_pad_lb",
+   "btn_pad_rb",
+   "btn_tap_a",
+   "btn_tap_b"
+  ],
+  "rarity": [
+   "beam_common_0",
+   "beam_common_1",
+   "beam_common_2",
+   "beam_common_3",
+   "sparkle_common_0",
+   "sparkle_common_1",
+   "sparkle_common_2",
+   "sparkle_common_3",
+   "beam_magic_0",
+   "beam_magic_1",
+   "beam_magic_2",
+   "beam_magic_3",
+   "sparkle_magic_0",
+   "sparkle_magic_1",
+   "sparkle_magic_2",
+   "sparkle_magic_3",
+   "beam_rare_0",
+   "beam_rare_1",
+   "beam_rare_2",
+   "beam_rare_3",
+   "sparkle_rare_0",
+   "sparkle_rare_1",
+   "sparkle_rare_2",
+   "sparkle_rare_3",
+   "beam_legendary_0",
+   "beam_legendary_1",
+   "beam_legendary_2",
+   "beam_legendary_3",
+   "sparkle_legendary_0",
+   "sparkle_legendary_1",
+   "sparkle_legendary_2",
+   "sparkle_legendary_3",
+   "beam_set_0",
+   "beam_set_1",
+   "beam_set_2",
+   "beam_set_3",
+   "sparkle_set_0",
+   "sparkle_set_1",
+   "sparkle_set_2",
+   "sparkle_set_3"
+  ]
+ },
+ "sheets": {
+  "window": "window.json",
+  "logo": "logo.json",
+  "fonts": {
+   "main": "font.json",
+   "large": "font_large.json",
+   "num": "font_num.json",
+   "numBig": "font_num_big.json"
+  },
+  "touch": {
+   "touch_dpad": "touch/dpad.png",
+   "touch_dpad_up": "touch/dpad_up.png",
+   "touch_dpad_down": "touch/dpad_down.png",
+   "touch_dpad_left": "touch/dpad_left.png",
+   "touch_dpad_right": "touch/dpad_right.png",
+   "touch_a": "touch/a.png",
+   "touch_a_pressed": "touch/a_pressed.png",
+   "touch_b": "touch/b.png",
+   "touch_b_pressed": "touch/b_pressed.png",
+   "touch_menu": "touch/menu.png",
+   "touch_menu_pressed": "touch/menu_pressed.png",
+   "touch_run": "touch/run.png",
+   "touch_run_pressed": "touch/run_pressed.png",
+   "touch_fullscreen": "touch/fullscreen.png",
+   "touch_fullscreen_pressed": "touch/fullscreen_pressed.png"
+  }
+ },
+ "textColors": {
+  "white": "#f6f4ee",
+  "gray": "#b3b6c4",
+  "dim": "#8e8997",
+  "gold": "#f9d77a",
+  "cream": "#fff7d6",
+  "cyan": "#8af0e8",
+  "blue": "#6ab3e4",
+  "green": "#b6cc58",
+  "red": "#e06b39",
+  "orange": "#eba14d",
+  "violet": "#bc94e2",
+  "pink": "#fcc4dc",
+  "shadow": "#14101e"
+ },
+ "rarity": {
+  "common": "#e8e8e8",
+  "magic": "#6f8cff",
+  "rare": "#ffd34d",
+  "legendary": "#ff8a2a",
+  "set": "#3cdc6a"
+ },
+ "icons": {
+  "size": 12,
+  "large16": {
+   "sword": "icon16_sword",
+   "spear": "icon16_spear",
+   "staff": "icon16_staff",
+   "axe": "icon16_axe",
+   "bow": "icon16_bow",
+   "fire": "icon16_fire",
+   "ice": "icon16_ice",
+   "thunder": "icon16_thunder",
+   "light": "icon16_light",
+   "lantern": "icon16_lantern",
+   "book": "icon16_book",
+   "letter": "icon16_letter"
+  },
+  "weakness": {
+   "sword": "icon_sword",
+   "spear": "icon_spear",
+   "staff": "icon_staff",
+   "axe": "icon_axe",
+   "bow": "icon_bow",
+   "fire": "icon_fire",
+   "ice": "icon_ice",
+   "thunder": "icon_thunder",
+   "light": "icon_light",
+   "unknown": "weak_unknown"
+  },
+  "status": {
+   "poison": "icon_poison",
+   "burn": "icon_burn",
+   "chill": "icon_chill",
+   "stun": "icon_stun",
+   "silence": "icon_silence",
+   "blind": "icon_blind",
+   "regen": "icon_regen",
+   "protect": "icon_protect",
+   "haste": "icon_haste",
+   "focus": "icon_focus",
+   "fury": "icon_fury",
+   "taunt": "icon_taunt",
+   "nameless": "icon_nameless"
+  },
+  "statusMini": {
+   "poison": "st8_poison",
+   "burn": "st8_burn",
+   "chill": "st8_chill",
+   "stun": "st8_stun",
+   "silence": "st8_silence",
+   "blind": "st8_blind",
+   "regen": "st8_regen",
+   "protect": "st8_protect",
+   "haste": "st8_haste",
+   "focus": "st8_focus",
+   "fury": "st8_fury",
+   "taunt": "st8_taunt",
+   "nameless": "st8_nameless"
+  }
+ },
+ "buttonGlyphs": {
+  "keyboard": {
+   "confirm": "btn_key_z",
+   "cancel": "btn_key_x",
+   "menu": "btn_key_c",
+   "start": "btn_key_enter",
+   "back": "btn_key_esc",
+   "run": "btn_key_shift",
+   "pageL": "btn_key_q",
+   "pageR": "btn_key_e"
+  },
+  "gamepad": {
+   "confirm": "btn_pad_a",
+   "cancel": "btn_pad_b",
+   "menu": "btn_pad_y",
+   "alt": "btn_pad_x",
+   "pageL": "btn_pad_lb",
+   "pageR": "btn_pad_rb",
+   "run": "btn_pad_b"
+  },
+  "touch": {
+   "confirm": "btn_tap_a",
+   "cancel": "btn_tap_b"
+  }
+ }
+}

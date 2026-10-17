@@ -1,0 +1,85 @@
+{
+ "image": "logo.png",
+ "frames": {
+  "logo": [
+   1,
+   1,
+   276,
+   58
+  ],
+  "subtitle": [
+   1,
+   60,
+   204,
+   24
+  ],
+  "sparkle_0": [
+   1,
+   85,
+   9,
+   9
+  ],
+  "sparkle_1": [
+   11,
+   85,
+   9,
+   9
+  ],
+  "sparkle_2": [
+   21,
+   85,
+   9,
+   9
+  ],
+  "sparkle_3": [
+   31,
+   85,
+   9,
+   9
+  ],
+  "sparkle_4": [
+   41,
+   85,
+   9,
+   9
+  ]
+ },
+ "origins": {
+  "sparkle_0": [
+   4,
+   4
+  ],
+  "sparkle_1": [
+   4,
+   4
+  ],
+  "sparkle_2": [
+   4,
+   4
+  ],
+  "sparkle_3": [
+   4,
+   4
+  ],
+  "sparkle_4": [
+   4,
+   4
+  ]
+ },
+ "anims": {
+  "sparkle": {
+   "frames": [
+    "sparkle_0",
+    "sparkle_1",
+    "sparkle_2",
+    "sparkle_3",
+    "sparkle_4"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "layout": {
+  "note": "Title screen: logo centered; subtitle centered 3 px under the logo. Sparkles: spawn one every ~1.5 s at a random opaque logo pixel on the upper half."
+ }
+}

@@ -242,7 +242,7 @@ indigo `#14101e`-ish), outline color per material (dark of its ramp), not univer
 
 ### 6.4 UI
 - Windows: Final Fantasy style. Deep blue vertical gradient (default; Config lets the player pick 6 colors),
-  2 px light bevel border with rounded corners, 9-slice from `assets/ui/window.png`. Slight transparency on field.
+  2 px light bevel border with rounded corners, 9-slice from `assets/ui/window.png`. Field windows fill at alpha 0.92 (busier backgrounds bleed through below that).
 - Cursor: pointing-hand glove (FF) that bobs 1 px. Disabled options dim to 50%.
 - Font: hand-built bitmap font `assets/ui/font.png` + `font.json` (ASCII 32..126 plus a few symbols: heart,
   arrow, note, star, ellipsis), proportional widths, 1 px shadow. A second **large** font for titles and
@@ -250,7 +250,7 @@ indigo `#14101e`-ish), outline color per material (dark of its ramp), not univer
 - Icons 12x12 or 16x16: sword, spear, staff, axe, bow, shield, armor, helm, charm, boots, mantle, potion,
   ether, phoenix feather, key, letter, gold, star, fire, ice, thunder, light, poison, stun, chill, burn,
   regen, protect, haste, fury.
-- Rarity colors (Diablo): common `#e8e8e8`, magic `#6f8cff`, rare `#ffd34d`, legendary `#ff8a2a`, set `#3cdc6a`.
+- Rarity colors (Diablo): common `#e8e8e8`, magic `#8fa6ff`, rare `#ffd34d`, legendary `#ff8a2a`, set `#3cdc6a`.
 
 ### 6.5 Effects and juice
 Screen transitions (fade, iris, battle swirl/shatter), hit-stop (2 to 4 frames) on heavy hits, screen shake,
