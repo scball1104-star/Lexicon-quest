@@ -4,14 +4,20 @@
     "archive": "assets/tiles/archive.png",
     "cliffs": "assets/tiles/cliffs.png",
     "environments": "../assets/art/environments.webp",
+    "interior": "assets/tiles/interior.png",
     "terrain": "assets/tiles/terrain.png",
     "town": "assets/tiles/town.png"
   },
   "atlases": {
     "bosses_battle": "assets/sprites/bosses_battle.json",
+    "enemies_battle": "assets/sprites/enemies_battle.json",
+    "enemies_field": "assets/sprites/enemies_field.json",
     "logo": "assets/ui/logo.json",
+    "misc": "assets/sprites/misc.json",
     "npcs": "assets/sprites/npcs.json",
+    "party_battle": "assets/sprites/party_battle.json",
     "party_field": "assets/sprites/party_field.json",
+    "portraits": "assets/sprites/portraits.json",
     "props": "assets/sprites/props.json",
     "ui": "assets/ui/ui.json",
     "window": "assets/ui/window.json"
@@ -42,5 +48,6 @@
     "menu_pressed": "assets/ui/touch/menu_pressed.png",
     "run": "assets/ui/touch/run.png",
     "run_pressed": "assets/ui/touch/run_pressed.png"
-  }
+  },
+  "scenes": "src/scenes/registry.js"
 }
