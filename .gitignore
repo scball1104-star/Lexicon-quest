@@ -9,3 +9,4 @@ test-results/
 .claude/
 next/qa/out/
 __pycache__/
+next/tools/**/out/
