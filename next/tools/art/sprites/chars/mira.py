@@ -2,8 +2,8 @@
 PAL = {
  '0': 'hair_violet:0', '1': 'cloth_purple:0', '2': 'metal:0', '3': 'hair_brown:0',
  'a': 'ink:1', 'b': '#2e2258', 'c': '#4a3888', 'd': '#6a54b0', 'e': '#9a86d8',
- 'w': 'skin_light:0', 't': 'skin_light:1', 'u': 'skin_light:2', 'v': 'skin_light:3',
- 'E': 'ink:2', 'F': 'cloth_purple:5',
+ 'w': 'skin_med:0', 't': 'skin_med:1', 'u': 'skin_med:2', 'v': 'skin_med:3',
+ 'E': 'ink:2', 'F': 'gold:4',
  'l': 'cloth_purple:1', 'm': 'cloth_purple:2', 'n': 'cloth_purple:3', 'o': 'cloth_purple:4', 'p': 'cloth_purple:5',
  'g': 'gold:2', 'G': 'gold:3', 'Y': 'gold:4',
  'T': 'stone_cool:2', 'U': 'stone_cool:3', 'V': 'stone_cool:1',

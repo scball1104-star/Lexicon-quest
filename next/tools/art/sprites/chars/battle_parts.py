@@ -252,7 +252,7 @@ ARMS = {
 
 ARM_PAL = {
  'hero': {'0': 'hair_brown:0', 'l': 'stone_warm:4', 'm': 'stone_warm:5', 'r': 'wood:1', 'R': 'wood:2', 'x': 'wood:3'},
- 'mira': {'0': 'hair_violet:0', 'l': 'cloth_purple:2', 'm': 'cloth_purple:3', 'r': 'skin_light:1', 'R': 'skin_light:2', 'x': 'skin_light:3'},
+ 'mira': {'0': 'hair_violet:0', 'l': 'cloth_purple:2', 'm': 'cloth_purple:3', 'r': 'skin_med:1', 'R': 'skin_med:2', 'x': 'skin_med:3'},
  'bram': {'0': 'metal:0', 'l': 'stone_cool:4', 'm': 'metal:2', 'r': 'metal:1', 'R': 'stone_cool:4', 'x': 'metal:3'},
 }
 
