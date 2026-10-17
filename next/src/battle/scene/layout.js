@@ -1,0 +1,109 @@
+// Battle scene layout: every rectangle and anchor the battle draws, as pure data and pure functions
+// (node tests import this). Internal resolution 384x216 (DESIGN 3). Positions follow the mocks in
+// tools/art/ui/out/mock_battle_*.png: enemies left in a diagonal, party right in a diagonal, command
+// window bottom-left, party status bottom-right, help window top-left, timeline top-right.
+
+export const W = 384;
+export const H = 216;
+
+// Windows (x, y, w, h).
+export const HELP_WIN = { x: 4, y: 4, w: 218, h: 19 };
+export const CMD_WIN = { x: 4, y: 152, w: 92, h: 60 };
+export const STATUS_WIN = { x: 98, y: 152, w: 282, h: 60 };
+export const CMD_ROWS = 4;            // visible command rows
+export const CMD_ROW_H = 11;
+export const STATUS_ROW_H = 17;
+
+// Timeline (top right): 8 slots of 18 px, the first (current) gets one extra px of air.
+export const TL = { x: 226, y: 6, slots: 8, slot: 18, railW: 154 };
+export function timelineSlotX(i) { return TL.x + 2 + (i === 0 ? 0 : 19 + (i - 1) * TL.slot); }
+
+// Floor line the sprites stand on (feet y) and the band the bottom windows cover.
+export const FLOOR_Y = 146;
+
+// Party slots: feet positions, a diagonal going down-right (FF6). Index 0 = leader.
+const PARTY_SLOTS_3 = [[298, 104], [320, 125], [342, 146]];
+const PARTY_SLOTS_2 = [[306, 112], [334, 140]];
+const PARTY_SLOTS_1 = [[320, 126]];
+/** Feet positions for n party members. */
+export function partySlots(n) {
+  const base = n >= 3 ? PARTY_SLOTS_3 : n === 2 ? PARTY_SLOTS_2 : PARTY_SLOTS_1;
+  return base.slice(0, Math.max(1, n)).map(([x, y]) => ({ x, y }));
+}
+/** Where a party member stands while striking a melee target (just right of the target's box). */
+export function meleeSpot(target, attacker) {
+  const half = Math.max(12, Math.round((target.w || 32) / 2));
+  return { x: Math.min(attacker.homeX - 8, target.x + half + 14), y: attacker.homeY };
+}
+/** Where an enemy stands while striking a party member (just left of them). */
+export function enemyMeleeSpot(target, attacker) {
+  const half = Math.max(12, Math.round((attacker.w || 48) / 2));
+  return { x: Math.max(attacker.homeX + 8, target.x - 18 - half), y: attacker.homeY };
+}
+
+// Enemy slots by group size (feet positions). Back row higher and further left, so sprites overlap
+// like FF6 formations. Boss encounters use bossSlot().
+const ENEMY_SLOTS = {
+  1: [[118, 146]],
+  2: [[74, 134], [156, 150]],
+  3: [[54, 122], [122, 140], [194, 152]],
+  4: [[44, 114], [100, 132], [160, 148], [222, 154]],
+  5: [[40, 110], [92, 128], [146, 144], [200, 152], [236, 120]],
+};
+export function enemySlots(n) {
+  const list = ENEMY_SLOTS[Math.min(5, Math.max(1, n))];
+  return list.map(([x, y]) => ({ x, y }));
+}
+export const BOSS_SLOT = { x: 98, y: 146 };
+/** Slots for summoned adds (Lost Pages) around the boss: they float, so y is their hover feet line. */
+const SUMMON_SLOTS = [[200, 70], [214, 118], [184, 44], [232, 92]];
+export function summonSlot(i) { const [x, y] = SUMMON_SLOTS[i % SUMMON_SLOTS.length]; return { x, y }; }
+
+/** Enemy size class -> ground shadow frame in misc.json. */
+export const SHADOW_BY_SIZE = { small: 'shadow_medium', medium: 'shadow_large', large: 'shadow_large', boss: 'shadow_huge' };
+
+// 14x14 face crops for the timeline (offsets inside the 32x32 portrait frame, per mocks).
+export const PORTRAIT_FACE = { default: [9, 9] };
+// Enemy face crops: offset of the 14x14 window inside the battle frame, as a fraction of the frame
+// (x: center, y: where the "head" is). Tuned per enemy; unknown ids use the default.
+export const ENEMY_FACE = {
+  default: [0.5, 0.3],
+  ink_slime: [0.52, 0.36], page_wraith: [0.6, 0.3], briar_wolf: [0.78, 0.45], moss_scarab: [0.8, 0.5],
+  bookmite: [0.5, 0.5], tome_golem: [0.5, 0.2], ink_wraith: [0.6, 0.18], echo_warden: [0.6, 0.15],
+  archivore: [0.49, 0.43], lost_page: [0.5, 0.5], lost_page_0: [0.5, 0.5], lost_page_1: [0.5, 0.5], lost_page_2: [0.5, 0.5],
+};
+export function enemyFaceRect(frame, id) {
+  const f = ENEMY_FACE[id] || ENEMY_FACE.default;
+  const x = Math.round(frame.x + frame.w * f[0] - 7), y = Math.round(frame.y + frame.h * f[1] - 7);
+  return { x: Math.max(frame.x, Math.min(frame.x + frame.w - 14, x)), y: Math.max(frame.y, Math.min(frame.y + frame.h - 14, y)) };
+}
+
+/** Shield badge + weakness row anchor under an enemy (kept above the bottom windows). */
+export function enemyRowAnchor(unit) {
+  const w = 12 + 15 * 4;
+  const x = Math.max(4, Math.min(W - w - 4, Math.round(unit.x - w / 2)));
+  const y = Math.min(STATUS_WIN.y - 16, Math.round(unit.y + 2));
+  return { x, y };
+}
+
+/** Bounding box of a unit on screen for tap targeting. */
+export function unitBox(u) {
+  const w = Math.max(24, u.w || 32), h = Math.max(32, u.h || 40);
+  return { x: Math.round(u.x - w / 2), y: Math.round(u.y - h), w, h };
+}
+
+/** Status window row rect and the x anchors inside it (mock_battle_command). */
+export function statusRow(i) {
+  const ry = STATUS_WIN.y + 5 + i * STATUS_ROW_H;
+  const x0 = STATUS_WIN.x + 8;
+  return { y: ry, x0, name: [x0, ry + 3], hp: [x0 + 92, ry + 1], hpGauge: [x0 + 44, ry + 11, 75],
+    mpLbl: [x0 + 126, ry + 2], mp: [x0 + 156, ry + 1], mpGauge: [x0 + 126, ry + 11, 31],
+    furyLbl: [x0 + 164, ry + 2], furyGauge: [x0 + 164, ry + 11, 52], ready: [x0 + 190, ry + 2], status: [x0 + 224, ry + 4],
+    bar: [STATUS_WIN.x + 4, ry, STATUS_WIN.w - 8, STATUS_ROW_H] };
+}
+
+/** Rewards window and level-up window rects. */
+export const REWARD_WIN = { x: 40, y: 14, w: 236, h: 102 };
+export const LEVEL_WIN = { x: 58, y: 34, w: 206, h: 106 };
+export const SUB_WIN = { x: 4, y: 90, w: 188, h: 60 };
+export const BANNER_Y = 84;

@@ -16,7 +16,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 ## Wave 2: systems on top of foundations
 - [~] W2-world: tilemap + autotile renderer, actors, followers, NPC behaviors, events, cutscene runner, camera, lighting, particles, transitions, field scene
 - [~] W2-ui: dialogue (typewriter, portraits, blips, choices), main menu (items/equip/tech/status/journal/bestiary/config/save), shop, name entry, title, save/load, options
-- [~] W2-battle-scene: battle presentation over the pure rules: layout, timeline, commands, targeting, animations, fx, rewards, level-up
+- [x] W2-battle-scene: battle presentation over the pure rules: layout, timeline, commands, targeting, animations, fx, rewards, level-up
 - [~] W2-maps: author Willowmere (+ interiors), Willowmere Valley, Archive F1-F3 + boss room, with a map preview tool
 
 ## Wave 3: integration
@@ -26,3 +26,8 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [ ] critic passes (art, UX, combat feel, story) on qa/out screenshots -> issue lists here
 - [ ] fix passes per issue list
 - [ ] balance simulation, mobile/touch pass, performance pass, accessibility/options pass
+
+## Polish backlog (found in review)
+- [ ] Battle timeline face crops (14x14) read as orange squares; use 12x12 head icons drawn for the purpose, plus enemy silhouettes
+- [ ] Enemies have a single battle frame; add a 2-frame idle breathe and a hurt squash in code
+- [ ] Long telegraph sentences get cut with an ellipsis in the help window; wrap to two lines

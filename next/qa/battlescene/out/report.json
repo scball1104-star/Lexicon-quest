@@ -1,0 +1,12 @@
+[
+  {
+    "device": "desktop",
+    "scenario": "combo",
+    "status": "ok",
+    "detail": "",
+    "note": "combo cross_rend",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-combo-cross_rend.png"
+    ]
+  }
+]

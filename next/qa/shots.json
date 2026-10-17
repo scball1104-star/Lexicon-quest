@@ -1,14 +1,51 @@
 {
   "$comment": "Screenshot plan for qa/shots.py. Add a shot per scene you build. Steps are documented at the top of shots.py.",
-  "defaultDevices": ["desktop", "phone"],
+  "defaultDevices": [
+    "desktop",
+    "phone"
+  ],
   "devices": {
-    "desktop": { "width": 1920, "height": 1080, "dpr": 1 },
-    "phone": { "width": 844, "height": 390, "dpr": 3, "mobile": true, "touch": true },
-    "laptop": { "width": 1440, "height": 900, "dpr": 1 },
-    "small": { "width": 1366, "height": 768, "dpr": 1 },
-    "hidpi": { "width": 1536, "height": 864, "dpr": 1.25 },
-    "portrait": { "width": 390, "height": 844, "dpr": 3, "mobile": true, "touch": true },
-    "tablet": { "width": 1180, "height": 820, "dpr": 2, "mobile": true, "touch": true }
+    "desktop": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1
+    },
+    "phone": {
+      "width": 844,
+      "height": 390,
+      "dpr": 3,
+      "mobile": true,
+      "touch": true
+    },
+    "laptop": {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1
+    },
+    "small": {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1
+    },
+    "hidpi": {
+      "width": 1536,
+      "height": 864,
+      "dpr": 1.25
+    },
+    "portrait": {
+      "width": 390,
+      "height": 844,
+      "dpr": 3,
+      "mobile": true,
+      "touch": true
+    },
+    "tablet": {
+      "width": 1180,
+      "height": 820,
+      "dpr": 2,
+      "mobile": true,
+      "touch": true
+    }
   },
   "ignoreConsole": [],
   "shots": [
@@ -16,104 +53,2125 @@
       "name": "title_dev",
       "note": "engine dev title: fonts, window, cursor menu, display facts",
       "steps": [
-        { "call": "reset", "args": ["_devTitle"] },
-        { "wait": 400 },
-        { "assert": "LQ_DEBUG.scene() === '_devTitle'", "message": "dev title is on top" }
+        {
+          "call": "reset",
+          "args": [
+            "_devTitle"
+          ]
+        },
+        {
+          "wait": 400
+        },
+        {
+          "assert": "LQ_DEBUG.scene() === '_devTitle'",
+          "message": "dev title is on top"
+        }
       ]
     },
     {
       "name": "title_input",
       "note": "input test panel while holding a direction (keyboard path)",
-      "devices": ["desktop", "laptop", "small", "hidpi"],
+      "devices": [
+        "desktop",
+        "laptop",
+        "small",
+        "hidpi"
+      ],
       "steps": [
-        { "call": "reset", "args": ["_devTitle"] },
-        { "wait": 200 },
-        { "keys": ["ArrowDown", "ArrowDown", "z"] },
-        { "assert": "LQ_DEBUG.state().sceneState.showInput === true", "message": "keyboard reached the Input Test item" },
-        { "eval": "LQ_DEBUG.press('right', 40)" },
-        { "frames": 20 }
+        {
+          "call": "reset",
+          "args": [
+            "_devTitle"
+          ]
+        },
+        {
+          "wait": 200
+        },
+        {
+          "keys": [
+            "ArrowDown",
+            "ArrowDown",
+            "z"
+          ]
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.showInput === true",
+          "message": "keyboard reached the Input Test item"
+        },
+        {
+          "eval": "LQ_DEBUG.press('right', 40)"
+        },
+        {
+          "frames": 20
+        }
       ]
     },
     {
       "name": "field_dev",
       "note": "dev field after walking right then running down: camera, followers, banner",
       "steps": [
-        { "call": "reset", "args": ["_devField"] },
-        { "frames": 5 },
-        { "press": "right", "frames": 50 },
-        { "frames": 52 },
-        { "eval": "LQ_DEBUG.press('run', 70)" },
-        { "press": "down", "frames": 60 },
-        { "frames": 70 },
-        { "assert": "LQ_DEBUG.state().sceneState.leader.x > 8", "message": "leader moved right" },
-        { "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.followers[0].x !== s.leader.x || s.followers[0].y !== s.leader.y; })()", "message": "followers trail behind" }
+        {
+          "call": "reset",
+          "args": [
+            "_devField"
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "press": "right",
+          "frames": 50
+        },
+        {
+          "frames": 52
+        },
+        {
+          "eval": "LQ_DEBUG.press('run', 70)"
+        },
+        {
+          "press": "down",
+          "frames": 60
+        },
+        {
+          "frames": 70
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.leader.x > 8",
+          "message": "leader moved right"
+        },
+        {
+          "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.followers[0].x !== s.leader.x || s.followers[0].y !== s.leader.y; })()",
+          "message": "followers trail behind"
+        }
       ]
     },
     {
       "name": "field_touch",
       "note": "touch d-pad drives the field (phone only)",
-      "devices": ["phone", "portrait", "tablet"],
+      "devices": [
+        "phone",
+        "portrait",
+        "tablet"
+      ],
       "steps": [
-        { "call": "reset", "args": ["_devField"] },
-        { "frames": 5 },
-        { "touch": "dpad", "dir": "right", "hold": 700 },
-        { "frames": 20 },
-        { "assert": "LQ_DEBUG.state().sceneState.leader.x > 6", "message": "touch d-pad moved the leader" },
-        { "assert": "LQ_DEBUG.state().lastDevice === 'touch'", "message": "lastDevice is touch" }
+        {
+          "call": "reset",
+          "args": [
+            "_devField"
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "touch": "dpad",
+          "dir": "right",
+          "hold": 700
+        },
+        {
+          "frames": 20
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.leader.x > 6",
+          "message": "touch d-pad moved the leader"
+        },
+        {
+          "assert": "LQ_DEBUG.state().lastDevice === 'touch'",
+          "message": "lastDevice is touch"
+        }
       ]
     },
     {
       "name": "field_dialog",
       "note": "sign message box with typewriter text over the field",
       "steps": [
-        { "call": "reset", "args": ["_devField"] },
-        { "call": "devWarp", "args": [10, 9] },
-        { "press": "up", "frames": 1 },
-        { "frames": 4 },
-        { "press": "confirm" },
-        { "frames": 180 },
-        { "assert": "LQ_DEBUG.scene() === '_devMessage'", "message": "message scene is on top" }
+        {
+          "call": "reset",
+          "args": [
+            "_devField"
+          ]
+        },
+        {
+          "call": "devWarp",
+          "args": [
+            10,
+            9
+          ]
+        },
+        {
+          "press": "up",
+          "frames": 1
+        },
+        {
+          "frames": 4
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 180
+        },
+        {
+          "assert": "LQ_DEBUG.scene() === '_devMessage'",
+          "message": "message scene is on top"
+        }
       ]
     },
     {
       "name": "field_pause",
       "note": "transparent pause overlay scene over the field",
       "steps": [
-        { "call": "reset", "args": ["_devField"] },
-        { "frames": 150 },
-        { "press": "menu" },
-        { "frames": 10 },
-        { "assert": "LQ_DEBUG.scene() === '_devPause'", "message": "pause overlay pushed" }
+        {
+          "call": "reset",
+          "args": [
+            "_devField"
+          ]
+        },
+        {
+          "frames": 150
+        },
+        {
+          "press": "menu"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.scene() === '_devPause'",
+          "message": "pause overlay pushed"
+        }
       ]
     },
     {
       "name": "transition_iris",
       "note": "iris transition caught mid-way (door in the dev field)",
-      "devices": ["desktop"],
+      "devices": [
+        "desktop"
+      ],
       "steps": [
-        { "call": "reset", "args": ["_devField"] },
-        { "call": "devWarp", "args": [40, 5] },
-        { "frames": 150 },
-        { "eval": "LQ_DEBUG.setSpeed(0)" },
-        { "press": "up", "frames": 1 },
-        { "advance": 30 }
+        {
+          "call": "reset",
+          "args": [
+            "_devField"
+          ]
+        },
+        {
+          "call": "devWarp",
+          "args": [
+            40,
+            5
+          ]
+        },
+        {
+          "frames": 150
+        },
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "press": "up",
+          "frames": 1
+        },
+        {
+          "advance": 30
+        }
       ]
     },
     {
       "name": "gallery_fonts",
       "note": "fonts as the engine draws them (real UI font or the embedded fallback)",
       "steps": [
-        { "call": "reset", "args": ["_devGallery", { "tab": "fonts" }] },
-        { "wait": 300 },
-        { "zoom": [0, 0, 480, 270], "scale": 2 }
+        {
+          "call": "reset",
+          "args": [
+            "_devGallery",
+            {
+              "tab": "fonts"
+            }
+          ]
+        },
+        {
+          "wait": 300
+        },
+        {
+          "zoom": [
+            0,
+            0,
+            480,
+            270
+          ],
+          "scale": 2
+        }
       ]
     },
     {
       "name": "gallery_atlases",
       "note": "first loaded atlas: frames, origins, animation preview",
       "steps": [
-        { "call": "reset", "args": ["_devGallery", { "tab": "atlases" }] },
-        { "wait": 300 }
+        {
+          "call": "reset",
+          "args": [
+            "_devGallery",
+            {
+              "tab": "atlases"
+            }
+          ]
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
+    {
+      "name": "ui_title",
+      "note": "title screen: logo, key art, menu (W2-ui)",
+      "steps": [
+        {
+          "call": "reset",
+          "args": [
+            "title"
+          ]
+        },
+        {
+          "frames": 40
+        }
+      ]
+    },
+    {
+      "name": "ui_name_entry",
+      "note": "name entry grid with a typed name (W2-ui)",
+      "steps": [
+        {
+          "call": "reset",
+          "args": [
+            "nameEntry"
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "keys": [
+            "Backspace",
+            "Backspace",
+            "Backspace",
+            "Backspace",
+            "A",
+            "r",
+            "d",
+            "e",
+            "n"
+          ]
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.value === 'Arden'",
+          "message": "typed name"
+        }
+      ]
+    },
+    {
+      "name": "ui_prologue",
+      "note": "prologue card 2 (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "prologue"
+            }
+          ]
+        },
+        {
+          "frames": 40
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 50
+        }
+      ]
+    },
+    {
+      "name": "ui_dialog",
+      "note": "dialogue window with portrait, name tab, typewriter over the stage (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('dialog',{who:'mael',text:'Ah, there you are. Did you sleep through the bell again? The {c:gold}Thirteenth Bell{/c} rang at midnight, though our tower has only ever held twelve.'}); return true; })()"
+        },
+        {
+          "frames": 70
+        },
+        {
+          "assert": "LQ_DEBUG.scene()==='dialog'",
+          "message": "dialog on top"
+        }
+      ]
+    },
+    {
+      "name": "ui_dialog_choice",
+      "note": "dialogue with a choice window (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage"
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('dialog',{who:'hazel',text:'Did you hear the bells last night? Pip has been at the chapel since dawn, swearing he counted thirteen.',choices:['I heard them too.','Thirteen?']}); return true; })()"
+        },
+        {
+          "frames": 140
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 8
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.choiceIndex===1",
+          "message": "choice cursor moved"
+        }
+      ]
+    },
+    {
+      "name": "ui_menu",
+      "note": "field main menu (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "press": "menu"
+        },
+        {
+          "frames": 20
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.scene()==='menu'",
+          "message": "menu on top"
+        }
+      ]
+    },
+    {
+      "name": "ui_menu_member",
+      "note": "menu: picking a member for Equip (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "press": "menu"
+        },
+        {
+          "frames": 20
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.mode==='members'",
+          "message": "member pick mode"
+        }
+      ]
+    },
+    {
+      "name": "ui_items",
+      "note": "menu Items screen with the member picker (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'items',instant:true}); return true; })()"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 12
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.screen.picker===true",
+          "message": "picker open"
+        }
+      ]
+    },
+    {
+      "name": "ui_tech",
+      "note": "menu Tech screen (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'tech',instant:true,member:2}); return true; })()"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_magic",
+      "note": "menu Magic screen for Mira (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'magic',instant:true,member:1}); return true; })()"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 6
+        }
+      ]
+    },
+    {
+      "name": "ui_equip",
+      "note": "menu Equip screen comparing a candidate (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'equip',instant:true,member:2}); return true; })()"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 4
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.screen.focus==='cands'",
+          "message": "candidates focused"
+        }
+      ]
+    },
+    {
+      "name": "ui_status",
+      "note": "menu Status screen (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'status',instant:true,member:1}); return true; })()"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_journal",
+      "note": "menu Journal (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'journal',instant:true}); return true; })()"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_bestiary",
+      "note": "menu Bestiary tab (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.game.bestiary={ink_slime:{seen:4,killed:3,weak:['fire']},briar_wolf:{seen:2,killed:0,weak:[]}}; return true; })()"
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'journal',instant:true}); return true; })()"
+        },
+        {
+          "frames": 6
+        },
+        {
+          "press": "pageR"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_config",
+      "note": "config screen (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('config'); return true; })()"
+        },
+        {
+          "frames": 6
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "right"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.key==='windowColor'",
+          "message": "window color row"
+        }
+      ]
+    },
+    {
+      "name": "ui_save",
+      "note": "save slots (W2-ui)",
+      "storage": {
+        "lq-next-slot-2": {
+          "v": 1,
+          "savedAt": "2026-10-17T12:00:00Z",
+          "meta": {
+            "name": "Arden",
+            "level": 5,
+            "map": "valley",
+            "playtime": 4000,
+            "chapter": 1,
+            "gold": 320,
+            "party": [
+              "hero",
+              "mira"
+            ]
+          },
+          "data": {}
+        }
+      },
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('loadGame',{mode:'save'}); return true; })()"
+        },
+        {
+          "frames": 6
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_load",
+      "note": "load slots from the title (W2-ui)",
+      "storage": {
+        "lq-next-slot-1": {
+          "v": 1,
+          "savedAt": "2026-10-17T12:00:00Z",
+          "meta": {
+            "name": "Arden",
+            "level": 8,
+            "map": "archive_f2",
+            "playtime": 9000,
+            "chapter": 1,
+            "gold": 1800,
+            "party": [
+              "hero",
+              "mira",
+              "bram"
+            ]
+          },
+          "data": {}
+        }
+      },
+      "steps": [
+        {
+          "call": "reset",
+          "args": [
+            "title"
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 12
+        },
+        {
+          "assert": "LQ_DEBUG.scene()==='loadGame'",
+          "message": "load screen"
+        }
+      ]
+    },
+    {
+      "name": "ui_shop",
+      "note": "smithy shop, browsing a weapon (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.game.flags.archive_entered=true; LQ_DEBUG.engine.pushAwait('shop',{shopId:'willowmere_smithy'}); return true; })()"
+        },
+        {
+          "frames": 6
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "down"
+        },
+        {
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "name": "ui_shop_qty",
+      "note": "item shop quantity picker (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('shop',{shopId:'willowmere_items'}); return true; })()"
+        },
+        {
+          "frames": 6
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "right"
+        },
+        {
+          "frames": 3
+        },
+        {
+          "press": "right"
+        },
+        {
+          "frames": 10
+        },
+        {
+          "assert": "LQ_DEBUG.state().sceneState.qty===3",
+          "message": "qty 3"
+        }
+      ]
+    },
+    {
+      "name": "ui_inn",
+      "note": "inn offer dialog (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.game.map='inn'; LQ_DEBUG.engine.pushAwait('inn',{price:10}); return true; })()"
+        },
+        {
+          "frames": 90
+        }
+      ]
+    },
+    {
+      "name": "ui_gameover",
+      "note": "game over with options (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.push('gameover'); return true; })()"
+        },
+        {
+          "frames": 200
+        }
+      ]
+    },
+    {
+      "name": "ui_credits",
+      "note": "credits scrolling (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.push('credits'); return true; })()"
+        },
+        {
+          "frames": 260
+        }
+      ]
+    },
+    {
+      "name": "ui_title_card",
+      "note": "end-of-episode title card (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.pushAwait('titleCard',{text:'End of Episode 1',sub:'The Missing Name',frames:240}); return true; })()"
+        },
+        {
+          "frames": 40
+        }
+      ]
+    },
+    {
+      "name": "ui_toast",
+      "note": "received item toast over the stage (W2-ui)",
+      "steps": [
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "stage",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "level": 6,
+              "gold": 1240,
+              "items": {
+                "potion": 5,
+                "ether": 2,
+                "antidote": 1,
+                "hi_potion": 1,
+                "phoenix_feather": 1,
+                "tent": 1,
+                "lantern_of_recall": 1,
+                "tess_letter_1": 1,
+                "archive_key": 2
+              },
+              "gear": [
+                "longsword",
+                "battle_axe",
+                "iron_pike",
+                "crystal_rod",
+                "chain_shirt",
+                "leather_hood",
+                "owl_charm",
+                "traveler_boots",
+                "scout_mantle",
+                "wayfarer_mantle"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "tess_quest_started": 1,
+                "tess_letter_1_found": 1,
+                "starter_quest_started": 1
+              },
+              "hp": 0.6,
+              "fury": 100,
+              "playtime": 5025,
+              "map": "willowmere",
+              "banner": false
+            }
+          ]
+        },
+        {
+          "frames": 5
+        },
+        {
+          "eval": "(() => { LQ_DEBUG.engine.toasts.received('potion',2); return true; })()"
+        },
+        {
+          "frames": 30
+        }
+      ]
+    },
+    {
+      "name": "battle_start",
+      "note": "battle intro: the field snapshot shatters into shards over the valley backdrop",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_wolves",
+            {
+              "fresh": true,
+              "seed": 3
+            }
+          ]
+        },
+        {
+          "advance": 20
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.phase === 'intro'",
+          "message": "intro is playing"
+        }
+      ]
+    },
+    {
+      "name": "battle_command",
+      "note": "hero's command window, timeline, party status (matches mock_battle_command)",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_wolves",
+            {
+              "fresh": true,
+              "seed": 3
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 600; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "advance": 4
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.menu === 'root'",
+          "message": "root command menu is open"
+        }
+      ]
+    },
+    {
+      "name": "battle_target_preview",
+      "note": "targeting a wolf: reticle, name tag, damage preview, timeline landing slot",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_wolves",
+            {
+              "fresh": true,
+              "seed": 3
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 600; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "advance": 4
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.menu === 'target'",
+          "message": "targeting mode"
+        }
+      ]
+    },
+    {
+      "name": "battle_break",
+      "note": "a sword hit on a Bookmite's last shield: BREAK burst + word art (matches mock_battle_break)",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "f1_mites",
+            {
+              "fresh": true,
+              "seed": 5
+            }
+          ]
+        },
+        {
+          "advance": 60
+        },
+        {
+          "call": "battleUntil",
+          "args": [
+            "hero"
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 600; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "call": "battleAct",
+          "args": [
+            {
+              "type": "attack",
+              "target": "e0"
+            }
+          ]
+        },
+        {
+          "advance": 46
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.units.find(u => u.uid === 'e0').broken",
+          "message": "the bookmite is broken"
+        }
+      ]
+    },
+    {
+      "name": "battle_boss",
+      "note": "the Archivore telegraphs Devour Name: orange help text, marker, '!' on the timeline",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "archivore",
+            {
+              "fresh": true,
+              "seed": 2
+            }
+          ]
+        },
+        {
+          "advance": 60
+        },
+        {
+          "call": "battleUntil",
+          "args": [
+            "telegraph"
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 600; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "advance": 4
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.telegraphs.length > 0",
+          "message": "a telegraph is pending"
+        }
+      ]
+    },
+    {
+      "name": "battle_victory",
+      "note": "Auto battle won: victory poses, rewards window (EXP, gold, mastery, drops)",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_wolves",
+            {
+              "fresh": true,
+              "seed": 3,
+              "auto": true
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 1200; i++) { const b = LQ_DEBUG.state().battle; if (b && b.phase === 'rewards') return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "advance": 70
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.rewards && LQ_DEBUG.state().battle.rewards.page === 'main'",
+          "message": "rewards page"
+        }
+      ]
+    },
+    {
+      "name": "battle_levelup",
+      "note": "level-up window after a Lv 1 win: portrait, stat gains, learned skills",
+      "steps": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_slimes",
+            {
+              "fresh": true,
+              "seed": 4,
+              "level": 1,
+              "fast": "end"
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 1200; i++) { const b = LQ_DEBUG.state().battle; if (b && b.phase === 'rewards') return i; LQ_DEBUG.advance(5); } return -1; })()"
+        },
+        {
+          "advance": 70
+        },
+        {
+          "press": "confirm"
+        },
+        {
+          "advance": 12
+        },
+        {
+          "assert": "LQ_DEBUG.state().battle.rewards && LQ_DEBUG.state().battle.rewards.page === 'level'",
+          "message": "level-up page"
+        }
       ]
     }
   ]
