@@ -1,0 +1,11 @@
+{
+  "name": "lexicon-quest-next",
+  "type": "module",
+  "private": true,
+  "description": "Lexicon Quest NEXT: the SNES-style rebuild. Vanilla ES modules, no runtime dependencies.",
+  "scripts": {
+    "test": "node qa/run.mjs",
+    "shots": "python qa/shots.py",
+    "manifest": "node qa/core/sync-manifest.mjs"
+  }
+}

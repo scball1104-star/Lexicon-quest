@@ -1,0 +1,46 @@
+{
+  "$comment": "Generated/maintained by qa/core/sync-manifest.mjs. Paths are relative to next/.",
+  "images": {
+    "archive": "assets/tiles/archive.png",
+    "cliffs": "assets/tiles/cliffs.png",
+    "environments": "../assets/art/environments.webp",
+    "terrain": "assets/tiles/terrain.png",
+    "town": "assets/tiles/town.png"
+  },
+  "atlases": {
+    "bosses_battle": "assets/sprites/bosses_battle.json",
+    "logo": "assets/ui/logo.json",
+    "npcs": "assets/sprites/npcs.json",
+    "party_field": "assets/sprites/party_field.json",
+    "props": "assets/sprites/props.json",
+    "ui": "assets/ui/ui.json",
+    "window": "assets/ui/window.json"
+  },
+  "json": {
+    "palette": "assets/palette.json",
+    "tiles": "assets/tiles/tiles.json"
+  },
+  "fonts": {
+    "large": "assets/ui/font_large.json",
+    "main": "assets/ui/font.json",
+    "num": "assets/ui/font_num.json",
+    "num_big": "assets/ui/font_num_big.json"
+  },
+  "touch": {
+    "a": "assets/ui/touch/a.png",
+    "a_pressed": "assets/ui/touch/a_pressed.png",
+    "b": "assets/ui/touch/b.png",
+    "b_pressed": "assets/ui/touch/b_pressed.png",
+    "dpad": "assets/ui/touch/dpad.png",
+    "dpad_down": "assets/ui/touch/dpad_down.png",
+    "dpad_left": "assets/ui/touch/dpad_left.png",
+    "dpad_right": "assets/ui/touch/dpad_right.png",
+    "dpad_up": "assets/ui/touch/dpad_up.png",
+    "fullscreen": "assets/ui/touch/fullscreen.png",
+    "fullscreen_pressed": "assets/ui/touch/fullscreen_pressed.png",
+    "menu": "assets/ui/touch/menu.png",
+    "menu_pressed": "assets/ui/touch/menu_pressed.png",
+    "run": "assets/ui/touch/run.png",
+    "run_pressed": "assets/ui/touch/run_pressed.png"
+  }
+}

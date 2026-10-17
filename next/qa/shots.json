@@ -1,0 +1,120 @@
+{
+  "$comment": "Screenshot plan for qa/shots.py. Add a shot per scene you build. Steps are documented at the top of shots.py.",
+  "defaultDevices": ["desktop", "phone"],
+  "devices": {
+    "desktop": { "width": 1920, "height": 1080, "dpr": 1 },
+    "phone": { "width": 844, "height": 390, "dpr": 3, "mobile": true, "touch": true },
+    "laptop": { "width": 1440, "height": 900, "dpr": 1 },
+    "small": { "width": 1366, "height": 768, "dpr": 1 },
+    "hidpi": { "width": 1536, "height": 864, "dpr": 1.25 },
+    "portrait": { "width": 390, "height": 844, "dpr": 3, "mobile": true, "touch": true },
+    "tablet": { "width": 1180, "height": 820, "dpr": 2, "mobile": true, "touch": true }
+  },
+  "ignoreConsole": [],
+  "shots": [
+    {
+      "name": "title_dev",
+      "note": "engine dev title: fonts, window, cursor menu, display facts",
+      "steps": [
+        { "call": "reset", "args": ["_devTitle"] },
+        { "wait": 400 },
+        { "assert": "LQ_DEBUG.scene() === '_devTitle'", "message": "dev title is on top" }
+      ]
+    },
+    {
+      "name": "title_input",
+      "note": "input test panel while holding a direction (keyboard path)",
+      "devices": ["desktop", "laptop", "small", "hidpi"],
+      "steps": [
+        { "call": "reset", "args": ["_devTitle"] },
+        { "wait": 200 },
+        { "keys": ["ArrowDown", "ArrowDown", "z"] },
+        { "assert": "LQ_DEBUG.state().sceneState.showInput === true", "message": "keyboard reached the Input Test item" },
+        { "eval": "LQ_DEBUG.press('right', 40)" },
+        { "frames": 20 }
+      ]
+    },
+    {
+      "name": "field_dev",
+      "note": "dev field after walking right then running down: camera, followers, banner",
+      "steps": [
+        { "call": "reset", "args": ["_devField"] },
+        { "frames": 5 },
+        { "press": "right", "frames": 50 },
+        { "frames": 52 },
+        { "eval": "LQ_DEBUG.press('run', 70)" },
+        { "press": "down", "frames": 60 },
+        { "frames": 70 },
+        { "assert": "LQ_DEBUG.state().sceneState.leader.x > 8", "message": "leader moved right" },
+        { "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.followers[0].x !== s.leader.x || s.followers[0].y !== s.leader.y; })()", "message": "followers trail behind" }
+      ]
+    },
+    {
+      "name": "field_touch",
+      "note": "touch d-pad drives the field (phone only)",
+      "devices": ["phone", "portrait", "tablet"],
+      "steps": [
+        { "call": "reset", "args": ["_devField"] },
+        { "frames": 5 },
+        { "touch": "dpad", "dir": "right", "hold": 700 },
+        { "frames": 20 },
+        { "assert": "LQ_DEBUG.state().sceneState.leader.x > 6", "message": "touch d-pad moved the leader" },
+        { "assert": "LQ_DEBUG.state().lastDevice === 'touch'", "message": "lastDevice is touch" }
+      ]
+    },
+    {
+      "name": "field_dialog",
+      "note": "sign message box with typewriter text over the field",
+      "steps": [
+        { "call": "reset", "args": ["_devField"] },
+        { "call": "devWarp", "args": [10, 9] },
+        { "press": "up", "frames": 1 },
+        { "frames": 4 },
+        { "press": "confirm" },
+        { "frames": 180 },
+        { "assert": "LQ_DEBUG.scene() === '_devMessage'", "message": "message scene is on top" }
+      ]
+    },
+    {
+      "name": "field_pause",
+      "note": "transparent pause overlay scene over the field",
+      "steps": [
+        { "call": "reset", "args": ["_devField"] },
+        { "frames": 150 },
+        { "press": "menu" },
+        { "frames": 10 },
+        { "assert": "LQ_DEBUG.scene() === '_devPause'", "message": "pause overlay pushed" }
+      ]
+    },
+    {
+      "name": "transition_iris",
+      "note": "iris transition caught mid-way (door in the dev field)",
+      "devices": ["desktop"],
+      "steps": [
+        { "call": "reset", "args": ["_devField"] },
+        { "call": "devWarp", "args": [40, 5] },
+        { "frames": 150 },
+        { "eval": "LQ_DEBUG.setSpeed(0)" },
+        { "press": "up", "frames": 1 },
+        { "advance": 30 }
+      ]
+    },
+    {
+      "name": "gallery_fonts",
+      "note": "fonts as the engine draws them (real UI font or the embedded fallback)",
+      "steps": [
+        { "call": "reset", "args": ["_devGallery", { "tab": "fonts" }] },
+        { "wait": 300 },
+        { "zoom": [0, 0, 480, 270], "scale": 2 }
+      ]
+    },
+    {
+      "name": "gallery_atlases",
+      "note": "first loaded atlas: frames, origins, animation preview",
+      "steps": [
+        { "call": "reset", "args": ["_devGallery", { "tab": "atlases" }] },
+        { "wait": 300 }
+      ]
+    }
+  ]
+}

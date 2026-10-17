@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d0b16">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>Lexicon Quest</title>
+<link rel="icon" href="../icon-192.png">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+  body {
+    position: fixed; inset: 0;
+    background: #0d0b16 radial-gradient(ellipse at 50% 40%, #1e1a33 0%, #120f1f 55%, #08070d 100%);
+    color: #b8b0d0;
+    touch-action: none; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  #game {
+    position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    touch-action: none; outline: none;
+  }
+  #boot {
+    position: fixed; left: 0; right: 0; top: 50%; margin: -0.6em 0 0; text-align: center;
+    font: 600 13px/1.2 ui-monospace, Consolas, "Courier New", monospace; letter-spacing: 0.2em;
+    color: #8c84a8; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="0" aria-label="Lexicon Quest"></canvas>
+<p id="boot">LOADING<noscript> - this game needs JavaScript</noscript></p>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

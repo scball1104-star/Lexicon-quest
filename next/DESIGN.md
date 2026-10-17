@@ -61,7 +61,9 @@ Scott's standing direction, from his own words:
 
 - **Internal resolution: 384 x 216** (16:9). One canvas `#game`, `image-rendering: pixelated`.
 - **Tile size: 16 px.** Visible field: 24 x 13.5 tiles.
-- **Scaling:** largest integer scale that fits; if the integer scale would be < 2 on a small screen, use
+- **Scaling:** largest integer scale that fits (computed in device pixels). On touch screens the scale may drop one
+  step so the controls sit beside the game; phones in portrait put the game at the top with the controls below.
+  If the integer scale would be < 2 on a small screen, use
   the exact fit scale (non-integer) with nearest-neighbor. Letterbox/pillarbox areas are filled with a
   dark themed backdrop (not flat black), and on touch devices the side bars host the touch controls.
 - **Characters:** sprite cell 24 x 32, feet at bottom-center, footprint = one 16 px tile. Battle sprites
@@ -88,7 +90,7 @@ next/
   package.json          {"type":"module","private":true} so node tests can import src/ directly
   DESIGN.md PLAN.md PROGRESS.md
   src/
-    main.js             boot: create Engine, preload manifest, push TitleScene
+    main.js             boot: create Engine, preload manifest, import src/scenes/registry.js when assets/manifest.json lists it under "scenes" (run node next/qa/core/sync-manifest.mjs after adding it), push TitleScene
     core/
       engine.js         Engine: loop, scene stack, global services (input, audio, assets, save, rng)
       renderer.js       canvas sizing, scale, letterbox, draw helpers (sprite, tile, rect, text)
