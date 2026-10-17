@@ -719,13 +719,15 @@ async function ending_hook(s) {
   await s.music(null);
   await s.camera.panTo('bell_tower', 0);
   await s.fade('in', 90);
+  // Timings follow W1-audio's files: bell_peal is 4.25 s, bell_toll 3.21 s.
   await s.sfx('bell_peal');
+  await s.wait(60);
   await narrate(s, "That night, Willowmere's twelve bells ring out, one for every family, and the whole valley hears them.");
-  await s.wait(90);
+  await s.wait(150);
   await narrate(s, 'The last note fades. And in the quiet after it...');
-  await s.wait(40);
+  await s.wait(60);
   await s.sfx('bell_toll');
-  await s.wait(90);
+  await s.wait(180);
   await s.camera.follow('hero');
   await say(s, 'mira', '...Thirteen.');
   await s.emote('bram', '!');
