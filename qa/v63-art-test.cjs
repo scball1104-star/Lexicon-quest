@@ -9,6 +9,6 @@ for(let i=0;i<8;i++)assert(world.detail(c,0,0,'road',i,2,2,{tiles:[[],[],['road'
 const html=fs.readFileSync('index.html','utf8'),ui=fs.readFileSync('rpg-ui.js','utf8'),sw=fs.readFileSync('sw.js','utf8');
 for(const p of ['v63-animated-atlas.js','v63-world-detail.js','v63-art.css'])assert(html.includes(p)&&sw.includes(p));
 assert(html.indexOf('v63-animated-atlas.js')<html.indexOf('rpg-ui.js'));
-assert(ui.includes('V63Atlas.drawHero')&&ui.includes('V63Atlas.drawEnemy')&&ui.includes('V63World.detail'));
+assert(ui.includes('V63Atlas.drawHero')&&ui.includes('V63World.detail')); /* drawEnemy overlay removed: battle now shows real enemy/boss key-art via .enemy-art CSS crop */
 assert(!fs.readFileSync('v63-animated-atlas.js','utf8').includes('localStorage'));
 console.log('PASS v63: 8 biomes, 288 enemy frames, 72 hero frames, terrain layers, integration and save safety');

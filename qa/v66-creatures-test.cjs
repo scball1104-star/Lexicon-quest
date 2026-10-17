@@ -17,7 +17,7 @@ const raw=fs.readFileSync('v66-creatures.js','utf8'),html=fs.readFileSync('index
 ok(html.includes('src="v66-creatures.js"'),'release HTML imports v66');
 ok(sw.includes("'./v66-creatures.js'"),'offline cache v66');
 ok(html.indexOf('v66-creatures.js')<html.indexOf('rpg-ui.js'),'v66 loaded before UI');
-ok(ui.includes('V66Creatures?.draw'),'new creatures used in actual battle');
+ok(ui.includes('<div class="enemy-art '),'battle shows region enemy/boss key-art (real art via CSS crop; fillRect overlay removed)');
 ok(atlas.includes('root.LQV66Creatures?.draw'),'new sprites animated during battle');
 ok(!raw.includes('localStorage'),'no save-schema writes');
 ok(!raw.includes('.act('),'no combat-rule mutation');
