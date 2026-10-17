@@ -58,9 +58,11 @@ try:
             page.locator('[data-action="confirmAction"]').click()
             page.locator('[data-action="ability"][data-id="rally"]').click()
             page.locator('[data-action="confirmAction"]').click()
-            assert 'Round 2' in page.locator('.battle-heading').inner_text()
-            assert 'Rally 1' in page.locator('.battle-heading').inner_text()
-            assert 'Poison' in page.locator('.tactical-enemy').first.inner_text()
+            page.screenshot(path=str(OUT / f'episode-one-{name}-combat.png'))
+            print('Battle heading:', page.locator('.battle-heading').text_content())
+            assert 'Round 2' in page.locator('.battle-heading').text_content()
+            assert 'Rally 1' in page.locator('.battle-heading').text_content()
+            assert 'Poison' in page.locator('.tactical-enemy').first.text_content()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 4'), 'mobile horizontal overflow'
             page.screenshot(path=str(OUT / f'episode-one-{name}-combat.png'))
             assert not errors, errors
