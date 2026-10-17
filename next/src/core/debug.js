@@ -36,7 +36,7 @@ export function installDebug(engine, opts = {}) {
       if (readyPromise) return readyPromise;
       readyPromise = new Promise((resolve) => {
         const check = () => {
-          if (engine.loaded && engine.renderedFrames - (engine.loadedAtRender || 0) >= 10) { resolve(true); return; }
+          if (engine.loaded && engine.registryLoaded !== false && engine.renderedFrames - (engine.loadedAtRender || 0) >= 10) { resolve(true); return; }
           setTimeout(check, 16);
         };
         check();

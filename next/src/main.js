@@ -52,8 +52,10 @@ async function main() {
   // The engine draws its own loading bar from here on; the HTML line only covers the module download.
   const boot = document.getElementById('boot');
   if (boot) boot.style.display = 'none';
+  engine.registryLoaded = false;   // LQ_DEBUG.ready() waits for the registry too (boot race fix)
   await engine.boot();
   try { await loadRegistry(); } catch (e) { console.error('[main] scene registry failed to load', e); }
+  engine.registryLoaded = true;
   if (boot) boot.remove();
   if (params.has('speed')) engine.timeScale = Number(params.get('speed')) || 1;
   const wanted = params.get('scene');
