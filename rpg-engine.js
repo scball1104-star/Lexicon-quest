@@ -27,7 +27,7 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const hash=(x,y,s=0)=>Math.abs(((x*374761393+y*668265263+s*69069)^((x+y)*1274126177))>>>0);
 const key=(x,y)=>x+','+y;
 function member(id,name,weapon){return{id,name,weapon,level:1,xp:0,hp:id===2?110:id===1?72:96,maxhp:id===2?110:id===1?72:96,mp:id===1?32:20,maxmp:id===1?32:20,mastery:{sword:0,spear:0,axe:0,staff:0},skills:{},tier:0,armor:0};}
-function fresh(name='Scott'){return{version:3,name:name.trim().slice(0,20)||'Scott',place:'town',region:0,floor:0,x:12,y:15,world:{x:12,y:13},steps:0,gold:100,potions:6,ethers:3,party:[member(0,name.trim().slice(0,20)||'Scott','sword'),member(1,'Mira','staff'),member(2,'Bram','spear')],cleared:[],flags:{},puzzles:{},tools:[],journal:['Elder Mael asked you to recover the first fragment from the Rootbound Archive.'],visited:[0],music:false,complete:false};}
+function fresh(name='Scott'){return{version:3,name:name.trim().slice(0,20)||'Scott',place:'town',region:0,floor:0,x:12,y:15,world:{x:12,y:13},steps:0,gold:100,potions:6,ethers:3,party:[member(0,name.trim().slice(0,20)||'Scott','sword'),member(1,'Mira','staff'),member(2,'Bram','spear')],cleared:[],flags:{},puzzles:{},tools:[],journal:['Elder Mael asked you to recover the first fragment from the Rootbound Archive.'],visited:[0],music:true,complete:false};}
 function mastery(p,w=p.weapon){return Math.min(8,1+Math.floor(Math.sqrt((p.mastery[w]||0)/24)));}
 function skillRank(p,s){return Math.min(8,1+Math.floor(Math.sqrt((p.skills[s]||0)/12)));}
 function regionAt(x,y){const col=Math.min(3,Math.max(0,Math.floor(x/24)));return y<24?col:7-col;}
