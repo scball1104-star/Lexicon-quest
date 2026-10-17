@@ -39,7 +39,11 @@ var SFX={
  cancel:function(){tone(440,0,0.09,'square',0.18,220);},
  step:function(){tone(130,0,0.05,'sine',0.11,80);},
  hit:function(){noise(0,0.13,0.28,500);tone(180,0,0.09,'sawtooth',0.16,90);},
- enemyhit:function(){noise(0,0.1,0.2,900);},
+ enemyhit:function(){noise(0,0.12,0.24,900);tone(150,0,0.08,'square',0.12,70);},
+ slash:function(){noise(0,0.09,0.26,1300);tone(540,0,0.06,'sawtooth',0.12,170);},
+ fire:function(){noise(0,0.24,0.2,260);tone(170,0,0.2,'sawtooth',0.13,55);tone(95,0.03,0.22,'triangle',0.1,48);},
+ ice:function(){tone(1500,0,0.08,'triangle',0.15,950);tone(2000,0.05,0.1,'sine',0.13);tone(1150,0.12,0.15,'triangle',0.11,720);},
+ crush:function(){noise(0,0.16,0.3,220);tone(110,0,0.12,'square',0.18,55);},
  heal:function(){tone(659,0,0.12,'sine',0.18);tone(880,0.08,0.16,'sine',0.18);tone(1047,0.18,0.22,'sine',0.16);},
  chest:function(){tone(784,0,0.08,'triangle',0.18);tone(988,0.08,0.08,'triangle',0.18);tone(1319,0.16,0.2,'triangle',0.18);},
  levelup:function(){[523,659,784,1047].forEach(function(f,i){tone(f,i*0.08,0.15,'square',0.18);});},
@@ -53,10 +57,7 @@ function cue(action,game,extra){
  var b=game&&game.battle;
  switch(action){
   case 'move': sfx('step'); break;
-  case 'confirmAction':
-   if(b){ if(extra==='mend'||extra==='revive'||extra==='potion'||extra==='ether')sfx('heal'); else sfx('hit'); }
-   else sfx('confirm');
-   break;
+  case 'confirmAction': case 'quickAttack': case 'quickGuard': break; /* battle attack SFX handled in runCombatAction via battleSfx() */
   case 'start': case 'load': case 'resume': case 'buy': case 'sell':
   case 'equip': case 'use': case 'interact': case 'citizenTalk': case 'forge': sfx('confirm'); break;
   case 'close': case 'back': case 'leaveArea': case 'title': sfx('cancel'); break;

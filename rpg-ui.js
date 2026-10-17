@@ -468,6 +468,19 @@ function renderInterior(){
 }
 
 function combatGuideHTML(){return '<div class="combat-help-grid"><section><span class="eyebrow">1 · Choose a command</span><h3>Pick the best action for this turn</h3><p>Companions act in descending <b>Speed</b>, followed by the enemy phase. Boots can change your order; axes trade 3 speed for power. <b>Attack</b> deals damage, trains your weapon and grants 22 Focus. <b>Defend</b> halves incoming damage, restores 2 MP and grants 18 Focus. Spells and techniques generate 14 Focus, plus a bonus for hitting elemental weaknesses.</p></section><section><span class="eyebrow">2 · Read enemy intent</span><h3>Respond to threats</h3><p>Red alerts mean a heavy move is approaching. Guard, use Aegis, or interrupt a charge if you can. Briar Venom lasts three enemy phases. Rally adds 25% weapon damage for two enemy phases. Armor Break stuns ordinary foes, who then resist repeated stuns for two phases. When a guardian summons protective copies, defeat those copies before trying to damage the guardian.</p></section><section><span class="eyebrow">3 · Pick the target</span><h3>Click a foe or ally</h3><p>Enemies show <b>Weak</b> and <b>Resists</b> beside their HP. Healing and items target your party. A highlighted card indicates your current choice. Confirm your action to advance to the next companion.</p></section><section><span class="eyebrow">4 · Build Resonance</span><h3>Combine all three companions</h3><p>At 100 Focus, when all three allies are alive, use <b>Triad Resonance</b> to hit all living foes and bypass armor. Boss wards may reduce damage to the boss until protective summons are defeated.</p></section></div><p class="notice">Keyboard: 1–9 to select actions, ←/→ to cycle targets, Enter to confirm, G to defend, R to retreat from regular encounters.</p>';}
+function battleSfx(prev,action){
+ if(!prev||typeof LQAudio==='undefined')return;
+ const af=game&&game.battle?game.battle.enemies:null;let enemyHurt=false;
+ if(af)prev.enemies.forEach((o,i)=>{const n=af[i];if(n&&n.hp<o.hp)enemyHurt=true;});
+ let allyHits=0;prev.party.forEach((o,i)=>{const n=game.s.party[i];if(n&&n.hp<o.hp)allyHits++;});
+ if(['mend','revive','potion','ether'].includes(action))LQAudio.sfx('heal');
+ else if(action==='flare')LQAudio.sfx('fire');
+ else if(action==='frost')LQAudio.sfx('ice');
+ else if(action==='crush')LQAudio.sfx('crush');
+ else if(enemyHurt)LQAudio.sfx('slash');
+ else if(['guard','ward','rally'].includes(action))LQAudio.sfx('confirm');
+ for(let k=0;k<allyHits;k++)setTimeout(function(){try{LQAudio.sfx('enemyhit');}catch(e){}},240+k*170);
+}
 function runCombatAction(action,tgt){
  const originId=game?.battle?.origin?.id||'';
  const phaseBefore=game?.battle?{phase:game.battle.phase||0}:null;
@@ -477,7 +490,7 @@ function runCombatAction(action,tgt){
  if(ok&&prev&&BattleUX){battleReport=BattleUX.summary(prev,game,action);
  combatImpact=BattleEffects&&game?.battle?BattleEffects.make(prev,BattleUX.snapshot(game),action,Date.now(),originId):null;
   if(combatImpact)combatImpact.actor=combatActor;
- const phase=Cinematic?.phaseCue(phaseBefore,game.battle);if(phase){bossPhaseCue={...phase,at:Date.now()};soundCue('phase');}else soundCue(combatImpact?.totalDamage>0?'hit':'step');
+ const phase=Cinematic?.phaseCue(phaseBefore,game.battle);if(phase){bossPhaseCue={...phase,at:Date.now()};soundCue('phase');}else battleSfx(prev,action);
  }
  if(ok&&prev&&!game.battle){cinematicTalk('victory');soundCue('victory');bossPhaseCue=null;}
  chosen='attack';target=0;render();
