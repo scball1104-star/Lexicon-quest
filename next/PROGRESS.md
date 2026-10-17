@@ -15,3 +15,19 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   when you tick it), so a composer agent is writing the missing tracks in code, SNES tracker style, with a shared
   four-note "name" motif. The existing Suno tracks (title, town, battle, boss, valley) stay in use. If you get a
   minute with Suno on your phone, `next/docs/SUNO_PROMPTS.md` has drop-in prompts and filenames.
+
+### Evening: Wave 1 complete (all eight foundations in)
+- Engine: one crisp pixel canvas at 384x216, keyboard, gamepad and touch (d-pad and A/B buttons on phones,
+  portrait and landscape), fades and transitions, saves, bitmap fonts. 60 fps on every size tested.
+- Art: a master palette; tile sets for the town, valley cliffs, Archive dungeon and interiors (previews look like
+  a real SNES town); party, townsfolk, animal, prop, enemy, boss and portrait sprites; Final Fantasy style
+  windows, icons, battle gauges, a proper "Lexicon Quest" logo.
+- Sound: 81 effects, 9 jingles (item, level up, inn, save, victory fanfare), 3 ambience loops, and four new
+  music tracks sharing one motif. The Suno tracks you already had stay in use.
+- Story: Episode 1 fully scripted (35 scenes, 29 named townsfolk with their own voices, 4 side quests, a
+  bestiary, books, credits). Companions tell you where to go next from the menu, so no quest arrows.
+- Combat: the whole rule set is built and balance-tested over 25,000 simulated fights: timeline turns,
+  weaknesses and Break, Fury, combo techs, weapon mastery, elite enemies, Diablo-style loot, a three-phase
+  Archivore. Ordinary fights 3 to 5 rounds; the boss punishes ignoring its warnings.
+- Wave 2 started: menus and dialogue, the battle screen, the field (walking, NPCs, puzzles, cutscenes) and the
+  maps themselves. Nothing is playable end to end yet; that is Wave 3.
