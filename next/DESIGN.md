@@ -164,6 +164,9 @@ export default {
   marks: { bedside: [4, 3], town_sign: [12, 17], meet_iris: [8, 6] }   // named points cutscenes refer to
 };
 ```
+- Extra map fields used by the authored maps: `overlays` (cells that override collision, e.g. shelves, faint ink =pit
+  until revealed), `under` (drawn beneath ground decor), `start`, `pitTo` (floor a pit drops to), `weatherZone`;
+  in-map door transfers land on one-cell `notch_*` cells with return doors. Full contract: `docs/MAPS.md` sections 1 and 2.
 - Triggers take `on: 'enter'` (fires when the player steps onto the tile) or `on: 'interact'` (confirm while facing).
   `marks` are required by story scripts: `walk`, `camera.panTo` and `spawn({at})` accept a mark name or x,y.
 - Legend values are `tiles.json` ids: a terrain (autotiled, layered low to high by `terrainOrder`), a wall system
