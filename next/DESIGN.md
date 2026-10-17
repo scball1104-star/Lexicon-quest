@@ -280,13 +280,14 @@ shimmer, day tint. Respect a `reduceMotion` setting (no shake/flash).
   Fury art becomes available (per weapon). **Combo Techs** (Chrono Trigger): when two (or three) party members
   are all ready on consecutive timeline slots and have MP, a Combo option appears (e.g., Hero+Mira
   "Ember Edge", Hero+Bram "Cross Rend", Mira+Bram "Thorn Bulwark", all three "Dawnname").
-- **Weakness + Break (Octopath/SoS):** each enemy has a Shield count and weakness icons (sword, spear, staff,
+- **Weakness + Break (Octopath/SoS):** each enemy has a Shield count and weakness icons (sword, spear, staff, bow,
   axe, fire, ice, thunder, light). Unknown weaknesses show as "?" until hit (or scanned with Mira's Appraise).
   Hitting a weakness removes 1 shield; at 0 the enemy is **Broken**: loses its next turn, takes +50% damage,
   shields refill after.
 - **Telegraphs:** dangerous enemy actions are announced one turn early in the help window and on the timeline
   ("The Archivore inhales a storm of ink..."). Defend, Break, or Stun can answer them. Every boss has phases.
-- **Statuses (Episode 1):** Poison, Burn, Chill (slow), Stun, Silence, Blind, Regen, Protect, Haste, Focus.
+- **Statuses (Episode 1):** Poison, Burn, Chill (slow), Stun, Silence, Blind, Regen, Protect, Haste, Focus, Taunt (Bram draws
+  attacks), Nameless (the Archivore's Devour Name drain).
 - **Weapon mastery (Secret of Mana):** each character can use 2 weapon types; using a type earns mastery XP;
   mastery levels unlock techs and a Fury art. Hero: sword/axe. Mira: staff/bow. Bram: spear/axe.
 - **Elites (Diablo):** 1 in ~8 encounters has an elite with a gold name and 1 to 2 modifiers (Swift, Stoneskin,

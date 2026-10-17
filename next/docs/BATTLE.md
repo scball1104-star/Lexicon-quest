@@ -1,0 +1,400 @@
+# Battle and progression (W1-battle-rules)
+
+The combat layer of Lexicon Quest NEXT: pure, deterministic rules that emit events for the battle scene to
+animate, all Episode 1 combat data, a balance simulator, and node tests. Everything here is plain ES modules
+with no DOM, canvas, audio or timers; every random roll goes through an injected rng.
+
+| File | What it holds |
+|---|---|
+| `src/battle/rules.js` | `createBattle`, `createEncounterBattle`, damage math, turn flow, events, `memberStats`, `equipDelta`, `applyResult` |
+| `src/battle/ctb.js` | timeline math: speed to delay, action ranks, Haste/Chill, `peek(n)` |
+| `src/battle/status.js` | status tunables (Poison 8%, Burn 10%, Regen 8%, Protect 2/3, Defend 1/2, Blind 1/2, Focus 1.5x) |
+| `src/battle/ai.js` | enemy scripts (basic, Echo Warden, Archivore, Lost Page), party policies (`competent` = Auto battle) |
+| `src/battle/loot.js` | item rolls: rarity, bases, affixes, uniques, sets, drops, chests, names, values |
+| `src/data/skills.js` | every skill (party, Fury arts, combos, enemy moves) and every status |
+| `src/data/party.js` | hero, mira, bram: stat tables Lv 1 to 15 + formula to 99, EXP curve, mastery |
+| `src/data/items.js` | consumables, key items, 30 equipment bases, 23 affixes, 6 uniques/set pieces |
+| `src/data/enemies.js` | all 10 enemies, Echo Warden stances, Archivore phases, Lost Page variants, elites |
+| `src/data/encounters.js` | 18 encounter groups, zone plans (how many visible enemies to place), `rollEncounter` |
+| `src/data/loot-tables.js`, `src/data/shops.js` | drop tables, chest tiers, boss loot; three shops with flag-gated stock |
+| `tools/sim/simulate.mjs` | the balance simulator; `tools/sim/tables.mjs` prints the tables below from the data |
+| `qa/battle/*.test.mjs` | 55 node tests in 9 files (about 6 s), including a fuzz pass of 252 random battles |
+
+---
+
+## 1. How a turn becomes a decision
+
+Every turn the player weighs several of these, and none is always right:
+
+1. **Weakness and Break.** Each foe shows shields and "?" weakness slots. Hitting a weakness strips a shield;
+   at 0 it Breaks: loses its next turn, takes +50% damage, and any telegraphed attack is cancelled. Which
+   character, which weapon (Swap is cheap), which element, and *when* to Break are the core choices.
+2. **The timeline.** CTB (FFX): fast actions (Defend 50, Swap 40, Appraise 50, Flash Step 55) come back
+   sooner, heavy ones (Heavy Chop 125) later. Every command previews where the actor lands. Pin Shot and
+   Shield Bash push targets back, Break pushes the victim back, Haste/Chill scale delays, Stun eats a turn.
+3. **Telegraphs.** Dangerous enemy moves are announced at the end of the enemy's turn, naming the target,
+   one turn before they fire. Answers: Defend (halves; fully stops Devour Name), Bram's Guard (takes the hit
+   for an ally while defending), Break or Stun (cancels it), Lunge (cancels on ordinary foes, knocks a boss
+   back 35% of a turn), or simply racing the kill.
+4. **Fury (Lufia II IP).** Per-character gauge 0 to 100, kept between battles. Fills from damage taken
+   (3 + 35% of the HP fraction lost) and dealt (+8, +4 on a weakness, +12 on a Break), +10 on Defend. When full,
+   the active weapon's Fury art is available. Spend it now, or hold it for the Break window?
+5. **Combos (Chrono Trigger).** Offered only when the partners hold the very next timeline slots and have
+   MP. They spend every member's MP and turn at once. Lining the timeline up for one is itself a decision.
+6. **Resources.** MP must last a dungeon floor; Mira heals and scans; items cost a turn but are faster
+   (rank 80). Defend restores 5% MP.
+7. **Setups.** Hero's Steady and Bram's Rally grant Focus (next hit x1.5) to land inside a Break window.
+
+## 2. Rules reference
+
+**Damage.** `stat * power/100 * 24 / (24 + DEF)` with DEF reduced by `pierce`. Physical uses ATK/DEF, magic
+MAG/SPR. Then: variance +-10%, crit x1.5 (physical only; 4% + LUK/500 + gear + mastery passives; enemies 3%),
+weakness x1.3, resist x0.5 (immune 0, absorb heals), Broken x1.5, Defend x0.5, Protect x2/3, Focus x1.5,
+mastery +3% per level above 1 with that weapon, element gear bonus (+% fire etc.), ink resistance on gear,
+Stoneskin elites take x0.75 physical. Hit chance: physical 97% (enemies 95%), Blind x0.5, flying foes evade
+melee 15 to 20% (bows and magic never miss). Minimum 1.
+
+**Timeline.** `delay = 3000 / (SPD + 10) * rank/100 * (Haste 2/3 | Chill 1.5)`. A *round* is 150 ticks, one
+normal action at SPD 10. The unit with the lowest `next` acts; ties go to the party. Statuses tick at turn
+start (Poison/Burn/Regen) and count down at turn end. Poison and Burn never KO a party member (they stop at 1
+HP) and bosses take 30% of normal ticks. Fire thaws Chill, ice puts out Burn; Burn and Chill replace each other.
+
+**Break.** Shields 1 to 8. One shield per weakness hit (multi-hit skills chip per hit; Cross Rend, Fury arts
+and Dawnname chip shields even without a weakness). At 0: `break` event, the foe is pushed back half a turn,
+loses its next turn (`skip` reason `break`), then `shield_restore`. Phase changes set a new shield count.
+
+**Mastery (Secret of Mana).** Levels 1 to 8 per weapon type at 0/25/70/140/240/380/560/800 points. Points:
++1 per use in battle, plus the enemies' mastery points split by the weapon types used. Unlocks: tech at M1,
+Fury art at M2, tech at M3, tech at M5; passives +3% damage per level, +3% crit at M4 and M7, +15% Fury gain
+at M6, +5% damage at M8.
+
+**Elites (Diablo).** `ELITE_RATE` 1 in 8 ordinary encounters: one enemy gets a gold name, 1 or 2 modifiers
+(30% chance of two), HP x1.45, ATK/MAG x1.12, double EXP/gold/mastery and a guaranteed magic+ drop.
+Swift (SPD x1.4), Stoneskin (+2 shields, DEF x1.5, x0.75 physical taken), Vampiric (heals 35% of damage dealt),
+Cursed (30% per hit: Poison, Blind or Chill), Splitting (splits into two 35%-HP copies when first defeated).
+
+**Defend** halves damage until the defender's next turn, +10 Fury, +5% MP, rank 50. **Swap** changes the active
+weapon (stats and techs follow; max HP/MP do not change), rank 40. **Flee** 50% +4% per SPD point over the
+foes' average, +15% per retry; never in boss fights.
+
+## 3. The party
+
+| | Role | Weapons | Signature |
+|---|---|---|---|
+| hero | Striker | sword (fast, crit) + axe (heavy) | Rising Slash, Steady (Focus), Dawnsplitter, combo glue |
+| mira | Archivist | staff (magic) + bow (flyers) | Ember/Frost/Spark/Lumen, Mend, Mending Rain, Appraise, Purify, Wellspring |
+| bram | Guardian | spear (pierce) + axe (break) | Guard, Taunt, Rally, Lunge (interrupt), Skyfall Lance |
+
+Start kits: hero Short Sword + Cloth Tunic; Mira Oak Staff + Short Bow + Cloth Tunic; Bram Ash Spear + Hatchet
++ Leather Vest + Cloth Cap. The hero's axe is the Hatchet that Garrick gives as a farewell gift (story,
+W1-content); a spare in an early valley chest is a good safety net.
+
+| Lv | EXP | Hero HP/MP/ATK/DEF/MAG/SPR/SPD | Mira | Bram |
+|---|---|---|---|---|
+| 1 | 0 | 48/12/12/8/6/7/12 | 36/22/7/6/14/12/11 | 60/10/11/12/4/8/9 |
+| 2 | 20 | 58/14/14/9/7/8/13 | 44/25/8/7/16/14/12 | 73/11/13/14/5/9/9 |
+| 3 | 68 | 69/15/16/11/8/9/13 | 52/29/9/8/19/16/12 | 86/13/15/16/5/10/10 |
+| 4 | 148 | 80/17/18/12/9/11/14 | 60/32/10/9/21/18/13 | 100/14/17/18/6/12/10 |
+| 5 | 266 | 92/19/20/14/10/12/14 | 69/36/12/10/24/20/13 | 115/16/19/20/6/13/11 |
+| 6 | 424 | 104/21/23/15/11/14/15 | 79/39/13/11/27/22/14 | 130/17/21/22/7/15/11 |
+| 7 | 623 | 117/23/25/17/12/15/15 | 88/43/14/12/29/24/14 | 146/19/23/24/7/16/12 |
+| 8 | 867 | 130/25/27/18/13/16/16 | 98/47/15/13/32/27/15 | 162/20/26/27/8/17/12 |
+| 9 | 1156 | 144/27/30/20/15/18/16 | 109/51/16/15/35/29/16 | 179/22/28/29/8/19/12 |
+| 10 | 1493 | 158/29/32/21/16/19/17 | 120/55/18/16/38/32/16 | 197/23/31/32/9/20/13 |
+
+Levels 11 to 15 are in `LEVEL_TABLE`; past 15 `statsAt` continues with `g(L-1) + q(L-1)^2` anchored on Lv 15.
+EXP to reach level L past 15: `10(L-1)^2.25 + 10(L-1)` anchored the same way. Every living member gets the full
+EXP of a victory.
+
+### Skills
+
+| Skill | Who | Learn | MP | Target | Power | Types | Rank | Help |
+|---|---|---|---|---|---|---|---|---|
+| Rising Slash | sword | M1 | 3 | enemy | 160 | sword | 100 | A strong upward cut. Builds Fury. |
+| Crescent Sweep | sword | M3 | 6 | enemies | 85 | sword | 110 | A wide arc that hits every foe. |
+| Flash Step | sword | M5 | 4 | enemy | 125 | sword | 55 | Quick cut. Your next turn comes soon. |
+| Heavy Chop | axe | M1 | 4 | enemy | 200 | axe | 125 | Huge blow, but slow to recover. |
+| Sunder | axe | M3 | 5 | enemy | 130 | axe | 100 | Cracks armor: DEF -30% for 3 turns. |
+| Whirlwind | axe | M5 | 7 | enemies | 105 | axe | 115 | Spinning axe strikes every foe. |
+| Lunge | spear | M1 | 3 | enemy | 145 | spear | 100 | Piercing thrust. Interrupts charges. |
+| Skewer | spear | M3 | 5 | random | 115x2 | spear | 100 | Two thrusts at random foes. |
+| Valiant Lance | spear | M5 | 6 | enemy | 210 | spear | 100 | Mighty thrust. Bram gains Protect. |
+| Channel | staff | M1 | 0 | enemy | 100 | staff | 100 | Staff strike that restores 5 MP. |
+| Ward Strike | staff | M3 | 3 | enemy | 120 | staff | 100 | Staff blow. May stun the target. |
+| Pin Shot | bow | M1 | 3 | enemy | 120 | bow | 100 | Arrow that knocks a foe back in line. |
+| Volley | bow | M3 | 6 | random | 60x4 | bow | 100 | Four arrows at random foes. |
+| Blinding Arrow | bow | M5 | 4 | enemy | 110 | bow | 100 | Arrow of ink-ash. May Blind. |
+| Steady | hero | Lv 3 | 2 | self | - | - | 60 | Gain Focus: next hit deals 50% more. |
+| Second Wind | hero | Lv 6 | 4 | self | - | - | 80 | Recover 35% HP and shake off ailments. |
+| Guard | bram | Lv 1 | 0 | ally | - | - | 70 | Shield an ally until your next turn. |
+| Taunt | bram | Lv 2 | 3 | self | - | - | 80 | Draw single attacks. Gain Protect. |
+| Rally | bram | Lv 4 | 5 | allies | - | - | 90 | Allies gain Focus and 10 Fury. |
+| Ember | mira | Lv 1 | 4 | enemy | 140 | fire | 100 | Fire magic. May Burn. |
+| Mend | mira | Lv 1 | 4 | ally | 220 | - | 90 | Restore HP to one ally. |
+| Appraise | mira | Lv 1 | 0 | enemy | - | - | 50 | Read a foe: weaknesses and HP. |
+| Frost | mira | Lv 2 | 4 | enemy | 140 | ice | 100 | Ice magic. May Chill. |
+| Purify | mira | Lv 3 | 3 | ally | - | - | 80 | Cleanse one ally of ailments. |
+| Spark | mira | Lv 4 | 5 | enemy | 150 | thunder | 100 | Thunder magic. May Stun. |
+| Lumen | mira | Lv 6 | 7 | enemy | 175 | light | 100 | Light magic. Ink fears it. |
+| Mending Rain | mira | Lv 7 | 10 | allies | 140 | - | 110 | Restore HP to the whole party. |
+| Dawnsplitter | sword | M2 | Fury | enemy | 330 | sword/light | 80 | Fury: a blinding cut of dawn light. |
+| Earthsunder | axe | M2 | Fury | enemies | 190 | axe | 80 | Fury: split the ground under all foes. |
+| Skyfall Lance | spear | M2 | Fury | enemy | 300 | spear | 80 | Fury: leap and pierce. Stuns. |
+| Wellspring | staff | M2 | Fury | allies | 200 | - | 80 | Fury: heal and cleanse all, Regen. |
+| Starfall Volley | bow | M2 | Fury | random | 85x6 | bow | 80 | Fury: six arrows rain on random foes. |
+| Ember Edge | hero+mira | Lv 2 | 5/6 | enemy | 130+150 | sword/axe/fire | 110 | Hero + Mira: a blade wreathed in fire. |
+| Cross Rend | hero+bram | Lv 2 | 5/5 | enemy | 135+135 | sword/axe/spear | 110 | Hero + Bram: X-cut, always chips 2. |
+| Thorn Bulwark | mira+bram | Lv 2 | 6/6 | allies | - | - | 100 | Mira + Bram: party Protect and Regen. |
+| Dawnname | hero+mira+bram | Lv 6 | 10/10/10 | enemies | 90+90+110 | light | 120 | All three speak a name of dawn. |
+
+Statuses: Poison, Burn, Chill, Stun, Silence, Blind, Regen, Protect, Haste, Focus (DESIGN 7), plus **Taunt**
+(Bram) and **Nameless** (Devour Name: ATK and MAG -20% until the battle ends). Icons: `icon_<status id>` in
+`assets/ui/ui.json` (W1-ui-art confirmed all of them exist).
+
+## 4. Enemies
+
+| Enemy | Lv | HP | ATK/MAG | DEF/SPR | SPD | Shields | Weak | Resist | EXP / Gold | Moves (telegraph in bold) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Ink Slime | 2 | 74 | 12/12 | 4/6 | 9 | 2 | fire, axe | - | 7 / 10 | Tackle, Ink Spit |
+| Briar Wolf | 3 | 120 | 14/4 | 6/4 | 15 | 2 | fire, spear | - | 9 / 12 | Bite, Thorn Bite, Howl |
+| Moss Scarab | 3 | 110 | 15/4 | 14/8 | 8 | 3 | axe, ice | sword, bow | 12 / 18 | Shell Bash, Harden, **Burrowing Charge** |
+| Page Wraith | 4 | 130 | 13/18 | 5/14 | 13 | 2 | fire, bow | ice | 14 / 24 | Paper Cut, Hush, Strike, **Page Storm** |
+| Bookmite | 4 | 95 | 15/4 | 7/5 | 16 | 1 | thunder, sword | - | 8 / 14 | Nibble, Gnaw |
+| Tome Golem | 6 | 220 | 26/6 | 18/8 | 7 | 4 | thunder, axe | sword, bow | 18 / 50 | Book Slam, Binding, **Shelf Quake** |
+| Echo Warden | 6 | 420 | 37/36 | 15/15 | 11 | 5 | by stance | - | 60 / 300 | Echo Slash, Shield Bash, **Reverberate** |
+| Ink Wraith | 7 | 150 | 16/30 | 9/18 | 14 | 3 | light, fire | sword, spear | 32 / 48 | Ink Lance, Ink Tide, Siphon, **Black Tide** |
+| Lost Page | 7 | 70 | 34/34 | 5/6 | 13 | 1 | by ink color | - | 0 / 0 | Flutter, Recite |
+| The Archivore | 8 | 820 | 70/72 | 12/14 | 12 | 6 | by phase | ice | 400 / 500 | Ink Lash, Gnash, Ink Spray |
+
+Targeting rules give enemies personality: wolves go for the weakest, Page Wraiths Hush the healer, Bookmites
+eat Mira's MP, Siphon drinks from the most hurt. Telegraphed moves fire on a fixed rhythm (`charge.first`,
+`charge.cooldown` in enemies.js) so a player can learn it.
+
+**Echo Warden** (mini-boss, guards the Lantern of Recall). Opens in **Mirror Stance**: spells rebound onto a
+random ally; weak to axe and spear. After every second turn it swaps to **Bulwark Stance**: weapon hits rebound
+(the attacker takes half), weak to fire and thunder. Breaking it drops the stance for the window; on recovery
+it takes the other stance. Reverberate (party-wide, 210%) is telegraphed every 4 turns. The fight teaches
+"read the stance": in Bulwark the sword arms Defend, Steady or Rally while Mira works; in Mirror they feast.
+
+**The Archivore** (Episode 1 boss), three phases with HP locks (one hit can never skip a phase):
+1. **Hunger** (100 to 70%): weak fire/spear, 6 shields. Devour Name telegraphed from its 2nd turn.
+2. **The Torn Book** (70 to 30%): weak fire/spear/thunder, 7 shields. Tears out two **Lost Pages**, each in a
+   different ink whose color is its weakness (Kindling = fire, Frosted = ice, Static = thunder, Taut =
+   spear/bow, Brittle = axe/staff, Loose = sword). While pages live the Archivore takes 20% less damage, pages
+   Recite to heal it, and it telegraphs **Feast** (eats every living page, 7% HP each, gains Haste). Kill the
+   pages first and Feast snaps at empty air. It can tear the Book twice. Ink Storm joins the rotation.
+3. **Nameless Maw** (below 30%): pages burn away, permanent Haste, weak light/axe/fire, 8 shields. Alternates
+   Devour Name and Ink Storm with one ordinary turn between.
+- **Devour Name**: names a target a turn ahead. If the target is Defending (or Guarded by a defending Bram) the
+  name holds. Otherwise: Silence 3, Nameless (-20% ATK/MAG) and the Archivore heals 8% and gains +20% ATK and
+  MAG for the rest of the fight. Ignoring it snowballs.
+- **Ink Storm**: party-wide 245% ink magic, Blind 40%. At Lv 8 with the expected gear it takes about 80% of
+  the hero's HP, 65% of Bram's and 45% of Mira's (Mirrorguard Mail); Defend halves it. Anyone below about 80%
+  who ignores it can fall.
+
+## 5. Items and loot
+
+Consumables: potion (60 HP, 20g), hi_potion (180, 90g), ether (15 MP, 60g), antidote, eye_drops, echo_herb
+(Silence/Burn/Chill), phoenix_feather (revive 30%, 150g), tent (save points, full rest). 15 weapons (5 types x 3
+tiers), 5 body, 4 head, 7 accessories (charm, boots, mantle slots). Gear rolls 0 (common), 1 to 2 (magic) or 3
+to 4 (rare) affixes from 8 prefixes and 15 suffixes, each with 2 to 3 tiers gated by item level, e.g.
+"Gleaming Iron Pike of Embers" = +5 ATK, +14% fire. Rares get two-word names ("Ember Oath"). Rarity colors
+DESIGN 6.4 (`RARITIES`).
+
+| Weapon | Type | Tier | Price | Stats |
+|---|---|---|---|---|
+| Short Sword / Longsword / Runed Saber | sword | 1/2/3 | 80/360/900 | ATK +6/+13/+21, crit +2/+3/+5 |
+| Hatchet / Battle Axe / Bearded Axe | axe | 1/2/3 | 90/400/950 | ATK +8/+16/+25, SPD -1 |
+| Ash Spear / Iron Pike / Winged Lance | spear | 1/2/3 | 85/380/920 | ATK +7/+14/+22, DEF +0/+1/+2 |
+| Oak Staff / Crystal Rod / Archivist's Staff | staff | 1/2/3 | 80/380/900 | MAG +5/+11/+18 |
+| Short Bow / Hunter's Bow / Yew Longbow | bow | 1/2/3 | 85/370/900 | ATK +6/+12/+19 |
+
+Placed uniques (Episode 1 random tables never roll legendaries):
+
+| Item | Rarity | Stats | Suggested source |
+|---|---|---|---|
+| Lanternheart (sword) | legendary | ATK +24, crit +6, +20% light, sword hits count as light | Archivore (guaranteed drop) |
+| Mirrorguard Mail (body) | legendary | DEF +11, SPR +9, HP +20, ink -20% | Echo Warden (guaranteed drop) |
+| Thornwake (spear) | legendary | ATK +17, SPD +1, 25% poison on hit | Valley secret at the Whisperwood edge, Lantern-revealed (return trip) |
+| The First Quill (staff) | legendary | MAG +17, MP +12, spells cost 1 less | Archive F3 secret chest behind hidden ink |
+| Wayfarer Boots (set) | set | SPD +2, DEF +1, HP +10 | Tess's reward for all three letters |
+| Wayfarer Mantle (set) | set | DEF +2, SPR +3, LUK +3 | Archive F1 secret chest |
+| Wayfarer's Promise (2 pieces) | set bonus | +1 SPD, start battles with Haste (2 turns) | |
+
+Drops: each ordinary victory has a 10 to 15% chance (by zone) of one piece of gear (70% common / 25% magic / 5%
+rare); elites always drop magic or rare; bosses drop their unique, rares and consumables. Chest tiers for map
+authors: `wood` (gold 15 to 40, consumable or common/magic gear), `iron` (40 to 90, magic/rare 60%), `gold`
+(100 to 200, a rare). `rollChest(rng, tier, ilvl)`.
+
+Shops (`shopStock(shopId, flags)`): **willowmere_items** (potions, ethers, cures, tent, bronze charm; phoenix,
+owl/river charms after `archive_entered`; hi_potion after `archive_f1_done`), **willowmere_smithy** (tier 1 gear;
+tier 2 after `archive_entered`; helms, circlet, boots, mantle after `archive_f1_done`; Bronze Plate after
+`echo_warden_defeated`), **valley_peddler** (consumables at a 15 to 20% markup, leather boots, hatchet).
+
+## 6. Progression and map plans (for W2-maps)
+
+Each zone's `plan` in `encounters.js` is how many visible enemies to place, by group. The EXP curve assumes the
+player fights each about once:
+
+| Zone | Fights | Level in, level out (all fights) | At 80% of fights |
+|---|---|---|---|
+| Willowmere Valley | 7 | 1 to 3 | 1 to 3 |
+| Archive F1 | 8 | 3 to 5 (mostly Lv 4) | 3 to 5 |
+| Archive F2 (+ Echo Warden) | 8 + 1 | 5 to 6 | 5 to 6 |
+| Archive F3 | 8 | 6 to 8 | 6 to 7 |
+| Archivore | 1 | fought at 8 | fought at 7 |
+
+Placement notes: make the first valley fight a `valley_wolves` (gentlest at Lv 1), keep scarabs and the
+`valley_pack` deeper in. The hero should own a **Hatchet** by Archive F1 (Garrick's gift). The simulator assumes **Iron
+Pike** and one **Chain Shirt** come from Archive F2 chests; with enemy gold that keeps the smithy reachable
+(battle gold on arriving at F1/F2/F3: about 200/520/1290). Field sprite for an enemy event = its leader's enemy id.
+
+## 7. API for the battle scene (W2-battle-scene)
+
+```js
+import { createEncounterBattle, createBattle, applyResult, memberStats, equipDelta } from './battle/rules.js';
+import { partyAction } from './battle/ai.js';
+
+const { battle: b, encounter } = createEncounterBattle('valley_wolves', {
+  party: save.party,            // member records (party.js): {id,name,level,exp,hp,mp,fury,weapon,equip,mastery}
+  rng: engine.rng.fork('battle'),
+  inventory: save.items,        // {potion: 3, ...}; battle uses and drops update a copy
+  bestiary: save.bestiary,      // weaknesses seen before (result().revealed) so "?" stays solved
+  start: 'normal',              // 'preemptive' (player touched it from behind) | 'ambush'
+});
+play(b.startEvents);            // battle_start, phase/stance/elite messages, first turn_start + timeline
+while (!b.isOver()) {
+  const u = b.current();
+  if (u.side === 'enemy') play(b.runEnemyTurn());
+  else play(b.perform(settings.autoBattle ? partyAction(b) : await chooseAction(u)));
+}
+const r = b.result();           // {outcome, exp, gold, mastery:{hero:{sword:12}}, items, consumables, inventory, party, revealed}
+const ups = applyResult(save.party, r);   // mutates members: EXP, levels (stat gains, learned skills), mastery ups
+```
+
+Menus: `b.commands(u)` returns `[{id:'attack'|'tech'|'magic'|'fury'|'combo'|'item'|'defend'|'swap'|'flee', name,
+enabled, reason, list?}]`; list entries carry `{skill|item, name, mp|qty, help, enabled, reason}`; `combo` has
+`visible` (show it only then) and `partners`. `b.targets(u, action)` gives `{mode:'single'|'all'|'random'|'self',
+side, ids, default}`. `b.previewTimeline(u, action)` gives `{order:[{uid, at, skip?, charging?}], landing, rank,
+delay, effects:[{target, min, max, avg, weak: true|false|'?', breaks, shieldsAfter, kills, hit, crit}]}` (weakness
+shows `'?'` until known, so the preview never leaks). `b.timeline(8)` is the top-right bar; `b.knowledge(uid)`
+gives `{weak, resist, unknown, appraised}` for the weakness row. `b.unit(uid)` is the live unit
+(`hp, maxHp, mp, fury, shields, maxShields, broken, statuses, charging, ai.stance, ai.phase, tint`).
+Actions: `{type:'attack', target}`, `{type:'skill', skill, target}` (techs, magic, Fury arts),
+`{type:'combo', skill, target}`, `{type:'item', item, target}`, `{type:'defend'}`, `{type:'swap'}`,
+`{type:'flee'}`. A bad action returns `[{type:'invalid', reason}]` and changes nothing.
+
+Events (in order; animate them as they come; uids are `hero mira bram e0 e1 ...`):
+
+| type | fields |
+|---|---|
+| battle_start | units[{uid,id,side,name,hp,maxHp,mp,maxMp,fury,elite,shields,boss,weapon,variant}], start, boss |
+| turn_start | actor, time, round |
+| timeline | order[{uid, at, skip?, charging?}] (next 8; emitted when an actor is ready for a command) |
+| telegraph | actor, skill, name, text, target, targets, nextTurn (turns until it fires) |
+| telegraph_cancel | actor, skill, reason: break, stun, interrupt, phase |
+| action_start | actor, action{type, skill/item, name, members?}, targets, fx, sfx, charged, weapon |
+| move_to | actor, target (melee step-in; bows and magic do not) |
+| damage | source, target, amount, hp, maxHp, kind (phys/mag/status), crit, weak, resist, types, element, shieldLost, shields, broken (target was already broken), reflected? |
+| shield | target, lost, shields (shield chips from effects) |
+| break / shield_restore | target / target, shields |
+| reveal | target, enemy, weak[], resist[], all?, hp?, maxHp? |
+| heal / mp | target, amount, hp/mp, max, plus skill/item/status/drain/lifesteal/feast/absorbed hints |
+| miss | source, target, reason: miss, evade, immune |
+| status_add / status_remove / status_tick / status_resist | target, status, turns / reason: expired, cured, consumed, countered, replaced / amount, hp |
+| stat_mod | target, stat, mult, turns (Sunder, Devour Name) |
+| fury_gain / fury_ready | target, amount, fury, reason / target |
+| defend / defend_end / guard / cover / swap | actor / actor / actor, target / actor (Bram), target / actor, weapon |
+| delay | target, amount (ticks), reason |
+| reflect | actor (Warden), source, kind: magic or phys, target (who takes it) |
+| stance / phase | actor, stance, name, text, reflect / actor, phase (1-3), id, name, text |
+| summon / split | enemy, id, name, variant, tint, hp, by, split / source, into[] |
+| devour / feast | actor, target, success / actor, pages[], healed |
+| ko / revive | target, reason (damage, poison, burn, devoured, burned) / target, hp |
+| skip | actor, reason: stun or break |
+| message | text, kind? (elite, taunt, interrupt) |
+| escape / victory / defeat | success / exp, gold, mastery, items, consumables |
+
+Equip screen: `memberStats(member)` and `equipDelta(member, slotOrWeaponType, item)` give the numbers for the
+green/red arrows. Loot UI: `itemStats`, `describeItem`, `rarityColor`, `itemValue` in `battle/loot.js`.
+
+## 8. Simulator and tuning
+
+`node tools/sim/simulate.mjs [--n 400] [--zone z] [--check] [--json]`, or `--trace <encounter> <seed> <policy>`
+to read one battle. Policies: **competent** (the Auto brain: answers telegraphs by Break/Lunge/Defend/Guard,
+heals under 40% (50% in boss fights), revives, exploits known weaknesses, swaps weapons when the other one has
+the only weakness, uses Fury in Break windows, combos when worth it, Appraises unknown bosses, and rations MP
+to about a third of the bar per ordinary fight), **naive** (Attack the first foe, nothing else) and **reckless**
+(competent but ignores telegraphs). The party uses each zone's expected level, mastery and gear (`LOADOUTS`);
+ordinary foes' weaknesses are known (bestiary), bosses' are not. All targets are checked by `checkTargets` and
+by `qa/battle/sim.test.mjs`.
+
+Final run (400 battles per row, 25,300 battles in 28 s, all targets met):
+
+| Zone | Encounter | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only: win / rounds / HP lost |
+|---|---|---|---|---|
+| valley | valley_wolves | 2 | 100% / 3.2 (2.7-4.0) / 16% | 100% / 5.3 / 41% |
+| valley | valley_wolves | 3 | 100% / 2.8 (2.3-3.3) / 14% | 100% / 4.9 / 31% |
+| valley | valley_slimes | 2 | 100% / 4.2 (3.3-5.0) / 24% | 100% / 6.2 / 44% |
+| valley | valley_slimes | 3 | 100% / 3.7 (3.0-4.3) / 19% | 100% / 5.5 / 30% |
+| valley | valley_scarab | 2 | 100% / 4.3 (3.0-5.3) / 13% | 100% / 7.1 / 50% |
+| valley | valley_scarab | 3 | 100% / 3.7 (3.0-5.0) / 10% | 100% / 6.4 / 36% |
+| valley | valley_mixed | 2 | 100% / 4.9 (3.7-6.0) / 17% | 100% / 7.6 / 49% |
+| valley | valley_mixed | 3 | 100% / 4.2 (3.0-5.0) / 13% | 100% / 7.0 / 36% |
+| valley | valley_pack | 2 | 100% / 5.5 (4.3-6.7) / 26% | 80% / 7.0 / 78% |
+| valley | valley_pack | 3 | 100% / 4.6 (3.7-5.7) / 23% | 99% / 6.7 / 57% |
+| archive_f1 | f1_slimes | 4 | 100% / 3.3 (2.7-4.0) / 15% | 100% / 4.9 / 29% |
+| archive_f1 | f1_mites | 4 | 100% / 3.3 (2.7-4.0) / 17% | 100% / 4.9 / 31% |
+| archive_f1 | f1_wraith | 4 | 100% / 4.6 (3.7-6.0) / 20% | 99% / 6.4 / 53% |
+| archive_f1 | f1_mixed | 4 | 100% / 3.1 (2.3-4.0) / 14% | 100% / 5.0 / 29% |
+| archive_f2 | f2_golem | 5 | 100% / 3.6 (3.0-4.3) / 12% | 100% / 8.0 / 59% |
+| archive_f2 | f2_golem | 6 | 100% / 3.3 (3.0-3.7) / 10% | 100% / 7.6 / 48% |
+| archive_f2 | f2_wraiths | 5 | 100% / 4.2 (3.0-5.7) / 19% | 100% / 6.8 / 51% |
+| archive_f2 | f2_wraiths | 6 | 100% / 3.7 (2.7-5.0) / 16% | 100% / 6.4 / 41% |
+| archive_f2 | f2_mites | 5 | 100% / 3.9 (2.7-5.3) / 17% | 100% / 6.9 / 49% |
+| archive_f2 | f2_mites | 6 | 100% / 3.4 (2.3-5.0) / 14% | 100% / 6.5 / 40% |
+| archive_f2 | f2_mixed | 5 | 100% / 4.7 (3.7-6.0) / 18% | 97% / 9.2 / 81% |
+| archive_f2 | f2_mixed | 6 | 100% / 4.2 (3.3-5.0) / 14% | 100% / 8.8 / 63% |
+| archive_f2 | echo_warden | 5 | 100% / 8.3 (6.3-10.3) / 22% | 0% / 5.3 / 100% |
+| archive_f2 | echo_warden | 6 | 100% / 7.2 (6.0-8.7) / 18% | 0% / 6.5 / 100% |
+| archive_f3 | f3_ink | 7 | 100% / 3.1 (2.3-4.0) / 20% | 100% / 6.6 / 54% |
+| archive_f3 | f3_golem | 7 | 100% / 4.5 (3.7-5.7) / 21% | 48% / 9.2 / 94% |
+| archive_f3 | f3_wraiths | 7 | 100% / 4.8 (3.3-6.7) / 25% | 34% / 7.8 / 95% |
+| archive_f3 | f3_mixed | 7 | 100% / 5.4 (4.3-7.0) / 22% | 100% / 9.3 / 66% |
+| archive_boss | archivore | 8 | 100% / 10.6 (8.0-13.3) / 23% | 0% / 8.4 / 100% |
+
+The Archivore when the party plays well but **ignores telegraphs**: 81% win, 11.5 rounds, 1.3 KOs per fight,
+3.6 items used (careful play: 100%, 0.2 KOs, 1.4 items). Elites (competent): 4 to 7 rounds in the valley and
+F1/F2, 5 to 9 in F3, always won. At Lv 1 the opening valley fights take 4 to 5 rounds (attack-only still wins
+87 to 99%).
+
+Rounds = party turns / party size. Targets: ordinary 3 to 5 (per-encounter tolerance 0.5, zone averages
+strictly), Echo Warden 6 to 8, Archivore 8 to 12 with careful play winning 85%+, attack-only winning at most
+60% and ignoring telegraphs costing at least 15 points of win rate.
+
+Tuning notes (what moved and why):
+- First pass: fights ended in 1.6 to 2.8 rounds. Enemy HP went up about 1.6x; combos got pricier
+  (Ember Edge 5/6, Cross Rend 5/5, Thorn Bulwark 6/6, Dawnname 10 each).
+- The simulator first started every fight at full MP and the policy spent it all; it now rations about a third
+  per ordinary fight, as a player on a long floor does. Without that, combos ran every turn.
+- A weapon-swap flip-flop in mixed groups (Bram: spear for wolves, axe for slimes, repeat) made the policy look
+  slow; Swap now only happens when the current weapon exploits nothing.
+- Burn was ticking 10% of the Archivore's HP (it once died to Burn); bosses now take 30% of DoT.
+- The Archivore's phase 2 dragged (pages respawning forever, 30% page armor): page waves capped at 2, armor
+  20%, a gap of one ordinary turn between telegraphs, HP 1700 to 820, DEF 16 to 12, ATK/MAG up to 70/72 so it
+  threatens a healing party. Ink Storm 150 to 245% and "each devoured name makes it stronger" are what make
+  ignoring telegraphs lose about one fight in five.
+- Echo Warden: HP 900 to 420, Reverberate 130 to 210% so defending against it matters.
+- EXP: golem 30 to 18, Echo Warden 140 to 60, ink wraith 36 to 32 so F2 ends at Lv 6 and F3 at Lv 8.
+- Gold roughly doubled so the smithy's tier 2 gear is reachable (see section 6).
+
+## 9. Known gaps and proposals
+
+- **DESIGN 7 weakness list** names sword, spear, staff, axe, fire, ice, thunder, light. Mira's bow is a weapon
+  type, so `bow` is also a weakness type here (Page Wraiths are weak to it). Proposal: add "bow" to that list.
+- **Statuses**: Taunt and Nameless are extra to DESIGN 7's list (both have icons). Proposal: list them.
+- Unique items have fixed stats (no rolled ranges) to keep their identity and the balance predictable.
+- The valley peddler has no COMMON.md sprite id; `keeperSprite: 'npc_farmer'` is only a hint.
+- The battle rules do not model field "preemptive/ambush" detection: the field scene passes `start`.
+- Multi-fight attrition (MP/HP carried across a floor) is not simulated; single fights start full, with the
+  policy rationing MP instead.
