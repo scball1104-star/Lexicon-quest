@@ -1,0 +1,53 @@
+/* Lexicon Quest — desktop viewport-fit layout: battle = enemies left / party
+   right, everything on one screen, no window scrolling. Mobile keeps its own
+   layout (rpg-mobile-play.css), so these rules are scoped to wider screens. */
+
+@media (min-width:820px){
+  html,body{overflow:hidden}
+
+  /* ===== BATTLE ===== */
+  .battle-shell{
+    display:flex !important;flex-direction:column !important;gap:5px;
+    height:calc(100dvh - 84px);max-height:calc(100dvh - 84px);
+    overflow:hidden;max-width:1680px;margin:2px auto 0;padding:0 14px;
+  }
+
+  /* top strip: turn order + a thin Focus bar only */
+  .battle-top{flex:0 0 auto;display:flex;flex-direction:column;gap:4px}
+  .battle-top>*{margin:0 !important}
+  .battle-top .battle-heading{align-items:center;padding:0}
+  .battle-top .battle-heading h2{font-size:18px;line-height:1.1;margin:0}
+  .battle-top .battle-heading .eyebrow{font-size:10px}
+  .battle-top .battle-heading img,.battle-top .battle-heading canvas{width:42px !important;height:42px !important}
+  .battle-top .battle-brief{display:none}
+  .battle-top .lq-coach-bar{display:none}
+  .battle-top .resonance-panel{padding:4px 11px}
+  .battle-top .resonance-panel small{display:none}
+  .battle-top .battle-result-strip{padding:4px 10px;font-size:11px}
+
+  /* battlefield fills the middle: enemies left, party right */
+  .battle-field{flex:1 1 auto;display:flex;gap:14px;min-height:0;width:100%;align-items:stretch}
+  .battle-stage{justify-content:flex-start !important}
+  .battle-field>.battle-stage{flex:1 1 auto;min-height:0 !important;height:auto !important;margin:0}
+  .battle-field>.battle-party{
+    flex:0 0 clamp(200px,21vw,280px) !important;
+    display:flex !important;flex-direction:column;gap:6px;margin:0 !important;
+    grid-template-columns:none !important;min-height:0;overflow:hidden;
+  }
+  .battle-field>.battle-party>.combat-ally{flex:1 1 0;min-height:0;padding:6px 10px !important;display:flex;flex-direction:column;justify-content:center}
+  .battle-field>.battle-party .portrait{width:38px;height:38px}
+  .battle-stage .tactical-enemy{min-height:0 !important}
+  .battle-stage .tactical-enemy .enemy-art{height:clamp(90px,18vh,160px) !important}
+
+  /* command console = one horizontal bar: actions | targets | confirm */
+  .battle-shell>.battle-bottom{flex:0 0 auto;display:block;max-height:30vh;overflow:hidden}
+  .battle-bottom .battle-log{display:none}
+  .battle-bottom .battle-console{padding:8px 12px;display:grid !important;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.1fr);gap:6px 14px;align-items:start}
+  .battle-bottom .battle-console>.battle-console-title{grid-column:1/-1}
+  .battle-bottom .battle-console>.commands{grid-column:1;gap:6px}
+  .battle-bottom .battle-console>.targetline{grid-column:2;align-self:stretch}
+  .battle-bottom .battle-console>.battle-confirm{grid-column:3;align-self:stretch;flex-direction:column;justify-content:center}
+  .battle-bottom .battle-console .command{min-height:0 !important;padding:6px 9px}
+  .battle-bottom .battle-console .command small{display:none}
+  .battle-bottom .battle-preview{display:none}
+}
