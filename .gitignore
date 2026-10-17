@@ -6,3 +6,6 @@ Thumbs.db
 *.log
 playwright-report/
 test-results/
+.claude/
+next/qa/out/
+__pycache__/
