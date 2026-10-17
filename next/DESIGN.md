@@ -166,6 +166,9 @@ export default {
 ```
 - Triggers take `on: 'enter'` (fires when the player steps onto the tile) or `on: 'interact'` (confirm while facing).
   `marks` are required by story scripts: `walk`, `camera.panTo` and `spawn({at})` accept a mark name or x,y.
+- Legend values are `tiles.json` ids: a terrain (autotiled, layered low to high by `terrainOrder`), a wall system
+  `<wall>_top` / `<wall>_face`, a plain tile, or a `line16` tile (fences, counters). Collision codes: `none, solid,
+  water, ledge_s, ledge_e, ledge_w, pit, counter` (counter = solid but you can talk across it).
 - Collision comes from `tiles.json` (per tile) + decor footprints + events. A map validity test checks
   every map: rectangular rows, legend complete, every door/exit target exists and lands on a walkable tile,
   every scripted id exists, and the start-to-boss path is reachable (BFS that respects puzzle gates).
@@ -214,7 +217,7 @@ there is no `credits()` cutscene primitive.
 ### 6.1 Palette
 Build `assets/palette.json` from the **existing painted sheets** in `../assets/art/` (k-means on
 environments/world-sprites/party/portraits) merged with hand-curated ramps, so new tiles match the existing art.
-Target ~56 colors in named ramps of 4 to 6 steps: `grass, foliage_dark, earth, path, stone_warm, stone_cool,
+Built: 74 colors in 30 named hue-shifted ramps of 4 to 6 steps (the ~56 target was too few to keep violet shadows and warm highlights): `grass, foliage_dark, earth, path, stone_warm, stone_cool,
 water, wood, roof_red, roof_blue, roof_purple, roof_green, skin_light, skin_med, skin_dark, hair_brown,
 hair_violet, metal, gold, cloth_blue, cloth_purple, ink, magic_cyan, magic_violet, fire, ice, ui_blue, shadow`.
 Rules: hue-shift ramps (shadows cooler/violet, highlights warmer/yellow), never pure black (darkest = deep
