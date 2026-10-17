@@ -112,7 +112,7 @@ export const NPCS = {
   },
 
   edda: {
-    name: 'Edda', sprite: 'npc_old_woman', portrait: 'edda', map: 'willowmere',
+    name: 'Edda', sprite: 'npc_old_woman', map: 'willowmere',
     spot: 'The twelve flowerbeds along the river road, near the thirteenth bed', move: 'wander', radius: 2,
     about: 'Old gardener who keeps a flowerbed for every founding family. Nella\'s mother; the fading has taken that from both.',
     talk: [
@@ -136,7 +136,7 @@ export const NPCS = {
   },
 
   holt: {
-    name: 'Sergeant Holt', sprite: 'npc_guard', portrait: 'holt', map: 'willowmere',
+    name: 'Sergeant Holt', sprite: 'npc_guard', map: 'willowmere',
     spot: 'South gate, right-hand post (Bram stands at the left post until he joins)', move: 'stand',
     about: 'The old gate sergeant. Steady, kind, keeps his promises. Holds Garrick\'s name for Bram.',
     talk: [
@@ -166,7 +166,7 @@ export const NPCS = {
   },
 
   cobb: {
-    name: 'Cobb', sprite: 'npc_farmer', portrait: 'cobb', map: 'willowmere',
+    name: 'Cobb', sprite: 'npc_farmer', map: 'willowmere',
     spot: 'The chicken run behind the library, east side of town', move: 'wander', radius: 2,
     about: 'Farmer. Named every one of his hens, and now cannot tell them apart.',
     talk: [
@@ -302,7 +302,7 @@ export const NPCS = {
   // bakery
   // ----------------------------------------------------------------------------------------------
   oren: {
-    name: 'Oren', sprite: 'npc_baker', portrait: 'oren', map: 'bakery',
+    name: 'Oren', sprite: 'npc_baker', map: 'bakery',
     spot: 'Behind the bakery counter, by the oven', move: 'turn',
     about: 'The baker. Big laugh, floury hands, talks to his dough. Forgot his own brother.',
     talk: [
@@ -517,7 +517,7 @@ export const NPCS = {
   // valley
   // ----------------------------------------------------------------------------------------------
   quill: {
-    name: 'Quill', sprite: 'npc_scholar', portrait: 'quill', map: 'valley',
+    name: 'Quill', sprite: 'npc_scholar', map: 'valley',
     spot: 'The Pilgrim\'s Rest campfire, near the milestone fork', move: 'stand',
     about: 'A traveling scribe who walks the pilgrim road each year to copy the milestone.',
     talk: [
@@ -536,7 +536,7 @@ export const NPCS = {
   },
 
   penny: {
-    name: 'Penny', sprite: 'npc_shopkeeper', portrait: 'penny', map: 'valley',
+    name: 'Penny', sprite: 'npc_shopkeeper', map: 'valley',
     spot: 'Peddler\'s cart at the valley end of the bridge', move: 'stand', service: { type: 'shop', id: 'valley_peddler' },
     about: 'The valley peddler, Pell\'s sister. Cheerful where he worries.',
     talk: [

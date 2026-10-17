@@ -173,6 +173,15 @@ PORTRAIT_CELL = {'hero': 0, 'mira': 1, 'bram': 2, 'mael': 3}
 
 
 def portrait(pid):
+    atlas = os.path.join(NEXT, 'assets', 'sprites', 'portraits.json')
+    if os.path.exists(atlas):  # the real 48 px portraits from W1-sprites
+        meta = json.load(open(atlas, encoding='utf-8'))
+        fr = meta['frames'].get(f'{pid}_48')
+        if fr:
+            img = Image.open(os.path.join(NEXT, 'assets', 'sprites', meta['image'])).convert('RGBA')
+            x, y, w, h = fr[:4] if isinstance(fr, list) else fr['rect'][:4]
+            return img.crop((x, y, x + w, y + h))
+        return None
     if pid not in PORTRAIT_CELL:
         return None
     src = Image.open(os.path.join(REPO, 'assets', 'art', 'portraits.png')).convert('RGB')

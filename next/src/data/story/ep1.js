@@ -11,8 +11,13 @@
 import { REWARDS } from '../quests.js';
 import { CREDITS } from '../text.js';
 
-// Speakers with guaranteed 48x48 portraits. Other speakers may get one from npcs.js (`portrait`).
-const PORTRAIT = { hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael' };
+// Speakers with 48x48 portraits (assets/sprites/portraits.json, ids `<id>_48`). Spawned stand-ins for an
+// NPC use that NPC's portrait. Speakers not listed here have no portrait.
+const PORTRAIT = {
+  hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael', tess: 'tess', iris: 'iris', nella: 'nella', pell: 'pell',
+  hazel: 'hazel', hob: 'hob', garrick: 'garrick', pip: 'pip',
+  garrick_g: 'garrick', iris_g: 'iris', hazel_g: 'hazel', mael_g: 'mael',
+};
 
 const say = (s, who, text) => s.say(who, text, PORTRAIT[who] ? { portrait: PORTRAIT[who] } : {});
 const narrate = (s, text) => s.say(null, text);
@@ -683,27 +688,27 @@ async function return_to_willowmere(s) {
   await s.spawn('mael_g', { sprite: 'npc_elder', name: 'Elder Mael', at: 'gather_mael', dir: 'down' });
   await s.walk('mael_g', 'meet_mael', { speed: 'slow' });
   await s.face('mael_g', 'hero');
-  await s.say('mael_g', 'You did it. Every sign in Willowmere has its name back. Every name in this book.', { portrait: 'mael' });
+  await say(s, 'mael_g', 'You did it. Every sign in Willowmere has its name back. Every name in this book.');
   await narrate(s, 'Mael opens the Town Register. His finger stops near the bottom of the page.');
   await s.emote('mael_g', '...');
-  await s.say('mael_g', 'Every name but one.', { portrait: 'mael' });
-  await s.say('mael_g', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.', { portrait: 'mael' });
-  await s.say('mael_g', 'I did not tell you. I was afraid that saying it aloud would make it true.', { portrait: 'mael' });
+  await say(s, 'mael_g', 'Every name but one.');
+  await say(s, 'mael_g', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.');
+  await say(s, 'mael_g', 'I did not tell you. I was afraid that saying it aloud would make it true.');
   const c = await s.choice(['Why my name?', 'You should have told me.']);
   if (c === 0) {
-    await s.say('mael_g', 'I do not know. I have read every page I own, and I do not know.', { portrait: 'mael' });
+    await say(s, 'mael_g', 'I do not know. I have read every page I own, and I do not know.');
   } else {
-    await s.say('mael_g', 'Yes. I should have. An old man\'s fear is a poor excuse, and it is the only one I have.', { portrait: 'mael' });
+    await say(s, 'mael_g', 'Yes. I should have. An old man\'s fear is a poor excuse, and it is the only one I have.');
   }
   await say(s, 'mira', "Someone put {hero}'s name on a list. We found it in the Archive, with all of yours crossed out.");
   await say(s, 'mira', 'Below the names, a place was scratched out so hard the pen tore through the paper.');
   await s.emote('mael_g', '!');
-  await s.say('mael_g', 'East of the river there is a town no map remembers. Travelers call it the Nameless Hollow.', { portrait: 'mael' });
-  await s.say('mael_g', 'They say its people cannot recall what their own home is called.', { portrait: 'mael' });
+  await say(s, 'mael_g', 'East of the river there is a town no map remembers. Travelers call it the Nameless Hollow.');
+  await say(s, 'mael_g', 'They say its people cannot recall what their own home is called.');
   await s.emote('mira', '...');
   await say(s, 'mira', "I came to Willowmere from the east, when I was small. I've never been able to say where from.");
   await say(s, 'bram', "Then that's where we go next. All three of us.");
-  await s.say('mael_g', 'Rest first. Tonight Willowmere rings its bells for every name that came home.', { portrait: 'mael' });
+  await say(s, 'mael_g', 'Rest first. Tonight Willowmere rings its bells for every name that came home.');
   await s.setFlag('returned_home');
   await ending_hook(s);
 }

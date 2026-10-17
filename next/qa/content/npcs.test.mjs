@@ -112,3 +112,16 @@ test('helpers: talkTo, isPresent, moveFor, npcsOnMap, speakerName', () => {
   // Every shop/inn NPC hands back its service after the lines.
   assert.ok(talkTo('hob', has([])).service.type === 'inn');
 });
+
+test('NPC portraits exist in the W1-sprites portrait atlas', async () => {
+  const { existsSync, readFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { NEXT, PORTRAITS } = await import('./_harness.mjs');
+  const atlasPath = join(NEXT, 'assets', 'sprites', 'portraits.json');
+  const frames = existsSync(atlasPath) ? JSON.parse(readFileSync(atlasPath, 'utf8')).frames : null;
+  for (const [id, n] of Object.entries(NPCS)) {
+    if (!n.portrait) continue;
+    assert.ok(PORTRAITS.includes(n.portrait), `${id}: portrait ${n.portrait} is not a known portrait id`);
+    if (frames) assert.ok(frames[`${n.portrait}_48`], `${id}: ${n.portrait}_48 missing from portraits.json`);
+  }
+});

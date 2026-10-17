@@ -14,7 +14,7 @@ const STATE = {
   return_to_willowmere: ['archivore_defeated', 'mira_joined', 'bram_joined'],
   tess_letters: ['intro_done', 'tess_quest_started', 'tess_letter_3_found', 'mira_joined', 'bram_joined'],
 };
-const PORTRAITS = { hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael' };
+const PORTRAITS = {};
 const out = [];
 for (const id of process.argv.slice(2)) {
   const spawnNames = {};

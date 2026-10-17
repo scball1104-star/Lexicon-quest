@@ -23,7 +23,8 @@ export const NPC_SPRITES = ['npc_elder', 'npc_tess', 'npc_baker', 'npc_ferry', '
   'npc_bellkeeper', 'animal_cat', 'animal_dog', 'animal_chicken', 'animal_duck'];
 // Extra sprite ids agreed with W1-sprites for the story (see report): party sprites and npc_dough.
 export const EXTRA_SPRITES = ['hero', 'mira', 'bram', 'npc_dough'];
-export const PORTRAITS = ['hero', 'mira', 'bram', 'mael'];
+export const PORTRAITS = ['hero', 'mira', 'bram', 'mael', 'tess', 'iris', 'nella', 'pell', 'hazel', 'hob', 'garrick',
+  'pip']; // W1-sprites portraits.json (48 and 32 px)
 export const MUSIC = ['title', 'willowmere', 'valley', 'archive', 'battle', 'boss_archivore', 'mystery', 'sorrow',
   'triumph', 'victory', 'gameover'];
 export const SFX = [
