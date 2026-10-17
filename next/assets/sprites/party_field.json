@@ -1,0 +1,784 @@
+{
+ "image": "party_field.png",
+ "cell": [
+  24,
+  32
+ ],
+ "origin": [
+  12,
+  31
+ ],
+ "layout": "per character a 4-row block (down, left, right, up); columns stand, stepA, stepB, blink",
+ "frames": {
+  "hero_down_0": [
+   0,
+   0,
+   24,
+   32
+  ],
+  "hero_down_1": [
+   24,
+   0,
+   24,
+   32
+  ],
+  "hero_down_2": [
+   48,
+   0,
+   24,
+   32
+  ],
+  "hero_down_blink": [
+   72,
+   0,
+   24,
+   32
+  ],
+  "hero_left_0": [
+   0,
+   32,
+   24,
+   32
+  ],
+  "hero_left_1": [
+   24,
+   32,
+   24,
+   32
+  ],
+  "hero_left_2": [
+   48,
+   32,
+   24,
+   32
+  ],
+  "hero_left_blink": [
+   72,
+   32,
+   24,
+   32
+  ],
+  "hero_right_0": [
+   0,
+   64,
+   24,
+   32
+  ],
+  "hero_right_1": [
+   24,
+   64,
+   24,
+   32
+  ],
+  "hero_right_2": [
+   48,
+   64,
+   24,
+   32
+  ],
+  "hero_right_blink": [
+   72,
+   64,
+   24,
+   32
+  ],
+  "hero_up_0": [
+   0,
+   96,
+   24,
+   32
+  ],
+  "hero_up_1": [
+   24,
+   96,
+   24,
+   32
+  ],
+  "hero_up_2": [
+   48,
+   96,
+   24,
+   32
+  ],
+  "hero_up_blink": [
+   72,
+   96,
+   24,
+   32
+  ],
+  "mira_down_0": [
+   0,
+   128,
+   24,
+   32
+  ],
+  "mira_down_1": [
+   24,
+   128,
+   24,
+   32
+  ],
+  "mira_down_2": [
+   48,
+   128,
+   24,
+   32
+  ],
+  "mira_down_blink": [
+   72,
+   128,
+   24,
+   32
+  ],
+  "mira_left_0": [
+   0,
+   160,
+   24,
+   32
+  ],
+  "mira_left_1": [
+   24,
+   160,
+   24,
+   32
+  ],
+  "mira_left_2": [
+   48,
+   160,
+   24,
+   32
+  ],
+  "mira_left_blink": [
+   72,
+   160,
+   24,
+   32
+  ],
+  "mira_right_0": [
+   0,
+   192,
+   24,
+   32
+  ],
+  "mira_right_1": [
+   24,
+   192,
+   24,
+   32
+  ],
+  "mira_right_2": [
+   48,
+   192,
+   24,
+   32
+  ],
+  "mira_right_blink": [
+   72,
+   192,
+   24,
+   32
+  ],
+  "mira_up_0": [
+   0,
+   224,
+   24,
+   32
+  ],
+  "mira_up_1": [
+   24,
+   224,
+   24,
+   32
+  ],
+  "mira_up_2": [
+   48,
+   224,
+   24,
+   32
+  ],
+  "mira_up_blink": [
+   72,
+   224,
+   24,
+   32
+  ],
+  "bram_down_0": [
+   0,
+   256,
+   24,
+   32
+  ],
+  "bram_down_1": [
+   24,
+   256,
+   24,
+   32
+  ],
+  "bram_down_2": [
+   48,
+   256,
+   24,
+   32
+  ],
+  "bram_down_blink": [
+   72,
+   256,
+   24,
+   32
+  ],
+  "bram_left_0": [
+   0,
+   288,
+   24,
+   32
+  ],
+  "bram_left_1": [
+   24,
+   288,
+   24,
+   32
+  ],
+  "bram_left_2": [
+   48,
+   288,
+   24,
+   32
+  ],
+  "bram_left_blink": [
+   72,
+   288,
+   24,
+   32
+  ],
+  "bram_right_0": [
+   0,
+   320,
+   24,
+   32
+  ],
+  "bram_right_1": [
+   24,
+   320,
+   24,
+   32
+  ],
+  "bram_right_2": [
+   48,
+   320,
+   24,
+   32
+  ],
+  "bram_right_blink": [
+   72,
+   320,
+   24,
+   32
+  ],
+  "bram_up_0": [
+   0,
+   352,
+   24,
+   32
+  ],
+  "bram_up_1": [
+   24,
+   352,
+   24,
+   32
+  ],
+  "bram_up_2": [
+   48,
+   352,
+   24,
+   32
+  ],
+  "bram_up_blink": [
+   72,
+   352,
+   24,
+   32
+  ]
+ },
+ "anims": {
+  "hero_walk_down": {
+   "frames": [
+    "hero_down_1",
+    "hero_down_0",
+    "hero_down_2",
+    "hero_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_idle_down": {
+   "frames": [
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_0",
+    "hero_down_blink",
+    "hero_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_walk_left": {
+   "frames": [
+    "hero_left_1",
+    "hero_left_0",
+    "hero_left_2",
+    "hero_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_idle_left": {
+   "frames": [
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_0",
+    "hero_left_blink",
+    "hero_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_walk_right": {
+   "frames": [
+    "hero_right_1",
+    "hero_right_0",
+    "hero_right_2",
+    "hero_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_idle_right": {
+   "frames": [
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_0",
+    "hero_right_blink",
+    "hero_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_walk_up": {
+   "frames": [
+    "hero_up_1",
+    "hero_up_0",
+    "hero_up_2",
+    "hero_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "hero_idle_up": {
+   "frames": [
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_0",
+    "hero_up_blink",
+    "hero_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_walk_down": {
+   "frames": [
+    "mira_down_1",
+    "mira_down_0",
+    "mira_down_2",
+    "mira_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_idle_down": {
+   "frames": [
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_0",
+    "mira_down_blink",
+    "mira_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_walk_left": {
+   "frames": [
+    "mira_left_1",
+    "mira_left_0",
+    "mira_left_2",
+    "mira_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_idle_left": {
+   "frames": [
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_0",
+    "mira_left_blink",
+    "mira_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_walk_right": {
+   "frames": [
+    "mira_right_1",
+    "mira_right_0",
+    "mira_right_2",
+    "mira_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_idle_right": {
+   "frames": [
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_0",
+    "mira_right_blink",
+    "mira_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_walk_up": {
+   "frames": [
+    "mira_up_1",
+    "mira_up_0",
+    "mira_up_2",
+    "mira_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "mira_idle_up": {
+   "frames": [
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_0",
+    "mira_up_blink",
+    "mira_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_walk_down": {
+   "frames": [
+    "bram_down_1",
+    "bram_down_0",
+    "bram_down_2",
+    "bram_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_idle_down": {
+   "frames": [
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_0",
+    "bram_down_blink",
+    "bram_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_walk_left": {
+   "frames": [
+    "bram_left_1",
+    "bram_left_0",
+    "bram_left_2",
+    "bram_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_idle_left": {
+   "frames": [
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_0",
+    "bram_left_blink",
+    "bram_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_walk_right": {
+   "frames": [
+    "bram_right_1",
+    "bram_right_0",
+    "bram_right_2",
+    "bram_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_idle_right": {
+   "frames": [
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_0",
+    "bram_right_blink",
+    "bram_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_walk_up": {
+   "frames": [
+    "bram_up_1",
+    "bram_up_0",
+    "bram_up_2",
+    "bram_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "bram_idle_up": {
+   "frames": [
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_0",
+    "bram_up_blink",
+    "bram_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  }
+ }
+}

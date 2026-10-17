@@ -1,0 +1,83 @@
+{
+ "image": "bosses_battle.png",
+ "frames": {
+  "archivore": [
+   0,
+   0,
+   148,
+   139
+  ],
+  "echo_warden": [
+   150,
+   0,
+   96,
+   98
+  ],
+  "lost_page_0": [
+   0,
+   141,
+   26,
+   24
+  ],
+  "lost_page_1": [
+   28,
+   141,
+   26,
+   24
+  ],
+  "lost_page_2": [
+   56,
+   141,
+   26,
+   24
+  ],
+  "lost_page": [
+   28,
+   141,
+   26,
+   24
+  ]
+ },
+ "origin": {
+  "archivore": [
+   74,
+   138
+  ],
+  "echo_warden": [
+   48,
+   97
+  ],
+  "lost_page_0": [
+   13,
+   23
+  ],
+  "lost_page_1": [
+   13,
+   23
+  ],
+  "lost_page_2": [
+   13,
+   23
+  ],
+  "lost_page": [
+   13,
+   23
+  ]
+ },
+ "aliases": {
+  "lost_page": "lost_page_1"
+ },
+ "anims": {
+  "lost_page_flutter": {
+   "frames": [
+    "lost_page_0",
+    "lost_page_1",
+    "lost_page_2",
+    "lost_page_1"
+   ],
+   "fps": 8,
+   "loop": true
+  }
+ },
+ "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre. Idle motion is procedural in code."
+}

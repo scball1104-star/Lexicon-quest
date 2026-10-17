@@ -1,0 +1,84 @@
+{
+ "image": "enemies_battle.png",
+ "frames": {
+  "ink_slime": [
+   0,
+   0,
+   51,
+   50
+  ],
+  "page_wraith": [
+   53,
+   0,
+   70,
+   74
+  ],
+  "briar_wolf": [
+   125,
+   0,
+   66,
+   62
+  ],
+  "moss_scarab": [
+   193,
+   0,
+   57,
+   52
+  ],
+  "bookmite": [
+   0,
+   76,
+   44,
+   40
+  ],
+  "tome_golem": [
+   46,
+   76,
+   91,
+   90
+  ],
+  "ink_wraith": [
+   139,
+   76,
+   85,
+   86
+  ]
+ },
+ "origin": {
+  "ink_slime": [
+   25,
+   49
+  ],
+  "page_wraith": [
+   35,
+   73
+  ],
+  "briar_wolf": [
+   33,
+   61
+  ],
+  "moss_scarab": [
+   28,
+   51
+  ],
+  "bookmite": [
+   22,
+   39
+  ],
+  "tome_golem": [
+   45,
+   89
+  ],
+  "ink_wraith": [
+   42,
+   85
+  ]
+ },
+ "facing": "right",
+ "external": {
+  "echo_warden": "bosses_battle",
+  "archivore": "bosses_battle",
+  "lost_page": "bosses_battle"
+ },
+ "notes": "One frame per enemy, facing RIGHT toward the party. origin = bottom-centre. Idle breathe, hit flash and death dissolve are procedural in code. echo_warden, archivore and lost_page live in bosses_battle.json."
+}

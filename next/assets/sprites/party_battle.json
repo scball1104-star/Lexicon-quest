@@ -1,0 +1,445 @@
+{
+ "image": "party_battle.png",
+ "cell": [
+  32,
+  40
+ ],
+ "origin": [
+  19,
+  39
+ ],
+ "facing": "left",
+ "weapons": {
+  "hero": [
+   "sword",
+   "axe"
+  ],
+  "mira": [
+   "staff",
+   "bow"
+  ],
+  "bram": [
+   "spear",
+   "axe"
+  ]
+ },
+ "poses": "per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory}; shared: <char>_{cast,hurt,defend,kneel,ko}",
+ "frames": {
+  "hero_sword_idle_0": [
+   0,
+   0,
+   32,
+   40
+  ],
+  "hero_sword_idle_1": [
+   32,
+   0,
+   32,
+   40
+  ],
+  "hero_sword_ready": [
+   64,
+   0,
+   32,
+   40
+  ],
+  "hero_sword_windup": [
+   96,
+   0,
+   32,
+   40
+  ],
+  "hero_sword_strike": [
+   128,
+   0,
+   32,
+   40
+  ],
+  "hero_sword_victory": [
+   160,
+   0,
+   32,
+   40
+  ],
+  "hero_axe_idle_0": [
+   192,
+   0,
+   32,
+   40
+  ],
+  "hero_axe_idle_1": [
+   224,
+   0,
+   32,
+   40
+  ],
+  "hero_axe_ready": [
+   0,
+   40,
+   32,
+   40
+  ],
+  "hero_axe_windup": [
+   32,
+   40,
+   32,
+   40
+  ],
+  "hero_axe_strike": [
+   64,
+   40,
+   32,
+   40
+  ],
+  "hero_axe_victory": [
+   96,
+   40,
+   32,
+   40
+  ],
+  "hero_cast": [
+   128,
+   40,
+   32,
+   40
+  ],
+  "hero_hurt": [
+   160,
+   40,
+   32,
+   40
+  ],
+  "hero_defend": [
+   192,
+   40,
+   32,
+   40
+  ],
+  "hero_kneel": [
+   224,
+   40,
+   32,
+   40
+  ],
+  "hero_ko": [
+   0,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_idle_0": [
+   32,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_idle_1": [
+   64,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_ready": [
+   96,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_windup": [
+   128,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_strike": [
+   160,
+   80,
+   32,
+   40
+  ],
+  "mira_staff_victory": [
+   192,
+   80,
+   32,
+   40
+  ],
+  "mira_bow_idle_0": [
+   224,
+   80,
+   32,
+   40
+  ],
+  "mira_bow_idle_1": [
+   0,
+   120,
+   32,
+   40
+  ],
+  "mira_bow_ready": [
+   32,
+   120,
+   32,
+   40
+  ],
+  "mira_bow_windup": [
+   64,
+   120,
+   32,
+   40
+  ],
+  "mira_bow_strike": [
+   96,
+   120,
+   32,
+   40
+  ],
+  "mira_bow_victory": [
+   128,
+   120,
+   32,
+   40
+  ],
+  "mira_cast": [
+   160,
+   120,
+   32,
+   40
+  ],
+  "mira_hurt": [
+   192,
+   120,
+   32,
+   40
+  ],
+  "mira_defend": [
+   224,
+   120,
+   32,
+   40
+  ],
+  "mira_kneel": [
+   0,
+   160,
+   32,
+   40
+  ],
+  "mira_ko": [
+   32,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_idle_0": [
+   64,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_idle_1": [
+   96,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_ready": [
+   128,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_windup": [
+   160,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_strike": [
+   192,
+   160,
+   32,
+   40
+  ],
+  "bram_spear_victory": [
+   224,
+   160,
+   32,
+   40
+  ],
+  "bram_axe_idle_0": [
+   0,
+   200,
+   32,
+   40
+  ],
+  "bram_axe_idle_1": [
+   32,
+   200,
+   32,
+   40
+  ],
+  "bram_axe_ready": [
+   64,
+   200,
+   32,
+   40
+  ],
+  "bram_axe_windup": [
+   96,
+   200,
+   32,
+   40
+  ],
+  "bram_axe_strike": [
+   128,
+   200,
+   32,
+   40
+  ],
+  "bram_axe_victory": [
+   160,
+   200,
+   32,
+   40
+  ],
+  "bram_cast": [
+   192,
+   200,
+   32,
+   40
+  ],
+  "bram_hurt": [
+   224,
+   200,
+   32,
+   40
+  ],
+  "bram_defend": [
+   0,
+   240,
+   32,
+   40
+  ],
+  "bram_kneel": [
+   32,
+   240,
+   32,
+   40
+  ],
+  "bram_ko": [
+   64,
+   240,
+   32,
+   40
+  ]
+ },
+ "anims": {
+  "hero_sword_idle": {
+   "frames": [
+    "hero_sword_idle_0",
+    "hero_sword_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "hero_sword_attack": {
+   "frames": [
+    "hero_sword_ready",
+    "hero_sword_windup",
+    "hero_sword_strike",
+    "hero_sword_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "hero_axe_idle": {
+   "frames": [
+    "hero_axe_idle_0",
+    "hero_axe_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "hero_axe_attack": {
+   "frames": [
+    "hero_axe_ready",
+    "hero_axe_windup",
+    "hero_axe_strike",
+    "hero_axe_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "mira_staff_idle": {
+   "frames": [
+    "mira_staff_idle_0",
+    "mira_staff_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "mira_staff_attack": {
+   "frames": [
+    "mira_staff_ready",
+    "mira_staff_windup",
+    "mira_staff_strike",
+    "mira_staff_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "mira_bow_idle": {
+   "frames": [
+    "mira_bow_idle_0",
+    "mira_bow_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "mira_bow_attack": {
+   "frames": [
+    "mira_bow_ready",
+    "mira_bow_windup",
+    "mira_bow_strike",
+    "mira_bow_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "bram_spear_idle": {
+   "frames": [
+    "bram_spear_idle_0",
+    "bram_spear_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "bram_spear_attack": {
+   "frames": [
+    "bram_spear_ready",
+    "bram_spear_windup",
+    "bram_spear_strike",
+    "bram_spear_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  "bram_axe_idle": {
+   "frames": [
+    "bram_axe_idle_0",
+    "bram_axe_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "bram_axe_attack": {
+   "frames": [
+    "bram_axe_ready",
+    "bram_axe_windup",
+    "bram_axe_strike",
+    "bram_axe_strike"
+   ],
+   "fps": 10,
+   "loop": false
+  }
+ }
+}

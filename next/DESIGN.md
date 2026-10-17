@@ -240,7 +240,9 @@ indigo `#14101e`-ish), outline color per material (dark of its ramp), not univer
   interactables have one bright accent pixel cluster (gold or cyan).
 
 ### 6.3 Sprites
-- Party field sprites derived from `../assets/art/party-sprites.png` (4 directions x 3 heroes, 96x128 cells):
+- Party field sprites are hand-redrawn at chibi proportions (bigger heads) to read at 24x32; a plain downscale of
+  `../assets/art/party-sprites.png` was unreadable. Battle: party sprites face LEFT, enemies face RIGHT.
+  Original intent, kept for reference, from `../assets/art/party-sprites.png` (4 directions x 3 heroes, 96x128 cells):
   downscale to the 24x32 cell with careful resampling, quantize to the palette, clean outline, then derive
   walk frames (leg/arm shift, 1 px body bob). Add idle blink, victory, hurt, cast, attack, KO poses for
   battle at the 32x40 battle cell.

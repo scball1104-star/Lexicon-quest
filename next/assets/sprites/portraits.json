@@ -1,0 +1,288 @@
+{
+ "image": "portraits.png",
+ "frames": {
+  "hero_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "mira_48": [
+   48,
+   0,
+   48,
+   48
+  ],
+  "bram_48": [
+   96,
+   0,
+   48,
+   48
+  ],
+  "mael_48": [
+   144,
+   0,
+   48,
+   48
+  ],
+  "noble_lady_48": [
+   192,
+   0,
+   48,
+   48
+  ],
+  "silver_rogue_48": [
+   0,
+   48,
+   48,
+   48
+  ],
+  "goggles_smith_48": [
+   48,
+   48,
+   48,
+   48
+  ],
+  "hooded_sage_48": [
+   96,
+   48,
+   48,
+   48
+  ],
+  "tess_48": [
+   144,
+   48,
+   48,
+   48
+  ],
+  "iris_48": [
+   192,
+   48,
+   48,
+   48
+  ],
+  "nella_48": [
+   0,
+   96,
+   48,
+   48
+  ],
+  "pell_48": [
+   48,
+   96,
+   48,
+   48
+  ],
+  "hazel_48": [
+   96,
+   96,
+   48,
+   48
+  ],
+  "hob_48": [
+   144,
+   96,
+   48,
+   48
+  ],
+  "garrick_48": [
+   192,
+   96,
+   48,
+   48
+  ],
+  "pip_48": [
+   0,
+   144,
+   48,
+   48
+  ],
+  "hero_32": [
+   48,
+   144,
+   32,
+   32
+  ],
+  "mira_32": [
+   80,
+   144,
+   32,
+   32
+  ],
+  "bram_32": [
+   112,
+   144,
+   32,
+   32
+  ],
+  "mael_32": [
+   144,
+   144,
+   32,
+   32
+  ],
+  "noble_lady_32": [
+   176,
+   144,
+   32,
+   32
+  ],
+  "silver_rogue_32": [
+   208,
+   144,
+   32,
+   32
+  ],
+  "goggles_smith_32": [
+   0,
+   192,
+   32,
+   32
+  ],
+  "hooded_sage_32": [
+   32,
+   192,
+   32,
+   32
+  ],
+  "tess_32": [
+   64,
+   192,
+   32,
+   32
+  ],
+  "iris_32": [
+   96,
+   192,
+   32,
+   32
+  ],
+  "nella_32": [
+   128,
+   192,
+   32,
+   32
+  ],
+  "pell_32": [
+   160,
+   192,
+   32,
+   32
+  ],
+  "hazel_32": [
+   192,
+   192,
+   32,
+   32
+  ],
+  "hob_32": [
+   224,
+   192,
+   32,
+   32
+  ],
+  "garrick_32": [
+   0,
+   224,
+   32,
+   32
+  ],
+  "pip_32": [
+   32,
+   224,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "hero": {
+   "48": "hero_48",
+   "32": "hero_32"
+  },
+  "mira": {
+   "48": "mira_48",
+   "32": "mira_32"
+  },
+  "bram": {
+   "48": "bram_48",
+   "32": "bram_32"
+  },
+  "mael": {
+   "48": "mael_48",
+   "32": "mael_32"
+  },
+  "noble_lady": {
+   "48": "noble_lady_48",
+   "32": "noble_lady_32"
+  },
+  "silver_rogue": {
+   "48": "silver_rogue_48",
+   "32": "silver_rogue_32"
+  },
+  "goggles_smith": {
+   "48": "goggles_smith_48",
+   "32": "goggles_smith_32"
+  },
+  "hooded_sage": {
+   "48": "hooded_sage_48",
+   "32": "hooded_sage_32"
+  },
+  "tess": {
+   "48": "tess_48",
+   "32": "tess_32"
+  },
+  "iris": {
+   "48": "iris_48",
+   "32": "iris_32"
+  },
+  "nella": {
+   "48": "nella_48",
+   "32": "nella_32"
+  },
+  "pell": {
+   "48": "pell_48",
+   "32": "pell_32"
+  },
+  "hazel": {
+   "48": "hazel_48",
+   "32": "hazel_32"
+  },
+  "hob": {
+   "48": "hob_48",
+   "32": "hob_32"
+  },
+  "garrick": {
+   "48": "garrick_48",
+   "32": "garrick_32"
+  },
+  "pip": {
+   "48": "pip_48",
+   "32": "pip_32"
+  }
+ },
+ "sources": {
+  "hero": "portraits.webp cell 0",
+  "mira": "portraits.webp cell 1",
+  "bram": "portraits.webp cell 2",
+  "mael": "portraits.webp cell 3",
+  "noble_lady": "portraits.webp cell 4",
+  "silver_rogue": "portraits.webp cell 5",
+  "goggles_smith": "portraits.webp cell 6",
+  "hooded_sage": "portraits.webp cell 7",
+  "tess": "interior-sprites.png cell 4",
+  "iris": "interior-sprites.png cell 3",
+  "nella": "interior-sprites.png cell 6",
+  "pell": "interior-sprites.png cell 5",
+  "hazel": "interior-sprites.png cell 1",
+  "hob": "interior-sprites.png cell 7",
+  "garrick": "interior-sprites.png cell 2",
+  "pip": "interior-sprites.png cell 0"
+ },
+ "unassigned": [
+  "noble_lady",
+  "silver_rogue",
+  "goggles_smith",
+  "hooded_sage"
+ ],
+ "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop."
+}
