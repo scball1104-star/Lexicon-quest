@@ -158,9 +158,12 @@ export default {
     { id: 'trig_gate', type: 'trigger', x: 12, y: 18, w: 2, h: 1, script: 'leave_town_first_time', once: true },
     { id: 'slime_a', type: 'enemy', x: 20, y: 6, sprite: 'enemy_inkslime', encounter: 'archive_f1_a', move: 'chase' }
   ],
-  exits: [ { x: 12, y: 18, w: 2, h: 1, to: ['valley', 30, 12, 'down'] } ]
+  exits: [ { x: 12, y: 18, w: 2, h: 1, to: ['valley', 30, 12, 'down'] } ],
+  marks: { bedside: [4, 3], town_sign: [12, 17], meet_iris: [8, 6] }   // named points cutscenes refer to
 };
 ```
+- Triggers take `on: 'enter'` (fires when the player steps onto the tile) or `on: 'interact'` (confirm while facing).
+  `marks` are required by story scripts: `walk`, `camera.panTo` and `spawn({at})` accept a mark name or x,y.
 - Collision comes from `tiles.json` (per tile) + decor footprints + events. A map validity test checks
   every map: rectangular rows, legend complete, every door/exit target exists and lands on a walkable tile,
   every scripted id exists, and the start-to-boss path is reachable (BFS that respects puzzle gates).
@@ -199,7 +202,10 @@ export async function mael_intro(s) {
 ```
 Primitives: `say, choice, walk, face, jump, emote(! ? ... heart sweat anger music zzz), wait, camera.panTo,
 camera.follow, shake, flash, fade, tint, music, sfx, spawn, despawn, setFlag, hasFlag, give, take, battle,
-addMember, title(card text)`. Text is held in `data/story/*.js` by id, not inlined in maps.
+addMember, title(card text)`. Text is held in `data/story/*.js` by id, not inlined in maps. Position arguments
+(`walk`, `camera.panTo`, `spawn`) accept a map mark name or x,y. `hasFlag` may be sync or async (always `await` it).
+When `ep1_complete` is set, the field scene hands off to the credits scene using `CREDITS` from `data/text.js`;
+there is no `credits()` cutscene primitive.
 
 ## 6. Art bible
 
@@ -243,7 +249,7 @@ indigo `#14101e`-ish), outline color per material (dark of its ramp), not univer
 ### 6.4 UI
 - Windows: Final Fantasy style. Deep blue vertical gradient (default; Config lets the player pick 6 colors),
   2 px light bevel border with rounded corners, 9-slice from `assets/ui/window.png`. Field windows fill at alpha 0.92 (busier backgrounds bleed through below that).
-- Cursor: pointing-hand glove (FF) that bobs 1 px. Disabled options dim to 50%.
+- Cursor: pointing-hand glove (FF, about 18x12, hotspot at the fingertip) that bobs 1 px. Disabled options dim to 50%.
 - Font: hand-built bitmap font `assets/ui/font.png` + `font.json` (ASCII 32..126 plus a few symbols: heart,
   arrow, note, star, ellipsis), proportional widths, 1 px shadow. A second **large** font for titles and
   location banners (about 12 to 14 px). Color codes in strings: `{c:gold}Text{/c}`.

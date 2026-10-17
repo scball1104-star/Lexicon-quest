@@ -130,7 +130,8 @@ tinted with the gradient color of the adjacent window edge (same alpha as the fi
 
 ### Touch skins and button glyphs
 - `touch/dpad.png` (45x45) + `dpad_up|down|left|right.png`, `a.png` / `a_pressed.png`, `b.png` /
-  `b_pressed.png` (26x26), `menu.png`, `run.png` (+ `_pressed`, 32x14). Pixel art at 1x; scale with
+  `b_pressed.png` (26x26), `menu.png`, `run.png` (+ `_pressed`, 32x14), `fullscreen.png` (+ `_pressed`,
+  18x18). Pixel art at 1x; scale with
   `image-rendering: pixelated` (3x reads well on phones). Translucent dark glass with a light rim and an ink
   outline, so they read on bright and dark scenes. Same pieces are in `ui.json` as `touch_*`.
 - Inline prompt glyphs, 11 px tall to sit in a text line: `btn_key_z|x|c|enter|esc|shift|q|e`,
