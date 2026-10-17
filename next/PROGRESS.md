@@ -11,3 +11,7 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Design bible written (`next/DESIGN.md`): what we take from Lufia II, Chrono Trigger, Final Fantasy, Diablo II,
   Dragon Quest and Secret of Mana, and how each shows up in the game.
 - Wave 1 launched: 7 parallel agents (engine, tiles, sprites, UI art, sound effects, story/content, battle rules).
+- Music: Suno cannot be driven from the app's built-in browser (Cloudflare's human check fails there even
+  when you tick it), so a composer agent is writing the missing tracks in code, SNES tracker style, with a shared
+  four-note "name" motif. The existing Suno tracks (title, town, battle, boss, valley) stay in use. If you get a
+  minute with Suno on your phone, `next/docs/SUNO_PROMPTS.md` has drop-in prompts and filenames.
