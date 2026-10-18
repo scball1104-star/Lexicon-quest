@@ -33,20 +33,21 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [ ] Long telegraph sentences get cut with an ellipsis in the help window; wrap to two lines
 
 ## Wave 4 polish backlog from docs/CRITIQUE_1.md (ranked)
-- [ ] C1 Quantize painted backdrops (title, battle, dialogue key art) to palette.json with ordered dither so every scene has one pixel density
+- [x] C1 Quantize painted backdrops (title, battle, dialogue key art) to palette.json with ordered dither so every scene has one pixel density
 - [x] C2 Bram and Mira sprites match their portraits (done before the critique ran)
 - [ ] C3 Battle stage: indigo lower band, ellipse shadows under units, one baseline so the party does not float
-- [ ] C4 Timeline icons: chibi head icons with side-colored frames (replaces eyebrow crops)
+- [~] C4 Timeline icons (heads atlas built; battle scene switch pending): chibi head icons with side-colored frames (replaces eyebrow crops)
 - [ ] C5 Battle-start shatter: axis-aligned slices over mosaic, no free-angle rotation of pixel art; remove the stray glyph
-- [ ] C6 Archive void: flat #14101e instead of the loud hatched brown; wall faces and pillars for depth; confirm F3 pit and valley navy rectangle are intended art
+- [x] C6 Archive void: flat #14101e instead of the loud hatched brown; wall faces and pillars for depth; confirm F3 pit and valley navy rectangle are intended art
 - [ ] C7 Lantern/brazier light: dithered radial falloff with max blend instead of overlapping alpha discs
-- [ ] C8 Enemy battle sprites: remove downscale speckle, add selective outlines
-- [ ] C9 Plaza cobble contrast lower than actors
+- [x] C8 Enemy battle sprites: remove downscale speckle, add selective outlines
+- [x] C9 Plaza cobble contrast lower than actors
 - [ ] C10 Victory window overlaps help bar and timeline (integrator)
 - [ ] C11 Slash fx: thicker arc, impact star, visible hit-stop
 - [ ] C12 Touch: menu rows too small on phone, add tap-to-select; tablet A/B buttons bigger
 - [ ] C13 Battle shows "Hero" while menus show the chosen name (integrator, bug)
 - [ ] C14 Game over asymmetric black top band
 - [ ] C15 Followers spawn stacked on the leader (integrator)
-- [ ] C16 Library rug reads as a tile grid
+- [x] C16 Library rug reads as a tile grid
 - [ ] C17 Ambient particles missing from field shots
+- [ ] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
