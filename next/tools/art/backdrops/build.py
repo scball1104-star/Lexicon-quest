@@ -42,8 +42,13 @@ BAYER4 = (np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]
 RECIPES = {
     'title': dict(cell=0, zoom=1.06, frameY=-1.0, bright=1.0, contrast=1.0, sat=1.0, extras=4,
                   topShade=(0.0, 0.42, 0.14), note='Willowmere key art framed for the logo (sky kept under the title)'),
-    'battle_valley': dict(cell=0, zoom=1.0, frameY=0.0, bright=0.96, contrast=0.86, sat=0.9, extras=4,
-                          stage=(118, 0.42), note='valley battle stage'),
+    # W5-art (CRITIQUE_2 item 3): there is no painted valley, so the valley stage is composed from the game's
+    # own palette, tiles and props by compose_valley.py (daylight meadow, river, bridge, pines, cliffs) and
+    # quantized like the others. battle_valley_dusk is the same scene in its evening palette (optional id).
+    'battle_valley': dict(compose='day', extras=0, max_pair=0.17, stage=(118, 0.42),
+                          note='valley battle stage: daytime meadow composed from the palette, tiles and props'),
+    'battle_valley_dusk': dict(compose='dusk', extras=0, max_pair=0.17, stage=(118, 0.46),
+                               note='valley battle stage at dusk (optional id for late-day fights)'),
     'battle_archive': dict(cell=7, zoom=1.0, frameY=0.0, bright=0.82, contrast=0.88, sat=0.9, extras=4,
                            tint=('#3c3278', 0.22), stage=(118, 0.44), note='archive battle stage (cell 7 as src/scenes/battle.js)'),
     'battle_boss': dict(cell=7, zoom=1.0, frameY=0.0, bright=0.72, contrast=0.9, sat=0.95, extras=4,
@@ -274,18 +279,24 @@ def old_runtime(cell, bright=1.0, tint=None, band=True):
 
 # ----------------------------------------------------------------------------- build
 def build_one(bid, rec, pal):
-    im = cell_window(rec['cell'], rec.get('zoom', 1.0), rec.get('frameY', 0.0))
-    a = downscale(im)
-    a = unsharp(a, 0.55, 1.0)
-    a = grade(a, rec)
+    if rec.get('compose'):
+        import compose_valley
+        a = compose_valley.compose(rec['compose'])
+    else:
+        im = cell_window(rec['cell'], rec.get('zoom', 1.0), rec.get('frameY', 0.0))
+        a = downscale(im)
+        a = unsharp(a, 0.55, 1.0)
+        a = grade(a, rec)
     pal2, extras = pick_extras(a, pal, min(EXTRA_MAX, rec.get('extras', 0)))
-    idx = quantize_ordered(a, pal2)
+    idx = quantize_ordered(a, pal2, rec.get('max_pair', 0.14))
     out = (pal2[idx] * 255 + 0.5).astype(np.uint8)
     img = Image.fromarray(out, 'RGB')
     os.makedirs(DST, exist_ok=True)
     img.save(os.path.join(DST, bid + '.png'), optimize=True)
-    meta = {'image': bid + '.png', 'w': W, 'h': H, 'cell': rec['cell'], 'note': rec.get('note', ''),
+    meta = {'image': bid + '.png', 'w': W, 'h': H, 'cell': rec.get('cell'), 'note': rec.get('note', ''),
             'extraColors': extras, 'colors': int(len(np.unique(idx)))}
+    if rec.get('compose'):
+        meta['composed'] = 'tools/art/backdrops/compose_valley.py (%s)' % rec['compose']
     if rec.get('stage'):
         meta['bandY'] = int(rec['stage'][0])
         meta['bandAlpha'] = float(rec['stage'][1])
@@ -296,7 +307,7 @@ def build_one(bid, rec, pal):
     os.makedirs(OUT, exist_ok=True)
     img.resize((W * 3, H * 3), Image.NEAREST).save(os.path.join(OUT, bid + '_3x.png'))
     # comparison strip: old runtime recipe (left) vs new (right), both at 2x
-    if bid.startswith('battle') or bid == 'title':
+    if (bid.startswith('battle') or bid == 'title') and rec.get('cell') is not None:
         old = old_runtime(rec['cell'], 1.0 if bid == 'title' else rec.get('bright', 1.0),
                           None if bid in ('title', 'battle_valley') else rec.get('tint'), band=bid != 'title')
         oi = Image.fromarray((old * 255 + 0.5).astype(np.uint8), 'RGB')
@@ -304,7 +315,7 @@ def build_one(bid, rec, pal):
         strip.paste(oi.resize((W * 2, H * 2), Image.NEAREST), (0, 0))
         strip.paste(img.resize((W * 2, H * 2), Image.NEAREST), (W * 2 + 6, 0))
         strip.save(os.path.join(OUT, 'compare_%s.png' % bid))
-    print('%-15s cell %d  colors %3d  extras %s' % (bid, rec['cell'], meta['colors'], extras or '-'))
+    print('%-15s cell %s  colors %3d  extras %s' % (bid, rec.get('cell', 'composed'), meta['colors'], extras or '-'))
     return meta
 
 

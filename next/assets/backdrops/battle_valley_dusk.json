@@ -1,0 +1,13 @@
+{
+ "image": "battle_valley_dusk.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "valley battle stage at dusk (optional id for late-day fights)",
+ "extraColors": [],
+ "colors": 37,
+ "composed": "tools/art/backdrops/compose_valley.py (dusk)",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

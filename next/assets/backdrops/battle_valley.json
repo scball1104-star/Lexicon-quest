@@ -2,15 +2,11 @@
  "image": "battle_valley.png",
  "w": 384,
  "h": 216,
- "cell": 0,
- "note": "valley battle stage",
- "extraColors": [
-  "#27475d",
-  "#3e5b78",
-  "#6474af",
-  "#67625b"
- ],
- "colors": 72,
+ "cell": null,
+ "note": "valley battle stage: daytime meadow composed from the palette, tiles and props",
+ "extraColors": [],
+ "colors": 48,
+ "composed": "tools/art/backdrops/compose_valley.py (day)",
  "bandY": 118,
  "bandAlpha": 0.42,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"

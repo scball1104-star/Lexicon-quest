@@ -599,9 +599,20 @@ def plate(down=False):
 def floor_switch(on=False, ink=None):
     """Floor rune switch. ink: None (normal), 'faint' or 'revealed' (Lantern of Recall)."""
     cv = Canvas(16, 16)
-    a = 255
+    glyph = [(0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2), (-2, -1), (2, -1), (-1, 2), (1, 2)]
     if ink == 'faint':
-        a = 46
+        # W5-art: barely there, a dotted outline of the rune disc that the Lantern of Recall fills in
+        col = VI(3)
+        for y in range(16):
+            for x in range(16):
+                dx, dy = x + 0.5 - 8, (y + 0.5 - 8) * 1.15
+                d = math.sqrt(dx * dx + dy * dy)
+                if 5.5 < d <= 6.5 and (x + y) % 2 == 0:
+                    cv.put(x, y, (col[0], col[1], col[2], 96))
+        for n, (dx, dy) in enumerate(glyph):
+            if n % 2 == 0:
+                cv.put(8 + dx, 8 + dy, (col[0], col[1], col[2], 72))
+        return cv
     for y in range(16):
         for x in range(16):
             dx, dy = x + 0.5 - 8, (y + 0.5 - 8) * 1.15
@@ -616,12 +627,10 @@ def floor_switch(on=False, ink=None):
                 c = K(1)
                 if on or ink == 'revealed':
                     c = CY(1)
-            cv.put(x, y, (c[0], c[1], c[2], a))
-    glyph = [(0, -3), (0, -2), (0, -1), (0, 0), (0, 1), (0, 2), (-2, -1), (2, -1), (-1, 2), (1, 2)]
-    gc = (CY(4) if on else K(3)) if ink is None else (CY(3) if ink == 'revealed' else VI(3))
+            cv.put(x, y, c)
+    gc = (CY(4) if on else K(3)) if ink is None else CY(3)
     for (dx, dy) in glyph:
-        g = gc if ink != 'faint' else (gc[0], gc[1], gc[2], 70)
-        cv.put(8 + dx, 8 + dy, g)
+        cv.put(8 + dx, 8 + dy, gc)
     if on and ink is None:
         cv.put(8, 8, CY(4))
         cv.put(7, 7, WHITE)
@@ -660,33 +669,39 @@ def crystal_switch(state):
 
 
 def push_block():
-    """Movable stone block, 16 x 24: top face 7 px + front face, rune on the front. Object, 1 tile footprint."""
+    """Movable carved stone block (W5-art, CRITIQUE_2 item 10): a rounded, lit top face with a carved
+    recess, a dark front face with a handle groove (dark slot, lit lower lip), a dark base course and a
+    soft translucent shadow down-right, so it reads as a heavy cube from across the room and never as a
+    cabinet. 16 x 24: the body is 15 px wide and the 16th column carries the shadow. Object, 1 tile footprint."""
+    rows = [
+        '................',
+        '................',
+        '................',
+        '................',
+        '..00000000000...',
+        '.0554444444440..',
+        '055444444444440.',
+        '054444454444440.',
+        '054444444444440.',
+        '054444444444440.',
+        '055555555555530.',
+        '044333333333320s',
+        '043330000033320s',
+        '043335555533320s',
+        '043333333333320s',
+        '043331111333320s',
+        '043313333133320s',
+        '043313333143320s',
+        '043313333143320s',
+        '043333444333320s',
+        '043333333333320s',
+        '042222222222220s',
+        '.0000000000000s.',
+        '..sssssssssss...',
+    ]
     cv = Canvas(16, 24)
-    for y in range(0, 7):
-        for x in range(1, 15):
-            cv.set(x, y, K(4) if y > 0 else K(1))
-    for x in range(1, 15):
-        cv.set(x, 1, K(5))
-    for y in range(7, 22):
-        for x in range(1, 15):
-            c = K(3)
-            if y == 7:
-                c = K(2)
-            if x == 1:
-                c = K(4)
-            if x == 14:
-                c = K(1)
-            cv.set(x, y, c)
-    for y in range(0, 22):
-        cv.set(0, y, K(0)); cv.set(15, y, K(0))
-    for x in range(16):
-        cv.set(x, 22, K(0))
-    for (dx, dy) in ((0, -3), (0, -2), (-2, -1), (-1, -1), (1, -1), (2, -1), (0, 0), (-1, 1), (1, 1), (0, 2)):
-        cv.set(8 + dx, 14 + dy, GOLD(3))
-    for (x, y) in ((4, 10), (11, 18), (5, 19)):
-        cv.set(x, y, K(2))
-    for y in range(4, 24):
-        cv.put(16 - 1, y, SH(0))
+    cmap = {'0': S(0), '1': S(1), '2': S(1), '3': S(2), '4': S(3), '5': S(4), 's': SH(96)}
+    cv.stamp(rows, 0, 0, cmap)
     return cv
 
 
@@ -845,31 +860,62 @@ def stairs_down():
 
 
 def ink_bridge(orient, state):
-    """Hidden-ink bridge plank over a pit. state: faint (unrevealed shimmer) or revealed (glowing ink glyph planks)."""
+    """Hidden-ink bridge over an ink pool (W5-art, CRITIQUE_2 item 5). faint: a barely-there dotted outline
+    of the planks, so the Lantern of Recall has something to reveal; revealed: weathered wood planks with
+    an ink sheen, a lit near edge, a dark far edge and a translucent shadow on the ink beyond it. The deck
+    spans rows 3..12 across the tile; 'v' is the transpose (light still from the top-left)."""
     cv = Canvas(16, 16)
-    a = 255 if state == 'revealed' else 40
+
+    def P(i, j, c):
+        x, y = (i, j) if orient == 'h' else (j, i)
+        cv.put(x, y, c)
+
+    if state == 'faint':
+        col = VI(3)
+        for i in range(16):
+            if i % 2 == 0:
+                P(i, 3, (col[0], col[1], col[2], 84))
+                P(i, 12, (col[0], col[1], col[2], 84))
+            if i % 4 == 0:
+                for j in range(5, 12, 2):
+                    P(i, j, (col[0], col[1], col[2], 64))
+        return cv
     for i in range(16):
+        k = i % 4                                   # plank strips 3 px wide, a 1 px gap shows the ink
         for j in range(3, 13):
-            x, y = (i, j) if orient == 'h' else (j, i)
-            k = (i % 4)
-            c = INK(3) if k in (1, 2) else INK(2)
-            if j in (3, 12):
-                c = CY(2) if state == 'revealed' else VI(2)
-            if j in (4, 11):
-                c = INK(2)
             if k == 0:
-                c = INK(1)
-            if state == 'revealed' and k == 2 and j in (6, 9):
-                c = CY(4)
-            if state == 'revealed' and k == 1 and j in (7, 8):
-                c = CY(3)
-            cv.put(x, y, (c[0], c[1], c[2], a))
-    if state == 'revealed':
-        for i in range(0, 16, 4):
-            x, y = (i + 1, 2) if orient == 'h' else (2, i + 1)
-            cv.put(x, y, CY(4))
-            x, y = (i + 3, 13) if orient == 'h' else (13, i + 3)
-            cv.put(x, y, VI(3))
+                c = WD(1) if j in (3, 12) else INK(1)
+            else:
+                c = WD(3)
+                if j == 3:
+                    c = WD(5) if k != 3 else WD(4)      # lit near edge
+                elif j == 4:
+                    c = WD(4)
+                elif j == 12:
+                    c = WD(1)                           # dark far edge
+                elif j == 11:
+                    c = WD(2)
+                elif (j + i * 3) % 5 == 0:
+                    c = WD(2)                           # grain
+            P(i, j, c)
+    # weathering: two knots, a crack, a chipped corner, a missing sliver at the far edge
+    for (i, j) in ((2, 7), (10, 9)):
+        P(i, j, WD(1)); P(i + 1, j, WD(2))
+    for j in range(5, 9):
+        P(6, j, WD(1))
+    P(13, 3, INK(1)); P(14, 3, WD(2))
+    P(9, 12, INK(1))
+    # ink sheen: one soft violet gloss band across the deck (the ink below shows through the wood), and
+    # two brighter glints where it catches the light
+    g4 = INK(4)
+    for i in range(16):
+        if i % 4:
+            P(i, 5, (g4[0], g4[1], g4[2], 120))
+            if i % 4 == 2:
+                P(i, 6, (g4[0], g4[1], g4[2], 60))
+    P(5, 4, VI(3)); P(13, 5, VI(3))
+    for i in range(1, 16):
+        P(i, 13, SH(80))
     return cv
 
 
@@ -894,15 +940,22 @@ def ink_puddle(k):
 def wall_glyph(state):
     """Secret-door glyph painted in hidden ink on a 2-tile wall face (16 x 32 overlay)."""
     cv = Canvas(16, 32)
-    a = 255 if state == 'revealed' else 36
-    col = CY(3) if state == 'revealed' else VI(2)
+    col = CY(3) if state == 'revealed' else VI(3)
     pts = []
     for t in range(40):
         ang = t / 40 * 2 * math.pi
         pts.append((8 + round(math.cos(ang) * 5), 15 + round(math.sin(ang) * 7)))
     pts += [(8, y) for y in range(9, 22)] + [(x, 15) for x in range(5, 12)]
+    seen = set()
     for (x, y) in pts:
-        cv.put(x, y, (col[0], col[1], col[2], a))
+        if (x, y) in seen:
+            continue
+        seen.add((x, y))
+        if state == 'revealed':
+            cv.put(x, y, col)
+        elif (x + y) % 2 == 0:
+            # W5-art: faint = a dotted trace of the glyph, barely there until the Lantern fills it in
+            cv.put(x, y, (col[0], col[1], col[2], 90))
     if state == 'revealed':
         cv.put(8, 15, WHITE)
     return cv

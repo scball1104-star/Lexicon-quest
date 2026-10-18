@@ -229,3 +229,75 @@ def report_colors(a):
     _init()
     on = sum(1 for c in cols if master_index(c)[1] < 1e-3)
     return len(cols), on
+
+
+# ----------------------------------------------------------------------------- W5-art: dark sprites on the dark stage
+def _ramp_of(rgb, prefer):
+    """(ramp name, step, ramp length) for a colour near a master colour, preferring the ramps listed first
+    (a dark indigo sits in several ramps); None when the colour is off-palette."""
+    _init()
+    j, d = master_index(rgb)
+    if d > 0.09:
+        return None
+    cands = _ramp_dark.get(j, [])
+    if not cands:
+        return None
+    for name in prefer:
+        for (n_, dark, second, k, n) in cands:
+            if n_ == name:
+                return (name, k, n)
+    name, dark, second, k, n = max(cands, key=lambda c: c[3] / c[4])
+    return (name, k, n)
+
+
+def lift_darkest(a, ramp='ink', mask=None):
+    """CRITIQUE_2 item 4: the darkest step of `ramp` inside the body (never on the outline ring) moves up
+    one step, so a dark sprite keeps its dark outline while its fill lifts off the dark stage."""
+    a = a.copy()
+    al = a[..., 3] > 0.5
+    r = P.ramp(ramp)
+    d0 = np.array(hex2rgb(r[0]), np.float32) / 255
+    d1 = np.array(hex2rgb(r[1]), np.float32) / 255
+    p = np.pad(al, 1)
+    inner = al & p[:-2, 1:-1] & p[2:, 1:-1] & p[1:-1, :-2] & p[1:-1, 2:]
+    sel = inner & np.all(np.abs(a[..., :3] - d0) < 1e-3, -1)
+    if mask is not None:
+        sel &= mask
+    a[sel, :3] = d1
+    return a
+
+
+def rim_light(a, prefer=('ink', 'shadow', 'stone_cool'), lift=None, max_L=0.42, mask=None, min_nb=4):
+    """CRITIQUE_2 item 4: a 1 px rim light on the upper-left edges. An opaque pixel with a transparent
+    neighbour above or to the left (the outline ring on the lit side) whose colour is dark (OKLab L below
+    max_L) takes a lighter step of its own ramp: `lift` steps up per ramp name (default 3 on the ink, shadow
+    and hair_violet ramps, 2 elsewhere), clamped to the ramp. Pixels with fewer than min_nb opaque
+    8-neighbours are skipped so 1 px wisps do not sparkle; `mask` (HxW bool) limits the pass."""
+    lift = lift or {}
+    a = a.copy()
+    al = a[..., 3] > 0.5
+    H, W = al.shape
+    p = np.pad(al, 1)
+    up, left = p[:-2, 1:-1], p[1:-1, :-2]
+    edge = al & (~up | ~left)
+    nb = sum(p[1 + dy:H + 1 + dy, 1 + dx:W + 1 + dx].astype(np.int32)
+             for dy in (-1, 0, 1) for dx in (-1, 0, 1)) - al.astype(np.int32)
+    lab = to_oklab(a[..., :3].reshape(-1, 3)).reshape(H, W, 3)
+    sel = edge & (nb >= min_nb) & (lab[..., 0] < max_L)
+    if mask is not None:
+        sel &= mask
+    src = a.copy()
+    cache = {}
+    for y, x in zip(*np.nonzero(sel)):
+        key = tuple(np.round(src[y, x, :3] * 255).astype(int))
+        if key not in cache:
+            r = _ramp_of(src[y, x, :3], prefer)
+            if r is None:
+                cache[key] = None
+            else:
+                name, k, n = r
+                steps = lift.get(name, 3 if name in ('ink', 'shadow', 'hair_violet') else 2)
+                cache[key] = np.array(hex2rgb(P.ramp(name)[min(n - 1, k + steps)]), np.float32) / 255
+        if cache[key] is not None:
+            a[y, x, :3] = cache[key]
+    return a

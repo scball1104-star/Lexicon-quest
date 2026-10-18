@@ -34,7 +34,16 @@ def archivore():
     src = load_src('bosses.png')
     obj = main_object(grid_cell(src, 4, 2, 0), keep_frac=0.02, max_dist=30)
     print('archivore src', obj.shape)
-    return pix_obj(obj, tw=146, k=22)
+    a = pix_obj(obj, tw=146, k=22)
+    # W5-art (CRITIQUE_2 item 4): the root-black lower body (tentacles under the eye) gets its darkest fill
+    # lifted one step and a 1 px violet rim light on its upper-left edges, so it separates from battle_boss
+    H = a.shape[0]
+    lower = np.zeros(a.shape[:2], bool)
+    lower[int(H * 0.5):, :] = True
+    a = CL.lift_darkest(a, 'shadow', mask=lower)
+    a = CL.rim_light(a, prefer=('hair_violet', 'shadow', 'wood', 'earth'), mask=lower,
+                     lift={'hair_violet': 4, 'shadow': 3, 'wood': 3, 'earth': 3})
+    return a
 
 
 def echo_warden():

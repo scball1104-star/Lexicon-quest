@@ -65,7 +65,11 @@ transparent outside the boundary. To draw cell (x, y) whose terrain is T:
 Holes (`water`, `shallow`, `ink`, `pit`) are highest, so they draw their own banks and lips; grass draws its
 tufted edge over dirt and sand; the plaza draws a dressed curb over grass. A `pit` has a rim: a lit 1 px edge on
 its top and left (the far wall is a cut stone face fading to ink), a darker right edge and a 2 px dark lip along
-the bottom, so it reads as a hole. `plaza` keeps its mortar in the mid step and dresses only every third stone,
+the bottom, so it reads as a hole. `ink` (W5-art, CRITIQUE_2 item 5) is a dark violet-indigo liquid, not flat navy:
+an ink:2 body with soft ink:1 depth bands, slow highlight ripples (thin ink:3 arcs that drift and breathe over the
+3 A1 frames) with ink:4 glints, a lighter meniscus ring (ink:3, shimmering to ink:4) inside the shore, a dark lip
+on the near and side banks and a cut stone face under the far bank. Preview: `python compose.py ink_test`
+(`out/preview_ink_test.png`; set the scene's `frame` to 1 or 2 for the other frames). `plaza` keeps its mortar in the mid step and dresses only every third stone,
 so actors out-contrast the floor (6 fill variants). `carpet_red` / `carpet_blue` read as cloth: a dark hem with
 a fringe stitch on the N and S ends, a gold line, a knot stripe and a soft woven field. Pre-render each map layer once
 into an offscreen canvas per animation frame; the cost is a few quarter blits per cell.
@@ -142,6 +146,15 @@ Closed doors list the doorway as footprint; open ones list it as `doorAt`.
 - Archive: `wall_shelf_<l|m|r>` (16x32 face overlay), `wall_cracked`, `wall_broken`, `wall_glyph_<faint|revealed>`,
   `plate_<up|down>`, `switch_<off|on>`, `switch_ink_<faint|revealed>`, `ink_bridge_<h|v>_<faint|revealed>`
   (faint = `pit`, revealed = `none`), `roots_0..2`, `ink_puddle_0..1`.
+  Hidden ink (W5-art): every `*_faint` tile is a barely-there dotted trace in translucent magic_violet (the plank
+  outline and joints of a bridge, the rune disc of a switch, the glyph on a wall), so the Lantern of Recall has
+  something to reveal; `ink_bridge_*_revealed` is weathered wood planks (lit near edge, dark far edge, knots, a
+  crack, a chipped corner, the ink showing in the gaps) with a soft violet ink sheen and a translucent shadow on
+  the pool beyond the far edge. `v` is the transpose of `h` (light still from the top-left).
+- `push_block` (object, 16x32 rect, 1-tile footprint, W5-art, CRITIQUE_2 item 10): a carved block of the floor's
+  warm stone, 15 px wide: a rounded, lit top face, a darker front with a grip notch under the lip and a carved
+  ring, a dark base course, and a translucent shadow in the 16th column and the bottom row. It slides 16 px per
+  push; the top 8 rows of the rect are the overhead row.
 - Interior: `in_<barrel|pot|pot_broken|crate|sacks>`, `chair_<down|up|left|right>` (facing of the sitter).
 - Overlays (decals, collision none): `flowers_<white|yellow|blue|violet|pink|red>`, `hydrangea_<blue|violet>`,
   `pebbles_0..2`, `leaves`, `tuft_0..1`.

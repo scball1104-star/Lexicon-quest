@@ -966,37 +966,56 @@ class Ink(Terrain):
             'surf': EdgeSpec({'N': 4.0, 'S': 2.2, 'W': 2.4, 'E': 2.4}, r=3.5, rr=2.5, prof=prof),
         }
 
+    # W5-art: a dark violet-indigo liquid, not flat navy. The body is ink:2 with soft ink:1 depth pools,
+    # slow highlight ripples (thin ink:3 arcs that drift and breathe over the 3 frames) and a few ink:4
+    # glints; the shore has a lighter meniscus ring (ink:3, shimmering to ink:4) under a dark lip.
     def make_texture(self, frame, variant):
-        t = blank(C('ink', 2))
-        # broad slow sheen bands (drift 1 px per frame)
-        for i, (x, y) in enumerate(scatter(151, 2, 8)):
-            for k in range(7):
-                t[y][(x + k + frame) % 16] = C('ink', 1)
-            for k in range(3):
-                t[(y + 1) % 16][(x + k + 2 + frame) % 16] = C('ink', 1)
-            for k in range(4):
-                t[(y - 2) % 16][(x + k + 5 + frame) % 16] = C('ink', 3)
-        # one highlight streak per band, breathing
-        for i, (x, y) in enumerate(scatter(151, 2, 8)):
-            L = [2, 3, 2][(frame + i) % 3]
-            for k in range(L):
-                t[y][(x + 2 + k + frame) % 16] = C('ink', 3)
-        for i, (x, y) in enumerate(scatter(153, 2, 7)):
+        I = lambda i: C('ink', i)
+        t = blank(I(2))
+        # depth: two broad, soft dark bands that never move (the pool is deep, not a sheet); their
+        # ends taper so they read as shadowed swells, not spots
+        for i, (x, y) in enumerate(scatter(157, 2, 9)):
+            for dy, (lo, hi) in enumerate(((-2, 4), (-4, 6), (-1, 5))):
+                for dx in range(lo, hi + 1):
+                    t[(y + dy - 1) % 16][(x + dx + dy + i) % 16] = I(1)
+        # highlight ripples: a long flattened arc that drifts 1 px per frame; its crest brightens on frame 1
+        arcs = [['...hhhhh...', '..h.....h..'], ['..hhhhhh...', '.h......h..'], ['...hhhhhh..', '..h......h.']]
+        for i, (x, y) in enumerate(scatter(151, 2, 9)):
+            shp = arcs[(frame + i) % 3]
+            for j, row in enumerate(shp):
+                for k, ch in enumerate(row):
+                    if ch == 'h':
+                        t[(y + j) % 16][(x + k + frame) % 16] = I(3)
+            if (frame + i) % 3 == 1:
+                t[y % 16][(x + 5 + frame) % 16] = I(4)
+        # glints that blink in turn
+        for i, (x, y) in enumerate(scatter(153, 3, 6)):
             if (frame + i) % 3 == 0:
-                t[y][x] = C('ink', 4)
+                t[y][x] = I(4)
+            elif (frame + i) % 3 == 1:
+                t[y][x] = I(3)
         return t
 
     def pixel(self, c, x, y):
+        I = lambda i: C('ink', i)
         if not c.i('ground', x, y):
             return None
         g = c.f('ground', x, y)
         if c.i('surf', x, y):
             d = c.f('surf', x, y)
             s = c.side('surf', x, y)
-            if s == 'N' and d < 1.5:
-                return DARK
+            if s == 'N':
+                # under the far bank: the bank's shadow on the liquid, then the meniscus
+                if d < 1:
+                    return I(0)
+                if d < 2:
+                    return I(3) if (x + c.frame) % 3 else I(2)
+                return self.tex(c, x, y)
             if d < 1:
-                return C('ink', 3) if (h32(x, y, c.frame, 161) % 4) else C('ink', 4)
+                # meniscus: a lighter rim that shimmers
+                return I(4) if (h32(x, y, c.frame, 161) % 5 == 0) else I(3)
+            if d < 2 and (x + y + c.frame) % 4 == 0:
+                return I(3)
             return self.tex(c, x, y)
         s = c.side('surf', x, y)
         if s == 'N':
@@ -1005,10 +1024,11 @@ class Ink(Terrain):
                 k += 1
             if k == 0 or g < 1:
                 return K(3)
-            return C('ink', 2) if (x + k) % 3 == 0 else K(1)
+            return I(2) if (x + k) % 3 == 0 else K(1)
+        # near and side banks: a dark lip (the floor's edge stained by the ink)
         if g < 1:
-            return C('ink', 2)
-        return K(1)
+            return K(1) if s == 'S' else (K(2) if s == 'W' else K(0))
+        return K(0)
 
 
 # =====================================================================================  overlays

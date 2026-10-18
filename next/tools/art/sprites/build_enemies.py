@@ -16,13 +16,16 @@ import cleanup as CL
 # id: (cell, target height, k, recolour fn, options)
 ENEMIES = {
     'ink_slime':   dict(cell=0, h=48, k=14),
-    'page_wraith': dict(cell=1, h=72, k=14, recolor='sepia', eyes=[(230, 68), (240, 68)], eye_col='magic_cyan:3', brow=False),
+    'page_wraith': dict(cell=1, h=72, k=14, recolor='sepia', eyes=[(230, 68), (240, 68)], eye_col='magic_cyan:3', brow=False, rim={'ink': 4}),
     'briar_wolf':  dict(cell=2, h=60, k=16, recolor='briar', flip=True, eyes=[(93, 233)], eye_col='gold:4', brow=True),
     'moss_scarab': dict(cell=3, h=50, k=16, flip=True),
-    'bookmite':    dict(cell=3, h=38, k=12, recolor='sepia_mite', flip=True),
+    'bookmite':    dict(cell=3, h=38, k=12, recolor='sepia_mite', flip=True, rim={'ink': 4, 'shadow': 3, 'stone_cool': 3}),
     'tome_golem':  dict(cell=4, h=88, k=16),
-    'ink_wraith':  dict(cell=7, h=84, k=14, recolor='ink'),
+    'ink_wraith':  dict(cell=7, h=84, k=14, recolor='ink', rim=True),
 }
+# rim: W5-art (CRITIQUE_2 item 4). Dark sprites get a 1 px rim light on their upper-left edges (a lighter
+# step of their own ramp) and their darkest fill lifted one ramp step, so they separate from the Archive
+# stage; the recolour stops below start at ink:1 for the same reason (the outline stays ink:0).
 
 
 def R(ref):
@@ -31,10 +34,10 @@ def R(ref):
 
 def recolour(a, how):
     if how in ('sepia', 'sepia_mite'):
-        stops = [(0.0, R('ink:0')), (0.16, R('ink:1')), (0.30, R('ink:2')), (0.44, R('earth:2')),
+        stops = [(0.0, R('ink:1')), (0.16, R('ink:2')), (0.30, R('ink:2')), (0.44, R('earth:2')),
                  (0.58, R('earth:4')), (0.72, R('path:3')), (0.86, R('sand:2')), (1.0, R('sand:3'))]
         if how == 'sepia_mite':
-            stops = [(0.0, R('ink:0')), (0.14, R('ink:2')), (0.3, R('earth:1')), (0.46, R('earth:2')),
+            stops = [(0.0, R('ink:1')), (0.14, R('ink:2')), (0.3, R('earth:1')), (0.46, R('earth:2')),
                      (0.62, R('earth:3')), (0.8, R('path:3')), (1.0, R('sand:3'))]
         if how == 'sepia':
             # glowing blue eyes stay, pushed to cyan glow
@@ -44,7 +47,7 @@ def recolour(a, how):
         keep = lambda L, C, h: (L > 0.97)
         return RC.gradient_map(a, stops, keep=keep)
     if how == 'ink':
-        stops = [(0.0, R('ink:0')), (0.2, R('ink:1')), (0.4, R('ink:2')), (0.62, R('ink:3')),
+        stops = [(0.0, R('ink:1')), (0.2, R('ink:2')), (0.4, R('ink:2')), (0.62, R('ink:3')),
                  (0.82, R('ink:4')), (1.0, R('magic_violet:3'))]
         keep = lambda L, C, h: (L > 0.97)
         return RC.gradient_map(a, stops, keep=keep)
@@ -82,6 +85,11 @@ def make_enemy(eid, spec, src):
                 big[y + 1, x, :3] = dark
     if spec.get('flip'):
         big = flip_x(big)
+    if spec.get('rim'):
+        # after the flip: the rim sits on the screen's upper-left edges of the final, right-facing sprite
+        lift = spec['rim'] if isinstance(spec['rim'], dict) else None
+        big = CL.lift_darkest(big, 'ink')
+        big = CL.rim_light(big, prefer=('ink', 'shadow', 'stone_cool', 'earth', 'wood'), lift=lift)
     return big
 
 

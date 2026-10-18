@@ -69,6 +69,11 @@ bosses_battle: `archivore`, `echo_warden`, `lost_page_0`, `lost_page_1`, `lost_p
 Cleanup pass (CRITIQUE_1 C8, `cleanup.py`): colours within 0.04 OKLab of a master colour snap to it, near-duplicate
 colours merge, isolated pixels take their majority neighbour (bright saturated accents are protected), and the 1 px
 outer outline uses the darkest step of the ramp each neighbouring material belongs to (never universal black).
+Dark sprites on the dark stage (CRITIQUE_2 item 4, W5-art): `bookmite`, `page_wraith`, `ink_wraith` and the
+Archivore's lower body carry a 1 px rim light on their upper-left edges (`cleanup.rim_light`: a lighter step of
+their own ramp, ink:4 on the ink wraiths and the mite, hair_violet:4 on the Archivore) and their darkest fill
+lifted one ramp step (`cleanup.lift_darkest`; the outline stays the ramp's darkest). Frame rects are unchanged.
+Judge them on the stages with `tools/art/backdrops/mock_stage.py` (out/mock_stage_<setup>_3x.png).
 Recolours: page_wraith and bookmite are parchment/ink gradient maps, briar_wolf brown fur + green briar,
 ink_wraith ink-violet. Idle motion, hit flash and death dissolve are procedural (DESIGN 6.3).
 
