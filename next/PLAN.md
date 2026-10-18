@@ -53,21 +53,21 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
 
 ## Wave 5: second critique and design playtest (read-only reviews, then fix passes)
-- [~] critic-2: art/UX critique on fresh shots -> docs/CRITIQUE_2.md
-- [~] play-critic: pacing, clarity, difficulty, fun review from the autoplay frames and dialogue log -> docs/PLAYTEST_REVIEW_1.md
-- [ ] battle touch rows + Auto/Speed hint in the battle help window (W4b proposal)
-- [ ] fix passes from both reviews
+- [x] critic-2: art/UX critique on fresh shots -> docs/CRITIQUE_2.md
+- [x] play-critic: pacing, clarity, difficulty, fun review from the autoplay frames and dialogue log -> docs/PLAYTEST_REVIEW_1.md
+- [x] battle touch rows + Auto/Speed hint in the battle help window (W4b proposal)
+- [x] fix passes from both reviews (W5 story/maps, W5 systems, W5 art); W5b-ui in progress
 
 ## Wave 5 visual backlog from docs/CRITIQUE_2.md (ranked; Bram item was stale, asset is correct)
 - [~] D1 Key-art screens (title, prologue, name entry, credits) still show 10k+ colors: dither the vignette/overlays instead of alpha-blending, draw the quantized atlas 1:1 (ui, W5b)
-- [~] D2 Valley battles use the dusk town painting: build a daytime valley backdrop from the tiles/map vista (W5-art)
-- [~] D3 Bookmites and the Archivore base go near-black on the dark Archive stage: rim light on dark sprites or a lighter stage band (W5-art + battle)
-- [~] D4 Hidden-ink pits and bridges are flat navy rectangles: real ink art with edges, ripples, and revealed-bridge planks (W5-art)
-- [~] D5 Valley terrain is blocky (rectangular tall grass, straight road): shape patches and curve the road (W5-story-maps)
-- [ ] D6 Text runs to the window edge in places: enforce 8 px padding in dialog/menus (W5b)
-- [ ] D7 Cursor glove clipped at x=0 in Shop and Journal (W5b)
-- [ ] D8 Touch chrome RUN/MENU pills about 14 css px: enlarge (W5b, core/touch)
-- [~] D9 Push block reads as a cabinet: redraw as a carved stone block with a handle groove (W5-art)
-- [ ] D10 Inconsistent confirm glyphs between screens (W5b)
-- [ ] D11 Empty Victory window on no-drop fights; Fury READY label overlaps the gauge (W5b)
-- [ ] D12 qa/shots.py: wait for typewriter completion before capturing story shots; re-render stale map previews (W5b)
+- [x] D2 Valley battles use the dusk town painting: build a daytime valley backdrop from the tiles/map vista (W5-art)
+- [x] D3 Bookmites and the Archivore base go near-black on the dark Archive stage: rim light on dark sprites or a lighter stage band (W5-art + battle)
+- [x] D4 Hidden-ink pits and bridges are flat navy rectangles: real ink art with edges, ripples, and revealed-bridge planks (W5-art)
+- [x] D5 Valley terrain is blocky (rectangular tall grass, straight road): shape patches and curve the road (W5-story-maps)
+- [~] D6 Text runs to the window edge in places: enforce 8 px padding in dialog/menus (W5b)
+- [~] D7 Cursor glove clipped at x=0 in Shop and Journal (W5b)
+- [~] D8 Touch chrome RUN/MENU pills about 14 css px: enlarge (W5b, core/touch)
+- [x] D9 Push block reads as a cabinet: redraw as a carved stone block with a handle groove (W5-art)
+- [~] D10 Inconsistent confirm glyphs between screens (W5b)
+- [~] D11 Empty Victory window on no-drop fights; Fury READY label overlaps the gauge (W5b)
+- [~] D12 qa/shots.py: wait for typewriter completion before capturing story shots; re-render stale map previews (W5b)

@@ -69,3 +69,20 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - A game-over retry now returns you to the last bell, stairs or landmark instead of the floor entrance; the
   Whisperwood secret has a hint; the smithy sells an affordable hood before the Archive.
 - Published to /next at 01:14 (verified live: no errors on desktop or phone).
+
+### Sunday early morning: second polish round (Wave 5), from two reviews
+- A game designer reviewed pacing, clarity and difficulty; an art director reviewed every screen again.
+- Pacing: the first fight now happens within five minutes of leaving town (a wolf pack cuts the road; Bram and
+  Mira each give one tip, no tutorial boxes). Side quests open after the party is together, so the town does not
+  front-load four errands.
+- Clarity: the party now says where the Archive key is and which door it fits; the three-crystal door has a
+  plaque; the Lantern tells you its button; Quill hints at the Whisperwood secret.
+- Fairness: a healing font and save before the Echo Warden, a campfire scene at the Pilgrim's Rest, a back-stair
+  shortcut after floor one, a fairer enemy mix on floor three, and the game now asks "Equip the Iron Pike on
+  Bram?" when you find better gear. The test bot used to die one to three times on floor three because it never
+  equipped anything; it now clears the whole episode with zero game overs, Lv 8 at the boss.
+- Spectacle: boss intros (camera, silence, title card, shake) for the Echo Warden and the Archivore; the
+  legendary sword is revealed in a staged scene with a golden beam; battles in the valley now happen on a
+  daytime meadow stage built from the game's own art instead of the dusk town painting; dark enemies have rim
+  light; ink pools ripple; the push block looks like a carved stone block; the valley terrain is organic.
+- Phones: battle commands and targets work by tap, with Auto and speed buttons.
