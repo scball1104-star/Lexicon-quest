@@ -31,3 +31,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   Archivore. Ordinary fights 3 to 5 rounds; the boss punishes ignoring its warnings.
 - Wave 2 started: menus and dialogue, the battle screen, the field (walking, NPCs, puzzles, cutscenes) and the
   maps themselves. Nothing is playable end to end yet; that is Wave 3.
+
+### Night: Wave 2 complete
+- Menus, dialogue, shops, inn, name entry, title, save/load, config, game over and credits are built in the
+  Final Fantasy style (every screen checked on desktop and phone).
+- The battle screen is in: transition swirl, enemies left and party right over the painted backdrops, timeline,
+  weakness and Break icons, telegraph warnings, damage numbers, victory and level-up windows.
+- The field is in: walking with the party following you, townsfolk with routines, visible enemies that move
+  only when you move in dungeons, chests, doors, switches, push blocks, pits, the Lantern of Recall reveal,
+  lighting in the Archive, rain in the valley, and a cutscene runner that plays the written scenes.
+- All 13 Episode 1 maps are authored and validated (every chest and story point reachable, puzzles gated).
+- Wave 3 started: one integrator wires it all into a single playable Episode 1 and plays it end to end with a
+  bot before anything goes live. A separate critic reviewed every screenshot for the polish backlog.
