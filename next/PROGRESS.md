@@ -68,3 +68,4 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   field to life. Dungeon light pools are dithered and warm.
 - A game-over retry now returns you to the last bell, stairs or landmark instead of the floor entrance; the
   Whisperwood secret has a hint; the smithy sells an affordable hood before the Archive.
+- Published to /next at 01:14 (verified live: no errors on desktop or phone).
