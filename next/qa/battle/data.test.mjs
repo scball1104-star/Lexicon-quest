@@ -92,7 +92,7 @@ test('encounters, zones, shops, loot tables and party kits reference real ids', 
     }
   }
   for (const [boss, rule] of Object.entries(BOSS_LOOT)) {
-    assert.ok(ENEMIES[boss] && UNIQUES[rule.unique] && RARITY_TABLES[rule.table]);
+    assert.ok(ENEMIES[boss] && (rule.unique === null || UNIQUES[rule.unique]) && RARITY_TABLES[rule.table]);
     for (const c of rule.consumables) assert.ok(CONSUMABLES[c.item]);
   }
   for (const id of PARTY_IDS) {

@@ -29,7 +29,8 @@ export const SLOT_WEIGHTS = { weapon: 34, body: 14, head: 14, charm: 14, boots: 
 export const BOSS_LOOT = {
   echo_warden: { unique: 'mirrorguard_mail', rolls: 1, table: 'boss', ilvl: 6,
     consumables: [{ item: 'hi_potion', qty: 2 }, { item: 'ether', qty: 2 }] },
-  archivore: { unique: 'lanternheart', rolls: 2, table: 'boss', ilvl: 8,
+  // Lanternheart is granted by the post-boss scene (archivore_after) so the reveal is staged; no battle drop.
+  archivore: { unique: null, rolls: 2, table: 'boss', ilvl: 8,
     consumables: [{ item: 'phoenix_feather', qty: 1 }] },
 };
 
