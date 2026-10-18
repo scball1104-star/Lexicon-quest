@@ -93,7 +93,9 @@ test('drop rules: elites always drop magic or better, bosses drop their unique, 
   const w = rollBattleDrops(makeRng(5), [{ id: 'echo_warden', elite: null, lootZone: 'archive_f2', drops: [] }]);
   assert.ok(w.items.some((x) => x.base === 'mirrorguard_mail'));
   const a = rollBattleDrops(makeRng(5), [{ id: 'archivore', elite: null, lootZone: 'archive_f3', drops: [] }]);
-  assert.ok(a.items.some((x) => x.base === 'lanternheart'));
+  // Lanternheart is granted by the post-boss scene, not rolled; the boss still drops boss-table loot.
+  assert.ok(!a.items.some((x) => x.base === 'lanternheart'));
+  assert.ok(a.items.length >= 1);
   assert.ok(a.items.filter((x) => x.rarity === 'rare').length === 2);
   assert.deepEqual(rollBattleDrops(makeRng(9), [{ id: 'ink_slime', lootZone: 'valley', drops: [{ item: 'potion', chance: 0.5 }] }]),
     rollBattleDrops(makeRng(9), [{ id: 'ink_slime', lootZone: 'valley', drops: [{ item: 'potion', chance: 0.5 }] }]));
