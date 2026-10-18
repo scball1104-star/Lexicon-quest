@@ -20,7 +20,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] W2-maps: author Willowmere (+ interiors), Willowmere Valley, Archive F1-F3 + boss room, with a map preview tool
 
 ## Wave 3: integration
-- [~] W3-integrate: full flow title -> prologue -> town -> valley -> archive -> boss -> ending -> credits; autoplay test; publish /next
+- [x] W3-integrate: full flow title -> prologue -> town -> valley -> archive -> boss -> ending -> credits; autoplay test; publish /next
 
 ## Wave 4+: polish loops (repeat all week)
 - [ ] critic passes (art, UX, combat feel, story) on qa/out screenshots -> issue lists here

@@ -43,3 +43,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - All 13 Episode 1 maps are authored and validated (every chest and story point reachable, puzzles gated).
 - Wave 3 started: one integrator wires it all into a single playable Episode 1 and plays it end to end with a
   bot before anything goes live. A separate critic reviewed every screenshot for the polish backlog.
+
+## 2026-10-18 (Sun), after midnight: first playable build published
+**Play it:** https://scball1104-star.github.io/Lexicon-quest/next/ (phone or PC; on a phone, landscape is best).
+- Episode 1 is playable from New Game to the credits: Willowmere, the valley, the three Archive floors, the Echo
+  Warden, the Lantern of Recall puzzles, the Archivore, the return home and the ending hook. A bot played the whole
+  thing on desktop and phone with no errors (about 35 in-game minutes at bot speed; a person will take 60 to 90).
+- Saves, menus, shops, the inn, side quests (Tess's letters, Oren's starter, Wick's name-tag, Nella's bell) all work.
+- Known rough edges going into the polish week: the Archive's third floor is a notch hard on Auto; night still
+  reads like evening; pits need a visible rim; the Whisperwood secret has no hint; nothing is affordable at the
+  smithy before the Archive; a game-over retry puts you at the floor entrance.
+- Next: polish passes from the critic's ranked list (painted backdrops matched to the pixel palette, a proper
+  battle stage with shadows, better timeline icons, Archive depth, lighting, hit effects, touch sizing).
