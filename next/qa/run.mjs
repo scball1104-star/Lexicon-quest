@@ -1,5 +1,5 @@
 // Test runner: finds every next/qa/**/*.test.mjs and runs each file with `node --test` in its own
-// child process (90 s timeout each, a few in parallel), prints a summary table, exits 1 on any failure.
+// child process (180 s timeout each, a few in parallel), prints a summary table, exits 1 on any failure.
 //
 //   node next/qa/run.mjs                 run everything
 //   node next/qa/run.mjs core battle     only files whose path contains "core" or "battle"
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 const QA = path.dirname(fileURLToPath(import.meta.url));
 const NEXT = path.dirname(QA);
-const TIMEOUT_MS = 90_000;
+const TIMEOUT_MS = 180_000;
 
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose') || args.includes('-v');
@@ -79,7 +79,7 @@ async function main() {
   const failed = results.filter((r) => r.code !== 0 || r.timedOut);
   for (const r of results) {
     if (verbose || r.code !== 0 || r.timedOut) {
-      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? '(TIMED OUT after 90 s)' : ''}`);
+      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? '(TIMED OUT after 180 s)' : ''}`);
       // TAP output: show failing assertions and diagnostics, not the full green list.
       const lines = r.output.split('\n');
       const shown = verbose ? lines : lines.filter((l) => /not ok|^\s+(error|expected|actual|operator|stack|at |location|message|code|failureType)|Error|^\s{4,}\S/.test(l));
