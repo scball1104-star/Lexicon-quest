@@ -119,6 +119,7 @@ const decor = [
   { t: 'signboard', x: 25, y: 32 },                 // bridge plaque
   { t: 'signboard', x: 49, y: 33 },                 // Whisperwood edge
   { t: 'bench', x: 38, y: 23 },                     // the dry log bench of the Pilgrim's Rest
+  { t: 'signboard', x: 40, y: 25 },                 // the pilgrims' note (the Whisperwood hint)
   { t: 'lamp_post', x: 37, y: 8, state: 1 }, { t: 'lamp_post', x: 34, y: 33, state: 1 },
   { t: 'crates_barrels', x: 40, y: 31 },
 ];
@@ -139,6 +140,7 @@ const events = [
   sign('hollow_tree', 15, 26, 'hollow_tree', { solid: false }),
   sign('bridge_plaque', 25, 32, 'bridge_plaque', { solid: false }),
   sign('whisperwood_edge', 49, 33, 'whisperwood_edge', { solid: false }),
+  sign('pilgrim_note', 40, 25, 'pilgrim_note', { solid: false }),
   sign('archive_door_carving', 37, 5, 'archive_door_carving', { solid: false }),
   { id: 'ferry_post', type: 'ferry', x: 34, y: 8, text: 'ferry_post_valley', to: ['willowmere', 43, 5, 'left'], rideIf: 'nella_bell_done', solid: false },
   // chests: the hollow tree cache, the cliff-top chest, the Whisperwood secret (Lantern)

@@ -1126,6 +1126,11 @@ export const lines = {
     { lines: 'A bell-post at the north landing, with nothing hanging from it. No bell, no ferry.' },
   ],
   whisperwood_edge: 'The edge of the Whisperwood. The trees here lean together as if trading secrets.',
+  pilgrim_note: [
+    'A scrap of bark nailed to a post by the benches, lettered in a careful pilgrim\'s hand:',
+    '"East of the fork the pines close ranks. Past them, a black pool. The way across is ink, and only a true light reads it."',
+    'Beneath it, scratched in a rougher hand: "Worth the thorns."',
+  ],
 
   // archive
   archive_door_carving: 'Carved above the great door: SPEAK, AND BE KEPT.',

@@ -28,6 +28,7 @@ export default {
   id: 'library', name: 'Willowmere Library', area: 'interior',
   music: null, ambience: null, tileset: 'interior',
   lighting: { tint: 'none', dark: 0 },
+  ambientFx: ['motes'],                       // dust drifting in the window light (CRITIQUE_1 C17)
   under: 'wood_floor',
   legend: { '#': 'interior_top', '|': 'interior_face', '.': 'wood_floor', ' ': 'interior_top' },
   ground,

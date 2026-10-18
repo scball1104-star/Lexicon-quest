@@ -17,9 +17,43 @@ input (only when no cutscene lock, no transition, and the field is the top scene
 prompt, the Lantern timer, camera, lighting, particles, banner, and the `ep1_complete` credits handoff.
 
 Draw order: ground layer (terrain autotiles, walls, legend tiles, decor tiles, overlays, building bases),
-sign fades, low particles, y-sorted props and actors (feet row; ties: props, followers, leader), overhead
-layer (building ridges, `overhead` tiles), lighting (tint multiply, darkness with banded light stamps,
-warm glows, the Lantern glow), high particles, emotes, the interaction prompt, the cutscene fade, banner.
+sign fades, low particles, y-sorted props and actors (feet row; ties: props, followers, leader), mid
+particles (grass sway over the feet), overhead layer (building ridges, `overhead` tiles), lighting (tint
+multiply plus desaturation, the darkness light map, glow halos, the Lantern pulse), lit windows after dusk,
+high particles, emotes, the interaction prompt, the cutscene fade, banner.
+
+## 1b. Light, night and life (W4-world-polish)
+
+**Lighting (`world/lighting.js`, CRITIQUE_1 C7).** A dark map (`lighting.dark` > 0) draws one light map per
+frame: it starts as the room's ambient (a dim, slightly cool multiplier, `ambientFor(dark)`), every light
+stamps a radial falloff into it with `lighten` (per-channel max, so two lights never add into a Venn
+diagram), and the map multiplies the frame; a faint indigo lift keeps nothing at pure black. A stamp has
+four brightness bands (`BANDS`) whose edges are Bayer-ordered dithered rings, cached per (radius, kind,
+ambient). Kinds: `cool` (the party's own light), `warm` (braziers, candelabras, lamps; also an additive
+orange halo), `lantern` (pale green: the leader's light while the Lantern of Recall is raised), `neutral`
+(map `light` events without a colour). A `light` event's `r` under 16 is in tiles.
+
+**Night.** `TINTS.night` is a deep indigo multiply plus a saturation drop; `dusk` a lighter one. Under
+`dusk`/`night` (and `dawn` for the lamps) `FieldScene.syncTimeOfDay()` sets every `lamp_post` prop to its
+lit frame (which makes it a light source) and back to unlit by day, whatever state the map authored; the
+ambient set follows (fireflies over grass at night, birds by day). It runs on map load and whenever the tint
+name changes (a scene's `tint`, a flag). `world/townlife.js` finds each building prefab's windows once
+(clusters of the kit's warm pane colours) and its chimney (the `chimney_stone` cap template-matched in the
+facade); after dusk the pane pixels are painted again over the tinted facade with a dithered halo.
+
+**Ambient life (`world/particles.js`, C17).** Per map and tint: `leaves` (field; ochre, tumbling, tinted
+with the time of day), `fireflies` (dusk/night, spawned over grass only), `birds` (day; a sparrow pecks on a
+grass tile at least five tiles away and takes off, flapping, when the party comes within ~3 tiles),
+`smoke` (town; from the detected chimney tops), `motes` (dungeons and `ambientFx: ['motes']` interiors such
+as the library), `drips` (ink beads with a splash), `embers` (dark rooms). Tall grass sways under any
+actor's step (`onActorEnter` -> `particles.sway`), drawn in the `mid` pass so it is tinted and darkened
+with the world. Caps are fixed; draw stays under 1 ms on the darkest floor (F3, 18 lights: 0.92 ms).
+
+**Game over return (PLAYTEST 7.11).** `game.lastSafe` is no longer every map load. It is set when a map is
+entered from another map (door, edge, ferry, warp), on any stairs transfer (so the stairs you came down),
+by the chapel bell and a Keeper's font when used, and by an `object`/`trigger`/`actor` event carrying
+`safe: true` after its script or text (the F2 Lantern pedestal). Same-map notch doors and pit falls do not
+move it. `FieldScene.markSafe()` records the leader's tile and facing.
 
 Input on the field: directions walk, `run` (or `cancel` on a keyboard) runs unless `alwaysRun`, `confirm`
 interacts with the faced tile (across counters), `menu` pushes the menu, `pageR` raises the Lantern of Recall.
@@ -68,10 +102,14 @@ Counters block but talking reaches across them.
 | `locked_door` | `key sprite to` | locked (door_locked sfx) until the key is carried; `archive_key` is consumed. Open state persists. |
 | `shelf` | `sprite positions state` | a target: slides between positions (shelf_move), collision follows. |
 | `brazier` | `lit flag? persist? target?` | confirm lights it (brazier_light, becomes a light source). |
-| `font` | `sprite? text?` | Keeper's font: full heal. `save` | | chapel bell: lines, full heal, `save` jingle, `menu {page:'save'}`. |
+| `font` | `sprite? text?` | Keeper's font: full heal, sets the game over return point. `save` | | chapel bell: lines, full heal, `save` jingle, return point, `menu {page:'save'}`. |
 | `ferry` | `to text rideIf` | reads `text`; with `rideIf` set, offers the ride (ferry fade). |
 | `pot` | `item? qty? gold? sprite?` | breakable (pot_break, shards), solid until broken, respawns on re-entry. |
-| `light` | `r color?` | extra light source. `pit` | `w h to` | drop area. |
+| `light` | `r color?` | extra light source (`r` under 16 = tiles; a colour makes it warm with a halo). `pit` | `w h to` | drop area. |
+
+`object`, `actor` and `trigger` events may carry `safe: true`: after their script or text the party's tile
+becomes the game over return point. Map-level `ambientFx: [...]` adds particle kinds (`motes`, `leaves`,
+`fireflies`, `birds`, `smoke`, `drips`, `embers`) to what the area and tint already give.
 
 Mechanism events draw themselves (tile ids like `plate_up` go into the ground layer; object ids become props).
 
@@ -103,8 +141,14 @@ at `bed` in day light.
   headless, drives the field, saves the 384x216 frame at 3x in `qa/world/out/`.
 - `python qa/shots.py --only field_town_morning,field_town_signs_fading,field_valley_wildlife,field_archive_dark_lantern,field_cutscene_dialog,field_chest_open,field_push_block`.
 
-Performance (headless Chromium, 1920x1080): field update 0.05 ms, draw 0.15 to 0.5 ms on lit maps,
-1.1 ms on the dark Archive floors (light stamps are cached per radius).
+- `python qa/world/polish_shots.py [--only night_square,dark_lantern,...] [--device phone]`: the polish
+  wave's targeted shots (dithered lighting, night town, dusk valley, F3 braziers, ambient life, the
+  pilgrim note, game over) in `qa/world/out/p_<name>.png`.
+- `node qa/run.mjs world` also runs `qa/world/lighting.test.mjs` (band falloff, dithered edges, ambient,
+  tints) without a browser.
+
+Performance (headless Chromium, 1920x1080): field update 0.07 ms, draw 0.2 to 0.5 ms on lit maps,
+0.9 ms on the darkest Archive floor (F3 great door hall, 18 lights; the light map pass is 0.78 ms of it).
 
 ## 5. Known gaps
 
@@ -112,3 +156,8 @@ Performance (headless Chromium, 1920x1080): field update 0.05 ms, draw 0.15 to 0
 - Field enemies use simple greedy chasing (no pathfinding) so walls can shelter the party.
 - The `cracked wall` tool interaction is not implemented (Episode 1 has no bomb).
 - Rain is particles only (no thunder, no puddle reflections).
+- Window detection relies on the kit's warm pane colours; a facade painted with other yellows gets no night
+  glow (the chapel, library and every house in town.png match today). The item shop's display window glows
+  too, which reads as a lit shop.
+- Birds are drawn as 5x3 px sparrows by the particle system (no sprite sheet frame); they never land on
+  plaza or path tiles.

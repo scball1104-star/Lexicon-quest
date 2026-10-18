@@ -24,9 +24,11 @@ export const SHOPS = {
   willowmere_smithy: {
     id: 'willowmere_smithy', name: 'The Willowmere Forge', map: 'smithy', keeper: 'npc_smith', kind: 'equipment',
     stock: [
-      // Tier 1 from the start.
+      // Tier 1 from the start. The Leather Hood carries Garrick's neighbour price (60, list 90) so one real
+      // upgrade (+3 def on an empty head slot) fits the 80 starting gold and the valley's loot before the
+      // Archive (PLAYTEST 7.7). Sell value stays the list-based 45, so there is no buy-sell loop.
       { item: 'short_sword' }, { item: 'hatchet' }, { item: 'ash_spear' }, { item: 'oak_staff' }, { item: 'short_bow' },
-      { item: 'leather_vest' }, { item: 'leather_hood' }, { item: 'cloth_cap' }, { item: 'leather_boots' },
+      { item: 'leather_vest' }, { item: 'leather_hood', price: 60 }, { item: 'cloth_cap' }, { item: 'leather_boots' },
       { item: 'wool_mantle' },
       // Tier 2 once the Archive has been opened (the smith hears the news and fires the forge).
       { item: 'longsword', ifFlag: 'archive_entered' }, { item: 'battle_axe', ifFlag: 'archive_entered' },

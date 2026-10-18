@@ -46,8 +46,13 @@ export class GameOverScene {
   draw(r) {
     r.clear('#07060c');
     const k = Math.min(1, this.t / 1.5);
-    // Slow red-violet glow that settles, then the words.
-    r.withAlpha(0.35 * k, () => r.gradientV(0, 40, r.W, 140, '#3a1030', '#07060c', 10));
+    // Slow red-violet glow that settles behind the words: the whole frame, brightest at the title line,
+    // banded top and bottom (CRITIQUE_1 C14: no hard black band).
+    const peak = 70;
+    r.withAlpha(0.35 * k, () => {
+      r.gradientV(0, 0, r.W, peak, '#07060c', '#3a1030', 7);
+      r.gradientV(0, peak, r.W, r.H - peak, '#3a1030', '#07060c', 14);
+    });
     r.text(GAMEOVER.title, r.W / 2, 62, { font: 'large', align: 'center', color: 'cream', alpha: Math.min(1, this.t / 1.2) });
     r.text(GAMEOVER.line, r.W / 2, 90, { align: 'center', color: 'gray', alpha: Math.max(0, Math.min(1, (this.t - 1.0) / 1.0)) });
     if (this.t >= this.menuAt) {

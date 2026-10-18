@@ -1,24 +1,49 @@
-// Field lighting: darkness with banded light radii (dungeons), day tints (dawn/day/dusk/night/ink) and the
-// Lantern of Recall glow. Drawn after the overhead layer, before emotes and windows.
+// Field lighting: day tints (dawn/day/dusk/night/ink), darkness with dithered light radii (dungeons), warm
+// glows on fire and lamps, and the Lantern of Recall glow. Drawn after the overhead layer, before emotes.
 //
 //   const light = new Lighting(engine);
 //   light.setTint('dawn', 0)            cut; setTint('night', 60) cross-fades over 60 frames
 //   light.setDark(0.7)                  0 = fully lit; dungeons use 0.6 to 0.8
 //   light.update()                      once per logic frame
-//   light.draw(r, cam, lights)          lights: [{ x, y, r, color?, flicker? }] in world pixels
+//   light.draw(r, cam, lights, lanternAt)
+//       lights: [{ x, y, r, kind?: 'cool'|'warm'|'lantern'|'neutral', color?, flicker? }] in world pixels
 //
-// Darkness is an offscreen layer filled with indigo at `dark` alpha, with each light erased in four
-// concentric bands (SNES style: no smooth gradients). Tints multiply the whole frame.
+// Darkness (CRITIQUE_1 C7): one light map per frame. It starts as the room's ambient (a cool, dim multiplier),
+// every light stamps a radial falloff into it with `lighten` (per-channel max, so overlapping lights never add
+// up into a Venn diagram), and the map multiplies the frame. A stamp is 4 brightness bands whose edges are
+// Bayer-ordered dithered rings (no smooth gradients, DESIGN 6.5 / SNES look). Fire and lamps are slightly warm,
+// the party's own light in a dark room slightly cool, the Lantern of Recall pale green. Stamps are cached per
+// (radius, kind, ambient).
+//
+// Tints multiply the whole frame; dusk and night also lower saturation (`desat`) so night reads as night, not
+// as a blue evening (PLAYTEST section 7).
+
+import { BAYER4 } from '../core/renderer.js';
 
 export const TINTS = {
   none: null,
   day: null,
   dawn: { color: '#ffd6a6', alpha: 0.30 },
-  dusk: { color: '#d08cb4', alpha: 0.42 },
-  night: { color: '#36418c', alpha: 0.78 },   // deep enough that the ending's bell tower reads as night, not dusk
+  dusk: { color: '#c48ab8', alpha: 0.46, desat: 0.14 },
+  night: { color: '#262a66', alpha: 0.84, desat: 0.42 },
   ink: { color: '#a498c4', alpha: 0.42 },
 };
-const BANDS = [[1.0, 0.32], [0.78, 0.36], [0.56, 0.45], [0.34, 0.7]];
+
+/** Tints under which lamps are lit, windows glow and fireflies come out. */
+export const NIGHT_TINTS = new Set(['dusk', 'night']);
+
+// Light colours at full brightness (centre band), per kind.
+export const LIGHT_TINTS = {
+  neutral: [255, 255, 255],
+  cool: [220, 228, 255],
+  warm: [255, 226, 184],
+  lantern: [196, 255, 220],
+  glow: [255, 184, 96],       // additive halo on fire and lamps (orange, so it reads as flame at night)
+};
+// Radial falloff: [outer edge as a fraction of the radius, brightness inside that edge]. Beyond the last edge: 0.
+export const BANDS = [[0.30, 1.0], [0.56, 0.72], [0.80, 0.44], [1.0, 0.20]];
+const EDGE = 0.07;                // half-width of the dithered transition at each band edge (fraction of r)
+const LIFT = '#1a1430';           // indigo lift so unlit floor never reaches pure black (DESIGN 6.1)
 
 export function tintSpec(name) {
   if (!name || name === 'none' || name === 'day') return null;
@@ -27,42 +52,99 @@ export function tintSpec(name) {
   return null;
 }
 
+/**
+ * Brightness of a light at normalized distance d (0 = centre, 1 = edge) for the pixel (x, y): the band value,
+ * with the Bayer 4x4 threshold deciding which side of a band edge a pixel in the transition zone falls on.
+ * Pure (exported for tests).
+ */
+export function bandBrightness(d, x, y) {
+  const th = (BAYER4[((y & 3) << 2) | (x & 3)] + 0.5) / 16;
+  for (let i = 0; i < BANDS.length; i++) {
+    const [edge, inner] = BANDS[i];
+    const outer = i + 1 < BANDS.length ? BANDS[i + 1][1] : 0;
+    if (d < edge - EDGE) return inner;
+    if (d < edge + EDGE) { const f = (d - (edge - EDGE)) / (2 * EDGE); return th < f ? outer : inner; }
+  }
+  return 0;
+}
+
+/** Ambient multiplier (0..255 per channel) for a darkness level: dim and slightly cool (shadows go violet). */
+export function ambientFor(dark) {
+  const base = 1 - dark;
+  const c = (k) => Math.round(Math.max(0, Math.min(1, base * k)) * 255);
+  return [c(0.92), c(0.90), c(1.12)];
+}
+
 export class Lighting {
   constructor(engine) {
     this.engine = engine;
     this.r = engine.renderer;
     this.layer = this.r.createLayer(this.r.W, this.r.H);
     this.dark = 0;
-    this.tint = null;           // { color, alpha }
+    this.tint = null;           // { color, alpha, desat? }
+    this.tintName = 'none';
     this.tintFade = null;       // { from, to, t, dur }
     this.frame = 0;
     this.lantern = 0;           // frames left of the lantern glow
     this.lanternTotal = 120;
+    this.stamps = new Map();
   }
 
-  /** A pre-rendered banded light disc (alpha = how much darkness it erases), cached per radius. */
-  stamp(rad) {
-    if (!this.stamps) this.stamps = new Map();
-    let c = this.stamps.get(rad);
-    if (c) return c;
-    c = document.createElement('canvas');
-    c.width = rad * 2 + 1; c.height = rad * 2 + 1;
+  /**
+   * A cached radial light stamp. kind 'cool'|'warm'|'lantern'|'neutral'. For the light map (`ambient` given)
+   * the pixel is ambient + (tint - ambient) * brightness on an ambient background; for an additive glow
+   * (`ambient` null) it is tint * brightness on black. Returns { canvas, R } with R the canvas half-size.
+   */
+  stamp(rad, kind = 'neutral', ambient = null) {
+    rad = Math.max(2, rad | 0);
+    const key = `${rad}|${kind}|${ambient ? ambient.join(',') : 'glow'}`;
+    let s = this.stamps.get(key);
+    if (s) return s;
+    const tint = LIGHT_TINTS[kind] || LIGHT_TINTS.neutral;
+    const R = Math.ceil(rad * (1 + EDGE)) + 1;
+    const size = R * 2 + 1;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
     const g = c.getContext('2d');
-    g.globalCompositeOperation = 'source-over';
-    // bands erase cumulatively: alpha_n = 1 - prod(1 - a_k) for the bands a pixel lies in
-    for (const [k, a] of BANDS) { g.globalAlpha = a; fillCircle(g, rad, rad, Math.round(rad * k), '#000'); }
-    if (this.stamps.size > 40) this.stamps.clear();
-    this.stamps.set(rad, c);
-    return c;
+    const img = g.createImageData(size, size);
+    const px = img.data;
+    const bg = ambient || [0, 0, 0];
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const dx = x - R, dy = y - R;
+        const d = Math.sqrt(dx * dx + dy * dy) / (rad + 0.5);
+        const b = d >= 1 + EDGE ? 0 : bandBrightness(d, x, y);
+        const i = (y * size + x) * 4;
+        px[i] = Math.round(bg[0] + (tint[0] - bg[0]) * b);
+        px[i + 1] = Math.round(bg[1] + (tint[1] - bg[1]) * b);
+        px[i + 2] = Math.round(bg[2] + (tint[2] - bg[2]) * b);
+        px[i + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    if (this.stamps.size > 64) this.stamps.clear();
+    s = { canvas: c, R };
+    this.stamps.set(key, s);
+    return s;
   }
 
   setTint(name, frames = 0) {
     const to = tintSpec(name);
+    this.tintName = typeof name === 'string' ? name : 'none';
     if (frames <= 0) { this.tint = to; this.tintFade = null; return Promise.resolve(); }
     return new Promise((resolve) => { this.tintFade = { from: this.tint, to, t: 0, dur: frames, resolve }; });
   }
   setDark(v) { this.dark = Math.max(0, Math.min(1, v || 0)); }
   raiseLantern(frames = 120) { this.lantern = frames; this.lanternTotal = frames; }
+  /** True while the scene reads as evening or night (lamps lit, windows glowing, fireflies out). */
+  get isNight() { return NIGHT_TINTS.has(this.tintName); }
+  /** How strongly lamps and windows glow for the current tint: 0 by day, up to 1 at night. */
+  get glowStrength() {
+    if (this.tintName === 'night') return 1;
+    if (this.tintName === 'dusk') return 0.6;
+    if (this.tintName === 'dawn') return 0.25;
+    return 0;
+  }
 
   update() {
     this.frame++;
@@ -74,81 +156,113 @@ export class Lighting {
     }
   }
 
-  /** Alpha-weighted tint pair while cross-fading. */
+  /** Alpha-weighted tint list while cross-fading: [{ color, alpha, desat }]. */
   currentTints() {
-    if (!this.tintFade) return this.tint ? [[this.tint.color, this.tint.alpha]] : [];
+    const spec = (t, k) => ({ color: t.color, alpha: t.alpha * k, desat: (t.desat || 0) * k });
+    if (!this.tintFade) return this.tint ? [spec(this.tint, 1)] : [];
     const f = this.tintFade, k = f.t / f.dur;
     const out = [];
-    if (f.from) out.push([f.from.color, f.from.alpha * (1 - k)]);
-    if (f.to) out.push([f.to.color, f.to.alpha * k]);
+    if (f.from) out.push(spec(f.from, 1 - k));
+    if (f.to) out.push(spec(f.to, k));
     return out;
   }
 
+  /** Multiplier the current tint applies to a colour (approximate), for particles drawn above the lighting. */
+  shade() {
+    let r = 1, g = 1, b = 1;
+    for (const t of this.currentTints()) {
+      if (t.alpha <= 0.005) continue;
+      const c = hexRgb(t.color);
+      r *= 1 - t.alpha + t.alpha * c[0] / 255;
+      g *= 1 - t.alpha + t.alpha * c[1] / 255;
+      b *= 1 - t.alpha + t.alpha * c[2] / 255;
+    }
+    return [r, g, b];
+  }
+
   draw(r, cam, lights, lanternAt) {
-    // Tints: multiply the frame (camera-independent).
     const g = r.ctx;
-    for (const [color, alpha] of this.currentTints()) {
-      if (alpha <= 0.005) continue;
+    // 1. Tints: multiply the frame, then pull saturation down for dusk and night (camera-independent).
+    for (const t of this.currentTints()) {
+      if (t.alpha <= 0.005) continue;
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = 'multiply';
-      g.globalAlpha = alpha; g.fillStyle = color; g.fillRect(0, 0, r.W, r.H);
+      g.globalAlpha = t.alpha; g.fillStyle = t.color; g.fillRect(0, 0, r.W, r.H);
+      if (t.desat > 0.005) {
+        g.globalCompositeOperation = 'saturation';
+        g.globalAlpha = t.desat; g.fillStyle = '#808080'; g.fillRect(0, 0, r.W, r.H);
+      }
       g.restore();
     }
-    if (this.dark <= 0.01 && this.lantern <= 0) return;
+    // 2. Darkness: the light map (ambient + max of every stamp) multiplies the frame.
     if (this.dark > 0.01) {
       const L = this.layer, lg = L.ctx;
+      const amb = ambientFor(this.dark);
       lg.save();
       lg.setTransform(1, 0, 0, 1, 0, 0);
       lg.globalCompositeOperation = 'source-over';
-      lg.clearRect(0, 0, L.w, L.h);
       lg.globalAlpha = 1;
-      lg.fillStyle = `rgba(13,10,22,${this.dark})`;
+      lg.fillStyle = `rgb(${amb[0]},${amb[1]},${amb[2]})`;
       lg.fillRect(0, 0, L.w, L.h);
-      lg.globalCompositeOperation = 'destination-out';
-      lg.globalAlpha = 1;
+      lg.globalCompositeOperation = 'lighten';
       for (const l of lights) {
         const sx = Math.round(l.x - cam.x), sy = Math.round(l.y - cam.y);
         let rad = l.r || 48;
         if (l.flicker) rad += ((this.frame >> 2) % 3) - 1;
         if (sx + rad < 0 || sy + rad < 0 || sx - rad > L.w || sy - rad > L.h) continue;
-        const st = this.stamp(rad);
-        lg.drawImage(st, sx - rad, sy - rad);
+        const st = this.stamp(rad, l.kind || (l.color ? 'warm' : 'cool'), amb);
+        lg.drawImage(st.canvas, sx - st.R, sy - st.R);
       }
       lg.restore();
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = 'multiply';
       g.globalAlpha = 1;
       g.drawImage(L.canvas, 0, 0);
+      // never pure black: a faint indigo lift over everything (lit areas barely notice it)
+      g.globalCompositeOperation = 'lighter';
+      g.globalAlpha = this.dark * 0.5; g.fillStyle = LIFT; g.fillRect(0, 0, r.W, r.H);
       g.restore();
     }
-    // Warm glow discs on lit sources (additive, subtle) so braziers read as fire.
-    if (lights.length) {
+    // 3. Glow halos on fire and lamps (additive, dithered): faint by day, strong at night, modest in dark rooms
+    //    where the light map already carries the warmth.
+    const glowK = this.dark > 0.01 ? 0.12 : 0.03 + 0.19 * this.glowStrength;
+    if (lights.length && glowK > 0.01) {
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = 'lighter';
       for (const l of lights) {
-        if (!l.color) continue;
+        if (!l.color && l.kind !== 'warm') continue;
         const sx = Math.round(l.x - cam.x), sy = Math.round(l.y - cam.y);
-        const rad = Math.round((l.r || 48) * 0.45);
+        const rad = Math.max(8, Math.round((l.r || 48) * 0.42)) + (l.flicker ? ((this.frame >> 3) % 2) : 0);
         if (sx + rad < 0 || sy + rad < 0 || sx - rad > r.W || sy - rad > r.H) continue;
-        g.globalAlpha = 0.10; fillCircle(g, sx, sy, rad, l.color);
-        g.globalAlpha = 0.06; fillCircle(g, sx, sy, Math.round(rad * 0.55), l.color);
+        const st = this.stamp(rad, 'glow', null);
+        g.globalAlpha = glowK * (l.glow == null ? 1 : l.glow);
+        g.drawImage(st.canvas, sx - st.R, sy - st.R);
       }
       g.restore();
     }
+    // 4. The Lantern of Recall: a pale green pulse around the leader while it is raised.
     if (this.lantern > 0 && lanternAt) {
       const k = this.lantern / this.lanternTotal;
       const a = k > 0.8 ? (1 - k) / 0.2 : k < 0.3 ? k / 0.3 : 1;
       const sx = Math.round(lanternAt[0] - cam.x), sy = Math.round(lanternAt[1] - cam.y);
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = 'lighter';
-      g.globalAlpha = 0.16 * a; fillCircle(g, sx, sy, 84 + ((this.frame >> 1) % 2), '#4ef0a8');
-      g.globalAlpha = 0.14 * a; fillCircle(g, sx, sy, 52, '#9fffd0');
-      g.globalAlpha = 0.10 * a; fillCircle(g, sx, sy, 24, '#ffffff');
+      const outer = this.stamp(84 + ((this.frame >> 2) % 2), 'lantern', null);
+      g.globalAlpha = 0.24 * a; g.drawImage(outer.canvas, sx - outer.R, sy - outer.R);
+      const core = this.stamp(26, 'lantern', null);
+      g.globalAlpha = 0.12 * a; g.drawImage(core.canvas, sx - core.R, sy - core.R);
       g.restore();
     }
   }
 }
 
-/** Crisp pixel circle from horizontal spans (no anti-aliasing). */
+function hexRgb(c) {
+  const s = String(c).replace('#', '');
+  const n = parseInt(s.length === 3 ? s.split('').map((ch) => ch + ch).join('') : s, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/** Crisp pixel circle from horizontal spans (no anti-aliasing). Kept for callers outside the lighting pass. */
 export function fillCircle(ctx, cx, cy, rad, color) {
   if (rad <= 0) return;
   ctx.fillStyle = color;

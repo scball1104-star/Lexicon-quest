@@ -19,6 +19,7 @@ import { updateNpc, refreshNpcBehaviour } from '../world/npc.js';
 import { Camera } from '../world/camera.js';
 import { Lighting } from '../world/lighting.js';
 import { Particles } from '../world/particles.js';
+import { buildingFeatures, chimneyTops, drawLitWindows } from '../world/townlife.js';
 import { Banner, transitionOpts } from '../world/transitions.js';
 import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
@@ -68,6 +69,8 @@ export class FieldScene {
     this.pendingBarks = [];
     this.lastMapIsInterior = false;
     this.transparentLetterbox = '#06050c';
+    this.features = [];                // windows and chimneys of the buildings on this map (townlife.js)
+    this.lastTint = null;
   }
 
   warnOnce(key, msg) { if (!this.warned.has(key)) { this.warned.add(key); console.warn(`[field] ${msg}`); } }
@@ -129,7 +132,10 @@ export class FieldScene {
     if (tx == null || ty == null) { const s = mod.start || { x: 1, y: 1 }; tx = s.x; ty = s.y; dir = dir || s.dir; }
     dir = DIRS[dir] ? dir : 'down';
     setPosition(g, mod.id, tx, ty, dir);
-    setSafePoint(g);
+    // Game over returns the party to the last landmark, not the floor entrance (PLAYTEST 7.11): a map
+    // entered from another map or by stairs is one; a same-map notch door or a pit fall is not. Save bells,
+    // Keeper's fonts and `safe: true` events mark one when used (markSafe).
+    if (o.first || o.landmark) setSafePoint(g);
     // party
     this.rebuildParty(tx, ty, dir);
     // events, reveals
@@ -143,10 +149,13 @@ export class FieldScene {
     const tintName = this.tintOverride || tintFor(mod.id, lighting.tint, this.hasFlag);
     this.lighting.setTint(tintName === 'ink_light' ? '#b8b0d0' : tintName, 0);
     this.tintOverride = null;
+    this.features = buildingFeatures(this.map);
     this.particles.list = [];
-    this.particles.setAmbient(this.ambientFor(mod, tintName));
+    this.particles.setChimneys(chimneyTops(this.features));
     this.particles.setRain(mod.weather === 'rain' && !mod.weatherZone);
     this.weatherZone = mod.weather === 'rain' ? mod.weatherZone || null : null;
+    this.lastTint = null;
+    this.syncTimeOfDay();
     this.applyMusic(mod);
     e.audio.ambience(mod.ambience || null, { fade: 1.2 });
     const b = bannerFor(mod.id, mod);
@@ -166,15 +175,39 @@ export class FieldScene {
     if (this.map.mod.lighting && this.map.mod.lighting.dark > 0.3) e.after(40, () => this.bark('first_dark_room'));
   }
 
+  /** Ambient life for a map at a time of day (tint name): what the particle system keeps alive. */
   ambientFor(mod, tint) {
     const out = [];
+    const night = tint === 'dusk' || tint === 'night';
     if (mod.area === 'field') out.push('leaves');
-    if (mod.area === 'town' && (tint === 'dusk' || tint === 'night')) out.push('fireflies');
-    if (mod.area === 'field' && (tint === 'dusk' || tint === 'night')) out.push('fireflies');
+    if ((mod.area === 'town' || mod.area === 'field') && night) out.push('fireflies');
+    if ((mod.area === 'town' || mod.area === 'field') && !night) out.push('birds');
+    if (mod.area === 'town') out.push('smoke');
     if (mod.area === 'dungeon') out.push('motes', 'drips');
     if (mod.lighting && mod.lighting.dark > 0.3) out.push('embers');
     if (mod.ambientFx) out.push(...mod.ambientFx);
     return out;
+  }
+
+  /**
+   * The tint changed (map load, a scene's `tint`, a flag): lamps light up after dusk and go out by day,
+   * the ambient set follows (fireflies at night, birds by day) and 'above' particles take the tint.
+   */
+  syncTimeOfDay() {
+    const tint = this.lighting.tintName;
+    if (tint === this.lastTint) return;
+    this.lastTint = tint;
+    const mod = this.map.mod;
+    this.particles.setAmbient(this.ambientFor(mod, tint));
+    const lit = this.lighting.isNight || tint === 'dawn' || (mod.lighting && mod.lighting.dark > 0.3) ? 1 : 0;
+    for (const p of this.map.props) if (p.t === 'lamp_post' && p.state !== lit) this.map.setPropState(p, lit);
+  }
+
+  /** Remember the party's current tile as the game over return point (bells, fonts, `safe` events). */
+  markSafe() {
+    const L = this.leader;
+    if (L) setPosition(this.game, this.mapId, L.tx, L.ty, L.dir);
+    setSafePoint(this.game);
   }
 
   applyMusic(mod) {
@@ -218,8 +251,9 @@ export class FieldScene {
     else if (k === 'stairs') e.audio.sfx('stairs');
     else if (k === 'pit' || k === 'fall') e.audio.sfx('fall');
     this.inputLocked++;
+    const landmark = !same || kind === 'stairs';
     this.pendingWarp = e.fadeTo(async () => {
-      await this.loadMap(mapId, x, y, dir, { quiet: same });
+      await this.loadMap(mapId, x, y, dir, { quiet: same, landmark });
     }, opts).then(() => {
       this.inputLocked = Math.max(0, this.inputLocked - 1);
       this.pendingWarp = null;
@@ -340,7 +374,10 @@ export class FieldScene {
   }
 
   onActorLeave(actor, x, y) { for (const ent of EV.entitiesAt(this, x, y)) EV.stepOff(this, ent, actor); }
-  onActorEnter(actor, x, y) { for (const ent of EV.entitiesAt(this, x, y)) EV.stepOn(this, ent, actor); }
+  onActorEnter(actor, x, y) {
+    for (const ent of EV.entitiesAt(this, x, y)) EV.stepOn(this, ent, actor);
+    if (this.map.terrainAt(x, y) === 'tallgrass') this.particles.sway(x, y);
+  }
 
   /** Slide a prop to a tile over `frames` (shelves, blocks). Collision moves at the end. */
   slideProp(p, x, y, frames, sfx) {
@@ -459,7 +496,7 @@ export class FieldScene {
       if (e.scene === this && !e.hasScene('gameover')) {
         heal(this.game, { full: true });
         const s = this.game.lastSafe;
-        e.fadeTo(() => this.loadMap(s.map, s.pos.x, s.pos.y, s.pos.dir, {}), { duration: 1.0, hold: 0.3 });
+        e.fadeTo(() => this.loadMap(s.map, s.pos.x, s.pos.y, s.pos.dir, { landmark: true }), { duration: 1.0, hold: 0.3 });
       } else if (e.scene === this && e.hasScene('gameover')) e.push('gameover');
     }
     if (result === 'flee') await this.bark('flee');
@@ -577,6 +614,8 @@ export class FieldScene {
     }
     this.camera.update();
     this.lighting.update();
+    this.syncTimeOfDay();
+    this.particles.setShade(this.lighting.shade());
     this.particles.update(this.camera);
     EV.tickGlints(this);
     this.banner.update();
@@ -685,7 +724,7 @@ export class FieldScene {
       if (e.hasScene('credits')) await e.pushAwait('credits');
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);
-      await e.fadeTo(() => this.loadMap('hero_home', null, null, 'down', { mark: 'bed' }), { duration: 1.0, hold: 0.2 });
+      await e.fadeTo(() => this.loadMap('hero_home', null, null, 'down', { mark: 'bed', landmark: true }), { duration: 1.0, hold: 0.2 });
       this.fadeAlpha = 0; this.fadeTween = null;
       this.lighting.setTint('day', 0);
     } finally { this.unlockInput(); }
@@ -721,6 +760,7 @@ export class FieldScene {
         map.drawProp(r, p, t);
       } else it.a.draw(r, t);
     }
+    this.particles.draw(r, cam, 'mid');
     map.drawOverhead(r, cam);
     r.popCamera();
     // lighting (tints, darkness, glows)
@@ -728,6 +768,7 @@ export class FieldScene {
     const L = this.leader;
     this.lighting.draw(r, cam, this.lightSources, this.lantern > 0 ? [L.feetX, L.feetY - 10] : null);
     r.pushCamera(cam.x, cam.y);
+    drawLitWindows(r, cam, map, this.features, this.lighting.glowStrength);
     this.particles.draw(r, cam, 'above');
     for (const a of this.actors) if (a.emote) a.drawEmote(r);
     this.drawPrompt(r);
@@ -748,12 +789,13 @@ export class FieldScene {
     const map = this.map;
     const dark = this.lighting.dark > 0.01;
     if (dark) {
+      // the party's own light is slightly cool; with the Lantern raised it turns pale green and reaches further
       const L = this.leader;
-      out.push({ x: L.feetX, y: L.feetY - 10, r: 58 + (this.lantern > 0 ? 40 : 0), color: null });
-      for (const f of this.followers) out.push({ x: f.feetX, y: f.feetY - 10, r: 34, color: null });
+      out.push({ x: L.feetX, y: L.feetY - 10, r: 58 + (this.lantern > 0 ? 40 : 0), color: null, kind: this.lantern > 0 ? 'lantern' : 'cool' });
+      for (const f of this.followers) out.push({ x: f.feetX, y: f.feetY - 10, r: 34, color: null, kind: 'cool' });
     }
-    for (const l of map.lights) out.push({ ...l, flicker: true });
-    for (const p of map.props) if (p.light && p.visible) out.push({ ...p.light, flicker: true });
+    for (const l of map.lights) out.push({ ...l, kind: l.color ? 'warm' : 'neutral', flicker: !!l.color });
+    for (const p of map.props) if (p.light && p.visible) out.push({ ...p.light, kind: 'warm', flicker: true });
     return out;
   }
 

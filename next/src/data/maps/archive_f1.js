@@ -53,9 +53,10 @@ const overlays = [
 ];
 
 const decor = [
-  // hall
+  // hall: pillars frame the carpet under the catalog wall and hold the side walls (CRITIQUE_1 C6)
   { t: 'reading_table_long', x: 16, y: 25 }, { t: 'reading_table', x: 22, y: 26 },
   { t: 'candelabra', x: 15, y: 22 }, { t: 'candelabra', x: 23, y: 22 },
+  { t: 'pillar', x: 18, y: 22 }, { t: 'pillar', x: 21, y: 22 }, { t: 'pillar', x: 14, y: 24 }, { t: 'pillar', x: 24, y: 23 },
   { t: 'brazier_lit', x: 18, y: 28 }, { t: 'brazier_lit', x: 22, y: 28 },
   // B
   { t: 'reading_table', x: 8, y: 26 }, { t: 'shelf_a', x: 11, y: 24 },

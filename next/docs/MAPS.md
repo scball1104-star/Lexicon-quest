@@ -36,7 +36,8 @@ python tools/maps/preview.py --all --scale=2
   `roots_*`, flowers are `none`. A 16x32 overlay applies to both rows it covers.
 - **Decor** entries are tiles.json objects (anchor = bottom-left footprint tile) or props.json objects
   (`x,y` = left tile of the bottom footprint row), with `state` = frame index when the object has frames
-  (`lamp_post` 1 = lit). Plain tiles with `w`/`h` repeat.
+  (`lamp_post` 1 = lit; the field overrides a lamp's state by time of day: lit under dawn/dusk/night and in
+  dark maps, unlit by day). Plain tiles with `w`/`h` repeat.
 - **Mechanism events draw themselves** (`block`, `plate`, `switch`, `shelf`, `gate`, `locked_door`,
   `brazier`, `font`, `chest`, `pot`, `object`): no duplicate decor. `gate`/`locked_door` with a 32 px door sprite
   own both doorway cells (`w: 2`); `door_boss` owns three.
@@ -69,10 +70,15 @@ Every event: `{ id, type, x, y, if?, ifNot? }`. The event exists only while its 
 | `shelf` | `positions, state` | slides between positions when a switch targeting it fires |
 | `pot` | `item?, qty?, gold?` | breakable, respawns on re-entry |
 | `brazier` | `lit` | interact to light; a light source in dark maps |
-| `font` / `save` | `text` | Keeper's font (full heal) / chapel bell (save) |
+| `font` / `save` | `text` | Keeper's font (full heal) / chapel bell (save); both set the game over return point |
 | `ferry` | `text, to, rideIf` | the post is readable always; the ride needs `nella_bell_done` |
-| `light` | `r, color?` | extra light source |
+| `light` | `r, color?` | extra light source; `r` under 16 is in tiles (F3 uses 4 to 7), otherwise pixels |
 | `pit` | `w, h, to` | overrides `pitTo` inside an area |
+
+`object` / `actor` / `trigger` may add `safe: true` (the F2 Lantern pedestal): using it makes the party's
+tile the game over return point. A map may add `ambientFx: ['motes']` (the library) to its ambient life;
+see docs/WORLD.md 1b. Stairs transfers and map-to-map doors set the return point by themselves; same-map
+notch doors and pits do not.
 
 ## 3. Collision and the walk model
 
@@ -123,7 +129,8 @@ pews, the bell-tower base with Pip under the ropes, the hand-bell save point by 
 ![valley](../tools/maps/previews/valley.png)
 Enter from the town gate at the west edge (1,33). The road runs east to the stone bridge (Penny's cart and
 crates at the far end), the pilgrim road north along the east bank with a jog around the willow, the fork
-(milestone object, fork signpost, the Pilgrim's Rest: campfire, log benches, Quill), the east road ending at the
+(milestone object, fork signpost, the Pilgrim's Rest: campfire, log benches, Quill, and the pilgrims' note
+`pilgrim_note` on a post at (40,25) that hints at the Whisperwood pool and its ink crossing), the east road ending at the
 washed-out ford of a tributary, the Whisperwood pines on the east edge, and the Rootbound Archive grown into
 the north cliff: the great door in the rock face under three willows with root columns, `door_step` (36,7) with
 open tiles each side, `root_exit` (39,7) where the boss chamber's passage comes out. North landing: sand, pier,

@@ -81,8 +81,9 @@ const events = [
   // the Echo Warden and the Lantern
   actor('echo_warden', 4, 14, 'echo_warden', 'down', { ifNot: 'echo_warden_defeated' }),
   trigger('warden_trig', 3, 16, 4, 1, 'echo_warden'),
-  object('lantern_pedestal', 4, 13, 'lantern_pedestal', { script: 'lantern_get', ifNot: 'lantern_get' }),
-  object('lantern_pedestal_empty', 4, 13, 'lantern_pedestal_empty', { if: 'lantern_get', text: 'hidden_ink_1' }),
+  // the pedestal is a game over landmark (`safe`): a lost fight on F2 returns the party here, not to the stairs
+  object('lantern_pedestal', 4, 13, 'lantern_pedestal', { script: 'lantern_get', ifNot: 'lantern_get', safe: true }),
+  object('lantern_pedestal_empty', 4, 13, 'lantern_pedestal_empty', { if: 'lantern_get', text: 'hidden_ink_1', safe: true }),
   sign('hidden_ink_1', 6, 11, 'hidden_ink_1', { solid: false, lantern: true }),
   sign('hidden_ink_2', 34, 11, 'hidden_ink_2', { solid: false, lantern: true }),
   trigger('f2_exit_trig', 33, 13, 3, 3, 'archive_f2_exit'),

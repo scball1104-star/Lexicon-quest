@@ -203,7 +203,12 @@ function create(field, ent) {
       else { ent.state = 'whole'; addProp(field, ent, ev.sprite || 'pot', 0, { solid: true }); }
       break;
     }
-    case 'light': map.lights.push({ x: ent.x * TILE + 8, y: ent.y * TILE + 8, r: ev.r || 48, color: ev.color || null, id: ent.id }); break;
+    case 'light': {
+      // `r` under 16 is in tiles (the F3 room lights say 4 to 7), otherwise world pixels
+      const r = ev.r == null ? 48 : ev.r < 16 ? ev.r * TILE : ev.r;
+      map.lights.push({ x: ent.x * TILE + 8, y: ent.y * TILE + 8, r, color: ev.color || null, id: ent.id });
+      break;
+    }
     case 'trigger': if (ev.on === 'enter') field.enterTriggers.push(ent); break;
     case 'pit': case 'book': case 'exit': break;
     default: field.warnOnce('ev:' + ent.type, `unknown event type "${ent.type}" (${ent.id})`);
@@ -307,8 +312,10 @@ export async function interact(field, ent) {
   switch (ent.type) {
     case 'npc': return talkNpc(field, ent);
     case 'actor': case 'object': case 'trigger': {
-      if (ev.script) return field.runScene(ev.script);
-      if (ev.text) return field.showBoxes(inspectBoxes(ev.text, field.hasFlag));
+      if (ev.script) await field.runScene(ev.script);
+      else if (ev.text) await field.showBoxes(inspectBoxes(ev.text, field.hasFlag));
+      // a `safe: true` landmark (the Lantern pedestal): game over returns the party here
+      if (ev.safe && field.markSafe && !field.dead) field.markSafe();
       return;
     }
     case 'sign': {
@@ -341,6 +348,7 @@ export async function interact(field, ent) {
     case 'font': {
       engine.audio.sfx('heal');
       heal(g, { full: true });
+      if (field.markSafe) field.markSafe();
       field.particles.sparkle(field.leader.feetX, field.leader.feetY - 16, 8, '#9fffd0');
       await field.showBoxes(inspectBoxes(ev.text || 'keeper_font', field.hasFlag));
       await field.bark('first_font');
@@ -349,6 +357,7 @@ export async function interact(field, ent) {
     case 'save': {
       await field.showBoxes(inspectBoxes(ev.text || 'save_bell', field.hasFlag));
       heal(g, { full: true });
+      if (field.markSafe) field.markSafe();
       field.particles.sparkle(field.leader.feetX, field.leader.feetY - 16, 8, '#fff7d6');
       await engine.audio.jingle('save');
       if (engine.hasScene('menu')) await engine.pushAwait('menu', { page: 'save' });

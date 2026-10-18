@@ -62,6 +62,7 @@ const decor = [
   { t: 'shelf_wide', x: 4, y: 13 }, { t: 'shelf_a', x: 9, y: 13 }, { t: 'shelf_b', x: 12, y: 13 },
   { t: 'shelf_wide', x: 7, y: 16 }, { t: 'shelf_a', x: 12, y: 16 },
   { t: 'root_column', x: 4, y: 15 }, { t: 'root_column', x: 13, y: 18 },
+  { t: 'pillar', x: 2, y: 13 }, { t: 'pillar', x: 14, y: 13 }, { t: 'pillar', x: 10, y: 18 },
   // crystal room
   { t: 'root_column', x: 20, y: 15 },
   // pit room
