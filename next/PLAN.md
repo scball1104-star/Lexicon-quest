@@ -44,10 +44,16 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] C9 Plaza cobble contrast lower than actors
 - [ ] C10 Victory window overlaps help bar and timeline (integrator)
 - [x] C11 Slash fx: thicker arc, impact star, visible hit-stop
-- [ ] C12 Touch: menu rows too small on phone, add tap-to-select; tablet A/B buttons bigger
+- [x] C12 Touch: menu rows too small on phone, add tap-to-select; tablet A/B buttons bigger
 - [ ] C13 Battle shows "Hero" while menus show the chosen name (integrator, bug)
 - [x] C14 Game over asymmetric black top band
 - [x] C15 Followers spawn stacked on the leader (integrator)
 - [x] C16 Library rug reads as a tile grid
 - [x] C17 Ambient particles missing from field shots
-- [~] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
+- [x] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
+
+## Wave 5: second critique and design playtest (read-only reviews, then fix passes)
+- [~] critic-2: art/UX critique on fresh shots -> docs/CRITIQUE_2.md
+- [~] play-critic: pacing, clarity, difficulty, fun review from the autoplay frames and dialogue log -> docs/PLAYTEST_REVIEW_1.md
+- [ ] battle touch rows + Auto/Speed hint in the battle help window (W4b proposal)
+- [ ] fix passes from both reviews
