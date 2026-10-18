@@ -94,7 +94,8 @@ at `bed` in day light.
 ## 4. Debug and QA
 
 `LQ_DEBUG.warp(mapId, x, y, dir)`, `setFlag(flag, v)`, `give(id, qty)`, `party('mira','bram')`,
-`scene(id)`, `lantern()`, `walk('up,up,left', run)`, `goto(x, y, run)` (pathfinds), `fieldState()`.
+`call('scene', id)` (runs a cutscene; `LQ_DEBUG.scene()` itself is the engine's top-scene query), `lantern()`,
+`walk('up,up,left', run)`, `goto(x, y, run)` (pathfinds), `fieldState()`.
 
 - `node qa/run.mjs world`: autotile cases, pathfinding, collision and ledge rules, follower chain, enemy
   step rule, gate AND logic, and the headless walks (`qa/world/walks.py`, every map, zero console errors).

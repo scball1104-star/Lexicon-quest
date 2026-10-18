@@ -386,9 +386,12 @@ export class TouchControls {
       const dp = Math.min(150, Math.max(78, lw - s.l - 2), H * 0.45);
       const cy = Math.min(H - s.b - dp / 2 - 12, H * 0.64);
       this._place(e.dpad, 'dpad', lcx, cy, dp, base, 10);
-      const bd = Math.min(66, Math.max(44, (rw - s.r - 6) * 0.5));
-      this._place(e.a, 'a', rcx + bd * 0.48, cy - bd * 0.42, bd, base, 6, R);
-      this._place(e.b, 'b', rcx - bd * 0.48, cy + bd * 0.5, bd, base, 6, R);
+      // A/B never below 56 css px (fingertips); on a narrow bar they stack more steeply so both stay on the bar.
+      const bd = Math.min(66, Math.max(56, (rw - s.r - 6) * 0.5));
+      const ra = this._place(e.a, 'a', rcx, cy, bd, base, 6, Math.ceil);
+      const off = Math.min(0.48, Math.max(0.18, (rw - s.r - 6 - ra.w) / (2 * ra.w)));
+      this._place(e.a, 'a', rcx + ra.w * off, cy - ra.w * 0.42, bd, base, 6, Math.ceil);
+      this._place(e.b, 'b', rcx - ra.w * off, cy + ra.w * 0.5, bd, base, 6, Math.ceil);
       this._place(e.menu, 'menu', rcx, s.t + 24, Math.min(70, Math.max(48, rw * 0.56)), base, 8, R);
       this._place(e.run, 'run', lcx, cy - dp / 2 - 30, Math.min(56, Math.max(40, lw * 0.44)), base, 8, R);
       this._place(e.fullscreen, 'fullscreen', lcx, s.t + 24, 24, base * 0.8, 8, R);

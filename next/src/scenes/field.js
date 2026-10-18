@@ -9,9 +9,10 @@
 // interacts, menu opens the menu, pageR raises the Lantern of Recall. Under a dialog (updateBelow) the
 // field keeps animating but reads no input.
 //
-// LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), scene(id), lantern(), state().
+// LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), call('scene', id), lantern(), state().
 
-import { createGame, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug } from '../game/state.js';
+import { createGame, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear } from '../game/state.js';
+import { grant } from '../game/inventory.js';
 import { TileMap, TILE } from '../world/tilemap.js';
 import { Actor, WALK_FRAMES, RUN_FRAMES } from '../world/actors.js';
 import { updateNpc, refreshNpcBehaviour } from '../world/npc.js';
@@ -22,7 +23,7 @@ import { Banner, transitionOpts } from '../world/transitions.js';
 import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
 import * as EV from '../world/events.js';
-import { DIRS, OPPOSITE } from '../world/pathfind.js';
+import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled } from '../game/story.js';
 import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
@@ -64,6 +65,7 @@ export class FieldScene {
     this.lastStepSfx = 0;
     this.prompt = null;
     this.stepCount = 0;
+    this.pendingBarks = [];
     this.lastMapIsInterior = false;
     this.transparentLetterbox = '#06050c';
   }
@@ -247,18 +249,23 @@ export class FieldScene {
     for (const a of keep.values()) if (!list.includes(a)) this.removeActor(a);
     this.leader = list[0];
     this.followers = list.slice(1, 1 + FOLLOW_DEPTH);
+    const open = (nx, ny) => !!this.map && this.map.inBounds(nx, ny) && !this.map.blockedAt(nx, ny) && this.map.codeAt(nx, ny) !== 'pit' && !this.actorAt(nx, ny);
     if (x != null) {
       this.leader.setPos(lx, ly, ldir);
-      // followers line up behind the leader when the tiles are open, else stack on the leader
-      const [bx, by] = DIRS[OPPOSITE[ldir]];
-      let px = lx, py = ly;
-      for (const f of this.followers) {
-        const nx = px + bx, ny = py + by;
-        if (this.map && this.map.inBounds(nx, ny) && !this.map.blockedAt(nx, ny) && this.map.codeAt(nx, ny) !== 'pit') { f.setPos(nx, ny, ldir); px = nx; py = ny; }
-        else f.setPos(lx, ly, ldir);
-      }
+      // followers line up behind the leader; in a doorway (wall behind) they fall in beside the trail instead
+      const spots = trailingTiles(open, lx, ly, ldir, this.followers.length);
+      this.followers.forEach((f, i) => { const s = spots[i] || [lx, ly]; f.setPos(s[0], s[1], ldir); });
     } else {
-      for (const f of this.followers) if (!keep.has(f.id)) f.setPos(this.leader.tx, this.leader.ty, this.leader.dir);
+      // a member who just joined falls in on a free tile next to the leader, never on top of them
+      const taken = new Set(list.filter((a) => keep.has(a.id)).map((a) => `${a.tx},${a.ty}`));
+      for (const f of this.followers) {
+        if (keep.has(f.id)) continue;
+        const L = this.leader;
+        const spots = trailingTiles((nx, ny) => open(nx, ny) && !taken.has(`${nx},${ny}`), L.tx, L.ty, L.dir, 1);
+        const s = spots[0] || [L.tx, L.ty];
+        f.setPos(s[0], s[1], L.dir);
+        taken.add(`${s[0]},${s[1]}`);
+      }
     }
   }
 
@@ -278,6 +285,7 @@ export class FieldScene {
   // ---------------------------------------------------------------- actors
   addActor(a) { if (!this.actors.includes(a)) this.actors.push(a); }
   removeActor(a) { const i = this.actors.indexOf(a); if (i >= 0) this.actors.splice(i, 1); }
+  /** A scripted despawn: the entity stays gone until the map is loaded again (any type, not only NPCs). */
   despawn(a) {
     this.removeActor(a);
     for (const ent of this.entities.values()) if (ent.actor === a) { ent.actor = null; ent.present = false; ent.data.despawned = true; }
@@ -385,17 +393,31 @@ export class FieldScene {
     const r = await this.dialog({ who: null, text: '', choices: options, instant: true });
     return typeof r === 'number' ? r : options.length - 1;
   }
+  /**
+   * A first-time companion remark. It only speaks when the field is idle and on top; during a cutscene, an
+   * interaction or a battle it waits in `pendingBarks` and plays at the next quiet moment (so the dark-room
+   * remark never stacks under an arrival scene's dialogue).
+   */
   async bark(key) {
+    if (this.inputLocked || this.pendingWarp || (this.cutscene && this.cutscene.running) || this.engine.scene !== this) {
+      if (!this.pendingBarks.includes(key)) this.pendingBarks.push(key);
+      return;
+    }
     const boxes = takeBark(this.game, key, this.hasFlag);
-    if (boxes.length) await this.showBoxes(boxes);
+    if (!boxes.length) return;
+    this.lockInput();
+    try { await this.showBoxes(boxes); } finally { this.unlockInput(); }
   }
+  /** A chest, pot or scene hands something over: gear goes to the bag as an instance (equippable), the rest counts. */
   async giveItem(itemId, qty = 1) {
     const e = this.engine;
-    stateGive(this.game, itemId, qty);
+    const got = grant(this.game, itemId, qty);
+    if (got.unknown) this.warnOnce('item:' + itemId, `unknown item "${itemId}" given`);
     const key = isKeyItem(itemId);
     const jingle = e.audio.jingle(key ? 'key_item' : 'item_get');
     let toast = null;
-    if (e.toasts) toast = e.toasts.received(itemId, qty, { jingle: false });
+    const inst = got.kind === 'gear' && got.uid != null ? findGear(this.game, got.uid) : null;
+    if (e.toasts) toast = e.toasts.received(inst || itemId, qty, { jingle: false });
     else { const it = ITEMS[itemId]; await this.dialog({ who: null, text: `Received {c:gold}${it ? it.name : itemId}{/c}${qty > 1 ? ' x' + qty : ''}.` }); }
     await Promise.all([jingle, toast]);
   }
@@ -513,6 +535,9 @@ export class FieldScene {
       }
     }
 
+    // a companion remark that had to wait (a scene, a battle, a chest) speaks now that the field is quiet
+    if (canControl && !L.moving && this.pendingBarks.length && e.scene === this && !this.banner.active) this.bark(this.pendingBarks.shift());
+
     // player input
     if (canControl && !L.moving && !this.pendingWarp) {
       const running = (input.held('run') || (input.lastDevice === 'keyboard' && input.held('cancel'))) !== !!e.settings.alwaysRun;
@@ -585,14 +610,14 @@ export class FieldScene {
     setPosition(g, this.mapId, L.tx, L.ty, L.dir);
     if (this.pendingWarp || this.inputLocked) return;
     const code = this.map.codeAt(L.tx, L.ty);
-    if (code === 'pit') { this.fallInPit(); return; }
+    // only pit TILES swallow the party; a `pit` area event just says where those tiles drop to (docs/MAPS.md)
+    if (code === 'pit') { this.fallInPit(EV.pitDropAt(this, L.tx, L.ty)); return; }
     // doors, exits, triggers on this tile
     for (const ent of EV.entitiesAt(this, L.tx, L.ty)) {
       if (!ent.present) continue;
       if (ent.type === 'door' && ent.ev.to) { this.useDoor(ent); return; }
       if (ent.type === 'gate' && ent.state === 'open' && ent.ev.to && ent.prop && ent.prop.doorAt && ent.prop.doorAt[0] === L.tx && ent.prop.doorAt[1] === L.ty) { this.warpTo(...ent.ev.to, 'door'); return; }
       if (ent.type === 'locked_door' && ent.state === 'open' && ent.ev.to) { this.warpTo(...ent.ev.to, 'door'); return; }
-      if (ent.type === 'pit' && ent.ev.to) { this.fallInPit(ent.ev.to); return; }
       if (ent.type === 'trigger' && (ent.ev.on == null || ent.ev.on === 'step') && ent.ev.script) { this.runScene(ent.ev.script); return; }
     }
     for (const ex of this.map.mod.exits || []) {

@@ -79,7 +79,7 @@ const events = [
   shelf('shelf_w', [[12, 17], [10, 17]]),      // blocks the west doorway until the switch fires
   shelf('shelf_e', [[29, 17], [27, 17]]),      // parked; the switch slides it over the east doorway
   // the Echo Warden and the Lantern
-  actor('echo_warden', 4, 14, 'echo_warden', 'down'),
+  actor('echo_warden', 4, 14, 'echo_warden', 'down', { ifNot: 'echo_warden_defeated' }),
   trigger('warden_trig', 3, 16, 4, 1, 'echo_warden'),
   object('lantern_pedestal', 4, 13, 'lantern_pedestal', { script: 'lantern_get', ifNot: 'lantern_get' }),
   object('lantern_pedestal_empty', 4, 13, 'lantern_pedestal_empty', { if: 'lantern_get', text: 'hidden_ink_1' }),

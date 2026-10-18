@@ -185,6 +185,7 @@ export class BattleScene {
     const e = this.engine;
     this.below = !!below;      // an overlay scene (dialog, choice) is on top: animate, but do not read input
     this.frame++;
+    if (e.game && typeof e.game.playtime === 'number') e.game.playtime += dt;   // the field is paused under us: keep the clock honest
     if (this.banner) { this.banner.t++; if (this.banner.t >= this.banner.frames) this.banner = null; }
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
     if (this.hitstop > 0) { this.hitstop--; return; }
@@ -566,10 +567,12 @@ export class BattleScene {
       if (prev) for (const ef of prev.effects || []) { const ta = this.actor(ef.target); if (ta && targetIds.includes(ef.target)) HUD.drawPreviewTag(r, ta, ef); }
     }
     this.pops.draw(r);
-    // HUD windows.
-    this.drawHelpWindow(r);
-    const preview = this.menu.state === 'target' && this.menu.preview ? { landing: this.menu.preview.landing, uid: this.currentUid } : null;
-    HUD.drawTimeline(r, this.timeline, this.actors, preview, frame);
+    // HUD windows. The help bar and the timeline make way for the rewards windows (they overlap them).
+    if (this.phase !== 'rewards') {
+      this.drawHelpWindow(r);
+      const preview = this.menu.state === 'target' && this.menu.preview ? { landing: this.menu.preview.landing, uid: this.currentUid } : null;
+      HUD.drawTimeline(r, this.timeline, this.actors, preview, frame);
+    }
     HUD.drawPartyStatus(r, this.party(), this.menu.state !== 'closed' ? this.currentUid : null, frame);
     if (this.menu.state !== 'closed') this.menu.draw(r, frame);
     else drawWindow(r, 4, STATUS_WIN.y, 92, STATUS_WIN.h);
@@ -724,7 +727,7 @@ export function makeDebugGame(encounterId, opts = {}) {
   const enc = ENCOUNTERS[encounterId];
   const zone = enc ? enc.zone : 'valley';
   const level = opts.level || ZONE_LEVEL[zone] || 2;
-  const g = createGame(opts.name || 'Hero');
+  const g = createGame(opts.name || 'Arden');   // the shots' hero; real battles read the member's own name
   const LOAD = {
     valley: { hero: { equip: { sword: 'short_sword', body: 'cloth_tunic' }, mastery: { sword: 12 } }, mira: { equip: { staff: 'oak_staff', bow: 'short_bow', body: 'cloth_tunic' }, mastery: { staff: 8, bow: 2 } }, bram: { equip: { spear: 'ash_spear', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { spear: 12, axe: 2 } }, items: { potion: 4, antidote: 1, eye_drops: 1 } },
     archive_f1: { hero: { equip: { sword: 'short_sword', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { sword: 45, axe: 6 } }, mira: { equip: { staff: 'oak_staff', bow: 'short_bow', body: 'cloth_tunic', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 25, bow: 10 } }, bram: { equip: { spear: 'ash_spear', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { spear: 45, axe: 10 } }, items: { potion: 5, ether: 1, antidote: 1, eye_drops: 1, echo_herb: 1 } },
@@ -752,7 +755,7 @@ export async function install(engine) {
   let pending = null, last = null;
   D.register('battle', (encounterId = 'valley_wolves', opts = {}) => {
     if (!ENCOUNTERS[encounterId]) throw new Error(`unknown encounter ${encounterId} (known: ${Object.keys(ENCOUNTERS).join(', ')})`);
-    if (opts.fresh || !engine.game || opts.level || opts.party) engine.game = makeDebugGame(encounterId, opts);
+    if (opts.fresh || !engine.game || opts.level || opts.party) engine.game = makeDebugGame(encounterId, { ...opts, name: opts.name || (engine.game && engine.game.heroName) || undefined });
     if (opts.settings) D.settings(opts.settings);
     last = null;
     pending = engine.pushAwait('battle', { encounterId, start: opts.start || 'normal', canFlee: opts.canFlee, gameover: opts.gameover ?? false,

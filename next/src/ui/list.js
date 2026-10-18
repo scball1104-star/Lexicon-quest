@@ -117,10 +117,12 @@ export class List {
     return { x: this.x + col * this.colW, y: this.y + (row - this.scroll) * this.rowH, w: this.columns > 1 ? this.colW : this.w, h: this.rowH };
   }
   isVisible(i) { const row = this.rowOf(i); return row >= this.scroll && row < this.scroll + this.rows; }
-  pointerRow(px, py) {
-    if (px < this.x || px >= this.x + this.w || py < this.y || py >= this.y + this.rows * this.rowH) return -1;
-    const row = this.scroll + Math.floor((py - this.y) / this.rowH);
-    const col = Math.min(this.columns - 1, Math.floor((px - this.x) / this.colW));
+  /** Item under a pointer, or -1. `slop` (px) accepts taps just outside the rows (touch: one row of slop). */
+  pointerRow(px, py, slop = 0) {
+    const h = this.rows * this.rowH;
+    if (px < this.x - slop || px >= this.x + this.w + slop || py < this.y - slop || py >= this.y + h + slop) return -1;
+    const row = this.scroll + Math.max(0, Math.min(this.rows - 1, Math.floor((py - this.y) / this.rowH)));
+    const col = Math.max(0, Math.min(this.columns - 1, Math.floor((px - this.x) / this.colW)));
     const i = row * this.columns + col;
     return i < this.items.length ? i : -1;
   }
@@ -141,7 +143,9 @@ export class List {
     // Touch / mouse: tap selects, tap again confirms, drag scrolls.
     if (this.touch && input.pointer) {
       const p = input.pointer;
-      if (p.pressed) this._drag = { y: p.y, row: this.pointerRow(p.x, p.y), moved: false, scroll0: this.scroll };
+      // Fingers are wide: a touch within one row of the list still lands on the nearest row.
+      const slop = p.type === 'touch' ? this.rowH : 0;
+      if (p.pressed) this._drag = { y: p.y, row: this.pointerRow(p.x, p.y, slop), moved: false, scroll0: this.scroll };
       if (this._drag && p.down) {
         const dy = p.y - this._drag.y;
         if (Math.abs(dy) > 8 && this.maxScroll > 0) { this._drag.moved = true; this.scrollTo(this._drag.scroll0 - Math.round(dy / this.rowH)); }

@@ -226,6 +226,8 @@ export class Input {
     if (down && this._text && !e.ctrlKey && !e.metaKey && !e.altKey) {
       if (e.key && e.key.length === 1) { this._text.push(e.key); e.preventDefault(); this._setDevice('keyboard'); return; }
       if (e.key === 'Backspace') { this._text.push('Backspace'); e.preventDefault(); return; }
+      // Enter ends text entry (name entry's "Enter when done"); as an action it would pick the glyph under the cursor.
+      if (e.key === 'Enter') { this._text.push('Enter'); e.preventDefault(); return; }
     }
     if (!down && this._text && e.key && e.key.length === 1) return;
     const actions = this._codeMap[code];

@@ -71,6 +71,33 @@ export function nearestAdjacent(canStand, target, from, facing = null) {
   return [cands[0].x, cands[0].y];
 }
 
+/**
+ * Where followers stand when the party appears at (x, y) facing `dir`: the two tiles behind the leader when
+ * they are open, else the tiles beside the first trailing tile, then beside the leader, then in front. Never
+ * the leader's own tile, never a tile twice. `open(x, y)` says whether a tile can hold a follower.
+ * Returns up to n [x, y] tiles (fewer when the map is that cramped; the caller stacks the rest).
+ */
+export function trailingTiles(open, x, y, dir, n) {
+  const d = DIRS[dir] || DIRS.down;
+  const back = [x - d[0], y - d[1]];
+  const back2 = [x - 2 * d[0], y - 2 * d[1]];
+  const perp = [[d[1], -d[0]], [-d[1], d[0]]];
+  const cands = [back, back2,
+    [back[0] + perp[0][0], back[1] + perp[0][1]], [back[0] + perp[1][0], back[1] + perp[1][1]],
+    [x + perp[0][0], y + perp[0][1]], [x + perp[1][0], y + perp[1][1]],
+    [x + d[0], y + d[1]]];
+  const out = [];
+  const seen = new Set([`${x},${y}`]);
+  for (const c of cands) {
+    const k = `${c[0]},${c[1]}`;
+    if (seen.has(k) || !open(c[0], c[1])) continue;
+    seen.add(k);
+    out.push(c);
+    if (out.length >= n) break;
+  }
+  return out;
+}
+
 /** Flood fill of reachable tiles (for tests and map checks): returns a Set of "x,y" keys. */
 export function reachable(canStep, start, maxNodes = 65536) {
   const seen = new Set([`${start[0]},${start[1]}`]);

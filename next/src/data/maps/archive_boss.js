@@ -37,7 +37,7 @@ const decor = [
 
 const events = [
   enter('boss_enter', 'archivore'),
-  actor('archivore', 12, 6, 'archivore', 'up'),
+  actor('archivore', 12, 6, 'archivore', 'up', { ifNot: 'archivore_defeated' }),
   door('back_to_f3', 12, 18, ['archive_f3', 20, 22, 'down']),
   // the root passage that opens after the fight
   object('root_passage', 16, 3, 'door_locked_open', { if: 'archivore_defeated', solid: false }),

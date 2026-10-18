@@ -15,7 +15,7 @@ export const TINTS = {
   day: null,
   dawn: { color: '#ffd6a6', alpha: 0.30 },
   dusk: { color: '#d08cb4', alpha: 0.42 },
-  night: { color: '#4b5ab4', alpha: 0.66 },
+  night: { color: '#36418c', alpha: 0.78 },   // deep enough that the ending's bell tower reads as night, not dusk
   ink: { color: '#a498c4', alpha: 0.42 },
 };
 const BANDS = [[1.0, 0.32], [0.78, 0.36], [0.56, 0.45], [0.34, 0.7]];

@@ -117,6 +117,23 @@ export function clampVitals(member) {
   if (member.mp > s.maxMp) member.mp = s.maxMp;
 }
 
+// ---------------------------------------------------------------- receiving things on the field
+/**
+ * Put a found or given item where it belongs: equipment becomes a gear instance in the bag (so it can be
+ * equipped), consumables and key items count in `items`. Returns { kind: 'gear'|'item'|'key', id, uid?, qty }
+ * (`uid` of the last instance for gear; `qty` as given). Unknown ids are stored as items and flagged.
+ */
+export function grant(g, id, qty = 1) {
+  const def = ITEMS[id];
+  if (def && def.kind === 'equipment') {
+    let uid = null;
+    for (let i = 0; i < Math.max(1, qty | 0); i++) uid = addGear(g, id);
+    return { kind: 'gear', id, uid, qty: Math.max(1, qty | 0) };
+  }
+  give(g, id, qty);
+  return { kind: def && def.kind === 'key' ? 'key' : 'item', id, qty, unknown: !def };
+}
+
 // ---------------------------------------------------------------- buying and selling
 export function sellConsumable(g, id, qty = 1) {
   const def = CONSUMABLES[id];

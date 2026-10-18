@@ -65,8 +65,12 @@ export function buildEntities(field) {
 export function refreshEntities(field) {
   if (!field.entities) return;
   for (const ent of field.entities.values()) {
-    const want = present(field, ent.ev) && !(ent.type === 'npc' && ent.data.despawned);
-    if (want !== ent.present) setPresent(field, ent, want);
+    const want = present(field, ent.ev) && !ent.data.despawned;   // a despawned actor never comes back mid-map
+    if (want !== ent.present) {
+      // a scripted actor (the Warden, the Archivore) leaves on its scene's cue, not the instant its flag flips
+      if (!want && ent.type === 'actor' && field.cutscene && field.cutscene.running) continue;
+      setPresent(field, ent, want);
+    }
     else if (ent.present && ent.type === 'npc' && ent.actor) {
       // an NPC may have been hidden by npcs.js show conditions, or its behaviour may change
       const rec = NPCS[ent.id];
@@ -232,18 +236,55 @@ function applyGate(field, ent, animate) {
 // ---------------------------------------------------------------- queries
 export function entitiesAt(field, x, y) { return (field.byTile && field.byTile.get(`${x},${y}`)) || []; }
 
-/** Entities on a tile that respond to confirm while faced. */
+/**
+ * Where a pit TILE at (x, y) drops the party: the `to` of a present `pit` area event covering the tile, else
+ * the map's `pitTo`. The area event never swallows floor tiles inside it (the walk model in
+ * tools/maps/mapcheck.mjs reads it the same way).
+ */
+export function pitDropAt(field, x, y) {
+  for (const ent of entitiesAt(field, x, y)) if (ent.present && ent.type === 'pit' && ent.ev.to) return ent.ev.to;
+  return (field.map && field.map.mod && field.map.mod.pitTo) || null;
+}
+
+/** Does this entity answer to confirm at all (type, state, text) regardless of where it stands? */
+function respondsToConfirm(field, ent) {
+  if (!ent.present || !INTERACT_TYPES.has(ent.type)) return false;
+  if (ent.type === 'trigger' && ent.ev.on !== 'interact') return false;
+  if (ent.type === 'actor' && !ent.ev.text && !ent.ev.script) return false;
+  if (ent.type === 'object' && !ent.ev.text && !ent.ev.script) return false;
+  if (ent.type === 'chest' && ent.state === 'open') return false;
+  if (ent.type === 'pot' && ent.state === 'broken') return false;
+  if (ent.type === 'sign' && ent.ev.dir && field.leader && ent.ev.dir !== field.leader.dir) return false;
+  return true;
+}
+
+/** Where a walking entity really is: its actor's tile (the one it is stepping into counts). */
+function actorOn(ent, x, y) {
+  const a = ent.actor;
+  if (!a) return false;
+  if (a.tx === x && a.ty === y) return true;
+  return !!(a.moving && a.fromX / TILE === x && a.fromY / TILE === y);
+}
+
+/**
+ * Entities on a tile that respond to confirm while faced. NPCs and scripted actors are looked up where they
+ * STAND (they wander), not where their event was placed: you talk to Tess wherever she is, and an empty
+ * home tile is just floor.
+ */
 export function interactables(field, x, y) {
   const out = [];
   for (const ent of entitiesAt(field, x, y)) {
-    if (!ent.present || !INTERACT_TYPES.has(ent.type)) continue;
-    if (ent.type === 'trigger' && ent.ev.on !== 'interact') continue;
-    if (ent.type === 'actor' && !ent.ev.text && !ent.ev.script) continue;
-    if (ent.type === 'object' && !ent.ev.text && !ent.ev.script) continue;
-    if (ent.type === 'chest' && ent.state === 'open') continue;
-    if (ent.type === 'pot' && ent.state === 'broken') continue;
-    if (ent.type === 'sign' && ent.ev.dir && ent.ev.dir !== field.leader.dir) continue;
+    if (!respondsToConfirm(field, ent)) continue;
+    if ((ent.type === 'npc' || ent.type === 'actor') && ent.actor && !actorOn(ent, x, y)) continue;
     out.push(ent);
+  }
+  if (field.actors) {
+    for (const a of field.actors) {
+      if ((a.kind !== 'npc' && a.kind !== 'actor') || !actorOn({ actor: a }, x, y)) continue;
+      const ent = field.entities && field.entities.get(a.id);
+      if (!ent || ent.actor !== a || out.includes(ent) || !respondsToConfirm(field, ent)) continue;
+      out.push(ent);
+    }
   }
   return out;
 }
@@ -409,7 +450,8 @@ async function breakPot(field, ent) {
   engine.audio.sfx('pot_break');
   field.sessionGone.add(`${map.id}:${ent.id}`);
   field.particles.burst('shard', ent.x * TILE + 8, ent.y * TILE + 8, 8, '#c8a070');
-  if (ent.prop) map.setPropSprite(ent.prop, 'pot_broken', 0);
+  // shards are walkable (and a push block slides over them): drop the whole pot's solid override
+  if (ent.prop) { ent.prop.solidOverride = false; map.setPropSprite(ent.prop, 'pot_broken', 0); }
   const ev = ent.ev;
   if (ev.item) await field.giveItem(ev.item, ev.qty || 1);
   else if (ev.gold) { g.gold += ev.gold; engine.audio.sfx('coin'); if (engine.toasts) await engine.toasts.gold(ev.gold); }
@@ -504,7 +546,9 @@ export function pushBlock(field, ent, dir) {
   if (code !== 'none' && code !== 'counter' && !(code === 'solid' && false)) return false;
   if (code !== 'none') return false;
   if (field.actorAt(nx, ny)) return false;
-  if (tileHasEvent(field, nx, ny) && !entitiesAt(field, nx, ny).every((e) => !e.present || e.type === 'plate' || e.type === 'trigger' || e.type === 'light')) return false;
+  // a block may slide onto plates, triggers, lights and the shards of a broken pot; nothing else that is there
+  const passableEvent = (e) => !e.present || e.type === 'plate' || e.type === 'trigger' || e.type === 'light' || (e.type === 'pot' && e.state === 'broken');
+  if (tileHasEvent(field, nx, ny) && !entitiesAt(field, nx, ny).every(passableEvent)) return false;
   ent.data.sliding = true;
   field.engine.audio.sfx('block_push');
   const ox = ent.x, oy = ent.y;
