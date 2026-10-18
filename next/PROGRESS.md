@@ -86,3 +86,4 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   daytime meadow stage built from the game's own art instead of the dusk town painting; dark enemies have rim
   light; ink pools ripple; the push block looks like a carved stone block; the valley terrain is organic.
 - Phones: battle commands and targets work by tap, with Auto and speed buttons.
+- Published to /next at 03:31 (verified live: no errors on desktop or phone).
