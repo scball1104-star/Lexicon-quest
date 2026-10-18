@@ -1222,7 +1222,7 @@
   },
   {
    "name": "ui_config",
-   "note": "config screen (W2-ui)",
+   "note": "config screen (W2-ui); 8 downs reach Window color after the Equip prompts row",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
@@ -1288,6 +1288,12 @@
     },
     {
      "frames": 6
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
     },
     {
      "press": "down"
