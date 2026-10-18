@@ -2,7 +2,8 @@
 
     python build_all.py            (about 10 seconds; deterministic)
 
-Outputs: next/assets/sprites/*.png + *.json + README.md, previews in tools/art/sprites/out/.
+Outputs: next/assets/sprites/*.png + *.json + README.md, next/assets/ui/heads.png/.json (timeline head icons),
+previews in tools/art/sprites/out/.
 Reads next/assets/palette.json (W1-tiles) at build time; re-run after palette tweaks.
 """
 import os, sys, json, time
@@ -16,7 +17,7 @@ import pal as P
 def main():
     t0 = time.time()
     import build_party_field, build_party_battle, build_npcs, build_props, build_enemies, build_bosses
-    import build_portraits, build_misc
+    import build_portraits, build_misc, build_heads
     steps = [
         ('party_field', build_party_field.build),
         ('party_battle', build_party_battle.build),
@@ -27,6 +28,7 @@ def main():
         ('bosses_battle', build_bosses.build),
         ('portraits', build_portraits.build_atlas),
         ('misc', build_misc.build),
+        ('heads', build_heads.build),
     ]
     for name, fn in steps:
         t = time.time()

@@ -1,8 +1,11 @@
 """Rootbound Archive dungeon kit -> assets/tiles/archive.png.
 
-Wall system 'archive' (legend archive_top / archive_face): root-choked earth and stone cap above, dressed
-violet-grey stone face below with roots hanging over it. Floor 'archive_floor' (A2): warm polished flags with
-brass inlay. Everything else is tiles (16 px grid) or objects (multi-tile, anchor + footprint).
+Wall system 'archive' (legend archive_top / archive_face): a dressed stone cap around a flat #14101e void
+(the darkest palette colour: beyond the walls is black, Lufia style), and a two-tone violet-grey stone face
+below it (lighter upper course, darker lower course on a dark plinth) with roots hanging over it.
+Wall system 'archive_roots' (archive_roots_top / archive_roots_face) keeps the old root-choked earth fill
+under the same cap, for maps that want a visible earth mass. Floor 'archive_floor' (A2): warm polished flags
+with brass inlay. Everything else is tiles (16 px grid) or objects (multi-tile, anchor + footprint).
 """
 import math
 from pxlib import Canvas, C, SH, DARK, WHITE, rnd, h32, profile1d
@@ -24,6 +27,7 @@ INK = lambda i: C('ink', i)
 
 # ====================================================================== wall top (A2)
 class ArchiveTop(Terrain):
+    """Stone cap rim around a flat void (CRITIQUE_1 C6: rooms read as carved space, black beyond)."""
     id = 'archive_top'
 
     def __init__(self):
@@ -33,6 +37,31 @@ class ArchiveTop(Terrain):
             'fill': EdgeSpec({'N': 3.0, 'S': 3.0, 'W': 3.0, 'E': 3.0}, r=2.0, rr=1.0, prof=rp),
             'rim': EdgeSpec({'N': 0.0, 'S': -0.5, 'W': 0.0, 'E': 0.0}, r=1.0, rr=0.5),
         }
+
+    def make_texture(self, frame, variant):
+        return blank(DARK)
+
+    def pixel(self, c, x, y):
+        if c.i('fill', x, y):
+            return self.tex(c, x, y)
+        if not c.i('rim', x, y):
+            return None
+        d = c.f('rim', x, y)
+        side = c.side('fill', x, y)
+        if d < 1:
+            return K(0)
+        if side == 'S':
+            return K(4) if d < 2 else K(3)
+        if side == 'N':
+            return K(2)
+        if side == 'W':
+            return K(3) if d < 2 else K(2)
+        return K(2) if d < 2 else K(1)
+
+
+class ArchiveRootsTop(ArchiveTop):
+    """The old root-choked earth fill (hatched brown), kept under its own wall id."""
+    id = 'archive_roots_top'
 
     def make_texture(self, frame, variant):
         t = blank(E(0))
@@ -99,8 +128,20 @@ class ArchiveFace(FaceStyle):
         # hanging roots: per column length (periodic 16)
         self.roots = {3: 9, 4: 7, 11: 4}
 
+    # lower course: every tone one step darker (depth: the wall falls away into the floor's shadow)
+    DARKER = None
+
+    def darker(self, col):
+        if ArchiveFace.DARKER is None:
+            ArchiveFace.DARKER = {K(4): K(3), K(3): K(2), K(2): K(1), K(1): K(0), K(0): DARK}
+        return ArchiveFace.DARKER.get(col, col)
+
     def pixel(self, x, y, left, top, right, bottom):
         col = self.tex[y][x]
+        # which course is this row in? upper (lit, under the cap), lower (dark, on the plinth) or middle.
+        lower = (not bottom) and (top or y >= 8)
+        if lower:
+            col = self.darker(col)
         if not top:
             if y == 0:
                 return DARK
@@ -116,23 +157,28 @@ class ArchiveFace(FaceStyle):
             if x == 5 and y == 8:
                 return WD(1)
         if not bottom:
+            # plinth: a dark foot course and the floor shadow line under it
             if y == 15:
-                return K(0)
+                return DARK
             if y == 14:
-                n = h32(x, 2204) % 4
-                return G(1) if n == 0 else (K(1) if n == 1 else K(2))
-            if y == 13 and h32(x, 2205) % 5 == 0:
+                return K(0)
+            if y == 13:
+                n = h32(x, 2204) % 5
+                return G(1) if n == 0 else K(1)
+            if y == 12 and h32(x, 2205) % 6 == 0:
                 return G(2)
+            if y == 12 and col == K(0):
+                return K(1)
         if not left:
             if x == 0:
                 return K(0)
             if x == 1:
-                return K(4)
+                return K(3) if lower else K(4)
         if not right:
             if x == 15:
                 return K(0)
             if x == 14:
-                return K(1)
+                return K(0) if lower else K(1)
         return col
 
 
@@ -451,6 +497,64 @@ def root_column():
         cv.set(min(31, x1 - 1), y, WD(0))
     for x in range(4, 30):
         cv.put(x + 2, 47, SH(90))
+    return cv
+
+
+def pillar():
+    """Free-standing stone column, 16 x 32: carved capital (overhead row), fluted shaft, square base.
+    Object with a 1-tile footprint; the top row draws over actors."""
+    cv = Canvas(16, 32)
+    # capital: a 14 px wide slab with a lit top and a carved band
+    for x in range(1, 15):
+        cv.set(x, 1, K(5) if 2 <= x <= 12 else K(4))
+        cv.set(x, 2, K(4) if x < 12 else K(3))
+        cv.set(x, 3, K(3) if x < 11 else K(2))
+        cv.set(x, 4, K(1))
+    for x in (1, 14):
+        cv.set(x, 1, K(1))
+    cv.set(0, 2, K(1)); cv.set(0, 3, K(1)); cv.set(15, 2, K(1)); cv.set(15, 3, K(0))
+    for x in range(3, 13, 3):
+        cv.set(x, 3, GOLD(2))
+    # echinus (the curve under the capital)
+    for x in range(3, 13):
+        cv.set(x, 5, K(3) if x < 9 else K(2))
+        cv.set(x, 6, K(2) if x < 9 else K(1))
+    cv.set(2, 5, K(1)); cv.set(13, 5, K(0))
+    # shaft, 10 px wide: lit left flute, mid body, shadowed right edge
+    for y in range(7, 26):
+        cv.set(3, y, K(1))
+        cv.set(4, y, K(4))
+        cv.set(5, y, K(4) if y % 5 else K(3))
+        cv.set(6, y, K(3))
+        cv.set(7, y, K(3))
+        cv.set(8, y, K(2) if y % 7 else K(3))
+        cv.set(9, y, K(2))
+        cv.set(10, y, K(2))
+        cv.set(11, y, K(1))
+        cv.set(12, y, K(0))
+    # a carved glyph band half way down
+    for x in range(4, 12):
+        cv.set(x, 15, K(1) if x % 2 else K(2))
+        cv.set(x, 16, K(3) if x < 9 else K(2))
+    cv.set(7, 15, GOLD(2)); cv.set(8, 15, GOLD(3))
+    # base: torus and square plinth
+    for x in range(2, 14):
+        cv.set(x, 26, K(4) if x < 10 else K(3))
+        cv.set(x, 27, K(3) if x < 10 else K(2))
+    cv.set(1, 26, K(1)); cv.set(14, 26, K(1)); cv.set(1, 27, K(1)); cv.set(14, 27, K(0))
+    for x in range(1, 15):
+        cv.set(x, 28, K(4) if x < 12 else K(3))
+        cv.set(x, 29, K(2))
+        cv.set(x, 30, K(1))
+    cv.set(0, 28, K(1)); cv.set(15, 28, K(1)); cv.set(0, 29, K(1)); cv.set(15, 29, K(0))
+    cv.set(0, 30, K(0)); cv.set(15, 30, K(0))
+    for x in range(1, 16):
+        cv.set(x, 31, DARK)
+    # cast shadow down-right
+    for y in range(8, 31):
+        cv.put(13, y, SH(70))
+        if y > 9:
+            cv.put(14, y, SH(50))
     return cv
 
 
@@ -851,7 +955,8 @@ def build():
     sh.cv.paste(face.block(), x, y)
     fx, fy = x, y
     sh.meta['walls'] = {'archive': {'top': [tx, ty], 'face': [fx, fy], 'collision': 'solid',
-                                    'note': 'legend ids archive_top / archive_face; face 1-3 rows below the top'}}
+                                    'note': 'legend ids archive_top / archive_face; face 1-3 rows below the top; '
+                                            'the top fill is flat #14101e (void) inside a stone cap'}}
     x, y = sh.alloc(32, 48)
     sh.cv.paste(floor.block(), x, y)
     sh.meta['terrains'] = {'archive_floor': {'x': x, 'y': y, 'w': 32, 'h': 48, 'autotile': 'A2', 'kind': 'fill',
@@ -896,6 +1001,14 @@ def build():
     pb = Canvas(16, 32)
     pb.paste(push_block(), 0, 8)
     sh.obj('push_block', pb, [0, 1], [[0, 0]], 0, note='movable; draw at its tile, slide 16 px per push')
+    sh.newline()
+    roots_top = ArchiveRootsTop()
+    x, y = sh.alloc(32, 48)
+    sh.cv.paste(roots_top.block(), x, y)
+    sh.meta['walls']['archive_roots'] = {'top': [x, y], 'face': [fx, fy], 'collision': 'solid',
+                                         'note': 'legend ids archive_roots_top / archive_roots_face; the old '
+                                                 'root-choked earth fill under the same cap and face as archive'}
+    sh.obj('pillar', pillar(), [0, 1], [[0, 0]], 1, note='free-standing column, 2 tiles tall; capital row overhead')
     sh.newline()
     for kind in ('key', 'locked'):
         for op in (False, True):

@@ -1,8 +1,9 @@
 """Enemy battle sprites -> assets/sprites/enemies_battle.png/.json
 
 Painted sources (../assets/art/enemies.png 4x2) are cut out, area-downscaled, quantized to a per-sprite
-palette (harmonized to the master palette), despeckled, recoloured per variant, and given a selective
-1 px outline. Feature fixes (eyes) are hand-placed pixels.
+palette, recoloured per variant, re-quantized to k colours and snapped to the master palette, despeckled
+with a majority filter (cleanup.py, CRITIQUE_1 C8), and given a 1 px outer outline in the darkest step of
+each material's ramp. Feature fixes (eyes) are hand-placed pixels.
 """
 import os
 from pix import *
@@ -10,6 +11,7 @@ import pal as P
 from srcutil import grid_cell, main_object, fit_size
 import recolor as RC
 from build_portraits import harmonize
+import cleanup as CL
 
 # id: (cell, target height, k, recolour fn, options)
 ENEMIES = {
@@ -56,17 +58,15 @@ def make_enemy(eid, spec, src):
     tw, th = fit_size(obj, th=spec['h'])
     d, pal = pixelize2(obj, tw, th, k=spec['k'], sharpen=0.0, max_de=0.10, ring=False)
     if spec.get('recolor'):
-        d = recolour(d, spec['recolor'])
-    # harmonize final colours toward master palette
-    cols = np.unique(d[d[..., 3] > 0.5][:, :3], axis=0)
-    hp = harmonize(cols, 0.04)
-    for c0, c1 in zip(cols, hp):
-        m = np.all(np.abs(d[..., :3] - c0) < 1e-4, -1) & (d[..., 3] > 0.5)
-        d[m, :3] = c1
+        d = recolour(d, spec['recolor'])     # maps the k quantized colours, so the count stays at k
+    d = CL.snap_master(d, spec.get('snap', 0.04))
+    d = CL.merge_close(d, 0.035)
+    prot = CL.accent_mask(d)
+    d = CL.despeckle(d, protect=prot)
     big = blank(tw + 2, th + 2)
     big[1:-1, 1:-1] = d
     big = drop_specks(big, 6)
-    big = outline(big, mode='outer', strength=0.55)
+    big = CL.ramp_outline(big)
     if spec.get('eyes'):
         # hand-placed eye accents mapped from the painting (they vanish in the area downscale)
         oh, ow = obj.shape[:2]

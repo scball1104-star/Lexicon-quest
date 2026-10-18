@@ -1,0 +1,12 @@
+{
+ "image": "dialog_keyart.png",
+ "w": 384,
+ "h": 216,
+ "cell": 0,
+ "note": "prologue / dialog cards: darkened so text reads over it",
+ "extraColors": [
+  "#082b4c",
+  "#513627"
+ ],
+ "colors": 43
+}

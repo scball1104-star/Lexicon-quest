@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MANIFEST = path.join(NEXT, 'assets', 'manifest.json');
-const SCAN_DIRS = ['assets/ui', 'assets/sprites', 'assets/tiles'];
+const SCAN_DIRS = ['assets/ui', 'assets/sprites', 'assets/tiles', 'assets/backdrops'];
 const EXTRA_FILES = ['assets/palette.json'];
 const FONT_IDS = { font: 'main', font_large: 'large', font_num: 'num' };
 const KINDS = ['images', 'atlases', 'json', 'fonts'];

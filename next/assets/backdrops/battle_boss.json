@@ -1,0 +1,17 @@
+{
+ "image": "battle_boss.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "boss stage: archive with the violet tint",
+ "extraColors": [
+  "#7f4945",
+  "#58324b",
+  "#442668",
+  "#25144c"
+ ],
+ "colors": 42,
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

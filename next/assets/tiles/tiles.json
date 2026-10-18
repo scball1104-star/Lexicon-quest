@@ -147,27 +147,37 @@
    "order": 8,
    "variants": [
     [
-     192,
-     144
+     0,
+     160
     ],
     [
-     208,
-     144
+     16,
+     160
     ],
     [
-     224,
-     144
+     32,
+     160
     ],
     [
-     240,
-     144
+     48,
+     160
+    ],
+    [
+     64,
+     160
+    ],
+    [
+     80,
+     160
     ]
    ],
    "variantWeights": [
     6,
     2,
     2,
-    1
+    1,
+    2,
+    2
    ]
   },
   "sand": {
@@ -182,19 +192,19 @@
    "order": 4,
    "variants": [
     [
-     0,
+     96,
      160
     ],
     [
-     16,
+     112,
      160
     ],
     [
-     32,
+     128,
      160
     ],
     [
-     48,
+     144,
      160
     ]
    ],
@@ -217,11 +227,11 @@
    "order": 12,
    "variants": [
     [
-     64,
+     160,
      160
     ],
     [
-     80,
+     176,
      160
     ]
    ],
@@ -242,24 +252,24 @@
    "order": 1,
    "variants": [
     [
-     96,
-     160
+     0,
+     176
     ],
     [
-     112,
-     160
+     16,
+     176
     ],
     [
-     128,
-     160
+     32,
+     176
     ],
     [
-     144,
-     160
+     48,
+     176
     ],
     [
-     160,
-     160
+     64,
+     176
     ]
    ],
    "variantWeights": [
@@ -282,20 +292,20 @@
    "order": 2,
    "variants": [
     [
-     176,
-     160
+     80,
+     176
     ],
     [
-     192,
-     160
+     96,
+     176
     ],
     [
-     208,
-     160
+     112,
+     176
     ],
     [
-     224,
-     160
+     128,
+     176
     ]
    ],
    "variantWeights": [
@@ -353,11 +363,11 @@
    "order": 6,
    "variants": [
     [
-     0,
+     144,
      176
     ],
     [
-     16,
+     160,
      176
     ]
    ],
@@ -524,7 +534,20 @@
     0
    ],
    "collision": "solid",
-   "note": "legend ids archive_top / archive_face; face 1-3 rows below the top",
+   "note": "legend ids archive_top / archive_face; face 1-3 rows below the top; the top fill is flat #14101e (void) inside a stone cap",
+   "sheet": "archive.png"
+  },
+  "archive_roots": {
+   "top": [
+    0,
+    96
+   ],
+   "face": [
+    32,
+    0
+   ],
+   "collision": "solid",
+   "note": "legend ids archive_roots_top / archive_roots_face; the old root-choked earth fill under the same cap and face as archive",
    "sheet": "archive.png"
   },
   "interior": {
@@ -1773,7 +1796,7 @@
   },
   "wall_shelf_l": {
    "x": 0,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1781,7 +1804,7 @@
   },
   "wall_shelf_m": {
    "x": 16,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1789,7 +1812,7 @@
   },
   "wall_shelf_r": {
    "x": 32,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1797,7 +1820,7 @@
   },
   "wall_cracked": {
    "x": 48,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1805,7 +1828,7 @@
   },
   "wall_broken": {
    "x": 64,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "none",
@@ -1813,7 +1836,7 @@
   },
   "wall_glyph_faint": {
    "x": 80,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1821,7 +1844,7 @@
   },
   "wall_glyph_revealed": {
    "x": 96,
-   "y": 144,
+   "y": 192,
    "w": 16,
    "h": 32,
    "collision": "solid",
@@ -1829,7 +1852,7 @@
   },
   "plate_up": {
    "x": 0,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1837,7 +1860,7 @@
   },
   "plate_down": {
    "x": 16,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1845,7 +1868,7 @@
   },
   "switch_off": {
    "x": 32,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1853,7 +1876,7 @@
   },
   "switch_on": {
    "x": 48,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1861,7 +1884,7 @@
   },
   "switch_ink_faint": {
    "x": 64,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1869,7 +1892,7 @@
   },
   "switch_ink_revealed": {
    "x": 80,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1877,7 +1900,7 @@
   },
   "ink_bridge_h_faint": {
    "x": 96,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "pit",
@@ -1885,7 +1908,7 @@
   },
   "ink_bridge_h_revealed": {
    "x": 112,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1893,7 +1916,7 @@
   },
   "ink_bridge_v_faint": {
    "x": 128,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "pit",
@@ -1901,7 +1924,7 @@
   },
   "ink_bridge_v_revealed": {
    "x": 144,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1909,7 +1932,7 @@
   },
   "roots_0": {
    "x": 160,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1917,7 +1940,7 @@
   },
   "roots_1": {
    "x": 176,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1925,7 +1948,7 @@
   },
   "roots_2": {
    "x": 192,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1933,7 +1956,7 @@
   },
   "ink_puddle_0": {
    "x": 208,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -1941,7 +1964,7 @@
   },
   "ink_puddle_1": {
    "x": 224,
-   "y": 176,
+   "y": 224,
    "w": 16,
    "h": 16,
    "collision": "none",
@@ -4403,10 +4426,34 @@
    "note": "movable; draw at its tile, slide 16 px per push",
    "sheet": "archive.png"
   },
+  "pillar": {
+   "rect": [
+    32,
+    96,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "free-standing column, 2 tiles tall; capital row overhead",
+   "sheet": "archive.png"
+  },
   "door_key_closed": {
    "rect": [
     0,
-    96,
+    144,
     32,
     32
    ],
@@ -4434,7 +4481,7 @@
   "door_key_open": {
    "rect": [
     32,
-    96,
+    144,
     32,
     32
    ],
@@ -4456,7 +4503,7 @@
   "door_locked_closed": {
    "rect": [
     64,
-    96,
+    144,
     32,
     32
    ],
@@ -4484,7 +4531,7 @@
   "door_locked_open": {
    "rect": [
     96,
-    96,
+    144,
     32,
     32
    ],
@@ -4506,7 +4553,7 @@
   "door_boss_closed": {
    "rect": [
     128,
-    96,
+    144,
     48,
     48
    ],
@@ -4537,7 +4584,7 @@
   "door_boss_open": {
    "rect": [
     176,
-    96,
+    144,
     48,
     48
    ],
@@ -4558,7 +4605,7 @@
   "stairs_up": {
    "rect": [
     224,
-    96,
+    144,
     32,
     32
    ],
@@ -4579,7 +4626,7 @@
   "stairs_down": {
    "rect": [
     256,
-    96,
+    144,
     32,
     32
    ],

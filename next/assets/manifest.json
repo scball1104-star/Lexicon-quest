@@ -9,9 +9,14 @@
     "town": "assets/tiles/town.png"
   },
   "atlases": {
+    "battle_archive": "assets/backdrops/battle_archive.json",
+    "battle_boss": "assets/backdrops/battle_boss.json",
+    "battle_valley": "assets/backdrops/battle_valley.json",
     "bosses_battle": "assets/sprites/bosses_battle.json",
+    "dialog_keyart": "assets/backdrops/dialog_keyart.json",
     "enemies_battle": "assets/sprites/enemies_battle.json",
     "enemies_field": "assets/sprites/enemies_field.json",
+    "heads": "assets/ui/heads.json",
     "logo": "assets/ui/logo.json",
     "misc": "assets/sprites/misc.json",
     "npcs": "assets/sprites/npcs.json",
@@ -19,6 +24,7 @@
     "party_field": "assets/sprites/party_field.json",
     "portraits": "assets/sprites/portraits.json",
     "props": "assets/sprites/props.json",
+    "title": "assets/backdrops/title.json",
     "ui": "assets/ui/ui.json",
     "window": "assets/ui/window.json"
   },

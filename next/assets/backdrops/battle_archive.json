@@ -1,0 +1,17 @@
+{
+ "image": "battle_archive.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "archive battle stage (cell 7 as src/scenes/battle.js)",
+ "extraColors": [
+  "#543534",
+  "#462f65",
+  "#6a4d91",
+  "#9b7457"
+ ],
+ "colors": 47,
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

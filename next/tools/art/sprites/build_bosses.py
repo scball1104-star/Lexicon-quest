@@ -4,6 +4,7 @@ from pix import *
 import pal as P
 from srcutil import grid_cell, main_object, fit_size
 from build_portraits import harmonize
+import cleanup as CL
 
 
 def harmonize_img(d, de=0.04):
@@ -16,13 +17,17 @@ def harmonize_img(d, de=0.04):
 
 
 def pix_obj(obj, tw=None, th=None, k=18, strength=0.55):
+    """downscale, quantize to k, snap to the master palette, majority-despeckle, ramp-darkest outline (C8)"""
     tw, th = fit_size(obj, th=th, tw=tw)
     d, pal = pixelize2(obj, tw, th, k=k, sharpen=0.0, max_de=0.10, ring=False)
-    d = harmonize_img(d)
+    d = CL.snap_master(d, 0.04)
+    d = CL.merge_close(d, 0.035)
+    prot = CL.accent_mask(d)
+    d = CL.despeckle(d, protect=prot)
     big = blank(tw + 2, th + 2)
     big[1:-1, 1:-1] = d
     big = drop_specks(big, 8)
-    return outline(big, mode='outer', strength=strength)
+    return CL.ramp_outline(big)
 
 
 def archivore():

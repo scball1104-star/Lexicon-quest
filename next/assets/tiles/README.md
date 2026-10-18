@@ -8,7 +8,7 @@ change the generator and rebuild. Everything is 16 px tiles, top-left light, col
 | `terrain.png` | ground autotiles (A2), animated water + ink (A1), fill variants, decal overlays |
 | `cliffs.png` | cliff wall system (grass top + rock face), stairs cut into cliffs, one-way ledges |
 | `town.png` | 11 prefab buildings (top) + modular kit: roofs, walls, doors, windows, awnings, fences, bridges, well, stalls, signs, banners, stairs |
-| `archive.png` | Rootbound Archive: wall system, archive floor, shelves (incl. moving shelf), tables, candelabra, braziers, roots, plates, switches, crystal switch, push block, doors (key, locked, boss), cracked wall, stairs, hidden-ink pieces, lantern pedestal |
+| `archive.png` | Rootbound Archive: wall systems `archive` (stone cap around a flat `#14101e` void, two-tone face) and `archive_roots` (same cap and face over the old root-choked earth fill), archive floor, pillar, shelves (incl. moving shelf), tables, candelabra, braziers, roots, plates, switches, crystal switch, push block, doors (key, locked, boss), cracked wall, stairs, hidden-ink pieces, lantern pedestal |
 | `interior.png` | 3 interior wall systems, wall windows, counter, beds, tables, chairs, hearth, goods shelves, barrels/pots/crates/sacks, rug, stairs |
 | `tiles.json` | every id below with its rect, collision and autotile/anim data |
 
@@ -63,7 +63,11 @@ transparent outside the boundary. To draw cell (x, y) whose terrain is T:
 3. each higher one L is drawn as an A2 cell where neighbour n is connected iff order(n) >= order(L).
 
 Holes (`water`, `shallow`, `ink`, `pit`) are highest, so they draw their own banks and lips; grass draws its
-tufted edge over dirt and sand; the plaza draws a dressed curb over grass. Pre-render each map layer once
+tufted edge over dirt and sand; the plaza draws a dressed curb over grass. A `pit` has a rim: a lit 1 px edge on
+its top and left (the far wall is a cut stone face fading to ink), a darker right edge and a 2 px dark lip along
+the bottom, so it reads as a hole. `plaza` keeps its mortar in the mid step and dresses only every third stone,
+so actors out-contrast the floor (6 fill variants). `carpet_red` / `carpet_blue` read as cloth: a dark hem with
+a fringe stitch on the N and S ends, a gold line, a knot stripe and a soft woven field. Pre-render each map layer once
 into an offscreen canvas per animation frame; the cost is a few quarter blits per cell.
 
 **Fill variants.** When all 8 neighbours of a layer are connected, draw `variants[k]` instead of the A2
@@ -75,8 +79,11 @@ every `anim.ms`. All three frames share the same edge geometry.
 
 ## Wall systems (3/4 view)
 
-`cliff`, `archive`, `interior`, `interior_wood`, `interior_stone`. Maps mark top cells `<id>_top` and face
-cells `<id>_face`. Faces sit directly below the south edge of a top region and are usually 2 rows tall (cliff
+`cliff`, `archive`, `archive_roots`, `interior`, `interior_wood`, `interior_stone`. Maps mark top cells `<id>_top` and face
+cells `<id>_face`. `archive_top` fills with flat `#14101e` inside its stone cap (beyond the walls is black);
+`archive_roots_top` is the old hatched earth fill for maps that want a visible earth mass (it shares the archive
+face block). The archive face is two-tone: the course under the cap is lit, the course on the floor is one ramp
+step darker and ends in a dark plinth with a shadow line (CRITIQUE_1 C6). Faces sit directly below the south edge of a top region and are usually 2 rows tall (cliff
 1 to 3). The top is an A2 block (connected = same `<id>_top`; face cells are *not* connected, so the top
 draws its south lip). The face is a 32 x 32 block composed by 4-neighbour connectivity (same `<id>_face`):
 
@@ -109,9 +116,10 @@ frame k at `rect.x + frames[i] * frameDx`.
 Buildings: `house_small house_medium house_large hero_home inn item_shop smithy bakery library
 chapel_bell_tower town_gate`. Town props: `well signpost signpost_arrow market_stall_fruit market_stall_cloth
 gable_<red|blue|purple|green>`. Archive: `shelf_a shelf_b shelf_wide shelf_moving reading_table
-reading_table_long root_column candelabra brazier_lit brazier_unlit crystal_switch_blue crystal_switch_gold
+reading_table_long root_column pillar candelabra brazier_lit brazier_unlit crystal_switch_blue crystal_switch_gold
 lantern_pedestal lantern_pedestal_empty push_block door_key_* door_locked_* door_boss_* (closed|open)
-stairs_up stairs_down`. Interior: `bed_single bed_single_red bed_double table_round table_long shelf_potions
+stairs_up stairs_down`. `pillar` is a 16 x 32 free-standing column (footprint 1 tile, capital row overhead) for
+room corners and alcoves. Interior: `bed_single bed_single_red bed_double table_round table_long shelf_potions
 shelf_bread rack_weapons rug_round stairs_in_up stairs_in_down hearth`.
 
 Door objects (`door_*`, `stairs_*`) are set into a 2-row wall face: anchor = bottom-left doorway cell.

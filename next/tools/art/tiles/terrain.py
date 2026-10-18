@@ -384,9 +384,11 @@ def touches_border(lab, L):
 
 
 class Plaza(Terrain):
+    """Cobble plaza. CRITIQUE_1 C9: mortar in the mid step, only every third stone gets a highlight and an
+    under-rim, so the floor stays quieter than the actors. Six fill variants break the 16 px course."""
     id = 'plaza'
-    nvariants = 4
-    weights = [6, 2, 2, 1]
+    nvariants = 6
+    weights = [6, 2, 2, 1, 2, 2]
 
     def __init__(self):
         super().__init__()
@@ -404,6 +406,7 @@ class Plaza(Terrain):
     def make_texture(self, frame, variant):
         joint = S(3)
         t = blank(joint)
+        k = 0
         for ri, (y0, h, row) in enumerate(self.SLABS):
             for si, (x0, w) in enumerate(row):
                 interior = x0 >= 1 and x0 + w <= 16 and y0 >= 1 and y0 + h <= 16
@@ -414,20 +417,24 @@ class Plaza(Terrain):
                 base = C('path', 3) if warm else S(4)
                 hi = C('path', 4) if warm else S(5)
                 lo = C('path', 2) if warm else S(3)
+                # every third stone is dressed (lit rim + under-rim); the rest sit flat at the base tone
+                dressed = (k + (variant % 3)) % 3 == 0
+                k += 1
                 if variant == 1 and interior:
-                    base, lo = S(3), S(2)
+                    base, hi, lo = S(3), S(4), S(2)
+                    dressed = True
                 for yy in range(h - 1):
                     for xx in range(w - 1):
                         X, Y = (x0 + xx) % 16, (y0 + yy) % 16
                         col = base
-                        if yy == 0 and 0 < xx < w - 2:
+                        if dressed and yy == 0 and 0 < xx < w - 2:
                             col = hi
-                        elif yy == h - 2 and xx > 0:
+                        elif dressed and yy == h - 2 and xx > 0:
                             col = lo
-                        elif xx == w - 2 and yy > 1:
+                        elif dressed and xx == w - 2 and yy > 1:
                             col = lo
                         t[Y][X] = col
-                t[(y0 + h - 1) % 16][(x0 + w - 1) % 16] = S(2)
+                t[(y0 + h - 1) % 16][(x0 + w - 1) % 16] = S(2) if dressed else joint
                 if variant == 2 and interior:
                     for (dx, dy) in [(2, 1), (3, 2), (3, 3), (4, 3)]:
                         if dy < h - 2:
@@ -437,6 +444,20 @@ class Plaza(Terrain):
                 for x in range(16):
                     if t[y][x] == joint and rnd(x, y, 59) < 0.3 and 3 < x < 13 and 3 < y < 13:
                         t[y][x] = C('grass', 2) if rnd(x, y, 60) < 0.7 else C('grass', 3)
+        if variant == 4:
+            # one cracked, sunken slab (middle course, second stone)
+            for (dx, dy) in [(1, 1), (2, 2), (3, 2), (4, 3), (5, 3), (3, 1)]:
+                t[(6 + dy) % 16][(9 + dx) % 16] = S(2)
+            for (dx, dy) in [(2, 1), (4, 2), (5, 2)]:
+                t[(6 + dy) % 16][(9 + dx) % 16] = S(4)
+        if variant == 5:
+            # a wind-blown sand drift over the top course, a pebble and a tuft of grass in a joint
+            for (dx, dy) in [(1, 2), (2, 2), (3, 2), (4, 2), (2, 3), (3, 3), (5, 1)]:
+                t[(0 + dy) % 16][(7 + dx) % 16] = C('sand', 3)
+            t[13][3] = S(5)
+            t[14][3] = S(2)
+            t[12][10] = C('grass', 3)
+            t[13][11] = C('grass', 2)
         return t
 
     def pixel(self, c, x, y):
@@ -694,35 +715,45 @@ class Carpet(Terrain):
     def R(self, i):
         return C(self.ramp, i)
 
-    def make_texture(self, frame, variant):
-        base, line, dot = self.R(3), self.R(2), C('gold', 3)
+    def tones(self):
+        """(field, weave-dark, weave-light, border-dark) for this cloth"""
         if self.ramp == 'cloth_blue':
-            base, line = self.R(2), self.R(1)
+            return self.R(2), self.R(1), self.R(3), self.R(0)
+        return self.R(3), self.R(2), self.R(4), self.R(1)
+
+    def make_texture(self, frame, variant):
+        # CRITIQUE_1 C16: cloth, not a tile grid. A soft field: a sparse diagonal weave one shade above and
+        # one below the base, never lines that meet at the tile edge.
+        base, dark, light, _ = self.tones()
         t = blank(base)
         for y in range(16):
             for x in range(16):
-                # diamond lattice, period 8
-                u, v = (x + y) % 8, (x - y) % 8
-                if u == 0 or v == 0:
-                    t[y][x] = line
-                if (x % 8 == 4 and y % 8 == 0) or (x % 8 == 0 and y % 8 == 4):
-                    t[y][x] = dot
-                if x % 8 == 4 and y % 8 == 4:
-                    t[y][x] = self.R(4) if self.ramp != 'cloth_blue' else self.R(3)
+                if (x + 2 * y) % 8 == 0 and (x + y) % 3 == 0:
+                    t[y][x] = dark
+                elif (x + 2 * y) % 8 == 4 and (x * 2 + y) % 10 == 0:
+                    t[y][x] = light
         return t
 
     def pixel(self, c, x, y):
         if c.i('top', x, y):
             d = c.f('top', x, y)
-            dark = self.R(1) if self.ramp != 'cloth_blue' else self.R(0)
+            base, dark, light, border = self.tones()
+            side = c.side('top', x, y)
+            along = x if side in ('N', 'S') else y
             if d < 1:
-                return dark
+                # binding: dark hem with a fringe stitch every other pixel on the N/S ends
+                if side in ('N', 'S') and along % 2 == 0:
+                    return C('gold', 2)
+                return border
             if d < 2:
-                return C('gold', 4) if c.side('top', x, y) in ('N', 'W') else C('gold', 3)
+                return C('gold', 3) if side in ('N', 'W') else C('gold', 2)
             if d < 3:
-                return C('gold', 2)
+                # guard stripe: base with a running knot pattern
+                return light if along % 4 == 1 else base
             if d < 4:
                 return dark
+            if d < 5:
+                return C('gold', 2) if along % 6 == 3 else base
             return self.tex(c, x, y)
         if c.f('top', x, y) > -1.0 and c.i('top', x, y - 1):
             return SH(90)
@@ -731,6 +762,9 @@ class Carpet(Terrain):
 
 # =====================================================================================  PIT / VOID
 class Pit(Terrain):
+    """Hole in the floor. Rim (brief W4 'pit rim'): a 1 px lighter edge on the top and left (lit lip), a
+    darker edge on the right, and a 2 px dark lip along the bottom so the hole reads as a hole; the far
+    (north) wall is a cut stone face fading into ink."""
     id = 'pit'
     kind = 'hole'
     collision = 'pit'
@@ -741,7 +775,7 @@ class Pit(Terrain):
         prof = {s: profile1d(600 + i, amp=0.5, spikes=0) for i, s in enumerate('NSWE')}
         self.specs = {
             'ground': EdgeSpec({'N': 1.0, 'S': 1.0, 'W': 1.0, 'E': 1.0}, r=2.0, rr=1.0, prof=prof),
-            'void': EdgeSpec({'N': 10.0, 'S': 2.0, 'W': 2.5, 'E': 2.5}, r=2.5, rr=1.5, prof=prof),
+            'void': EdgeSpec({'N': 10.0, 'S': 3.0, 'W': 2.5, 'E': 2.5}, r=2.5, rr=1.5, prof=prof),
         }
 
     def make_texture(self, frame, variant):
@@ -768,7 +802,7 @@ class Pit(Terrain):
             while k < 12 and c.i('ground', x, y - k - 1) and not c.i('void', x, y - k - 1):
                 k += 1
             if k == 0 or g < 1:
-                return K(4)
+                return K(5)
             if k == 1:
                 return K(3)
             course = (k - 2) % 4
@@ -778,9 +812,16 @@ class Pit(Terrain):
             if k < 9:
                 return C('ink', 1) if joint else (K(1) if (x + k) % 2 else C('ink', 1))
             return C('ink', 1)
+        if s == 'S':
+            # near edge: a 2 px dark lip (no lit line here, so the floor falls away instead of ending in a slab)
+            if g < 1:
+                return K(0)
+            return DARK
         if g < 1:
-            return K(4) if s in ('W',) else K(2)
-        return K(1)
+            return K(4) if s == 'W' else K(1)
+        if s == 'W':
+            return K(2) if g < 2 else K(1)
+        return K(0) if g < 2 else DARK
 
 
 # =====================================================================================  MOSS (on stone)
