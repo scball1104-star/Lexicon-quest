@@ -52,3 +52,18 @@ test('enemy face crops stay inside their frame', () => {
     assert.ok(r.x >= f.x && r.x + 14 <= f.x + f.w && r.y >= f.y && r.y + 14 <= f.y + f.h, id);
   }
 });
+
+test('touch layout (W5): 15 px rows keep four command rows and the windows stay inside the bottom band', async () => {
+  const { cmdWin, subWin, cmdRowsFor, CMD_WIN_TOUCH, SUB_WIN_TOUCH, HELP_TOUCH_BTNS, CMD_ROW_H } = await import('../../src/battle/scene/layout.js');
+  const { TOUCH_ROW_H } = await import('../../src/ui/list.js');
+  assert.deepEqual(cmdWin(false), CMD_WIN); assert.deepEqual(subWin(false), SUB_WIN);
+  assert.deepEqual(cmdWin(true), CMD_WIN_TOUCH); assert.deepEqual(subWin(true), SUB_WIN_TOUCH);
+  assert.equal(cmdRowsFor(CMD_WIN, CMD_ROW_H), 4);
+  assert.equal(cmdRowsFor(CMD_WIN_TOUCH, TOUCH_ROW_H), 4, 'four rows at the touch height');
+  assert.equal(cmdRowsFor(SUB_WIN_TOUCH, TOUCH_ROW_H), 4);
+  assert.equal(CMD_WIN_TOUCH.x, CMD_WIN.x); assert.equal(CMD_WIN_TOUCH.w, CMD_WIN.w);
+  assert.equal(CMD_WIN_TOUCH.y + CMD_WIN_TOUCH.h, H - 4, 'the touch command window keeps the bottom edge');
+  assert.ok(SUB_WIN_TOUCH.y + SUB_WIN_TOUCH.h <= CMD_WIN_TOUCH.y, 'sub-list above the command window');
+  assert.ok(CMD_WIN_TOUCH.y < CMD_WIN.y && CMD_WIN_TOUCH.y + CMD_WIN_TOUCH.h <= H);
+  for (const b of Object.values(HELP_TOUCH_BTNS)) assert.ok(b.x >= HELP_WIN.x && b.x + b.w <= HELP_WIN.x + HELP_WIN.w && b.y >= HELP_WIN.y && b.y + b.h <= HELP_WIN.y + HELP_WIN.h, 'touch buttons sit inside the help window');
+});

@@ -185,7 +185,7 @@ antechamber. **Branches:** the crystal room (three crystal switches, all lit ope
 room above: the gold chest with the Stacks Key, the Keeper's third journal, the broken chronicle; the plaque
 `crystal_plaque` beside the barred door reads THREE LIGHTS, ONE DOOR); the pit room (a golem and a patrol among
 the pits; falling drops into the cache below: a gold chest, a brazier, and across a hidden ink bridge the First
-Quill; the cache's stairs climb back to the pit room, one way). Eight enemies with ink wraiths in the stacks and
+Quill; the cache's stairs climb back to the pit room, one way; the module's `ambientFx: [{ fx: 'page_fall', at: [29, 14], area: {...} }]` drops one page into the nearest pit the first time the party steps into the room, the tell before the first fall). Eight enemies with ink wraiths in the stacks and
 the corridors: the unavoidable corridor patrol to the bell hollow (5,20) is the lighter `f3_ink` group and the
 two-wraith `f3_wraiths` guard sits in the letter alcove (3,14), which can be walked around (PLAYTEST_REVIEW_1 3).
 

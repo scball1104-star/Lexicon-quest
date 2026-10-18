@@ -146,3 +146,57 @@ test('itemLine and gearName describe instances', () => {
   assert.equal(inv.gearName('short_sword'), 'Short Sword');
   assert.equal(inv.gearName({ base: 'longsword', name: 'Gleaming Longsword', rarity: 'magic', affixes: [] }), 'Gleaming Longsword');
 });
+
+// ---------------------------------------------------------------- the equip prompt decision (W5-systems)
+test('equipOffers: Iron Pike is offered to Bram only, with its stat arrows', () => {
+  const g = party();
+  const uid = addGear(g, 'iron_pike');
+  const o = inv.equipOffers(g, uid);
+  assert.ok(o, 'someone gains');
+  assert.equal(o.uid, uid);
+  assert.deepEqual(o.offers.map((x) => x.member.id), ['bram']);
+  assert.equal(o.offers[0].key, 'spear');
+  assert.ok(o.offers[0].delta.atk > 0 && o.offers[0].delta.def > 0);
+  assert.match(inv.deltaLine(o.offers[0].delta), /\{c:green\}ATK \+7\{\/c\}/);
+});
+
+test('equipOffers: Mirrorguard Mail fits everyone and Mira is first (best role-weighted gain)', () => {
+  const g = party();
+  const uid = addGear(g, 'mirrorguard_mail');
+  const o = inv.equipOffers(g, uid);
+  assert.deepEqual(o.offers.map((x) => x.member.id).sort(), ['bram', 'hero', 'mira']);
+  assert.equal(o.offers[0].member.id, 'mira');
+  for (const x of o.offers) assert.equal(x.key, 'body');
+});
+
+test('equipOffers: a Chain Shirt skips Mira (who list) and nothing is offered twice or when worse', () => {
+  const g = party();
+  const uid = addGear(g, 'chain_shirt');
+  const o = inv.equipOffers(g, uid);
+  assert.deepEqual(o.offers.map((x) => x.member.id).sort(), ['bram', 'hero']);
+  // wear it on the hero: a second Chain Shirt is then only an upgrade for Bram
+  inv.equipGear(g, g.party[0], 'body', uid);
+  const uid2 = addGear(g, 'chain_shirt');
+  assert.deepEqual(inv.equipOffers(g, uid2).offers.map((x) => x.member.id), ['bram']);
+  inv.equipGear(g, g.party[2], 'body', uid2);
+  const uid3 = addGear(g, 'cloth_tunic');
+  assert.equal(inv.equipOffers(g, uid3), null, 'a downgrade never prompts');
+  assert.equal(inv.equipOffers(g, 9999), null, 'unknown uid');
+  assert.equal(inv.equipOffers(g, 'potion'), null, 'not gear');
+});
+
+test('equipOffers: a second weapon type is measured with that weapon active', () => {
+  const g = party();
+  const hero = g.party[0];
+  const uid = addGear(g, 'hatchet');
+  const o = inv.equipOffers(g, uid);
+  const mine = o.offers.find((x) => x.member.id === 'hero');
+  assert.ok(mine && mine.key === 'axe', 'the empty axe key takes the hatchet');
+  assert.equal(mine.delta.atk, 8);
+  assert.ok(!o.offers.some((x) => x.member.id === 'bram'), 'Bram already carries a hatchet');
+  // equipDeltaFor on the active key equals equipDelta
+  const ls = addGear(g, 'longsword');
+  const d1 = inv.equipDeltaFor(hero, 'sword', g.gear.find((x) => x.uid === ls));
+  assert.equal(d1.atk, 7);
+  assert.equal(inv.deltaLine({ spd: -1, atk: 2, resPoison: 50 }), '{c:green}ATK +2{/c}  {c:red}SPD -1{/c}  {c:green}Poison res +50%{/c}');
+});

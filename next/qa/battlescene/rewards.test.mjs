@@ -122,3 +122,22 @@ test('mergeBestiary keeps known types, derives weak/resist and survives the old 
   assert.deepEqual(bestiaryForBattle(g).briar_wolf.sort(), ['fire', 'sword', 'spear'].sort());
   assert.deepEqual(g.bestiary['lost_page:kindling'].weak, ['fire']);
 });
+
+test('scene-granted uniques (W5): the Archivore outcome keeps its rolled rares but not Lanternheart', async () => {
+  const { applyBattleOutcome, SCENE_GRANTED_UNIQUES } = await import('../../src/battle/scene/rewards.js');
+  const { createGame, addMember } = await import('../../src/game/state.js');
+  const { makeUnique } = await import('../../src/battle/loot.js');
+  assert.deepEqual(SCENE_GRANTED_UNIQUES.archivore, ['lanternheart']);
+  const g = createGame('Arden'); addMember(g, 'mira'); addMember(g, 'bram');
+  const rare = { base: 'iron_helm', rarity: 'rare', ilvl: 8, affixes: [], name: 'Ember Crown' };
+  const result = { outcome: 'victory', exp: 10, gold: 5, party: g.party.map((m) => ({ id: m.id, hp: m.hp, mp: m.mp, fury: 0, weapon: m.weapon })), items: [makeUnique('lanternheart'), rare], consumables: [], revealed: {} };
+  const s = applyBattleOutcome(g, result, { id: 'archivore', boss: true, flag: 'archivore_defeated' });
+  assert.deepEqual(s.items.map((i) => i.name), ['Ember Crown'], 'the unique is left to the scene');
+  assert.ok(!g.gear.some((it) => it.base === 'lanternheart'));
+  assert.ok(g.gear.some((it) => it.base === 'iron_helm'));
+  // any other encounter keeps its unique
+  const g2 = createGame('Arden');
+  const r2 = { ...result, party: g2.party.map((m) => ({ id: m.id, hp: m.hp, mp: m.mp, fury: 0, weapon: m.weapon })), items: [makeUnique('mirrorguard_mail')] };
+  const s2 = applyBattleOutcome(g2, r2, { id: 'echo_warden', boss: true, flag: 'echo_warden_defeated' });
+  assert.deepEqual(s2.items.map((i) => i.name), ['Mirrorguard Mail']);
+});

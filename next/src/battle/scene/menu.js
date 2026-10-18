@@ -4,18 +4,22 @@
 //   menu.open(unit)                       // b.commands(unit) -> root list (Attack, Tech, Magic, Fury, Combo, Item, Defend, Swap, Flee)
 //   const action = menu.update(input, audio);   // the chosen action { type, skill|item, target } or null
 //   menu.draw(r); menu.close(); menu.state ('closed' | 'root' | 'sub' | 'target'); menu.preview; menu.helpText
+//   menu.cmdRect / menu.subRect           // the windows for the current layout (layout.cmdWin / subWin)
 //
 // Targeting: left/right cycle the targets by x, up/down by y; `all`/`random` highlight every target;
-// `self` shows the reticle on the actor. Touch: tap a command row, tap a target, tap it again to confirm.
+// `self` shows the reticle on the actor. Touch: tap a command row, tap it again to confirm (List's tap model),
+// tap a target, tap it again to confirm; rows are TOUCH_ROW_H tall while the touch controls show (W5), so
+// the command window grows upward (layout.CMD_WIN_TOUCH) and the sub-list window moves up with it.
 
-import { List } from '../../ui/list.js';
+import { List, rowHeightFor, touchUi } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
-import { CMD_WIN, CMD_ROWS, CMD_ROW_H, SUB_WIN, unitBox } from './layout.js';
+import { CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox } from './layout.js';
 
+// One short line each (at most 111 px): the help window shares its width with the Auto / Speed hint (W5).
 const CMD_HELP = {
-  attack: 'Strike with the equipped weapon.', tech: 'Weapon techniques. Cost MP.', magic: 'Spells and healing. Cost MP.',
-  fury: 'Unleash the Fury art of this weapon.', combo: 'Act together with a partner.', item: 'Use an item from the bag.',
-  defend: 'Halve damage until your next turn.', swap: 'Switch to the other weapon.', flee: 'Try to run from the battle.',
+  attack: 'Strike with your weapon.', tech: 'Weapon techs. Cost MP.', magic: 'Spells and heals. Cost MP.',
+  fury: 'This weapon\'s Fury art.', combo: 'Act with a partner.', item: 'Use an item from the bag.',
+  defend: 'Halve damage this turn.', swap: 'Switch weapons.', flee: 'Try to run away.',
 };
 const CMD_ICON = { attack: 'sword', tech: 'scroll', magic: 'magic', fury: 'fury', combo: 'combo', item: 'bag', defend: 'shield', swap: 'swap', flee: 'flee' };
 
@@ -35,14 +39,27 @@ export class CommandMenu {
     this.helpColor = null;
     this.lastRootIndex = 0;
     this.tapArmed = null;
+    this.touch = false;
+    this.cmdRect = cmdWin(false);
+    this.subRect = subWin(false);
   }
   get b() { return this.scene.b; }
   get actors() { return this.scene.actors; }
+  get rowH() { return rowHeightFor(this.scene.engine, CMD_ROW_H); }
+
+  /** Pick the window rects for the current layout (called on open; the closed window uses it too). */
+  syncLayout() {
+    this.touch = touchUi(this.scene.engine);
+    this.cmdRect = cmdWin(this.touch);
+    this.subRect = subWin(this.touch);
+    return this.cmdRect;
+  }
 
   open(unit) {
     this.unit = unit;
     this.state = 'root';
     this.base = null; this.tInfo = null; this.preview = null;
+    this.syncLayout();
     const cmds = this.b.commands(unit).filter((c) => c.id !== 'combo' || c.visible);
     const items = cmds.map((c) => ({
       id: c.id, cmd: c, label: c.label || c.name, disabled: !c.enabled,
@@ -50,7 +67,8 @@ export class CommandMenu {
       help: c.enabled ? CMD_HELP[c.id] : (c.reason || CMD_HELP[c.id]),
       icon: CMD_ICON[c.id] || null,
     }));
-    this.root = new List({ x: CMD_WIN.x + 18, y: CMD_WIN.y + 6, w: CMD_WIN.w - 22, rows: CMD_ROWS, rowH: CMD_ROW_H, items, bar: false,
+    const win = this.cmdRect, rowH = this.rowH;
+    this.root = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 22, rows: cmdRowsFor(win, rowH), rowH, items, bar: false,
       textX: 2, icons: false, confirmSfx: false, cancelSfx: false });
     this.root.moveTo(Math.min(this.lastRootIndex, items.length - 1));
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
@@ -87,7 +105,8 @@ export class CommandMenu {
     if (!list.length) return false;
     this.subCmd = cmd;
     this.showHelp = true;
-    this.sub = new List({ x: SUB_WIN.x + 18, y: SUB_WIN.y + 6, w: SUB_WIN.w - 24, rows: CMD_ROWS, rowH: CMD_ROW_H, items: list, bar: true,
+    const win = this.subRect, rowH = this.rowH;
+    this.sub = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 24, rows: cmdRowsFor(win, rowH), rowH, items: list, bar: true,
       textX: 2, icons: false, confirmSfx: false, cancelSfx: false, rightPad: 4 });
     this.state = 'sub';
     this.syncHelp();
@@ -152,6 +171,17 @@ export class CommandMenu {
     this.syncHelp();
     return true;
   }
+  /** Tap hit test over the targetable units (unitBox); returns the uid or null. */
+  unitAt(px, py) {
+    if (!this.tInfo) return null;
+    for (const uid of this.tInfo.ids) {
+      const a = this.actors.get(uid);
+      if (!a) continue;
+      const bx = unitBox(a);
+      if (px >= bx.x && px < bx.x + bx.w && py >= bx.y && py < bx.y + bx.h) return uid;
+    }
+    return null;
+  }
 
   // ----------------------------------------------------------------------------- update
   /** Returns a complete action when the player confirms, else null. */
@@ -195,17 +225,12 @@ export class CommandMenu {
       // Touch: tap a unit to select it, tap the selected one to confirm; tap the command window to cancel.
       const p = input.pointer;
       if (p && p.pressed) {
-        let hit = null;
-        for (const uid of this.tInfo.ids) {
-          const a = this.actors.get(uid);
-          if (!a) continue;
-          const bx = unitBox(a);
-          if (p.x >= bx.x && p.x < bx.x + bx.w && p.y >= bx.y && p.y < bx.y + bx.h) { hit = uid; break; }
-        }
+        const hit = this.unitAt(p.x, p.y);
+        const win = this.cmdRect;
         if (hit) {
           if (this.tInfo.mode === 'single' && this.tInfo.ids[this.tIndex] !== hit) { this.tIndex = this.tInfo.ids.indexOf(hit); this.refreshPreview(); this.syncHelp(); audio.sfx('cursor'); }
           else { input.consume('confirm'); audio.sfx('confirm'); return this.finish(); }
-        } else if (p.x < CMD_WIN.x + CMD_WIN.w && p.y >= CMD_WIN.y) { input.consume('cancel'); audio.sfx('cancel'); this.backFromTarget(); return null; }
+        } else if (p.x < win.x + win.w && p.y >= win.y) { input.consume('cancel'); audio.sfx('cancel'); this.backFromTarget(); return null; }
       }
       if (input.pressed('confirm')) { input.consume('confirm'); audio.sfx('confirm'); return this.finish(); }
       if (input.pressed('cancel')) { input.consume('cancel'); audio.sfx('cancel'); this.backFromTarget(); }
@@ -226,16 +251,18 @@ export class CommandMenu {
   // ----------------------------------------------------------------------------- draw
   draw(r, frame) {
     if (this.state === 'closed' || !this.root) return;
-    drawWindow(r, CMD_WIN.x, CMD_WIN.y, CMD_WIN.w, CMD_WIN.h);
+    const win = this.cmdRect;
+    drawWindow(r, win.x, win.y, win.w, win.h);
     const rootActive = this.state === 'root';
     this.root.draw(r, { frame, cursor: rootActive, bar: false });
     if (!rootActive && this.root.item) {
       // The chosen command stays marked while its sub-list or target is picked.
       const rr = this.root.rowRect(this.root.index);
-      r.text('▶', rr.x - 9, rr.y + 1, { color: 'gold' });
+      r.text('▶', rr.x - 9, rr.y + 1 + this.root.textDy, { color: 'gold' });
     }
     if (this.state === 'sub' && this.sub) {
-      drawWindow(r, SUB_WIN.x, SUB_WIN.y, SUB_WIN.w, SUB_WIN.h);
+      const sw = this.subRect;
+      drawWindow(r, sw.x, sw.y, sw.w, sw.h);
       this.sub.draw(r, { frame, cursor: true, bar: true });
     }
   }

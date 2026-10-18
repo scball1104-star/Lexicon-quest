@@ -31,6 +31,19 @@ export function bestiaryForBattle(game) {
 
 function enemyIdOf(key) { return String(key).split(':')[0]; }
 
+/**
+ * Uniques a story scene hands over itself right after the fight (the Archivore's aftermath gives Lanternheart
+ * with its own line and the legendary toast, W5-story). The rules still roll them (loot-tables BOSS_LOOT, so the
+ * pure loot tests hold); the outcome drops them here so the player gets exactly one.
+ */
+export const SCENE_GRANTED_UNIQUES = { archivore: ['lanternheart'] };
+function sceneGranted(encounter, inst) {
+  const id = encounter && encounter.id;
+  const list = id ? SCENE_GRANTED_UNIQUES[id] : null;
+  if (!list || !inst || typeof inst === 'string') return false;
+  return !!inst.unique && list.includes(inst.base);
+}
+
 /** Merge result().revealed (weakKey -> types) and the kills into game.bestiary. Returns the touched entries. */
 export function mergeBestiary(game, revealed, killed = [], seen = []) {
   if (!game.bestiary) game.bestiary = {};
@@ -76,6 +89,7 @@ export function applyBattleOutcome(game, result, encounter = {}, opts = {}) {
     summary.gold = result.gold || 0;
     game.gold = Math.max(0, (game.gold || 0) + summary.gold);
     for (const inst of result.items || []) {
+      if (sceneGranted(encounter, inst)) continue;
       const copy = typeof inst === 'string' ? inst : JSON.parse(JSON.stringify(inst));
       const uid = addGear(game, copy);
       const rarity = (typeof inst === 'string' ? 'common' : inst.rarity) || 'common';

@@ -20,6 +20,7 @@ import { ZONES, ENCOUNTERS } from '../data/encounters.js';
 import { give, take, count, isKeyItem, markOpened, isOpened, addGear, heal } from '../game/state.js';
 import { rollChest } from '../battle/loot.js';
 import { ITEMS } from '../data/items.js';
+import { HELP } from '../data/text.js';
 import { inspectBoxes, bookBoxes, takeBark } from '../game/story.js';
 import { Actor, EnemyBrain, WALK_FRAMES } from './actors.js';
 import { makeNpcActor } from './npc.js';
@@ -316,6 +317,8 @@ export async function interact(field, ent) {
       else if (ev.text) await field.showBoxes(inspectBoxes(ev.text, field.hasFlag));
       // a `safe: true` landmark (the Lantern pedestal): game over returns the party here
       if (ev.safe && field.markSafe && !field.dead) field.markSafe();
+      // `rest: true` (the Pilgrim's Rest campfire): the font's rest flow after the scene, without the font bark
+      if (ev.rest && !field.dead) await restFlow(field, { bark: null, sparkle: '#ffd080' });
       return;
     }
     case 'sign': {
@@ -346,21 +349,13 @@ export async function interact(field, ent) {
     }
     case 'pot': return breakPot(field, ent);
     case 'font': {
-      engine.audio.sfx('heal');
-      heal(g, { full: true });
-      if (field.markSafe) field.markSafe();
-      field.particles.sparkle(field.leader.feetX, field.leader.feetY - 16, 8, '#9fffd0');
       await field.showBoxes(inspectBoxes(ev.text || 'keeper_font', field.hasFlag));
-      await field.bark('first_font');
+      await restFlow(field, { bark: 'first_font', sparkle: '#9fffd0' });
       return;
     }
     case 'save': {
       await field.showBoxes(inspectBoxes(ev.text || 'save_bell', field.hasFlag));
-      heal(g, { full: true });
-      if (field.markSafe) field.markSafe();
-      field.particles.sparkle(field.leader.feetX, field.leader.feetY - 16, 8, '#fff7d6');
-      await engine.audio.jingle('save');
-      if (engine.hasScene('menu')) await engine.pushAwait('menu', { page: 'save' });
+      await restFlow(field, { bark: null, sparkle: '#fff7d6', jingle: 'save' });
       return;
     }
     case 'ferry': {
@@ -387,6 +382,30 @@ export async function interact(field, ent) {
     }
     default: return;
   }
+}
+
+/**
+ * The rest flow every landmark shares (fonts, the chapel bell, `rest: true` objects such as the campfire):
+ * "Rest here?" first; on Rest a full HP and MP heal (state.heal with the stats provider restores both),
+ * the game over return point, sparkles and the `heal` sfx (or a jingle), an optional one-time bark, then
+ * "Record your journey here?" which opens the menu's save page. Declining either choice costs nothing.
+ * Returns true when the party rested.
+ */
+export async function restFlow(field, o = {}) {
+  const { engine, game: g } = field;
+  const c = await field.dialog({ who: null, text: 'Rest here?', choices: ['Rest', 'Not now'], cancel: 1 });
+  if (c !== 0 || field.dead) return false;
+  if (o.jingle) engine.audio.jingle(o.jingle); else engine.audio.sfx('heal');
+  heal(g, { full: true });
+  if (field.markSafe) field.markSafe();
+  field.particles.sparkle(field.leader.feetX, field.leader.feetY - 16, 8, o.sparkle || '#9fffd0');
+  if (engine.toasts) await engine.toasts.flash('{c:green}HP{/c} and {c:blue}MP{/c} restored.', { frames: 70 });
+  else await engine.waitFrames(30);
+  if (o.bark) await field.bark(o.bark);
+  if (field.dead) return true;
+  const s = await field.dialog({ who: null, text: HELP.save.prompt, choices: ['Save', 'Not now'], cancel: 1 });
+  if (s === 0 && engine.hasScene('menu') && !field.dead) await engine.pushAwait('menu', { page: 'save' });
+  return true;
 }
 
 function targetsOf(ev) { return ev.target == null ? [] : Array.isArray(ev.target) ? ev.target : [ev.target]; }
@@ -435,21 +454,33 @@ async function openChest(field, ent) {
     engine.audio.sfx('coin');
     if (engine.toasts) await engine.toasts.gold(ev.gold);
   } else {
+    // a random chest: rollChest -> { gold, items: [instances], consumables: [{ item, qty }] } (loot-tables CHEST_TIERS)
     const zone = ZONES[map.id];
     const ilvl = ev.ilvl || (zone ? zone.level[0] : 1);
-    const inst = rollChest(field.rng, ev.tier || 'wood', ilvl);
-    if (inst && typeof inst === 'object') {
-      const uid = addGear(g, inst);
-      const rarity = inst.rarity || 'common';
-      engine.audio.sfx(`drop_${rarity}` in (engine.audio.real && engine.audio.real.manifest ? engine.audio.real.manifest.sfx : {}) ? `drop_${rarity}` : 'drop_common');
-      if (engine.toasts) await engine.toasts.received(uid != null ? { ...inst, uid } : inst, 1, { jingle: false });
-      if (rarity === 'rare') await field.bark('first_rare_drop');
-      if (rarity === 'legendary') await field.bark('first_legendary_drop');
-    } else if (typeof inst === 'string') {
-      await field.giveItem(inst, 1);
+    const roll = rollChest(field.rng, ev.tier || 'wood', ilvl);
+    if (roll && typeof roll === 'object' && (Array.isArray(roll.items) || Array.isArray(roll.consumables))) {
+      if (roll.gold > 0) { g.gold += roll.gold; engine.audio.sfx('coin'); if (engine.toasts) await engine.toasts.gold(roll.gold); }
+      for (const c of roll.consumables || []) await field.giveItem(c.item, c.qty || 1);
+      for (const inst of roll.items || []) {
+        const rarity = inst.rarity || 'common';
+        await field.giveGear(inst, { at: chestScreenPoint(field, ent) });
+        if (rarity === 'rare') await field.bark('first_rare_drop');
+        if (rarity === 'legendary' || rarity === 'set') await field.bark('first_legendary_drop');
+      }
+    } else if (roll && typeof roll === 'object' && roll.base) {
+      await field.giveGear(roll, { at: chestScreenPoint(field, ent) });
+    } else if (typeof roll === 'string') {
+      await field.giveItem(roll, 1);
     }
   }
   await field.bark('first_chest');
+}
+
+/** Screen point (bottom center) of a chest for the legendary beam: the tile under the chest's prop. */
+function chestScreenPoint(field, ent) {
+  if (!field.camera || !field.camera.toScreen) return null;
+  const [sx, sy] = field.camera.toScreen(ent.x * TILE + 8, ent.y * TILE + 14);
+  return [sx, sy];
 }
 
 async function breakPot(field, ent) {

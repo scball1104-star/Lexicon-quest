@@ -13,6 +13,19 @@ export const STATUS_WIN = { x: 98, y: 152, w: 282, h: 60 };
 export const CMD_ROWS = 4;            // visible command rows
 export const CMD_ROW_H = 11;
 export const STATUS_ROW_H = 17;
+// Touch layouts (W5, DESIGN 3): rows grow to List's TOUCH_ROW_H (15 px = 25 css px on the phone), so the command
+// window grows upward to keep four rows and the sub-list window moves up with it (both still above / beside the
+// bottom band; the enemy row anchor is clamped above STATUS_WIN either way).
+export const CMD_WIN_TOUCH = { x: 4, y: 140, w: 92, h: 72 };
+export const SUB_WIN_TOUCH = { x: 4, y: 66, w: 188, h: 72 };
+/** Command window rect for a layout. */
+export function cmdWin(touch) { return touch ? CMD_WIN_TOUCH : CMD_WIN; }
+/** Sub-list (Tech / Magic / Item / Fury / Combo) window rect for a layout. */
+export function subWin(touch) { return touch ? SUB_WIN_TOUCH : SUB_WIN; }
+/** Rows of `rowH` that fit a command-style window (6 px padding top and bottom). */
+export function cmdRowsFor(win, rowH) { return Math.max(1, Math.floor((win.h - 12) / rowH)); }
+/** The touch layout's AUTO and x2 buttons inside the help window (tap targets; the desktop shows glyphs). */
+export const HELP_TOUCH_BTNS = { auto: { x: 158, y: 6, w: 30, h: 15 }, speed: { x: 190, y: 6, w: 28, h: 15 } };
 
 // Timeline (top right): 8 slots of 18 px, the first (current) gets one extra px of air.
 export const TL = { x: 226, y: 6, slots: 8, slot: 18, railW: 154 };

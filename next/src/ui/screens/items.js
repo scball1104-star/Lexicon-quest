@@ -1,7 +1,7 @@
 // Items screen: consumables (use on a member) and key items, two tabs.
 
-import { List, rowHeightFor, rowsThatFit } from '../list.js';
-import { drawWindow } from '../window.js';
+import { List, rowHeightFor, rowsThatFit, touchUi } from '../list.js';
+import { drawWindow, btn } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { MemberPicker, drawTabs } from './common.js';
 import { CONSUMABLES, KEY_ITEMS } from '../../data/items.js';
@@ -27,7 +27,13 @@ export class ItemsScreen {
         .sort((a, b) => (CONSUMABLES[a].price || 0) - (CONSUMABLES[b].price || 0));
       for (const id of ids) { const d = CONSUMABLES[id]; items.push({ id, label: d.name, icon: d.icon, right: `x${g.items[id]}`, help: d.desc, disabled: !d.field }); }
     } else {
-      for (const id of Object.keys(g.items)) { const d = KEY_ITEMS[id]; if (d) items.push({ id, label: d.name, icon: d.icon, right: d.counted && g.items[id] > 1 ? `x${g.items[id]}` : '', help: d.desc, disabled: false }); }
+      for (const id of Object.keys(g.items)) {
+        const d = KEY_ITEMS[id];
+        if (!d) continue;
+        // the Lantern names its button (PLAYTEST 2.4): the pageR glyph, or the touch layout's Lantern button
+        const help = id !== 'lantern_of_recall' ? d.desc : touchUi(this.engine) ? 'Reveals ink that wants to be forgotten. Raise it: the Lantern button.' : `${d.desc} Raise it: ${btn('pageR')}.`;
+        items.push({ id, label: d.name, icon: d.icon, right: d.counted && g.items[id] > 1 ? `x${g.items[id]}` : '', help, disabled: false });
+      }
     }
     this.list.setItems(items, keep);
   }

@@ -11,8 +11,11 @@
 //
 // LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), call('scene', id), lantern(), state().
 
-import { createGame, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear } from '../game/state.js';
-import { grant } from '../game/inventory.js';
+import { createGame, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
+import { grant, equipOffers, equipGear, deltaLine, gearName, isWeaponKey, baseOf } from '../game/inventory.js';
+import { memberName } from '../ui/party.js';
+import { touchUi } from '../ui/list.js';
+import { drawIcon } from '../ui/window.js';
 import { TileMap, TILE } from '../world/tilemap.js';
 import { Actor, WALK_FRAMES, RUN_FRAMES } from '../world/actors.js';
 import { updateNpc, refreshNpcBehaviour } from '../world/npc.js';
@@ -33,6 +36,9 @@ const FOLLOW_DEPTH = 2;
 const AUTOSAVE_SLOT = 0;
 const FIELD_RESPAWN_SEC = 60;
 const LANTERN_FRAMES = 120;
+const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
+/** The touch layout's on-canvas "Lantern" button (game px, bottom right, above the dialog area's top edge). */
+export const LANTERN_BTN = { x: 322, y: 128, w: 58, h: 18 };
 const respawnAt = new Map();     // "<map>:<enemyId>" -> engine.time when it comes back (field zones)
 
 export class FieldScene {
@@ -71,6 +77,9 @@ export class FieldScene {
     this.transparentLetterbox = '#06050c';
     this.features = [];                // windows and chimneys of the buildings on this map (townlife.js)
     this.lastTint = null;
+    this.lanternHint = false;          // hidden ink is near and the Lantern is carried: show its prompt
+    this.fxTriggers = [];              // one-shot particle tells from the map's ambientFx (the pit page)
+    this.fxDone = new Set();
   }
 
   warnOnce(key, msg) { if (!this.warned.has(key)) { this.warned.add(key); console.warn(`[field] ${msg}`); } }
@@ -126,6 +135,8 @@ export class FieldScene {
     this.sliding = [];
     this.lantern = 0;
     this.prompt = null;
+    this.lanternHint = false; this._inkKey = null;
+    this.fxTriggers = fxTriggersOf(mod); this.fxDone = new Set();
     // position
     let tx = x, ty = y;
     if (o.mark) { const m = this.map.mark(o.mark); if (m) { tx = m[0]; ty = m[1]; } }
@@ -185,7 +196,8 @@ export class FieldScene {
     if (mod.area === 'town') out.push('smoke');
     if (mod.area === 'dungeon') out.push('motes', 'drips');
     if (mod.lighting && mod.lighting.dark > 0.3) out.push('embers');
-    if (mod.ambientFx) out.push(...mod.ambientFx);
+    // ambientFx strings are particle kinds; objects ({ fx, at, area }) are one-shot tells handled by fxTriggers
+    if (mod.ambientFx) out.push(...mod.ambientFx.filter((k) => typeof k === 'string' && k !== 'page_fall'));
     return out;
   }
 
@@ -445,18 +457,70 @@ export class FieldScene {
     this.lockInput();
     try { await this.showBoxes(boxes); } finally { this.unlockInput(); }
   }
-  /** A chest, pot or scene hands something over: gear goes to the bag as an instance (equippable), the rest counts. */
+  /**
+   * A chest, pot or scene hands something over: gear goes to the bag as an instance (equippable), the rest
+   * counts. The toast plays the jingle or the rarity drop sound (legendaries get the beam); gear that beats
+   * what someone wears is then offered through the equip prompt.
+   */
   async giveItem(itemId, qty = 1) {
     const e = this.engine;
     const got = grant(this.game, itemId, qty);
     if (got.unknown) this.warnOnce('item:' + itemId, `unknown item "${itemId}" given`);
-    const key = isKeyItem(itemId);
-    const jingle = e.audio.jingle(key ? 'key_item' : 'item_get');
-    let toast = null;
     const inst = got.kind === 'gear' && got.uid != null ? findGear(this.game, got.uid) : null;
-    if (e.toasts) toast = e.toasts.received(inst || itemId, qty, { jingle: false });
-    else { const it = ITEMS[itemId]; await this.dialog({ who: null, text: `Received {c:gold}${it ? it.name : itemId}{/c}${qty > 1 ? ' x' + qty : ''}.` }); }
-    await Promise.all([jingle, toast]);
+    if (e.toasts) await e.toasts.received(inst || itemId, qty, inst ? { at: this.leaderScreenPoint() } : {});
+    else {
+      const jingle = e.audio.jingle(isKeyItem(itemId) ? 'key_item' : 'item_get');
+      const it = ITEMS[itemId];
+      await this.dialog({ who: null, text: `Received {c:gold}${it ? it.name : itemId}{/c}${qty > 1 ? ' x' + qty : ''}.` });
+      await jingle;
+    }
+    if (inst) await this.maybeEquipPrompt(got.uid);
+  }
+  /** A rolled gear instance (random chests): into the bag, the toast (beam at `o.at`), then the equip prompt. */
+  async giveGear(inst, o = {}) {
+    const e = this.engine;
+    const uid = addGear(this.game, inst);
+    if (uid == null) { this.warnOnce('gear', 'giveGear: not an item'); return null; }
+    const it = findGear(this.game, uid);
+    if (e.toasts) await e.toasts.received(it, 1, { at: o.at || this.leaderScreenPoint() });
+    await this.maybeEquipPrompt(uid);
+    return uid;
+  }
+  /** Screen point (bottom center) at the leader's feet, for the legendary beam. */
+  leaderScreenPoint() {
+    const L = this.leader;
+    if (!L || !this.camera) return undefined;
+    return this.camera.toScreen(L.feetX, L.feetY + 1);
+  }
+
+  /**
+   * The equip prompt (PLAYTEST 3, W5): gear just received that beats what a member wears is offered at once,
+   * "Equip the Iron Pike on Bram?" Yes / Later, or the members' names when more than one gains (best gain
+   * first). Yes equips through inventory.equipGear and shows the stat arrows in a toast. Off when the
+   * `equipPrompts` setting is false. Returns true when something was equipped.
+   */
+  async maybeEquipPrompt(uid) {
+    const e = this.engine;
+    if (this.dead || e.settings.equipPrompts === false) return false;
+    const offer = equipOffers(this.game, uid);
+    if (!offer) return false;
+    const name = gearName(offer.item);
+    const names = offer.offers.map((x) => memberName(x.member));
+    let text, choices, cancel;
+    if (offer.offers.length === 1) { text = `Equip the ${name} on ${names[0]}?`; choices = ['Yes', 'Later']; cancel = 1; }
+    else { text = `Equip the ${name}?`; choices = [...names, 'Later']; cancel = names.length; }
+    const pick = await this.dialog({ who: null, text, choices, cancel });
+    if (this.dead || typeof pick !== 'number' || pick < 0 || pick >= offer.offers.length) return false;
+    const chosen = offer.offers[pick];
+    const out = equipGear(this.game, chosen.member, chosen.key, uid);
+    if (!out.ok) { e.audio.sfx('buzzer'); return false; }
+    const m = chosen.member;
+    if (isWeaponKey(m, chosen.key) && !m.equip[m.weapon]) m.weapon = chosen.key;
+    e.audio.sfx('equip');
+    const who = isWeaponKey(m, chosen.key) && m.weapon !== chosen.key ? `${memberName(m)} (${chosen.key})` : memberName(m);
+    const base = baseOf(offer.item);
+    if (e.toasts) await e.toasts.show({ text: `${who}: ${deltaLine(chosen.delta)}`, icon: base ? base.icon : null, icon16: !!(base && base.slot === 'weapon'), frames: 80 });
+    return true;
   }
   async takeItem(itemId, qty = 1) {
     stateTake(this.game, itemId, qty);
@@ -491,6 +555,16 @@ export class FieldScene {
     if (result === undefined) result = 'lose';
     // the battle writes outcome flags (echo_warden_defeated, ...) straight into engine.game
     if (!this.dead) { EV.refreshEntities(this); for (const a of this.actors) if (a.kind === 'npc') refreshNpcBehaviour(this, a); }
+    // gear that dropped in the fight (battle.js leaves the uids on the engine): the equip prompt after the rewards
+    const drops = e.lastBattleDrops; e.lastBattleDrops = null;
+    if (result === 'win' && drops && drops.length && !this.dead) {
+      this.lockInput();
+      try {
+        while (e.transition && !this.dead) await e.waitFrames(1);
+        await e.waitFrames(6);
+        for (const uid of drops) { if (this.dead) break; await this.maybeEquipPrompt(uid); }
+      } finally { this.unlockInput(); }
+    }
     if (result === 'lose' && !this.dead) {
       // the battle scene normally hands off to gameover itself; this is the fallback
       if (e.scene === this && !e.hasScene('gameover')) {
@@ -585,6 +659,7 @@ export class FieldScene {
       } else if (input.pressed('confirm')) this.interact();
       else if (input.pressed('menu')) this.openMenu();
       else if (input.pressed('pageR')) this.useLantern();
+      else if (this.lanternHint && touchUi(e) && input.tapIn(LANTERN_BTN.x, LANTERN_BTN.y, LANTERN_BTN.w, LANTERN_BTN.h)) this.useLantern();
     }
 
     // prompt over the faced interactable
@@ -594,6 +669,8 @@ export class FieldScene {
       const list = EV.interactables(this, fx, fy);
       if (list.length) this.prompt = { x: fx, y: fy, kind: EV.promptKind(list[0]), ent: list[0] };
     }
+    // the Lantern prompt: carried, not raised, and unrevealed ink within reach
+    this.lanternHint = canControl && !L.moving && this.lantern <= 0 && this.hiddenInkNear();
 
     // lantern timer and reveals
     if (this.lantern > 0) {
@@ -647,6 +724,7 @@ export class FieldScene {
   onLeaderArrived() {
     const L = this.leader, g = this.game;
     setPosition(g, this.mapId, L.tx, L.ty, L.dir);
+    this.checkFxTriggers();
     if (this.pendingWarp || this.inputLocked) return;
     const code = this.map.codeAt(L.tx, L.ty);
     // only pit TILES swallow the party; a `pit` area event just says where those tiles drop to (docs/MAPS.md)
@@ -709,11 +787,68 @@ export class FieldScene {
     if (this.lantern > 0) return;
     if (!this.game.items.lantern_of_recall) return;
     this.lantern = LANTERN_FRAMES;
+    this.lanternHint = false; this._inkKey = null;
     this.lighting.raiseLantern(LANTERN_FRAMES);
     this.engine.audio.sfx('lantern_reveal');
     const L = this.leader;
     L.showEmote('idea', 40);
     this.engine.after(LANTERN_FRAMES - 20, () => { if (!this.dead) this.bark('first_hidden_ink'); });
+  }
+
+  /**
+   * Is unrevealed hidden ink (any `*_faint` tile: bridges, wall glyphs, ink switches) within LANTERN_HINT_TILES
+   * of the leader while the Lantern of Recall is carried? Cached per tile, rechecked every 20 frames.
+   */
+  hiddenInkNear() {
+    if (!this.game.items.lantern_of_recall || !this.map) return false;
+    const L = this.leader;
+    const key = `${L.tx},${L.ty}`;
+    if (this._inkKey === key && this.frame - this._inkFrame < 20) return this._inkNear;
+    this._inkKey = key; this._inkFrame = this.frame;
+    const R = LANTERN_HINT_TILES;
+    let near = false;
+    for (let y = L.ty - R; y <= L.ty + R && !near; y++) {
+      for (let x = L.tx - R; x <= L.tx + R; x++) {
+        if (!this.map.inBounds(x, y)) continue;
+        if (this.map.idsAt(x, y).some((id) => id.endsWith('_faint'))) { near = true; break; }
+      }
+    }
+    this._inkNear = near;
+    return near;
+  }
+
+  /**
+   * One-shot particle tells from the map's `ambientFx` (fxTriggersOf): a `page_fall` entry sends one page
+   * drifting down into a pit when the party first steps into its `area` (or, with no area, within `radius`
+   * tiles of the nearest pit tile). Once per map load.
+   */
+  checkFxTriggers() {
+    if (!this.fxTriggers.length) return;
+    const L = this.leader;
+    for (const t of this.fxTriggers) {
+      if (this.fxDone.has(t.id)) continue;
+      let at = t.at || null;
+      let hit = false;
+      if (t.area) hit = L.tx >= t.area.x && L.tx < t.area.x + (t.area.w || 1) && L.ty >= t.area.y && L.ty < t.area.y + (t.area.h || 1);
+      if (!at || (!t.area && !hit)) {
+        const p = this.nearestPit(L.tx, L.ty, t.radius || 5);
+        if (!t.area) hit = !!p;
+        if (!at) at = p;
+      }
+      if (!hit || !at) continue;
+      this.fxDone.add(t.id);
+      if (t.fx === 'page_fall') this.particles.pageFall(at[0] * TILE + 8, at[1] * TILE + 8);
+    }
+  }
+  /** Nearest pit tile within `r` tiles (manhattan), or null. */
+  nearestPit(cx, cy, r) {
+    let best = null, bestD = Infinity;
+    for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) {
+      const d = Math.abs(x - cx) + Math.abs(y - cy);
+      if (d > r || d >= bestD || !this.map.inBounds(x, y)) continue;
+      if (this.map.codeAt(x, y) === 'pit') { best = [x, y]; bestD = d; }
+    }
+    return best;
   }
 
   async rollCredits() {
@@ -772,9 +907,38 @@ export class FieldScene {
     this.particles.draw(r, cam, 'above');
     for (const a of this.actors) if (a.emote) a.drawEmote(r);
     this.drawPrompt(r);
+    this.drawLanternHint(r);
     r.popCamera();
+    this.drawLanternButton(r);
     if (this.fadeAlpha > 0) r.fade('#000000', this.fadeAlpha);
     this.banner.draw(r);
+  }
+
+  /**
+   * The Lantern prompt over the leader's head: the lantern icon with the pageR button glyph beside it, bobbing
+   * (touch layouts show the icon alone; the tappable button sits in the corner, drawLanternButton).
+   */
+  drawLanternHint(r) {
+    if (!this.lanternHint || !this.engine.assets.has('ui')) return;
+    const L = this.leader;
+    const bob = Math.floor(this.frame / 10) % 2;
+    const headY = L.feetY - L.lift - (L.spr.h - 2);
+    const y = headY - 16 - bob;
+    const touch = touchUi(this.engine);
+    const glyphW = touch ? 0 : r.measure('{i:btn_pageR}');
+    const w = 12 + (glyphW ? glyphW + 2 : 0);
+    const x = L.feetX - Math.round(w / 2);
+    drawIcon(r, 'lantern', x, y);
+    if (glyphW) r.text('{i:btn_pageR}', x + 14, y + 1, { shadow: true });
+  }
+  /** Touch layouts: a small "Lantern" button (bottom right of the game area) while the prompt applies. */
+  drawLanternButton(r) {
+    if (!this.lanternHint || !touchUi(this.engine)) return;
+    const b = LANTERN_BTN;
+    const pulse = Math.floor(this.frame / 20) % 2 === 0;
+    drawWindow(r, b.x, b.y, b.w, b.h, { kind: 'thin', alpha: 0.94 });
+    drawIcon(r, 'lantern', b.x + 5, b.y + 3);
+    r.text('Lantern', b.x + 20, b.y + 4, { color: pulse ? 'cream' : 'white' });
   }
 
   drawPropShadow(r, p) {
@@ -951,9 +1115,25 @@ export class FieldScene {
       actors: this.actors.length, props: this.map ? this.map.props.length : 0, lantern: this.lantern,
       entities: [...this.entities.values()].filter((e) => e.present).map((e) => `${e.type}:${e.id}@${e.x},${e.y}${e.state ? ':' + e.state : ''}`),
       prompt: this.prompt ? { x: this.prompt.x, y: this.prompt.y, kind: this.prompt.kind } : null,
+      lanternHint: this.lanternHint, fxDone: [...this.fxDone],
       perf: this.engine.perfStats(),
     };
   }
+}
+
+/**
+ * One-shot tells from a map's `ambientFx`: strings are particle kinds (motes, leaves, ...); `'page_fall'` or an
+ * object `{ fx: 'page_fall', at?: [x, y], area?: { x, y, w, h }, radius?: 5, id? }` sends one page drifting
+ * into a pit (`at`, else the nearest pit tile) when the party first enters `area` (else comes within `radius`
+ * tiles of a pit). Default off: a map without the entry shows nothing.
+ */
+export function fxTriggersOf(mod) {
+  const out = [];
+  for (const k of (mod && mod.ambientFx) || []) {
+    if (typeof k === 'string') { if (k === 'page_fall') out.push({ id: `page_fall_${out.length}`, fx: 'page_fall', radius: 5 }); continue; }
+    if (k && typeof k === 'object' && k.fx) out.push({ id: k.id || `${k.fx}_${out.length}`, radius: 5, ...k });
+  }
+  return out;
 }
 
 export default FieldScene;

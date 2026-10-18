@@ -29,9 +29,10 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H } from '../battle/scene/layout.js';
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS } from '../battle/scene/layout.js';
+import { touchUi } from '../ui/list.js';
 import * as HUD from '../battle/scene/hud.js';
-import { drawWindow, drawLabel, drawIcon, drawIcon16, drawPortrait, drawDivider, uiAtlas } from '../ui/window.js';
+import { drawWindow, drawLabel, drawIcon, drawIcon16, drawPortrait, drawDivider, uiAtlas, btn } from '../ui/window.js';
 import { NumberPopups } from '../ui/numberPopup.js';
 import { animFrameAt } from '../core/assets.js';
 import { createRng, hashSeed } from '../core/rng.js';
@@ -252,6 +253,7 @@ export class BattleScene {
     this.help = { text: '', color: null, chars: 0 };
     if (data.auto != null) e.settings.autoBattle = !!data.auto;
     this.fast = data.fast || null;
+    e.lastBattleDrops = null;        // gear uids of this fight's drops, left for the field's equip prompt (W5)
   }
   exit() {
     this.engine.renderer.setBackdrop(null);
@@ -321,8 +323,9 @@ export class BattleScene {
     const { input, audio } = e;
     if (this.below) { this.runOps(); return; }
     // Global toggles: start = Auto, pageR = speed (both persisted settings).
-    if (input.pressed('start')) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
-    if (input.pressed('pageR') || input.pressed('pageL')) { e.setSetting('battleSpeed', this.speed === 1 ? 2 : 1); audio.sfx('cursor'); }
+    const tb = this.touchButtons();
+    if (input.pressed('start') || (tb && input.tapIn(tb.auto.x, tb.auto.y, tb.auto.w, tb.auto.h))) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
+    if (input.pressed('pageR') || input.pressed('pageL') || (tb && input.tapIn(tb.speed.x, tb.speed.y, tb.speed.w, tb.speed.h))) { e.setSetting('battleSpeed', this.speed === 1 ? 2 : 1); audio.sfx('cursor'); }
     if (this.menu.state !== 'closed') {
       if (this.auto) { this.menu.close(); }
       else {
@@ -630,6 +633,8 @@ export class BattleScene {
     const style = result === 'lose' ? 'fade' : 'dither';
     e.fadeTo(() => {
       if (result === 'lose') e.audio.stopMusic(0.1); else e.audio.popMusic(0.8);
+      // the field (under us) offers to equip what dropped once the rewards are closed and the fade is in
+      e.lastBattleDrops = result === 'win' && this.summary && this.summary.items.length ? this.summary.items.map((it) => it.uid).filter((u) => u != null) : null;
       e.pop(result);
       if (result === 'lose' && this.data.gameover !== false && !this.data.scripted && e.hasScene('gameover')) e.push('gameover');
       if (typeof this.onDone === 'function') this.onDone(result);
@@ -681,23 +686,47 @@ export class BattleScene {
     }
     HUD.drawPartyStatus(r, this.party(), this.menu.state !== 'closed' ? this.currentUid : null, frame);
     if (this.menu.state !== 'closed') this.menu.draw(r, frame);
-    else drawWindow(r, 4, STATUS_WIN.y, 92, STATUS_WIN.h);
+    else { const cw = cmdWin(touchUi(e)); drawWindow(r, cw.x, cw.y, cw.w, cw.h); }
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
     if (this.phase === 'rewards') this.drawRewards(r);
     void e;
   }
 
+  /** The touch layout's AUTO and x2 tap targets (null on keyboard / pad, or outside the play phase). */
+  touchButtons() {
+    return this.phase === 'play' && touchUi(this.engine) ? HELP_TOUCH_BTNS : null;
+  }
+
+  /**
+   * Help window. Keyboard / pad: while the command menu waits at its root with no telegraph pending, the right
+   * side names the two global toggles with device glyphs ("[Enter] Auto [E] Speed", or the gold x2 when fast).
+   * Touch: two small AUTO / x2 buttons sit there throughout the fight (touchButtons), lit when on.
+   */
   drawHelpWindow(r) {
     let text = this.help.text, color = this.help.color, chars = this.help.chars;
+    const tele = this.telegraphs.size ? [...this.telegraphs.values()][0] : null;
     if (this.menu.state !== 'closed') {
-      const tele = this.telegraphs.size ? [...this.telegraphs.values()][0] : null;
       if (tele && !this.menu.showHelp) { text = tele.text; color = 'orange'; chars = undefined; }
       else if (this.menu.helpText) { text = this.menu.helpText; color = this.menu.helpColor; chars = undefined; }
       else if (tele) { text = tele.text; color = 'orange'; chars = undefined; }
       else { const a = this.actor(this.currentUid); text = a ? `${a.name}'s turn.` : ''; color = null; chars = undefined; }
-    } else if (this.phase === 'play' && this.telegraphs.size && !text) { const t = [...this.telegraphs.values()][0]; text = t.text; color = 'orange'; chars = undefined; }
-    const right = this.auto ? 'AUTO' : this.speed > 1 ? 'x2' : null;
-    HUD.drawHelp(r, text, color, { right, rightColor: this.auto ? 'cyan' : 'gold', rightW: right ? 30 : 0 });
+    } else if (this.phase === 'play' && tele && !text) { text = tele.text; color = 'orange'; chars = undefined; }
+    const tb = this.touchButtons();
+    const idle = this.menu.state === 'root' && !tele && !this.auto;
+    let right = this.auto ? 'AUTO' : this.speed > 1 ? 'x2' : null;
+    let rightColor = this.auto ? 'cyan' : 'gold';
+    if (tb) right = null;
+    else if (idle) { right = `${btn('start')} Auto ${btn('pageR')} ${this.speed > 1 ? '{c:gold}x2{/c}' : 'Speed'}`; rightColor = 'gray'; }
+    const rightW = tb ? 64 : right ? r.measure(right) + 2 : 0;
+    HUD.drawHelp(r, text, color, { right, rightColor, rightW });
+    if (tb) {
+      const pulse = Math.floor(this.frame / 20) % 2 === 0;
+      const b1 = tb.auto, b2 = tb.speed;
+      drawWindow(r, b1.x, b1.y, b1.w, b1.h, { kind: 'thin', alpha: 0.96 });
+      r.text('AUTO', b1.x + b1.w / 2, b1.y + 2, { align: 'center', color: this.auto ? (pulse ? 'cyan' : 'white') : 'gray' });
+      drawWindow(r, b2.x, b2.y, b2.w, b2.h, { kind: 'thin', alpha: 0.96 });
+      r.text(this.speed > 1 ? 'x2' : 'x1', b2.x + b2.w / 2, b2.y + 2, { align: 'center', color: this.speed > 1 ? 'gold' : 'gray' });
+    }
     void chars;
   }
 
@@ -810,6 +839,7 @@ export class BattleScene {
       lastInvalid: this.lastInvalid || null,
       stage: this.backdropLayer ? { asset: !!this.backdropLayer.usedAsset, key: this.backdropLayer.key, band: this.backdropLayer.band } : null,
       kick: { ...this.kick }, hitstop: this.hitstop, rows: this.rowShow.size,
+      cmdRect: this.menu.cmdRect, rowH: this.menu.root ? this.menu.root.rowH : null, menuRows: this.menu.root ? this.menu.root.rows : null, touch: !!this.touchButtons(),
     };
   }
 }

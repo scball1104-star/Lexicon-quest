@@ -15,7 +15,7 @@
 // tint through `shade` so they do not glow at night.
 
 const CAPS = { leaves: 14, fireflies: 16, motes: 26, drips: 5, rain: 70, embers: 10, smoke: 14, birds: 3 };
-const ABOVE = new Set(['leaf', 'firefly', 'mote', 'rain', 'sparkle', 'glint', 'ember', 'smoke']);
+const ABOVE = new Set(['leaf', 'firefly', 'mote', 'rain', 'sparkle', 'glint', 'ember', 'smoke', 'page']);
 const MID = new Set(['sway', 'splash']);
 const GRASS = new Set(['grass', 'tallgrass']);
 const BIRD_FLEE_PX = 44;
@@ -79,6 +79,16 @@ export class Particles {
     for (let i = 0; i < 2; i++) this.spawn('puff', x + rng.int(-3, 3), y - 1, { vx: rng.range(-0.25, 0.25), vy: -0.15, life: 14 + rng.int(0, 6), size: 1 });
   }
   drip(x, y, h) { this.spawn('drip', x, y, { vy: 0.4, g: 0.08, life: 90, data: { floor: y + h } }); }
+  /**
+   * The pit tell (PLAYTEST fix 6): one loose page drifts down from above and is swallowed by the pit whose
+   * center is (x, y) world px. It sways, tumbles between a wide and a narrow frame, and fades as it crosses the
+   * pit's rim. One-shot; the field fires it from a map `ambientFx` page_fall entry.
+   */
+  pageFall(x, y) {
+    const rng = this.field.rng;
+    this.engine.audio.sfx('page_flutter', { volume: 0.6 });
+    return this.spawn('page', x + rng.int(-3, 3), y - 46, { vy: 0.4, life: 124, phase: rng.range(0, 6.28), data: { rim: y - 6 } });
+  }
   /** Tall grass bends under a step: three blades over the tile's feet row, leaning for a quarter second. */
   sway(tx, ty) {
     for (const p of this.list) if (p.kind === 'sway' && p.data && p.data.tx === tx && p.data.ty === ty) { p.t = 0; return; }
@@ -162,6 +172,7 @@ export class Particles {
           break;
         }
         case 'sway': break;
+        case 'page': p.x += Math.sin(p.phase + p.t * 0.09) * 0.55; p.y += p.vy; if (p.data && p.y > p.data.rim + 10) p.t = Math.max(p.t, p.life - 1); break;
         default: p.vy += p.g; p.x += p.vx; p.y += p.vy;
       }
       if (p.t < p.life && (p.kind === 'rain' || cam.visible(p.x, p.y, 2, 2, 48))) keep.push(p);
@@ -266,6 +277,24 @@ export class Particles {
           break;
         }
         case 'puff': g.globalAlpha = 0.5 * (1 - k); g.fillStyle = '#e8dcc0'; g.fillRect(x - 1, y - 1, 3 - (k > 0.5 ? 1 : 0), 2); g.globalAlpha = 1; break;
+        case 'page': {
+          // a loose page: cream sheet with two ink lines, tumbling between a wide and an edge-on frame,
+          // fading as it crosses the pit's rim
+          const rim = p.data ? p.data.rim : Infinity;
+          const past = Math.max(0, y - rim);
+          const a = (k < 0.1 ? k * 10 : 1) * Math.max(0, 1 - past / 10);
+          if (a <= 0) break;
+          const edgeOn = Math.floor(p.t / 9) % 3 === 2;
+          g.globalAlpha = a;
+          if (edgeOn) { g.fillStyle = '#f4ecd2'; g.fillRect(x - 1, y - 3, 2, 7); }
+          else {
+            g.fillStyle = '#f8f1dc'; g.fillRect(x - 3, y - 3, 6, 7);
+            g.fillStyle = '#cdbf9a'; g.fillRect(x + 2, y - 3, 1, 7); g.fillRect(x - 3, y + 3, 6, 1);
+            g.fillStyle = '#4a3f8a'; g.fillRect(x - 2, y - 1, 4, 1); g.fillRect(x - 2, y + 1, 3, 1);
+          }
+          g.globalAlpha = 1;
+          break;
+        }
         case 'shard': g.fillStyle = p.color; g.fillRect(x, y, p.size, p.size); break;
         case 'ember': {
           g.globalAlpha = 1 - k; g.fillStyle = k < 0.5 ? '#ffd080' : '#ff8a2a'; g.fillRect(x + Math.round(Math.sin(p.phase + p.t * 0.2)), y, 1, 1); g.globalAlpha = 1;

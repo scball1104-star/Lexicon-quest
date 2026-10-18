@@ -6,7 +6,10 @@ It pathfinds on the maps' static walk model (tools/maps/mapcheck.mjs via qa/auto
 live field overlaid (actors, opened gates, pushed blocks, broken pots, revealed ink), talks to NPCs, reads
 signs, opens chests, solves the push-block, switch, crystal and Lantern puzzles by their documented
 solutions (docs/MAPS.md), buys at the shops, rests at the inn when hurt, saves and reloads at three points,
-fights every visible enemy on its way with Auto battle at 2x, and reaches the credits.
+fights every visible enemy on its way with Auto battle at 2x, and reaches the credits. Upkeep (W5, PLAYTEST 3):
+it answers the equip prompt with Yes / the first name, runs Equip -> Optimize for everyone after every chest it
+opens and at the end of each floor (`maintain`), drinks Ethers through the Items screen when a member is under
+30% MP outside battle, and rests at any Keeper's font on its map when someone is under 60% HP.
 
     python next/qa/autoplay.py                       desktop profile
     python next/qa/autoplay.py --device phone        phone profile (844x390 @3, touch)
@@ -285,14 +288,16 @@ class Bot:
 
     # ------------------------------------------------------------------ overlay scenes
     def choose(self, options, prefer=None, safe=False):
-        """Index to pick for a choice list."""
+        """Index to pick for a choice list. `prefer`: an index, a substring, or a list of substrings tried in
+        order (the first that matches any option wins), so one call can answer a run of different prompts."""
         opts = [str(o) for o in options]
         if prefer is not None:
             if isinstance(prefer, int):
                 return max(0, min(len(opts) - 1, prefer))
-            for i, o in enumerate(opts):
-                if prefer.lower() in o.lower():
-                    return i
+            for want in (prefer if isinstance(prefer, (list, tuple)) else [prefer]):
+                for i, o in enumerate(opts):
+                    if str(want).lower() in o.lower():
+                        return i
         if safe:
             for i, o in enumerate(opts):
                 if any(k in o.lower() for k in ('not ', 'stay', 'keep', 'later', 'no', 'maybe')):
@@ -605,7 +610,7 @@ class Bot:
             if (g['x'], g['y']) != (sx, sy):
                 raise Fail(f'face {d}: ended on {g["x"]},{g["y"]} instead of {sx},{sy}')
         else:
-            raise Fail(f'face {d}: the faced tile is walkable and nothing is behind us to step back to')
+            raise Fail(f'face {d}: the faced tile is walkable and nothing is behind us to step back to (at {sx},{sy} on {f["map"]}; {getattr(self, "last_interact", None)})')
 
     def interact(self, ent_id=None, actor_id=None, prefer=None, safe=False, label=''):
         """Walk next to an entity or actor, face it, press confirm, and settle through whatever follows."""
@@ -627,7 +632,7 @@ class Bot:
             raise Fail(f'no tile to stand on next to {ent_id or actor_id} on {f["map"]}')
         passable, _ = self.model(f)
         L = (f['leader']['x'], f['leader']['y'])
-        best = None
+        ranked = []
         for spot, d in spots:
             p = self.bfs(L, [spot], passable)
             if p is None:
@@ -644,26 +649,35 @@ class Bot:
                 turn = 2
             else:
                 turn = 50
-            score = len(p) + turn
-            if best is None or score < best[0]:
-                best = (score, spot, d)
-        if best is None:
+            ranked.append((len(p) + turn, spot, d))
+        if not ranked:
             near = [(a['id'], a['x'], a['y']) for a in f['actors'] if a['kind'] != 'party' and abs(a['x'] - L[0]) + abs(a['y'] - L[1]) <= 3]
             raise Fail(f'cannot reach {ent_id or actor_id} on {f["map"]} ({label}) from {L}; spots {spots}; actors nearby {near}')
-        _, spot, d = best
-        f = self.walk_to([spot], label=label or (ent_id or actor_id))
-        # NPCs wander: re-check where it is now and re-aim.
-        if actor_id:
-            a = self.actor(f, actor_id)
-            if a and (a['x'], a['y']) not in [(spot[0] + dx, spot[1] + dy) for dx, dy in DIRS.values()] + [(spot[0] + 2 * dx, spot[1] + 2 * dy) for dx, dy in DIRS.values()]:
-                return self.interact(ent_id=ent_id, actor_id=actor_id, prefer=prefer, safe=safe, label=label)
-            if a:
-                d = self.dir_toward(spot, (a['x'], a['y']))
-        self.face(d)
-        before = self.frame()
-        self.tap('confirm', 3)
-        self.settle(prefer=prefer, safe=safe)
-        return before
+        ranked.sort(key=lambda t: t[0])
+        # Try the spots best first: a walkable target (a letter on the floor) can only be faced from a tile that
+        # lets us arrive moving toward it or step back behind it; when a spot turns out not to, take the next.
+        last_err = None
+        for _, spot, d in ranked[:4]:
+            self.last_interact = {'target': ent_id or actor_id, 'spot': spot, 'dir': d, 'from': L}
+            f = self.walk_to([spot], label=label or (ent_id or actor_id))
+            # NPCs wander: re-check where it is now and re-aim.
+            if actor_id:
+                a = self.actor(f, actor_id)
+                if a and (a['x'], a['y']) not in [(spot[0] + dx, spot[1] + dy) for dx, dy in DIRS.values()] + [(spot[0] + 2 * dx, spot[1] + 2 * dy) for dx, dy in DIRS.values()]:
+                    return self.interact(ent_id=ent_id, actor_id=actor_id, prefer=prefer, safe=safe, label=label)
+                if a:
+                    d = self.dir_toward(spot, (a['x'], a['y']))
+            try:
+                self.face(d)
+            except Fail as e:
+                last_err = e
+                self.notes.append(f'face retry at {spot} {d}: {e}')
+                continue
+            before = self.frame()
+            self.tap('confirm', 3)
+            self.settle(prefer=prefer, safe=safe)
+            return before
+        raise Fail(f'could not face {ent_id or actor_id} on {f["map"]} ({label}): {last_err}')
 
     @staticmethod
     def dir_toward(a, b):
@@ -1057,6 +1071,92 @@ class Bot:
                 break
         self.settle()
 
+    def party_vitals(self):
+        """[{id, hp, maxHp, mp, maxMp, level}] with the real stat formula (equipment included)."""
+        return self.js("(async () => { const { memberStats } = await import('./src/battle/rules.js'); "
+                       "return LQ_ENGINE.game.party.map(m => { const s = memberStats(m); return { id: m.id, hp: m.hp, maxHp: s.maxHp, mp: m.mp, maxMp: s.maxMp, level: m.level }; }); })()")
+
+    def grid_pick(self, index, current, columns=2):
+        """Move the cursor in a multi-column List from `current` to `index` and confirm."""
+        r0, c0 = (current or 0) // columns, (current or 0) % columns
+        r1, c1 = index // columns, index % columns
+        for _ in range(abs(r1 - r0)):
+            self.tap('down' if r1 > r0 else 'up', 3)
+        for _ in range(abs(c1 - c0)):
+            self.tap('right' if c1 > c0 else 'left', 3)
+        self.tap('confirm', 2)
+
+    def menu_use_item(self, item, member_index):
+        """Menu -> Items -> the item -> a member, through the real screens. Returns True when it was used."""
+        self.open_menu()
+        self.menu_command('items')
+        self.frames(6)
+        ids = self.js("(() => { const s = LQ_ENGINE.scene; return s.screen && s.screen.list ? s.screen.list.items.map(i => i.id) : []; })()")
+        if item not in ids:
+            self.close_menu()
+            return False
+        ss = (self.scene_state()['ss'] or {}).get('screen') or {}
+        before = self.items().get(item, 0)
+        self.grid_pick(ids.index(item), ss.get('index') or 0, columns=2)
+        self.frames(6)
+        if not ((self.scene_state()['ss'] or {}).get('screen') or {}).get('picker'):
+            self.close_menu()
+            return False
+        self.pick(member_index, 0)
+        self.frames(10)
+        self.close_menu()
+        return self.items().get(item, 0) < before
+
+    def top_up_mp(self, frac=0.3):
+        """Ethers for anyone under `frac` of their MP (casters first), as long as Ethers remain."""
+        used = []
+        for _ in range(6):
+            if self.items().get('ether', 0) <= 0:
+                break
+            vit = self.party_vitals()
+            low = [(i, v) for i, v in enumerate(vit) if v['maxMp'] > 0 and v['mp'] < v['maxMp'] * frac]
+            if not low:
+                break
+            low.sort(key=lambda iv: (iv[1]['id'] != 'mira', iv[1]['mp'] / max(1, iv[1]['maxMp'])))
+            i, v = low[0]
+            if not self.menu_use_item('ether', i):
+                break
+            used.append(v['id'])
+        if used:
+            print(f'  ethers: {used}', flush=True)
+            self.notes.append(f'ethers used on {used} ({self.last_map})')
+        return used
+
+    def rest_at_font(self, ent_id, label='font'):
+        """Rest at a Keeper's font (Rest, then decline the save prompt)."""
+        self.interact(ent_id=ent_id, prefer=['Rest', 'Not now'], label=label)
+        self.settle(prefer=['Not now'])
+
+    def maybe_rest_at_fonts(self, frac=0.6):
+        """Rest at a font on this map when anyone is under `frac` HP (or a caster is out of MP)."""
+        f = self.settle()
+        fonts = [e['id'] for e in f['ents'] if e['type'] == 'font']
+        if not fonts:
+            return False
+        vit = self.party_vitals()
+        hurt = any(v['hp'] < v['maxHp'] * frac for v in vit) or any(v['maxMp'] > 0 and v['mp'] < v['maxMp'] * 0.3 for v in vit)
+        if not hurt:
+            return False
+        try:
+            self.rest_at_font(fonts[0], label=f'rest {fonts[0]}')
+        except Fail as e:
+            self.notes.append(f'font {fonts[0]} unreachable: {e}')
+            return False
+        self.notes.append(f'rested at {fonts[0]} on {f["map"]}')
+        print(f'  rested at {fonts[0]}', flush=True)
+        return True
+
+    def maintain(self, label=''):
+        """Upkeep between rooms: Optimize for everyone, Ethers for low casters, a font when hurt."""
+        self.menu_optimize_all()
+        self.top_up_mp()
+        self.maybe_rest_at_fonts()
+
     def hp_fraction(self):
         g = self.game()
         return self.js("(() => { const g = LQ_ENGINE.game; return g.party.map(m => m.hp / (globalThis.__LQ_memberStats ? 1 : 1)); })()") and min(
@@ -1119,11 +1219,13 @@ class Episode:
         return self.b.settle()
 
     def chest(self, ent_id):
+        """Open a chest (the equip prompt answers itself in settle), then Optimize everyone."""
         b = self.b
         f = b.settle()
         if b.opened(f['map'], ent_id) or not b.ent(f, ent_id):
             return False
         b.interact(ent_id=ent_id, label=f'chest {ent_id}')
+        b.menu_optimize_all()
         return True
 
     def sign(self, ent_id):
@@ -1362,6 +1464,7 @@ class Episode:
             b.interact(ent_id='prop_ferry_bell', label='ferry bell')
         self.sign('ferry_post')
         b.hunt(limit=6, label='valley north')
+        b.top_up_mp()
         b.walk_to([(36, 7)], label='door_step')
         b.settle()
         if not self.has('archive_entered'):
@@ -1413,6 +1516,7 @@ class Episode:
         if not self.has('archive_f1_done'):
             raise Fail('archive_f1_bell did not set archive_f1_done')
         b.mark('warden')
+        b.maintain('end of F1')
         b.through('stairs_f2')
         self.ensure_map('archive_f2')
 
@@ -1441,6 +1545,7 @@ class Episode:
         b.hunt(limit=3, label='west wing')
         self.chest('chest_wg')
         b.interact(ent_id='keeper_journal_2', label='journal 2')
+        b.maintain('before the warden')
         for attempt in range(5):
             if self.has('echo_warden_defeated'):
                 break
@@ -1479,6 +1584,7 @@ class Episode:
         b.round_trip(2, 'F2 after the lantern')
         self.ensure_map('archive_f2')
         b.mark('stacks')
+        b.maintain('end of F2')
         b.through('stairs_f3')
         self.ensure_map('archive_f3')
 
@@ -1540,10 +1646,12 @@ class Episode:
         f = b.settle()
         if f['map'] == 'archive_f3' and f['leader']['y'] >= 22 and f['leader']['x'] >= 29:
             b.through('cache_up')
+        b.maintain('F3 before the great door hall')
         # the great door hall: font, journal, the door
         b.walk_to([(23, 24)], fight=True, label='great door hall')
         b.hunt(limit=3, label='great door hall')
-        b.interact(ent_id='keeper_font', label='font')
+        b.menu_optimize_all()
+        b.rest_at_font('keeper_font', label='font')
         self.sign('boss_door_plate')
         self.sign('hidden_ink_3')
         g = b.grid('archive_f3')
@@ -1555,7 +1663,7 @@ class Episode:
             b.through('shortcut_f1')
             b.through('shortcut_f3')
             b.hunt(limit=8, label='re-hunt F3')
-            b.interact(ent_id='keeper_font', label='font again')
+            b.rest_at_font('keeper_font', label='font again')
         b.round_trip(3, 'before the boss')
         self.ensure_map('archive_f3')
         b.interact(ent_id='boss_door', prefer="Let's go", label='boss door')
@@ -1578,8 +1686,9 @@ class Episode:
             # a loss reloads the chamber (full HP) and the scene replays on entry; step out, drink, come back
             b.notes.append(f'Archivore attempt {attempt + 1}')
             b.through('back_to_f3')
-            b.interact(ent_id='keeper_font', label='font before the boss again')
+            b.rest_at_font('keeper_font', label='font before the boss again')
             b.hunt(limit=3, label='before the boss again')
+            b.maintain('before the boss again')
         if not self.has('archivore_defeated'):
             raise Fail('the Archivore fight did not resolve in 5 attempts')
         b.mark('go_home')

@@ -1,7 +1,7 @@
 // Game over: GAMEOVER text over a slow dark vignette, gameover_sting then the gameover track,
 // options Retry (reload lastSafe with full HP) / Load / Title. Pushed by the battle scene on defeat.
 
-import { List } from '../ui/list.js';
+import { List, rowHeightFor } from '../ui/list.js';
 import { drawWindow } from '../ui/window.js';
 import { GAMEOVER } from '../data/text.js';
 import { heal } from '../game/state.js';
@@ -11,7 +11,10 @@ export class GameOverScene {
   enter() {
     const e = this.engine;
     this.t = 0; this.frame = 0; this.busy = false; this.menuAt = 2.6;
-    this.menu = new List({ x: 150, y: 150, w: 84, rowH: 11, rows: 3, textX: 16, items: [
+    // Touch layouts get 15 px rows (W5): the window grows and sits a little higher so the line under it fits.
+    const rowH = rowHeightFor(e, 11);
+    this.win = { x: 144, y: rowH > 12 ? 138 : 144, w: 96, h: rowH * 3 + 13 };
+    this.menu = new List({ x: this.win.x + 6, y: this.win.y + 6, w: this.win.w - 12, rowH, rows: 3, textX: 16, items: [
       { id: 'retry', label: 'Retry', disabled: !e.game },
       { id: 'load', label: 'Load' },
       { id: 'title', label: 'Title' },
@@ -56,12 +59,13 @@ export class GameOverScene {
     r.text(GAMEOVER.title, r.W / 2, 62, { font: 'large', align: 'center', color: 'cream', alpha: Math.min(1, this.t / 1.2) });
     r.text(GAMEOVER.line, r.W / 2, 90, { align: 'center', color: 'gray', alpha: Math.max(0, Math.min(1, (this.t - 1.0) / 1.0)) });
     if (this.t >= this.menuAt) {
-      drawWindow(r, 144, 144, 96, 46, { alpha: 0.94 });
+      const w = this.win;
+      drawWindow(r, w.x, w.y, w.w, w.h, { alpha: 0.94 });
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: !this.busy });
-      r.text(GAMEOVER.continue, r.W / 2, 200, { align: 'center', color: 'dim' });
+      r.text(GAMEOVER.continue, r.W / 2, Math.min(r.H - 12, w.y + w.h + 6), { align: 'center', color: 'dim' });
     }
   }
-  debugState() { return { t: Math.round(this.t * 10) / 10, index: this.menu.index, busy: this.busy }; }
+  debugState() { return { t: Math.round(this.t * 10) / 10, index: this.menu.index, busy: this.busy, rowH: this.menu.rowH, win: { ...this.win } }; }
 }
 
 export default GameOverScene;

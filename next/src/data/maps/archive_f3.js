@@ -135,6 +135,9 @@ export default {
   id: 'archive_f3', name: 'The Rootbound Stacks', area: 'dungeon',
   music: 'archive', ambience: 'archive_hush', tileset: 'archive',
   lighting: { tint: 'none', dark: 0.7 },
+  // the pit tell (PLAYTEST_REVIEW_1 fix 6): the first time the leader steps into the pit room a single page
+  // drifts down into the pit nearest its doorway (W5-systems ambientFx contract; once per map load)
+  ambientFx: [{ fx: 'page_fall', at: [29, 14], area: { x: 27, y: 11, w: 11, h: 8 } }],
   under: 'archive_floor',
   pitTo: ['archive_f3', 31, 24, 'down'],
   legend: { '#': 'archive_top', '|': 'archive_face', '.': 'archive_floor', 'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss',

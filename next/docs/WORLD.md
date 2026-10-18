@@ -59,6 +59,26 @@ Input on the field: directions walk, `run` (or `cancel` on a keyboard) runs unle
 interacts with the faced tile (across counters), `menu` pushes the menu, `pageR` raises the Lantern of Recall.
 Under a dialog (`updateBelow`) the field animates but reads no input.
 
+**The Lantern prompt (W5, PLAYTEST 2.4).** While the Lantern of Recall is carried, not raised, and any `*_faint`
+tile (ink bridges, wall glyphs, ink switches) lies within `LANTERN_HINT_TILES` (2) of the leader, `lanternHint`
+is on: the lantern icon and the `{i:btn_pageR}` glyph bob over the leader's head (`drawLanternHint`). Touch
+layouts show the icon alone plus a tappable on-canvas `Lantern` button at `LANTERN_BTN` (322, 128, 58 x 18;
+`drawLanternButton`), which calls `useLantern()`. `hiddenInkNear()` is cached per tile and rechecked every
+20 frames. `debugState().lanternHint` reports it.
+
+**Receiving things (W5).** `giveItem(id, qty)` puts the item in the bag (`inventory.grant`), shows the toast
+(which plays `item_get` / `key_item` or the rarity drop sound, and the legendary beam at the leader's feet) and
+then, for gear, runs `maybeEquipPrompt(uid)`; `giveGear(inst, { at })` does the same for a rolled instance
+(random chests pass the chest's screen point for the beam). The prompt is described in `docs/UI.md` (W5).
+After a won fight `startBattle` reads `engine.lastBattleDrops` (uids the battle scene left behind), waits for
+the fade-in and offers each drop in turn.
+
+**One-shot tells (W5, PLAYTEST fix 6).** `ambientFx` may hold, besides particle kind strings, `'page_fall'` or
+`{ fx: 'page_fall', at?: [x, y], area?: { x, y, w, h }, radius?: 5, id? }` (`fxTriggersOf`): when the leader
+first enters `area` (or, with no area, comes within `radius` tiles of a pit tile) one loose page drifts down
+from above and is swallowed by the pit at `at` (default: the nearest pit tile) with `page_flutter`
+(`particles.pageFall`). Once per map load; `debugState().fxDone` lists what has fired. Default off.
+
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 
 Top level: `id name area music ambience lighting{tint,dark,lights[]} under underMap legend ground overlays
@@ -89,10 +109,10 @@ Counters block but talking reaches across them.
 | `npc` | `sprite? dir? solid?` | id = `npcs.js` id; sprite, presence (`show`), movement (`moveFor`) and talk (`talkTo`) come from the data. Lines open the dialog with the NPC's portrait; a `scene` runs the cutscene; `service` pushes `shop`/`inn` after the lines. Faces the player while talking. |
 | `actor` | `sprite dir solid? ghost? text? script?` | scripted sprite (echo_warden, archivore, ink readers). `ghost` = ink-tinted, 55% alpha, non-solid. |
 | `door` | `to:[map,x,y,dir] kind:'door'|'stairs' sprite?` | fires when stepped on. Doors fade (door_open / door_close), stairs iris on the player. Same-map targets fade short with no music change. A flag-gated door opens `*_closed` tiles under it when it appears. |
-| `chest` | `tier item? qty? gold? flag? ilvl?` | one-shot via `engine.game.opened`; `item` gives it (toast + item_get / key_item jingle), `gold` adds gold, neither rolls `rollChest(rng, tier, ilvl)` into `gear`. |
+| `chest` | `tier item? qty? gold? flag? ilvl?` | one-shot via `engine.game.opened`; `item` gives it (`field.giveItem`: toast, jingle or rarity sound, equip prompt), `gold` adds gold, neither rolls `rollChest(rng, tier, ilvl)`: its gold (coin toast), consumables (`giveItem`) and gear instances (`field.giveGear`, beam at the chest, `first_rare_drop` / `first_legendary_drop` barks). |
 | `sign` | `text tile? fade? dir? lantern?` | `text` is an `ep1.js` lines id. `fade: 'shop'|'inn'|'square'|'gate'` washes the painted sign while `signs_fading` (gate: half after `left_town`), restored after `archivore_defeated`. `lantern: true` reads only once a `*_revealed` id is on or beside the cell. |
 | `book` | `book` | `BOOKS` title then pages. |
-| `object` | `sprite script? text? state? solid?` | inspectable prop; `script` runs a scene, `text` shows lines. `prop_letter` / `prop_ferry_bell` glint. |
+| `object` | `sprite script? text? state? solid? rest?` | inspectable prop; `script` runs a scene, `text` shows lines. `prop_letter` / `prop_ferry_bell` glint. `rest: true` (the Pilgrim's Rest campfire) runs the font's rest flow after the script, without the font bark. |
 | `trigger` | `script on:'enter'|'step'|'interact'` | `enter` runs after the fade-in; `step` when the leader arrives (also on the landing tile of a transfer); scenes guard themselves. |
 | `enemy` | `sprite encounter move:'wander'|'patrol'|'chase'|'guard' path? radius?` | dungeons: one step per player step; field: own clock. Contact pushes `battle` with `preemptive` (touched from behind) / `ambush` (caught from behind). Won: gone until re-entry (dungeon) or 60 s (field). Fled: it sits still 2 s and the party backs off a tile. |
 | `switch` | `target state kind:'floor'|'crystal' color? hidden?` | `confirm` while facing toggles it (crystal_hit / switch_on) and fires every target. `hidden` (ink) switches work only after the Lantern reveals them. |
@@ -102,14 +122,15 @@ Counters block but talking reaches across them.
 | `locked_door` | `key sprite to` | locked (door_locked sfx) until the key is carried; `archive_key` is consumed. Open state persists. |
 | `shelf` | `sprite positions state` | a target: slides between positions (shelf_move), collision follows. |
 | `brazier` | `lit flag? persist? target?` | confirm lights it (brazier_light, becomes a light source). |
-| `font` | `sprite? text?` | Keeper's font: full heal, sets the game over return point. `save` | | chapel bell: lines, full heal, `save` jingle, return point, `menu {page:'save'}`. |
+| `font` | `sprite? text? safe?` | Keeper's font: its lines, then the rest flow (`events.restFlow`): `Rest here?` (Rest / Not now); Rest = `heal` sfx, full HP and MP, the game over return point, sparkles, the `HP and MP restored.` toast, the `first_font` bark, then `Record your journey here?` (Save / Not now) which pushes `menu {page:'save'}`. `save` | | chapel bell: lines, the same rest flow with the `save` jingle and no bark. |
 | `ferry` | `to text rideIf` | reads `text`; with `rideIf` set, offers the ride (ferry fade). |
 | `pot` | `item? qty? gold? sprite?` | breakable (pot_break, shards), solid until broken, respawns on re-entry. |
 | `light` | `r color?` | extra light source (`r` under 16 = tiles; a colour makes it warm with a halo). `pit` | `w h to` | drop area. |
 
 `object`, `actor` and `trigger` events may carry `safe: true`: after their script or text the party's tile
-becomes the game over return point. Map-level `ambientFx: [...]` adds particle kinds (`motes`, `leaves`,
-`fireflies`, `birds`, `smoke`, `drips`, `embers`) to what the area and tint already give.
+becomes the game over return point (a `font` marks it when the party rests). Map-level `ambientFx: [...]` adds
+particle kinds (`motes`, `leaves`, `fireflies`, `birds`, `smoke`, `drips`, `embers`) to what the area and tint
+already give, and may hold `page_fall` tells (section 1).
 
 Mechanism events draw themselves (tile ids like `plate_up` go into the ground layer; object ids become props).
 
@@ -140,6 +161,8 @@ at `bed` in day light.
 - `python qa/world/fieldlab.py --map valley --x 10 --y 30 --shot valley` or `--script steps.json`: boots
   headless, drives the field, saves the 384x216 frame at 3x in `qa/world/out/`.
 - `python qa/shots.py --only field_town_morning,field_town_signs_fading,field_valley_wildlife,field_archive_dark_lantern,field_cutscene_dialog,field_chest_open,field_push_block`.
+- `python qa/integrate/w5_shots.py` (W5): the equip prompt, legendary / rare toasts, the Lantern prompt and
+  touch button, the font rest flow and the pit tell, on both profiles, with state assertions.
 
 - `python qa/world/polish_shots.py [--only night_square,dark_lantern,...] [--device phone]`: the polish
   wave's targeted shots (dithered lighting, night town, dusk valley, F3 braziers, ambient life, the

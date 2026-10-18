@@ -65,7 +65,11 @@ enter  -> intro (SliceTransition: the field snapshot mosaics 2 px then 4 px unde
 
 Settings read live: `battleSpeed` (1 or 2, divides every blocking op's frames; `pageL/pageR` toggles it in
 battle) and `autoBattle` (`start` toggles it; `cancel` turns it off at the next party turn; the rewards pages
-auto-advance after 150 frames while Auto is on). `reduceMotion` disables shake, flash, slow motion, the camera kick and the
+auto-advance after 150 frames while Auto is on). **W5:** while the command menu waits at its root with no
+telegraph pending and Auto off, the help window's right side reads `{i:btn_start} Auto {i:btn_pageR} Speed`
+(device glyphs; `x2` in gold when fast), so the command help lines are kept to 111 px (`CMD_HELP`). Touch
+layouts instead draw two tap buttons `AUTO` and `x1 / x2` inside the help window (`layout.HELP_TOUCH_BTNS`,
+`touchButtons()`), lit when on, throughout the fight. `reduceMotion` disables shake, flash, slow motion, the camera kick and the
 slice intro (plain white fade instead); hit-stop stays (it is a pause, not motion).
 
 ## 3. Ops (the animator's vocabulary)
@@ -116,13 +120,22 @@ A plain attack is about 60 frames; an ordinary 3 to 5 round fight runs 40 to 60 
   rules' `weakKey` (`'briar_wolf'`, `'lost_page:kindling'`, `'echo_warden:mirror'`); `bestiaryForBattle(game)`
   turns it back into the `{ weakKey: [types] }` the rules want, so a "?" once revealed stays revealed;
 - `game.flags[encounter.flag] = true` on victory (`echo_warden_defeated`, `archivore_defeated`);
-- counters `battles_won / battles_lost / battles_fled / bosses_defeated`.
+- counters `battles_won / battles_lost / battles_fled / bosses_defeated`;
+- `SCENE_GRANTED_UNIQUES` (`{ archivore: ['lanternheart'] }`): uniques a story scene gives itself right after
+  the fight are dropped from the outcome (the rules still roll them), so the player gets exactly one;
+- on `leave('win')` the scene stores the dropped gear uids in `engine.lastBattleDrops` for the field's equip
+  prompt (docs/UI.md, W5).
 Returns the summary the rewards windows draw: `{ exp, gold, levelUps, mastery, masteryPoints, items, consumables, used, flag }`.
 
 ## 6. Layout (384 x 216, `layout.js`)
 
 Help window (4,4,218,19) thin; timeline rail at x 226 to 380, slots 18 px (first slot has 1 px extra); command
-window (4,152,92,60); sub-list window (4,90,188,60) above it; party status (98,152,282,60) with rows every 17 px
+window (4,152,92,60); sub-list window (4,90,188,60) above it; party status (98,152,282,60) with rows every 17 px.
+**Touch (W5):** rows are `rowHeightFor(engine, CMD_ROW_H)` = 15 px, so the command window grows upward to
+`CMD_WIN_TOUCH` (4,140,92,72) and the sub-list to `SUB_WIN_TOUCH` (4,66,188,72), both still showing 4 rows
+(`cmdWin(touch)`, `subWin(touch)`, `cmdRowsFor(win, rowH)`; `menu.cmdRect / subRect`). Tap a row to select it,
+tap it again to confirm (List's tap model); tap a unit to target it, tap it again to confirm; a tap on the
+command window cancels targeting.
 (name, HP numbers + 75 px gauge with a white damage trail, MP, Fury with READY glow, up to 5 status badges).
 
 **Stage (C3).** `buildBackdrop()` draws the zone backdrop (section 9) and then the indigo band `BAND.color`
@@ -176,7 +189,7 @@ face crop and a smooth 12x12 thumbnail of the enemy sprite.
 
 - Enemies have one frame each (DESIGN 6.3): attacks are a lunge plus procedural fx, hurt is a 2 px recoil plus
   the squash, idle is the 1 px breathe.
-- No touch "tap to confirm" hint glyph in the help window yet (the device button glyphs exist in ui.json).
+- No touch "tap to confirm" hint glyph in the help window (the AUTO / x2 buttons and the row model cover touch).
 - No name on hover over a timeline slot (CRITIQUE C4 suggested one); the heads carry identity on their own.
 - The help window is one line; long telegraph sentences are cut with an ellipsis (the marker, timeline '!' and
   the orange color carry the warning).

@@ -10,6 +10,9 @@
 //   useItemOnMember(g, itemId, member) -> { ok, reason, hp, mp, revived }
 //   fieldSkills(member) -> [{ id, skill, mp, usable }]   useSkillOnMember(g, caster, skillId, target) -> { ok, reason, healed }
 //   itemLine(instance) -> '+6 ATK, +12% Fire'
+//   equipDeltaFor(member, key, item) -> { atk: 7, ... }   (a weapon key is measured with that weapon active)
+//   equipOffers(g, uidOrInstance) -> { uid, item, offers: [{ member, key, delta, gain }] } | null   (W5: the equip prompt)
+//   deltaLine(delta) -> '{c:green}ATK +7{/c}  {c:red}SPD -1{/c}'
 
 import { EQUIPMENT, UNIQUES, CONSUMABLES, ARMOR_SLOTS, canEquip, sellPrice, ITEMS } from '../data/items.js';
 import { PARTY, knownSkills } from '../data/party.js';
@@ -115,6 +118,82 @@ export function clampVitals(member) {
   const s = memberStats(member);
   if (member.hp > s.maxHp) member.hp = s.maxHp;
   if (member.mp > s.maxMp) member.mp = s.maxMp;
+}
+
+// ---------------------------------------------------------------- the equip prompt (W5-systems, PLAYTEST 3)
+/**
+ * Stat delta of wearing `item` in `key`. For a weapon key the comparison is made with THAT weapon type active
+ * (a better second weapon still reads as an upgrade; equipDelta alone sees only HP/MP for an inactive weapon).
+ * Armor keys are plain equipDelta. Keys: maxHp maxMp atk def mag spr spd luk plus every percent stat.
+ */
+export function equipDeltaFor(member, key, item) {
+  if (!isWeaponKey(member, key)) return equipDelta(member, key, item);
+  const before = memberStats(member, key);
+  const m2 = { ...member, equip: { ...(member.equip || {}), [key]: item } };
+  const after = memberStats(m2, key);
+  const out = {};
+  for (const k of Object.keys(after)) {
+    if (typeof after[k] !== 'number') continue;
+    const d = after[k] - (typeof before[k] === 'number' ? before[k] : 0);
+    if (d) out[k] = d;
+  }
+  return out;
+}
+
+/** Role-weighted value of a delta (the same weights optimize() uses). */
+export function weightedGain(member, delta) {
+  const w = ROLE_WEIGHTS[member.id] || ROLE_WEIGHTS.hero;
+  let s = 0;
+  for (const [k, v] of Object.entries(delta || {})) s += (w[k] ?? 0.3) * v;
+  return s;
+}
+
+/**
+ * Should the game offer to equip a piece of gear that was just received, and on whom? Pure.
+ * A member is offered when the item fits one of their keys, at least one stat line of the delta is positive
+ * (so an empty or all-negative delta never prompts) and the role-weighted gain over what is worn there beats
+ * zero (a sidegrade that loses more than it gains never prompts). One offer per member (their best key),
+ * sorted best gain first, so offers[0] is "the right member" (Iron Pike to Bram, Mirrorguard Mail to Mira).
+ * Returns null when nobody gains. `itemOrUid`: a uid in g.gear or an instance / base id.
+ */
+export function equipOffers(g, itemOrUid) {
+  const it = typeof itemOrUid === 'number' ? findGear(g, itemOrUid) : toInstance(itemOrUid);
+  if (!it || !baseOf(it)) return null;
+  const offers = [];
+  for (const member of g.party || []) {
+    let best = null;
+    for (const key of equipKeys(member)) {
+      if (!fits(member, key, it)) continue;
+      const delta = equipDeltaFor(member, key, it);
+      if (!Object.values(delta).some((v) => v > 0)) continue;
+      const gain = weightedGain(member, delta);
+      if (gain <= 1e-6) continue;
+      if (!best || gain > best.gain) best = { member, key, delta, gain };
+    }
+    if (best) offers.push(best);
+  }
+  if (!offers.length) return null;
+  offers.sort((a, b) => b.gain - a.gain);
+  return { uid: it.uid ?? null, item: it, offers };
+}
+
+const DELTA_LABELS = { atk: 'ATK', def: 'DEF', mag: 'MAG', spr: 'SPR', spd: 'SPD', luk: 'LUK', maxHp: 'HP', maxMp: 'MP', crit: 'CRIT',
+  fireDmg: 'Fire', iceDmg: 'Ice', thunderDmg: 'Thunder', lightDmg: 'Light', inkRes: 'Ink res', furyGain: 'Fury', lifesteal: 'Leech',
+  healPow: 'Heal', resPoison: 'Poison res', resBlind: 'Blind res', resSilence: 'Silence res', resBurn: 'Burn res', resChill: 'Chill res',
+  mpCostDown: 'MP cost', poisonOnHit: 'Poison hit', startHaste: 'Haste' };
+const DELTA_ORDER = ['atk', 'def', 'mag', 'spr', 'spd', 'maxHp', 'maxMp', 'luk', 'crit'];
+/** One toast line of stat arrows: main stats first, green up / red down, at most `max` entries. */
+export function deltaLine(delta, max = 4) {
+  const keys = Object.keys(delta || {}).filter((k) => delta[k]);
+  keys.sort((a, b) => {
+    const ia = DELTA_ORDER.indexOf(a), ib = DELTA_ORDER.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || Math.abs(delta[b]) - Math.abs(delta[a]);
+  });
+  return keys.slice(0, max).map((k) => {
+    const v = delta[k];
+    const pct = /Dmg|Res|crit|furyGain|lifesteal|healPow|res[A-Z]|OnHit/.test(k) ? '%' : '';
+    return `{c:${v > 0 ? 'green' : 'red'}}${DELTA_LABELS[k] || k} ${v > 0 ? '+' : ''}${v}${pct}{/c}`;
+  }).join('  ');
 }
 
 // ---------------------------------------------------------------- receiving things on the field

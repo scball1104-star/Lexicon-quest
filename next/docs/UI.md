@@ -13,7 +13,7 @@ missing, so nothing here can crash a build that lacks it.
 | `list.js` | `new List({ x, y, w, rows, rowH: 12, columns, colW, items: [{ id, label, icon, right, color, disabled, help }], textX, iconX, align: 'center', cursorDx, cursorDy, onChange, skipDisabled, confirmSfx, cancelSfx, tapMode: 'double'|'single' })`. `update(input, audio)` -> `'confirm'|'cancel'|'pageL'|'pageR'|null`; plays `cursor`, `confirm`, `cancel`, `buzzer`; keyboard, gamepad and touch (tap selects, tap again confirms, drag scrolls; `tapMode: 'single'` confirms on the first tap, used by the name grid). `draw(r, { scheme, cursor, bar, frame, pageDots })`; rows taller than 12 px center their text, icon and bar (`textDy`). `item`, `index`, `moveTo`, `setItems(items, keepIndex)`, `rowRect(i)`, `isVisible(i)`, `pointerRow`, `active`. Disabled rows are landable and buzz (FF style). **Touch rows (W4b, C12):** `TOUCH_ROW_H = 15`, `touchUi(engine)` (true while the touch controls show), `rowHeightFor(engine, base)` (base with a keyboard or pad, at least 15 on touch = 25 css px on the phone profile), `rowsThatFit(px, rowH)`. Every menu builds its lists with these and derives `rows` from its window, so lists scroll instead of overflowing. |
 | `choice.js` | `ChoiceBox(engine, options, { x, y, anchor, cancel, field })` embedded; `ChoiceScene` registered as **`choice`**: `await engine.pushAwait('choice', { options, cancel?: index|false, x?, y?, anchor? })` -> index. `popScene(engine, scene, result)` pops a specific scene (see "below" rule). |
 | `dialog.js` | scene **`dialog`** (also `src/scenes/dialog.js`): `await engine.pushAwait('dialog', { who, name?, portrait?, text, choices?, position?: 'top'|'bottom', cancel?, instant?, boxes?, tail? })` -> chosen index or `undefined`. Typewriter with `text_blip_low/mid/high` per speaker (hero mid, Mira high, Bram low, narration silent), 3-line pages, more/end marks, `{hero}` substitution, name tab from `speakerName(who)`, portrait from the party or `NPCS[who].portrait` when the art exists. `transparent` + `updateBelow`. A dialog pushed within 3 frames of the last one skips the open animation. `say(engine, data)`, `sayLines(engine, [{ who, text }])`. |
-| `toast.js` | `installToasts(engine)` (done by `title.js` install) -> `engine.toasts`: `show({ text, icon, icon16, sfx, jingle, frames })`, `received(itemIdOrGearInstance, qty, { jingle: false | id })`, `gold(n)`, `flash(text)`. Queued top-center strips, 1.5 s, drawn from the engine `postdraw` hook; each returns a Promise. |
+| `toast.js` | `installToasts(engine)` (done by `title.js` install) -> `engine.toasts`: `show({ text, icon, icon16, sfx, jingle, frames, beam })`, `received(itemIdOrGearInstance, qty, { jingle: false | id, sfx: false | id, beam: bool, at: [x, y] })`, `gold(n)`, `flash(text)`. Queued top-center strips, 1.5 s, drawn from the engine `postdraw` hook; each returns a Promise. **Rarity (W5):** `toastSpec(item, qty, opts)` (pure, `qa/ui/toast.test.mjs`) maps what is shown and played: the name in its rarity color; common gear and consumables `item_get`, key items `key_item`; magic / rare / legendary / set gear play `RARITIES[r].sfx` (`drop_magic`, `drop_rare`, `drop_legendary`) instead of the jingle, and legendary / set items also get the `beam_<rarity>` sprite rising from screen point `at` (bottom center; the field passes the chest or the leader's feet) for the whole 1.5 s, drawn twice (the second pass additive) so it reads over a lit floor, with its sparkles and a soft flash. |
 | `numberPopup.js` | `new NumberPopups()`: `spawn(x, y, value, { kind: 'damage'|'crit'|'heal'|'mp'|'poison'|'gray' })`, `word(x, y, 'MISS'|...)`, `update()`, `draw(r)`, `layout()` (Map entry -> bottom y this frame), `active`, `clear()`. Popups within 14 x 28 px of a live group's anchor form one column per target: each new number lands one slot above the previous (10 px pitch for the small digits, newest on top), word art spawned within 12 frames of a number on the same target attaches 12 px above it (16 over a big crit) and rides its bounce, a word with no number (MISS, BREAK) takes a slot of its own, at most 4 entries per target (a fifth retires the oldest), and the column is relaxed at draw time so nothing overlaps mid-bounce. |
 | `help.js` | `drawHelpBar(r, text, { right, y, h, scheme })` (default 4,184,376,28). |
 | `party.js` | `drawMemberRow(r, member, x, y, { w, divider, frame })` (57 px FF6 row), `drawMemberLine`, `memberInfo(member)`, `WEAPON_ICON`, `SLOT_ICON`. |
@@ -34,9 +34,9 @@ missing, so nothing here can crash a build that lacks it.
 | `menu` | `pushAwait('menu', { page?: 'items'|'tech'|'magic'|'equip'|'status'|'journal'|'config'|'save', member?, instant? })` | `undefined` when closed. Plays `menu_open` / `menu_close`. Quit resets the engine to `title` itself. Save page does not heal (the chapel does that before pushing). Touch layout (`TOUCH_LAYOUT`): 15 px command rows, the command window reaches y 166, the gold/time box sits under it to y 212, the help line and map title move into the bottom of the party panel (no help bar). |
 | `shop` | `pushAwait('shop', { shopId })` | `true` when the player leaves. Keeper = the NPC whose `service.id` is the shop. Quantity picker: real arrow glyphs; a tap on an arrow steps the count, elsewhere in the window confirms, outside it cancels. |
 | `inn` | `pushAwait('inn', { price, who? })` | `true` after the rest (fade, `inn_rest`, full heal, autosave slot 0), `false` if declined or too poor. |
-| `config` | `pushAwait('config')` | `undefined` on cancel. Edits `master music sfx ambience textSpeed battleSpeed autoBattle windowColor alwaysRun reduceMotion touchControls scaleMode` via `engine.setSetting` (`SETTING_KEYS`), plus a "Reset to defaults" action row (asks Reset / Keep mine, then writes `DEFAULT_SETTINGS`). Text speed offers Slow / Normal / Fast / Instant. Battle speed and Auto battle help lines name their in-battle toggles with device glyphs (`{i:btn_pageR}`, `{i:btn_start}`; nothing on touch, which has no such buttons): `ROWS[i].help` may be a function of the engine, read it with `helpFor(row, engine)`. 13 rows at 11 px on desktop; on touch 15 px rows that scroll. A tap on the selected row steps forward, on its left arrow back, inside a slider to that point. |
+| `config` | `pushAwait('config')` | `undefined` on cancel. Edits `master music sfx ambience textSpeed battleSpeed autoBattle equipPrompts windowColor alwaysRun reduceMotion touchControls scaleMode` via `engine.setSetting` (`SETTING_KEYS`), plus a "Reset to defaults" action row (asks Reset / Keep mine, then writes `DEFAULT_SETTINGS`). Text speed offers Slow / Normal / Fast / Instant. Battle speed and Auto battle help lines name their in-battle toggles with device glyphs (`{i:btn_pageR}`, `{i:btn_start}`; nothing on touch, which has no such buttons): `ROWS[i].help` may be a function of the engine, read it with `helpFor(row, engine)`. 13 rows at 11 px on desktop; on touch 15 px rows that scroll. A tap on the selected row steps forward, on its left arrow back, inside a slider to that point. |
 | `loadGame` | `pushAwait('loadGame', { mode: 'load'|'save' })` | load: sets `engine.game`, `reset('field')`; save: `true` after `save_chime`. Slot 0 (autosave) is listed in load mode. |
-| `gameover` | `push('gameover')` (the battle scene does this on defeat) | never returns: Retry (`heal` + `reset('field', lastSafe)`), Load, Title. |
+| `gameover` | `push('gameover')` (the battle scene does this on defeat) | never returns: Retry (`heal` + `reset('field', lastSafe)`), Load, Title. Rows are `rowHeightFor(engine, 11)` (15 px on touch; the window grows and sits at y 138 so the line under it fits). |
 | `credits` | `push('credits')` / `pushAwait` | pops `true` after the last card has held centered for 4 s (start skips, confirm hurries). Plays `triumph`; `debugState()` reports `music`, `holdT`, `lastCardBottom`. |
 
 ## Rules every scene follows
@@ -76,13 +76,33 @@ gear, flags, hp (fraction), fury, playtime, map, banner })`, `LQ_DEBUG.give(item
   zoomed PNG. Screenshots in `qa/ui/out/`.
 - `python qa/shots.py --only ui_title,...`: the `ui_*` shots in `qa/shots.json` (desktop + phone).
 
+## W5-systems: the equip prompt, rest flow, Lantern help
+
+- **Equip prompt** (PLAYTEST 3). `game/inventory.js` `equipOffers(g, uidOrInstance)` (pure, `qa/ui/inventory.test.mjs`)
+  decides: for each member, the best key the item fits where at least one delta line is positive and the
+  role-weighted gain (`weightedGain`, the Optimize weights) beats what is worn; weapon keys are measured with that
+  weapon active (`equipDeltaFor`). Offers are sorted best gain first (Iron Pike: Bram; Mirrorguard Mail: Mira,
+  then Bram, then the hero). `FieldScene.maybeEquipPrompt(uid)` shows the dialog `Equip the Iron Pike on Bram?`
+  with `Yes / Later` (one member) or `Equip the Chain Shirt?` with the names then `Later`; Yes equips through
+  `equipGear`, plays `equip` and shows `Bram: {c:green}ATK +7{/c}  {c:green}DEF +1{/c}` (`deltaLine`) in a toast
+  (a second weapon type is labelled `Arden (axe):`). It runs after `giveItem` (chests, pots, scenes), `giveGear`
+  (random chests) and, for battle drops, after the rewards window and the fade (the battle scene leaves the uids
+  in `engine.lastBattleDrops`; `startBattle` consumes them). The Config row **Equip prompts** (`equipPrompts`,
+  default on) turns it off.
+- **Rest flow.** Fonts, the chapel bell and `rest: true` objects ask `Rest here?` (Rest / Not now) before healing;
+  Rest restores HP and MP in full (`state.heal` with the stats provider), sets the game over return point,
+  toasts `HP and MP restored.`, then asks `Record your journey here?` (Save / Not now), which opens the menu's
+  save page. See `docs/WORLD.md` (events `font`, `save`, `object`).
+- **Lantern help.** The Key Items tab's description of the Lantern of Recall ends with `Raise it: {i:btn_pageR}.`
+  (keyboard / pad glyph) or `Raise it: the Lantern button.` on touch.
+- `python qa/integrate/w5_shots.py [--device desktop,phone] [--only ...]`: drives the real scenes for every item
+  above plus the battle touch rows, the Auto / Speed hint, the touch game-over menu and the pit tell; PNGs in
+  `qa/integrate/out/`.
+
 ## Known gaps
 
-- Touch row heights cover the UI module's lists only. The battle command menu (`src/battle/scene`) and the
-  game-over menu (`scenes/gameover.js`, 11 px rows) belong to other agents and still use keyboard-sized rows.
-- The battle help window does not say that Start toggles Auto and Q/E (LB/RB) toggle the speed; the Config
-  help lines do. Proposal for the battle scene: when idle with the command menu open and no telegraph, append
-  `{i:btn_start} Auto  {i:btn_pageR} Speed` to the right of the help text.
+- The battle command menu, its sub-lists and the game-over menu now use `rowHeightFor` on touch (W5); the
+  battle help window names Auto and Speed with device glyphs (desktop) or shows two tap buttons (touch).
 
 - Field cure items (Antidote, Eye Drops, Echo Herb) refuse on the field because party records carry no
   statuses between battles in Episode 1; they work in battle.

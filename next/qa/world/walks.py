@@ -22,7 +22,7 @@ MAPS_DIR = NEXT / 'src' / 'data' / 'maps'
 FLAGS = ['intro_done', 'saw_fading_sign', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'valley_arrived',
          'archive_entered', 'f1_arrived', 'archive_f1_done', 'f2_arrived', 'echo_warden_defeated', 'lantern_get',
          'archive_f2_done', 'f3_arrived', 'found_thirteenth_bell', 'boss_door_open', 'archivore_defeated', 'returned_home',
-         'saw_milestone', 'starter_quest_started']   # not ep1_complete: that rolls the credits
+         'saw_milestone', 'starter_quest_started', 'first_fight_done', 'campfire_rested']   # not ep1_complete: that rolls the credits
 
 FAR_JS = """(n) => {
   const f = LQ_ENGINE.stack.find(s => s.name === 'field'); if (!f || !f.map) return { reachable: 0, targets: [] };

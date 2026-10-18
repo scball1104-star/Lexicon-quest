@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   textSpeed: 2,               // 1 slow, 2 normal, 3 fast, 4 instant
   battleSpeed: 1,             // 1 or 2
   autoBattle: false,
+  equipPrompts: true,         // offer to equip better gear when it is found (W5)
   alwaysRun: false,           // when true, holding run walks instead
   reduceMotion: false,        // no screen shake, softer flashes (defaults to the OS preference)
   scaleMode: 'integer',       // integer | fit | sharp
