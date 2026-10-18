@@ -55,3 +55,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   smithy before the Archive; a game-over retry puts you at the floor entrance.
 - Next: polish passes from the critic's ranked list (painted backdrops matched to the pixel palette, a proper
   battle stage with shadows, better timeline icons, Archive depth, lighting, hit effects, touch sizing).
+
+### Sunday small hours: first polish round done (Wave 4)
+- The painted backdrops (title, battles) now sit at the same pixel density as the tiles, so scenes read as one
+  piece of pixel art instead of a photo behind sprites.
+- Battles have a real stage: shadows under everyone, one ground line, a dark band for the windows, chibi head
+  icons on the turn timeline, a clean slice transition in, thicker slashes with impact stars and a hit pause.
+  The Auto brain heals earlier in big fights and revives first.
+- Enemies were cleaned up (speckle removed, outlines added). The Archive has depth now (flat dark void, two-tone
+  walls, pillars), pits have rims, the plaza is calmer, carpets look like cloth.
+- Night is night: deeper indigo, lamps and windows lit, fireflies; leaves, smoke, birds and ink drips bring the
+  field to life. Dungeon light pools are dithered and warm.
+- A game-over retry now returns you to the last bell, stairs or landmark instead of the floor entrance; the
+  Whisperwood secret has a hint; the smithy sells an affordable hood before the Archive.

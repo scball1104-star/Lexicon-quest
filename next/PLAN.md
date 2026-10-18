@@ -39,15 +39,15 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] C4 Timeline icons: chibi head icons in the timeline: chibi head icons with side-colored frames (replaces eyebrow crops)
 - [x] C5 Battle-start shatter: axis-aligned slices over mosaic, no free-angle rotation of pixel art; remove the stray glyph
 - [x] C6 Archive void: flat #14101e instead of the loud hatched brown; wall faces and pillars for depth; confirm F3 pit and valley navy rectangle are intended art
-- [ ] C7 Lantern/brazier light: dithered radial falloff with max blend instead of overlapping alpha discs
+- [x] C7 Lantern/brazier light: dithered radial falloff with max blend instead of overlapping alpha discs
 - [x] C8 Enemy battle sprites: remove downscale speckle, add selective outlines
 - [x] C9 Plaza cobble contrast lower than actors
 - [ ] C10 Victory window overlaps help bar and timeline (integrator)
 - [x] C11 Slash fx: thicker arc, impact star, visible hit-stop
 - [ ] C12 Touch: menu rows too small on phone, add tap-to-select; tablet A/B buttons bigger
 - [ ] C13 Battle shows "Hero" while menus show the chosen name (integrator, bug)
-- [ ] C14 Game over asymmetric black top band
-- [ ] C15 Followers spawn stacked on the leader (integrator)
+- [x] C14 Game over asymmetric black top band
+- [x] C15 Followers spawn stacked on the leader (integrator)
 - [x] C16 Library rug reads as a tile grid
-- [ ] C17 Ambient particles missing from field shots
-- [ ] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
+- [x] C17 Ambient particles missing from field shots
+- [~] W4b-ui-polish: title and prologue use assets/backdrops/title.png and dialog_keyart.png; game over band (C14); any leftover UI items
