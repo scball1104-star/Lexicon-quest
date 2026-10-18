@@ -6,8 +6,10 @@
 // open"). West wing: long gallery, then north into the rotunda from the south: the Warden faces down over the
 // lantern pedestal. East wing: the reading rooms (letter 2, Iron Pike). With the Lantern, hidden ink bridges
 // appear: one beside the pedestal straight back into the hub (the shortcut), one from the hub to the stairs.
+// The stairs room holds the floor's Keeper's font (heal, save, `safe` landmark): the breather before the Warden
+// for anyone who crosses the hub first, and the last one before F3's.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, actor,
-  floorSwitch, shelf, steps, enter } from './_kit.js';
+  floorSwitch, shelf, font, steps, enter } from './_kit.js';
 
 const W = 40, H = 30;
 const g = grid(W, H, '#');
@@ -87,6 +89,8 @@ const events = [
   sign('hidden_ink_1', 6, 11, 'hidden_ink_1', { solid: false, lantern: true }),
   sign('hidden_ink_2', 34, 11, 'hidden_ink_2', { solid: false, lantern: true }),
   trigger('f2_exit_trig', 33, 13, 3, 3, 'archive_f2_exit'),
+  // the Keeper's font of the Galleries: the only heal and save between the F1 bell and F3's font
+  { ...font('keeper_font_f2', 34, 17, 'keeper_font_galleries'), safe: true },
   // Tess's second letter, in the south-east reading room
   object('prop_letter', 37, 23, 'prop_letter', { script: 'find_letter_2', ifNot: 'tess_letter_2_found', solid: false }),
   // faint ink readers (ink-tinted, translucent, non-solid: see docs/MAPS.md)
@@ -123,6 +127,6 @@ export default {
   overhead: [],
   events,
   exits: [],
-  marks: { lantern_pedestal: [4, 13], warden_spot: [4, 14], stairs_down: [35, 12], entrance: [20, 4] },
+  marks: { lantern_pedestal: [4, 13], warden_spot: [4, 14], stairs_down: [35, 12], entrance: [20, 4], font: [35, 15] },
   start: { x: 20, y: 4, dir: 'down' },
 };

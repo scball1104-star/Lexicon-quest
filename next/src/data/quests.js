@@ -39,6 +39,9 @@ export const FLAGS = {
   f2_arrived: 'Archive F2 arrival scene played.',
   f3_arrived: 'Archive F3 arrival scene played.',
   found_thirteenth_bell: 'Found the thirteenth bell in the Stacks (thirteenth_bell).',
+  first_fight_done: 'The wolf pack on the valley road was beaten; the teaching fight is over (first_fight).',
+  campfire_rested: 'The party sat down at the Pilgrim\'s Rest campfire once (campfire_rest).',
+  archive_key_found: 'Set by the F1 chest that holds the archive_key (map chest flag). Opens the back-stair hint.',
   stacks_key_found: 'Set by the F3 chest that holds the stacks_key (map chest flag).',
   returned_home: 'The return-to-Willowmere scene played.',
   hal_returned: 'Hal and Oren reunion scene played in the bakery (hal_returns).',
@@ -147,9 +150,13 @@ export const MAIN_QUEST = {
       id: 'catalog_halls', title: 'The Catalog Halls', done: 'archive_f1_done',
       journal: 'Explore the Catalog Halls, the Archive\'s first floor, and find the way down.',
       chat: [
+        { map: 'archive_f1', if: 'archive_key_found', lines: [
+          { who: 'mira', text: 'We have the key. The door it fits is in the east wing: through the plate room, then north.' },
+          { who: 'bram', text: "East, then. Back past the pots and through the blocks. If a block wants pushing, I'm pushing it." },
+        ] },
         { map: 'archive_f1', lines: [
-          { who: 'mira', text: "The stairs down will be behind a locked gate. The Keepers loved a lock. There'll be keys on this floor." },
-          { who: 'bram', text: "And if a block looks like it wants pushing, I'm pushing it." },
+          { who: 'mira', text: 'The stairs are behind a locked door, east wing. The Keepers kept keys far from locks: the key will be in the west wing.' },
+          { who: 'bram', text: "West for the key, east for the door. And if a block looks like it wants pushing, I'm pushing it." },
         ] },
         { lines: [{ who: 'mira', text: 'The Archive is waiting. North end of the valley, through the door that listens.' }] },
       ],
@@ -178,7 +185,7 @@ export const MAIN_QUEST = {
       journal: 'Use the Lantern of Recall to reveal hidden ink and find the stairs down.',
       chat: [
         { map: 'archive_f2', lines: [
-          { who: 'mira', text: 'Where a path stops and the room seems to go on, raise the Lantern. The Keepers wrote their bridges in ink.' },
+          { who: 'mira', text: 'Where a path stops, raise the Lantern with {i:btn_pageR}. The Keepers wrote their bridges in ink.' },
           { who: 'bram', text: 'Lamp. Finds bridges. I remember.' },
         ] },
         { lines: [{ who: 'mira', text: 'Back to the Reading Galleries. The Lantern will show us the way across.' }] },
@@ -195,6 +202,7 @@ export const MAIN_QUEST = {
         { map: 'archive_f3', lines: [
           { who: 'bram', text: "The big door needs a key the size of my hand. It's somewhere in these stacks." },
           { who: 'mira', text: 'Watch where the shelves go when they move. And light the braziers. Dark rooms hide things.' },
+          { who: 'bram', text: 'Bars mean a switch. That side room has three crystals. Three lights, one door.' },
         ] },
         { lines: [{ who: 'mira', text: 'The Rootbound Stacks, at the bottom of the Archive. The great door is there.' }] },
       ],

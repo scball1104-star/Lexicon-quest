@@ -50,6 +50,13 @@ Scene ids from `ep1.js` are in brackets. Flags are the COMMON.md main flags unle
 ### Act II: The valley and the door
 9. **Willowmere Valley** [`valley_arrival`]. Rain on the way, sheep, visible wildlife (briar wolves, moss scarabs,
    ink slimes). The pilgrim road runs north over the bridge.
+9a. **The first fight** [`first_fight`, sets `first_fight_done`]. A few steps out of the gate a wolf pack cuts the
+    road. Bram: wolves come to you; a Lunge breaks a charging foe. Mira: Appraise first, it is free. The fight
+    cannot be fled. After: "Spear. Wolves hate it. Noted." Four boxes, no signage: the game's one teaching fight.
+9b. **The Pilgrim's Rest** [`campfire_rest`, sets `campfire_rested`]. At the fork campfire the party sits. One
+    choice: Bram on Emberpeak (the fire, his mother's face kept, her name gone with the smoke), Mira on the
+    Archive (sealed a century, three floors, "assume a key or a switch"), or just rest (apples and eleven
+    pencils). Then the field's rest flow: full heal and a save. Later visits: a one-box offer.
 10. **The milestone** [`milestone`]. "Every name is a promise that something will not be forgotten." The last word,
     "forgotten," is fading faster than the rest. Bram does not find that funny.
 11. **The Archive door** [`archive_door`, sets `archive_entered`]. A library grown into a willow. The door reads
@@ -62,13 +69,15 @@ Scene ids from `ep1.js` are in brackets. Flags are the COMMON.md main flags unle
     eating names. The cards were just the plate." Keys, locked gates, push blocks, the first visible-enemy rooms.
     Tess's first letter (Hal to Oren) [`find_letter_1`]: Oren has a brother nobody remembers.
 13. **The bell below** [`archive_f1_bell`, sets `archive_f1_done`]. At the stairs down, the thirteenth bell tolls
-    from somewhere beneath them. It is the sound from last night.
+    from somewhere beneath them. It is the sound from last night. The toll shakes open the Keepers' back-stair
+    between the landing and the antechamber by the entrance, so a trip home (and back) skips the floor.
 14. **F2, the Reading Galleries** [`archive_f2_arrival`]. Pale ink echoes of readers still turn pages at the desks.
     A voice ahead keeps repeating itself. Tess's second letter (Nella to her mother, addressed to Edda)
     [`find_letter_2`]: the ferrywoman and the old gardener are mother and daughter and have forgotten it.
 15. **The Echo Warden** [`echo_warden`, sets `echo_warden_defeated`]. A knight of mirrors repeating its Keeper's
-    last order: NONE SHALL READ WHAT WAS NOT WRITTEN FOR THEM. Mira reads its stances for the player. Defeated, it
-    speaks what lay under the order: "...keep... their names..."
+    last order: NONE SHALL READ WHAT WAS NOT WRITTEN FOR THEM. Mira reads its stances for the player; a name card
+    (ECHO WARDEN, Knight of the Last Order), a jolt, the battle theme. Defeated, it speaks what lay under the
+    order: "...keep... their names...". A Keeper's font in the stairs room is the breather before it.
 16. **The Lantern of Recall** [`lantern_get`, sets `lantern_get`]. Hidden ink rises on the wall. Mira explains it as
     a priceless relic; Bram calls it a lamp that finds things; Mira concedes. The Lantern then reveals the
     Keepers' hidden bridges [`archive_f2_exit`, sets `archive_f2_done`]: "What did they want to keep down there?"
@@ -86,14 +95,16 @@ Scene ids from `ep1.js` are in brackets. Flags are the COMMON.md main flags unle
 ### Act IV: The Heart of the Archive
 20. **The Archivore** [`archivore`]. Inside the willow's heart, pages drift like snow. The Archivore murmurs eaten
     names (Oren, Iris, Garrick), then says the hero's: "ON THE LIST. NEXT ON THE LIST." Mira: "A name is harder to
-    eat while someone is holding it." Three phases (Hunger, The Torn Book with Lost Pages, Nameless Maw) and the
-    telegraphed Devour Name are the battle-rules agent's.
+    eat while someone is holding it." Name card (THE ARCHIVORE, Eater of Names), a jolt, its theme. Three phases
+    (Hunger, The Torn Book with Lost Pages, Nameless Maw) and the telegraphed Devour Name are the battle-rules
+    agent's.
 21. **After** [sets `archivore_defeated`]. The ink pours off and leaves a small, papery keeper-beast. Mira names her
     from the Keeper's journal: Moth. "She was somebody's." Moth crumbles to pages at the sound of her name. The
     party takes the first fragment of the Book of Names. Among the debris is a list, on cheap paper in a cold
     hand: Willowmere's eaten names, all crossed out, Mira's among them. The last name is not crossed out: the
     hero's. On the golden page every name brightens but one. "It'll come back. They all came back." "...Maybe it
-    just takes longer."
+    just takes longer." Where Moth lay, the ink draws back from Lanternheart, the archive's one blade; Mira hands
+    it over.
 
 ### Act V: Home
 22. **Return to Willowmere** [`return_to_willowmere`]. The gate sign burns bright; shop signs relight as the party
@@ -121,6 +132,9 @@ Scene ids from `ep1.js` are in brackets. Flags are the COMMON.md main flags unle
 | Wick's Name-Tag | Wick (square) | The Duke, a duck of low character, bit off the name-tag Wick's mother sewed on "so I wouldn't get forgot." It is in his nest by the river: "WICK. If found, he belongs to Willowmere." After this, Wick and Lark play tag in the square. | `bronze_charm` ("a lucky coin on a cord") |
 | Nella's Ferry Bell | Nella (ferry landing) | The storm tore Maudie, the call-bell, off the north landing post. It is in the valley shallows below the landing. Returning it reopens the ferry: a shortcut home from the Archive end of the valley. | `river_charm` + ferry shortcut |
 | Optional farewells | Hazel, Garrick | Hazel's knitted mantle ("archives are only cellars with ambitions"); Garrick's axe for the hero and his goodbye to Bram ("say it again when you are back"). | `wool_mantle`, `hatchet` |
+
+Tess, Wick and Nella open their quests only once Bram has joined (the party is whole and the valley is next); before
+that each has a line that hints something is on their mind. Oren's starter opens as soon as the hero is up.
 
 ---
 

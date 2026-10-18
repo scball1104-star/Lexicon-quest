@@ -263,8 +263,10 @@ export const BARKS = {
   first_chest: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'Someone hid this for a traveler who would need it.' }] },
   ],
+  // Dungeon rule only (DESIGN 5.2): keyed to archive_entered so a valley touch never consumes the one-shot key.
+  // The valley's first wolves are scripted (scene first_fight), and Bram's line lives there.
   first_visible_enemy: [
-    { if: 'bram_joined', lines: [{ who: 'bram', text: 'It moves when we move. Watch it, pick your moment, then hit it first.' }] },
+    { if: ['archive_entered', 'bram_joined'], lines: [{ who: 'bram', text: 'It moves when we move. Watch it, pick your moment, then hit it first.' }] },
   ],
   first_archive_key: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'A Keeper\'s key. One key, one door. They were very tidy people.' }] },
@@ -298,9 +300,6 @@ export const BARKS = {
   ],
   flee: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'We can come back better prepared. A retreat is not forgetting.' }] },
-  ],
-  pilgrim_rest: [
-    { if: 'bram_joined', lines: [{ who: 'bram', text: 'A warm fire on a long road. Even heroes need a sit-down.' }] },
   ],
 };
 

@@ -7,7 +7,7 @@ import { NPCS } from '../../src/data/npcs.js';
 import { FLAGS } from '../../src/data/quests.js';
 import { ITEMS } from '../../src/data/items.js';
 import { fits, boxLines, CHOICE_COLS } from '../../src/data/story/dialogue.js';
-import { explore, playthrough, MUSIC, SFX, EMOTES, DIRS, TINTS, PORTRAITS, NPC_SPRITES, EXTRA_SPRITES,
+import { explore, playthrough, runOnce, MUSIC, SFX, EMOTES, DIRS, TINTS, PORTRAITS, NPC_SPRITES, EXTRA_SPRITES,
   ENCOUNTER_IDS_FALLBACK } from './_harness.mjs';
 
 let ENCOUNTERS = null;
@@ -17,7 +17,7 @@ const encounterExists = (id) => (ENCOUNTERS ? !!ENCOUNTERS[id] : ENCOUNTER_IDS_F
 const MAIN_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered',
   'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open',
   'archivore_defeated', 'ep1_complete'];
-const MAP_ACTORS = ['echo_warden', 'archivore']; // placed on maps as scene actors, not NPC records
+const MAP_ACTORS = ['echo_warden', 'archivore', 'e_wolves_a']; // map actors scenes drive: boss actors, the first-fight wolf pack
 const PARTY = ['hero', 'mira', 'bram'];
 
 // Explore every scene once and keep the runs for the checks below.
@@ -182,7 +182,7 @@ test('a full playthrough reaches ep1_complete with every main flag set, in order
     'south_gate',                       // blocked: Mira has not joined yet
     (s) => assert.ok(!s.has('bram_joined'), 'Bram must not join before Mira'),
     'mira_joins', 'south_gate', 'garrick_farewell', 'hazel_farewell', 'leave_town',
-    'valley_arrival', 'milestone', 'archive_door',
+    'valley_arrival', 'first_fight', 'milestone', 'campfire_rest', 'archive_door',
     'archive_f1_arrival', 'find_letter_1', 'archive_f1_bell',
     'archive_f2_arrival', 'find_letter_2', 'echo_warden', 'lantern_get', 'archive_f2_exit',
     'archive_f3_arrival', 'find_letter_3', 'thirteenth_bell',
@@ -196,8 +196,102 @@ test('a full playthrough reaches ep1_complete with every main flag set, in order
   for (const f of MAIN_FLAGS) assert.ok(set.has(f), `missing ${f}`);
   // The hero leaves with the fragment; Tess's letters are in the bag.
   const given = Object.values(logs).flat(2).filter((e) => e.op === 'give').map((e) => e.args[0]);
-  for (const it of ['lantern_of_recall', 'name_fragment_1', 'tess_letter_1', 'tess_letter_2', 'tess_letter_3'])
+  for (const it of ['lantern_of_recall', 'name_fragment_1', 'tess_letter_1', 'tess_letter_2', 'tess_letter_3', 'lanternheart'])
     assert.ok(given.includes(it), `never given: ${it}`);
+  assert.ok(set.has('first_fight_done') && set.has('campfire_rested'), 'the valley beats played');
+});
+
+// ------------------------------------------------------------------------------------------------
+// W5: the teaching fight, the campfire, the boss intros, the legendary and the button line.
+// ------------------------------------------------------------------------------------------------
+const ops = (log, op) => log.filter((e) => e.op === op);
+
+test('first_fight: unavoidable, four boxes, the pack is driven and despawned, only after Bram joins', async () => {
+  const early = await playthrough(scenes, ['first_fight'], { flags: ['mira_joined'] });
+  assert.equal(ops(early.logs.first_fight[0], 'say').length, 0, 'needs bram_joined');
+  const win = await playthrough(scenes, ['first_fight'], { flags: ['mira_joined', 'bram_joined'] });
+  const log = win.logs.first_fight[0];
+  const says = ops(log, 'say');
+  assert.equal(says.length, 4, 'four boxes in all');
+  assert.deepEqual(says.map((e) => e.args[0]), ['bram', 'mira', 'mira', 'bram']);
+  assert.match(says[0].args[1], /Wolves\. They will come to us\./);
+  assert.match(says[0].args[1], /Lunge/);
+  assert.match(says[1].args[1], /Appraise/);
+  const b = ops(log, 'battle')[0];
+  assert.equal(b.args[0], 'valley_wolves');
+  assert.equal(b.args[1].canFlee, false, 'cannot be fled');
+  assert.ok(ops(log, 'walk').some((e) => e.args[0] === 'e_wolves_a'), 'the pack runs at the hero');
+  assert.ok(ops(log, 'despawn').some((e) => e.args[0] === 'e_wolves_a'), 'the pack is gone after the win');
+  assert.ok(win.set.has('first_fight_done'));
+  // no tutorial signage: nobody says "press" or "button"
+  for (const e of says) assert.doesNotMatch(e.args[1], /press|button|tutorial/i);
+  // a loss sets nothing, so the trigger fires again on reload
+  const lose = await runOnce(scenes.first_fight, { flags: ['mira_joined', 'bram_joined'], decisions: [1], branchFlags: false });
+  assert.ok(!lose.log.some((e) => e.op === 'setFlag' && e.args[0] === 'first_fight_done'));
+  assert.equal(ops(lose.log, 'say').length, 2, 'the exchange only follows a win');
+});
+
+test('campfire_rest: one choice of three, three boxes per answer, never heals or gives, one box later', async () => {
+  const first = await runOnce(scenes.campfire_rest, { flags: ['mira_joined', 'bram_joined'], branchFlags: false });
+  const choice = ops(first.log, 'choice')[0];
+  assert.deepEqual(choice.args[0], ['Ask Bram about Emberpeak', 'Ask Mira about the Archive', 'Just rest']);
+  for (let pick = 0; pick < 3; pick++) {
+    const r = await runOnce(scenes.campfire_rest, { flags: ['mira_joined', 'bram_joined'], decisions: [pick], branchFlags: false });
+    const says = ops(r.log, 'say');
+    assert.equal(says.length, 4, `choice ${pick}: one box before the choice, three after`);
+    assert.equal(ops(r.log, 'give').length, 0);
+    assert.ok(r.log.some((e) => e.op === 'setFlag' && e.args[0] === 'campfire_rested'));
+    assert.deepEqual(ops(r.log, 'battle'), []);
+  }
+  const again = await runOnce(scenes.campfire_rest, { flags: ['mira_joined', 'bram_joined', 'campfire_rested'], branchFlags: false });
+  assert.equal(ops(again.log, 'say').length, 1, 'later visits: one box');
+  assert.equal(ops(again.log, 'choice').length, 0);
+});
+
+test('boss intros: pan 40, silence, dialogue, title card, shake, flash, theme, then the battle', async () => {
+  const check = (log, card, theme) => {
+    const order = log.map((e) => e.op);
+    const first = (op) => order.indexOf(op);
+    assert.ok(first('music') >= 0);
+    assert.equal(log[first('music')].args[0], null, 'silence first');
+    const pan = log.find((e) => e.op === 'camera.panTo');
+    assert.equal(pan.args[1], 40, 'the pan is 40 frames');
+    const title = log.find((e) => e.op === 'title');
+    assert.equal(title.args[0], card);
+    assert.ok(title.args[1].sub && title.args[1].frames <= 120, 'a short card with an epithet');
+    const ti = log.indexOf(title), bi = log.findIndex((e) => e.op === 'battle');
+    assert.ok(ops(log.slice(0, ti), 'say').length >= 5, 'the dialogue comes before the card');
+    const between = log.slice(ti, bi).map((e) => e.op);
+    assert.ok(between.includes('shake') && between.includes('flash'), 'shake and flash after the card');
+    const m = log.slice(ti, bi).find((e) => e.op === 'music');
+    assert.equal(m.args[0], theme, 'the theme starts right before the battle');
+    assert.equal(ops(log.slice(ti, bi), 'say').length, 0, 'no dialogue between the card and the swirl');
+  };
+  const w = await runOnce(scenes.echo_warden, { flags: ['archive_f1_done', 'mira_joined', 'bram_joined'], branchFlags: false });
+  check(w.log, 'ECHO WARDEN', 'battle');
+  const a = await runOnce(scenes.archivore, { flags: ['boss_door_open', 'mira_joined', 'bram_joined'], branchFlags: false });
+  check(a.log, 'THE ARCHIVORE', 'boss_archivore');
+});
+
+test('the Archivore scene gives Lanternheart after the fragment, with a line from Mira', async () => {
+  const { log } = await runOnce(scenes.archivore, { flags: ['boss_door_open', 'mira_joined', 'bram_joined'], branchFlags: false });
+  const gives = ops(log, 'give').map((e) => e.args[0]);
+  assert.deepEqual(gives, ['name_fragment_1', 'lanternheart']);
+  const gi = log.findIndex((e) => e.op === 'give' && e.args[0] === 'lanternheart');
+  const next = log.slice(gi + 1).find((e) => e.op === 'say');
+  assert.equal(next.args[0], 'mira');
+  assert.match(next.args[1], /Lanternheart/);
+  assert.ok(ITEMS.lanternheart.rarity === 'legendary');
+});
+
+test('clarity lines name the button and the places', async () => {
+  const { log } = await runOnce(scenes.lantern_get, { flags: ['echo_warden_defeated', 'mira_joined', 'bram_joined'], branchFlags: false });
+  assert.ok(ops(log, 'say').some((e) => /raise the Lantern with \{i:btn_pageR\}/.test(e.args[1])), 'lantern_get names the button');
+  assert.match(lines.crystal_plaque, /THREE LIGHTS, ONE DOOR/);
+  assert.ok(Array.isArray(lines.keeper_font_galleries) && lines.keeper_font_galleries.length === 2, 'the F2 font has a two-box text');
+  const bell = await runOnce(scenes.archive_f1_bell, { flags: ['archive_entered', 'mira_joined', 'bram_joined'], branchFlags: false });
+  const bi = bell.log.findIndex((e) => e.op === 'setFlag' && e.args[0] === 'archive_f1_done');
+  assert.ok(bell.log.slice(bi).some((e) => e.op === 'say' && /back-stair/.test(e.args[1])), 'the bell scene shows the back-stair opening');
 });
 
 test('guards stop scenes from replaying or firing early', async () => {

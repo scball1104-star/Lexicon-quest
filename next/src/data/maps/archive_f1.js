@@ -6,6 +6,8 @@
 // The key: west corridor -> pot storeroom C (break pots to free the push block, push it onto the plate, the
 // barred door opens) -> key alcove D (wood chest with the Archive Key).
 // Optional: moss alcove E (Tess's letter 1) with a broken wall into the hidden cell F (Wayfarer Mantle).
+// Shortcuts: once the bell has tolled (archive_f1_done) a back-stair joins the stairs landing J and the
+// antechamber B both ways, so a town trip from F2 skips the floor. The F3 shortcut surfaces in B on archive_f2_done.
 // Doors set into wall faces are same-map transfers that land on a one-cell notch in the far room's south wall.
 import { grid, box, put, rows, room, wallShelf, npc, door, sign, book, object, trigger, enemy, chest, pot,
   block, plate, gate, lockedDoor, steps, enter } from './_kit.js';
@@ -45,7 +47,7 @@ const overlays = [
   { t: 'wall_shelf_l', x: 5, y: 22 }, { t: 'wall_shelf_r', x: 6, y: 22 },
   { t: 'wall_shelf_l', x: 3, y: 8 }, { t: 'wall_shelf_r', x: 4, y: 8 },
   { t: 'wall_broken', x: 9, y: 17 },          // the hole into the hidden cell
-  { t: 'wall_cracked', x: 33, y: 2 }, { t: 'wall_cracked', x: 11, y: 8 },
+  { t: 'wall_cracked', x: 11, y: 8 }, { t: 'wall_cracked', x: 29, y: 2 },
   { t: 'roots_0', x: 3, y: 27 }, { t: 'roots_1', x: 24, y: 27 }, { t: 'roots_2', x: 37, y: 17 }, { t: 'roots_1', x: 25, y: 10 },
   { t: 'roots_0', x: 12, y: 15 }, { t: 'roots_2', x: 6, y: 20 }, { t: 'roots_1', x: 14, y: 27 },
   { t: 'ink_puddle_0', x: 28, y: 15 }, { t: 'ink_puddle_1', x: 10, y: 26 }, { t: 'ink_puddle_0', x: 33, y: 24 },
@@ -90,6 +92,11 @@ const events = [
   door('hole_e', 9, 18, ['archive_f1', 15, 14, 'up']),
   door('notch_f', 15, 14, ['archive_f1', 9, 19, 'down']),
   door('stairs_f2', 31, 3, ['archive_f2', 20, 3, 'down'], { kind: 'stairs' }),
+  // the Keepers' back-stair: J (stairs landing) <-> B (antechamber), opened by the bell (archive_f1_done)
+  object('shortcut_b_stairs', 33, 3, 'stairs_up', { if: 'archive_f1_done', solid: false }),
+  door('shortcut_b', 33, 3, ['archive_f1', 7, 23, 'down'], { kind: 'stairs', if: 'archive_f1_done' }),
+  object('shortcut_j_stairs', 7, 23, 'stairs_up', { if: 'archive_f1_done', solid: false }),
+  door('shortcut_j', 7, 23, ['archive_f1', 33, 3, 'down'], { kind: 'stairs', if: 'archive_f1_done' }),
   // the F3 shortcut surfaces here once the party has reached F3
   object('shortcut_stairs', 10, 23, 'stairs_up', { if: 'archive_f2_done', solid: false }),
   door('shortcut_f3', 10, 23, ['archive_f3', 24, 21, 'down'], { kind: 'stairs', if: 'archive_f2_done' }),
@@ -105,7 +112,7 @@ const events = [
   block('block_h1', 31, 24), block('block_h2', 33, 24),
   plate('plate_h1', 28, 22, 'gate_h'), plate('plate_h2', 35, 22, 'gate_h'),
   // chests
-  chest('chest_d', 8, 4, 'wood', { item: 'archive_key' }),
+  chest('chest_d', 8, 4, 'wood', { item: 'archive_key', flag: 'archive_key_found' }),
   chest('chest_b', 5, 24, 'wood', { item: 'potion', qty: 2 }),
   chest('chest_i', 36, 10, 'iron'),
   chest('chest_f', 16, 12, 'iron', { item: 'wayfarer_mantle' }),

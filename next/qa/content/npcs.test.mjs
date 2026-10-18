@@ -113,6 +113,35 @@ test('helpers: talkTo, isPresent, moveFor, npcsOnMap, speakerName', () => {
   assert.ok(talkTo('hob', has([])).service.type === 'inn');
 });
 
+test('Tess, Wick and Nella open their quests only once Bram has joined; Oren opens early', () => {
+  const has = (set) => (f) => set.includes(f);
+  const town = ['intro_done', 'met_mael'];
+  for (const [id, scene] of [['tess', 'tess_letters'], ['wick', 'wick_tag'], ['nella', 'nella_bell']]) {
+    const before = talkTo(id, has(town));
+    assert.ok(before.lines && !before.scene, `${id}: no quest before Bram joins`);
+    assert.ok(before.lines.length >= 1 && before.lines.every((l) => l.who === id), `${id}: a plain line of their own`);
+    const withMira = talkTo(id, has([...town, 'mira_joined']));
+    assert.ok(withMira.lines && !withMira.scene, `${id}: still no quest with only Mira`);
+    assert.deepEqual(talkTo(id, has([...town, 'mira_joined', 'bram_joined'])), { scene }, `${id}: the quest opens with Bram`);
+  }
+  // the pre-quest line is a hint: it differs from the fallback and from the post-quest lines
+  const hint = talkTo('tess', has(town)).lines.map((l) => l.text).join(' ');
+  assert.match(hint, /short|errand/i);
+  assert.match(talkTo('wick', has(town)).lines.map((l) => l.text).join(' '), /Duke/);
+  assert.match(talkTo('nella', has(town)).lines.map((l) => l.text).join(' '), /tied up/);
+  // a tag taken from the nest early does not open Wick's quest before Bram
+  assert.ok(!talkTo('wick', has([...town, 'wick_tag_found'])).scene);
+  // Oren's starter can open as soon as the hero is up
+  assert.deepEqual(talkTo('oren', has(['intro_done'])), { scene: 'oren_starter' });
+  // Quill tells the Whisperwood secret, twice over
+  for (const flags of [[], ['lantern_get']]) {
+    const q = talkTo('quill', has(['bram_joined', ...flags])).lines.map((l) => l.text).join(' ');
+    assert.match(q, /pool/);
+    assert.match(q, /pines/);
+    assert.match(q, /bridge/);
+  }
+});
+
 test('NPC portraits exist in the W1-sprites portrait atlas', async () => {
   const { existsSync, readFileSync } = await import('node:fs');
   const { join } = await import('node:path');

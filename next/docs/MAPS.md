@@ -59,7 +59,7 @@ Every event: `{ id, type, x, y, if?, ifNot? }`. The event exists only while its 
 | `door` | `to: [map,x,y,dir], kind: 'door'|'stairs', w?` | transfer on step; same-map transfers allowed |
 | `chest` | `tier, item?, qty?, flag?` | no `item` = `rollChest(tier)`; one-shot via `engine.game.opened`; `flag` only on `stacks_key` |
 | `sign` / `book` | `text` / `book`, `tile?`, `fade?`, `lantern?` | `fade` = `shop|inn|square|gate` for the flag-driven blank states; `lantern: true` = readable once revealed |
-| `object` | `sprite, script?, text?, solid?, state?` | inspectables: letters, milestone, pedestal, nest, bell, the boss door; flag swaps are two events with `if`/`ifNot` |
+| `object` | `sprite, script?, text?, solid?, state?, rest?` | inspectables: letters, milestone, pedestal, nest, bell, the boss door; flag swaps are two events with `if`/`ifNot`; `rest: true` (the valley campfire) runs the font's rest flow after the script |
 | `trigger` | `w, h, script, on?` | `on: 'enter'` runs after the fade-in; default = step; scenes guard themselves |
 | `enemy` | `sprite, encounter, move, path?, radius?` | `move` = `wander|patrol|chase|guard`; dungeon enemies step only when the player steps |
 | `switch` | `target, kind: 'floor'|'crystal', color?, state, hidden?` | toggles on interact; every target fires |
@@ -138,8 +138,14 @@ the empty bell post (`ferry` event), Nella's bell glinting in the shallows just 
 a fenced pasture, the hollow willow (wood chest: Echo Herb x2 under the canopy), a cliff plateau with stairs,
 an iron chest (spare Hatchet) and a grassy ledge for a one-way hop down. Secrets: the Whisperwood clearing's
 ink pool with a hidden ink bridge to a gold chest (Thornwake; needs the Lantern, so it is found on the way
-home). Seven visible enemies per the plan: wolves first by the start, the pack deepest by the Archive. Rain
-zone: the north half (`weatherZone`).
+home). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
+step trigger `first_fight_trig` (column 7, rows 6 to 39, a full cut of the map) runs the scripted first fight
+before the pack can be walked past;
+the pack deepest by the Archive. The campfire (39,22) is an `object` with `script: 'campfire_rest'`, `safe` and
+`rest` (the fireside scene, then the rest flow); the log bench carries `pilgrim_bench`. Rain zone: the north half
+(`weatherZone`). Shapes: the roads bend and widen (one span per row in `ROAD` / `PILGRIM`), tall grass is
+value-noise blobs kept one cell off the roads, the tributary and the ink pool have ragged banks, the cliff-top
+tree line is broken.
 
 ### archive_f1 (40 x 30): The Catalog Halls
 ![archive_f1](../tools/maps/previews/archive_f1.png)
@@ -150,9 +156,11 @@ shelf aisles) and its key door, then the stairs landing J where the bell tolls (
 down. **The key:** west corridor to the pot storeroom C: break the pots to free the push block, push it west
 four and north two onto the plate; the barred door opens into the key alcove D (wood chest, Archive Key).
 **Optional:** the moss alcove E (Tess's letter 1) with a broken wall into the hidden cell F (iron chest, the
-Wayfarer Mantle); wood chest in the antechamber B. The F3 shortcut surfaces in B's north face once
-`archive_f2_done` is set. Eight enemies as planned (slimes in B and the corridor, mites guarding the pots and
-the alcove, wraiths and mixed groups in H and I).
+Wayfarer Mantle); wood chest in the antechamber B. **Shortcuts:** the bell (`archive_f1_done`) opens the Keepers' back-stair,
+`stairs_up` objects and same-map stairs doors both ways between the landing J (33,3) and B (7,23), so a trip to
+town from F2 and back skips the floor; the F3 shortcut surfaces in B's north face (10,23) once `archive_f2_done`
+is set. The key chest `chest_d` sets `archive_key_found` (the Talk hint turns east). Eight enemies as planned
+(slimes in B and the corridor, mites guarding the pots and the alcove, wraiths and mixed groups in H and I).
 
 ### archive_f2 (40 x 30): The Reading Galleries
 ![archive_f2](../tools/maps/previews/archive_f2.png)
@@ -163,8 +171,9 @@ wing: the reading rooms, Tess's letter 2 (south-east), the Iron Pike chest. West
 Chain Shirt chest, then north through the gallery's wall into the rotunda from the south: the Warden faces down
 over the Lantern pedestal (trigger row 16 across the rotunda). With the Lantern, the ink beside the pedestal
 reveals a bridge straight back into the hub (the shortcut), and the hub's east moat reveals the bridge to the
-stairs room (`archive_f2_exit` trigger in front of the stairs, `hidden_ink_2` on its wall). Seven ordinary
-enemies plus the Warden. Faint bridges are pits until revealed (`pitTo` = the hub).
+stairs room (`archive_f2_exit` trigger in front of the stairs, `hidden_ink_2` on its wall, the Keeper's font
+`keeper_font_f2` at (34,17), 4 x 2, `safe`: the floor's heal and save). Seven ordinary enemies plus the Warden.
+Faint bridges are pits until revealed (`pitTo` = the hub).
 
 ### archive_f3 (40 x 30): The Rootbound Stacks (dark 0.7)
 ![archive_f3](../tools/maps/previews/archive_f3.png)
@@ -173,10 +182,12 @@ split by roots; letter 3 wedged between roots at (3,17)), south through the corr
 thirteenth bell between two root columns, trigger at the hollow's mouth, braziers), east to the great door hall:
 the boss door with its plate and `hidden_ink_3` beside it, the Keeper's font, the shortcut stairs back to F1's
 antechamber. **Branches:** the crystal room (three crystal switches, all lit opens the barred door to the key
-room above: the gold chest with the Stacks Key, the Keeper's third journal, the broken chronicle); the pit room
-(a golem and a patrol among the pits; falling drops into the cache below: a gold chest, a brazier, and across a
-hidden ink bridge the First Quill; the cache's stairs climb back to the pit room, one way). Eight enemies with
-ink wraiths in the stacks and the corridors.
+room above: the gold chest with the Stacks Key, the Keeper's third journal, the broken chronicle; the plaque
+`crystal_plaque` beside the barred door reads THREE LIGHTS, ONE DOOR); the pit room (a golem and a patrol among
+the pits; falling drops into the cache below: a gold chest, a brazier, and across a hidden ink bridge the First
+Quill; the cache's stairs climb back to the pit room, one way). Eight enemies with ink wraiths in the stacks and
+the corridors: the unavoidable corridor patrol to the bell hollow (5,20) is the lighter `f3_ink` group and the
+two-wraith `f3_wraiths` guard sits in the letter alcove (3,14), which can be walked around (PLAYTEST_REVIEW_1 3).
 
 ### archive_boss (24 x 20): Heart of the Archive
 ![archive_boss](../tools/maps/previews/archive_boss.png)

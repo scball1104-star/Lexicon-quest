@@ -68,6 +68,16 @@ test('barks: declared flags, companion speakers, fitting lines', () => {
   }
 });
 
+test('the first-enemy bark is a dungeon rule: it matches only once archive_entered is set', () => {
+  const has = (set) => (f) => set.includes(f);
+  const pickFor = (flags) => BARKS.first_visible_enemy.find((e) => [e.if].flat().filter(Boolean).every((f) => flags.includes(f)) && ![e.ifNot].flat().filter(Boolean).some((f) => flags.includes(f)));
+  assert.equal(pickFor(['mira_joined', 'bram_joined', 'left_town']), undefined, 'a valley touch must not consume the one-shot key');
+  const e = pickFor(['mira_joined', 'bram_joined', 'left_town', 'archive_entered']);
+  assert.ok(e && /moves when we move/.test(e.lines[0].text));
+  assert.ok(!('pilgrim_rest' in BARKS), 'the fireside line lives in campfire_rest now');
+  void has;
+});
+
 test('game over and credits', () => {
   for (const v of Object.values(GAMEOVER)) assert.ok(fits(v));
   assert.ok(CREDITS.length >= 8);

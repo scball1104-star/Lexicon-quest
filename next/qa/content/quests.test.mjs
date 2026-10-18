@@ -95,6 +95,20 @@ test('journal lists the main step and started side quests with counters', () => 
   assert.equal(j.side.some((s) => s.id === 'wick'), false, 'unstarted quests stay hidden');
 });
 
+test('W5 clarity hints: F1 key west / door east, F2 names the button, F3 crystals', () => {
+  const f1 = (extra) => partyChat((f) => ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', ...extra].includes(f), 'archive_f1');
+  const before = f1([]).lines.map((l) => l.text).join(' ');
+  assert.match(before, /west/i); assert.match(before, /east/i); assert.match(before, /key/i);
+  const after = f1(['archive_key_found']).lines.map((l) => l.text).join(' ');
+  assert.match(after, /east/i); assert.match(after, /key/i);
+  assert.notEqual(before, after);
+  const f2 = partyChat((f) => ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done', 'echo_warden_defeated', 'lantern_get'].includes(f), 'archive_f2');
+  assert.ok(f2.lines.some((l) => /raise the Lantern with \{i:btn_pageR\}/.test(l.text)), 'the F2 hint names the button');
+  const f3 = partyChat((f) => ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done'].includes(f), 'archive_f3');
+  assert.ok(f3.lines.some((l) => /Three lights, one door/.test(l.text)), 'the F3 hint says three lights, one door');
+  for (const f of ['first_fight_done', 'campfire_rested', 'archive_key_found']) assert.ok(f in FLAGS, f);
+});
+
 test('party chat adds a side-quest reminder after the main hint', () => {
   const flags = new Set(['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'wick_quest_started']);
   const chat = partyChat((f) => flags.has(f), 'willowmere');

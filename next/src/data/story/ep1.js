@@ -330,6 +330,52 @@ async function milestone(s) {
   await s.setFlag('saw_milestone');
 }
 
+// The first fight (valley road, just outside the gate). A step trigger on the road; the wolf pack
+// `e_wolves_a` (a chase enemy at the bend) cuts the party off. Unavoidable, four boxes, no signage: Bram's
+// box carries the valley's first-enemy line, Mira's the free Appraise. Sets first_fight_done on a win; a
+// loss is a Game Over and the trigger fires again on reload.
+async function first_fight(s) {
+  await s.camera.panTo('e_wolves_a', 40);
+  await all(s.emote('bram', '!'), s.emote('mira', '!'));
+  await s.walk('e_wolves_a', 'hero', { speed: 'run' });
+  await s.camera.follow('hero');
+  await say(s, 'bram', 'Wolves. They will come to us. Good. When one winds up to charge, Lunge: a Lunge breaks a charging foe.');
+  await say(s, 'mira', "And Appraise one before you swing. It shows a foe's weak points, and it costs us nothing.");
+  const result = await s.battle('valley_wolves', { canFlee: false });
+  if (result !== 'win') return;
+  await s.despawn('e_wolves_a');
+  await say(s, 'mira', 'Spear. Wolves hate it. Noted.');
+  await say(s, 'bram', "Everything hates a spear. That's the point of a spear.");
+  await s.setFlag('first_fight_done');
+}
+
+// The Pilgrim's Rest campfire (valley fork). Object `campfire` with `rest: true`: the field runs the
+// rest flow (Rest here?, full heal, save prompt) after this scene returns, so the scene never heals.
+// First visit: the party sits, one choice, three boxes. Later visits: one box, then the rest offer.
+async function campfire_rest(s) {
+  if (await s.hasFlag('campfire_rested')) {
+    await say(s, 'bram', "Fire's still warm. Sit a minute, {hero}. The road isn't going anywhere.");
+    return;
+  }
+  await all(s.emote('bram', 'music'), s.emote('mira', '...'));
+  await say(s, 'bram', 'A warm fire on a long road. Even heroes need a sit-down. Go on, sit.');
+  const c = await s.choice(['Ask Bram about Emberpeak', 'Ask Mira about the Archive', 'Just rest']);
+  if (c === 0) {
+    await say(s, 'bram', 'Emberpeak. A forge town, high up where the snow starts. Every roof was copper. You could see it shine from two valleys off.');
+    await say(s, 'bram', 'The fire took the lower town in one night. I was nine. My father carried me out. My mother went back in for the neighbors.');
+    await say(s, 'bram', "They got out. She didn't. I kept her face. Her name went with the smoke. That's all I'm saying tonight. Pass the kettle.");
+  } else if (c === 1) {
+    await say(s, 'mira', 'Sealed a hundred years ago by the Keepers themselves. Nobody knows why. The page that would tell us went blank.');
+    await say(s, 'mira', 'Three floors, the books agree on that much: the Catalog Halls, the Reading Galleries, and the Rootbound Stacks.');
+    await say(s, 'mira', 'The Keepers loved a lock and hated a straight corridor. If a room looks finished, assume a key or a switch.');
+  } else {
+    await say(s, 'bram', "Hazel put apples in your pack, {hero}. I checked. Don't give me that look, I was hungry.");
+    await say(s, 'mira', 'And mine?');
+    await say(s, 'bram', "Eleven pencils, Mira. Eleven. I counted. I thought you'd want them counted.");
+  }
+  await s.setFlag('campfire_rested');
+}
+
 // ------------------------------------------------------------------------------------------------
 // 8. The Archive door (valley, north end). Trigger on the door step. Sets archive_entered.
 // ------------------------------------------------------------------------------------------------
@@ -414,6 +460,11 @@ async function archive_f1_bell(s) {
   await say(s, 'mira', 'The thirteenth bell is down there. Somewhere in the Archive.');
   await say(s, 'bram', 'Then we go down.');
   await s.setFlag('archive_f1_done');
+  // The toll shakes the Keepers' back-stair open (F1 events shortcut_b / shortcut_j, gated on archive_f1_done).
+  await s.sfx('door_rumble');
+  await s.shake(1, 20);
+  await narrate(s, 'The toll has shaken a panel loose beside the stairs: a narrow back-stair, running down to the antechamber by the entrance.');
+  await say(s, 'bram', "Good. Next time we come this way, it's the short way.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -444,7 +495,8 @@ async function find_letter_2(s) {
 async function echo_warden(s) {
   if (await s.hasFlag('echo_warden_defeated')) return;
   await s.music(null);
-  await s.camera.panTo('echo_warden', 50);
+  await s.camera.panTo('echo_warden', 40);
+  await s.wait(30);
   await say(s, 'echo_warden', '...WHO COMES... WHO COMES... COMES...');
   await say(s, 'bram', "We're here for the lantern.");
   await say(s, 'echo_warden', '...THE LANTERN... THE LANTERN...');
@@ -454,6 +506,11 @@ async function echo_warden(s) {
   await say(s, 'bram', "Then let's help it run out.");
   await say(s, 'echo_warden', '...RUN OUT... RUN OUT...');
   await say(s, 'mira', 'Watch its stance. One stance turns back magic, the other turns back steel. Read it before you swing.');
+  // Boss intro: name card, a jolt, then the battle theme and the swirl.
+  await s.title('ECHO WARDEN', { sub: 'Knight of the Last Order', frames: 100 });
+  await s.shake(3, 24);
+  await s.flash('#ffffff', 8);
+  await s.music('battle');
   const result = await s.battle('echo_warden', { boss: true, canFlee: false });
   if (result !== 'win') return;
   await s.camera.panTo('echo_warden', 20);
@@ -483,7 +540,7 @@ async function lantern_get(s) {
   await say(s, 'mira', "It's a priceless relic of the Keepers' order that restores concealed text.");
   await say(s, 'bram', 'A lamp that finds things.');
   await say(s, 'mira', "...Yes. Fine. It's a lamp that finds things.");
-  await say(s, 'mira', "If a path ends where it shouldn't, hold it up. The Keepers hid their bridges in ink.");
+  await say(s, 'mira', "If a path ends where it shouldn't, raise the Lantern with {i:btn_pageR}. The Keepers hid their bridges in ink.");
 }
 
 async function archive_f2_exit(s) {
@@ -574,7 +631,8 @@ async function boss_door(s) {
 async function archivore(s) {
   if (await s.hasFlag('archivore_defeated')) return;
   await s.music(null);
-  await s.camera.panTo('archivore', 80);
+  await s.camera.panTo('archivore', 40);
+  await s.wait(30);
   await narrate(s, "The chamber is a hollow in the willow's heart. Pages drift through the air like slow snow.");
   await narrate(s, 'In the middle of it all, something vast is eating.');
   await s.sfx('ink_gurgle');
@@ -590,6 +648,10 @@ async function archivore(s) {
   await say(s, 'bram', "Nobody's letting anybody go.");
   await say(s, 'mira', 'A list. Someone gave it orders.');
   await say(s, 'mira', 'Keep saying each other\'s names. A name is harder to eat while someone is holding it.');
+  // Boss intro: name card, a jolt, then its own theme and the swirl.
+  await s.title('THE ARCHIVORE', { sub: 'Eater of Names', frames: 100 });
+  await s.shake(4, 30);
+  await s.flash('#ffffff', 10);
   await s.music('boss_archivore');
   const result = await s.battle('archivore', { boss: true, canFlee: false });
   if (result !== 'win') return;
@@ -633,6 +695,13 @@ async function archivore_after(s) {
   await say(s, 'mira', 'Yours is still faint.');
   await say(s, 'bram', "It'll come back. They all came back.");
   await say(s, 'mira', '...Maybe it just takes longer.');
+  // The legendary: given here, with its own line, so the player sees it land (not a silent battle drop).
+  await s.camera.panTo('archivore', 30);
+  await s.sfx('name_restore');
+  await narrate(s, 'Where Moth lay, the ink draws back from something long and bright: an old sword, its edge the green of the Lantern\'s glass.');
+  await s.give('lanternheart');
+  await say(s, 'mira', 'Lanternheart. Every Keeper archive kept one blade, for the day its books needed more than a lock. Yours now, {hero}.');
+  await s.camera.panTo('fragment_spot', 30);
   await narrate(s, 'Warm air moves through the roots. Between them, a passage opens toward daylight.');
   await say(s, 'bram', "Let's go home.");
   await s.setFlag('archivore_defeated');
@@ -942,6 +1011,8 @@ export const SCENE_CONDITIONS = {
   leave_town: { if: 'bram_joined', ifNot: 'left_town' },
   valley_arrival: { if: 'bram_joined', ifNot: 'valley_arrived' },
   milestone: null,
+  first_fight: { if: 'bram_joined', ifNot: 'first_fight_done' },
+  campfire_rest: { if: 'bram_joined' },
   archive_door: { if: 'bram_joined', ifNot: 'archive_entered' },
   archive_f1_arrival: { if: 'archive_entered', ifNot: 'f1_arrived' },
   find_letter_1: { if: 'archive_entered', ifNot: 'tess_letter_1_found' },
@@ -970,7 +1041,7 @@ export const SCENE_CONDITIONS = {
 
 const RAW = {
   prologue, wake_up, hazel_farewell, fading_sign, mael_intro, mira_joins, south_gate, garrick_farewell,
-  leave_town, valley_arrival, milestone, archive_door, archive_f1_arrival, find_letter_1, archive_f1_bell,
+  leave_town, valley_arrival, milestone, first_fight, campfire_rest, archive_door, archive_f1_arrival, find_letter_1, archive_f1_bell,
   archive_f2_arrival, find_letter_2, echo_warden, lantern_get, archive_f2_exit, archive_f3_arrival,
   find_letter_3, thirteenth_bell, boss_door, archivore, return_to_willowmere, ending_hook,
   tess_letters, oren_starter, starter_found, wick_tag, duck_nest, nella_bell, ferry_bell_found, hal_returns,
@@ -1120,6 +1191,7 @@ export const lines = {
   ],
   hollow_tree: 'A hollow willow, its heart split open by lightning long ago. Pilgrims leave small gifts inside for travelers who come after.',
   pilgrim_rest: 'The Pilgrim\'s Rest: a ring of stones, a kettle, and a dry log bench. A warm fire on a long road.',
+  pilgrim_bench: 'A dry log bench, worn smooth by a century of pilgrims. Someone has carved a small bell into the end of it.',
   bridge_plaque: 'MENDED BY NELLA AND THE RIVER FOLK, SPRING FLOOD YEAR. MAKE ROOM FOR THE RIVER.',
   ferry_post_valley: [
     { if: 'nella_bell_done', lines: 'A bell-post at the north landing. Ring, and Nella\'s ferry will carry you home to Willowmere.' },
@@ -1149,6 +1221,11 @@ export const lines = {
     '"Perhaps the one holding the list still walks free."',
   ],
   keeper_font: 'A Keeper\'s font. The water is cold, clear, and somehow tastes like the first day of spring.',
+  keeper_font_galleries: [
+    'A Keeper\'s font set into the gallery wall. The water runs clear over a lip of green bronze, and the air above it is cool.',
+    'Three words are chipped into the rim: DRINK. REST. REMEMBER.',
+  ],
+  crystal_plaque: 'A bronze plate beside the barred door. Three crystals are etched into it, a small flame over each. THREE LIGHTS, ONE DOOR.',
   thirteenth_bell: [
     { if: 'found_thirteenth_bell', lines: [
       'The thirteenth bell. RUNG FOR EVERY NAME THE WORLD FORGETS, SO THAT SOMEONE WILL NOTICE.',

@@ -11,6 +11,9 @@ const STATE = {
   lantern_get: ['echo_warden_defeated', 'archive_f1_done', 'mira_joined', 'bram_joined'],
   thirteenth_bell: ['archive_f2_done', 'mira_joined', 'bram_joined'],
   archivore: ['boss_door_open', 'mira_joined', 'bram_joined'],
+  echo_warden: ['archive_f1_done', 'mira_joined', 'bram_joined'],
+  first_fight: ['left_town', 'mira_joined', 'bram_joined'],
+  campfire_rest: ['left_town', 'mira_joined', 'bram_joined'],
   return_to_willowmere: ['archivore_defeated', 'mira_joined', 'bram_joined'],
   tess_letters: ['intro_done', 'tess_quest_started', 'tess_letter_3_found', 'mira_joined', 'bram_joined'],
 };

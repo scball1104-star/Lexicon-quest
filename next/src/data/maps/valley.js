@@ -3,10 +3,23 @@
 // along the east bank as the pilgrim road, past the fork (milestone, signpost, Pilgrim's Rest) to the Rootbound
 // Archive grown into the north cliff. North landing with the empty bell post; Nella's bell in the shallows below
 // it. West: the meadow, the hollow tree cache and a cliff with a ledge shortcut; east: the Whisperwood edge.
-import { grid, box, put, rows, scatter, bridgeH, ledge, npc, door, sign, object, trigger, enemy, chest, hash01, steps } from './_kit.js';
+//
+// Shapes (CRITIQUE_2 item 6): the roads bend and widen, the tall grass and flower drifts are value-noise blobs,
+// the tributary and the ink pool have ragged banks and the cliff-top tree line is broken. Every mark, event and
+// the walk model are unchanged from the straight version (qa/maps asserts them).
+import { grid, box, put, rows, scatter, bridgeH, npc, door, sign, object, trigger, enemy, chest, hash01, steps } from './_kit.js';
 
 const W = 60, H = 40;
 const g = grid(W, H, '.');
+
+/** Smooth value noise in [0,1): bilinear blend of hash01 at a lattice of `cell` tiles. */
+function vnoise(x, y, cell, salt) {
+  const gx = Math.floor(x / cell), gy = Math.floor(y / cell);
+  const fx = x / cell - gx, fy = y / cell - gy;
+  const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash01(gx, gy, salt), b = hash01(gx + 1, gy, salt), c = hash01(gx, gy + 1, salt), d = hash01(gx + 1, gy + 1, salt);
+  return (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + d * sx) * sy;
+}
 
 // ---------------------------------------------------------------- terrain
 // north cliff band (the Archive is grown into it), with the face rows below the top
@@ -22,34 +35,46 @@ put(g, 15, 13, 'S'); put(g, 15, 14, 't'); put(g, 15, 15, 'z');
 put(g, 7, 13, 'L'); put(g, 8, 13, 'M'); put(g, 9, 13, 'R');
 put(g, 7, 14, '.'); put(g, 8, 14, '.'); put(g, 9, 14, '.');
 put(g, 7, 15, '.'); put(g, 8, 15, '.'); put(g, 9, 15, '.');
-// the river (cols 27..32, bending), banks, the bridge gap, the shallows below the north landing
+// the river (cols 27..32, bending), banks with the odd bulge, the bridge gap, the shallows below the landing
 const RIVER = [];                                   // [x0, x1] per row, a gentle S-bend
 for (let y = 6; y < H; y++) {
   const wob = y < 12 ? 0 : y < 18 ? 1 : y < 24 ? 2 : y < 27 ? 1 : y < 30 ? 0 : y < 33 ? -1 : y < 37 ? 0 : 1;
   const x0 = 27 + wob, x1 = 32 + wob;
   RIVER[y] = [x0, x1];
   for (let x = x0; x <= x1; x++) put(g, x, y, '~');
-  if (y >= 7 && !(y >= 33 && y <= 34) && hash01(0, y, 11) < 0.85) put(g, x0 - 1, y, 's');
-  if (y >= 7 && !(y >= 33 && y <= 34) && hash01(1, y, 11) < 0.85) put(g, x1 + 1, y, 's');
+  if (y >= 7 && !(y >= 33 && y <= 34)) {
+    if (hash01(0, y, 11) < 0.85) put(g, x0 - 1, y, 's');
+    if (hash01(1, y, 11) < 0.85) put(g, x1 + 1, y, 's');
+    if (hash01(2, y, 12) < 0.28) put(g, x0 - 2, y, 's');     // a wider bank here and there
+    if (hash01(3, y, 12) < 0.28) put(g, x1 + 2, y, 's');
+  }
 }
 box(g, 30, 11, 32, 13, '-');                      // shallows that hold Nella's bell
 put(g, 33, 12, 's');
-// tributary from the east with the washed-out ford
-box(g, 47, 19, 59, 21, '~');
+// tributary from the east with the washed-out ford: a ragged channel, two to four rows deep
+for (let x = 47; x < W; x++) {
+  const top = 19 - (hash01(x, 0, 13) < 0.3 ? 1 : 0);
+  const bot = 21 + (hash01(x, 1, 13) < 0.3 ? 1 : 0);
+  for (let y = top; y <= bot; y++) put(g, x, y, '~');
+  put(g, x, top - 1, 's'); put(g, x, bot + 1, 's');
+}
 put(g, 46, 20, '-'); put(g, 46, 19, 's'); put(g, 46, 21, 's'); put(g, 45, 19, 's'); put(g, 45, 21, 's');
-box(g, 47, 18, 59, 18, 's'); box(g, 47, 22, 59, 22, 's');
-// ink pool at the Whisperwood edge (the Lantern secret)
-box(g, 53, 29, 55, 32, 'i');
-// roads: west road from the gate to the bridge, the bridge, the pilgrim road north, the fork roads
-box(g, 0, 33, 26, 34, '=');
-box(g, 34, 33, 36, 34, '=');
-box(g, 35, 8, 36, 21, '=');
-box(g, 36, 22, 37, 27, '=');
-box(g, 35, 28, 36, 34, '=');
-put(g, 37, 21, '='); put(g, 37, 28, '=');
-box(g, 37, 20, 45, 20, '=');
-box(g, 33, 20, 34, 20, '=');
-box(g, 35, 6, 36, 7, '=');
+// ink pool at the Whisperwood edge (the Lantern secret): a blot, with a tongue of land at the bridge's west end
+for (const [x0, x1, y] of [[53, 54, 28], [52, 55, 29], [52, 55, 30], [53, 55, 31], [52, 55, 32], [53, 55, 33]]) box(g, x0, y, x1, y, 'i');
+// roads. One span per row: the west road from the gate to the bridge wanders north and widens twice, the pilgrim
+// road leans into the bank and opens out at the slope, the fork and the Pilgrim's Rest.
+const ROAD = {
+  // west road (gate at x 0, bridge deck from x 26)
+  32: [[5, 17]], 33: [[0, 25]], 34: [[0, 9], [18, 25]], 35: [[22, 25]],
+};
+const PILGRIM = {
+  6: [33, 40], 7: [33, 40], 8: [35, 36], 9: [35, 36], 10: [35, 37], 11: [35, 37], 12: [36, 37], 13: [36, 37],
+  14: [35, 37], 15: [35, 37], 16: [35, 36], 17: [35, 36], 18: [35, 37], 19: [35, 36], 20: [33, 45], 21: [35, 37],
+  22: [36, 37], 23: [36, 37], 24: [36, 38], 25: [36, 38], 26: [36, 37], 27: [36, 37], 28: [35, 37], 29: [35, 36],
+  30: [35, 36], 31: [35, 36], 32: [34, 36], 33: [34, 36], 34: [34, 36],
+};
+for (const [y, spans] of Object.entries(ROAD)) for (const [x0, x1] of spans) box(g, x0, +y, x1, +y, '=');
+for (const [y, [x0, x1]] of Object.entries(PILGRIM)) box(g, x0, +y, x1, +y, '=');
 // a fenced pasture in the west meadow (the sheep are out)
 for (let x = 3; x <= 11; x++) { put(g, x, 18, 'F'); put(g, x, 23, 'F'); }
 for (let y = 19; y <= 22; y++) { put(g, 3, y, 'F'); put(g, 11, y, 'F'); }
@@ -57,16 +82,21 @@ put(g, 7, 23, '.');
 box(g, 4, 19, 10, 22, ',');
 // north landing sand and the Archive forecourt
 box(g, 33, 8, 34, 10, 's');
-box(g, 33, 6, 40, 7, '=');
 put(g, 32, 7, 's'); put(g, 33, 7, 's');
-// meadow texture: tall grass drifts
+// meadow texture: tall grass drifts as irregular blobs (two octaves of value noise plus a little grain)
 for (let y = 6; y < H; y++) for (let x = 0; x < W; x++) {
   if (g[y][x] !== '.') continue;
-  const n = hash01(x >> 1, y >> 1, 21);
-  if (n < 0.22 && hash01(x, y, 22) < 0.8) put(g, x, y, ',');
+  const n = 0.55 * vnoise(x, y, 6, 21) + 0.3 * vnoise(x, y, 3, 23) + 0.15 * hash01(x, y, 22);
+  if (n > 0.58) put(g, x, y, ',');
 }
-// clear tall grass off the road verges and the forecourt
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (g[y][x] === ',' && (y >= 31 && y <= 36 && x <= 37)) put(g, x, y, '.');
+// keep the verges clear: no tall grass touching a road cell, and none in the Archive forecourt
+const isRoad = (x, y) => y >= 0 && y < H && x >= 0 && x < W && g[y][x] === '=';
+for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+  if (g[y][x] !== ',') continue;
+  let near = y <= 9 && x >= 31 && x <= 42;
+  for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1; dx++) if (isRoad(x + dx, y + dy)) { near = true; break; }
+  if (near) put(g, x, y, '.');
+}
 
 const ground = rows(g);
 
@@ -86,12 +116,17 @@ const overlays = [
 // ---------------------------------------------------------------- decor
 const pines = [];
 function pine(x, y) { pines.push({ t: 'tree_pine', x, y }); }
-// north cliff top: a tree line with gaps, the big willows over the Archive door
-for (let x = 1; x < 59; x += 2) if (hash01(x, 1, 41) < 0.75 && (x < 24 || x > 35)) pine(x, 1 + (hash01(x, 2, 42) < 0.5 ? 0 : 2));
+// north cliff top: a broken tree line, trunks at varied depth with gaps and the odd pair, clear of the Archive
+for (let x = 1; x < 59; x++) {
+  if (x >= 24 && x <= 35) continue;
+  const r = hash01(x, 1, 41);
+  if (r < 0.42) pine(x, Math.floor(hash01(x, 2, 42) * 3));
+  else if (r < 0.52) { pine(x, 0); pine(x, 2 + (hash01(x, 3, 42) < 0.5 ? 0 : 1)); }
+}
 // Whisperwood: dense pines on the east edge, thinning westward, a clearing around the ink pool
 for (let y = 6; y < H; y += 2) for (let x = 46; x < 60; x += 2) {
   const edge = (x - 46) / 14;
-  if (y >= 18 && y <= 22) continue;                             // tributary
+  if (y >= 16 && y <= 23) continue;                             // tributary and its banks
   if (x >= 47 && x <= 59 && y >= 26 && y <= 36) continue;       // clearing + pool (ringed by hand below)
   if (hash01(x, y, 43) < 0.25 + edge * 0.7) pine(x + (hash01(x, y, 44) < 0.5 ? 0 : 1), y + (hash01(x, y, 45) < 0.5 ? 0 : 1));
 }
@@ -127,6 +162,10 @@ const decor = [
 // ---------------------------------------------------------------- events
 const events = [
   trigger('valley_enter', 0, 0, 1, 1, 'valley_arrival', { on: 'enter' }),
+  // the teaching fight: a step trigger down the whole of column 7 (every passable cell at x 7, from the strip
+  // above the plateau to the south edge), so the road cannot be skirted through the meadow; the pack waits at
+  // the bend (14,33), two tiles outside its chase radius from the trigger
+  trigger('first_fight_trig', 7, 6, 1, 34, 'first_fight'),
   trigger('archive_door_trig', 36, 7, 1, 1, 'archive_door'),
   door('archive_entrance', 36, 5, ['archive_f1', 20, 27, 'up'], { w: 2, h: 1, if: 'archive_entered' }),
   // NPCs
@@ -135,7 +174,9 @@ const events = [
   // scripted objects and inspectables
   object('milestone', 37, 19, 'prop_milestone', { script: 'milestone' }),
   object('prop_ferry_bell', 31, 12, 'prop_ferry_bell', { script: 'ferry_bell_found', if: 'nella_quest_started', ifNot: 'ferry_bell_found', solid: false }),
-  object('campfire', 39, 22, 'brazier_lit', { text: 'pilgrim_rest' }),
+  // the Pilgrim's Rest campfire: the fireside scene, then the field's rest flow (`rest: true`; a `safe` landmark)
+  object('campfire', 39, 22, 'brazier_lit', { script: 'campfire_rest', text: 'pilgrim_rest', safe: true, rest: true }),
+  sign('pilgrim_bench', 38, 23, 'pilgrim_bench', { solid: false }),
   sign('valley_fork_sign', 34, 19, 'valley_fork_sign', { solid: false }),
   sign('hollow_tree', 15, 26, 'hollow_tree', { solid: false }),
   sign('bridge_plaque', 25, 32, 'bridge_plaque', { solid: false }),
@@ -147,11 +188,11 @@ const events = [
   chest('chest_hollow', 16, 25, 'wood', { item: 'echo_herb', qty: 2 }),
   chest('chest_cliff', 4, 8, 'iron', { item: 'hatchet' }),
   chest('chest_whisperwood', 57, 31, 'gold', { item: 'thornwake' }),
-  // visible enemies: 7 per encounters.js ZONES.valley.plan (wolves first, the pack deepest)
-  enemy('e_wolves_a', 12, 31, 'briar_wolf', 'valley_wolves', 'wander', { radius: 3 }),
+  // visible enemies: 7 per encounters.js ZONES.valley.plan (the wolf pack at the gate chases, the pack deepest)
+  enemy('e_wolves_a', 14, 33, 'briar_wolf', 'valley_wolves', 'chase'),
   enemy('e_wolves_b', 9, 10, 'briar_wolf', 'valley_wolves', 'guard'),
   enemy('e_slimes', 22, 27, 'ink_slime', 'valley_slimes', 'wander', { radius: 3 }),
-  enemy('e_scarab_a', 41, 27, 'moss_scarab', 'valley_scarab', 'patrol', { path: steps('up', 4, 'right', 3, 'down', 4, 'left', 3) }),
+  enemy('e_scarab_a', 43, 27, 'moss_scarab', 'valley_scarab', 'patrol', { path: steps('up', 3, 'right', 2, 'down', 3, 'left', 2) }),
   enemy('e_scarab_b', 44, 13, 'moss_scarab', 'valley_scarab', 'wander', { radius: 3 }),
   enemy('e_mixed', 42, 10, 'briar_wolf', 'valley_mixed', 'chase'),
   enemy('e_pack', 39, 14, 'briar_wolf', 'valley_pack', 'chase'),
@@ -173,6 +214,6 @@ export default {
   overhead: [],
   events,
   exits: [{ x: 0, y: 33, w: 1, h: 2, to: ['willowmere', 20, 30, 'up'] }],
-  marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9] },
+  marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9], campfire: [39, 22] },
   start: { x: 1, y: 33, dir: 'right' },
 };

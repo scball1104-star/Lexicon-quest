@@ -67,12 +67,17 @@ export const NPCS = {
         'Three letters home. My satchel feels lighter and heavier at the same time.',
         'Mind the boots. They know the roads better than you do. Let them lead.',
       ] },
-      { if: 'intro_done', ifNot: 'tess_quest_started', scene: 'tess_letters' },
+      // The letters quest opens once the party is whole (bram_joined). Before that Tess only hints.
+      { if: B, ifNot: 'tess_quest_started', scene: 'tess_letters' },
       { if: 'tess_letter_1_found', ifNot: 'tess_letter_1_delivered', scene: 'tess_letters' },
       { if: 'tess_letter_2_found', ifNot: 'tess_letter_2_delivered', scene: 'tess_letters' },
       { if: 'tess_letter_3_found', ifNot: 'tess_letter_3_delivered', scene: 'tess_letters' },
       { if: DONE, lines: [
         "You came back! Did you see my letters down there? They'll be in the quiet places. Letters like quiet.",
+      ] },
+      { ifNot: B, lines: [
+        "Three short. I've counted this satchel four times, and it's three short.",
+        "If you're ever walking north, {hero}, come and find me first. A courier may have an errand for you.",
       ] },
       { lines: [
         'One letter per floor of the Archive, if I know letters. And I know letters.',
@@ -86,8 +91,9 @@ export const NPCS = {
     spot: 'Ferry landing on the river, beside the inn', move: 'turn',
     about: 'The Ferrymender. Salty, practical, names boats by the sound of their ropes. Lark\'s mother, Edda\'s daughter.',
     talk: [
+      // The ferry bell quest opens once the party is whole (bram_joined). Before that Nella only hints.
       { if: 'ferry_bell_found', ifNot: 'nella_bell_done', scene: 'nella_bell' },
-      { if: 'intro_done', ifNot: 'nella_quest_started', scene: 'nella_bell' },
+      { if: B, ifNot: 'nella_quest_started', scene: 'nella_bell' },
       { if: [DONE, 'tess_letter_2_delivered'], lines: [
         'Mother and I mended the little skiff this morning. She talks to the boards. I talk to the rope. We get on.',
         'Lark has a grandmother now. She keeps saying it, like a new word she is trying out.',
@@ -106,7 +112,8 @@ export const NPCS = {
         "The ropes still sing. I just can't hear what they're called anymore.",
       ] },
       { lines: [
-        "Ferry's tied up until I get my bell back. The river's laughing at me. I can hear it.",
+        "Ferry's tied up till further notice. Something's gone off the north post, and I'm not saying what. Yet.",
+        "The river's laughing at me. I can hear it. Come back when you've got somewhere to be.",
       ] },
     ],
   },
@@ -206,13 +213,18 @@ export const NPCS = {
     spot: 'Lantern Square, near the well', move: [{ if: 'wick_tag_done', move: 'tag', partner: 'lark' }, { move: 'turn' }],
     about: 'A small, brave, worried boy. The Duke stole the name-tag his mother sewed so he would not be forgotten.',
     talk: [
-      { if: 'wick_tag_found', ifNot: 'wick_tag_done', scene: 'wick_tag' },
-      { if: 'intro_done', ifNot: 'wick_quest_started', scene: 'wick_tag' },
+      // The name-tag quest opens once the party is whole (bram_joined). Before that Wick only hints.
+      { if: ['wick_tag_found', B], ifNot: 'wick_tag_done', scene: 'wick_tag' },
+      { if: B, ifNot: 'wick_quest_started', scene: 'wick_tag' },
       { if: ['wick_tag_done', DONE], lines: [
         "My tag still says me! And the gate says Willowmere again, so I'm double safe!",
       ] },
       { if: 'wick_tag_done', lines: [
         "I wear my tag on a string now. The Duke can't reach a string. Probably.",
+      ] },
+      { ifNot: B, lines: [
+        "The Duke keeps looking at my collar. Ma sewed something on it. I'm not telling you what. It's private.",
+        "He's the meanest duck in the whole world. Lark says I'm scared of him. I'm not. I'm careful.",
       ] },
       { lines: [
         "I can't play tag without my tag. Lark made that rule.",
@@ -527,10 +539,12 @@ export const NPCS = {
       ] },
       { if: 'lantern_get', lines: [
         'Is that a Keeper\'s lantern? May I... no. No, you keep it. Some things should stay with the people using them.',
+        'Take it past the pines, east of the fork, to the pool where the pilgrims lost their bridge. Ink remembers, they say.',
       ] },
       { lines: [
         "I'm Quill, a scribe. I walk the pilgrim road every year to copy the milestone.",
         'This year I copy every name twice. One for me, and one for the village, in case one of us forgets.',
+        'Past the pines east of the fork is a black pool where the pilgrims lost a bridge. Lost, mind. Not broken.',
       ] },
     ],
   },

@@ -40,6 +40,7 @@ const overlays = [
   { t: 'ink_bridge_h_faint', x: 34, y: 25 }, { t: 'ink_bridge_h_faint', x: 35, y: 25 },
   { t: 'wall_glyph_faint', x: 17, y: 20 },    // hidden_ink_3, beside the great door
   { t: 'wall_glyph_revealed', x: 23, y: 2 },  // the broken chronicle
+  { t: 'wall_glyph_revealed', x: 22, y: 9 },  // the crystal plaque beside the barred door
   ...wallShelf(2, 4, 9), ...wallShelf(7, 13, 9),
   ...wallShelf(2, 4, 2), ...wallShelf(7, 9, 2),
   ...wallShelf(18, 23, 2),
@@ -95,6 +96,7 @@ const events = [
   crystal('crystal_a', 18, 12, 'gate_bk', 'blue'), crystal('crystal_b', 23, 12, 'gate_bk', 'gold'), crystal('crystal_c', 21, 17, 'gate_bk', 'blue'),
   gate('gate_bk', 20, 10, 'door_locked', { to: ['archive_f3', 20, 8, 'up'] }),
   door('notch_bk', 20, 8, ['archive_f3', 20, 11, 'down']),
+  sign('crystal_plaque', 22, 10, 'crystal_plaque', { solid: false }),
   // the pits drop into the cache; the cache stairs climb back to the pit room (one way)
   pit('pits_pr', 27, 11, 11, 8, ['archive_f3', 31, 24, 'down']),
   door('cache_up', 33, 22, ['archive_f3', 32, 11, 'down'], { kind: 'stairs' }),
@@ -117,14 +119,15 @@ const events = [
   // signs and books
   sign('broken_chronicle', 23, 3, 'broken_chronicle', { solid: false }),
   book('keeper_journal_3', 22, 6, 'keeper_journal_3', { solid: false }),
-  // visible enemies: 8 per ZONES.archive_f3.plan
+  // visible enemies: 8 per ZONES.archive_f3.plan. The two-wraith group guards the letter alcove (avoidable);
+  // the corridor to the bell hollow, which cannot be avoided, carries the lighter ink group (PLAYTEST_REVIEW_1 3).
   enemy('e_ws_ink_a', 6, 12, 'ink_wraith', 'f3_ink', 'chase'),
   enemy('e_ws_mixed', 11, 17, 'tome_golem', 'f3_mixed', 'patrol', { path: steps('left', 4, 'right', 4) }),
-  enemy('e_ws_ink_b', 3, 14, 'ink_wraith', 'f3_ink', 'guard'),
+  enemy('e_ws_wraiths', 3, 14, 'ink_wraith', 'f3_wraiths', 'guard'),
   enemy('e_cr_golem', 19, 14, 'tome_golem', 'f3_golem', 'guard'),
   enemy('e_pr_golem', 34, 13, 'tome_golem', 'f3_golem', 'chase'),
   enemy('e_pr_mixed', 29, 16, 'tome_golem', 'f3_mixed', 'wander', { radius: 1 }),
-  enemy('e_cor_wraiths', 5, 20, 'ink_wraith', 'f3_wraiths', 'patrol', { path: steps('down', 1, 'up', 1) }),
+  enemy('e_cor_ink', 5, 20, 'ink_wraith', 'f3_ink', 'patrol', { path: steps('down', 1, 'up', 1) }),
   enemy('e_gd_wraiths', 16, 24, 'ink_wraith', 'f3_wraiths', 'chase'),
 ];
 

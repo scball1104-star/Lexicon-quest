@@ -19,7 +19,7 @@ Everything returns a promise (or a plain value) and every call is awaited.
 | `lockInput()` / `unlockInput()` | Every scene is wrapped in these (the wrapper also releases on error). |
 | `say(who, text, opts?)` | One dialogue box. `who`: an actor id (`hero`, `mira`, `bram`, an NPC id from `npcs.js`, a spawned id, or a map actor `echo_warden` / `archivore`), or `null` for narration (no name tag, no portrait). `opts.portrait`: portrait id (`hero`, `mira`, `bram`, `mael`). If no portrait is given, the UI may use `NPCS[who].portrait` when that asset exists. Display names come from `speakerName(who)` in `npcs.js` (spawned actors carry their own `name`). Resolves when the player dismisses the box. Text tokens: `{hero}`, `{c:color}..{/c}`. |
 | `choice(options)` | Shows options (max 28 characters each) under the last box. Resolves to the chosen index. Cancel picks the last option. |
-| `walk(who, path, opts?)` | `path` is either an array of `'up'|'down'|'left'|'right'` steps, or a **string naming a mark, event or actor**: pathfind to that tile (for an actor: the free tile next to it). `opts.speed`: `'walk'` (default), `'run'`, `'slow'`. When `who` is `hero`, the followers trail as usual. |
+| `walk(who, path, opts?)` | `path` is either an array of `'up'|'down'|'left'|'right'` steps, or a **string naming a mark, event or actor**: pathfind to that tile (for an actor: the free tile next to it). `opts.speed`: `'walk'` (default), `'run'`, `'slow'`. When `who` is `hero`, the followers trail as usual. `who` may also be a map enemy's event id (`first_fight` drives `e_wolves_a`). |
 | `face(who, dirOrActor)` | A direction, or another actor id to turn toward. |
 | `jump(who)` | A small hop in place. |
 | `emote(who, kind)` | Balloon over the actor: `! ? ... heart sweat anger music zzz`. |
@@ -61,6 +61,8 @@ therefore be simple and do not need `once`.
   boxes, or a first-match conditional list). Books: `{ type: 'book', book: '<bookId>' }` reads `BOOKS` in
   `text.js` (title, then pages).
 - **Scripted objects.** An inspectable object that runs a scene: `{ type: 'object', script: '<sceneId>', sprite? }`.
+  With `rest: true` (the valley campfire) the field runs the Keeper's font flow after the scene returns: "Rest
+  here?", full heal, the save prompt. Such objects also carry `safe: true`.
 - **Location banners.** `BANNERS[mapId]` in `text.js`.
 
 ### Visual state driven by flags
@@ -72,6 +74,8 @@ therefore be simple and do not need `once`.
 | `archivore_defeated` | Every sign is restored. Hal appears in the bakery. The root passage in `archive_boss` opens. The town is back to normal colors. |
 | `ep1_complete` | Post-game state (NPC lines change). After the credits, load `hero_home` at `bed` in day lighting: Hazel's last line pays off there. |
 | `nella_bell_done` | The valley north landing bell post becomes an exit to the Willowmere ferry landing (ferry shortcut). |
+| `archive_f1_done` | The Keepers' back-stair appears on F1: `stairs_up` objects and doors `shortcut_b` (stairs landing J) and `shortcut_j` (antechamber B), both ways. |
+| `first_fight_done` | The wolf pack `e_wolves_a` at the valley road bend stays a normal `chase` enemy; the scene only despawns it for the current visit. |
 | `starter_quest_started` and not `starter_found` | `starter_dough` sits by the smithy forge. |
 | `nella_quest_started` and not `ferry_bell_found` | The bell (`prop_ferry_bell`) glints in the valley shallows. |
 
@@ -179,6 +183,24 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 - Map: `valley`. The milestone is an object (`prop_milestone`) with `script: 'milestone'`. First read with the
   party adds Mira and Bram's lines and sets `saw_milestone`; later reads only show the inscription.
 
+### first_fight
+- Map: `valley`. Step trigger `first_fight_trig` down the whole of column 7 (rows 6 to 39: every passable cell at
+  x 7, so the meadow offers no way round), a few steps out of the gate. Needs `bram_joined`, not `first_fight_done`.
+- The wolf pack is the map enemy **`e_wolves_a`** (`valley_wolves`, `chase`, at the bend (14,33)). Camera pans to
+  it (40 frames), both companions emote, the pack runs to the hero (`walk('e_wolves_a', 'hero', { speed: 'run' })`),
+  camera back to the hero. Bram one box (the valley's first-enemy line and the Lunge tip), Mira one box (Appraise).
+- `battle('valley_wolves', { canFlee: false })`. On a win the pack is despawned, two boxes, `first_fight_done`.
+  On a loss the engine runs Game Over and the trigger fires again on reload. Four boxes in all, no signage.
+
+### campfire_rest
+- Map: `valley`. Object **`campfire`** (sprite `brazier_lit`, the Pilgrim's Rest fire at (39,22)) with
+  `script: 'campfire_rest'`, `safe: true` and `rest: true`. Quill stands beside it; the log bench (38,23) carries the
+  inspect sign `pilgrim_bench`.
+- First visit (needs `bram_joined`): emotes, Bram's one box, a three-way choice (Bram about Emberpeak, Mira about
+  the Archive, just rest), three boxes for the answer, sets `campfire_rested`. Later visits: Bram's one-box offer.
+- The scene never heals: the field's rest flow (Rest here?, full heal, save prompt) runs after it returns.
+  No second font or bell exists on this map.
+
 ### archive_door
 - Map: `valley`, north end. Step trigger on mark **`door_step`** (the tile directly in front of the great door).
 - Mark **`archive_door`**: the door itself (camera pans there, 60 frames). **The tiles directly left and right of
@@ -197,7 +219,9 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 
 ### archive_f1_bell
 - Map: `archive_f1`. Step trigger on the landing in front of the stairs down (behind the locked gate).
-- SFX `bell_toll`, shake. Sets `archive_f1_done`.
+- SFX `bell_toll`, shake. Sets `archive_f1_done`, then SFX `door_rumble`, a small shake and one narration box: the
+  Keepers' back-stair (`shortcut_b_stairs` beside the stairs, `shortcut_j_stairs` in the antechamber) appears
+  with the flag, so the player sees it open.
 
 ### archive_f2_arrival
 - Map: `archive_f2`. Trigger `on: 'enter'`. Decor: two or three faint ink "readers" at desks (a translucent,
@@ -209,7 +233,11 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 ### echo_warden
 - Map: `archive_f2`. A long gallery. Map actor **`echo_warden`** (field sprite of the Echo Warden, facing
   down) stands in front of the lantern pedestal. Step trigger across the gallery 2 to 3 tiles in front of it.
-- Music: silence, then the encounter's own music. Battle `echo_warden` (boss, no flee).
+- Music: silence, camera pans to the Warden (40 frames), half a second of nothing, then the dialogue. Boss intro
+  after Mira's stance line: `title('ECHO WARDEN', { sub: 'Knight of the Last Order', frames: 100 })`, shake, flash,
+  `music('battle')`, then battle `echo_warden` (boss, no flee).
+- The stairs room (east) holds the floor's Keeper's font `keeper_font_f2` (`safe: true`): the breather before
+  the Warden and the last heal before F3's font. There is no other font or bell on the floor.
 - After the win: flash, `page_flutter`, the Warden despawns. Music back to `archive`. Sets `echo_warden_defeated`.
 - If the battle is lost the engine runs Game Over; on reload the trigger plays the scene again.
 
@@ -247,10 +275,14 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
   `on: 'enter'`. The party enters from the south.
 - Map actor **`archivore`** (the boss's field sprite, large) at mark **`archivore`**, north center, facing up
   (it is eating), then turns down. Mark **`fragment_spot`**: two or three tiles south of it.
-- Music: silence, then `boss_archivore`. Battle `archivore` (boss, no flee).
+- Music: silence, camera pans to the Archivore (40 frames), half a second of nothing, then the dialogue. Boss
+  intro after Mira's last line: `title('THE ARCHIVORE', { sub: 'Eater of Names', frames: 100 })`, shake, flash,
+  `music('boss_archivore')`, then battle `archivore` (boss, no flee).
 - After: shake, flash, the Archivore despawns into pages, camera to `fragment_spot`, gives `name_fragment_1`,
-  music `triumph`. Sets `archivore_defeated`; a root passage opens (exit to the valley, mark `root_exit` near
-  the Archive door).
+  music `triumph`, the list. Then the camera returns to where Moth lay: SFX `name_restore`, one narration box,
+  `give('lanternheart')` (the legendary; the field shows the received toast) and Mira's one line, camera back to
+  `fragment_spot`. Sets `archivore_defeated`; a root passage opens (exit to the valley, mark `root_exit` near
+  the Archive door). The battle's own reward roll must not also hand out Lanternheart (see the W5 report).
 
 ### return_to_willowmere and ending_hook
 - Map: `willowmere`. Trigger `on: 'enter'` (needs `archivore_defeated`, not `returned_home`), so it works whether
@@ -292,9 +324,9 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | `inn` | NPCs `hob barnaby` |
 | `item_shop` | NPC `pell` |
 | `chapel` | NPC `pip`; save bell object |
-| `valley` | `archive_door`, `door_step` (+ open tiles left and right), `root_exit`; objects `milestone`, `prop_ferry_bell`; NPCs `quill penny` |
+| `valley` | `archive_door`, `door_step` (+ open tiles left and right), `root_exit`, `campfire`; objects `milestone`, `prop_ferry_bell`, `campfire`; NPCs `quill penny` |
 | `archive_f1` | `catalog_drawer`; object `prop_letter` (letter 1) |
-| `archive_f2` | actor `echo_warden`; object `lantern_pedestal`; object `prop_letter` (letter 2) |
+| `archive_f2` | `font`; actor `echo_warden`; object `lantern_pedestal`; object `prop_letter` (letter 2) |
 | `archive_f3` | `thirteenth_bell`; object `boss_door`; object `prop_letter` (letter 3); chest with flag `stacks_key_found` |
 | `archive_boss` | actor `archivore`, `fragment_spot`, root passage exit |
 
@@ -309,10 +341,10 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | `inn` | `inn_guestbook` | |
 | `bakery` | `bakery_crock`, `flour_bin` | |
 | `smithy` | `forge` | |
-| `valley` | `valley_fork_sign`, `milestone` (object runs the scene), `hollow_tree`, `pilgrim_rest`, `bridge_plaque`, `ferry_post_valley`, `whisperwood_edge` | |
+| `valley` | `valley_fork_sign`, `milestone` (object runs the scene), `hollow_tree`, `pilgrim_rest` (the campfire; `campfire_rest` runs first), `pilgrim_bench`, `pilgrim_note`, `bridge_plaque`, `ferry_post_valley`, `whisperwood_edge` | |
 | `archive_f1` | `archive_door_carving` (valley side), `catalog_promise`, `catalog_drawers`, `marginalia`, `reading_desk` | `catalog_ledger`, `keeper_journal_1` |
-| `archive_f2` | `reading_desk`, `hidden_ink_1`, `hidden_ink_2` | `readers_oath`, `keeper_journal_2` |
-| `archive_f3` | `broken_chronicle`, `keeper_font`, `thirteenth_bell`, `boss_door_plate`, `hidden_ink_3` | `keeper_journal_3` |
+| `archive_f2` | `reading_desk`, `hidden_ink_1`, `hidden_ink_2`, `keeper_font_galleries` (the font) | `readers_oath`, `keeper_journal_2` |
+| `archive_f3` | `broken_chronicle`, `keeper_font`, `crystal_plaque`, `thirteenth_bell`, `boss_door_plate`, `hidden_ink_3` | `keeper_journal_3` |
 
 `hidden_ink_*` texts only become readable once the Lantern reveals them.
 
@@ -320,8 +352,11 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 
 `BARKS` in `text.js`: one companion line the first time something happens (first chest, first visible enemy,
 first locked door, first pushed block, first switch, first dark room, first hidden-ink reveal, first font,
-first elite, first rare and legendary drop, fleeing, the Pilgrim's Rest). Show each once per save, as a small
-non-blocking line or a single box. Each entry is a first-match conditional list (the speaker must have joined).
+first elite, first rare and legendary drop, fleeing). Show each once per save, as a small non-blocking line or a
+single box. Each entry is a first-match conditional list (the speaker must have joined).
+`first_visible_enemy` only matches once `archive_entered` is set: it teaches the dungeon step rule (DESIGN 5.2),
+so it fires on the first Archive enemy and a valley touch does not consume the one-shot key. The valley's first
+wolves are the scripted `first_fight`; the Pilgrim's Rest line is in `campfire_rest`.
 
 ## 8. The Talk command (party chat)
 
