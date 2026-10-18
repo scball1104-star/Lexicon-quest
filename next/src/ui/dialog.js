@@ -17,11 +17,13 @@
 //   -> chosen index, or undefined when there were no choices.
 //
 // Confirm (or a tap on the window) finishes the typewriter, then turns the page, then closes. Cancel acts
-// like confirm on plain text and picks the cancel option on choices. Text speed comes from settings.
+// like confirm on plain text and picks the cancel option on choices. Text speed comes from settings
+// (1 slow, 2 normal, 3 fast, 4 instant: the whole page appears at once and the blips stay quiet).
+// Pages end on word boundaries (text.js paginate + hardBreaks); the per-speaker blip voice is voiceFor(who).
 
 import { drawWindow, drawPortrait, hasPortrait, drawTextMark, WindowAnim } from './window.js';
 import { ChoiceBox, popScene } from './choice.js';
-import { fillHero, paginate, charsPerFrame, voiceFor } from './text.js';
+import { fillHero, paginate, hardBreaks, charsPerFrame, voiceFor } from './text.js';
 import { speakerName, NPCS } from '../data/npcs.js';
 
 export const DIALOG_ROWS = 3;
@@ -75,8 +77,10 @@ export class DialogScene {
     const textX = this.portrait ? 64 : 12;
     this.textX = rect.x + textX;
     this.textW = rect.w - textX - 14;
+    // Lines break on word boundaries (the font wrapper only cuts a word longer than the whole line) and a
+    // page never ends on such a cut, so the typewriter may stop mid-word only while it is still typing.
     const lines = r.wrap(this.text, this.textW);
-    this.pages = paginate(lines, box.rows || DIALOG_ROWS);
+    this.pages = paginate(lines, box.rows || DIALOG_ROWS, { hard: hardBreaks(this.text, lines) });
     this.page = 0;
     this.choices = Array.isArray(box.choices) && box.choices.length ? box.choices : null;
     this.choiceBox = null;

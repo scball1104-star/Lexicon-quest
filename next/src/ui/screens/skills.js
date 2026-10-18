@@ -1,6 +1,6 @@
 // Tech / Magic screen: a member's known skills with MP costs and help; field heals are castable.
 
-import { List } from '../list.js';
+import { List, rowHeightFor, rowsThatFit } from '../list.js';
 import { drawWindow, drawIcon, drawGauge, drawLabel } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { MemberPicker, drawMemberHeader } from './common.js';
@@ -17,7 +17,8 @@ export class SkillsScreen {
   enter(member) {
     this.member = member;
     this.picker = null;
-    this.list = new List({ x: 174, y: 10, w: 200, rowH: 12, rows: 13, items: [], textX: 19 });
+    const rowH = rowHeightFor(this.engine, 12);
+    this.list = new List({ x: 174, y: 10, w: 200, rowH, rows: rowsThatFit(166, rowH), items: [], textX: 19 });
     this.refresh(false);
   }
   get title() { return this.kind === 'magic' ? 'Magic' : 'Tech'; }

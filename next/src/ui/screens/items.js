@@ -1,6 +1,6 @@
 // Items screen: consumables (use on a member) and key items, two tabs.
 
-import { List } from '../list.js';
+import { List, rowHeightFor, rowsThatFit } from '../list.js';
 import { drawWindow } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { MemberPicker, drawTabs } from './common.js';
@@ -14,7 +14,8 @@ export class ItemsScreen {
   enter() {
     this.tab = 0;
     this.picker = null;
-    this.list = new List({ x: 10, y: 36, w: 364, rowH: 12, rows: 11, columns: 2, items: [], textX: 19 });
+    const rowH = rowHeightFor(this.engine, 12);
+    this.list = new List({ x: 10, y: 36, w: 364, rowH, rows: rowsThatFit(138, rowH), columns: 2, items: [], textX: 19 });
     this.refresh(false);
     this.note = null;
   }

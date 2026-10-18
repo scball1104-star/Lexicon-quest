@@ -1,6 +1,6 @@
 // Journal: main quest step and side quests; Bestiary tab with seen/killed counts, known weaknesses and lore.
 
-import { List } from '../list.js';
+import { List, rowHeightFor, rowsThatFit } from '../list.js';
 import { drawWindow, drawIcon, drawDivider, drawScrollArrow } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { drawTabs } from './common.js';
@@ -26,7 +26,8 @@ export class JournalScreen {
   enter() {
     this.tab = 0;
     const ids = Object.keys(BESTIARY);
-    this.beasts = new List({ x: 10, y: 34, w: 138, rowH: 12, rows: 12, items: ids.map((id) => {
+    const rowH = rowHeightFor(this.engine, 12);
+    this.beasts = new List({ x: 10, y: 34, w: 138, rowH, rows: Math.min(12, rowsThatFit(144, rowH)), items: ids.map((id) => {
       const e = bestiaryEntry(this.g, id);
       const known = e.seen > 0 || e.killed > 0;
       return { id, label: known ? BESTIARY[id].name : '???', color: known ? (e.killed ? 'white' : 'gray') : 'dim', known, entry: e };

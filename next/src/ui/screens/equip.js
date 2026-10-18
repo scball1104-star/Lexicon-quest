@@ -1,7 +1,7 @@
 // Equip screen: slots on the left (two weapon types, body, head, charm, boots, mantle + Optimize / Remove All),
 // candidates on the right with rarity colors, a compare table with green/red deltas, set bonus lines.
 
-import { List } from '../list.js';
+import { List, rowHeightFor, rowsThatFit } from '../list.js';
 import { drawWindow, drawIcon, drawDelta, drawDivider } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { drawMemberHeader } from './common.js';
@@ -19,8 +19,10 @@ export class EquipScreen {
   enter(member) {
     this.member = member;
     this.focus = 'slots';
-    this.slots = new List({ x: 10, y: 56, w: 152, rowH: 11, rows: 9, items: [], iconX: 2, textX: 17 });
-    this.cands = new List({ x: 174, y: 30, w: 200, rowH: 12, rows: 6, items: [], textX: 19 });
+    // Touch rows: the slot list (9 rows) scrolls inside its 112 px window; the candidate list shows 5 rows.
+    const slotH = rowHeightFor(this.engine, 11), candH = rowHeightFor(this.engine, 12);
+    this.slots = new List({ x: 10, y: 56, w: 152, rowH: slotH, rows: Math.min(9, rowsThatFit(104, slotH)), items: [], iconX: 2, textX: 17 });
+    this.cands = new List({ x: 174, y: 30, w: 200, rowH: candH, rows: rowsThatFit(74, candH), items: [], textX: 19 });
     this.cands.active = false;
     this.note = null;
     this.refreshSlots(false);
@@ -165,8 +167,7 @@ export class EquipScreen {
     drawMemberHeader(r, m, 4, 4, 164, 44, { mastery: true });
     drawWindow(r, 4, 50, 164, 112);
     this.slots.draw(r, { frame: r.frame, cursor: this.focus === 'slots', bar: this.focus === 'slots' });
-    const divY = this.slots.rowRect(this.keys.length).y - 1;
-    drawDivider(r, 10, divY, 152);
+    if (this.slots.isVisible(this.keys.length)) { const divY = this.slots.rowRect(this.keys.length).y - 1; drawDivider(r, 10, divY, 152); }
     // Candidate list with a title.
     drawWindow(r, 168, 4, 212, 104);
     const slot = this.slots.item;

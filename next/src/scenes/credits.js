@@ -1,5 +1,6 @@
-// Credits: CREDITS cards (data/text.js) scrolling up over drifting key art with the triumph theme.
-// engine.push('credits') (or pushAwait); pops when the last card has held. start skips, confirm hurries.
+// Credits: CREDITS cards (data/text.js) scrolling up over the quantized `dialog_keyart` backdrop (painted
+// crop as the fallback) with the triumph theme. engine.push('credits') (or pushAwait); pops when the last
+// card has held centered for 4 s. start skips, confirm hurries.
 
 import { CREDITS } from '../data/text.js';
 import { KeyArt } from '../ui/keyart.js';
@@ -13,7 +14,7 @@ export class CreditsScene {
   enter(data = {}) {
     const e = this.engine;
     this.cards = (data.cards || CREDITS).map((c) => ({ heading: fillHero(c.heading || '', e.game), lines: (c.lines || []).map((l) => fillHero(l, e.game)) }));
-    this.art = new KeyArt(e, { cell: data.cell ?? 0, drift: 1.2, range: 12 });
+    this.art = new KeyArt(e, { backdrop: data.backdrop || 'dialog_keyart', cell: data.cell ?? 0, drift: 1.2, range: 12 });
     this.y = 0; this.t = 0; this.done = false; this.holdT = 0;
     // Pre-compute card heights.
     let y = e.renderer.H + 10;
@@ -47,7 +48,8 @@ export class CreditsScene {
     this.y += SPEED * (hurry ? 4 : 1);
   }
   draw(r) {
-    this.art.draw(r, { dark: 0.55, vignette: true });
+    if (this.art.usesBackdrop) this.art.draw(r, { dark: 0.3 });
+    else this.art.draw(r, { dark: 0.55, vignette: true });
     this.cards.forEach((c, i) => {
       const L = this.layout[i];
       let y = Math.round(L.at - this.y);
@@ -56,7 +58,11 @@ export class CreditsScene {
       for (const line of c.lines) { r.text(line, r.W / 2, y, { align: 'center', color: 'cream' }); y += 12; }
     });
   }
-  debugState() { return { y: Math.round(this.y), done: this.done }; }
+  debugState() {
+    const last = this.layout[this.layout.length - 1];
+    return { y: Math.round(this.y), done: this.done, holdT: Math.round(this.holdT * 10) / 10, endY: this.endY, lastCardBottom: last ? Math.round(last.at + last.h - this.y) : null,
+      music: this.engine.audio.currentMusic ? this.engine.audio.currentMusic() : null, backdrop: this.art.usesBackdrop };
+  }
 }
 
 export default CreditsScene;

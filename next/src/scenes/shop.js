@@ -1,8 +1,10 @@
 // Shop: engine.pushAwait('shop', { shopId }) -> resolves when the player leaves. Buy / Sell / Leave,
 // quantity picker, per-member "can equip" and stat-delta hints, buy / coin sounds, keeper line.
+// Touch: stock rows grow to rowHeightFor() and scroll; in the quantity picker a tap on the left / right
+// arrow steps the count, a tap elsewhere in the window confirms, a tap outside it cancels.
 
-import { List } from '../ui/list.js';
-import { drawWindow, drawIcon, drawPortrait, drawDelta, drawDivider } from '../ui/window.js';
+import { List, rowHeightFor, rowsThatFit } from '../ui/list.js';
+import { drawWindow, drawIcon, drawPortrait, drawDelta, drawDivider, drawPageArrow } from '../ui/window.js';
 import { drawHelpBar } from '../ui/help.js';
 import { fmtGold } from '../ui/text.js';
 import { SHOPS, shopStock } from '../data/shops.js';
@@ -13,6 +15,8 @@ import { count, hasFlag } from '../game/state.js';
 import { buyItem, sellables, sellConsumable, sellGear, fits, weaponTypes, baseOf, itemLine } from '../game/inventory.js';
 
 const CMDS = ['Buy', 'Sell', 'Leave'];
+const STOCK = { x: 4, y: 32, w: 220, h: 148 };
+const QTY = { x: 100, y: 80, w: 184, h: 50, zone: 28 };   // zone: tap target width of each arrow (px)
 const LINES = {
   items: ['Take a look. Everything is labeled. Twice.', 'Stocking up? Wise. The road is long.'],
   equipment: ['Steel, leather, and no small talk.', 'Pick it up. Feel the weight. Then decide.'],
@@ -35,7 +39,8 @@ export class ShopScene {
     this.qty = null;
     this.note = null;
     this.frame = 0;
-    this.list = new List({ x: 10, y: 38, w: 210, rowH: 12, rows: 11, items: [], textX: 19 });
+    const rowH = rowHeightFor(e, 12);
+    this.list = new List({ x: STOCK.x + 6, y: STOCK.y + 6, w: STOCK.w - 10, rowH, rows: rowsThatFit(STOCK.h - 10, rowH), items: [], textX: 19 });
     this.list.active = false;
     this.refresh(false);
     if (!this.g || !this.shop) { this.dead = true; }
@@ -123,7 +128,13 @@ export class ShopScene {
     if (d === 'up') { q.n = Math.min(q.max, q.n + 10); audio.sfx('cursor'); }
     if (d === 'down') { q.n = Math.max(1, q.n - 10); audio.sfx('cursor'); }
     if (input.pressed('cancel')) { audio.sfx('cancel'); this.qty = null; return; }
-    if (input.pressed('confirm') || input.tapIn(100, 80, 184, 50)) {
+    const { x, y, w, h, zone } = QTY;
+    if (input.pointer.pressed) {
+      if (input.tapIn(x + w - 2 * zone - 8, y + 10, zone, h - 14)) { if (q.n > 1) { q.n--; audio.sfx('cursor'); } else audio.sfx('buzzer'); return; }
+      if (input.tapIn(x + w - zone - 4, y + 10, zone + 4, h - 14)) { if (q.n < q.max) { q.n++; audio.sfx('cursor'); } else audio.sfx('buzzer'); return; }
+      if (!input.tapIn(x, y, w, h)) { audio.sfx('cancel'); this.qty = null; return; }
+    }
+    if (input.pressed('confirm') || input.tapIn(x, y, w, h)) {
       if (q.max < 1) { audio.sfx('buzzer'); this.qty = null; return; }
       if (q.sell) { const gold = sellConsumable(this.g, q.item.id, q.n); audio.sfx('coin'); this.say(`Sold ${q.item.label} x${q.n} for ${gold} gold.`); }
       else this.buy(q.item, q.n);
@@ -188,24 +199,28 @@ export class ShopScene {
     drawWindow(r, 158, 4, 222, 24);
     r.text(`{c:gold}${this.keeperName}{/c}  ${this.line}`, 166, 10, { width: 206 });
     // Stock list.
-    drawWindow(r, 4, 32, 220, 148);
+    drawWindow(r, STOCK.x, STOCK.y, STOCK.w, STOCK.h);
     this.list.draw(r, { frame: this.frame, cursor: this.focus === 'list' && !this.qty, bar: this.focus === 'list' });
     if (!this.list.items.length) r.text(this.cmd === 0 ? 'Nothing for sale.' : 'Nothing to sell.', 114, 98, { align: 'center', color: 'dim' });
     this.drawInfo(r);
     drawHelpBar(r, this.help, { right: `${fmtGold(this.g.gold)} G` });
     if (this.qty) {
       const q = this.qty;
-      const x = 100, y = 80, w = 184, h = 50;
+      const { x, y, w, h, zone } = QTY;
       drawWindow(r, x, y, w, h);
       r.text(q.sell ? 'Sell how many?' : 'Buy how many?', x + 8, y + 6, { color: 'gold' });
       drawIcon(r, q.item.icon, x + 8, y + 20);
       r.text(`${q.item.label}`, x + 24, y + 21);
-      r.text(`◂ ${q.n} ▸`, x + w - 8, y + 21, { align: 'right', color: 'white' });
+      // Count with real arrow glyphs (the font has no triangle characters); each arrow has a wide tap zone.
+      const cx = x + w - zone - 8;
+      drawPageArrow(r, 'left', cx - 14 - 6, y + 23, { alpha: q.n > 1 ? 1 : 0.4 });
+      r.text(String(q.n), cx, y + 21, { align: 'center', color: 'white' });
+      drawPageArrow(r, 'right', cx + 14, y + 23, { alpha: q.n < q.max ? 1 : 0.4 });
       r.text(`${q.n * q.item.price} G`, x + w - 8, y + 34, { align: 'right', color: 'gold' });
       r.text('Up/Down: 10 at a time', x + 8, y + 34, { color: 'dim' });
     }
   }
-  debugState() { return { shop: this.shop ? this.shop.id : null, cmd: CMDS[this.cmd], focus: this.focus, index: this.list.index, item: this.list.item ? this.list.item.id : null, qty: this.qty ? this.qty.n : null, gold: this.g ? this.g.gold : null }; }
+  debugState() { return { shop: this.shop ? this.shop.id : null, cmd: CMDS[this.cmd], focus: this.focus, index: this.list.index, item: this.list.item ? this.list.item.id : null, qty: this.qty ? this.qty.n : null, gold: this.g ? this.g.gold : null, rowH: this.list.rowH, rows: this.list.rows }; }
 }
 
 export default ShopScene;

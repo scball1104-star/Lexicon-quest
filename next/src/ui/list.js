@@ -11,9 +11,33 @@
 //
 // Labels may be functions (evaluated at draw time). `disabled` rows can be landed on (FF style) and buzz on
 // confirm unless `skipDisabled` is set. `textX` overrides where the label starts inside the row.
+//
+// Touch (W4b, CRITIQUE C12): while the touch controls are showing, menus build their lists with
+// rowHeightFor(engine, base) so every row is at least TOUCH_ROW_H game px (15 px = 25 css px on the phone
+// profile, where one game px is 5/3 css px). Rows taller than 12 px center their text, icon and bar.
+// `tapMode: 'single'` makes a tap select AND confirm in one go (the name entry grid); the default is tap to
+// select, tap the selected row again to confirm.
 
 import { drawSelBar, drawIcon, drawScrollArrow, drawPageDots, schemeColors } from './window.js';
 import { drawCursor, cursorHotspotForRow } from './cursor.js';
+
+/** Minimum row height (game px) while touch controls are showing. */
+export const TOUCH_ROW_H = 15;
+
+/** True when the on-screen touch controls are visible (the player is on a touch layout). */
+export function touchUi(engine) {
+  return !!(engine && engine.touch && engine.touch.visible);
+}
+
+/** Row height for a menu: `base` with a keyboard or pad, at least TOUCH_ROW_H on a touch layout. */
+export function rowHeightFor(engine, base = 12, touchH = TOUCH_ROW_H) {
+  return touchUi(engine) ? Math.max(base, touchH) : base;
+}
+
+/** How many rows of `rowH` fit in `available` px (never below 1). */
+export function rowsThatFit(available, rowH) {
+  return Math.max(1, Math.floor(available / rowH));
+}
 
 export class List {
   constructor(o = {}) {
@@ -22,6 +46,7 @@ export class List {
     this.scroll = 0;                       // first visible row (in rows, not items)
     this.rows = o.rows || Math.max(1, Math.ceil(this.items.length / (o.columns || 1)));
     this.rowH = o.rowH || 12;
+    this.tapMode = o.tapMode === 'single' ? 'single' : 'double';
     this.columns = Math.max(1, o.columns || 1);
     this.x = o.x || 0; this.y = o.y || 0; this.w = o.w || 100;
     this.colW = o.colW || Math.floor(this.w / this.columns);
@@ -49,6 +74,8 @@ export class List {
 
   get length() { return this.items.length; }
   get item() { return this.items[this.index] || null; }
+  /** Vertical offset that centers one 11 px text line (or a 12 px icon) in a row taller than 12 px. */
+  get textDy() { return Math.max(0, Math.floor((this.rowH - 12) / 2)); }
   get rowCount() { return Math.ceil(this.items.length / this.columns); }
   get maxScroll() { return Math.max(0, this.rowCount - this.rows); }
   get page() { return this.rows > 0 ? Math.floor(this.scroll / this.rows) : 0; }
@@ -154,6 +181,7 @@ export class List {
         const dr = this._drag; this._drag = null;
         if (!dr.moved && dr.row >= 0) {
           if (dr.row === this.index) { if (!action) action = 'confirm'; }
+          else if (this.tapMode === 'single') { this.moveTo(dr.row); if (!action) action = 'confirm'; }
           else if (this.moveTo(dr.row)) snd('cursor');
         }
       }
@@ -185,9 +213,10 @@ export class List {
     const last = Math.min(n, (this.scroll + this.rows) * this.columns);
     const showCursor = this.active && (o.cursor ?? this.cursor) && n > 0;
     const showBar = this.active && (o.bar ?? this.bar);
+    const dy = this.textDy;
     if (showBar && this.index >= first && this.index < last) {
       const rr = this.rowRect(this.index);
-      if (this.rowH <= 12) drawSelBar(r, rr.x, rr.y, rr.w, { scheme: o.scheme, alpha });
+      if (this.rowH <= 16) drawSelBar(r, rr.x, rr.y + dy, rr.w, { scheme: o.scheme, alpha });
       else { const c = schemeColors(r, o.scheme); r.withAlpha(0.28 * alpha, () => r.rect(rr.x, rr.y, rr.w, rr.h, c.highlight)); }
     }
     for (let i = first; i < last; i++) {
@@ -196,14 +225,14 @@ export class List {
       const rr = this.rowRect(i);
       const dim = it.disabled || o.dimAll;
       const label = typeof it.label === 'function' ? it.label() : it.label;
-      if (icons && it.icon) drawIcon(r, it.icon, rr.x + this.iconX, rr.y, { alpha: alpha * (dim ? 0.5 : 1) });
+      if (icons && it.icon) drawIcon(r, it.icon, rr.x + this.iconX, rr.y + dy, { alpha: alpha * (dim ? 0.5 : 1) });
       if (label != null) {
-        if (this.align === 'center') r.text(String(label), rr.x + Math.floor(rr.w / 2), rr.y + 1, { align: 'center', color: dim ? 'dim' : (it.color || 'white'), alpha });
-        else r.text(String(label), rr.x + textX, rr.y + 1, { color: dim ? 'dim' : (it.color || 'white'), alpha });
+        if (this.align === 'center') r.text(String(label), rr.x + Math.floor(rr.w / 2), rr.y + 1 + dy, { align: 'center', color: dim ? 'dim' : (it.color || 'white'), alpha });
+        else r.text(String(label), rr.x + textX, rr.y + 1 + dy, { color: dim ? 'dim' : (it.color || 'white'), alpha });
       }
       if (it.right != null) {
         const right = typeof it.right === 'function' ? it.right() : it.right;
-        r.text(String(right), rr.x + rr.w - this.rightPad, rr.y + 1, { align: 'right', color: dim ? 'dim' : (it.rightColor || 'gray'), alpha });
+        r.text(String(right), rr.x + rr.w - this.rightPad, rr.y + 1 + dy, { align: 'right', color: dim ? 'dim' : (it.rightColor || 'gray'), alpha });
       }
       if (typeof it.draw === 'function') it.draw(r, rr, dim, alpha);
     }

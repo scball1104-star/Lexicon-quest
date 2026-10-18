@@ -7,7 +7,7 @@
 //   box.update() -> index | -1 (cancel) | null;   box.draw(r);   box.rect
 
 import { drawWindow, WindowAnim } from './window.js';
-import { List } from './list.js';
+import { List, rowHeightFor } from './list.js';
 import { fillHero } from './text.js';
 
 export class ChoiceBox {
@@ -19,7 +19,7 @@ export class ChoiceBox {
     this.engine = engine;
     const r = engine.renderer;
     this.items = (options || []).map((op) => (typeof op === 'string' ? { label: fillHero(op, engine.game) } : { ...op, label: fillHero(op.label, engine.game) }));
-    const rowH = o.rowH || 11;
+    const rowH = o.rowH || rowHeightFor(engine, 11);   // touch layouts get 15 px rows
     let tw = 0;
     for (const it of this.items) tw = Math.max(tw, r.measure(it.label));
     const w = Math.max(o.minWidth || 48, tw + 32);

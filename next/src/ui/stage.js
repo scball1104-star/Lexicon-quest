@@ -11,7 +11,7 @@ export class UiStageScene {
   constructor(engine) { this.engine = engine; this.name = '_uiStage'; this.t = 0; this.frame = 0; }
   enter(data = {}) {
     const e = this.engine;
-    this.art = new KeyArt(e, { cell: data.cell ?? 0, drift: 1 });
+    this.art = new KeyArt(e, { backdrop: data.backdrop || 'title', cell: data.cell ?? 0, drift: 1 });
     this.bannerT = data.banner === false ? 99 : 0;
     this.map = (e.game && e.game.map) || 'willowmere';
     this.walk = 0;

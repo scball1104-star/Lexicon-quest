@@ -1,8 +1,9 @@
-// Title screen: logo with sparkles over drifting key art, New Game / Continue / Config, version string,
-// attract mode after 20 s idle (prologue cards, then back). Also the UI module's install(): toasts, the
-// 'choice' and '_uiStage' scenes, the stats provider, and LQ_DEBUG.newGame / give / uiStage.
+// Title screen: logo with sparkles over the quantized `title` backdrop (assets/backdrops, 2 px drift; the
+// painted crop is the fallback), New Game / Continue / Config, version string, attract mode after 20 s idle
+// (prologue cards, then back). Also the UI module's install(): toasts, the 'choice' and '_uiStage' scenes,
+// the stats provider, and LQ_DEBUG.newGame / give / uiStage.
 
-import { List } from '../ui/list.js';
+import { List, rowHeightFor } from '../ui/list.js';
 import { drawWindow, installToasts, ChoiceScene } from '../ui/index.js';
 import { KeyArt } from '../ui/keyart.js';
 import { UiStageScene } from '../ui/stage.js';
@@ -20,7 +21,7 @@ export class TitleScene {
   enter(data = {}) {
     const e = this.engine;
     this.t = 0; this.idle = 0; this.frame = 0;
-    this.art = new KeyArt(e, { cell: 0, drift: 1, range: 10, t: data.artT || 0 });
+    this.art = new KeyArt(e, { backdrop: 'title', cell: 0, drift: 1, range: 10, t: data.artT || 0 });
     this.sparkles = [];
     this.nextSparkle = 0.6;
     this.points = null;
@@ -30,7 +31,11 @@ export class TitleScene {
       { id: 'continue', label: 'Continue', disabled: !this.hasSaves },
       { id: 'config', label: 'Config' },
     ];
-    this.menu = new List({ x: 148, y: 157, w: 88, rowH: 11, rows: 3, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
+    // Menu window: anchored at the bottom (y 196) and grown to fit touch-sized rows.
+    const rowH = rowHeightFor(e, 11);
+    const h = items.length * rowH + 13;
+    this.win = { x: 142, y: 196 - h, w: 100, h };
+    this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);
@@ -93,7 +98,8 @@ export class TitleScene {
 
   draw(r) {
     const e = this.engine;
-    this.art.draw(r, { dark: 0.18, vignette: true });
+    // The quantized backdrop already has its sky shaded for the logo; the painted crop needs the extra dark.
+    this.art.draw(r, { dark: this.art.usesBackdrop ? 0.06 : 0.18, vignette: true });
     const logo = e.assets.has('logo') ? e.assets.atlas('logo') : null;
     const f = logo && logo.frames.logo;
     if (f) {
@@ -110,12 +116,12 @@ export class TitleScene {
       r.text('LEXICON QUEST', r.W / 2, 34, { font: 'large', align: 'center', color: 'gold', outline: '#14101e' });
       r.text('The Reforged Realms', r.W / 2, 56, { align: 'center', color: 'cream' });
     }
-    drawWindow(r, 142, 150, 100, 46, { alpha: 0.92 });
+    drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h, { alpha: 0.92 });
     this.menu.draw(r, { frame: this.frame, bar: false });
     r.text(VERSION, 4, 205, { color: 'gray' });
   }
 
-  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy }; }
+  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop }; }
 }
 
 // ---------------------------------------------------------------- install (runs once at boot from the registry)

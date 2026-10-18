@@ -1,8 +1,9 @@
 // FF-style name entry: 8 characters, a 13x5 glyph grid (A-Z, a-z, 0-9, space, erase, done), keyboard
-// typing through input.startText(), touch taps. Default name "Hero". Result: createGame(name) on
+// typing through input.startText(), touch taps (one tap types the glyph: the cells are 15 px on a touch
+// layout). Over the quantized `title` backdrop. Default name "Hero". Result: createGame(name) on
 // engine.game, then the prologue.
 
-import { List } from '../ui/list.js';
+import { List, rowHeightFor, touchUi } from '../ui/list.js';
 import { drawWindow, drawPortrait, btn } from '../ui/index.js';
 import { drawHelpBar } from '../ui/help.js';
 import { KeyArt } from '../ui/keyart.js';
@@ -13,6 +14,7 @@ const ROWS = [
   'ABCDEFGHIJKLM', 'NOPQRSTUVWXYZ', 'abcdefghijklm', 'nopqrstuvwxyz', '0123456789 ←✓',
 ];
 const GRID = { cols: 13, cellW: 14, cellH: 13 };
+const HELP_RECT = { y: 192, h: 22 };
 
 export class NameEntryScene {
   constructor(engine) { this.engine = engine; this.name = 'nameEntry'; }
@@ -21,13 +23,18 @@ export class NameEntryScene {
     const e = this.engine;
     this.value = data.name != null ? String(data.name) : 'Hero';
     this.t = 0; this.frame = 0; this.busy = false;
-    this.art = new KeyArt(e, { cell: 0, drift: 1, t: data.artT || 0 });
+    this.art = new KeyArt(e, { backdrop: 'title', cell: 0, drift: 1, t: data.artT || 0 });
     const items = [];
     for (const row of ROWS) for (const ch of row) items.push({ id: ch, label: ch === ' ' ? '_' : ch });
-    const gw = GRID.cols * GRID.cellW;
-    this.gridRect = { x: Math.round((e.renderer.W - gw - 24) / 2), y: 104, w: gw + 24, h: ROWS.length * GRID.cellH + 14 };
-    this.grid = new List({ x: this.gridRect.x + 12, y: this.gridRect.y + 7, w: gw, rowH: GRID.cellH, rows: ROWS.length, columns: GRID.cols, colW: GRID.cellW,
-      items, align: 'center', confirmSfx: false, cancelSfx: false, index: 0 });
+    const touch = touchUi(e);
+    const cellH = rowHeightFor(e, GRID.cellH), cellW = Math.max(GRID.cellW, touch ? cellH : 0);
+    const gw = GRID.cols * cellW, gh = ROWS.length * cellH + 14;
+    // Grid anchored just above the help bar; the name window and title move up on a touch layout.
+    this.gridRect = { x: Math.round((e.renderer.W - gw - 24) / 2), y: HELP_RECT.y - 4 - gh, w: gw + 24, h: gh };
+    this.nameRect = { x: 84, y: touch ? 28 : 36, w: 216, h: touch ? 56 : 60 };
+    this.titleY = touch ? 6 : 12;
+    this.grid = new List({ x: this.gridRect.x + 12, y: this.gridRect.y + 7, w: gw, rowH: cellH, rows: ROWS.length, columns: GRID.cols, colW: cellW,
+      items, align: 'center', confirmSfx: false, cancelSfx: false, index: 0, tapMode: 'single' });
     e.input.startText();
     e.audio.music('title');
   }
@@ -93,9 +100,9 @@ export class NameEntryScene {
   draw(r) {
     const e = this.engine;
     this.art.draw(r, { dark: 0.35, vignette: true });
-    r.text('What is your name?', r.W / 2, 12, { font: 'large', align: 'center', color: 'cream' });
+    r.text('What is your name?', r.W / 2, this.titleY, { font: 'large', align: 'center', color: 'cream' });
     // Name window: portrait + 8 cells.
-    const nx = 84, ny = 36, nw = 216, nh = 60;
+    const { x: nx, y: ny, w: nw, h: nh } = this.nameRect;
     drawWindow(r, nx, ny, nw, nh, { alpha: 0.94 });
     drawPortrait(r, 'hero', nx + 6, ny + 4, 48);
     const cx = nx + 66, cy = ny + 20;
@@ -111,11 +118,11 @@ export class NameEntryScene {
     const g = this.gridRect;
     drawWindow(r, g.x, g.y, g.w, g.h, { alpha: 0.94 });
     this.grid.draw(r, { frame: this.frame });
-    drawHelpBar(r, `${btn('confirm')} pick   ${btn('cancel')} erase   ✓ or Enter when done`, { y: 192, h: 22 });
+    drawHelpBar(r, `${btn('confirm')} pick   ${btn('cancel')} erase   ✓ or Enter when done`, { y: HELP_RECT.y, h: HELP_RECT.h });
     void e;
   }
 
-  debugState() { return { value: this.value, index: this.grid.index, busy: this.busy }; }
+  debugState() { return { value: this.value, index: this.grid.index, busy: this.busy, cell: [this.grid.colW, this.grid.rowH], grid: this.gridRect }; }
 }
 
 export default NameEntryScene;

@@ -1,4 +1,5 @@
-// Prologue: title cards over slowly moving key art (text from data/story/ep1.js PROLOGUE). Confirm advances,
+// Prologue: title cards over the quantized `dialog_keyart` backdrop (darkened Willowmere with the vignette
+// baked in; the painted crop is the fallback), text from data/story/ep1.js PROLOGUE. Confirm advances,
 // start skips everything, then the field starts at START_MAP / START_POS (the world scene runs wake_up).
 // enter({ attract: true }) plays the cards as the title's attract mode and pops back on any input.
 
@@ -17,7 +18,7 @@ export class PrologueScene {
     this.cards = (data.cards || PROLOGUE).slice();
     this.index = 0; this.phase = 'in'; this.f = 0; this.t = 0; this.done = false;
     this.hold = data.frames || HOLD;
-    this.art = new KeyArt(e, { cell: data.cell ?? 0, drift: 1.4, range: 14 });
+    this.art = new KeyArt(e, { backdrop: data.backdrop || 'dialog_keyart', cell: data.cell ?? 0, drift: 1.4, range: 14 });
     e.audio.music('title');
     e.renderer.setBackdrop(null);
   }
@@ -61,7 +62,9 @@ export class PrologueScene {
   }
 
   draw(r) {
-    this.art.draw(r, { dark: 0.5, vignette: true });
+    // dialog_keyart is already at 62 percent brightness with a baked vignette; the crop fallback is not.
+    if (this.art.usesBackdrop) this.art.draw(r, { dark: 0.22 });
+    else this.art.draw(r, { dark: 0.5, vignette: true });
     const card = this.cards[this.index];
     if (!card) return;
     const a = this.alpha();
