@@ -6,7 +6,7 @@
 //
 // Op shapes (the scene's runner interprets them; see docs/BATTLE_SCENE.md):
 //   blocking:  { op:'wait', frames }  { op:'move', uid, to:'home'|'target'|'cover', target, frames }
-//              { op:'dissolve', uid, frames }  { op:'hitstop', frames }  { op:'fall', uid, frames }
+//              { op:'dissolve', uid, frames }  { op:'hitstop', frames, uid, crit }  { op:'fall', uid, frames }
 //   instant:   help, pose, flash, number, word, fx, sfx, shake, screenFlash, hp, mp, fury, shield, break,
 //              shieldRestore, status, telegraph, telegraphCancel, timeline, turn, reveal, summon, split,
 //              ko, revive, defendPose, swap, slow, banner, elite, knockback, cover, start, victory,
@@ -16,7 +16,7 @@
 export const FRAMES = Object.freeze({
   start: 30, ready: 6, stepIn: 8, windup: 6, strikeHold: 3, hitHold: 14, multiStagger: 5, randomStagger: 9,
   stepBack: 8, bowDraw: 8, arrowFlight: 8, castWindup: 22, castRelease: 10, buffWindup: 18,
-  item: 24, defend: 14, swap: 16, hitstop: 3, hitstopHeavy: 4, flash: 6,
+  item: 24, defend: 14, swap: 16, hitstop: 2, hitstopHeavy: 4, flash: 6,
   enemyLunge: 8, enemyWindup: 6, enemySpell: 20, enemyRelease: 10,
   heal: 16, miss: 14, status: 18, statusQuiet: 8, tick: 16, reveal: 22, delay: 14, reflect: 22,
   breakSlow: 18, breakHold: 30, shieldChip: 8, telegraph: 36, telegraphCancel: 16,
@@ -317,7 +317,8 @@ class Planner {
     const heavy = !!e.crit || e.amount >= max * 0.2;
     const status = e.kind === 'status';
     if (!status) {
-      this.push({ op: 'hitstop', frames: heavy ? FRAMES.hitstopHeavy : FRAMES.hitstop });
+      // Hit-stop: 4 frames on a crit, 2 on any other hit; the scene also kicks the camera 1 px toward the target.
+      this.push({ op: 'hitstop', frames: e.crit ? FRAMES.hitstopHeavy : FRAMES.hitstop, uid: e.target, crit: !!e.crit });
       this.push({ op: 'flash', uid: e.target, color: '#ffffff', frames: FRAMES.flash });
       this.push({ op: 'fx', kind: 'hit_spark', uid: e.target, big: heavy });
       const quiet = this.seg && this.seg.enemyHitSfx === false && !heavy;
@@ -343,6 +344,7 @@ class Planner {
     this.wait(FRAMES.shieldChip);
   }
   ev_break(e) {
+    this.push({ op: 'hitstop', frames: FRAMES.hitstopHeavy, uid: e.target, crit: true });
     this.push({ op: 'slow', factor: 0.5, frames: FRAMES.breakSlow });
     this.push({ op: 'break', uid: e.target });
     this.push({ op: 'fx', kind: 'break_burst', uid: e.target });

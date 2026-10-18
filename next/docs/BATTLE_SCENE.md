@@ -1,8 +1,13 @@
-# Battle scene (W2-battle-scene)
+# Battle scene (W2-battle-scene, polished by W4-battle-polish)
 
 The presentation layer over the pure rules in `src/battle/rules.js` (docs/BATTLE.md section 7). FF6 / Chrono
 Trigger staging, Octopath-style shields and weaknesses, Sea of Stars snappiness. Everything the scene shows
 comes from the rules' event array; the scene never computes damage or decides turns.
+
+W4 (CRITIQUE_1 C3, C4, C5, C11; PLAYTEST 7) added: a real stage (palette backdrop, indigo band, one baseline per
+side, width-scaled shadows, enemy breathe and hurt squash), head icons on the timeline, an axis-aligned slice
+intro, a heavier impact language (2 px arcs, impact star, hit-stop, camera kick, motion lines, wedge, trail,
+bloom) and a sharper Auto brain. Section 9 lists the contracts.
 
 | File | What |
 |---|---|
@@ -25,7 +30,7 @@ const result = await engine.pushAwait('battle', {
   start: 'normal' | 'preemptive' | 'ambush',
   canFlee: true,                          // optional override (bosses never flee)
   gameover: true,                         // false: a scripted loss, the scene will not push 'gameover'
-  seed: 'any',                            // optional: mixes into the battle rng fork
+  seed: 'any',                            // optional: a seeded battle replays identically whatever the engine seed
   forceElite, noElite, eliteRate,         // optional: passed to createEncounterBattle
 });
 // result === 'win' | 'lose' | 'flee'
@@ -45,7 +50,9 @@ What the scene does on its own:
 ## 2. Flow
 
 ```
-enter  -> intro (shard shatter of the field snapshot, 30 frames, mosaic + white flash first)
+enter  -> intro (SliceTransition: the field snapshot mosaics 2 px then 4 px under a white flash for 8 frames,
+          then 12 vertical slices slide out alternately up and down over 18 frames; 26 frames, no rotation;
+          reduceMotion = mosaic + plain white fade)
        -> enter (party slides in from the right, 22 frames)
        -> play: loop { ops pending? run them : battle over? (end op switches phase)
                         : enemy turn? plan(runEnemyTurn()) : party turn? Auto ? plan(perform(partyAction))
@@ -58,14 +65,15 @@ enter  -> intro (shard shatter of the field snapshot, 30 frames, mosaic + white 
 
 Settings read live: `battleSpeed` (1 or 2, divides every blocking op's frames; `pageL/pageR` toggles it in
 battle) and `autoBattle` (`start` toggles it; `cancel` turns it off at the next party turn; the rewards pages
-auto-advance after 150 frames while Auto is on). `reduceMotion` disables shake, flash, slow motion and the
-shard shatter (plain white fade instead).
+auto-advance after 150 frames while Auto is on). `reduceMotion` disables shake, flash, slow motion, the camera kick and the
+slice intro (plain white fade instead); hit-stop stays (it is a pause, not motion).
 
 ## 3. Ops (the animator's vocabulary)
 
 `planEvents(events, { units: unitInfo(b.units()) })` returns a flat list. Blocking ops carry `frames` (at 1x):
-`wait`, `move {uid, to:'target'|'home'|'cover', target}`, `dissolve {uid}`, `fall {uid}`, `hitstop` (freezes
-actors, fx and numbers; not scaled by speed beyond rounding). Instant ops: `help {text,color}`, `pose
+`wait`, `move {uid, to:'target'|'home'|'cover', target}`, `dissolve {uid}`, `fall {uid}`, `hitstop {frames, uid,
+crit}` (freezes actors, fx and numbers; 2 frames on a hit, 4 on a crit or a Break; the scene also kicks the
+camera 1 px toward `uid` for the pause, 1 px down as well on a crit). Instant ops: `help {text,color}`, `pose
 {uid,pose}` (idle ready windup strike cast hurt defend kneel ko victory), `flash {uid,color,frames,hold,soft}`,
 `number {uid,text,variant,big}`, `word {uid,word}` (MISS WEAK BREAK RESIST IMMUNE CRITICAL DODGE), `fx
 {kind,uid,from,to,big,small,status}`, `sfx {id,volume,pitch}`, `shake`, `screenFlash`, `hp`, `mp`, `fury`,
@@ -84,7 +92,7 @@ combo, enemy lunge or enemy cast), then plays the hits in order, then returns ev
 |---|---|---|---|
 | battle start help | 30 | ready pose | 6 |
 | melee step-in / step back | 8 / 8 | wind-up / strike hold | 6 / 3 |
-| hit hold (single) / multi-target stagger / random-hit stagger | 14 / 5 / 9 | hit-stop light / heavy | 3 / 4 |
+| hit hold (single) / multi-target stagger / random-hit stagger | 14 / 5 / 9 | hit-stop normal / crit and Break | 2 / 4 |
 | bow draw / arrow flight | 8 / 8 | cast wind-up / release | 22 / 10 |
 | buff wind-up / item / defend / swap | 18 / 24 / 14 / 16 | enemy wind-up / lunge / spell / release | 6 / 8 / 20 / 10 |
 | heal / miss / status / status tick | 16 / 14 / 18 / 16 | reveal / knockback / reflect | 22 / 14 / 22 |
@@ -115,11 +123,26 @@ Returns the summary the rewards windows draw: `{ exp, gold, levelUps, mastery, m
 
 Help window (4,4,218,19) thin; timeline rail at x 226 to 380, slots 18 px (first slot has 1 px extra); command
 window (4,152,92,60); sub-list window (4,90,188,60) above it; party status (98,152,282,60) with rows every 17 px
-(name, HP numbers + 75 px gauge with a white damage trail, MP, Fury with READY glow, up to 5 status badges);
-party feet at (298,104) (320,125) (342,146); enemies at `enemySlots(n)` (1 to 5 foes, back row higher and
-further left), the boss at (98,146), summons at four float slots around the boss. Enemy row (shield badge +
-weakness slots + status badges) sits under the foe, clamped above the windows. Rewards window (40,14,236,102)
-keeps the party visible; drop beams rise at x 150 on the enemies' side.
+(name, HP numbers + 75 px gauge with a white damage trail, MP, Fury with READY glow, up to 5 status badges).
+
+**Stage (C3).** `buildBackdrop()` draws the zone backdrop (section 9) and then the indigo band `BAND.color`
+(#292657) from `bandY` (the backdrop's json, default `BAND.y` 120) to the bottom at `bandAlpha` (default 0.55),
+with the 2 rows above it Bayer-dithered at 50% and 25%. Every unit stands on one baseline per side,
+`BASELINE.party` = `BASELINE.enemy` = 146 (6 px of floor above the bottom windows): party feet at x 290, 318,
+346 (leader nearest the foes), enemies at `enemySlots(n)` spread over x 36 to 236 on the same y, the boss at
+(98,146), summons at the four float slots around it. Draw order is feet y, then the moving unit, then x
+(rightmost in front). Under every unit an ellipse shadow from the misc atlas chosen by `shadowFor(width)`
+(about 0.8 of the sprite's width; 0.6 for flyers), centred 2 px below the feet, two passes for grounded units.
+Grounded enemies breathe (the top 55% of the sprite settles 1 px on alternate 36-frame beats, `Actor.breath()`);
+a hit squashes an enemy 2 px wider and shorter for its first hurt frames. Enemy row (shield badge + weakness
+slots + status badges) sits under the foe, clamped above the windows. Rewards window (40,14,236,102) keeps the
+party visible and hides the help bar and timeline; drop beams rise at x 150 on the enemies' side.
+
+**Timeline (C4).** Each slot is an 18 px frame (`tl_party` blue, `tl_enemy` red, `tl_elite` for elites and
+bosses, `tl_current` gold with the `tl_glow` pulse and a gold ring every 10 frames) over an ink backing with the
+unit's 12x12 head from the `heads` atlas (`head_<id>`, `HUD.drawHead`). The preview landing slot is drawn
+below the rail with a marching gold dashed border. Fallback when `heads` is not loaded: the party's portrait
+face crop and a smooth 12x12 thumbnail of the enemy sprite.
 
 ## 7. Debug and QA
 
@@ -138,16 +161,49 @@ keeps the party visible; drop beams rise at x 150 on the enemies' side.
   rewards, round, actions[], commands[] }`.
 - `python next/qa/shots.py --only battle_start,battle_command,battle_target_preview,battle_break,battle_boss,battle_victory,battle_levelup`
   (desktop + phone, zero console errors).
-- `python next/qa/battlescene/autobattle.py` (scenarios: start command target_preview break boss victory levelup
-  flee strip_attack strip_enemy strip_death boss_phase party_ko combo boss_death e2e_win e2e_lose e2e_all);
-  PNGs and filmstrips in `qa/battlescene/out/`. `e2e_win` is Auto at 2x from push to 'win' under 60 s wall
-  clock; `e2e_all` plays every encounter (with an elite every fourth) to an outcome with no engine errors.
+- `python next/qa/battlescene/autobattle.py` (scenarios: start stage strip_intro strip_impact breathe
+  reduce_motion command target_preview break boss victory levelup flee strip_attack strip_enemy strip_death
+  boss_phase party_ko combo boss_death e2e_win e2e_lose e2e_all); PNGs, filmstrips and `_zoom_*.png` crops in
+  `qa/battlescene/out/`. `stage` shoots the four backdrops with feet zooms and reports asset-or-fallback plus
+  bandY; `strip_intro` films the slice transition at 2-frame steps; `strip_impact` films slash, thrust, Ember,
+  chop and arrow at 1-frame steps zoomed on the target and asserts the camera kick; `breathe` asserts enemies
+  move between beats while their feet do not; `reduce_motion` asserts no kick under reduceMotion. `e2e_win` is
+  Auto at 2x from push to 'win' under 60 s wall clock; `e2e_all` plays every encounter (with an elite every
+  fourth) to an outcome with no engine errors. `qa/battlescene/out/before/` keeps the pre-W4 shots.
 - `node next/qa/run.mjs battlescene`.
 
 ## 8. Known gaps
 
-- Enemies have one frame each (DESIGN 6.3): attacks are a lunge plus procedural fx, hurt is a 2 px recoil.
+- Enemies have one frame each (DESIGN 6.3): attacks are a lunge plus procedural fx, hurt is a 2 px recoil plus
+  the squash, idle is the 1 px breathe.
 - No touch "tap to confirm" hint glyph in the help window yet (the device button glyphs exist in ui.json).
-- Timeline faces are 14x14 crops; a dedicated face strip from W1-sprites would read better for enemies.
+- No name on hover over a timeline slot (CRITIQUE C4 suggested one); the heads carry identity on their own.
 - The help window is one line; long telegraph sentences are cut with an ellipsis (the marker, timeline '!' and
   the orange color carry the warning).
+- The battle_start QA shot still takes its snapshot from whatever scene is under the debug push (the title in
+  shots.json), so its slices carry logo letters; in play the snapshot is always the field.
+
+## 9. Contracts with the art (W4-art)
+
+- Backdrops: `assets/backdrops/battle_valley|battle_archive|battle_boss.png` (384x216) with a json of the same
+  stem carrying `"image"`, `bandY` and `bandAlpha`. The manifest lists them as **atlases**, so the scene reads
+  `assets.atlas(id).image` and `.meta.bandY / .meta.bandAlpha`; when an id is not in the manifest the scene
+  path-loads the png and json itself (`preloadBattleArt`, a plain image plus `<id>_band` json), and when the
+  file is missing it falls back to the old environments.webp crop. Zone -> asset: valley -> battle_valley,
+  archive and archive_deep (F3, darkened 22% more by code) -> battle_archive, boss -> battle_boss. The band is
+  never baked into the png.
+- Heads: `assets/ui/heads.json` atlas id `heads`, frames `head_<id>` 12x12 (1 px frame included, origin
+  top-left) for hero, mira, bram and every enemy and boss id; `lost_page_<n>` variants fall back to `head_lost_page`.
+- Shadows: misc atlas `shadow_small|medium|large|huge` with their centre origins in misc.json's `origin` table
+  (resolved with `frameOrigin`, since `normalizeAtlas` only reads array origins).
+
+## 10. Auto brain (src/battle/ai.js competentPolicy, PLAYTEST 7)
+
+Heals at 55% when three or more foes are up and at least one is Archive-grade (level 4+), 40% otherwise, 50% in
+boss fights; potions only under 40%. Revives with a Phoenix Feather before anything else unless a plain attack
+would end the fight. While a telegraph is pending it takes any one-hit Break, else a known-weakness chip on the
+charging foe when the party's turns before it can finish the Break. A member under 35% with no potion and the
+healer not ready (Mira dead, silenced, out of MP or more than three slots away) Defends; Bram with Guard covers
+a teammate in that spot instead. `node tools/sim/simulate.mjs --check` meets every target with this policy (the
+55% rule is gated to Archive groups because an early Mend in valley_pack pushed it to 5.5 rounds, past the 3 to 5
+target).

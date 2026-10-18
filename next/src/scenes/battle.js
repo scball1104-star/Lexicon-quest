@@ -3,7 +3,8 @@
 //   const r = await engine.pushAwait('battle', { encounterId, start: 'normal'|'preemptive'|'ambush', canFlee, gameover });
 //   r === 'win' | 'lose' | 'flee'
 //
-// Flow: field snapshot -> encounter sfx + shard shatter -> backdrop -> party slides in -> CTB loop
+// Flow: field snapshot -> encounter sfx + mosaic + slice transition -> stage (backdrop, indigo band, baseline)
+// -> party slides in -> CTB loop
 // (enemy turns and the player's commands become event arrays; battle/scene/animator.js turns them into
 // frame-timed ops this scene runs) -> victory (poses, fanfare, rewards + level-up windows) | defeat (fade
 // to the gameover scene unless { gameover: false }) | flee (dash out). Rewards are applied to engine.game
@@ -23,25 +24,19 @@ import { describeItem } from '../battle/loot.js';
 import { SKILLS } from '../data/skills.js';
 import { newMember } from '../data/party.js';
 import { createGame } from '../game/state.js';
-import { BattleFx, ShardTransition, C } from '../battle/fx.js';
+import { BattleFx, SliceTransition, C } from '../battle/fx.js';
 import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, W, H } from '../battle/scene/layout.js';
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H } from '../battle/scene/layout.js';
 import * as HUD from '../battle/scene/hud.js';
 import { drawWindow, drawLabel, drawIcon, drawIcon16, drawPortrait, drawDivider, uiAtlas } from '../ui/window.js';
 import { NumberPopups } from '../ui/numberPopup.js';
 import { animFrameAt } from '../core/assets.js';
+import { createRng, hashSeed } from '../core/rng.js';
 
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8 };
-// Backdrop recipe per zone: environments.webp cell, brightness, tint multiply color, band darkening.
-const BACKDROPS = {
-  valley: { cell: 0, bright: 1.0, tint: null },
-  archive: { cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
-  archive_deep: { cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
-  boss: { cell: 7, bright: 0.72, tint: 'rgba(110,60,160,0.32)' },
-};
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
 const VICTORY_WAIT = 54;
 const DEFEAT_WAIT = 100;
@@ -51,50 +46,145 @@ const DROP_INTRO = 46;
 const AUTO_PAGE_HOLD = 150;
 
 function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+// Backdrop per zone. Preferred: the art agent's palette-quantized stage `assets/backdrops/<asset>.png` (384x216)
+// with its sidecar json { bandY, bandAlpha } (CRITIQUE C1/C3). Fallback when that file is not there: the
+// environments.webp cell, box-downscaled and posterized as before. `tint` and `bright` apply in both cases.
+const BACKDROPS = {
+  valley: { asset: 'battle_valley', cell: 0, bright: 1.0, tint: null },
+  archive: { asset: 'battle_archive', cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
+  archive_deep: { asset: 'battle_archive', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)', darken: 0.22 },
+  boss: { asset: 'battle_boss', cell: 7, bright: 0.72, tint: 'rgba(110,60,160,0.32)' },
+};
+const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss'];
+const artLoads = new Map();      // asset id -> 'loading' | 'ok' | 'missing'
 
-/** Build the zone backdrop layer: 16:9 crop of the key art, box-downscaled, posterized, tinted, banded. */
+function loadImageUrl(href) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`image failed: ${href}`));
+    img.src = href;
+  });
+}
+/**
+ * Start loading the battle art that lives outside the manifest (assets/backdrops/*). Called at install and again
+ * on every battle entry; each asset loads once. Missing files are tolerated (the fallback backdrop is used).
+ */
+export function preloadBattleArt(engine) {
+  const assets = engine && engine.assets;
+  if (!assets || typeof Image === 'undefined') return;
+  for (const id of BACKDROP_ASSETS) {
+    if (artLoads.has(id) || assets.has(id)) continue;
+    artLoads.set(id, 'loading');
+    (async () => {
+      try {
+        const img = await loadImageUrl(assets.url(`assets/backdrops/${id}.png`));
+        let meta = null;
+        try { const res = await fetch(assets.url(`assets/backdrops/${id}.json`), { cache: 'no-cache' }); if (res.ok) meta = await res.json(); } catch (e) { meta = null; }
+        assets.setImage(id, img);
+        assets.setJson(`${id}_band`, meta && typeof meta === 'object' ? meta : {});
+        artLoads.set(id, 'ok');
+      } catch (e) { artLoads.set(id, 'missing'); }
+    })();
+  }
+}
+/**
+ * The stage art for an asset id, or null. The manifest lists the backdrops as atlases (their json carries "image"
+ * plus bandY / bandAlpha in the same object), so the image is atlas.image and the band values atlas.meta; a
+ * path-loaded backdrop (preloadBattleArt) is a plain image with its sidecar under `<id>_band`.
+ */
+function backdropArt(assets, id) {
+  if (!id || !assets.has(id) || artLoads.get(id) === 'missing') return null;
+  if (assets.ids('atlas').includes(id)) {
+    const a = assets.atlas(id);
+    return a && a.image ? { image: a.image, meta: a.meta || {} } : null;
+  }
+  const meta = assets.has(`${id}_band`) ? assets.json(`${id}_band`, {}) : {};
+  return { image: assets.img(id), meta: meta || {} };
+}
+/** True once the asset for this backdrop key is usable (so a layer built from the fallback can be rebuilt). */
+function backdropAssetReady(engine, key) {
+  const rec = BACKDROPS[key] || BACKDROPS.valley;
+  return !!backdropArt(engine.assets, rec.asset);
+}
+export function backdropKey(zoneId, isBoss) {
+  const zone = ZONES[zoneId];
+  return isBoss && zoneId === 'archive_boss' ? 'boss' : zone && zone.backdrop ? zone.backdrop : zoneId === 'valley' ? 'valley' : 'archive';
+}
+
+/**
+ * Build the stage layer (CRITIQUE C3): the backdrop, then the indigo band from bandY down (2 px dithered top
+ * edge) under everything that stands on it. Returns { ...layer, usedAsset, band: { y, alpha } }.
+ */
 export function buildBackdrop(engine, zoneId, isBoss) {
   const r = engine.renderer;
   const layer = r.createLayer(W, H);
   const g = layer.ctx;
-  const zone = ZONES[zoneId];
-  const key = isBoss && zoneId === 'archive_boss' ? 'boss' : zone && zone.backdrop ? zone.backdrop : zoneId === 'valley' ? 'valley' : 'archive';
+  const key = backdropKey(zoneId, isBoss);
   const rec = BACKDROPS[key] || BACKDROPS.valley;
-  const img = engine.assets.has('environments') ? engine.assets.img('environments') : null;
-  if (img) {
-    const cw = Math.floor(img.width / 2), ch = Math.floor(img.height / 4);
-    let tw = cw, th = Math.round(tw * H / W);
-    if (th > ch) { th = ch; tw = Math.round(th * W / H); }
-    const sx = (rec.cell % 2) * cw + Math.floor((cw - tw) / 2), sy = Math.floor(rec.cell / 2) * ch + Math.floor((ch - th) / 2);
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
-    g.drawImage(img, sx, sy, tw, th, 0, 0, W, H);
+  const assets = engine.assets;
+  let usedAsset = false;
+  let band = { y: BAND.y, alpha: BAND.alpha };
+  const art = backdropArt(assets, rec.asset);
+  if (art) {
     g.imageSmoothingEnabled = false;
-    // Posterize to a 5-bit-per-channel feel so the painted art sits with the pixel sprites.
-    try {
-      const id = g.getImageData(0, 0, W, H);
-      const d = id.data;
-      const b = rec.bright;
-      for (let i = 0; i < d.length; i += 4) {
-        d[i] = Math.min(255, Math.round((d[i] * b) / 10) * 10);
-        d[i + 1] = Math.min(255, Math.round((d[i + 1] * b) / 10) * 10);
-        d[i + 2] = Math.min(255, Math.round((d[i + 2] * b) / 10) * 10);
-      }
-      g.putImageData(id, 0, 0);
-    } catch (e) { /* tainted canvas (file://): keep the smooth copy */ }
+    g.drawImage(art.image, 0, 0, W, H);
+    const meta = art.meta;
+    if (meta && Number.isFinite(meta.bandY)) band.y = Math.max(40, Math.min(H - 4, Math.round(meta.bandY)));
+    if (meta && Number.isFinite(meta.bandAlpha)) band.alpha = Math.max(0, Math.min(1, meta.bandAlpha));
+    if (rec.darken) { g.fillStyle = `rgba(10,8,22,${rec.darken})`; g.fillRect(0, 0, W, H); }
+    usedAsset = true;
   } else {
-    const grad = g.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#2a2458'); grad.addColorStop(1, '#0d0b16');
-    g.fillStyle = grad; g.fillRect(0, 0, W, H);
+    const img = assets.has('environments') ? assets.img('environments') : null;
+    if (img) {
+      const cw = Math.floor(img.width / 2), ch = Math.floor(img.height / 4);
+      let tw = cw, th = Math.round(tw * H / W);
+      if (th > ch) { th = ch; tw = Math.round(th * W / H); }
+      const sx = (rec.cell % 2) * cw + Math.floor((cw - tw) / 2), sy = Math.floor(rec.cell / 2) * ch + Math.floor((ch - th) / 2);
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      g.drawImage(img, sx, sy, tw, th, 0, 0, W, H);
+      g.imageSmoothingEnabled = false;
+      // Posterize to a 5-bit-per-channel feel so the painted art sits with the pixel sprites.
+      try {
+        const id = g.getImageData(0, 0, W, H);
+        const d = id.data;
+        const b = rec.bright;
+        for (let i = 0; i < d.length; i += 4) {
+          d[i] = Math.min(255, Math.round((d[i] * b) / 10) * 10);
+          d[i + 1] = Math.min(255, Math.round((d[i + 1] * b) / 10) * 10);
+          d[i + 2] = Math.min(255, Math.round((d[i + 2] * b) / 10) * 10);
+        }
+        g.putImageData(id, 0, 0);
+      } catch (e) { /* tainted canvas (file://): keep the smooth copy */ }
+    } else {
+      const grad = g.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, '#2a2458'); grad.addColorStop(1, '#0d0b16');
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+    }
+    if (rec.tint) { g.fillStyle = rec.tint; g.fillRect(0, 0, W, H); }
   }
-  if (rec.tint) { g.fillStyle = rec.tint; g.fillRect(0, 0, W, H); }
-  // Darkened lower band under the windows (DESIGN 7), banded per row like the mocks.
-  for (let y = Math.floor(H * 0.62); y < H; y++) {
-    const t = (y - H * 0.62) / (H * 0.38);
-    const k = 0.55 * Math.min(1, t * 1.4);
-    g.fillStyle = `rgba(10,8,22,${k.toFixed(3)})`;
-    g.fillRect(0, y, W, 1);
+  drawStageBand(g, band);
+  return Object.assign(layer, { usedAsset, band, key });
+}
+/** The indigo ground band: solid from band.y down, its top `BAND.edge` rows dithered (Bayer) so the edge is soft. */
+function drawStageBand(g, band) {
+  const col = BAND.color;
+  const alpha = band.alpha;
+  if (alpha <= 0) return;
+  g.fillStyle = col;
+  g.globalAlpha = alpha;
+  g.fillRect(0, band.y, W, H - band.y);
+  // Dithered edge above the band: a 4x4 Bayer checker at 50% then 25% density.
+  const edge = BAND.edge;
+  for (let row = 1; row <= edge; row++) {
+    const y = band.y - row;
+    const density = row === 1 ? 0.5 : 0.25;
+    for (let x = 0; x < W; x++) {
+      const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5][(y % 4) * 4 + (x % 4)];
+      if (bayer < density * 16) g.fillRect(x, y, 1, 1);
+    }
   }
-  return layer;
+  g.globalAlpha = 1;
 }
 
 export class BattleScene {
@@ -114,6 +204,8 @@ export class BattleScene {
     this.eliteTag = null; this.rowShow = new Map();
     this.fast = null; this.autoHold = 0;
     this.shard = null; this.backdropLayer = null;
+    this.kick = { x: 0, y: 0, frames: 0 };      // 1 px camera kick toward the hit target (C11)
+    preloadBattleArt(engine);
     this.rewards = null; this.drops = [];
     this.summons = 0;
     this.timer = 0;
@@ -129,7 +221,10 @@ export class BattleScene {
     const g = e.game;
     g.counters = g.counters || {};
     const n = (g.counters.battles = (g.counters.battles || 0) + 1);
-    const rng = e.rng.fork(`battle:${n}:${data.seed ?? ''}`);
+    // An explicit seed (debug battles, QA shots) gets its own stream so the fight replays the same whatever the
+    // engine was seeded with (shots.py boots without ?seed, so the engine seed is Date.now()); ordinary battles
+    // fork the engine rng per battle so no two playthroughs match.
+    const rng = data.seed != null ? createRng(hashSeed(`battle:${data.seed}`)) : e.rng.fork(`battle:${n}`);
     const { battle, encounter } = createEncounterBattle(data.encounterId, {
       party: g.party, rng, inventory: g.items, bestiary: bestiaryForBattle(g), start: data.start || 'normal',
       forceElite: data.forceElite, noElite: data.noElite, eliteRate: data.eliteRate,
@@ -149,7 +244,8 @@ export class BattleScene {
     // Intro: encounter sound, battle music over the field track, shatter the field snapshot.
     e.audio.sfx('encounter');
     e.audio.pushMusic(encounter.music || 'battle');
-    this.shard = new ShardTransition(this.snapshot, e.rng.fork('shards'), { reduceMotion: !!e.settings.reduceMotion });
+    this.shard = new SliceTransition(this.snapshot, e.rng.fork('shards'), { reduceMotion: !!e.settings.reduceMotion });
+    this.kick = { x: 0, y: 0, frames: 0 };
     this.phase = 'intro';
     this.startOps = planEvents(startEvents, { units: this.info });
     this.timeline = battle.timeline(8);
@@ -188,6 +284,11 @@ export class BattleScene {
     if (e.game && typeof e.game.playtime === 'number') e.game.playtime += dt;   // the field is paused under us: keep the clock honest
     if (this.banner) { this.banner.t++; if (this.banner.t >= this.banner.frames) this.banner = null; }
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
+    if (this.kick.frames > 0 && --this.kick.frames <= 0) { this.kick.x = 0; this.kick.y = 0; }
+    if (this.backdropLayer && !this.backdropLayer.usedAsset && backdropAssetReady(e, this.backdropLayer.key)) {
+      this.backdropLayer = buildBackdrop(e, this.zone, !!(this.encounter && this.encounter.boss));
+      e.renderer.setBackdrop(this.backdropLayer.canvas);
+    }
     if (this.hitstop > 0) { this.hitstop--; return; }
     for (const a of this.actors.values()) a.update();
     this.fx.update();
@@ -307,7 +408,12 @@ export class BattleScene {
     const a = op.uid ? this.actor(op.uid) : null;
     switch (op.op) {
       case 'wait': this.waitLeft = this.scaled(op.frames); return true;
-      case 'hitstop': if (!this.fast) this.hitstop = Math.max(1, Math.round(op.frames / this.speed)); return false;
+      case 'hitstop': {
+        if (this.fast) return false;
+        this.hitstop = Math.max(1, Math.round(op.frames / this.speed));
+        if (a && !e.settings.reduceMotion) this.kick = { x: a.side === 'enemy' ? -1 : 1, y: op.crit ? 1 : 0, frames: this.hitstop + 2 };
+        return false;
+      }
       case 'move': {
         if (!a) return false;
         let to;
@@ -533,19 +639,19 @@ export class BattleScene {
   // ---------------------------------------------------------------------------------------------- draw
   draw(r) {
     const e = this.engine;
-    if (this.phase === 'intro' && this.shard && this.shard.t < 8) { this.shard.draw(r); return; }
+    if (this.phase === 'intro' && this.shard && this.shard.t < this.shard.mosaicFrames) { this.shard.draw(r); return; }
+    // Stage (kicked 1 px toward the hit target during hit-stop): backdrop + band, under-fx, actors (y-sorted), over-fx.
+    const kicked = this.kick.frames > 0 && (this.kick.x || this.kick.y);
+    if (kicked) { r.clear('#14101e'); r.pushCamera(-this.kick.x, -this.kick.y); }
     r.drawLayer(this.backdropLayer);
-    // Stage: under-fx, actors (y-sorted), over-fx, numbers.
     this.fx.drawUnder(r);
     const list = sortedActors(this.actors);
     const targetIds = this.menu.state === 'target' ? this.menu.highlightedIds() : [];
-    for (const a of list) {
-      if (this.phase === 'intro' || this.phase === 'enter') { if (a.side === 'party') { a.draw(r); } else a.draw(r); continue; }
-      a.draw(r);
-    }
-    if (this.phase === 'intro') { this.shard.draw(r); return; }
+    for (const a of list) a.draw(r);
+    if (this.phase === 'intro') { if (kicked) r.popCamera(); this.shard.draw(r); return; }
     for (const d of this.drops) this.drawDrop(r, d);
     this.fx.drawOver(r);
+    if (kicked) r.popCamera();
     // Markers.
     const frame = this.frame;
     for (const [uid, t] of this.telegraphs) { const a = this.actor(uid); if (a && !a.dead) HUD.drawTelegraphMarker(r, a, frame, t.nextTurn); }
@@ -702,6 +808,8 @@ export class BattleScene {
       commands: this.menu.state !== 'closed' && this.menu.unit ? this.b.commands(this.menu.unit).filter((c) => c.enabled && (c.id !== 'combo' || c.visible)).map((c) => c.id) : [],
       combos: this.menu.state !== 'closed' && this.menu.unit ? ((this.b.commands(this.menu.unit).find((c) => c.id === 'combo') || {}).list || []).filter((e) => e.enabled).map((e) => e.skill) : [],
       lastInvalid: this.lastInvalid || null,
+      stage: this.backdropLayer ? { asset: !!this.backdropLayer.usedAsset, key: this.backdropLayer.key, band: this.backdropLayer.band } : null,
+      kick: { ...this.kick }, hitstop: this.hitstop, rows: this.rowShow.size,
     };
   }
 }
@@ -750,6 +858,7 @@ export function makeDebugGame(encounterId, opts = {}) {
 }
 
 export async function install(engine) {
+  preloadBattleArt(engine);
   const D = typeof window !== 'undefined' ? window.LQ_DEBUG : null;
   if (!D) return;
   let pending = null, last = null;

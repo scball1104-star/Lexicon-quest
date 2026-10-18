@@ -1,13 +1,15 @@
 // Battle presentation effects (W2-battle-scene). Everything here is drawn with the renderer's crisp pixel
 // helpers at the internal resolution: weapon arcs, projectiles, magic circles, element bursts, status
 // sparkles, ink splashes, enemy attack marks, the BREAK burst, the Fury flash, summon pops, the devour
-// vortex, pixel dissolves and the battle-intro shard shatter. No game logic lives here.
+// vortex, pixel dissolves and the battle-intro slice transition. No game logic lives here.
+// Impact language (W4-battle-polish, CRITIQUE C11): weapon arcs are 2 px with a trailing fade, every hit lands a
+// 4-frame impact star, thrusts leave motion lines, chops a wedge, arrows a trail and magic a brief bloom.
 //
 //   const fx = new BattleFx(engine);
 //   fx.spawn('slash', { x, y, h, fromX, fromY, weapon, big })     target feet (x, y), sprite height h
 //   fx.update();  fx.drawUnder(r);  fx.drawOver(r);  fx.active;  fx.clear();
 //   dissolveSprite(r, atlas, frame, x, y, k, opts)                 pixel dissolve (k 0 = whole, 1 = gone)
-//   new ShardTransition(snapshotCanvas, rng)                       .update(), .draw(r), .done
+//   new SliceTransition(snapshotCanvas, rng, { reduceMotion })      .update(), .draw(r), .done  (battle intro)
 //
 // Coordinates: (x, y) is the target's feet (sprite origin); cy = y - h / 2 is the body center.
 
@@ -161,25 +163,66 @@ export class BattleFx {
   center(o) { return { cx: Math.round(o.x || 0), cy: Math.round((o.y || 0) - (o.h || 32) / 2) }; }
 
   // --- weapon arcs (party faces left: arcs sweep from upper-right to lower-left of the target) ----------
+  /**
+   * Weapon arc: a 2 px head (3 px when thick) sweeping a0 -> a1 over the first ~55% of `frames`, with a trail
+   * behind it that fades and thins toward the tail (colors[0] at the head ... colors[last] at the tail), then the
+   * whole arc fades out. Every point is ink-outlined so it reads over any backdrop.
+   */
   arc(cx, cy, radius, a0, a1, frames, colors, o = {}) {
-    const n = Math.max(2, Math.round(Math.abs(a1 - a0) * radius / 2.5));
+    const n = Math.max(4, Math.round(Math.abs(a1 - a0) * radius / 2));
+    const thick = o.thick ? 3 : 2;
+    const tailLen = o.tailLen ?? 0.5;
     this.add(frames, (r, t) => {
-      const k = Math.min(1, (t + 1) / Math.max(1, frames * (o.sweep ?? 0.6)));
-      const tail = Math.max(0, k - (o.tailLen ?? 0.45));
-      const fade = t > frames * 0.7 ? 1 - (t - frames * 0.7) / (frames * 0.3) : 1;
+      const sweep = Math.max(1, frames * (o.sweep ?? 0.55));
+      const k = Math.min(1, (t + 1) / sweep);
+      const tail = Math.max(0, k - tailLen);
+      const after = t > sweep ? (t - sweep) / Math.max(1, frames - sweep) : 0;
       const pts = [];
-      for (let i = 0; i < n; i++) {
+      for (let i = 0; i <= n; i++) {
         const u = i / n;
         if (u > k || u < tail) continue;
+        const back = Math.min(1, (k - u) / tailLen);          // 0 at the head, 1 at the end of the trail
         const a = a0 + (a1 - a0) * u;
-        const ci = Math.min(colors.length - 1, Math.floor((k - u) / Math.max(0.01, k - tail) * colors.length));
-        const x = cx + cos(a) * radius, y = cy + sin(a) * radius * (o.squash ?? 0.8);
-        const w = o.thick ? (ci === 0 ? 4 : 3) : (ci === 0 ? 3 : 2);
-        pts.push([Math.round(x - w / 2), Math.round(y - w / 2), w, colors[ci]]);
+        const w = back < 0.3 ? thick : Math.max(2, thick - 1);
+        const x = Math.round(cx + cos(a) * radius - w / 2), y = Math.round(cy + sin(a) * radius * (o.squash ?? 0.8) - w / 2);
+        const ci = Math.min(colors.length - 1, Math.floor(back * colors.length));
+        pts.push([x, y, w, colors[ci], Math.max(0.12, 1 - back * 0.85) * (1 - after)]);
       }
-      r.withAlpha(fade, () => {
-        for (const [x, y, w] of pts) r.rect(x - 1, y - 1, w + 2, w + 2, C.ink);
-        for (const [x, y, w, c] of pts) r.rect(x, y, w, w, c);
+      for (const [x, y, w, , al] of pts) r.withAlpha(al, () => r.rect(x - 1, y - 1, w + 2, w + 2, C.ink));
+      for (const [x, y, w, c, al] of pts) r.withAlpha(al, () => r.rect(x, y, w, w, c));
+      // A bright 1 px core on the head while the sweep is still moving.
+      if (k < 1 && pts.length) { const h = pts[pts.length - 1]; r.rect(h[0] + 1, h[1] + 1, Math.max(1, h[2] - 2), Math.max(1, h[2] - 2), C.white); }
+    }, 'over');
+  }
+  /**
+   * Chop wedge: the filled sector the blade sweeps, drawn as rays from the pivot (narrow where the swing began,
+   * full radius at the blade), fading once the swing lands.
+   */
+  wedge(cx, cy, radius, a0, a1, frames, colors, o = {}) {
+    this.add(frames, (r, t) => {
+      const sweep = Math.max(1, frames * (o.sweep ?? 0.5));
+      const k = Math.min(1, (t + 1) / sweep);
+      const after = t > sweep ? (t - sweep) / Math.max(1, frames - sweep) : 0;
+      const a = a0 + (a1 - a0) * k;
+      const steps = Math.max(3, Math.round(Math.abs(a - a0) * radius / 1.6));
+      r.withAlpha(0.7 * (1 - after), () => {
+        for (let i = 0; i <= steps; i++) {
+          const u = i / steps;
+          const ang = a0 + (a - a0) * u;
+          const rr = radius * (0.3 + 0.7 * u);
+          r.line(cx, cy, cx + cos(ang) * rr, cy + sin(ang) * rr * (o.squash ?? 1), i >= steps - 1 ? colors[0] : colors[1]);
+        }
+      });
+    }, 'over');
+  }
+  /** Brief magic bloom at the point of effect: three dithered discs (white core, element rim) that swell and fade. */
+  bloom(cx, cy, color, big = false) {
+    const R = big ? [8, 14, 20] : [5, 10, 15];
+    this.add(3, (r, t) => {
+      const rad = R[t];
+      r.withAlpha(0.8 - t * 0.25, () => {
+        r.ditherEllipse(cx, cy, rad + 3, Math.round((rad + 3) * 0.75), color, 0.45);
+        r.ditherEllipse(cx, cy, rad, Math.round(rad * 0.75), C.white, t === 0 ? 0.8 : 0.5);
       });
     }, 'over');
   }
@@ -217,7 +260,9 @@ export class BattleFx {
   fx_chop(o) {
     const { cx, cy } = this.center(o);
     const big = !!o.big;
-    this.arc(cx + 6, cy - 4, this.targetRadius(o, big) + 2, -1.9, 1.2, big ? 14 : 10, big ? [C.white, C.gold, C.orange] : [C.white, C.cream, C.orange], { thick: true, squash: 1.1, sweep: 0.5 });
+    const rad = this.targetRadius(o, big) + 2;
+    this.wedge(cx + 6, cy - 4, rad, -1.9, 1.2, big ? 14 : 10, big ? [C.gold, C.orange] : [C.cream, C.orange], { squash: 1.1, sweep: 0.5 });
+    this.arc(cx + 6, cy - 4, rad, -1.9, 1.2, big ? 14 : 10, big ? [C.white, C.gold, C.orange] : [C.white, C.cream, C.orange], { thick: true, squash: 1.1, sweep: 0.5 });
     this.add(12, (r, t) => {
       if (t < 4) return;
       const k = (t - 4) / 8;
@@ -232,6 +277,17 @@ export class BattleFx {
       const k = Math.min(1, t / 4);
       const len = Math.round((big ? 34 : 24) * k);
       const x0 = cx + 14;
+      // Motion lines: speed streaks trailing behind the point, longest on the first frame, gone by the hit.
+      if (t < 6) {
+        const fade = 1 - t / 6;
+        r.withAlpha(fade, () => {
+          for (let i = -1; i <= 1; i++) {
+            const y = cy + i * (big ? 7 : 5) - (i === 0 ? 1 : 0);
+            const l = Math.round((big ? 44 : 32) * (1 - t / 7) * (i === 0 ? 1 : 0.65));
+            if (l > 1) { r.rect(x0 + 6, y, l, 1, C.ink); r.rect(x0 + 6, y - 1, l, 1, i === 0 ? C.white : C.cyan); }
+          }
+        });
+      }
       if (t < 7) {
         r.rect(x0 - len - 1, cy - (big ? 6 : 5), len + 3, big ? 13 : 11, C.ink);
         for (let i = -1; i <= 1; i++) {
@@ -267,6 +323,13 @@ export class BattleFx {
       const k = Math.min(1, (t - delay) / (frames - 1));
       const x = fx + (tx - fx) * k, y = fy + (ty - fy) * k - sin(k * Math.PI) * 6;
       const dx = Math.sign(tx - fx) || -1;
+      // Trail: three fading marks where the arrow just was.
+      for (let j = 1; j <= 3; j++) {
+        const kk = k - j * 0.09;
+        if (kk <= 0) continue;
+        const px = fx + (tx - fx) * kk, py = fy + (ty - fy) * kk - sin(kk * Math.PI) * 6;
+        r.withAlpha(0.8 - j * 0.22, () => r.rect(Math.round(px), Math.round(py), 2, 1, j === 1 ? C.white : C.cream));
+      }
       r.line(x, y, x - dx * 7, y + 1, '#8a6a4a');
       r.rect(Math.round(x) - (dx < 0 ? 1 : 0), Math.round(y), 2, 1, C.white);
       r.pixel(x - dx * 7, y, C.cream); r.pixel(x - dx * 6, y + 2, C.cream);
@@ -347,14 +410,35 @@ export class BattleFx {
   fx_hit_spark(o) {
     const { cx, cy } = this.center(o);
     const big = !!o.big;
-    this.add(big ? 8 : 6, (r, t) => {
-      const s = big ? 9 - t : 6 - t;
-      if (s <= 0) return;
-      r.rect(cx - s - 1, cy - 1, s * 2 + 3, 3, C.ink); r.rect(cx - 1, cy - s - 1, 3, s * 2 + 3, C.ink);
-      r.rect(cx - s, cy, s * 2 + 1, 1, C.white); r.rect(cx, cy - s, 1, s * 2 + 1, C.white);
-      if (t < 3) { r.rect(cx - 2, cy - 2, 5, 5, C.ink); r.rect(cx - 1, cy - 1, 3, 3, C.cream); }
-    }, 'top');
+    this.star(cx, cy, big);
     this.particles(cx, cy, big ? 10 : 5, { colors: [C.white, C.cream, C.gold], speed: big ? 2.4 : 1.6, life: 12, gravity: 0.1 });
+  }
+  /** 4-frame impact star at the hit point: flash block, 8-point star, thinner bigger star, fading tips. */
+  star(cx, cy, big = false) {
+    const R = big ? [3, 7, 11, 14] : [2, 5, 8, 10];
+    this.add(4, (r, t) => {
+      const rad = R[t];
+      if (t === 0) {
+        r.rect(cx - rad - 1, cy - rad - 1, rad * 2 + 3, rad * 2 + 3, C.ink);
+        r.rect(cx - rad, cy - rad, rad * 2 + 1, rad * 2 + 1, C.white);
+        return;
+      }
+      const col = t === 1 ? C.white : t === 2 ? C.cream : C.gold;
+      const d = Math.round(rad * 0.62);
+      if (t === 3) {
+        r.withAlpha(0.6, () => {
+          r.rect(cx - rad, cy, 3, 1, col); r.rect(cx + rad - 2, cy, 3, 1, col);
+          r.rect(cx, cy - rad, 1, 3, col); r.rect(cx, cy + rad - 2, 1, 3, col);
+          r.pixel(cx - d, cy - d, col); r.pixel(cx + d, cy + d, col); r.pixel(cx - d, cy + d, col); r.pixel(cx + d, cy - d, col);
+        });
+        return;
+      }
+      r.rect(cx - rad - 1, cy - 1, rad * 2 + 3, 3, C.ink); r.rect(cx - 1, cy - rad - 1, 3, rad * 2 + 3, C.ink);
+      r.rect(cx - rad, cy, rad * 2 + 1, 1, col); r.rect(cx, cy - rad, 1, rad * 2 + 1, col);
+      r.line(cx - d, cy - d, cx + d, cy + d, col); r.line(cx - d, cy + d, cx + d, cy - d, col);
+      if (t === 1) { r.rect(cx - 2, cy - 2, 5, 5, C.ink); r.rect(cx - 1, cy - 1, 3, 3, C.white); }
+      else r.pixel(cx, cy, C.white);
+    }, 'top');
   }
 
   // --- magic ------------------------------------------------------------------------------------------------
@@ -384,6 +468,7 @@ export class BattleFx {
     const { cx, cy } = this.center(o);
     const small = !!o.small;
     const n = small ? 8 : 22;
+    if (!small) this.bloom(cx, cy, FIRE[1]);
     this.particles(cx, o.y - 4, n, { colors: FIRE, dir: -Math.PI / 2, spread: 1.3, speed: small ? 1.2 : 2.2, life: small ? 14 : 24, radius: small ? 6 : 12, radiusY: 2, size: small ? 2 : 3, shrink: true, gravity: -0.05 });
     if (!small) {
       this.add(16, (r, t) => {
@@ -401,6 +486,7 @@ export class BattleFx {
   fx_burst_ice(o) {
     const { cx, cy } = this.center(o);
     const seed = this.seed++;
+    this.bloom(cx, cy, ICE[1]);
     this.add(18, (r, t) => {
       const k = Math.min(1, t / 6);
       const fade = t > 12 ? (18 - t) / 6 : 1;
@@ -420,11 +506,13 @@ export class BattleFx {
   fx_burst_thunder(o) {
     this.fx_bolt(o);
     const { cx, cy } = this.center(o);
+    this.bloom(cx, cy, C.gold);
     this.particles(cx, cy, 12, { colors: [C.white, C.gold, C.cream], speed: 2.4, life: 12, delay: 4 });
     this.fx_ring(o, { color: C.gold, r0: 2, r1: 18, frames: 10 });
   }
   fx_burst_light(o) {
     const { cx, cy } = this.center(o);
+    this.bloom(cx, cy, C.cream, true);
     this.fx_rays(o, { color: C.cream, n: 10, len: 26, frames: 16 });
     this.particles(cx, cy, 14, { colors: LIGHT, speed: 1.4, life: 20, blink: true, gravity: -0.03 });
   }
@@ -432,6 +520,7 @@ export class BattleFx {
     const { cx, cy } = this.center(o);
     const small = !!o.small, big = !!o.big;
     const n = small ? 8 : big ? 26 : 16;
+    if (!small) this.bloom(cx, cy, HEAL[2], big);
     this.particles(cx, o.y, n, { colors: HEAL, dir: -Math.PI / 2, spread: 0.5, speed: big ? 1.3 : 1, life: 28, radius: big ? 18 : 12, radiusY: 2, blink: true, delay: 8, drift: 0.4 });
     if (!small) this.add(16, (r, t) => {
       const k = t / 16;
@@ -760,26 +849,27 @@ export class BattleFx {
   }
 }
 
-// ------------------------------------------------------------------------------------------- intro shatter
+// ------------------------------------------------------------------------------------------- intro slices
 /**
- * Battle intro: the field snapshot mosaics for a few frames, then breaks into shards that fly outward and
- * fade, revealing the battle beneath. 30 frames. Deterministic for a given rng.
+ * Battle intro (CRITIQUE C5): the field snapshot mosaics in two steps (2 px then 4 px blocks) under a white flash
+ * for 8 frames, then splits into 12 axis-aligned vertical slices that slide out alternately up and down over 18
+ * frames, revealing the stage beneath. Nothing rotates and nothing is drawn off the pixel grid. 26 frames.
+ * reduceMotion: the mosaic, then a plain white fade. Deterministic (the rng only staggers the slices).
  */
-export class ShardTransition {
+export class SliceTransition {
   constructor(snapshot, rng, opts = {}) {
     this.snap = snapshot;
-    this.frames = opts.frames || 30;
+    this.mosaicFrames = 8;
+    this.slideFrames = opts.slideFrames || 18;
+    this.frames = this.mosaicFrames + this.slideFrames;
     this.t = 0;
-    this.cols = 8; this.rows = 6;
-    const W = snapshot.width, H = snapshot.height;
-    this.cw = W / this.cols; this.ch = H / this.rows;
-    this.shards = [];
+    this.cols = opts.cols || 12;
     const r = rng || { next: () => 0.5 };
-    for (let j = 0; j < this.rows; j++) for (let i = 0; i < this.cols; i++) {
-      const cx = (i + 0.5) * this.cw - W / 2, cy = (j + 0.5) * this.ch - H / 2;
-      const d = Math.hypot(cx, cy) || 1;
-      this.shards.push({ i, j, dx: cx / d, dy: cy / d, speed: 4 + r.next() * 4, spin: (r.next() - 0.5) * 0.35, delay: Math.floor(d / 40) });
-    }
+    this.W = snapshot.width; this.H = snapshot.height;
+    this.sw = Math.ceil(this.W / this.cols);
+    // Each slice starts a frame or two apart so the row does not move as one block.
+    this.delay = [];
+    for (let i = 0; i < this.cols; i++) this.delay.push(Math.floor(r.next() * 3));
     this.reduce = !!opts.reduceMotion;
   }
   get done() { return this.t >= this.frames; }
@@ -787,32 +877,33 @@ export class ShardTransition {
   draw(r) {
     const g = r.ctx;
     const t = this.t;
-    if (t < 8) {
-      // Mosaic in: the field pixelates and brightens.
+    if (t < this.mosaicFrames) {
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.drawImage(this.snap, 0, 0);
       g.restore();
-      r.mosaic(1 + t);
-      r.fade('#ffffff', Math.min(0.7, t / 10));
+      r.mosaic(t < 4 ? 2 : 4);
+      r.fade('#ffffff', Math.min(0.6, t / 12));
       return;
     }
-    if (this.reduce) { r.fade('#ffffff', Math.max(0, 1 - (t - 8) / 12)); return; }
+    if (this.reduce) { r.fade('#ffffff', Math.max(0, 1 - (t - this.mosaicFrames) / 12)); return; }
+    const H = this.H;
     g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
-    for (const s of this.shards) {
-      const age = t - 8 - s.delay;
-      if (age < 0) { g.drawImage(this.snap, s.i * this.cw, s.j * this.ch, this.cw, this.ch, s.i * this.cw, s.j * this.ch, this.cw, this.ch); continue; }
-      const k = age / (this.frames - 8);
-      if (k >= 1) continue;
-      const dist = s.speed * age + 0.5 * 0.35 * age * age;
-      const x = s.i * this.cw + this.cw / 2 + s.dx * dist, y = s.j * this.ch + this.ch / 2 + s.dy * dist + 0.25 * age * age;
-      g.save();
-      g.globalAlpha = Math.max(0, 1 - k * 1.2);
-      g.translate(Math.round(x), Math.round(y));
-      g.rotate(s.spin * age);
-      g.drawImage(this.snap, s.i * this.cw, s.j * this.ch, this.cw, this.ch, -this.cw / 2, -this.ch / 2, this.cw, this.ch);
-      g.restore();
+    for (let i = 0; i < this.cols; i++) {
+      const age = t - this.mosaicFrames - this.delay[i];
+      const sx = i * this.sw, sw = Math.min(this.sw, this.W - sx);
+      if (sw <= 0) continue;
+      if (age < 0) { g.drawImage(this.snap, sx, 0, sw, H, sx, 0, sw, H); continue; }
+      const k = Math.min(1, age / Math.max(1, this.slideFrames - 3));
+      const dist = Math.round(H * k * k);                // accelerating slide, whole pixels
+      if (dist >= H) continue;
+      const dy = (i % 2 ? 1 : -1) * dist;
+      g.drawImage(this.snap, sx, 0, sw, H, sx, dy, sw, H);
+      // A 1 px ink seam on the leading edge keeps neighbouring slices from reading as one image.
+      if (dist > 0) { g.fillStyle = '#14101e'; g.fillRect(sx, dy < 0 ? H + dy - 1 : dy, sw, 1); }
     }
     g.restore();
-    if (t < 14) r.fade('#ffffff', (14 - t) / 10);
+    if (t < this.mosaicFrames + 6) r.fade('#ffffff', (this.mosaicFrames + 6 - t) / 10);
   }
 }
+/** @deprecated name kept for older imports; the battle now uses SliceTransition. */
+export const ShardTransition = SliceTransition;

@@ -367,6 +367,37 @@ function nextTurnIndex(b, me, action) {
   return idx >= 0 ? idx : after;
 }
 
+/** Party turns that come before `uid` on the visible timeline (how many swings the party gets at a charging foe). */
+function partyTurnsBefore(b, uid) {
+  let n = 0;
+  for (const r of b.timeline(14)) {
+    if (r.uid === uid) return n;
+    const u = b.unit(r.uid);
+    if (u && u.side === 'party' && u.alive && !r.skip) n++;
+  }
+  return n;
+}
+
+/** The healer (Mira) can act usefully within the next three slots: alive, not silenced, has MP for a Mend. */
+function healerReady(b, order) {
+  const m = b.unit('mira');
+  if (!m || !m.alive || (m.statuses && m.statuses.silence) || m.mp < 4) return false;
+  const idx = order.indexOf('mira');
+  return idx >= 0 && idx <= 3;
+}
+
+/** A plain attack from `me` would end the fight this turn. */
+function finishingBlow(b, me, foes) {
+  if (foes.length !== 1) return false;
+  const est = b.estimate(me, { type: 'attack', target: foes[0].uid })[0];
+  return !!(est && est.kills && (est.hit ?? 1) >= 0.85);
+}
+
+/**
+ * Auto-battle brain (PLAYTEST 7): heals at 55% when three or more foes are up (40% otherwise, 50% in boss
+ * fights), revives before attacking, prefers a Break (or a shield chip toward one) while a telegraph is pending,
+ * and Defends when a member is under 35% with no potion in hand and the healer not ready.
+ */
 export function competentPolicy(b, me, opts = {}) {
   const cmds = b.commands(me);
   const foes = b.living('enemy');
@@ -392,6 +423,10 @@ export function competentPolicy(b, me, opts = {}) {
     const breakAct = bestBreakAction(b, me, t.foe, canSkill);
     if (breakAct) return breakAct;
     if (!t.foe.boss && canSkill('lunge') && me.weapon === 'spear') return { type: 'skill', skill: 'lunge', target: t.foe.uid };
+    // No break in one hit: chip its shields with a known weakness when the party has enough turns to finish the
+    // Break before the charge fires (a Break cancels the telegraph).
+    const chip = bestChipAction(b, me, t.foe, canSkill);
+    if (chip && !t.foe.broken && t.foe.shields <= partyTurnsBefore(b, t.foe.uid)) return chip;
   }
   for (const t of threats) {
     const mineIdx = nextTurnIndex(b, me, { type: 'defend' });
@@ -417,12 +452,17 @@ export function competentPolicy(b, me, opts = {}) {
   }
 
   // ---------------------------------------------------------------- 2. revive, heal, cure
+  // Revive before attacking: a fallen member is the biggest loss of tempo there is. The only exception is a
+  // fight this very swing would end.
   const down = st.order.map((id) => st.units[id]).filter((u) => u.side === 'party' && !u.alive);
-  if (down.length && foes.length && hasItem('phoenix_feather')) {
-    const enemyHp = foes.reduce((s, f) => s + f.hp, 0);
-    if (isBossFight || enemyHp > 60) return { type: 'item', item: 'phoenix_feather', target: down[0].uid };
+  if (down.length && foes.length && hasItem('phoenix_feather') && !finishingBlow(b, me, foes)) {
+    return { type: 'item', item: 'phoenix_feather', target: down[0].uid };
   }
-  const hurt = allies.filter((a) => pct(a) < (isBossFight ? 0.5 : 0.4)).sort((a, c) => pct(a) - pct(c));
+  // Groups of three or more Archive-grade foes (level 4+) wear the party down between Mira's turns: heal at 55%
+  // there. Valley packs are not that dangerous and an early Mend only drags the fight past the 5-round target.
+  const bigGroup = foes.length >= 3 && foes.some((f) => ((ENEMIES[f.id] || {}).level || 0) >= 4);
+  const healAt = isBossFight ? 0.5 : bigGroup ? 0.55 : 0.4;
+  const hurt = allies.filter((a) => pct(a) < healAt).sort((a, c) => pct(a) - pct(c));
   const aoeIncoming = threats.some((t) => t.skill.target === 'enemies');
   if (hurt.length || (aoeIncoming && allies.some((a) => pct(a) < 0.6))) {
     const low = hurt[0] || allies.slice().sort((a, c) => pct(a) - pct(c))[0];
@@ -436,10 +476,21 @@ export function competentPolicy(b, me, opts = {}) {
     const mira = b.unit('mira');
     const miraCanHeal = mira && mira.alive && !(mira.statuses && mira.statuses.silence) && mira.mp >= 4;
     const miraIdx = order.indexOf('mira');
-    if (pct(low) < 0.3 || !miraCanHeal || miraIdx > 3) {
+    // Potions are for real trouble (under 40%): the earlier 55% line in big groups is Mira's cue, not everyone's.
+    if (pct(low) < 0.4 && (pct(low) < 0.3 || !miraCanHeal || miraIdx > 3)) {
       if (low.maxHp - low.hp > 120 && hasItem('hi_potion')) return { type: 'item', item: 'hi_potion', target: low.uid };
       if (hasItem('potion')) return { type: 'item', item: 'potion', target: low.uid };
       if (hasItem('hi_potion')) return { type: 'item', item: 'hi_potion', target: low.uid };
+    }
+  }
+  // Under 35% with no potion and no healer coming: Defend (halves the next hit) instead of trading blows.
+  // Bram with Guard covers a teammate in that spot instead.
+  if (!finishingBlow(b, me, foes)) {
+    const healer = healerReady(b, order);
+    const lowOther = allies.find((a) => a.uid !== me.uid && pct(a) < 0.35);
+    if (pct(me) < 0.35 && me.id !== 'mira' && !healer && !hasItem('potion') && !hasItem('hi_potion')) return { type: 'defend' };
+    if (lowOther && me.id === 'bram' && !healer && !hasItem('potion') && !hasItem('hi_potion') && canSkill('guard') && foes.length > 1) {
+      return { type: 'skill', skill: 'guard', target: lowOther.uid };
     }
   }
   // Mira silenced in a long fight: an Echo Herb gets the healer back
@@ -621,6 +672,29 @@ function bestBreakAction(b, me, foe, canSkill) {
     if (est && est.breaks && est.weak !== '?') return { ...a, target: foe.uid };
   }
   return null;
+}
+
+/** The best known-weakness hit on `foe` (removes a shield), when no single action breaks it. */
+function bestChipAction(b, me, foe, canSkill) {
+  if (foe.broken || foe.shields <= 0) return null;
+  const cmds = b.commands(me);
+  const tries = [{ type: 'attack' }];
+  for (const g of ['tech', 'magic']) {
+    const c = cmds.find((x) => x.id === g);
+    if (c && c.list) for (const e of c.list) if (e.enabled && !(SKILLS[e.skill].mp > me.mp * 0.5)) tries.push({ type: 'skill', skill: e.skill });
+  }
+  let best = null;
+  for (const a of tries) {
+    const sk = a.type === 'attack' ? SKILLS.attack : SKILLS[a.skill];
+    if (!(sk.formula === 'phys' || sk.formula === 'mag') || sk.target === 'random') continue;
+    if (reflectsAgainst(foe, sk.formula)) continue;
+    const est = b.estimate(me, { ...a, target: foe.uid }).find((e) => e.target === foe.uid);
+    if (!est || est.weak !== true) continue;
+    const score = Math.min(est.hits || sk.hits || 1, foe.shields) * 10 + est.avg * 0.1 - (sk.mp || 0) * 0.5;
+    if (!best || score > best.score) best = { action: { ...a, target: foe.uid }, score };
+  }
+  void canSkill;
+  return best ? best.action : null;
 }
 
 function swapValue(b, me, other) {

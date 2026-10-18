@@ -6,7 +6,7 @@
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
 import { ENEMIES } from '../../data/enemies.js';
-import { partySlots, enemySlots, summonSlot, BOSS_SLOT, SHADOW_BY_SIZE } from './layout.js';
+import { partySlots, enemySlots, summonSlot, BOSS_SLOT, shadowFor } from './layout.js';
 
 const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory']);
 const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko']);
@@ -132,12 +132,18 @@ export class Actor {
   startMove(toX, toY, frames) { this.move = { fromX: this.x, fromY: this.y, toX, toY, t: 0, frames: Math.max(1, frames) }; }
   startDissolve(frames) { this.dissolve = { t: 0, frames: Math.max(1, frames) }; this.flash = null; this.ko = true; }
 
-  /** Bob offset for idle breathing (enemies) and hovering (flying). */
+  /** Hover offset for flying units (whole sprite). Grounded enemies breathe instead (see breath()). */
   bob() {
     const f = this.engine.frame + this.bobPhase;
     if (this.flying) return Math.round(Math.sin(f / 18) * 2);
-    if (this.side === 'enemy') return (Math.floor(f / 40) % 2) ? 1 : 0;
     return 0;
+  }
+  /** 2-frame breathe for grounded enemies: 1 px vertical squash (the top of the sprite settles 1 px) on alternate beats. */
+  breath() {
+    if (this.side !== 'enemy' || this.flying || !this.alive || this.move || this.dissolve) return 0;
+    if (this.hurtT > 0 || (this.pose !== 'idle' && this.pose !== 'kneel')) return 0;
+    const f = this.engine.frame + this.bobPhase;
+    return (Math.floor(f / 36) % 2) ? 1 : 0;
   }
 
   draw(r, opts = {}) {
@@ -152,25 +158,48 @@ export class Actor {
     const enterDx = this.enterT > 0 ? Math.round((this.enterT / ENTER_FRAMES) ** 2 * 120) : 0;
     const x = this.cx + dx + enterDx, y = Math.round(this.y) + bob;
     const flipX = false;
-    // Ground shadow (misc atlas), smaller and lighter while hovering.
+    // Ground shadow (misc atlas) scaled to the sprite's width (about 0.8 of it, so it shows past the feet), centred
+    // 2 px below the feet so most of the ellipse shows in front of the sprite. The atlas pixels are 42% ink, so
+    // grounded units get two passes to read on the dark band; hovering units get one lighter pass.
     const misc = this.engine.assets.has('misc') ? this.engine.assets.atlas('misc') : null;
-    const shadowName = this.side === 'party' ? 'shadow_medium' : (SHADOW_BY_SIZE[this.size] || 'shadow_large');
+    const shadowName = shadowFor((this.flying ? 0.6 : 0.8) * this.w);
     if (misc && misc.frames[shadowName] && !opts.noShadow) {
       const k = this.dissolve ? 1 - this.dissolve.t / this.dissolve.frames : 1;
-      r.sprite(misc, misc.frames[shadowName], x, Math.round(this.y) + (this.flying ? 6 : 0), { alpha: (this.flying ? 0.5 : 1) * k });
+      // misc.json keeps the shadows' centre origins in a per-frame table: resolve it, or the ellipse lands above the feet.
+      const so = frameOrigin(misc, shadowName, misc.frames[shadowName]);
+      const sf = { ...misc.frames[shadowName], ox: so.ox, oy: so.oy };
+      const sx = this.cx + enterDx, sy = Math.round(this.y) + 2;
+      r.sprite(misc, sf, sx, sy, { alpha: (this.flying ? 0.6 : 1) * k });
+      if (!this.flying) r.sprite(misc, sf, sx, sy, { alpha: k });
     }
     if (this.dissolve) {
       const k = this.dissolve.t / this.dissolve.frames;
       dissolveSprite(r, this.atlas, fr, x, y, k, { flipX, tint: this.tint, tintAmount: this.tint ? 0.35 : 0, drop: Math.round(k * 8), rows: true });
       return;
     }
-    const alpha = this.fallT > 0 ? 1 : 1;
     let tint = null, amount = 0;
     if (this.flash) { tint = this.flash.color; amount = this.flash.hold ? 1 : Math.min(1, 0.4 + 0.6 * (this.flash.frames / Math.max(1, this.flash.total))) * (this.flash.soft ? 0.55 : 1); }
     else if (this.tint) { tint = this.tint; amount = 0.35; }
     else if (this.elite) { tint = '#ffd34d'; amount = 0.14; }
-    const fallDy = this.fallT > 0 ? 0 : 0;
-    r.sprite(this.atlas, fr, x, y + fallDy, { flipX, alpha, tint, tintAmount: amount });
+    const sopts = { flipX, alpha: 1, tint, tintAmount: amount };
+    // Enemy hurt squash: the first 4 hurt frames draw the sprite 2 px wider and 2 px shorter, feet planted.
+    if (this.side === 'enemy' && this.hurtT > HURT_FRAMES - 4 && !this.ko) {
+      const img = this.atlas.image;
+      const squash = this.hurtT > HURT_FRAMES - 2 ? 2 : 1;
+      r.image(img, x - fr.ox - squash, y - fr.oy + squash, { sx: fr.x, sy: fr.y, sw: fr.w, sh: fr.h, w: fr.w + squash * 2, h: fr.h - squash, ...sopts });
+      return;
+    }
+    const br = this.breath();
+    if (br > 0) {
+      // Breathe: the top part of the sprite settles 1 px; the lower part stays put so the feet never leave the ground.
+      const img = this.atlas.image;
+      const split = Math.max(1, Math.round(fr.h * 0.55));
+      const dx0 = x - fr.ox, dy0 = y - fr.oy;
+      r.image(img, dx0, dy0 + split, { sx: fr.x, sy: fr.y + split, sw: fr.w, sh: fr.h - split, ...sopts });
+      r.image(img, dx0, dy0 + br, { sx: fr.x, sy: fr.y, sw: fr.w, sh: split, ...sopts });
+      return;
+    }
+    r.sprite(this.atlas, fr, x, y, sopts);
   }
 }
 
@@ -200,7 +229,7 @@ export function addSummon(engine, actors, unit, index) {
   return a;
 }
 
-/** Draw order: enemies and party sorted by feet y (back to front), the acting/moving unit last on ties. */
+/** Draw order: by feet y (back to front); on the shared baseline the moving unit, then the rightmost, is in front. */
 export function sortedActors(actors) {
-  return [...actors.values()].filter((a) => !a.dead).sort((a, b) => (a.y - b.y) || (a.move ? 1 : 0) - (b.move ? 1 : 0));
+  return [...actors.values()].filter((a) => !a.dead).sort((a, b) => (a.y - b.y) || ((a.move ? 1 : 0) - (b.move ? 1 : 0)) || (a.x - b.x));
 }

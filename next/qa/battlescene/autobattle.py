@@ -10,6 +10,9 @@ error, page error or engine error. Scenarios:
 
 Scenarios: start, command, target_preview, break, boss, victory, levelup, flee, e2e_win (Auto at 2x from
 start to 'win' in under 60 s wall clock), e2e_lose (scripted defeat), e2e_all (every encounter, fast).
+W4-battle-polish adds: stage (one shot per backdrop with the band, baselines and shadows, plus feet zooms),
+strip_intro (the mosaic + slice transition at 2-frame steps), strip_impact (1-frame strips of a sword slash,
+a spear thrust, Ember, an axe chop and an arrow, zoomed on the target), and _zoom_timeline.png from command.
 """
 import argparse
 import json
@@ -73,6 +76,7 @@ def sc_command(page, ctx):
     advance_until(page, WAIT_MENU)
     page.evaluate(ADVANCE.format(4))
     shot(page, ctx, 'root')
+    zoom(page, ctx, 'timeline', (222, 0, 162, 32), 4)
     s = bstate(page)
     assert s['menu'] == 'root', s
     page.evaluate("LQ_DEBUG.press('down')"); page.evaluate(ADVANCE.format(3))
@@ -187,6 +191,172 @@ def filmstrip(page, ctx, name, frames, step, cols=6, full=False):
     path = OUT / f"{ctx['device']}-{ctx['name']}-{name}.png"
     sheet.save(path)
     ctx['files'].append(str(path))
+
+
+def zoom(page, ctx, name, region, scale=4):
+    """Save a nearest-neighbour zoom of a GAME-pixel region (x, y, w, h) of the current frame as _zoom_<name>.png."""
+    from PIL import Image
+    v = page.evaluate('LQ_DEBUG.view()')
+    x0, y0, k = v['cssX'], v['cssY'], v['cssScale']
+    p = OUT / '_zoom_tmp.png'
+    page.screenshot(path=str(p))
+    im = Image.open(p)
+    gx, gy, gw, gh = region
+    crop = im.crop((int(x0 + gx * k), int(y0 + gy * k), int(x0 + (gx + gw) * k), int(y0 + (gy + gh) * k)))
+    crop = crop.resize((gw * scale, gh * scale), Image.NEAREST)
+    im.close(); p.unlink()
+    path = OUT / f'_zoom_{name}.png'
+    crop.save(path)
+    ctx['files'].append(str(path))
+    return path
+
+
+def micro_strip(page, ctx, name, frames, step, region, scale=3, cols=4):
+    """Advance `step` frames `frames` times, keeping a `scale`x zoom of a GAME-pixel region each time; stitched grid."""
+    from PIL import Image
+    v = page.evaluate('LQ_DEBUG.view()')
+    x0, y0, k = v['cssX'], v['cssY'], v['cssScale']
+    gx, gy, gw, gh = region
+    tiles = []
+    kicks = ctx.setdefault('kicks', [])
+    for i in range(frames):
+        page.evaluate(ADVANCE.format(step))
+        st = bstate(page)
+        if st and st.get('kick'):
+            kicks.append((st['kick']['x'], st['kick']['y'], st.get('hitstop', 0)))
+        p = OUT / '_strip_tmp.png'
+        page.screenshot(path=str(p))
+        im = Image.open(p)
+        crop = im.crop((int(x0 + gx * k), int(y0 + gy * k), int(x0 + (gx + gw) * k), int(y0 + (gy + gh) * k)))
+        tiles.append(crop.resize((gw * scale, gh * scale), Image.NEAREST))
+        im.close(); p.unlink()
+    tw, th = tiles[0].size
+    rows = (len(tiles) + cols - 1) // cols
+    sheet = Image.new('RGB', (cols * tw + (cols - 1) * 4, rows * th + (rows - 1) * 4), (20, 16, 30))
+    for i, t in enumerate(tiles):
+        sheet.paste(t, ((i % cols) * (tw + 4), (i // cols) * (th + 4)))
+    path = OUT / f"{ctx['device']}-{ctx['name']}-{name}.png"
+    sheet.save(path)
+    ctx['files'].append(str(path))
+    return path
+
+
+def sc_stage(page, ctx):
+    """The stage per backdrop (valley, archive F1, deep archive F3, boss) with the command menu open, plus feet zooms."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    used = []
+    for enc, tag in [('valley_pack', 'valley'), ('f1_wraith', 'archive'), ('f3_mixed', 'deep'), ('archivore', 'boss')]:
+        page.evaluate(f"LQ_DEBUG.battle('{enc}', {{ fresh: true, seed: 3 }})")
+        advance_until(page, WAIT_MENU)
+        page.evaluate(ADVANCE.format(4))
+        shot(page, ctx, tag)
+        s = bstate(page)
+        assert s['stage'] and s['stage']['band'], s.get('stage')
+        used.append(f"{tag}:{'asset' if s['stage']['asset'] else 'fallback'}@{s['stage']['band']['y']}")
+        zoom(page, ctx, f'stage_{tag}_feet', (0, 100, 384, 56), 3)
+    ctx['note'] = ' '.join(used)
+
+
+def sc_breathe(page, ctx):
+    """Grounded enemies breathe (1 px top squash on alternate beats): two zooms 36 frames apart must differ, feet must not move."""
+    from PIL import ImageChops
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('valley_pack', { fresh: true, seed: 3 })")
+    # a command menu with no enemy HUD rows showing (shield badges flash and expire, which would read as motion)
+    advance_until(page, WAIT_MENU + " && LQ_DEBUG.state().battle.rows === 0", step=5)
+    region = (0, 80, 260, 70)
+    a = zoom(page, ctx, 'breathe_a', region, 3)
+    page.evaluate(ADVANCE.format(36))
+    b = zoom(page, ctx, 'breathe_b', region, 3)
+    from PIL import Image
+    ia, ib = Image.open(a).convert('RGB'), Image.open(b).convert('RGB')
+    diff = ImageChops.difference(ia, ib).getbbox()
+    assert diff, 'no breathing: the two frames are identical'
+    # feet rows (game y 146..150) must be identical: the squash settles the top, never the feet
+    fy0, fy1 = (146 - region[1]) * 3, (150 - region[1]) * 3
+    feet = ImageChops.difference(ia.crop((0, fy0, ia.width, fy1)), ib.crop((0, fy0, ib.width, fy1))).getbbox()
+    assert feet is None, f'feet moved: {feet}'
+    ctx['note'] = f'breathe diff bbox {diff}'
+
+
+def sc_strip_intro(page, ctx):
+    """Mosaic + slice transition, 2-frame steps, from a field snapshot when the dev field is available."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    try:
+        page.evaluate("LQ_DEBUG.push('_devField')")
+        page.evaluate(ADVANCE.format(30))
+        ctx['note'] = 'from _devField'
+    except Exception:  # noqa: BLE001 - the dev field is optional; the title works as a snapshot too
+        ctx['note'] = 'from title'
+    page.evaluate("LQ_DEBUG.battle('valley_wolves', { fresh: true, seed: 3 })")
+    filmstrip(page, ctx, 'slices', 16, 2, full=True)
+    s = bstate(page)
+    assert s['phase'] in ('enter', 'play'), s['phase']
+
+
+def _act_when(page, uid, action):
+    """Fast-forward to `uid`'s command, then perform `action` (a 'target' of '*' = the first living foe)."""
+    page.evaluate(f"LQ_DEBUG.battleUntil('{uid}')")
+    advance_until(page, WAIT_MENU + f" && LQ_DEBUG.state().battle.current === '{uid}'")
+    if action.get('target') == '*':
+        uid2, _x = _living_foe(page)
+        action = {**action, 'target': uid2}
+    page.evaluate('LQ_DEBUG.battleAct(' + json.dumps(action) + ')')
+
+
+def _living_foe(page):
+    s = bstate(page)
+    foe = next(u for u in s['units'] if u['uid'].startswith('e') and not u['ko'] and not u['dead'])
+    return foe['uid'], foe['x']
+
+
+def _foe_region(page, w=150, h=100):
+    _uid, x = _living_foe(page)
+    return (max(0, min(384 - w, int(x) - w // 2)), 156 - h, w, h)
+
+
+def sc_strip_impact(page, ctx):
+    """1-frame strips around the hit, zoomed 3x on the target: slash, thrust, Ember, chop, arrow."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('f1_slimes', { fresh: true, seed: 5, level: 3 })")
+    page.evaluate(ADVANCE.format(60))
+    _act_when(page, 'hero', {'type': 'attack', 'target': '*'})
+    page.evaluate(ADVANCE.format(18))          # ready 6 + step-in 8 + wind-up 6: the arc starts about now
+    micro_strip(page, ctx, 'slash', 16, 1, _foe_region(page))
+    _act_when(page, 'bram', {'type': 'attack', 'target': '*'})
+    page.evaluate(ADVANCE.format(18))
+    micro_strip(page, ctx, 'thrust', 16, 1, _foe_region(page))
+    _act_when(page, 'mira', {'type': 'skill', 'skill': 'ember', 'target': '*'})
+    page.evaluate(ADVANCE.format(20))          # cast wind-up 22
+    micro_strip(page, ctx, 'ember', 16, 1, _foe_region(page))
+    _act_when(page, 'hero', {'type': 'swap'})
+    _act_when(page, 'hero', {'type': 'attack', 'target': '*'})
+    page.evaluate(ADVANCE.format(18))
+    micro_strip(page, ctx, 'chop', 16, 1, _foe_region(page))
+    _act_when(page, 'mira', {'type': 'swap'})
+    _act_when(page, 'mira', {'type': 'attack', 'target': '*'})
+    page.evaluate(ADVANCE.format(12))          # ready 6 + bow draw 8: the arrow is in flight
+    micro_strip(page, ctx, 'arrow', 16, 1, (0, 56, 384, 100), scale=2)
+    s = bstate(page)
+    assert not s.get('lastInvalid'), s.get('lastInvalid')
+    kicked = [k for k in ctx['kicks'] if k[0]]
+    assert kicked, 'no camera kick was seen during the hits'
+    assert all(k[0] == -1 for k in kicked), f'kick should point at the enemy side: {kicked[:4]}'
+    ctx['note'] = f'{len(kicked)} kicked frames, hitstop seen {max(k[2] for k in ctx["kicks"])}'
+
+
+def sc_reduce_motion(page, ctx):
+    """reduceMotion: a plain mosaic + white fade intro, no camera kick, no slow motion; still no errors."""
+    page.evaluate("LQ_DEBUG.settings({ reduceMotion: true })")
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('f1_mites', { fresh: true, seed: 5 })")
+    page.evaluate(ADVANCE.format(12)); shot(page, ctx, 'intro12')
+    advance_until(page, WAIT_MENU)
+    _act_when(page, 'hero', {'type': 'attack', 'target': '*'})
+    ctx['kicks'] = []
+    micro_strip(page, ctx, 'hit', 24, 1, _foe_region(page))
+    assert all(k[0] == 0 and k[1] == 0 for k in ctx['kicks']), ctx['kicks'][:6]
+    page.evaluate("LQ_DEBUG.settings({ reduceMotion: false })")
 
 
 def sc_strip_attack(page, ctx):
@@ -377,6 +547,11 @@ def sc_boss_death(page, ctx):
 
 SCENARIOS = {
     'start': (sc_start, ['desktop', 'phone']),
+    'stage': (sc_stage, ['desktop']),
+    'strip_intro': (sc_strip_intro, ['desktop']),
+    'breathe': (sc_breathe, ['desktop']),
+    'reduce_motion': (sc_reduce_motion, ['desktop']),
+    'strip_impact': (sc_strip_impact, ['desktop']),
     'command': (sc_command, ['desktop', 'phone']),
     'target_preview': (sc_target_preview, ['desktop', 'phone']),
     'break': (sc_break, ['desktop']),

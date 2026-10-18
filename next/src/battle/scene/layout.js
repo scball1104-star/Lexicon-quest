@@ -18,17 +18,22 @@ export const STATUS_ROW_H = 17;
 export const TL = { x: 226, y: 6, slots: 8, slot: 18, railW: 154 };
 export function timelineSlotX(i) { return TL.x + 2 + (i === 0 ? 0 : 19 + (i - 1) * TL.slot); }
 
-// Floor line the sprites stand on (feet y) and the band the bottom windows cover.
+// The stage (W4-battle-polish, CRITIQUE C3): one ground plane. An indigo band darkens the lower part of
+// the backdrop (bandY..216, drawn under the sprites, top edge dithered 2 px); every unit's feet sit on ONE
+// baseline per side inside that band, with an ellipse shadow scaled to the sprite's width. The backdrop
+// json (assets/backdrops/<id>.json {bandY, bandAlpha}) overrides BAND when present.
 export const FLOOR_Y = 146;
+export const BASELINE = { party: 146, enemy: 146 };   // 6 px of floor between the feet and the bottom windows for the shadows
+export const BAND = { y: 120, alpha: 0.55, color: '#292657', edge: 2 };
 
-// Party slots: feet positions, a diagonal going down-right (FF6). Index 0 = leader.
-const PARTY_SLOTS_3 = [[298, 104], [320, 125], [342, 146]];
-const PARTY_SLOTS_2 = [[306, 112], [334, 140]];
-const PARTY_SLOTS_1 = [[320, 126]];
-/** Feet positions for n party members. */
+// Party slots: feet on the party baseline, the leader nearest the foes, 28 px apart (32 px sprites).
+const PARTY_X_3 = [290, 318, 346];
+const PARTY_X_2 = [300, 336];
+const PARTY_X_1 = [318];
+/** Feet positions for n party members. Index 0 = leader. */
 export function partySlots(n) {
-  const base = n >= 3 ? PARTY_SLOTS_3 : n === 2 ? PARTY_SLOTS_2 : PARTY_SLOTS_1;
-  return base.slice(0, Math.max(1, n)).map(([x, y]) => ({ x, y }));
+  const xs = n >= 3 ? PARTY_X_3 : n === 2 ? PARTY_X_2 : PARTY_X_1;
+  return xs.slice(0, Math.max(1, n)).map((x) => ({ x, y: BASELINE.party }));
 }
 /** Where a party member stands while striking a melee target (just right of the target's box). */
 export function meleeSpot(target, attacker) {
@@ -41,26 +46,34 @@ export function enemyMeleeSpot(target, attacker) {
   return { x: Math.max(attacker.homeX + 8, target.x - 18 - half), y: attacker.homeY };
 }
 
-// Enemy slots by group size (feet positions). Back row higher and further left, so sprites overlap
-// like FF6 formations. Boss encounters use bossSlot().
-const ENEMY_SLOTS = {
-  1: [[118, 146]],
-  2: [[74, 134], [156, 150]],
-  3: [[54, 122], [122, 140], [194, 152]],
-  4: [[44, 114], [100, 132], [160, 148], [222, 154]],
-  5: [[40, 110], [92, 128], [146, 144], [200, 152], [236, 120]],
+// Enemy slots by group size: feet on the enemy baseline, spread across the left two thirds of the stage.
+// Big groups overlap a little (drawn left to right, so the rightmost foe is in front). Bosses use BOSS_SLOT.
+const ENEMY_X = {
+  1: [118],
+  2: [78, 164],
+  3: [52, 124, 196],
+  4: [40, 98, 156, 214],
+  5: [36, 86, 136, 186, 236],
 };
 export function enemySlots(n) {
-  const list = ENEMY_SLOTS[Math.min(5, Math.max(1, n))];
-  return list.map(([x, y]) => ({ x, y }));
+  const xs = ENEMY_X[Math.min(5, Math.max(1, n))];
+  return xs.map((x) => ({ x, y: BASELINE.enemy }));
 }
-export const BOSS_SLOT = { x: 98, y: 146 };
+export const BOSS_SLOT = { x: 98, y: BASELINE.enemy };
 /** Slots for summoned adds (Lost Pages) around the boss: they float, so y is their hover feet line. */
 const SUMMON_SLOTS = [[200, 70], [214, 118], [184, 44], [232, 92]];
 export function summonSlot(i) { const [x, y] = SUMMON_SLOTS[i % SUMMON_SLOTS.length]; return { x, y }; }
 
-/** Enemy size class -> ground shadow frame in misc.json. */
+/** Enemy size class -> ground shadow frame in misc.json (legacy; shadowFor() picks by sprite width). */
 export const SHADOW_BY_SIZE = { small: 'shadow_medium', medium: 'shadow_large', large: 'shadow_large', boss: 'shadow_huge' };
+/** misc.json shadow frames by width (an ellipse about half the sprite's width reads as its footprint). */
+export const SHADOW_FRAMES = [['shadow_small', 12], ['shadow_medium', 18], ['shadow_large', 28], ['shadow_huge', 48]];
+export function shadowFor(spriteW) {
+  const want = Math.max(10, (spriteW || 32) * 0.5);
+  let best = SHADOW_FRAMES[0];
+  for (const f of SHADOW_FRAMES) if (Math.abs(f[1] - want) < Math.abs(best[1] - want)) best = f;
+  return best[0];
+}
 
 // 14x14 face crops for the timeline (offsets inside the 32x32 portrait frame, per mocks).
 export const PORTRAIT_FACE = { default: [9, 9] };

@@ -26,7 +26,7 @@ export function drawHelp(r, text, color, opts = {}) {
   if (opts.right) r.text(opts.right, hw.x + hw.w - 6, hw.y + 4, { align: 'right', color: opts.rightColor || 'gold' });
 }
 
-/** 14x14 face crop for a unit: portrait crop for the party, a head crop of the battle frame for enemies. */
+/** 14x14 face crop for a unit (legacy fallback): portrait crop for the party, a head crop of the battle frame for enemies. */
 export function faceRect(r, actor) {
   const assets = r.assets;
   if (actor.side === 'party') {
@@ -48,8 +48,58 @@ function drawFace(r, face, x, y, alpha = 1) {
   r.image(face.image, x, y, { sx: face.x, sy: face.y, sw: 14, sh: 14, alpha, tint: face.tint || null, tintAmount: face.tint ? 0.35 : 0 });
 }
 
+// Timeline heads (CRITIQUE C4): 12x12 `head_<id>` icons from assets/ui/heads.json (the art agent's atlas, listed in
+// the manifest as "heads"). Fallback when the atlas is missing: the party's portrait face crop, and for enemies a
+// smooth 12x12 thumbnail of the whole battle sprite (a colored silhouette reads better than an eyebrow crop).
+const thumbs = new Map();
+function headsAtlas(r) { const a = r && r.assets; return a && a.has('heads') ? a.atlas('heads') : null; }
+function thumbnail(actor) {
+  const atlas = actor.atlas;
+  const f = atlas && (atlas.frames[actor.id] || (actor.anim && atlas.frames[actor.anim.frames[0]]));
+  if (!f || !atlas.image || typeof document === 'undefined') return null;
+  const key = `${atlas.id}|${f.name}|${actor.tint || ''}`;
+  let c = thumbs.get(key);
+  if (c) return c;
+  c = document.createElement('canvas'); c.width = 12; c.height = 12;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  const k = Math.min(12 / f.w, 12 / f.h);
+  const w = Math.max(1, Math.round(f.w * k)), h = Math.max(1, Math.round(f.h * k));
+  g.drawImage(atlas.image, f.x, f.y, f.w, f.h, Math.floor((12 - w) / 2), 12 - h, w, h);
+  if (actor.tint) { g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.35; g.fillStyle = actor.tint; g.fillRect(0, 0, 12, 12); }
+  thumbs.set(key, c);
+  return c;
+}
+/** Draw a unit's 12x12 head at (x, y) (top-left). Returns false when nothing could be drawn. */
+export function drawHead(r, actor, x, y, alpha = 1) {
+  if (!actor) { r.rect(x, y, 12, 12, '#2a2440'); return false; }
+  const heads = headsAtlas(r);
+  const hf = heads && (heads.frames[`head_${actor.id}`] || (actor.side === 'enemy' && heads.frames[`head_${String(actor.id).replace(/_\d+$/, '')}`]));
+  if (hf) { r.sprite(heads, hf, x, y, { topLeft: true, alpha }); return true; }
+  if (actor.side === 'party') {
+    const face = faceRect(r, actor);
+    if (face) { r.image(face.image, x, y, { sx: face.x + 1, sy: face.y + 1, sw: 12, sh: 12, alpha }); return true; }
+  } else {
+    const c = thumbnail(actor);
+    if (c) { r.image(c, x, y, { alpha }); return true; }
+  }
+  r.rect(x, y, 12, 12, '#2a2440');
+  return false;
+}
+function dashedRect(r, x, y, w, h, color, phase = 0) {
+  // 2 px dashes, 2 px gaps, marching with `phase` (the dash pattern wraps around the corners).
+  const pts = [];
+  for (let i = 0; i < w; i++) pts.push([x + i, y]);
+  for (let i = 1; i < h; i++) pts.push([x + w - 1, y + i]);
+  for (let i = w - 2; i >= 0; i--) pts.push([x + i, y + h - 1]);
+  for (let i = h - 2; i >= 1; i--) pts.push([x, y + i]);
+  pts.forEach(([px, py], i) => { if ((((i + phase) >> 1) & 1) === 0) r.pixel(px, py, color); });
+}
+
 /**
  * Timeline: order = [{uid, at, skip?, charging?}], actors map, preview = { landing, uid } | null.
+ * Party slots blue, enemy slots red (elite/boss gold-orange), the current slot gold with a pulse, the preview
+ * landing slot dashed. The next 8 actors are shown; the preview slot sits below the rail.
  */
 export function drawTimeline(r, order, actors, preview, frame) {
   const ui = uiAtlas(r);
@@ -57,6 +107,7 @@ export function drawTimeline(r, order, actors, preview, frame) {
   const rail = ui.frames.tl_rail;
   if (rail) r.nineSlice(ui.image, [rail.x, rail.y, rail.w, rail.h], [2, 0, 2, 0], TL.x, TL.y + 7, TL.railW, rail.h);
   const glowName = animFrameAt(ui.anims.tl_glow, frame / 60);
+  const pulse = Math.floor(frame / 10) % 2 === 0;
   for (let i = 0; i < Math.min(TL.slots, order.length); i++) {
     const row = order[i];
     const a = actors.get(row.uid);
@@ -64,8 +115,10 @@ export function drawTimeline(r, order, actors, preview, frame) {
     const kind = i === 0 ? 'tl_current' : a && a.side === 'enemy' ? (a.elite || a.boss ? 'tl_elite' : 'tl_enemy') : 'tl_party';
     if (i === 0 && ui.frames[glowName]) r.sprite(ui, ui.frames[glowName], sx - 2, sy - 2, { topLeft: true });
     const f = ui.frames[kind];
-    if (f) r.sprite(ui, f, sx, sy, { topLeft: true });
-    drawFace(r, a ? faceRect(r, a) : null, sx + 2, sy + 2, row.skip ? 0.45 : 1);
+    r.rect(sx + 2, sy + 2, 14, 14, '#14101e');       // ink backing: heads have transparent corners, the rail must not show through
+    if (f) r.sprite(ui, f, sx, sy, { topLeft: true, tint: i === 0 && pulse ? '#fff7d6' : null, tintAmount: i === 0 && pulse ? 0.35 : 0 });
+    drawHead(r, a, sx + 3, sy + 3, row.skip ? 0.45 : 1);
+    if (i === 0 && pulse) r.strokeRect(sx - 1, sy - 1, 20, 20, '#f9d77a');
     if (row.skip) {
       const m = ui.frames[row.skip === 'stun' ? 'st8_stun' : 'shield_broken'];
       if (m) r.sprite(ui, m, sx + 9, sy + 9, { topLeft: true });
@@ -81,8 +134,10 @@ export function drawTimeline(r, order, actors, preview, frame) {
     const beyond = i < 0 || i >= TL.slots;
     const px = beyond ? timelineSlotX(TL.slots - 1) + 10 : timelineSlotX(i) - 9;
     const py = TL.y + 10;
-    if (f) r.sprite(ui, f, px, py, { topLeft: true });
-    drawFace(r, a ? faceRect(r, a) : null, px + 2, py + 2, 0.6);
+    r.rect(px + 2, py + 2, 14, 14, '#14101e');
+    if (f) r.sprite(ui, f, px, py, { topLeft: true, alpha: 0.85 });
+    drawHead(r, a, px + 3, py + 3, 0.75);
+    dashedRect(r, px, py, 18, 18, '#f9d77a', Math.floor(frame / 4));
     const arrow = ui.frames[beyond ? 'arrow_right' : 'arrow_up'];
     if (arrow) r.sprite(ui, arrow, px + (beyond ? 20 : 4), py + (beyond ? 5 : 19) + (Math.floor(frame / 12) % 2 ? 1 : 0), { topLeft: true });
   }
