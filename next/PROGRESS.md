@@ -143,3 +143,12 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   a misty pass to a town where no one has a reflection, and across the lake to the Court of Mirrors (light-and-mirror
   puzzles, your party's own reflections as a mini-boss, the three-phase Nameless King). Plan:
   `next/docs/EPISODE2_PLAN.md`. I will start building it after the weekly usage reset so your loops keep room.
+
+## 2026-10-20 (Tue) afternoon: Episode 1 fix pass from the second playtest review
+- Fights ran long because the party kept running out of MP between the campfire and the Echo Warden. There is now a
+  healing font in the Reading Galleries' entry hall before the Warden, and Auto battle uses Mira's free MP-restoring
+  strike. A new full-route simulator confirms fights are back to about 4 to 5 rounds.
+- Whisperwood Hollow has a shrine rest point before the Briar Alpha; if you come back after the Archivore, an Elder
+  Alpha waits so it is still a fight. After you get the Lantern, Bram and the Talk menu point you back to the pool.
+- Gold has a use again: Rook the peddler by the floor-three font, and the smithy stocks better gear after floor two.
+- The start is quicker: 16 fewer text boxes before the first fight, with every favourite moment kept.
