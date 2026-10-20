@@ -34,13 +34,14 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - **Episode 2 "The Town Without a Name": in progress, NOT yet published.**
   - Wave 10a done and committed: E2-story (`src/data/story/ep2.js`, 48 scenes), E2-battle (enemies, Other Selves,
     Nameless King, Kept; simulator targets met), E2-tiles (court and hollow kits, five backdrops).
-  - Wave 10b: E2-sprites done and committed. **E2-world is done and committed (51008e6). E2-maps and E2-audio were still running in the
-    old session at handoff.** Their files land uncommitted in the working tree. In the new session: `git status`, wait until no
+  - Wave 10b: E2-sprites done and committed. **E2-world and E2-maps are done and committed. E2-audio was still running in the old session at
+    handoff** (its files: next/assets/audio/**, next/tools/music/**, next/tools/audio/**; two audio/pwa tests fail until
+    it finishes: court_hush loop seam, audio size, mirror_turn.wav precache). Their files land uncommitted in the working tree. In the new session: `git status`, wait until no
     files are still changing (or check the old session), run `node next/qa/run.mjs`, view their previews
     (`next/tools/maps/previews/*`, `next/qa/world/out/*`, `next/tools/music/out/*`), then commit each piece.
     If any of the three never finished, relaunch only that brief (EPISODE2_PLAN section 10, Wave 10b).
-  - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. Still open: E2-maps must set
-    `EP2_MAPS_LISTED = true` in `src/data/encounters.js`; one maps test fails until its maps are complete.
+  - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
+    Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
     and publish. Episode 2 shows on the title screen only after `ep1_complete` (or `?ep=2`).
 - Small backlog: Episode 2 reflection timeline heads read as blobs; drawn Episode 2 portraits are simpler than the
