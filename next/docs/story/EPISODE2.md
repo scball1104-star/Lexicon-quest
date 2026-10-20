@@ -574,7 +574,7 @@ Chapter II lines; the Signless Inn, the Hollow Provisioner and the Silverglass S
 (glasslike bells, muted piano, reflected melody) as the town theme's brief.
 
 **Changed, with reasons.**
-- The Mirror-Word crossword on F2 is gone (DESIGN hard rule 2). Its gate is now the light-bridge puzzle.
+- The old Mirror-Word letter game on F2 is gone (DESIGN hard rule 2). Its gate is now the light-bridge puzzle.
 - The lens inscription that printed the answer ("the WEST looks EAST...") is gone: the visible beam is the
   readout (DESIGN 5.3, "readable on screen without text").
 - The portrait order (Child, Keeper, King) is no longer a gate or an order puzzle; the portraits are optional story
