@@ -91,3 +91,8 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] CRITIQUE_3 #10 field Archivore avatar does not match the battle boss (art)
 - [x] CRITIQUE_3 #12 music reuse: mystery/sorrow cues in story scenes, a distinct F3 or boss-door cue (content + audio)
 - [ ] Next big steps (CRITIQUE_3): party field abilities; Lantern upgrade; Episode 2 vertical slice
+
+## Wave 9 (running)
+- [~] W9-abilities: Hero Dash Strike, Mira field Appraise + Lantern, Bram Shove; optional uses placed in existing maps
+- [~] play-critic-2: docs/PLAYTEST_REVIEW_2.md
+- [~] ep2-designer: docs/story/EPISODE2.md + docs/EPISODE2_PLAN.md (build briefs for the second realm)
