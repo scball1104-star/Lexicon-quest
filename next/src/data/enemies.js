@@ -154,6 +154,58 @@ enemy('archivore', {
   flavor: 'It was commanded to forget. It has been eating names ever since.',
 });
 
+// ---------------------------------------------------------------- Whisperwood Hollow (optional, Lv 6-7)
+// No new art (W6-content brief): each entry names the base frame it borrows through `sprite.frame`, with a
+// `scale` and `tint` the battle scene may apply (contract requested from W6-anim; the field uses the base
+// field sprite ids). The hollow is reached after the Lantern, so its foes are tuned for a Lv 6 to 7 party.
+enemy('thornback_wolf', {
+  name: 'Thornback Wolf', family: 'beast', level: 6,
+  hp: 215, atk: 27, def: 10, mag: 6, spr: 8, spd: 16, luk: 7,
+  shields: 2, weak: ['fire', 'spear'],
+  exp: 26, gold: 34, masteryPts: 4,
+  moves: [{ skill: 'bite', weight: 50, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 35 },
+          { skill: 'howl', weight: 15, once: true, if: 'notHasted' }],
+  drops: [{ item: 'potion', chance: 0.12 }, { item: 'antidote', chance: 0.15 }], lootZone: 'whisperwood_hollow',
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_wolf', scale: 1.0, tint: '#7a4a8a' },
+  flavor: 'A briar wolf grown old under the pines. The thorns go all the way through.',
+});
+enemy('ink_blot', {
+  name: 'Ink Blot', family: 'ooze', level: 6,
+  hp: 190, atk: 24, def: 8, mag: 26, spr: 12, spd: 10, luk: 4,
+  shields: 3, weak: ['fire', 'axe'], resist: ['ice'], statusImmune: ['poison'],
+  exp: 22, gold: 40, masteryPts: 4,
+  moves: [{ skill: 'slime_tackle', weight: 50 }, { skill: 'ink_spit', weight: 50 }],
+  drops: [{ item: 'ether', chance: 0.12 }, { item: 'eye_drops', chance: 0.15 }], lootZone: 'whisperwood_hollow',
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'ink_slime', scale: 1.15, tint: '#3a2a6a' },
+  flavor: 'Ink from the black pool, thick as tar and twice as patient.',
+});
+enemy('briar_alpha', {
+  name: 'Briar Alpha', family: 'beast', level: 7, size: 'large', boss: true,
+  hp: 540, atk: 33, def: 11, mag: 10, spr: 10, spd: 15, luk: 8,
+  shields: 3, weak: ['fire', 'axe'],
+  statusImmune: ['stun', 'silence', 'poison', 'blind'],
+  exp: 110, gold: 260, masteryPts: 14,
+  // Howl once it is hurt (allyHurt reads its own HP under 70% when it fights alone): the Haste phase.
+  moves: [{ skill: 'bite', weight: 45, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 35 },
+          { skill: 'howl', weight: 20, once: true, if: 'allyHurt' }],
+  // Its telegraph reuses the scarab's charge (the only single-target telegraph skill in skills.js): "digs in,
+  // eyes fixed on {target}" reads as a pounce. Lunge, Defend or a Break answer it.
+  charge: { skill: 'burrow_charge', first: 2, cooldown: 3 },
+  // Phase data for the `briar_alpha` AI script proposed in the W6-content report (calls one Thornback Wolf at
+  // 50%, gains Haste at 25%). The basic script ignores it; the fight is still a real one without it.
+  phases: [
+    { id: 'warden', name: 'Warden of the Bridge', at: 1.0, weak: ['fire', 'axe'], resist: [], shields: 3,
+      text: 'The Briar Alpha plants itself between you and the plaque.' },
+    { id: 'pack_call', name: 'Pack Call', at: 0.5, weak: ['fire', 'axe'], resist: [], shields: 3, summon: 'thornback_wolf',
+      text: 'The Alpha throws back its head and calls. Something answers from the pines.' },
+    { id: 'thornrage', name: 'Thorn Rage', at: 0.25, weak: ['fire', 'axe'], resist: [], shields: 4, haste: true,
+      text: 'Thorns bristle along its spine. It is faster now, and past caring.' },
+  ],
+  drops: [], lootZone: 'whisperwood_hollow', uniqueDrop: 'bramblefang',
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_wolf', scale: 1.3, tint: '#ffd34d' },
+  flavor: 'The pack\'s first and oldest. It kept the lost bridge for years, and nobody told it to stop.',
+});
+
 // Lost Page variants: each summon picks distinct variants so the pages want different answers.
 // The ink color tells the player the weakness (revealed from the start: the tint IS the hint).
 export const LOST_PAGE_VARIANTS = [

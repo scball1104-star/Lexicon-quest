@@ -111,6 +111,7 @@ const overlays = [
   ...scatter(ground, [','], ['flowers_yellow', 'flowers_white', 'flowers_pink'], 0.12, 32),
   ...scatter(ground, ['s'], ['pebbles_0', 'pebbles_1', 'pebbles_2'], 0.3, 33),
   { t: 'hydrangea_blue', x: 38, y: 22 }, { t: 'hydrangea_violet', x: 41, y: 23 },
+  { t: 'roots_1', x: 50, y: 28 }, { t: 'roots_0', x: 52, y: 28 },   // roots spill out of the hollow's mouth
 ];
 
 // ---------------------------------------------------------------- decor
@@ -155,6 +156,7 @@ const decor = [
   { t: 'signboard', x: 49, y: 33 },                 // Whisperwood edge
   { t: 'bench', x: 38, y: 23 },                     // the dry log bench of the Pilgrim's Rest
   { t: 'signboard', x: 40, y: 25 },                 // the pilgrims' note (the Whisperwood hint)
+  { t: 'arch_ruin', x: 50, y: 27 },                 // the root arch at the pool's edge: the mouth of Whisperwood Hollow
   { t: 'lamp_post', x: 37, y: 8, state: 1 }, { t: 'lamp_post', x: 34, y: 33, state: 1 },
   { t: 'crates_barrels', x: 40, y: 31 },
 ];
@@ -168,6 +170,8 @@ const events = [
   trigger('first_fight_trig', 7, 6, 1, 34, 'first_fight'),
   trigger('archive_door_trig', 36, 7, 1, 1, 'archive_door'),
   door('archive_entrance', 36, 5, ['archive_f1', 20, 27, 'up'], { w: 2, h: 1, if: 'archive_entered' }),
+  // the Whisperwood Hollow: the root arch's passable middle cell at the pool's edge is the door down
+  door('hollow_mouth', 51, 27, ['whisperwood_hollow', 2, 13, 'down']),
   // NPCs
   npc('penny', 39, 32, 'down'),
   npc('quill', 40, 22, 'left'),
@@ -214,6 +218,7 @@ export default {
   overhead: [],
   events,
   exits: [{ x: 0, y: 33, w: 1, h: 2, to: ['willowmere', 20, 30, 'up'] }],
-  marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9], campfire: [39, 22] },
+  marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9], campfire: [39, 22],
+    hollow_mouth: [51, 28] },
   start: { x: 1, y: 33, dir: 'right' },
 };

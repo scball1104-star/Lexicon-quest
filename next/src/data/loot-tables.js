@@ -20,6 +20,7 @@ export const ZONE_LOOT = {
   archive_f1: { ilvl: 4, equipChance: 0.12 },
   archive_f2: { ilvl: 5, equipChance: 0.14 },
   archive_f3: { ilvl: 7, equipChance: 0.15 },
+  whisperwood_hollow: { ilvl: 6, equipChance: 0.15 },   // optional side dungeon (Lv 6-7)
 };
 
 // Which slot a random equipment drop fills.
@@ -32,6 +33,9 @@ export const BOSS_LOOT = {
   // Lanternheart is granted by the post-boss scene (archivore_after) so the reveal is staged; no battle drop.
   archivore: { unique: null, rolls: 2, table: 'boss', ilvl: 8,
     consumables: [{ item: 'phoenix_feather', qty: 1 }] },
+  // Whisperwood Hollow mini-boss: the axe is its guaranteed drop (the gold chest behind it rolls a rare).
+  briar_alpha: { unique: 'bramblefang', rolls: 1, table: 'boss', ilvl: 6,
+    consumables: [{ item: 'hi_potion', qty: 1 }, { item: 'antidote', qty: 2 }] },
 };
 
 // Chest tiers for map authors: { type:'chest', tier:'wood'|'iron'|'gold', ... }. A chest may also
