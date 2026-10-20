@@ -2,9 +2,11 @@
 // help bar. Sub-screens live in src/ui/screens/*. engine.pushAwait('menu', { page? }) resolves with
 // undefined when closed ({ quit: true } is never returned: Quit resets the engine to the title itself).
 //
-// Touch layout (W4b): command rows grow to 15 px (25 css px on the phone), so the command window reaches
-// y 166, the gold/time box sits under it down to the screen bottom (y 212), and the help line moves into
-// the bottom of the party panel, which extends to the same edge. Nothing is lost, nothing scrolls.
+// Touch layout (W4b, W7): the ten commands go in TWO columns of five (column major: Items ... Status, then
+// Journal ... Quit), 30 px rows = 50 css px on the phone, so a thumb never has to aim. The party panel gives up 34
+// px to make room (its gauges are 34 px shorter), the gold/time box sits under the commands down to the screen
+// bottom (y 212) and also names the map, and the help line moves into the bottom of the party panel, which extends
+// to the same edge. Nothing is lost, nothing scrolls.
 
 import { List, rowHeightFor, touchUi } from '../ui/list.js';
 import { drawWindow, drawIcon, drawDivider, WindowAnim } from '../ui/window.js';
@@ -39,7 +41,8 @@ const COMMANDS = [
 export const PANEL = { x: 4, y: 4, w: 274, h: 178 };
 export const CMD = { x: 282, y: 4, w: 98, h: 122 };
 export const INFO = { x: 282, y: 130, w: 98, h: 52 };
-export const TOUCH_LAYOUT = { PANEL: { x: 4, y: 4, w: 274, h: 208 }, CMD: { x: 282, y: 4, w: 98, h: 162 }, INFO: { x: 282, y: 170, w: 98, h: 42 } };
+export const TOUCH_LAYOUT = { PANEL: { x: 4, y: 4, w: 240, h: 208 }, CMD: { x: 248, y: 4, w: 132, h: 162 }, INFO: { x: 248, y: 170, w: 132, h: 42 } };
+export const TOUCH_CMD_ROWS = 5;
 
 export class MenuScene {
   constructor(engine) { this.engine = engine; this.name = 'menu'; this.transparent = true; }
@@ -60,7 +63,12 @@ export class MenuScene {
     const magic = this.g.party.some((m) => knownSkills(m).some((id) => SKILLS[id] && SKILLS[id].kind === 'magic'));
     const items = COMMANDS.map((c) => ({ ...c, disabled: c.id === 'magic' && !magic }));
     const { PANEL: P, CMD: C } = this.L;
-    this.commands = new List({ x: C.x + 5, y: C.y + 6, w: C.w - 10, rowH: rowHeightFor(e, 11), rows: items.length, items, index: data.index || 0 });
+    if (this.touch) {
+      const rows = TOUCH_CMD_ROWS, rowH = Math.floor((C.h - 12) / rows);
+      this.commands = new List({ x: C.x + 5, y: C.y + 6, w: C.w - 10, colW: Math.floor((C.w - 10) / 2), columns: 2, columnMajor: true, rows, rowH, items, index: data.index || 0, textX: 18, iconX: 3, cursorDx: 3 });
+    } else {
+      this.commands = new List({ x: C.x + 5, y: C.y + 6, w: C.w - 10, rowH: rowHeightFor(e, 11), rows: items.length, items, index: data.index || 0 });
+    }
     this.members = new List({ x: P.x + 4, y: P.y + 6, w: P.w - 8, rowH: 57, rows: 3, items: this.g.party.map((m) => ({ id: m.id, label: null })), bar: true, cursorDx: 20, cursorDy: 13 });
     this.members.active = false;
     if (!data.silent) e.audio.sfx('menu_open');
@@ -163,19 +171,27 @@ export class MenuScene {
     const I = this.L.INFO;
     drawWindow(r, I.x, I.y, I.w, I.h);
     const x = I.x + 8, rx = I.x + I.w - 8;
-    const lines = [];
     const letters = ['tess_letter_1_found', 'tess_letter_2_found', 'tess_letter_3_found'].filter((f) => hasFlag(g, f)).length;
     const quest = hasFlag(g, 'tess_quest_started');
-    lines.push(['Time', fmtTime(g.playtime)]);
-    if (!this.touch || quest) lines.push(quest ? ['Letters', `${letters}/3`] : ['Party', String(g.party.length)]);
-    if (!this.touch || !quest) lines.push(['Chapter', roman(g.chapter || 1)]);
     drawIcon(r, 'gold', x, I.y + 4);
     r.text(fmtGold(g.gold), rx, I.y + 5, { align: 'right', color: 'gold' });
-    lines.forEach(([k, v], i) => {
+    const row = (i, k, v) => {
       const y = I.y + 16 + i * 10;   // 10 px apart: the last baseline keeps 8 px under it (D6)
       r.text(k, x, y, { color: 'gray' });
       r.text(v, rx, y, { align: 'right' });
-    });
+    };
+    if (this.touch) {
+      // The help bar's map title has no room on the touch layout: it takes the third line here (the Letters and
+      // Chapter lines stay on the desktop box and in the Journal).
+      row(0, 'Time', fmtTime(g.playtime));
+      r.text(this.mapTitle, x, I.y + 26, { color: 'gold' });
+      void letters; void quest;
+      return;
+    }
+    const lines = [['Time', fmtTime(g.playtime)]];
+    lines.push(quest ? ['Letters', `${letters}/3`] : ['Party', String(g.party.length)]);
+    lines.push(['Chapter', roman(g.chapter || 1)]);
+    lines.forEach(([k, v], i) => row(i, k, v));
   }
 
   draw(r) {
@@ -198,8 +214,7 @@ export class MenuScene {
       // Help line inside the panel (the help bar's place is taken by the taller command window).
       const hy = P.y + P.h - 21;
       drawDivider(r, P.x + 6, hy - 4, P.w - 12);
-      r.text(helpText, P.x + 8, hy + 3, { color: 'white', width: P.w - 16 - 80 });
-      if (this.mapTitle) r.text(this.mapTitle, P.x + P.w - 8, hy + 3, { align: 'right', color: 'gold' });
+      r.text(helpText, P.x + 8, hy + 3, { color: 'white', width: P.w - 16 });
     }
     if (this.mode === 'members') this.members.draw(r, { frame: this.frame, cursor: true });
     this.commands.draw(r, { frame: this.frame, cursor: this.mode === 'commands', bar: true });

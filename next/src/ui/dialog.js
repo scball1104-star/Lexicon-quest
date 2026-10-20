@@ -8,7 +8,8 @@
 //     portrait: 'mael' | null,                    // portraits.json id (optional; default NPCS[who].portrait / party)
 //     text: 'Ah, there you are...',               // {hero} and {c:gold}..{/c} supported; auto-wrapped and paged
 //     choices: ['Yes', 'No'],                     // optional; shown after the last page; resolves to the index
-//     position: 'bottom' | 'top',                 // optional (default bottom)
+//     position: 'bottom' | 'top',                 // optional; default: bottom, flipped to the top when the window
+//                                                 // would hide the speaker or the hero on the field (see pickPosition)
 //     cancel: 1 | false,                          // which choice `cancel` picks (default: the last one)
 //     instant: true,                              // show the whole text at once (re-showing a box with choices)
 //     boxes: [{ who, name, portrait, text }, ...] // several boxes in one scene (no flicker between them)
@@ -20,6 +21,12 @@
 // like confirm on plain text and picks the cancel option on choices. Text speed comes from settings
 // (1 slow, 2 normal, 3 fast, 4 instant: the whole page appears at once and the blips stay quiet).
 // Pages end on word boundaries (text.js paginate + hardBreaks); the per-speaker blip voice is voiceFor(who).
+//
+// Size and place (W7, CRITIQUE_3 item 1): the window is as tall as its text (1, 2 or 3 lines, never a spare
+// fourth: at most DIALOG_MAX_H = 45 px, 21% of the 216 px screen), the name tab sits ABOVE it (below it when the
+// window is at the top), and the 48 px portrait is anchored to the screen-side edge of the window and may
+// overlap its far edge (FF6 style) instead of making the window taller. The window starts at the bottom and
+// flips to the top when the speaker's actor or the hero would be under it (pickPosition, pure, node-tested).
 
 import { drawWindow, drawPortrait, hasPortrait, drawTextMark, WindowAnim } from './window.js';
 import { ChoiceBox, popScene } from './choice.js';
@@ -27,8 +34,37 @@ import { fillHero, paginate, hardBreaks, charsPerFrame, voiceFor } from './text.
 import { speakerName, NPCS } from '../data/npcs.js';
 
 export const DIALOG_ROWS = 3;
-export const DIALOG_RECT = { x: 6, y: 150, w: 372, h: 62 };
-export const DIALOG_TOP_Y = 14;
+export const DIALOG_PAD_TOP = 7;       // text starts 7 px under the window's top edge (the name tab overlaps 4)
+export const DIALOG_PAD_BOT = 5;       // plus the line box, so the ink keeps about 6 to 7 px below it
+export const DIALOG_LINE_H = 11;
+/** Height of a window with `lines` text lines. */
+export function dialogHeight(lines) { return DIALOG_PAD_TOP + Math.max(1, lines) * DIALOG_LINE_H + DIALOG_PAD_BOT; }
+export const DIALOG_MAX_H = dialogHeight(DIALOG_ROWS);
+export const DIALOG_RECT = { x: 6, y: 216 - 4 - DIALOG_MAX_H, w: 372, h: DIALOG_MAX_H };
+export const DIALOG_TOP_Y = 6;
+const SCREEN_H = 216;
+const BOTTOM_MARGIN = 4;
+const TAB_RISE = 13;                    // how far the name tab stands above (or below) the window
+const PORTRAIT_BOX = 52;                // 48 px portrait plus its thin frame
+
+/**
+ * Where the window goes. `bottomTop` / `topBottom` are the screen y spans the bottom and the top window would
+ * cover (with a 2 px margin); `actors` are [{ top, bottom }] screen spans (the speaker, the hero) that must stay
+ * visible. Returns 'bottom' or 'top': `prefer` unless it hides an actor and the other side does not; when both
+ * hide something, the side hiding fewer wins.
+ */
+export function pickPosition(hBox, actors, prefer = 'bottom', o = {}) {
+  const H = o.H || SCREEN_H;
+  const spans = {
+    bottom: [H - BOTTOM_MARGIN - hBox - 2, H],
+    top: [0, (o.topY ?? DIALOG_TOP_Y) + hBox + 2],
+  };
+  const hidden = (side) => actors.filter((a) => a && a.bottom > spans[side][0] && a.top < spans[side][1]).length;
+  const other = prefer === 'bottom' ? 'top' : 'bottom';
+  const hp = hidden(prefer);
+  if (hp === 0) return prefer;
+  return hidden(other) < hp ? other : prefer;
+}
 
 let lastClosed = { frame: -100, text: null, who: null };
 
@@ -71,28 +107,64 @@ export class DialogScene {
     const nameSrc = box.name != null ? box.name : (this.who ? speakerName(this.who) : '');
     this.speaker = fillHero(nameSrc, e.game);
     this.portrait = portraitFor(r, this.who, box.portrait);
-    this.position = box.position === 'top' ? 'top' : 'bottom';
     this.voice = box.voice !== undefined ? box.voice : (box.name && !this.who ? 'mid' : voiceFor(this.who));
-    const rect = this.rect = this._layout(box);
     const textX = this.portrait ? 64 : 12;
-    this.textX = rect.x + textX;
-    this.textW = rect.w - textX - 14;
+    this.textW = (box.w || DIALOG_RECT.w) - textX - 14;
     // Lines break on word boundaries (the font wrapper only cuts a word longer than the whole line) and a
     // page never ends on such a cut, so the typewriter may stop mid-word only while it is still typing.
     const lines = r.wrap(this.text, this.textW);
     this.pages = paginate(lines, box.rows || DIALOG_ROWS, { hard: hardBreaks(this.text, lines) });
+    // The window is as tall as the longest page of this box (a portrait asks for two lines so it is not
+    // taller than the window), and it is placed after that: bottom, or top when it would hide someone.
+    const most = this.pages.reduce((m, p) => Math.max(m, p.length), 1);
+    this.lines = Math.min(box.rows || DIALOG_ROWS, Math.max(most, this.portrait ? 2 : 1));
+    this.position = this._pickPosition(box, dialogHeight(this.lines));
+    const rect = this.rect = this._layout(box, dialogHeight(this.lines));
+    this.textX = rect.x + textX;
     this.page = 0;
     this.choices = Array.isArray(box.choices) && box.choices.length ? box.choices : null;
     this.choiceBox = null;
     this._startPage(instant || !!box.instant);
   }
 
-  _layout(box) {
+  /** Screen spans (top, bottom) of the speaker's actor and the hero, when the field is the scene underneath. */
+  _actorSpans() {
+    const e = this.engine;
+    const stack = e.scenes;
+    let i = stack.indexOf(this) - 1;
+    while (i >= 0 && (stack[i].name === 'dialog' || stack[i].name === 'choice')) i--;
+    const field = i >= 0 ? stack[i] : null;
+    if (!field || field.name !== 'field' || !field.camera || typeof field.actorById !== 'function') return [];
+    const find = (id) => { try { return id ? field.actorById(id) : null; } catch { return null; } };
+    const cands = [];
+    const speaker = find(this.who);
+    if (speaker) cands.push(speaker);
+    else if (Array.isArray(field.actors)) { const t = field.actors.find((a) => a && a.talking); if (t) cands.push(t); }
+    if (field.leader && !cands.includes(field.leader)) cands.push(field.leader);
+    const out = [];
+    for (const a of cands) {
+      if (!a || a.visible === false || a.dead) continue;
+      const [sx, sy] = field.camera.toScreen(a.feetX, a.feetY);
+      if (sx < -8 || sx > e.renderer.W + 8) continue;
+      out.push({ top: sy - ((a.spr && a.spr.h) || 20) + 2, bottom: sy + 2 });
+    }
+    return out;
+  }
+
+  _pickPosition(box, h) {
+    if (box.position === 'top' || box.position === 'bottom') return box.position;
+    if (box.rect || box.y != null) return 'bottom';
+    const prefer = this.position || 'bottom';
+    return pickPosition(h, this._actorSpans(), prefer, { H: this.engine.renderer.H });
+  }
+
+  _layout(box, h) {
     const r = this.engine.renderer;
     if (box.rect) return { ...box.rect };
-    const w = box.w || DIALOG_RECT.w, h = box.h || DIALOG_RECT.h;
+    const w = box.w || DIALOG_RECT.w;
+    h = box.h || h;
     const x = box.x ?? Math.round((r.W - w) / 2);
-    const y = box.y ?? (this.position === 'top' ? DIALOG_TOP_Y : r.H - h - 4);
+    const y = box.y ?? (this.position === 'top' ? DIALOG_TOP_Y : r.H - h - BOTTOM_MARGIN);
     return { x, y, w, h };
   }
 
@@ -192,17 +264,22 @@ export class DialogScene {
     const box = this.box;
     const field = box.field !== false;
     const tail = box.tail ? { x: box.tail.x, dir: box.tail.dir || (this.position === 'top' ? 'down' : 'up') } : null;
-    drawWindow(r, rect.x, rect.y, rect.w, rect.h, { field, scheme: box.scheme, open: k, tail });
+    // A window at the top is opaque: the map banner and the sky behind it would bleed through the 8 % of a field window.
+    drawWindow(r, rect.x, rect.y, rect.w, rect.h, { field, scheme: box.scheme, open: k, tail, alpha: this.position === 'top' && !box.tail ? 1 : undefined });
     if (k < 1) return;
-    if (this.portrait) drawPortrait(r, this.portrait, rect.x + 6, rect.y + 5, 48, { scheme: box.scheme });
+    if (this.portrait) {
+      // Anchored to the screen-side edge of the window, overlapping the far edge instead of stretching the window.
+      const py = this.position === 'top' ? rect.y + 4 : rect.y + rect.h - 3 - PORTRAIT_BOX;
+      drawPortrait(r, this.portrait, rect.x + 6, py, 48, { scheme: box.scheme });
+    }
     if (this.speaker) {
       const nw = r.measure(this.speaker) + 14;
       const nx = rect.x + (this.portrait ? 62 : 10);
-      const ny = this.position === 'top' ? rect.y + rect.h - 8 : rect.y - 9;
+      const ny = this.position === 'top' ? rect.y + rect.h - 4 : rect.y - TAB_RISE;
       drawWindow(r, nx, ny, nw, 17, { kind: 'thin', scheme: box.scheme });
       r.text(this.speaker, nx + 7, ny + 3, { color: 'gold' });
     }
-    r.text(this.pageText, this.textX, rect.y + 10, { chars: Math.floor(this.shown), width: this.textW });
+    r.text(this.pageText, this.textX, rect.y + DIALOG_PAD_TOP, { chars: Math.floor(this.shown), width: this.textW });
     if (!this.typing && !this.choiceBox) {
       const more = !this.lastPage || this.boxIndex < this.boxes.length - 1;
       drawTextMark(r, more ? 'more' : 'end', rect.x + rect.w - 14, rect.y + rect.h - 13, { frame: this.frame });
@@ -214,7 +291,7 @@ export class DialogScene {
   get done() { return this.anim.isOpen && !this.typing; }
 
   debugState() {
-    return { who: this.who, speaker: this.speaker, portrait: this.portrait, page: this.page, pages: this.pages.length, shown: Math.floor(this.shown), total: this.total,
+    return { who: this.who, speaker: this.speaker, portrait: this.portrait, position: this.position, rect: { ...this.rect }, lines: this.lines, page: this.page, pages: this.pages.length, shown: Math.floor(this.shown), total: this.total,
       typing: this.typing, done: this.done, choices: this.choices, choiceIndex: this.choiceBox ? this.choiceBox.index : null, box: this.boxIndex, boxes: this.boxes.length };
   }
 }

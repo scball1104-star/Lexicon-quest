@@ -305,10 +305,10 @@ export function drawPreviewTag(r, actor, eff, opts = {}) {
   if (eff.mp) parts.push(`{c:blue}+${eff.mp} MP{/c}`);
   if (eff.revive) parts.push('{c:green}Revive{/c}');
   if (eff.weak === true) parts.push('{c:gold}WEAK{/c}');
-  else if (eff.weak === '?') parts.push('{c:gray}?{/c}');
+  else if (eff.weak === '?') parts.push('{i:weak_unknown}');   // the same "?" box the enemy row uses (not a multiply sign)
   else if (eff.resist === true) parts.push('{c:dim}RESIST{/c}');
   if (eff.breaks) parts.push('{c:orange}BREAK{/c}');
-  else if (eff.shieldsAfter != null && actor.side === 'enemy' && eff.shieldsAfter !== actor.shields && !actor.broken) parts.push(`{c:cyan}${eff.shieldsAfter}{/c}`);
+  else if (eff.shieldsAfter != null && actor.side === 'enemy' && eff.shieldsAfter !== actor.shields && !actor.broken) parts.push(`{i:icon_shield}{c:cyan}${eff.shieldsAfter}{/c}`);
   if (eff.kills) parts.push('{c:red}KO{/c}');
   if (eff.hit != null && eff.hit < 0.9) parts.push(`{c:gray}${Math.round(eff.hit * 100)}%{/c}`);
   if (!parts.length) return;

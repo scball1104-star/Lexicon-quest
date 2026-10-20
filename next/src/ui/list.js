@@ -2,27 +2,41 @@
 // scroll arrows, page dots, disabled rows, optional icons and right-aligned values, keyboard / gamepad /
 // touch (tap selects, tap the selected row confirms, drag scrolls).
 //
-//   const list = new List({ x, y, w, rows: 8, rowH: 12, columns: 1, items: [
+//   const list = new List({ x, y, w, rows: 8, rowH: 12, columns: 1, columnMajor: false, items: [
 //     { id: 'items', label: 'Items', icon: 'bag', right: 'x3', color: 'white', disabled: false, help: '...' },
 //   ], onChange: (item, index) => {} });
 //   const act = list.update(engine.input, engine.audio);   // 'confirm' | 'cancel' | 'pageL' | 'pageR' | null
 //   list.draw(r, { scheme, cursor: true, bar: true, alpha });
 //   list.item, list.index, list.setItems(items, keepIndex), list.moveTo(i), list.rowRect(i)
 //
+// `columns: 2, columnMajor: true, rows: 4` fills the first column top to bottom, then the second (battle
+// commands): up / down stay inside a column, left / right cross to the same row of the other column (the last
+// item when that cell is empty). No scrolling in that mode: every item must fit rows x columns.
+//
 // Labels may be functions (evaluated at draw time). `disabled` rows can be landed on (FF style) and buzz on
 // confirm unless `skipDisabled` is set. `textX` overrides where the label starts inside the row.
 //
 // Touch (W4b, CRITIQUE C12): while the touch controls are showing, menus build their lists with
-// rowHeightFor(engine, base) so every row is at least TOUCH_ROW_H game px (15 px = 25 css px on the phone
-// profile, where one game px is 5/3 css px). Rows taller than 12 px center their text, icon and bar.
+// rowHeightFor(engine, base) so every row is at least TOUCH_ROW_H game px (20 px = 33 css px on the phone
+// profile, where one game px is 5/3 css px; short menus use tapRowHeight: 27 px = 45 css px). Rows taller than 12 px center their text, icon and bar.
 // `tapMode: 'single'` makes a tap select AND confirm in one go (the name entry grid); the default is tap to
 // select, tap the selected row again to confirm.
 
 import { drawSelBar, drawIcon, drawScrollArrow, drawPageDots, schemeColors } from './window.js';
 import { drawCursor, cursorHotspotForRow } from './cursor.js';
 
-/** Minimum row height (game px) while touch controls are showing. */
-export const TOUCH_ROW_H = 15;
+/**
+ * Minimum row height (game px) for a list while touch controls are showing: 20 px = 33 css px on the 844x390
+ * phone profile (one game px = 5/3 css px; it was 15 = 25 css px). Lists derive their visible rows from their
+ * window, so they scroll instead of overflowing.
+ */
+export const TOUCH_ROW_H = 20;
+/**
+ * Row height (game px) of a SHORT standalone menu on touch (the main menu grid, choice boxes): 27 px = 45 css px
+ * on the phone profile, above the 44 px finger floor. Dense data lists use TOUCH_ROW_H; a 216 px screen cannot
+ * hold 44 css px rows for a 10-row list.
+ */
+export const TOUCH_TAP_H = 27;
 
 /** True when the on-screen touch controls are visible (the player is on a touch layout). */
 export function touchUi(engine) {
@@ -32,6 +46,11 @@ export function touchUi(engine) {
 /** Row height for a menu: `base` with a keyboard or pad, at least TOUCH_ROW_H on a touch layout. */
 export function rowHeightFor(engine, base = 12, touchH = TOUCH_ROW_H) {
   return touchUi(engine) ? Math.max(base, touchH) : base;
+}
+
+/** Row height for a short standalone menu: `base` with a keyboard or pad, at least TOUCH_TAP_H on a touch layout. */
+export function tapRowHeight(engine, base = 12) {
+  return touchUi(engine) ? Math.max(base, TOUCH_TAP_H) : base;
 }
 
 /** How many rows of `rowH` fit in `available` px (never below 1). */
@@ -48,6 +67,7 @@ export class List {
     this.rowH = o.rowH || 12;
     this.tapMode = o.tapMode === 'single' ? 'single' : 'double';
     this.columns = Math.max(1, o.columns || 1);
+    this.columnMajor = !!o.columnMajor && this.columns > 1;
     this.x = o.x || 0; this.y = o.y || 0; this.w = o.w || 100;
     this.colW = o.colW || Math.floor(this.w / this.columns);
     this.wrap = o.wrap !== false;
@@ -76,7 +96,7 @@ export class List {
   get item() { return this.items[this.index] || null; }
   /** Vertical offset that centers one 11 px text line (or a 12 px icon) in a row taller than 12 px. */
   get textDy() { return Math.max(0, Math.floor((this.rowH - 12) / 2)); }
-  get rowCount() { return Math.ceil(this.items.length / this.columns); }
+  get rowCount() { return this.columnMajor ? Math.min(this.rows, this.items.length) : Math.ceil(this.items.length / this.columns); }
   get maxScroll() { return Math.max(0, this.rowCount - this.rows); }
   get page() { return this.rows > 0 ? Math.floor(this.scroll / this.rows) : 0; }
   get pages() { return this.rows > 0 ? Math.max(1, Math.ceil(this.rowCount / this.rows)) : 1; }
@@ -90,8 +110,13 @@ export class List {
     return this;
   }
 
-  rowOf(i) { return Math.floor(i / this.columns); }
-  colOf(i) { return i % this.columns; }
+  rowOf(i) { return this.columnMajor ? i % this.rows : Math.floor(i / this.columns); }
+  colOf(i) { return this.columnMajor ? Math.floor(i / this.rows) : i % this.columns; }
+  /** Item index at a grid cell, or -1 when the cell is empty. */
+  cellIndex(row, col) {
+    const i = this.columnMajor ? col * this.rows + row : row * this.columns + col;
+    return i >= 0 && i < this.items.length ? i : -1;
+  }
 
   ensureVisible() {
     const row = this.rowOf(this.index);
@@ -116,18 +141,18 @@ export class List {
   step(dir) {
     const n = this.items.length;
     if (n <= 1) return false;
+    if (this.columnMajor) return this._stepColumns(dir);
     const cols = this.columns;
     const rows = this.rowCount;
     let i = this.index;
     const row = this.rowOf(i), col = this.colOf(i);
-    const tryIndex = (ni) => (ni >= 0 && ni < n ? ni : -1);
     for (let guard = 0; guard < n; guard++) {
       let r2 = this.rowOf(i), c2 = this.colOf(i);
       if (dir === 'up') { r2 -= 1; if (r2 < 0) { if (!this.wrap) return false; r2 = rows - 1; } }
       else if (dir === 'down') { r2 += 1; if (r2 >= rows) { if (!this.wrap) return false; r2 = 0; } }
       else if (dir === 'left') { if (cols === 1) return false; c2 -= 1; if (c2 < 0) { if (!this.wrap) return false; c2 = cols - 1; } }
       else if (dir === 'right') { if (cols === 1) return false; c2 += 1; if (c2 >= cols) { if (!this.wrap) return false; c2 = 0; } }
-      let ni = tryIndex(r2 * cols + c2);
+      let ni = this.cellIndex(r2, c2);
       if (ni < 0) ni = n - 1;   // past the ragged end of the last row: land on the last item
       i = ni;
       if (ni === this.index) return false;
@@ -135,6 +160,33 @@ export class List {
     }
     if (i === this.index) return false;
     void row; void col;
+    return this.moveTo(i);
+  }
+
+  /** step() for columnMajor lists: up / down wrap inside the column, left / right keep the row (or take the column's last item). */
+  _stepColumns(dir) {
+    const n = this.items.length, R = this.rows;
+    const colCount = Math.ceil(n / R);
+    const lenOf = (c) => Math.min(R, n - c * R);
+    let i = this.index;
+    for (let guard = 0; guard < n; guard++) {
+      const row = this.rowOf(i), col = this.colOf(i);
+      let ni;
+      if (dir === 'up' || dir === 'down') {
+        const len = lenOf(col);
+        if (len <= 1) return false;
+        const r2 = (row + (dir === 'down' ? 1 : -1) + len) % len;
+        ni = col * R + r2;
+      } else {
+        if (colCount <= 1) return false;
+        const c2 = (col + (dir === 'right' ? 1 : -1) + colCount) % colCount;
+        ni = this.cellIndex(row, c2);
+        if (ni < 0) ni = c2 * R + lenOf(c2) - 1;
+      }
+      i = ni;
+      if (!this.skipDisabled || !this.items[ni].disabled) break;
+    }
+    if (i === this.index) return false;
     return this.moveTo(i);
   }
 
@@ -150,8 +202,7 @@ export class List {
     if (px < this.x - slop || px >= this.x + this.w + slop || py < this.y - slop || py >= this.y + h + slop) return -1;
     const row = this.scroll + Math.max(0, Math.min(this.rows - 1, Math.floor((py - this.y) / this.rowH)));
     const col = Math.max(0, Math.min(this.columns - 1, Math.floor((px - this.x) / this.colW)));
-    const i = row * this.columns + col;
-    return i < this.items.length ? i : -1;
+    return this.cellIndex(row, col);
   }
 
   /** Returns 'confirm' | 'cancel' | 'pageL' | 'pageR' | null. */

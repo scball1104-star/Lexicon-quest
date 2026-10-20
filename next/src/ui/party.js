@@ -59,7 +59,7 @@ export function drawMemberRow(r, m, x, y, o = {}) {
   drawLabel(r, 'fury', x0, y + 34, { alpha });
   const full = info.furyFrac >= 1;
   // READY sits beside the gauge on its own line (D11): the gauge gives up 25 px for the 21 px label.
-  const furyW = gaugeW - 22 - (full ? 25 : 0);
+  const furyW = Math.max(18, gaugeW - 22 - (full ? 25 : 0));
   drawGauge(r, x0 + 22, y + 35, furyW, info.furyFrac, 'fury', { thin: true, glow: full, frame: o.frame });
   if (full) drawLabel(r, 'ready', x0 + 22 + furyW + 4, y + 34, { alpha });
   drawLabel(r, 'next', mx, y + 34, { alpha });

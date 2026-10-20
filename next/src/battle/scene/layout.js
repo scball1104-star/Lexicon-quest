@@ -7,25 +7,34 @@ export const W = 384;
 export const H = 216;
 
 // Windows (x, y, w, h).
+//
+// W7 (CRITIQUE_3 item 2): the command window is TWO columns of four rows (column major: Attack, Tech, Magic,
+// Fury | Combo, Item, Defend, Swap / Flee), so every command is on screen with no scroll arrow. It is 126 px wide
+// and the party status window gives up the 34 px (statusRow() packs its gauges a little tighter). On the touch
+// layout the rows are TOUCH_CMD_ROW_H tall (18 px = 30 css px) and Flee moves out of the grid into a FLEE button
+// in the help window (HELP_TOUCH_BTNS.flee: tap once to arm, again to run), which keeps the grid at 4 rows.
 export const HELP_WIN = { x: 4, y: 4, w: 218, h: 19 };
-export const CMD_WIN = { x: 4, y: 152, w: 92, h: 60 };
-export const STATUS_WIN = { x: 98, y: 152, w: 282, h: 60 };
-export const CMD_ROWS = 4;            // visible command rows
+export const CMD_WIN = { x: 4, y: 152, w: 126, h: 60 };
+export const STATUS_WIN = { x: 132, y: 152, w: 248, h: 60 };
+export const CMD_ROWS = 4;            // visible command rows (per column)
+export const CMD_COLS = 2;
 export const CMD_ROW_H = 11;
+export const CMD_COL_W = 52;          // glove (16) + the longest label ("Attack", "Defend") + air
+export const TOUCH_CMD_ROW_H = 18;
 export const STATUS_ROW_H = 17;
-// Touch layouts (W5, DESIGN 3): rows grow to List's TOUCH_ROW_H (15 px = 25 css px on the phone), so the command
-// window grows upward to keep four rows and the sub-list window moves up with it (both still above / beside the
-// bottom band; the enemy row anchor is clamped above STATUS_WIN either way).
-export const CMD_WIN_TOUCH = { x: 4, y: 140, w: 92, h: 72 };
-export const SUB_WIN_TOUCH = { x: 4, y: 66, w: 188, h: 72 };
+// Touch layouts (W5, DESIGN 3): rows grow to TOUCH_CMD_ROW_H, so the command window grows upward to keep four
+// rows and the sub-list window moves up with it (both still above / beside the bottom band; the enemy row anchor
+// is clamped above STATUS_WIN either way).
+export const CMD_WIN_TOUCH = { x: 4, y: 132, w: 126, h: 80 };
+export const SUB_WIN_TOUCH = { x: 4, y: 46, w: 188, h: 84 };
 /** Command window rect for a layout. */
 export function cmdWin(touch) { return touch ? CMD_WIN_TOUCH : CMD_WIN; }
 /** Sub-list (Tech / Magic / Item / Fury / Combo) window rect for a layout. */
 export function subWin(touch) { return touch ? SUB_WIN_TOUCH : SUB_WIN; }
-/** Rows of `rowH` that fit a command-style window (6 px padding top and bottom). */
-export function cmdRowsFor(win, rowH) { return Math.max(1, Math.floor((win.h - 12) / rowH)); }
-/** The touch layout's AUTO and x2 buttons inside the help window (tap targets; the desktop shows glyphs). */
-export const HELP_TOUCH_BTNS = { auto: { x: 158, y: 6, w: 30, h: 15 }, speed: { x: 190, y: 6, w: 28, h: 15 } };
+/** Rows of `rowH` that fit a command-style window (`padding` px in all: 6 on top and bottom by default). */
+export function cmdRowsFor(win, rowH, padding = 12) { return Math.max(1, Math.floor((win.h - padding) / rowH)); }
+/** The touch layout's AUTO, x2 and FLEE buttons inside the help window (tap targets; the desktop shows glyphs). */
+export const HELP_TOUCH_BTNS = { flee: { x: 124, y: 6, w: 31, h: 15 }, auto: { x: 158, y: 6, w: 30, h: 15 }, speed: { x: 190, y: 6, w: 28, h: 15 } };
 
 // Timeline (top right): 8 slots of 18 px, the first (current) gets one extra px of air.
 export const TL = { x: 226, y: 6, slots: 8, slot: 18, railW: 154 };
@@ -122,13 +131,17 @@ export function unitBox(u) {
   return { x: Math.round(u.x - w / 2), y: Math.round(u.y - h), w, h };
 }
 
-/** Status window row rect and the x anchors inside it (mock_battle_command). */
+/**
+ * Status window row rect and the x anchors inside it (mock_battle_command). The window is 248 px wide now (the
+ * command window took 34), so the HP gauge, the MP block and the Fury gauge are packed 34 px tighter than the
+ * 282 px original; the name, the numbers and the status icons keep their sizes.
+ */
 export function statusRow(i) {
   const ry = STATUS_WIN.y + 5 + i * STATUS_ROW_H;
   const x0 = STATUS_WIN.x + 8;
-  return { y: ry, x0, name: [x0, ry + 3], hp: [x0 + 92, ry + 1], hpGauge: [x0 + 44, ry + 11, 75],
-    mpLbl: [x0 + 126, ry + 2], mp: [x0 + 156, ry + 1], mpGauge: [x0 + 126, ry + 11, 31],
-    furyLbl: [x0 + 164, ry + 2], furyGauge: [x0 + 164, ry + 11, 52], ready: [x0 + 190, ry + 2], status: [x0 + 224, ry + 4],
+  return { y: ry, x0, name: [x0, ry + 3], hp: [x0 + 74, ry + 1], hpGauge: [x0 + 40, ry + 11, 62],
+    mpLbl: [x0 + 106, ry + 2], mp: [x0 + 134, ry + 1], mpGauge: [x0 + 106, ry + 11, 31],
+    furyLbl: [x0 + 142, ry + 2], furyGauge: [x0 + 142, ry + 11, 44], ready: [x0 + 168, ry + 2], status: [x0 + 190, ry + 4],
     bar: [STATUS_WIN.x + 4, ry, STATUS_WIN.w - 8, STATUS_ROW_H] };
 }
 

@@ -7,7 +7,7 @@
 //   box.update() -> index | -1 (cancel) | null;   box.draw(r);   box.rect
 
 import { drawWindow, WindowAnim } from './window.js';
-import { List, rowHeightFor } from './list.js';
+import { List, rowHeightFor, tapRowHeight } from './list.js';
 import { fillHero } from './text.js';
 
 export class ChoiceBox {
@@ -19,7 +19,11 @@ export class ChoiceBox {
     this.engine = engine;
     const r = engine.renderer;
     this.items = (options || []).map((op) => (typeof op === 'string' ? { label: fillHero(op, engine.game) } : { ...op, label: fillHero(op.label, engine.game) }));
-    const rowH = o.rowH || rowHeightFor(engine, 11);   // touch layouts get 15 px rows
+    // Touch layouts get the big tap rows (27 px = 45 css px on the phone) while the box stays under 150 px tall;
+    // a long list steps down to the ordinary touch row height instead.
+    let rowH = o.rowH || tapRowHeight(engine, 11);
+    const floorH = rowHeightFor(engine, 11);
+    while (!o.rowH && rowH > floorH && (options || []).length * rowH + 12 > 150) rowH--;
     let tw = 0;
     for (const it of this.items) tw = Math.max(tw, r.measure(it.label));
     const w = Math.max(o.minWidth || 48, tw + 32);

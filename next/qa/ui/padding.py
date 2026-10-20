@@ -72,7 +72,7 @@ HOOK_JS = r"""
             clip = clip ? { x: Math.max(clip.x, c.x), y: Math.max(clip.y, c.y), x2: Math.min(clip.x2, c.x + c.w), y2: Math.min(clip.y2, c.y + c.h) } : { x: c.x, y: c.y, x2: c.x + c.w, y2: c.y + c.h };
           }
           r.__padLog.push({ text: String(str).slice(0, 40), font: opts.font || 'main', frame: r.frame,
-            nwin: ua && ua.frame === r.frame ? ua.windows.length : 1e9, clip,
+            nwin: !ua ? 1e9 : (ua.frame === r.frame ? ua.windows.length : 0), clip,
             ink: { x: Math.round(x) + (x0 - OX), y: Math.round(y) + (y0 - OY), w: x1 - x0 + 1, h: y1 - y0 + 1 },
             baseline: Math.min(baseline, Math.round(y) + (y1 - OY) + 1) });
         }
@@ -121,6 +121,8 @@ def audit(sample):
             if y1 < t['ink']['y'] + t['ink']['h']:
                 t = dict(t, baseline=y1)
         wins = [w for i, w in enumerate(sample['windows']) if i < t.get('nwin', 1e9) and w.get('open', 1) >= 1] or wins_all
+        if t.get('nwin', 1e9) == 0:
+            continue   # drawn before any window of the frame (a banner under a later dialog): no window owns it
         cx, cy = ink['x'] + ink['w'] / 2, ink['y'] + ink['h'] / 2
         inside = [w for w in wins if contains(w, cx, cy)]
         if not inside:

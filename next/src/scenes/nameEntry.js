@@ -5,7 +5,7 @@
 
 import { List, rowHeightFor, touchUi } from '../ui/list.js';
 import { drawWindow, drawPortrait } from '../ui/index.js';
-import { btn, hasBtn } from '../ui/glyphs.js';
+import { btn, hasBtn, deviceOf } from '../ui/glyphs.js';
 import { drawHelpBar } from '../ui/help.js';
 import { KeyArt, DARK } from '../ui/keyart.js';
 import { createGame, cleanName } from '../game/state.js';
@@ -32,8 +32,11 @@ export class NameEntryScene {
     const gw = GRID.cols * cellW, gh = ROWS.length * cellH + 14;
     // Grid anchored just above the help bar; the name window and title move up on a touch layout.
     this.gridRect = { x: Math.round((e.renderer.W - gw - 24) / 2), y: HELP_RECT.y - 4 - gh, w: gw + 24, h: gh };
-    this.nameRect = { x: 84, y: touch ? 28 : 36, w: 216, h: touch ? 56 : 60 };
-    this.titleY = touch ? 6 : 12;
+    // Touch cells are 20 px tall (33 css px), so the grid needs 114 px: the name window shrinks to 46 px (a 32 px
+    // portrait) and sits right under the title so the two never touch.
+    this.nameRect = { x: 84, y: touch ? 22 : 36, w: 216, h: touch ? 46 : 60 };
+    this.titleY = touch ? 3 : 12;
+    this.compact = touch;
     this.grid = new List({ x: this.gridRect.x + 12, y: this.gridRect.y + 7, w: gw, rowH: cellH, rows: ROWS.length, columns: GRID.cols, colW: cellW,
       items, align: 'center', confirmSfx: false, cancelSfx: false, index: 0, tapMode: 'single' });
     e.input.startText();
@@ -105,26 +108,35 @@ export class NameEntryScene {
     // Name window: portrait + 8 cells.
     const { x: nx, y: ny, w: nw, h: nh } = this.nameRect;
     drawWindow(r, nx, ny, nw, nh);   // opaque over the key art (D1)
-    drawPortrait(r, 'hero', nx + 6, ny + 4, 48);
-    const cx = nx + 66, cy = ny + 20;
+    const cmp = this.compact;
+    drawPortrait(r, 'hero', nx + 6, ny + (cmp ? 4 : 4), cmp ? 32 : 48);
+    const cx = nx + (cmp ? 52 : 66), cy = ny + (cmp ? 12 : 20);
     for (let i = 0; i < MAX; i++) {
-      const x = cx + i * 17;
+      const x = cx + i * (cmp ? 19 : 17);
       const ch = this.value[i];
       r.rect(x, cy + 13, 14, 1, i < this.value.length ? '#f9d77a' : '#6b6a8a');
       if (ch) r.text(ch, x + 7, cy, { align: 'center', color: 'white' });
       else if (i === this.value.length && Math.floor(this.frame / 20) % 2 === 0) r.rect(x + 2, cy + 11, 10, 1, '#f6f4ee');
     }
-    r.text(`${this.value.length}/${MAX}`, nx + nw - 8, ny + 42, { align: 'right', color: 'dim' });
+    r.text(`${this.value.length}/${MAX}`, nx + nw - 8, ny + (cmp ? 30 : 42), { align: 'right', color: 'dim' });
     // Grid.
     const g = this.gridRect;
     drawWindow(r, g.x, g.y, g.w, g.h);
     this.grid.draw(r, { frame: this.frame });
-    const help = hasBtn('confirm', e) ? `${btn('confirm')} pick   ${btn('cancel')} erase   ✓ or Enter when done` : 'Tap a letter   ← erase   ✓ when done';
-    drawHelpBar(r, help, { y: HELP_RECT.y, h: HELP_RECT.h });
+    // Touch: the A / B tap glyphs and no "Enter" (a phone has no such key); keyboard: key caps and Enter.
+    drawHelpBar(r, this.helpText(), { y: HELP_RECT.y, h: HELP_RECT.h });
     void e;
   }
 
-  debugState() { return { value: this.value, index: this.grid.index, busy: this.busy, cell: [this.grid.colW, this.grid.rowH], grid: this.gridRect }; }
+  /** The help line for the current input device (raw inline codes; the keycap and Enter wording is keyboard only). */
+  helpText() {
+    const e = this.engine;
+    const dev = deviceOf(e);
+    if (!hasBtn('confirm', e)) return 'Tap a letter   ← erase   ✓ when done';
+    return `${btn('confirm')} pick   ${btn('cancel')} erase   ${dev === 'keyboard' ? '✓ or Enter when done' : '✓ when done'}`;
+  }
+
+  debugState() { return { help: this.helpText(), device: deviceOf(this.engine), value: this.value, index: this.grid.index, busy: this.busy, cell: [this.grid.colW, this.grid.rowH], grid: this.gridRect }; }
 }
 
 export default NameEntryScene;

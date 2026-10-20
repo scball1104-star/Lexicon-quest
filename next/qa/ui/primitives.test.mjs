@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { List, TOUCH_ROW_H, rowHeightFor, rowsThatFit } from '../../src/ui/list.js';
+import { List, TOUCH_ROW_H, TOUCH_TAP_H, rowHeightFor, tapRowHeight, rowsThatFit } from '../../src/ui/list.js';
 import { fillHero, fmtGold, fmtTime, paginate, hardBreaks, charsPerFrame, voiceFor, roman } from '../../src/ui/text.js';
 import { schemeColors, SCHEMES, currentScheme } from '../../src/ui/window.js';
-import { portraitFor } from '../../src/ui/dialog.js';
+import { portraitFor, pickPosition, dialogHeight, DIALOG_MAX_H, DIALOG_ROWS } from '../../src/ui/dialog.js';
+import { fitScale, PIC } from '../../src/ui/screens/journal.js';
 import { NumberPopups } from '../../src/ui/numberPopup.js';
 import { cleanName } from '../../src/game/state.js';
 import { ROWS as CONFIG_ROWS, SETTING_KEYS as CONFIG_SETTING_KEYS, helpFor } from '../../src/scenes/config.js';
@@ -219,18 +220,23 @@ test('config rows cover the settings they edit and every choice value exists', (
   assert.ok(!/btn_/.test(helpFor(bs, touchEngine)) && !/btn_/.test(helpFor(ab, touchEngine)), 'no key glyphs on a touch layout');
 });
 
-test('touch row helpers: 15 px rows only while the touch controls show; List centers taller rows', () => {
-  assert.equal(TOUCH_ROW_H, 15);
-  assert.equal(rowHeightFor({ touch: { visible: true } }, 11), 15);
+test('touch row helpers: 20 px rows (27 for short menus) only while the touch controls show; List centers taller rows', () => {
+  assert.equal(TOUCH_ROW_H, 20);
+  assert.equal(TOUCH_TAP_H, 27);
+  assert.equal(rowHeightFor({ touch: { visible: true } }, 11), 20);
   assert.equal(rowHeightFor({ touch: { visible: true } }, 46), 46, 'big rows keep their height');
   assert.equal(rowHeightFor({ touch: { visible: false } }, 11), 11);
   assert.equal(rowHeightFor(null, 12), 12);
-  assert.equal(rowsThatFit(138, 12), 11); assert.equal(rowsThatFit(138, 15), 9); assert.equal(rowsThatFit(5, 15), 1);
+  assert.equal(tapRowHeight({ touch: { visible: true } }, 11), 27);
+  assert.equal(tapRowHeight({ touch: { visible: false } }, 11), 11);
+  assert.equal(rowsThatFit(138, 12), 11); assert.equal(rowsThatFit(138, 20), 6); assert.equal(rowsThatFit(5, 15), 1);
   assert.equal(new List({ rowH: 15 }).textDy, 1);
+  assert.equal(new List({ rowH: 20 }).textDy, 4);
   assert.equal(new List({ rowH: 12 }).textDy, 0);
   assert.equal(new List({ rowH: 11 }).textDy, 0);
   // Phone profile: 384 x 216 at device scale 5 on a dpr 3 screen = 5/3 css px per game px.
-  assert.ok(15 * (5 / 3) >= 24, 'touch rows are at least 24 css px on the phone profile');
+  assert.ok(TOUCH_ROW_H * (5 / 3) >= 33, 'list rows are at least 33 css px on the phone profile');
+  assert.ok(TOUCH_TAP_H * (5 / 3) >= 44, 'short-menu rows reach the 44 css px finger floor');
   // Tap model: a tap selects, a second tap on the same row confirms; 'single' confirms at once.
   const items = [{ label: 'a' }, { label: 'b' }, { label: 'c' }];
   const mk = (tapMode) => new List({ x: 0, y: 0, w: 50, rows: 3, rowH: 15, items, tapMode });
@@ -295,4 +301,57 @@ test('no story word is wider than the dialog text column (so the wrapper never c
   }
   assert.ok(strings > 300, `scanned ${strings} strings`);
   assert.ok(widest.w <= PORTRAIT_W, `widest word "${widest.word}" (${widest.w} px, ${widest.file}) exceeds ${PORTRAIT_W} px`);
+});
+
+test('List columnMajor (W7): fills a column first; up / down stay in the column, left / right cross', () => {
+  const items = Array.from({ length: 6 }, (_, i) => ({ id: i, label: `c${i}` }));   // rows 4 -> col 0 = 0..3, col 1 = 4..5
+  const list = new List({ x: 10, y: 20, w: 100, colW: 50, rows: 4, rowH: 11, columns: 2, columnMajor: true, items });
+  const input = fakeInput(), audio = fakeAudio();
+  assert.equal(list.rowOf(3), 3); assert.equal(list.colOf(3), 0); assert.equal(list.rowOf(4), 0); assert.equal(list.colOf(4), 1);
+  assert.deepEqual(list.rowRect(5), { x: 60, y: 31, w: 50, h: 11 });
+  assert.equal(list.maxScroll, 0, 'no scrolling: every item fits');
+  input.step('down'); list.update(input, audio); assert.equal(list.index, 1, 'down stays in the first column');
+  input.step('right'); list.update(input, audio); assert.equal(list.index, 5, 'right keeps the row');
+  input.step('down'); list.update(input, audio); assert.equal(list.index, 4, 'a short column wraps inside itself');
+  input.step('left'); list.update(input, audio); assert.equal(list.index, 0);
+  list.moveTo(3);
+  input.step('right'); list.update(input, audio); assert.equal(list.index, 5, 'an empty cell lands on the last item of that column');
+  input.step('up'); list.update(input, audio); assert.equal(list.index, 4);
+  assert.equal(list.pointerRow(70, 22), 4); assert.equal(list.pointerRow(70, 44), -1, 'empty cell');
+  // skipDisabled works through the column logic.
+  const sk = new List({ x: 0, y: 0, w: 100, colW: 50, rows: 4, columns: 2, columnMajor: true, skipDisabled: true,
+    items: items.map((it) => ({ ...it, disabled: it.id === 1 })) });
+  input.step('down'); sk.update(input, audio); assert.equal(sk.index, 2, 'down skips the disabled row');
+});
+
+test('dialog window size and placement (W7)', () => {
+  assert.equal(DIALOG_ROWS, 3);
+  assert.equal(dialogHeight(1), 23); assert.equal(dialogHeight(2), 34); assert.equal(dialogHeight(3), DIALOG_MAX_H);
+  assert.ok(DIALOG_MAX_H / 216 <= 0.22, `a 3-line window covers ${(DIALOG_MAX_H / 216 * 100).toFixed(1)} % of the screen (about 22 % at most)`);
+  const h = dialogHeight(2);
+  // Nobody under the window: stay at the bottom.
+  assert.equal(pickPosition(h, [{ top: 90, bottom: 120 }], 'bottom'), 'bottom');
+  // The speaker stands in the bottom band: flip to the top.
+  assert.equal(pickPosition(h, [{ top: 150, bottom: 180 }], 'bottom'), 'top');
+  // Someone under the top window too: stay where it hurts less (bottom hides one, top hides two).
+  assert.equal(pickPosition(h, [{ top: 150, bottom: 180 }, { top: 8, bottom: 30 }, { top: 12, bottom: 28 }], 'bottom'), 'bottom');
+  // Sticky: a top window stays at the top while the bottom would still hide the hero.
+  assert.equal(pickPosition(h, [{ top: 150, bottom: 180 }], 'top'), 'top');
+  // ... and goes back when the top would now hide someone and the bottom would not.
+  assert.equal(pickPosition(h, [{ top: 8, bottom: 30 }], 'top'), 'bottom');
+  assert.equal(pickPosition(h, [], 'bottom'), 'bottom');
+});
+
+test('bestiary picture scale: integer or 1/n, nearest neighbour, the biggest that fits (W7)', () => {
+  const iw = PIC.w - 4, ih = PIC.h - 4;
+  assert.equal(fitScale(26, 24, iw, ih), 2, 'a tiny sprite doubles');
+  assert.equal(fitScale(51, 50, iw, ih), 1);
+  assert.equal(fitScale(70, 74, iw, ih), 1);
+  assert.equal(fitScale(91, 90, iw, ih), 1 / 2);
+  assert.equal(fitScale(148, 139, iw, ih), 1 / 2, 'the Archivore fits at half size');
+  assert.equal(fitScale(500, 500, iw, ih), 1 / 4, 'never below a quarter');
+  for (const [w, h] of [[51, 50], [70, 74], [66, 62], [57, 52], [44, 40], [91, 90], [85, 86], [96, 98], [26, 24], [148, 139]]) {
+    const sc = fitScale(w, h, iw, ih);
+    assert.ok(w * sc <= iw && h * sc <= ih, `${w}x${h} at ${sc} fits the box`);
+  }
 });

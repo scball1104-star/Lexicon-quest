@@ -11,9 +11,11 @@ export class GameOverScene {
   enter() {
     const e = this.engine;
     this.t = 0; this.frame = 0; this.busy = false; this.menuAt = 2.6;
-    // Touch layouts get 15 px rows (W5): the window grows and sits a little higher so the line under it fits.
+    // Touch layouts get taller rows (W5, W7: 20 px): the window grows and sits higher so the line under it fits
+    // (its bottom edge stays at or above y 196, the continue line is drawn 6 px below it).
     const rowH = rowHeightFor(e, 11);
-    this.win = { x: 144, y: rowH > 12 ? 138 : 144, w: 96, h: rowH * 3 + 13 };
+    const h = rowH * 3 + 13;
+    this.win = { x: 144, y: rowH > 12 ? Math.min(138, 196 - h) : 144, w: 96, h };
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 6, w: this.win.w - 12, rowH, rows: 3, textX: 16, items: [
       { id: 'retry', label: 'Retry', disabled: !e.game },
       { id: 'load', label: 'Load' },

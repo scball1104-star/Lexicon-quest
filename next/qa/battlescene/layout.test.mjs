@@ -17,6 +17,15 @@ test('party and enemy slots stand above the bottom windows and inside the screen
   for (let i = 0; i < 6; i++) { const s = summonSlot(i); assert.ok(inside(s.x, s.y)); }
 });
 
+test('the command window holds two columns of four rows (W7)', async () => {
+  const { CMD_COLS, CMD_ROWS, CMD_COL_W, CMD_ROW_H, TOUCH_CMD_ROW_H, CMD_WIN_TOUCH } = await import('../../src/battle/scene/layout.js');
+  assert.equal(CMD_COLS, 2); assert.equal(CMD_ROWS, 4);
+  assert.ok(18 + CMD_COLS * CMD_COL_W + 4 <= CMD_WIN.w, 'glove + two columns + air fit the window');
+  assert.ok(6 + CMD_ROWS * CMD_ROW_H <= CMD_WIN.h, 'four desktop rows fit the window height');
+  assert.ok(4 + CMD_ROWS * TOUCH_CMD_ROW_H + 4 <= CMD_WIN_TOUCH.h, 'four touch rows fit the touch window height');
+  assert.ok(TOUCH_CMD_ROW_H * 5 / 3 >= 30, 'touch command rows are at least 30 css px on the phone profile');
+});
+
 test('windows tile the bottom band and the timeline fits the top right', () => {
   assert.equal(CMD_WIN.x + CMD_WIN.w + 2, STATUS_WIN.x);
   assert.equal(CMD_WIN.y + CMD_WIN.h, H - 4);
@@ -53,13 +62,13 @@ test('enemy face crops stay inside their frame', () => {
   }
 });
 
-test('touch layout (W5): 15 px rows keep four command rows and the windows stay inside the bottom band', async () => {
-  const { cmdWin, subWin, cmdRowsFor, CMD_WIN_TOUCH, SUB_WIN_TOUCH, HELP_TOUCH_BTNS, CMD_ROW_H } = await import('../../src/battle/scene/layout.js');
-  const { TOUCH_ROW_H } = await import('../../src/ui/list.js');
+test('touch layout (W5, W7): 18 px rows keep four command rows and the windows stay inside the bottom band', async () => {
+  const { cmdWin, subWin, cmdRowsFor, CMD_WIN_TOUCH, SUB_WIN_TOUCH, HELP_TOUCH_BTNS, CMD_ROW_H, TOUCH_CMD_ROW_H } = await import('../../src/battle/scene/layout.js');
+  const TOUCH_ROW_H = TOUCH_CMD_ROW_H;
   assert.deepEqual(cmdWin(false), CMD_WIN); assert.deepEqual(subWin(false), SUB_WIN);
   assert.deepEqual(cmdWin(true), CMD_WIN_TOUCH); assert.deepEqual(subWin(true), SUB_WIN_TOUCH);
   assert.equal(cmdRowsFor(CMD_WIN, CMD_ROW_H), 4);
-  assert.equal(cmdRowsFor(CMD_WIN_TOUCH, TOUCH_ROW_H), 4, 'four rows at the touch height');
+  assert.equal(cmdRowsFor(CMD_WIN_TOUCH, TOUCH_ROW_H, 8), 4, 'four rows at the touch height (4 px padding)');
   assert.equal(cmdRowsFor(SUB_WIN_TOUCH, TOUCH_ROW_H), 4);
   assert.equal(CMD_WIN_TOUCH.x, CMD_WIN.x); assert.equal(CMD_WIN_TOUCH.w, CMD_WIN.w);
   assert.equal(CMD_WIN_TOUCH.y + CMD_WIN_TOUCH.h, H - 4, 'the touch command window keeps the bottom edge');

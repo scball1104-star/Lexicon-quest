@@ -1,4 +1,6 @@
-// Journal: main quest step and side quests; Bestiary tab with seen/killed counts, known weaknesses and lore.
+// Journal: main quest step and side quests; Bestiary tab with seen/killed counts, known weaknesses and lore,
+// and (W7) the creature's own battle sprite in a picture box: integer scale (2, 1, 1/2, 1/3, 1/4), nearest
+// neighbour, the biggest that fits; a black silhouette for an entry the player has not met yet.
 
 import { List, rowHeightFor, rowsThatFit } from '../list.js';
 import { drawWindow, drawIcon, drawDivider, drawScrollArrow } from '../window.js';
@@ -21,13 +23,56 @@ export function bestiaryEntry(g, id) {
   return { seen: raw.seen || (raw.killed ? 1 : 0) || 0, killed: raw.killed || 0, weak: raw.weak || [], resist: raw.resist || [] };
 }
 
+/** Picture box of the bestiary detail panel (screen px). */
+export const PIC = { x: 284, y: 34, w: 92, h: 78 };
+const SCALES = [2, 1, 1 / 2, 1 / 3, 1 / 4];
+
+/** The battle atlas and frame for an enemy id: enemies_battle, or bosses_battle for the ids it holds. */
+export function enemyArt(r, id) {
+  const assets = r.assets;
+  if (!assets) return null;
+  const en = assets.has('enemies_battle') ? assets.atlas('enemies_battle') : null;
+  const def = ENEMIES[id];
+  const frameId = (def && def.sprite && def.sprite.frame) || id;
+  const tryAtlas = (a) => (a && a.frames[frameId] ? { atlas: a, frame: a.frames[frameId], id: frameId } : null);
+  const own = tryAtlas(en);
+  if (own) return own;
+  const ext = en && en.meta && en.meta.external && en.meta.external[frameId];
+  if (ext && assets.has(ext)) { const hit = tryAtlas(assets.atlas(ext)); if (hit) return hit; }
+  return assets.has('bosses_battle') ? tryAtlas(assets.atlas('bosses_battle')) : null;
+}
+
+
+/** Largest integer scale (or 1/n) of a w x h sprite that fits the box; never below 1/4. */
+export function fitScale(w, h, bw, bh) {
+  for (const sc of SCALES) if (w * sc <= bw && h * sc <= bh) return sc;
+  return SCALES[SCALES.length - 1];
+}
+
+/** Draw the creature in the picture box: its sprite, or a black silhouette when `known` is false. */
+export function drawBeastPicture(r, id, known) {
+  drawWindow(r, PIC.x, PIC.y, PIC.w, PIC.h, { kind: 'thin' });
+  r.rect(PIC.x + 3, PIC.y + 3, PIC.w - 6, PIC.h - 6, known ? '#1a1e42' : '#3a4280');   // the silhouette needs a lighter ground to read
+  const art = enemyArt(r, id);
+  if (!art) { r.text('?', PIC.x + PIC.w / 2, PIC.y + PIC.h / 2 - 8, { font: 'large', align: 'center', color: 'dim' }); return false; }
+  const f = art.frame;
+  const iw = PIC.w - 4, ih = PIC.h - 4;
+  const sc = fitScale(f.w, f.h, iw, ih);
+  const w = Math.round(f.w * sc), h = Math.round(f.h * sc);
+  const x = PIC.x + 2 + Math.floor((iw - w) / 2), y = PIC.y + 2 + Math.floor((ih - h) / 2);
+  // A soft ground ellipse under walkers keeps the sprite from floating in the box.
+  const tint = (ENEMIES[id] && ENEMIES[id].sprite && ENEMIES[id].sprite.tint) || null;   // elite variants share a frame and differ by tint
+  r.sprite(art.atlas, f, x, y, !known ? { topLeft: true, scale: sc, tint: '#05030c', tintAmount: 1 } : tint ? { topLeft: true, scale: sc, tint, tintAmount: 0.35 } : { topLeft: true, scale: sc });
+  return true;
+}
+
 export class JournalScreen {
   constructor(menu) { this.menu = menu; this.engine = menu.engine; this.g = menu.g; }
   enter() {
     this.tab = 0;
     const ids = Object.keys(BESTIARY);
     const rowH = rowHeightFor(this.engine, 12);
-    this.beasts = new List({ x: 24, y: 34, w: 124, rowH, rows: Math.min(12, rowsThatFit(144, rowH)), items: ids.map((id) => {   // x 24: glove inside the screen (D7)
+    this.beasts = new List({ x: 24, y: 34, w: 124, rowH, rows: Math.min(11, rowsThatFit(144, rowH)), items: ids.map((id) => {   // x 24: glove inside the screen (D7)
       const e = bestiaryEntry(this.g, id);
       const known = e.seen > 0 || e.killed > 0;
       return { id, label: known ? BESTIARY[id].name : '???', color: known ? (e.killed ? 'white' : 'gray') : 'dim', known, entry: e };
@@ -46,7 +91,12 @@ export class JournalScreen {
       const id = this.beasts.item ? this.beasts.item.id : null;
       if (id !== this.loreFor) { this.loreFor = id; this.loreScroll = 0; }
       const rows = this.loreRows || [];
-      if (input.pressed('right') && (this.loreScroll || 0) < (this.loreMax || 0)) {
+      const p = input.pointer;
+      if (p && p.pressed && p.x >= 158 && p.x < 380 && p.y >= 116 && p.y < 180 && (this.loreMax || 0) > 0) {
+        const down = p.y >= 148;
+        if (down && this.loreScroll < this.loreMax) { this.loreScroll++; if (rows[this.loreScroll] === null) this.loreScroll++; audio.sfx('cursor'); }
+        else if (!down && this.loreScroll > 0) { this.loreScroll--; if (rows[this.loreScroll] === null) this.loreScroll--; audio.sfx('cursor'); }
+      } else if (input.pressed('right') && (this.loreScroll || 0) < (this.loreMax || 0)) {
         this.loreScroll = (this.loreScroll || 0) + 1;
         if (rows[this.loreScroll] === null) this.loreScroll++;
         audio.sfx('cursor');
@@ -104,29 +154,34 @@ export class JournalScreen {
     const it = this.beasts.item;
     if (!it) return;
     const x = 166;
-    if (!it.known) { r.text('???', x, 36, { font: 'large', color: 'dim' }); r.text('You have not met this creature.', x, 58, { color: 'dim' }); return; }
+    drawBeastPicture(r, it.id, it.known);
+    if (!it.known) { r.text('???', x, 36, { font: 'large', color: 'dim' }); r.text('You have not met\nthis creature.', x, 58, { color: 'dim' }); return; }
     const b = BESTIARY[it.id], d = ENEMIES[it.id], e = it.entry;
-    r.text(b.name, x, 35, { font: 'large', color: 'cream' });
+    // The text column is 114 px wide (the picture box takes the right 92).
+    const big = r.measure(b.name, 'large') <= 112;   // a long name (Thornback Wolf) drops to the small font instead of running under the picture
+    r.text(b.name, x, big ? 35 : 38, { font: big ? 'large' : 'main', color: 'cream' });
     r.text(b.where, x, 52, { color: 'gray' });
-    r.text(`Seen ${e.seen}   Defeated ${e.killed}`, 372, 52, { align: 'right', color: 'gray' });
-    drawDivider(r, 164, 65, 210);
-    r.text('Weak:', x, 70, { color: 'gold' });
+    r.text(`Seen ${e.seen}  Defeated ${e.killed}`, x, 63, { color: 'gray' });
+    r.text('Weak:', x, 76, { color: 'gold' });
     let wx = x + 34;
     const weakKnown = (d ? d.weak : []).filter((t) => e.weak.includes(t));
     const unknown = d ? d.weak.length - weakKnown.length : 0;
-    for (const t of weakKnown) { drawIcon(r, WEAK_ICON[t] || t, wx, 68); wx += 14; }
-    for (let i = 0; i < unknown; i++) { drawIcon(r, 'weak_unknown', wx, 68); wx += 15; }
+    for (const t of weakKnown) { drawIcon(r, WEAK_ICON[t] || t, wx, 74); wx += 14; }
+    for (let i = 0; i < unknown; i++) { drawIcon(r, 'weak_unknown', wx, 74); wx += 15; }
+    let ly = 88;
     if (d && d.resist && d.resist.length) {
-      r.text('Resists:', wx + 6, 70, { color: 'gold' }); wx += 6 + r.measure('Resists:') + 4;
-      for (const t of d.resist) { drawIcon(r, WEAK_ICON[t] || t, wx, 68, { alpha: e.resist.includes(t) ? 1 : 0.35 }); wx += 14; }
+      r.text('Resists:', x, ly + 2, { color: 'gold' }); let rx = x + r.measure('Resists:') + 4;
+      for (const t of d.resist) { drawIcon(r, WEAK_ICON[t] || t, rx, ly, { alpha: e.resist.includes(t) ? 1 : 0.35 }); rx += 14; }
+      ly += 14;
     }
-    if (d) r.text(`Lv ${d.level}   HP ${e.killed ? d.hp : '???'}   Shields ${d.shields}`, x, 82, { color: 'gray' });
-    // Lore sits in a box from y 95 down to 174 (6 px above the frame); only whole lines are drawn, never a cut
-    // one. Left / Right scroll an entry that is taller than the box.
+    if (d) r.text(`Lv ${d.level}  HP ${e.killed ? d.hp : '???'}  Shields ${d.shields}`, x, Math.min(ly, 100), { color: 'gray' });
+    drawDivider(r, 164, 116, 210);
+    // Lore sits in a box from y 121 down to 174 (6 px above the frame); only whole lines are drawn, never a cut
+    // one. Left / Right (or a tap on its lower / upper half) scroll an entry that is taller than the box.
     const lore = e.killed ? b.lore : b.lore.slice(0, 1);
     const rows = this.loreRows = [];
     lore.forEach((para, pi) => { if (pi) rows.push(null); for (const line of r.wrap(para, 204)) rows.push(line); });
-    const LINE = 11, GAP = 4, TOP = 95, LAST_Y = 164;   // a line is drawn only when y <= LAST_Y (its descenders end by 174)
+    const LINE = 11, GAP = 4, TOP = 121, LAST_Y = 164;   // a line is drawn only when y <= LAST_Y (its descenders end by 174)
     const fits = (from) => { let y = TOP; for (let i = from; i < rows.length; i++) { if (rows[i] === null) { y += GAP; continue; } if (y > LAST_Y) return false; y += LINE; } return true; };
     this.loreMax = 0;
     while (this.loreMax < rows.length && !fits(this.loreMax)) this.loreMax++;
@@ -139,8 +194,8 @@ export class JournalScreen {
       y += LINE;
     }
     if (this.loreScroll < this.loreMax) drawScrollArrow(r, 'down', 372, 169);
-    if (this.loreScroll > 0) drawScrollArrow(r, 'up', 372, 92);
-    if (!e.killed) r.text('Defeat one to read more.', x, 168, { color: 'dim' });
+    if (this.loreScroll > 0) drawScrollArrow(r, 'up', 372, 118);
+    if (!e.killed && this.loreMax === 0 && y + 4 <= 166) r.text('Defeat one to read more.', x, y + 4, { color: 'dim' });
   }
   draw(r) {
     drawWindow(r, 4, 4, 376, 24);

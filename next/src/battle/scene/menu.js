@@ -2,6 +2,9 @@
 //
 //   const menu = new CommandMenu(scene);
 //   menu.open(unit)                       // b.commands(unit) -> root list (Attack, Tech, Magic, Fury, Combo, Item, Defend, Swap, Flee)
+//                                         // laid out in two columns of four (W7): left column first, then the right
+//                                         // one; on the touch layout Flee is the FLEE button in the help window
+//                                         // (menu.fleeTap: first tap arms, second runs).
 //   const action = menu.update(input, audio);   // the chosen action { type, skill|item, target } or null
 //   menu.draw(r); menu.close(); menu.state ('closed' | 'root' | 'sub' | 'target'); menu.preview; menu.helpText
 //   menu.cmdRect / menu.subRect           // the windows for the current layout (layout.cmdWin / subWin)
@@ -11,9 +14,9 @@
 // tap a target, tap it again to confirm; rows are TOUCH_ROW_H tall while the touch controls show (W5), so
 // the command window grows upward (layout.CMD_WIN_TOUCH) and the sub-list window moves up with it.
 
-import { List, rowHeightFor, touchUi } from '../../ui/list.js';
+import { List, touchUi } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
-import { CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox } from './layout.js';
+import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox } from './layout.js';
 
 // One short line each (at most 111 px): the help window shares its width with the Auto / Speed hint (W5).
 const CMD_HELP = {
@@ -21,6 +24,8 @@ const CMD_HELP = {
   fury: 'This weapon\'s Fury art.', combo: 'Act with a partner.', item: 'Use an item from the bag.',
   defend: 'Halve damage this turn.', swap: 'Switch weapons.', flee: 'Try to run away.',
 };
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const FLEE_ARM_FRAMES = 72;
 const CMD_ICON = { attack: 'sword', tech: 'scroll', magic: 'magic', fury: 'fury', combo: 'combo', item: 'bag', defend: 'shield', swap: 'swap', flee: 'flee' };
 
 export class CommandMenu {
@@ -40,12 +45,14 @@ export class CommandMenu {
     this.lastRootIndex = 0;
     this.tapArmed = null;
     this.touch = false;
+    this.fleeCmd = null;     // the Flee command while the touch layout keeps it out of the grid
+    this.fleeArmed = 0;      // frames left on the FLEE button's "tap again" window
     this.cmdRect = cmdWin(false);
     this.subRect = subWin(false);
   }
   get b() { return this.scene.b; }
   get actors() { return this.scene.actors; }
-  get rowH() { return rowHeightFor(this.scene.engine, CMD_ROW_H); }
+  get rowH() { return this.touch ? TOUCH_CMD_ROW_H : CMD_ROW_H; }
 
   /** Pick the window rects for the current layout (called on open; the closed window uses it too). */
   syncLayout() {
@@ -58,25 +65,43 @@ export class CommandMenu {
   open(unit) {
     this.unit = unit;
     this.state = 'root';
-    this.base = null; this.tInfo = null; this.preview = null;
+    this.base = null; this.tInfo = null; this.preview = null; this.fleeArmed = 0;
     this.syncLayout();
     // Combo shows only when it is possible; Swap only when this member carries a second weapon (a greyed Swap
     // on the hero, who starts with a sword alone, read as a broken command).
-    const cmds = this.b.commands(unit).filter((c) => (c.id !== 'combo' || c.visible) && (c.id !== 'swap' || c.enabled));
+    const all = this.b.commands(unit).filter((c) => (c.id !== 'combo' || c.visible) && (c.id !== 'swap' || c.enabled));
+    // Touch: Flee is the FLEE button in the help window, which keeps the grid at four rows (W7).
+    this.fleeCmd = this.touch ? all.find((c) => c.id === 'flee') || null : null;
+    const cmds = this.touch ? all.filter((c) => c.id !== 'flee') : all;
     const items = cmds.map((c) => ({
-      id: c.id, cmd: c, label: c.label || c.name, disabled: !c.enabled,
+      id: c.id, cmd: c, label: c.id === 'swap' ? 'Swap' : (c.label || c.name), disabled: !c.enabled,
       color: c.id === 'fury' && c.enabled ? 'orange' : c.id === 'combo' ? 'cyan' : 'white',
-      help: c.enabled ? CMD_HELP[c.id] : (c.reason || CMD_HELP[c.id]),
+      help: c.id === 'swap' && c.enabled && c.weapon ? `Ready the ${cap(c.weapon)}.` : c.enabled ? CMD_HELP[c.id] : (c.reason || CMD_HELP[c.id]),
       icon: CMD_ICON[c.id] || null,
     }));
-    const win = this.cmdRect, rowH = this.rowH;
-    this.root = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 22, rows: cmdRowsFor(win, rowH), rowH, items, bar: false,
-      textX: 2, icons: false, confirmSfx: false, cancelSfx: false });
+    // Two columns of CMD_ROWS (a ninth command on the keyboard / pad grows the window by one row at the top).
+    const rows = Math.max(CMD_ROWS, Math.ceil(items.length / CMD_COLS)), rowH = this.rowH;
+    const base = cmdWin(this.touch);
+    const h = this.touch ? base.h : Math.max(base.h, rows * rowH + 16);
+    this.cmdRect = { ...base, y: base.y + base.h - h, h };
+    const win = this.cmdRect;
+    this.root = new List({ x: win.x + 18, y: win.y + (this.touch ? 4 : 6), w: CMD_COLS * CMD_COL_W, colW: CMD_COL_W, columns: CMD_COLS, columnMajor: true,
+      rows, rowH, items, bar: false, textX: 2, icons: false, confirmSfx: false, cancelSfx: false });
     this.root.moveTo(Math.min(this.lastRootIndex, items.length - 1));
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
     this.syncHelp();
   }
-  close() { this.state = 'closed'; this.root = null; this.sub = null; this.preview = null; this.tInfo = null; this.base = null; }
+  /** Touch FLEE button: the first tap arms it, a second within about a second returns the flee action. */
+  fleeTap(audio) {
+    if (this.state !== 'root' || !this.fleeCmd) return null;
+    if (!this.fleeCmd.enabled) { audio.sfx('buzzer'); this.showHelp = true; this.helpText = this.fleeCmd.reason || 'Cannot flee'; this.helpColor = 'dim'; return null; }
+    if (this.fleeArmed > 0) { this.fleeArmed = 0; audio.sfx('confirm'); return { type: 'flee' }; }
+    this.fleeArmed = FLEE_ARM_FRAMES;
+    audio.sfx('cursor');
+    this.showHelp = true; this.helpText = 'Tap FLEE again to run.'; this.helpColor = 'gold';
+    return null;
+  }
+  close() { this.fleeArmed = 0; this.state = 'closed'; this.root = null; this.sub = null; this.preview = null; this.tInfo = null; this.base = null; }
 
   syncHelp() {
     const it = this.state === 'sub' ? this.sub && this.sub.item : this.root && this.root.item;
@@ -189,9 +214,10 @@ export class CommandMenu {
   /** Returns a complete action when the player confirms, else null. */
   update(input, audio) {
     if (this.state === 'closed' || !this.unit) return null;
+    if (this.fleeArmed > 0 && --this.fleeArmed === 0) this.syncHelp();
     if (this.state === 'root') {
       const act = this.root.update(input, audio);
-      if (this.root.changed) { this.showHelp = true; this.syncHelp(); }
+      if (this.root.changed) { this.showHelp = true; this.fleeArmed = 0; this.syncHelp(); }
       if (act === 'confirm') {
         const it = this.root.item;
         this.lastRootIndex = this.root.index;

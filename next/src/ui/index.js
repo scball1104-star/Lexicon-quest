@@ -6,6 +6,6 @@ export * from './list.js';
 export * from './help.js';
 export * from './text.js';
 export { ChoiceBox, ChoiceScene, pushChoice } from './choice.js';
-export { DialogScene, say, sayLines, portraitFor, DIALOG_RECT } from './dialog.js';
+export { DialogScene, say, sayLines, portraitFor, pickPosition, dialogHeight, DIALOG_RECT, DIALOG_MAX_H } from './dialog.js';
 export { NumberPopups } from './numberPopup.js';
 export { Toasts, installToasts } from './toast.js';

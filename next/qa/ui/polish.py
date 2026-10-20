@@ -7,7 +7,7 @@ Screenshots go to next/qa/ui/out/. Fails on any console or page error. Exit code
   python next/qa/ui/polish.py                 run every check
   python next/qa/ui/polish.py --only touch_title,credits_end
 
-Checks: touch_title (tap selects, second tap confirms, 15 px rows = 25 css px), touch_menu (main menu touch layout),
+Checks: touch_title (tap selects, second tap confirms, 20 px rows = 33 css px), touch_menu (main menu touch layout),
 touch_config (tap on a row steps the value, left arrow steps back, slider tap, Reset to defaults), touch_shop_qty
 (quantity arrows by touch, tap elsewhere confirms), touch_name_entry (one tap types a glyph), text_instant (text
 speed 4 shows a page at once), credits_end (triumph plays, the last card holds centered inside the screen on the
@@ -94,8 +94,8 @@ def check_touch_title(d):
     d.expect('title')
     st = d.state()
     assert st['backdrop'] is True, 'title draws the quantized backdrop atlas'
-    assert st['rowH'] == 15, f"touch rows are 15 px (got {st['rowH']})"
-    assert st['rowH'] * d.css_scale() >= 24, 'rows are at least 24 css px on the phone'
+    assert st['rowH'] == 20, f"touch rows are 20 px (got {st['rowH']})"
+    assert st['rowH'] * d.css_scale() >= 32, 'rows are at least 32 css px on the phone'
     row_y = lambda i: st['listY'] + i * st['rowH'] + 7
     d.tap(190, row_y(2))                          # Config row: first tap selects
     d.expect('title', 'first tap only moves the cursor')
@@ -115,12 +115,13 @@ def check_touch_menu(d):
     d.press('menu', wait=14)
     d.expect('menu')
     st = d.state()
-    assert st['touch'] is True and st['rowH'] == 15, f'menu uses the touch layout ({st})'
+    assert st['touch'] is True and st['rowH'] == 30, f'menu uses the two-column touch layout ({st})'
+    assert st['rowH'] * d.css_scale() >= 44, 'main menu rows are at least 44 css px on the phone'
     d.shot('touch_menu')
-    # Command rows: x 287.., y 10 + i*15. Tap Journal (index 5) twice.
-    d.tap(330, 10 + 5 * 15 + 7)
+    # Two columns of five, 30 px rows from y 10; the left one starts at x 253, the right one 61 px further.
+    d.tap(253 + 61 + 20, 10 + 15)                  # Journal = index 5 = right column, first row
     assert d.state()['command'] == 'journal' and d.state()['mode'] == 'commands', 'first tap selects Journal'
-    d.tap(330, 10 + 5 * 15 + 7)
+    d.tap(253 + 61 + 20, 10 + 15)
     assert d.state()['mode'] == 'screen', 'second tap opens it'
     d.press('cancel'); d.press('cancel')
     d.expect('_uiStage')
@@ -134,19 +135,28 @@ def check_touch_config(d):
     st = d.state()
     rowh = st['rowH']
     list_y = 32 if rowh > 12 else 30
-    assert st['rows'] < 13 if rowh == 15 else st['rows'] == 13, f'touch config scrolls ({st})'
+    assert st['rows'] < 13 if rowh == 20 else st['rows'] == 13, f'touch config scrolls ({st})'
     before = d.ev("LQ_DEBUG.engine.settings.windowColor")
-    # Row 7 = Window color. Tap selects, tap again steps forward once (not twice).
-    d.tap(120, list_y + 7 * rowh + 7)
+    # Window color (scrolled into view with the keys first, so it is selected). A tap steps forward once.
+    for _ in range(14):
+        if d.state()['key'] == 'windowColor':
+            break
+        d.press('down', wait=3)
     assert d.state()['key'] == 'windowColor'
-    d.tap(120, list_y + 7 * rowh + 7)
+    wi = d.state()['index']
+    wy = list_y + (wi - d.state()['scroll']) * rowh + rowh // 2
+    d.tap(120, wy)                                 # the row is already selected (keys): one tap steps forward once
+    assert d.state()['key'] == 'windowColor'
     after = d.ev("LQ_DEBUG.engine.settings.windowColor")
     assert after != before, 'tap on the selected row changes the value'
-    d.tap(48 + 150 + 4, list_y + 7 * rowh + 7)    # left arrow zone steps back
+    d.tap(48 + 150 + 4, wy)                        # left arrow zone steps back
     assert d.ev("LQ_DEBUG.engine.settings.windowColor") == before, 'left arrow tap steps back'
     # Slider: tap the middle of the Music gauge -> about 0.5.
-    d.tap(120, list_y + 1 * rowh + 7)
-    d.tap(48 + 150 + 12 + 45, list_y + 1 * rowh + 7)
+    for _ in range(wi - 1):
+        d.press('up', wait=3)
+    my = list_y + (1 - d.state()['scroll']) * rowh + rowh // 2
+    d.tap(120, my)
+    d.tap(48 + 150 + 12 + 45, my)
     music = d.ev("LQ_DEBUG.engine.settings.music")
     assert 0.4 <= music <= 0.6, f'slider tap sets the value near the tap ({music})'
     d.shot('touch_config')
@@ -182,10 +192,10 @@ def check_touch_shop_qty(d):
     d.frames(10)
     d.expect('shop')
     st = d.state()
-    assert st['rowH'] == (15 if d.touch else 12), f'shop rows ({st})'
+    assert st['rowH'] == (20 if d.touch else 12), f'shop rows ({st})'
     d.tap(36, 16)                                  # Buy strip (already selected) -> enter the list
     assert d.state()['focus'] == 'list', 'tap on the selected command enters the stock list'
-    d.tap(100, 38 + 7)                             # Potion row (index 0, already selected) -> quantity picker
+    d.tap(100, 38 + 10)                            # Potion row (index 0, already selected) -> quantity picker
     assert d.state()['qty'] == 1, f"quantity picker open ({d.state()})"
     d.tap(100 + 184 - 14, 80 + 25)                 # right arrow zone
     d.tap(100 + 184 - 14, 80 + 25)
@@ -213,7 +223,7 @@ def check_touch_name_entry(d):
     st = d.state()
     cw, ch = st['cell']
     g = st['grid']
-    assert (cw, ch) == ((15, 15) if d.touch else (14, 13)), f'cell size {st["cell"]}'
+    assert (cw, ch) == ((20, 20) if d.touch else (14, 13)), f'cell size {st["cell"]}'
     cell = lambda row, col: (g['x'] + 12 + col * cw + cw // 2, g['y'] + 7 + row * ch + ch // 2)
     for _ in range(4):
         d.tap(*cell(4, 11))                        # erase glyph

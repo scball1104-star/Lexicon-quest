@@ -31,11 +31,15 @@ import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
 import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
+
 import * as HUD from '../battle/scene/hud.js';
 import { drawWindow, drawLabel, drawIcon, drawIcon16, drawPortrait, drawDivider, uiAtlas, btn } from '../ui/window.js';
 import { NumberPopups } from '../ui/numberPopup.js';
 import { animFrameAt } from '../core/assets.js';
 import { createRng, hashSeed } from '../core/rng.js';
+
+const LOG_KEEP = 6;          // lines kept; the idle command window shows the last LOG_SHOW (W7)
+const LOG_SHOW = 3;
 
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
@@ -200,6 +204,7 @@ export class BattleScene {
     this.pops = new NumberPopups();
     this.menu = new CommandMenu(this);
     this.help = { text: '', color: null, chars: 0 };
+    this.log = [];                  // the battle log: the last lines the help window said (W7), drawn in the idle command window
     this.timeline = []; this.currentUid = null; this.telegraphs = new Map();
     this.banner = null; this.result = null; this.summary = null;
     this.eliteTag = null; this.rowShow = new Map();
@@ -251,6 +256,7 @@ export class BattleScene {
     this.startOps = planEvents(startEvents, { units: this.info });
     this.timeline = battle.timeline(8);
     this.help = { text: '', color: null, chars: 0 };
+    this.log = [];
     if (data.auto != null) e.settings.autoBattle = !!data.auto;
     this.fast = data.fast || null;
     e.lastBattleDrops = null;        // gear uids of this fight's drops, left for the field's equip prompt (W5)
@@ -266,7 +272,15 @@ export class BattleScene {
   scaled(frames) { return this.fast ? 0 : Math.max(1, Math.round(frames / this.speed / (this.slow ? 1 / this.slow.factor : 1))); }
   actor(uid) { return this.actors.get(uid) || null; }
   unit(uid) { return this.b.unit(uid); }
-  setHelp(text, color) { this.help = { text: text || '', color: color || null, chars: 0 }; }
+  setHelp(text, color) { this.help = { text: text || '', color: color || null, chars: 0 }; this.logLine(text, color); }
+  /** Add a line to the battle log (consecutive repeats are dropped; the colour wraps the whole line). */
+  logLine(text, color) {
+    if (!text) return;
+    const line = color ? `{c:${color}}${text}{/c}` : String(text);
+    if (this.log[this.log.length - 1] === line) return;
+    this.log.push(line);
+    if (this.log.length > LOG_KEEP) this.log.shift();
+  }
   party() { return [...this.actors.values()].filter((a) => a.side === 'party'); }
   livingEnemies() { return [...this.actors.values()].filter((a) => a.side === 'enemy' && !a.dead); }
   fxAt(kind, uid, extra = {}) {
@@ -329,6 +343,11 @@ export class BattleScene {
     if (this.menu.state !== 'closed') {
       if (this.auto) { this.menu.close(); }
       else {
+        // Touch: Flee lives in the help window (tap to arm, tap again to run).
+        if (tb && input.tapIn(tb.flee.x, tb.flee.y, tb.flee.w, tb.flee.h)) {
+          const run = this.menu.fleeTap(audio);
+          if (run) { this.performParty(run); return; }
+        }
         const action = this.menu.update(input, audio);
         if (action) this.performParty(action);
         return;
@@ -559,6 +578,9 @@ export class BattleScene {
     if (page.kind === 'main' && !R.dropsSpawned) {
       R.dropsSpawned = true;
       const items = this.summary.items;
+      this.logLine(`{c:gold}+${this.summary.exp} EXP, +${this.summary.gold} G{/c}`);
+      for (const c of this.summary.consumables) this.logLine(`${c.name} x${c.qty}`);
+      for (const it of items) this.logLine(`{c:${it.rarity}}${it.name}{/c}`);
       items.forEach((it, i) => {
         const x = DROP_X - Math.round((items.length - 1) * 14) + i * 28;
         this.drops.push({ x, y: DROP_Y, rarity: it.rarity, t: -i * 18, sfx: it.sfx, played: false });
@@ -571,8 +593,20 @@ export class BattleScene {
       audio.sfx('level_up_sparkle');
       const a = this.actor(page.uid);
       if (a) { this.fxAt('revive', page.uid); a.setPose('victory'); }
+      const who = a ? a.name : page.uid;
+      this.logLine(`${who} reaches Lv {c:gold}${page.ups[page.ups.length - 1].level}{/c}`);
+      const learned = page.ups.flatMap((u) => u.learned || []);
+      if (learned.length) this.logLine(`${who} learns {c:cyan}${learned.map((id) => (SKILLS[id] ? SKILLS[id].name : id)).join(', ')}{/c}`);
     }
-    if (page.kind === 'mastery' && R.t === 1) audio.sfx('fury_ready', { volume: 0.7 });
+    if (page.kind === 'mastery' && R.t === 1) {
+      audio.sfx('fury_ready', { volume: 0.7 });
+      for (const m of page.list) {
+        const a = this.actor(m.uid);
+        const who = a ? a.name : m.uid;
+        this.logLine(`${who}: ${cap(m.type)} {c:gold}${m.to}{/c}`);
+        if (m.unlocked && m.unlocked.length) this.logLine(`${who} learns {c:cyan}${m.unlocked.map((id) => (SKILLS[id] ? SKILLS[id].name : id)).join(', ')}{/c}`);
+      }
+    }
     const minHold = this.fast ? 1 : 10;
     const tapped = input.pointer && input.pointer.pressed;
     const autoNext = this.auto && R.t > this.scaled(AUTO_PAGE_HOLD);
@@ -686,13 +720,34 @@ export class BattleScene {
     }
     HUD.drawPartyStatus(r, this.party(), this.menu.state !== 'closed' ? this.currentUid : null, frame);
     if (this.menu.state !== 'closed') this.menu.draw(r, frame);
-    else { const cw = cmdWin(touchUi(e)); drawWindow(r, cw.x, cw.y, cw.w, cw.h); }
+    else this.drawLog(r);
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
     if (this.phase === 'rewards') this.drawRewards(r);
     void e;
   }
 
-  /** The touch layout's AUTO and x2 tap targets (null on keyboard / pad, or outside the play phase). */
+  /**
+   * The battle log (W7, CRITIQUE_3 item 5): while nobody is choosing a command (enemy turns, the victory and
+   * level-up pages) the command window shows the last three things the help window said, newest at the bottom
+   * and the older ones dimmer. Nothing is drawn until there is a first line, so there is no blank box.
+   */
+  drawLog(r) {
+    if (!this.log.length) return;
+    const cw = cmdWin(touchUi(this.engine));
+    const rows = this.log.slice(-LOG_SHOW);
+    const rowH = 12, h = rows.length * rowH + 10;
+    const y = cw.y + cw.h - h;
+    drawWindow(r, cw.x, y, cw.w, h);
+    const maxW = cw.w - 16;
+    rows.forEach((line, i) => {
+      let t = line;
+      if (r.measure(t) > maxW) { const lines = r.wrap(t, maxW); t = lines[0] + (lines.length > 1 ? '…' : ''); }
+      const age = rows.length - 1 - i;
+      r.text(t, cw.x + 8, y + 5 + i * rowH, { alpha: age === 0 ? 1 : age === 1 ? 0.75 : 0.5, shadow: age === 0 });
+    });
+  }
+
+  /** The touch layout's FLEE, AUTO and x2 tap targets (null on keyboard / pad, or outside the play phase). */
   touchButtons() {
     return this.phase === 'play' && touchUi(this.engine) ? HELP_TOUCH_BTNS : null;
   }
@@ -717,11 +772,15 @@ export class BattleScene {
     let rightColor = this.auto ? 'cyan' : 'gold';
     if (tb) right = null;
     else if (idle) { right = `${btn('start')} Auto ${btn('pageR')} ${this.speed > 1 ? '{c:gold}x2{/c}' : 'Speed'}`; rightColor = 'gray'; }
-    const rightW = tb ? 64 : right ? r.measure(right) + 2 : 0;
+    const rightW = tb ? 94 : right ? r.measure(right) + 2 : 0;
     HUD.drawHelp(r, text, color, { right, rightColor, rightW });
     if (tb) {
       const pulse = Math.floor(this.frame / 20) % 2 === 0;
-      const b1 = tb.auto, b2 = tb.speed;
+      const b1 = tb.auto, b2 = tb.speed, b0 = tb.flee;
+      const fleeOk = this.menu.state === 'root' && this.menu.fleeCmd && this.menu.fleeCmd.enabled;
+      const armed = this.menu.fleeArmed > 0;
+      drawWindow(r, b0.x, b0.y, b0.w, b0.h, { kind: 'thin', alpha: 0.96 });
+      r.text('FLEE', b0.x + b0.w / 2, b0.y + 2, { align: 'center', color: armed ? (pulse ? 'gold' : 'white') : fleeOk ? 'white' : 'dim' });
       drawWindow(r, b1.x, b1.y, b1.w, b1.h, { kind: 'thin', alpha: 0.96 });
       r.text('AUTO', b1.x + b1.w / 2, b1.y + 2, { align: 'center', color: this.auto ? (pulse ? 'cyan' : 'white') : 'gray' });
       drawWindow(r, b2.x, b2.y, b2.w, b2.h, { kind: 'thin', alpha: 0.96 });
@@ -835,7 +894,7 @@ export class BattleScene {
       opsLeft: this.ops.length - this.opIndex, waitLeft: this.waitLeft, auto: this.auto, speed: this.speed,
       telegraphs: [...this.telegraphs.keys()], timeline: this.timeline.map((t) => t.uid),
       units: [...this.actors.values()].map((a) => ({ uid: a.uid, hp: a.hp, maxHp: a.maxHp, shields: a.shields, broken: a.broken, ko: a.ko, dead: a.dead, x: Math.round(a.x), y: Math.round(a.y), pose: a.pose })),
-      target: this.menu.currentTarget ? this.menu.currentTarget() : null, preview: this.menu.preview ? this.menu.preview.landing : null,
+      log: this.log.slice(), target: this.menu.currentTarget ? this.menu.currentTarget() : null, preview: this.menu.preview ? this.menu.preview.landing : null,
       rewards: this.rewards ? { page: this.rewards.pages[this.rewards.index].kind, index: this.rewards.index, pages: this.rewards.pages.length } : null,
       over: this.b ? this.b.isOver() : null, round: this.b ? Math.floor(this.b.state.partyTurns / this.b.state.partySize) + 1 : 0,
       actions: (this.actionLog || []).slice(-40), partyTurns: this.b ? this.b.state.partyTurns : 0, enemyTurns: this.b ? this.b.state.enemyTurns : 0,
@@ -845,6 +904,9 @@ export class BattleScene {
       stage: this.backdropLayer ? { asset: !!this.backdropLayer.usedAsset, key: this.backdropLayer.key, band: this.backdropLayer.band } : null,
       kick: { ...this.kick }, hitstop: this.hitstop, rows: this.rowShow.size,
       cmdRect: this.menu.cmdRect, rowH: this.menu.root ? this.menu.root.rowH : null, menuRows: this.menu.root ? this.menu.root.rows : null, touch: !!this.touchButtons(),
+      menuItems: this.menu.root ? this.menu.root.items.map((it) => it.id) : [], menuIndex: this.menu.root ? this.menu.root.index : -1,
+      menuCols: this.menu.root ? this.menu.root.columns : 0, rootRects: this.menu.root ? this.menu.root.items.map((_, i) => this.menu.root.rowRect(i)) : [],
+      fleeArmed: this.menu.fleeArmed, fleeBtn: this.menu.fleeCmd ? { enabled: this.menu.fleeCmd.enabled } : null, helpBtns: this.touchButtons(),
     };
   }
 }
