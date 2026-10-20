@@ -100,7 +100,13 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 ## Done: Episode 1 fix pass (W10). Next: Episode 2 build (docs/EPISODE2_PLAN.md, after the weekly usage reset)
 
 ## Episode 2 build (docs/EPISODE2_PLAN.md section 10)
-- [x] Wave 10a: E2-story, E2-battle, E2-tiles
-- [~] Wave 10b: E2-world, E2-maps, E2-sprites running (14:00, weekly 67%); E2-audio next
-- [ ] Wave 10c
-- [ ] Wave 10d
+- [x] Wave 10a: E2-story, E2-battle, E2-tiles (committed)
+- [x] Wave 10b: E2-sprites (committed edcbfbe); E2-world + E2-maps committed 3862a6d (world systems and
+      all 11 maps + valley/chapel edits; 484 qa tests green; every map preview viewed)
+- [~] E2-audio: still running from the prior session at new-session start (verified live via file mtimes and a
+      722MB render process, so NOT relaunched). 3 of 5 tracks rendered + court; boss_king rendering; SFX,
+      ambiences and manifest rebuild still pending. Watching for quiescence, then verify + commit.
+- [ ] Wave 10c: E2-scene-ui (title Episode 2 entry, Kept/boss-intro presentation, per-zone backdrops)
+- [ ] Wave 10d: E2-integrate, then critic-4 + play-critic-3, then a fix pass, then publish
+- Note: mcp__ccd_session_mgmt__get_usage is NOT connected this session, so live usage cannot be read. Last known
+  reading was weekly 67% at ~14:00 today. Proceeding conservatively: one background agent at a time.
