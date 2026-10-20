@@ -183,6 +183,8 @@ const events = [
   sign('well', 22, 17, 'well', { solid: false }),
   sign('flowerbeds', 31, 4, 'flowerbeds', { solid: false }),
   sign('garden_plaque', 25, 4, 'garden_plaque', { solid: false }),
+  // Episode 2 (E2-maps): GONE TO THE FORD. G. nailed on the smithy door while Garrick is at the ford (the door still opens)
+  sign('smithy_ford_note', 29, 25, 'smithy_ford_note', { if: 'garrick_at_ford', solid: false }),
   { id: 'ferry_landing', type: 'ferry', x: 45, y: 4, text: 'ferry_landing', to: ['valley', 34, 9, 'left'], rideIf: 'nella_bell_done', solid: false },
 ];
 

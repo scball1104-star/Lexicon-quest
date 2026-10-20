@@ -189,3 +189,47 @@ export function room(g, x0, y0, x1, y1, F, A, faceRows = 2) {
   for (let y = y0 - faceRows; y < y0; y++) put(g, x0, y, A.repeat(x1 - x0 + 1));
   box(g, x0, y0, x1, y1, F);
 }
+
+/**
+ * W8 wall depth for the 3/4-view dungeon kits (the archive floors' depth(), shared by the Court of Mirrors): a wall
+ * cell `#` that touches a non-wall cell (8-neighbourhood) stays the band `#` (a full tile of wall top: walls have
+ * thickness); a wall cell under a band's south side becomes the outer face `o` (one or two rows); every other wall
+ * cell is the deep `v`. All three are wall. Takes and returns a list of row strings.
+ */
+export function wallDepth(rowsIn) {
+  const H = rowsIn.length, W = rowsIn[0].length;
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : rowsIn[y][x]);
+  const band = (x, y) => {
+    if (at(x, y) !== '#') return false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(x + dx, y + dy) !== '#') return true;
+    return false;
+  };
+  const out = rowsIn.map((r) => r.split(''));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (rowsIn[y][x] !== '#' || band(x, y)) continue;
+    if (band(x, y - 1)) out[y][x] = 'o';
+    else if (y >= 2 && out[y - 1][x] === 'o' && band(x, y - 2)) out[y][x] = 'o';
+    else out[y][x] = 'v';
+  }
+  return out.map((r) => r.join(''));
+}
+
+// ---------------------------------------------------------------- Episode 2 (EPISODE2_PLAN 5.1 to 5.4)
+/** Beam source: `beam_window` set in a north face (emits from its cell) or a `beam_lens` pedestal. */
+export const beam = (id, x, y, dir, sprite = 'beam_window', extra = {}) => ({ id, type: 'beam', x, y, dir, sprite, ...extra });
+/** Turnable mirror: state 0 = '/', 1 = '\'. `fixed`, `push`, `heavy` (Shove; draws mirror_heavy). */
+export const mirror = (id, x, y, state, extra = {}) =>
+  ({ id, type: 'mirror', x, y, state, sprite: extra.heavy ? 'mirror_heavy' : 'mirror_stand', ...extra });
+/** Crystal receptor: lit by a beam arriving through `face` (the side it looks toward); a gate source while lit. */
+export const receptor = (id, x, y, target, extra = {}) =>
+  ({ id, type: 'receptor', x, y, target, sprite: 'receptor', text: 'court_receptor', ...extra });
+/** Keeper mirror door (kind mirror): the event sits on the mirror's walk-in cell; present only while `if` holds. */
+export const mirrorDoor = (id, x, y, to, iff, extra = {}) =>
+  ({ id, type: 'door', x, y, to, kind: 'mirror', sprite: 'mirror_tall', if: iff, ...extra });
+/** The dull mirror shown in a mirror door's place until its flag is set. */
+export const dullMirror = (id, x, y, iff, text) =>
+  ({ id, type: 'object', x, y, sprite: 'mirror_tall', state: 0, text, ifNot: iff });
+/** Invisible same-map fog door (the Fading Stretch): a wander off the cairn path lands on `to`. */
+export const fogDoor = (id, x, y, w, h, to) => ({ id, type: 'door', x, y, w, h, to, kind: 'fog' });
+/** Silver font: rest and save, a safe point (font_silver, 2 x 1). */
+export const silverFont = (id, x, y) => ({ id, type: 'font', x, y, w: 2, h: 1, text: 'silver_font', sprite: 'font_silver', safe: true });

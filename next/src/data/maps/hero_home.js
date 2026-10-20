@@ -46,6 +46,7 @@ export default {
   overhead: [],
   events: [
     enter('wake_up_enter', 'wake_up'),
+    enter('ep2_morning_enter', 'ep2_morning'),      // Episode 2 (E2-world asked): the scene guards itself
     npc('hazel', 13, 4, 'up'),
     door('home_exit', 12, 11, ['willowmere', 4, 16, 'down']),
     sign('home_doorframe', 11, 11, 'home_doorframe'),

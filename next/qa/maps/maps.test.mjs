@@ -6,15 +6,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { NEXT, MAP_IDS, listMapIds, loadAll, loadDb, validate, walk, parseStagingChecklist, buildGrid } from '../../tools/maps/mapcheck.mjs';
+import { NEXT, MAP_IDS, MAP_IDS_EP2, listMapIds, loadAll, loadDb, validate, walk, parseStagingChecklist, buildGrid, loadStaging } from '../../tools/maps/mapcheck.mjs';
 
-// COMMON.md maps plus the optional side dungeon (W6-content).
-const ALL_IDS = [...MAP_IDS, 'whisperwood_hollow'];
+// COMMON.md maps plus the optional side dungeon (W6-content); Episode 2's eleven maps (E2-maps, qa/maps/ep2_maps.test.mjs).
+const EP1_IDS = [...MAP_IDS, 'whisperwood_hollow'];
+const ALL_IDS = [...EP1_IDS, ...MAP_IDS_EP2];
 
 const db = await loadDb();
 const maps = await loadAll();
 const staging = parseStagingChecklist(fs.readFileSync(path.join(NEXT, 'docs', 'story', 'STAGING.md'), 'utf8'));
-const results = Object.fromEntries(Object.entries(maps).map(([id, m]) => [id, validate(m, db, maps, { staging })]));
+// validation reads both checklists (STAGING.md section 5 and STAGING_EP2.md section 4, merged per map)
+const results = Object.fromEntries(Object.entries(maps).map(([id, m]) => [id, validate(m, db, maps, { staging: loadStaging() })]));
 
 test('every COMMON.md map id has a module and no module is unexpected', () => {
   assert.deepEqual(listMapIds().sort(), [...ALL_IDS].sort());
@@ -22,7 +24,7 @@ test('every COMMON.md map id has a module and no module is unexpected', () => {
 });
 
 test('STAGING.md section 5 parsed into a checklist for every map', () => {
-  for (const id of ALL_IDS) assert.ok(staging[id], `no checklist row for ${id}`);
+  for (const id of EP1_IDS) assert.ok(staging[id], `no checklist row for ${id}`);
   assert.ok(staging.willowmere.marks.includes('gather_oren'));
   assert.ok(staging.willowmere.npcs.includes('loaf'));
   assert.ok(staging.archive_boss.marks.includes('fragment_spot'));
@@ -65,7 +67,9 @@ test('visible enemy counts match ZONES plans and the boss actors exist', () => {
     const counts = {};
     for (const e of m.events) if (e.type === 'enemy') counts[e.encounter] = (counts[e.encounter] || 0) + 1;
     for (const [encId, n] of zone.plan) {
-      if (db.ENCOUNTERS[encId].boss) assert.equal(m.events.filter((e) => e.type === 'actor' && e.id === encId).length, n, `${zoneId} boss ${encId}`);
+      // a boss is an actor with the encounter's id, or (the Other Selves) the step trigger running the scene of that id
+      const bossEvents = m.events.filter((e) => e.type === 'actor' && e.id === encId);
+      if (db.ENCOUNTERS[encId].boss) assert.equal((bossEvents.length ? bossEvents : m.events.filter((e) => e.type === 'trigger' && e.script === encId)).length, n, `${zoneId} boss ${encId}`);
       else assert.equal(counts[encId] || 0, n, `${zoneId} ${encId}`);
     }
   }

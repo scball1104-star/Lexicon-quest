@@ -65,6 +65,17 @@ for (let x = 47; x < W; x++) {
 put(g, 46, 20, '-'); put(g, 46, 19, 's'); put(g, 46, 21, 's'); put(g, 45, 19, 's'); put(g, 45, 21, 's');
 // ink pool at the Whisperwood edge (the Lantern secret): a blot, with a tongue of land at the bridge's west end
 for (const [x0, x1, y] of [[53, 54, 28], [52, 55, 29], [52, 55, 30], [53, 55, 31], [52, 55, 32], [53, 55, 33]]) box(g, x0, y, x1, y, 'i');
+// Episode 2 (E2-maps, EPISODE2_PLAN 3): the washout. A stream falls from the north cliff at x 45..46 and runs down to the
+// tributary beside the old ford: the flood that cut it took the east road with it, so the fork's east branch ends in the
+// shallows and the north bank beyond is out of reach (it always was, behind the Whisperwood pines; now the water says
+// why). Garrick's Crossing (planks over the gully, only once ep2_started) is the one way east; the bank road runs along
+// the tributary's north bank to the east edge (exit to the Fading Road).
+box(g, 45, 0, 46, 5, '~');
+for (let y = 6; y <= 19; y++) { put(g, 45, y, '~'); put(g, 46, y, '~'); }
+for (const y of [9, 10, 11]) put(g, 44, y, '~');          // the gully swells where the flood scoured it
+for (const y of [6, 7, 13, 14]) put(g, 47, y, '~');
+for (const y of [6, 7, 8, 12, 13, 14]) put(g, 44, y, 's');  // its banks: runs of sand, not single tiles
+for (const y of [8, 9, 10, 11, 15]) put(g, 47, y, 's');
 // roads. One span per row: the west road from the gate to the bridge wanders north and widens twice, the pilgrim
 // road leans into the bank and opens out at the slope, the fork and the Pilgrim's Rest.
 const ROAD = {
@@ -79,6 +90,8 @@ const PILGRIM = {
 };
 for (const [y, spans] of Object.entries(ROAD)) for (const [x0, x1] of spans) box(g, x0, +y, x1, +y, '=');
 for (const [y, [x0, x1]] of Object.entries(PILGRIM)) box(g, x0, +y, x1, +y, '=');
+box(g, 43, 16, 44, 19, '=');                      // Episode 2: the turn off the fork road up to Garrick's Crossing
+box(g, 47, 16, 59, 17, '=');                      // Episode 2: the bank road along the tributary's north bank
 // a fenced pasture in the west meadow (the sheep are out)
 for (let x = 3; x <= 11; x++) { put(g, x, 18, 'F'); put(g, x, 23, 'F'); }
 for (let y = 19; y <= 22; y++) { put(g, 3, y, 'F'); put(g, 11, y, 'F'); }
@@ -117,11 +130,18 @@ const overlays = [
   { t: 'hydrangea_blue', x: 38, y: 22 }, { t: 'hydrangea_violet', x: 41, y: 23 },
   { t: 'roots_1', x: 50, y: 28 }, { t: 'roots_0', x: 52, y: 28 },   // roots spill out of the hollow's mouth
   { t: 'wall_broken', x: 4, y: 14 },                // W9: the grotto behind the cracked face (drawn over by the crack)
+  // Episode 2: Garrick's Crossing, planks over the gully (only once ep2_started)
+  ...bridgeH(44, 47, 16, 'wood', false).map((o) => ({ ...o, if: 'ep2_started' })),
 ];
 
 // ---------------------------------------------------------------- decor
 const pines = [];
-function pine(x, y) { pines.push({ t: 'tree_pine', x, y }); }
+function pine(x, y) {
+  // Episode 2: no pines in the washout gully, on the crossing's approach or on the bank road
+  if (x >= 43 && x <= 47 && y >= 6 && y <= 19) return;
+  if (y >= 15 && y <= 17 && x >= 47) return;
+  pines.push({ t: 'tree_pine', x, y });
+}
 // north cliff top: a broken tree line, trunks at varied depth with gaps and the odd pair, clear of the Archive
 for (let x = 1; x < 59; x++) {
   if (x >= 24 && x <= 35) continue;
@@ -148,7 +168,7 @@ const decor = [
   { t: 'tree_willow', x: 15, y: 26 },               // the hollow tree
   { t: 'bush', x: 14, y: 25 }, { t: 'bush', x: 17, y: 25 }, { t: 'bush', x: 18, y: 26 }, { t: 'bush', x: 14, y: 24 }, { t: 'bush', x: 17, y: 24 },
   { t: 'bush', x: 20, y: 32 }, { t: 'bush', x: 41, y: 31 },
-  { t: 'bush', x: 44, y: 9 }, { t: 'bush', x: 37, y: 16 }, { t: 'bush', x: 40, y: 12 },
+  { t: 'bush', x: 43, y: 9 }, { t: 'bush', x: 37, y: 16 }, { t: 'bush', x: 40, y: 12 },
   { t: 'bush', x: 56, y: 30 }, { t: 'bush', x: 56, y: 32 }, { t: 'bush', x: 57, y: 30 }, { t: 'bush', x: 57, y: 32 }, { t: 'bush', x: 58, y: 31 },
   { t: 'bush', x: 56, y: 29 }, { t: 'bush', x: 56, y: 33 }, { t: 'bush', x: 52, y: 28 }, { t: 'bush', x: 52, y: 33 },
   { t: 'bush', x: 48, y: 30 }, { t: 'bush', x: 48, y: 32 }, { t: 'bush', x: 57, y: 29 }, { t: 'bush', x: 57, y: 33 }, { t: 'bush', x: 58, y: 30 }, { t: 'bush', x: 58, y: 32 },
@@ -203,6 +223,10 @@ const events = [
   // W9-abilities: Dash Strike breaks the cracked face; the grotto's chest appears behind it
   object('crack_plateau', 4, 14, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2 }),
   chest('chest_grotto', 4, 15, 'iron', { item: 'phoenix_feather', behind: 'crack_plateau' }),
+  // Episode 2: the washout and Garrick's Crossing (scene garrick_crossing; Garrick and Hal are spawned by it)
+  object('ford_wrack', 42, 14, 'floodwrack', { text: 'ford_wrack' }),
+  object('garrick_rail', 44, 15, 'signpost', { text: 'garrick_rail', if: 'crossing_done' }),
+  trigger('crossing_trig', 43, 16, 2, 4, 'garrick_crossing'),
   // visible enemies: 7 per encounters.js ZONES.valley.plan (the wolf pack at the gate chases, the pack deepest)
   enemy('e_wolves_a', 14, 33, 'briar_wolf', 'valley_wolves', 'chase'),
   enemy('e_wolves_b', 9, 10, 'briar_wolf', 'valley_wolves', 'guard'),
@@ -228,8 +252,10 @@ export default {
   decor,
   overhead: [],
   events,
-  exits: [{ x: 0, y: 33, w: 1, h: 2, to: ['willowmere', 20, 30, 'up'] }],
+  exits: [{ x: 0, y: 33, w: 1, h: 2, to: ['willowmere', 20, 30, 'up'] },
+    { x: 59, y: 16, w: 1, h: 2, to: ['east_road', 1, 16, 'right'] }],
   marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9], campfire: [39, 22],
-    hollow_mouth: [51, 28] },
+    hollow_mouth: [51, 28],
+    ford: [46, 16], crossing_garrick: [45, 16], crossing_hal: [46, 17], east_exit: [58, 16] },
   start: { x: 1, y: 33, dir: 'right' },
 };

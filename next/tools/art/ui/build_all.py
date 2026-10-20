@@ -78,7 +78,19 @@ def build_ui_atlas():
         groups[gname] = ids
         anims.update(mod.anims())
         slices.update(mod.slices())
-    sheet, rects = pack(items)
+    # E2-sprites: the Episode 2 icons go in a strip under the Episode 1 pack (art_icons.E2_IDS), so every
+    # existing rect stays where it was
+    late = [it for it in items if it[0] in art_icons.E2_IDS]
+    sheet, rects = pack([it for it in items if it[0] not in art_icons.E2_IDS])
+    if late:
+        strip, srects = pack(late)
+        top = sheet.shape[0]
+        full = blank(sheet.shape[1], top + strip.shape[0])
+        full[:top] = sheet
+        full[top:] = strip
+        sheet = full
+        for sid, (x, y, w, h) in srects.items():
+            rects[sid] = (x, y + top, w, h)
     save(sheet, ASSETS_UI / 'ui.png')
     touch_files = art_touch.export_touch_pngs()
     js = {
@@ -104,6 +116,7 @@ def build_ui_atlas():
                          'light': 'icon_light', 'unknown': 'weak_unknown'},
             'status': {k: f'icon_{k}' for k in art_icons.STATUS_RAMPS},
             'statusMini': {k: f'st8_{k}' for k in art_icons.STATUS_RAMPS},
+            'markers': {'reflect': 'icon_reflect'},
         },
         'buttonGlyphs': {
             'keyboard': {'confirm': 'btn_key_z', 'cancel': 'btn_key_x', 'menu': 'btn_key_c',

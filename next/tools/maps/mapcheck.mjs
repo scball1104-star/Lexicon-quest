@@ -5,6 +5,16 @@
 //   node tools/maps/mapcheck.mjs walk <mapId>          reachability report (JSON)
 //   node tools/maps/mapcheck.mjs check [mapId ...]     validation report for every map (exit 1 on errors)
 //   node tools/maps/mapcheck.mjs list                  map ids found in src/data/maps
+//   node tools/maps/mapcheck.mjs walk <mapId> [flags]  the walk under a comma list of story flags (gated events,
+//                                                      overlays and overhead tiles filtered; Episode 2)
+//   node tools/maps/mapcheck.mjs beams <mapId> [flags] beam traces for the preview: the start state and, per receptor
+//                                                      and per bridge, the first configuration the walk found that
+//                                                      lights it
+//
+// Episode 2 (E2-maps): maps with beam / mirror / receptor events walk through beamWalk(): a search over (mirror
+// configuration, cell) per beam system with src/world/beam.js tracing, receptors as gate sources, latches as an outer
+// fixpoint, bridges walkable only while lit, pushes and shoves of movable mirrors, and a softlock count. W9 breakables
+// (`opens`) are modeled in both walks.
 //
 // Collision model (docs/MAPS.md section 3): a cell's code comes from its legend id (terrain collision,
 // wall systems solid, plain tiles their own code); an overlay replaces it with the overlay tile's code;
@@ -17,6 +27,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
+import { traceBeams } from '../../src/world/beam.js';
 
 export const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MAPS_DIR = path.join(NEXT, 'src', 'data', 'maps');
@@ -47,6 +58,7 @@ export async function loadDb() {
   const npcs = await src('npcs.js');
   const enc = await src('encounters.js');
   const story = await src('story/ep1.js');
+  const story2 = await src('story/ep2.js');
   const text = await src('text.js');
   const items = await src('items.js');
   const quests = await src('quests.js');
@@ -54,7 +66,8 @@ export async function loadDb() {
     tiles, props, npcAtlas, enemiesField, partyField,
     NPCS: npcs.NPCS, npcsOnMap: npcs.npcsOnMap,
     ENCOUNTERS: enc.ENCOUNTERS, ZONES: enc.ZONES,
-    scenes: story.scenes, lines: story.lines, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
+    // Episode 2 scenes and inspect lines merge with Episode 1's (ids never collide; qa/content tests it)
+    scenes: { ...story.scenes, ...story2.scenes }, lines: { ...story.lines, ...story2.lines }, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
     ITEMS: items.ITEMS, FLAGS: quests.FLAGS,
   };
   return _db;
@@ -112,8 +125,34 @@ export function eventCells(e) {
 }
 
 // Event types that block the walk when solid, and whether the walk may pass through them anyway.
-const SOLID_TYPES = new Set(['npc', 'actor', 'chest', 'object', 'block', 'pot', 'brazier', 'font', 'save', 'sign', 'book', 'ferry']);
+const SOLID_TYPES = new Set(['npc', 'actor', 'chest', 'object', 'block', 'pot', 'brazier', 'font', 'save', 'sign', 'book', 'ferry',
+  'beam', 'mirror', 'receptor']);
 const PASS_THROUGH = new Set(['actor', 'enemy', 'block', 'pot']);   // despawn, fight, push, break
+
+// ------------------------------------------------------------------------------------------------ flags
+/** Is a flag-gated entry (event, overlay, overhead tile) present under `flags` (a Set)? No flags = everything. */
+export function present(e, flags) {
+  if (!flags) return true;
+  for (const f of toList(e.if)) if (!flags.has(f)) return false;
+  for (const f of toList(e.ifNot)) if (flags.has(f)) return false;
+  return true;
+}
+/** The map as a save with exactly these flags sees it: absent events, overlays and overhead tiles removed. */
+export function withFlags(map, flags) {
+  const f = flags instanceof Set ? flags : new Set(flags || []);
+  return {
+    ...map,
+    events: (map.events || []).filter((e) => present(e, f)),
+    overlays: (map.overlays || []).filter((o) => present(o, f)),
+    overhead: (map.overhead || []).filter((o) => present(o, f)),
+  };
+}
+/** First-match conditional map field (`music`, `lighting.tint`): a plain value or [{ if, ifNot, id }, ...]. */
+export function pickConditional(v, flags) {
+  if (!Array.isArray(v)) return v;
+  for (const c of v) if (present(c, flags)) return c.id;
+  return null;
+}
 
 // ------------------------------------------------------------------------------------------------ grid
 export function buildGrid(map, db) {
@@ -190,6 +229,8 @@ function eventIndex(map) {
 }
 
 export function walk(map, db, opts = {}) {
+  if (opts.flags) map = withFlags(map, new Set(opts.flags));
+  if (hasBeams(map)) return beamWalk(map, db, opts);
   const grid = buildGrid(map, db);
   const { W, H, code, faint } = grid;
   const events = map.events || [];
@@ -199,7 +240,7 @@ export function walk(map, db, opts = {}) {
   const start = opts.start || (map.start ? [map.start.x, map.start.y] : null);
   if (!start) return { ...grid, error: 'map has no start' };
 
-  const state = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), log: [] };
+  const state = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), broken: new Set(), openCells: new Set(), log: [] };
   const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
   const evAt = (x, y) => byCell.get(`${x},${y}`) || [];
 
@@ -209,8 +250,10 @@ export function walk(map, db, opts = {}) {
       const rid = faint[y][x].replace('_faint', '_revealed');
       c = tileCode(db, rid) ?? c;
     }
+    if (state.openCells.has(`${x},${y}`)) return 'none';
     for (const e of evAt(x, y)) {
       if (flags.size && e.if && !toList(e.if).every((f) => flags.has(f))) continue;
+      if (e.type === 'object' && e.breakable && state.broken.has(e.id)) return 'none';
       if ((e.type === 'gate' || e.type === 'locked_door') && state.opened.has(e.id)) return 'none';
       if (e.type === 'shelf' && state.shelves.has(e.id)) return 'none';
       if (PASS_THROUGH.has(e.type)) return 'none';
@@ -273,6 +316,11 @@ export function walk(map, db, opts = {}) {
         if (e.item && /_key$/.test(e.item) && !state.keys.has(e.item) && touchable(seen, e)) { state.keys.add(e.item); state.log.push(`${e.item} from ${e.id}`); changed = true; }
       }
       if (e.type === 'object' && e.script === 'lantern_get' && !state.lantern && touchable(seen, e)) { state.lantern = true; state.log.push(`lantern from ${e.id}`); changed = true; }
+      // W9 Dash Strike: a breakable the party can reach is broken and its `opens` cells become floor
+      if (e.type === 'object' && e.breakable && !state.broken.has(e.id) && touchable(seen, e)) {
+        state.broken.add(e.id); for (const [x, y] of e.opens || []) state.openCells.add(`${x},${y}`);
+        state.log.push(`broke ${e.id}`); changed = true;
+      }
       if (e.type === 'locked_door' && !state.opened.has(e.id) && state.keys.has(e.key) && touchable(seen, e)) { state.opened.add(e.id); state.log.push(`unlocked ${e.id}`); changed = true; }
       if ((e.type === 'gate' || e.type === 'shelf') && !state.opened.has(e.id) && !state.shelves.has(e.id)) {
         const sources = events.filter((s) => (s.type === 'switch' || s.type === 'plate') && toList(s.target).includes(e.id));
@@ -309,12 +357,396 @@ export function walk(map, db, opts = {}) {
   return report;
 }
 
+
+// ------------------------------------------------------------------------------------------------ beams (Episode 2)
+// The Court of Mirrors' puzzles (EPISODE2_PLAN 5.1) are modeled as a search over (configuration, cell): a
+// configuration is the state of every turnable mirror (0 = '/', 1 = backslash) and the cell of every movable thing
+// (push blocks, push and heavy mirrors). From a cell the party may step (bridges walkable only while lit; a dim
+// bridge is a pit), turn an adjacent mirror, or push/shove an adjacent movable one tile (never onto a bridge, never
+// into a wall). Receptors light per configuration; a gate whose sources are receptors opens while they are lit, and
+// a `latch` receptor, once lit in any reachable configuration, stays lit (an outer fixpoint, like keys and
+// switches). The tracer is E2-world's src/world/beam.js. Softlocks: every reachable state must still reach a cell
+// that leaves the map (a map-to-map door, an exit, a ferry, the start), because leaving resets mirrors and blocks.
+
+export function hasBeams(map) {
+  return (map.events || []).some((e) => e.type === 'beam' || e.type === 'mirror' || e.type === 'receptor');
+}
+
+/** Cells whose ground or overlay tile lets a beam through (tiles.json `beam: 'pass'`). */
+export function passGrid(map, db) {
+  const H = map.ground.length, W = map.ground[0].length;
+  const out = Array.from({ length: H }, () => new Array(W).fill(false));
+  const isPass = (id) => !!(db.tiles.tiles[id] && db.tiles.tiles[id].beam === 'pass');
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (isPass(map.legend[map.ground[y][x]])) out[y][x] = true;
+  for (const o of map.overlays || []) if (o.y >= 0 && o.y < H && o.x >= 0 && o.x < W && isPass(o.t)) out[o.y][o.x] = true;
+  return out;
+}
+
+export const BRIDGE_RE = /^glass_bridge_[hv]_dim$/;
+
+function beamWalk(map, db, opts = {}) {
+  const events = map.events || [];
+  const W = map.ground[0].length, H = map.ground.length, N = W * H;
+  const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
+  const idx = (x, y) => y * W + x;
+  const start = opts.start || (map.start ? [map.start.x, map.start.y] : null);
+  if (!start) return { error: 'map has no start' };
+
+  const mirrors = events.filter((e) => e.type === 'mirror');
+  // push blocks stay out of the configuration (the state space would explode): one in a beam's line blocks it until the
+  // party can reach it, then counts as pushed aside (qa/maps checks each such block has room to leave the line)
+  const movables = events.filter((e) => e.type === 'mirror' && (e.push || e.heavy));
+  const blocks = events.filter((e) => e.type === 'block');
+  const turnables = mirrors.filter((e) => !e.fixed);
+  const moveSet = new Set(movables);
+  const staticEvents = events.filter((e) => !moveSet.has(e) && e.type !== 'mirror' && e.type !== 'block');
+  const sg = buildGrid({ ...map, events: staticEvents }, db);
+  // beam code: no actors (they never block a beam), no movables or mirrors (placed per configuration)
+  const bg = buildGrid({ ...map, events: staticEvents.filter((e) => !['npc', 'actor', 'enemy'].includes(e.type)) }, db);
+  const pass = passGrid(map, db);
+  const bridge = new Uint8Array(N);
+  for (const o of map.overlays || []) if (BRIDGE_RE.test(o.t) && inb(o.x, o.y)) bridge[idx(o.x, o.y)] = 1;
+  const byCell = eventIndex({ events: staticEvents });
+  const evAt = (x, y) => byCell.get(`${x},${y}`) || [];
+  const doorCell = new Uint8Array(N);
+  for (const e of staticEvents) if (e.type === 'door') for (const [x, y] of eventCells(e)) if (inb(x, y)) doorCell[idx(x, y)] = 1;
+  const gates = events.filter((e) => e.type === 'gate' || e.type === 'locked_door');
+  const receptors = events.filter((e) => e.type === 'receptor');
+  const recAt = new Map(receptors.map((r) => [idx(r.x, r.y), r]));
+  const sources = events.filter((e) => e.type === 'beam').map((e) => ({ id: e.id, x: e.x, y: e.y, dir: e.dir || 'down' }));
+  const recSources = (gid) => receptors.filter((r) => toList(r.target).includes(gid));
+
+  const g = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), latched: new Set(), pushed: new Set(),
+    broken: new Set(), openCells: new Set(), log: [] };
+
+  // ---- beam systems: a source and every mirror its light can ever reach (both states of each turnable mirror, every
+  // cell a movable mirror can be pushed to). Systems that share a mirror merge. The search runs per system with the
+  // other systems' mirrors at their authored states (the wings of F3 are independent; a joint search would explode).
+  const movRegion = new Map();
+  for (const m of movables) {
+    const seen = new Set([idx(m.x, m.y)]);
+    const q = [[m.x, m.y]];
+    const free = (x, y) => inb(x, y) && sg.code[y][x] === 'none' && !bridge[idx(x, y)] && !doorCell[idx(x, y)];
+    while (q.length) {
+      const [x, y] = q.pop();
+      for (const [dx, dy] of Object.values(DIRS)) {
+        // a push needs the party standing behind the mirror and a free cell ahead
+        if (!free(x + dx, y + dy) || !(free(x - dx, y - dy) || (x - dx === m.x && y - dy === m.y))) continue;
+        const k = idx(x + dx, y + dy);
+        if (!seen.has(k)) { seen.add(k); q.push([x + dx, y + dy]); }
+      }
+    }
+    movRegion.set(m, seen);
+  }
+  const fixedAt = new Map(mirrors.filter((m) => !moveSet.has(m)).map((m) => [idx(m.x, m.y), m]));
+  const DV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  const TURN = [{ right: 'up', up: 'right', left: 'down', down: 'left' }, { right: 'down', down: 'right', left: 'up', up: 'left' }];
+  const systems = sources.map((s) => ({ sources: [s.id], mir: new Set() }));
+  sources.forEach((src, si) => {
+    const S = systems[si];
+    for (let round = 0; round < 8; round++) {
+      const seenB = new Set(), cells = new Set();
+      const stack = [[src.x, src.y, src.dir]];
+      while (stack.length) {
+        const [x, y, d] = stack.pop();
+        const nx = x + DV[d][0], ny = y + DV[d][1];
+        if (!inb(nx, ny)) continue;
+        const k = idx(nx, ny), sk = k * 4 + ['up', 'down', 'left', 'right'].indexOf(d);
+        if (seenB.has(sk)) continue;
+        seenB.add(sk); cells.add(k);
+        if (recAt.has(k)) continue;
+        const fm = fixedAt.get(k);
+        if (fm) {
+          if (!fm.fixed) S.mir.add(fm);
+          for (const st of fm.fixed ? [fm.state ? 1 : 0] : [0, 1]) stack.push([nx, ny, TURN[st][d]]);
+          continue;
+        }
+        if (movables.some((m) => S.mir.has(m) && movRegion.get(m).has(k))) for (const st of [0, 1]) stack.push([nx, ny, TURN[st][d]]);
+        const c = bg.code[ny][nx];
+        const gateHere = evAt(nx, ny).some((e) => e.type === 'gate' || e.type === 'locked_door');
+        if ((c === 'solid' || c === 'void') && !pass[ny][nx] && !gateHere) continue;
+        stack.push([nx, ny, d]);
+      }
+      let grew = false;
+      for (const m of movables) if (!S.mir.has(m) && [...movRegion.get(m)].some((k) => cells.has(k))) { S.mir.add(m); grew = true; }
+      if (!grew) break;
+    }
+  });
+  // merge systems that share a mirror
+  for (let i = 0; i < systems.length; i++) for (let j = i + 1; j < systems.length; j++) {
+    if (!systems[i] || !systems[j]) continue;
+    if ([...systems[j].mir].some((m) => systems[i].mir.has(m))) {
+      systems[i].sources.push(...systems[j].sources);
+      for (const m of systems[j].mir) systems[i].mir.add(m);
+      systems[j] = null;
+    }
+  }
+  const sysList = systems.filter(Boolean);
+  if (!sysList.length) sysList.push({ sources: [], mir: new Set() });
+
+  // ---- configurations (per system): st = its turnable mirrors' states, pos = its movable mirrors' cells
+  const cfgs = [], cfgIdx = new Map();
+  function cfgId(sys, st, pos) {
+    const k = sys.key + ':' + st.join('') + '|' + pos.join(',');
+    let id = cfgIdx.get(k);
+    if (id == null) { id = cfgs.length; cfgIdx.set(k, id); cfgs.push({ sys, st, pos, info: null }); }
+    return id;
+  }
+  sysList.forEach((s, i) => {
+    s.key = i;
+    s.turn = turnables.filter((m) => s.mir.has(m));
+    s.move = movables.filter((m) => s.mir.has(m));
+  });
+  const mirrorPos = (c, m) => { const j = c.sys.move.indexOf(m); return j >= 0 ? c.pos[j] : idx(m.x, m.y); };
+  const mirrorState = (c, m) => { const i = c.sys.turn.indexOf(m); return i >= 0 ? c.st[i] : (m.state ? 1 : 0); };
+
+  function info(id) {
+    const c = cfgs[id];
+    if (c.info) return c.info;
+    const movAt = new Map();
+    for (const m of movables) movAt.set(mirrorPos(c, m), m);
+    const mir = mirrors.map((m) => { const p = mirrorPos(c, m); return { id: m.id, x: p % W, y: Math.floor(p / W), state: mirrorState(c, m) }; });
+    const blocksAt = new Set(blocks.filter((b) => !g.pushed.has(b.id)).map((b) => idx(b.x, b.y)));
+    let open = new Set(g.opened), tr = null;
+    for (let iter = 0; iter < 4; iter++) {
+      const code = (x, y) => {
+        if (!inb(x, y)) return 'void';
+        if (blocksAt.has(idx(x, y))) return 'solid';
+        for (const e of evAt(x, y)) if ((e.type === 'gate' || e.type === 'locked_door') && open.has(e.id)) return 'none';
+        return bg.code[y][x];
+      };
+      tr = traceBeams({ w: W, h: H, code, pass: (x, y) => inb(x, y) && pass[y][x], sources, mirrors: mir,
+        receptors: receptors.map((r) => ({ id: r.id, x: r.x, y: r.y, face: r.face || null })) });
+      const next = new Set(g.opened);
+      for (const gt of gates) {
+        const rs = recSources(gt.id);
+        if (rs.length && rs.every((r) => tr.litReceptors.has(r.id) || g.latched.has(r.id))) next.add(gt.id);
+      }
+      if (next.size === open.size) break;
+      open = next;
+    }
+    const litCells = new Set();
+    for (const k of tr.lit) { const [x, y] = k.split(',').map(Number); litCells.add(idx(x, y)); }
+    const codeArr = new Array(N);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const k = idx(x, y);
+      let cc = sg.code[y][x];
+      if (sg.faint[y][x] && g.lantern) cc = tileCode(db, sg.faint[y][x].replace('_faint', '_revealed')) ?? cc;
+      if (bridge[k]) cc = litCells.has(k) ? 'none' : 'pit';
+      if (g.openCells.has(k)) cc = 'none';
+      for (const e of evAt(x, y)) {
+        if ((e.type === 'gate' || e.type === 'locked_door') && open.has(e.id)) cc = 'none';
+        if (e.type === 'shelf' && g.shelves.has(e.id)) cc = 'none';
+        if (e.type === 'actor' || e.type === 'pot' || e.type === 'enemy') cc = 'none';
+        if (e.type === 'object' && e.breakable && g.broken.has(e.id)) cc = 'none';
+      }
+      codeArr[k] = cc;
+    }
+    for (const m of mirrors) codeArr[mirrorPos(c, m)] = 'solid';
+    c.info = { code: codeArr, lit: litCells, litReceptors: tr.litReceptors, open, trace: tr, movAt };
+    return c.info;
+  }
+
+  const pitTarget = (x, y) => {
+    for (const e of evAt(x, y)) if (e.type === 'pit' && e.to) return e.to;
+    return map.pitTo || null;
+  };
+
+  let everLit = new Set(), firstLit = {}, firstBridge = new Map(), seenAll = new Set(), softlocks = [], statesTotal = 0, cfgSeen = new Set();
+
+  function searchSystem(sys, recordEdges) {
+    const st0 = sys.turn.map((m) => (m.state ? 1 : 0));
+    const pos0 = sys.move.map((m) => idx(m.x, m.y));
+    const seen = new Set();
+    const q = [];
+    const from = [], to = [];
+    const s0 = cfgId(sys, st0, pos0) * N + idx(start[0], start[1]);
+    seen.add(s0); q.push(s0);
+    const add = (prev, s) => {
+      if (recordEdges) { from.push(prev); to.push(s); }
+      if (!seen.has(s)) { seen.add(s); q.push(s); }
+    };
+    for (let qi = 0; qi < q.length; qi++) {
+      const s = q[qi];
+      const cid = Math.floor(s / N), cell = s % N;
+      const x = cell % W, y = Math.floor(cell / W);
+      const inf = info(cid);
+      const c = cfgs[cid];
+      if (!cfgSeen.has(cid)) {
+        cfgSeen.add(cid);
+        for (const r of inf.litReceptors) if (!everLit.has(r)) { everLit.add(r); firstLit[r] = cid; }
+        for (const k of inf.lit) if (bridge[k] && !firstBridge.has(k)) firstBridge.set(k, cid);
+      }
+      for (const [dir, [dx, dy]] of Object.entries(DIRS)) {
+        const nx = x + dx, ny = y + dy;
+        if (!inb(nx, ny)) continue;
+        const nk = idx(nx, ny);
+        const cc = inf.code[nk];
+        let ok = cc === 'none' || cc === 'pit';
+        if (LEDGE_OK[cc]) ok = LEDGE_OK[cc] === dir;
+        if (ok) {
+          if (cc === 'pit') {
+            const t = pitTarget(nx, ny);
+            if (t && t[0] === map.id && inb(t[1], t[2])) add(s, cid * N + idx(t[1], t[2]));
+          } else {
+            add(s, cid * N + nk);
+            for (const e of evAt(nx, ny)) {
+              const tt = e.to;
+              if ((e.type === 'door' || ((e.type === 'gate' || e.type === 'locked_door') && inf.open.has(e.id))) && tt && tt[0] === map.id && inb(tt[1], tt[2])) add(s, cid * N + idx(tt[1], tt[2]));
+            }
+          }
+        }
+        // turn an adjacent mirror of this system
+        sys.turn.forEach((m, i) => {
+          if (mirrorPos(c, m) !== nk) return;
+          const st = c.st.slice(); st[i] ^= 1;
+          add(s, cfgId(sys, st, c.pos) * N + cell);
+        });
+        // push / shove an adjacent movable mirror of this system one tile away from the party (never onto a bridge or
+        // a door cell, never into anything solid)
+        const mv = inf.movAt.get(nk);
+        const j = mv ? sys.move.indexOf(mv) : -1;
+        if (j >= 0) {
+          const tx = nx + dx, ty = ny + dy;
+          if (inb(tx, ty)) {
+            const tk = idx(tx, ty);
+            const blocked = evAt(tx, ty).some((e) => SOLID_TYPES.has(e.type) && e.solid !== false && e.type !== 'pot' && e.type !== 'actor');
+            if (inf.code[tk] === 'none' && !bridge[tk] && !doorCell[tk] && !inf.movAt.has(tk) && !blocked) {
+              const pos = c.pos.slice(); pos[j] = tk;
+              add(s, cfgId(sys, c.st, pos) * N + cell);
+            }
+          }
+        }
+      }
+    }
+    if (recordEdges) {
+      const safeCell = new Set([idx(start[0], start[1])]);
+      for (const e of events) if (e.type === 'door' && e.to && e.to[0] !== map.id) for (const [x, y] of eventCells(e)) safeCell.add(idx(x, y));
+      for (const e of events) if (e.type === 'ferry') for (const [dx, dy] of [[0, 0], ...Object.values(DIRS)]) if (inb(e.x + dx, e.y + dy)) safeCell.add(idx(e.x + dx, e.y + dy));
+      for (const x of map.exits || []) for (let jj = 0; jj < (x.h || 1); jj++) for (let i = 0; i < (x.w || 1); i++) safeCell.add(idx(x.x + i, x.y + jj));
+      const rev = new Map();
+      for (let i = 0; i < from.length; i++) { const t = to[i]; let l = rev.get(t); if (!l) { l = []; rev.set(t, l); } l.push(from[i]); }
+      const good = new Set();
+      const gq = [];
+      for (const s of seen) if (safeCell.has(s % N)) { good.add(s); gq.push(s); }
+      for (let qi = 0; qi < gq.length; qi++) for (const p of rev.get(gq[qi]) || []) if (!good.has(p)) { good.add(p); gq.push(p); }
+      for (const s of seen) if (!good.has(s)) softlocks.push(s);
+    }
+    for (const s of seen) seenAll.add(s % N);
+    statesTotal += seen.size;
+  }
+
+  function search(recordEdges) {
+    for (const c of cfgs) c.info = null;
+    everLit = new Set(); firstLit = {}; firstBridge = new Map(); seenAll = new Set(); softlocks = []; statesTotal = 0; cfgSeen = new Set();
+    for (const sys of sysList) searchSystem(sys, recordEdges);
+  }
+
+  const cellsOf = () => { const out = new Set(); for (const c of seenAll) out.add(`${c % W},${Math.floor(c / W)}`); return out; };
+  const touchable = (seenCells, e) => {
+    for (const [x, y] of eventCells(e)) {
+      if (seenCells.has(`${x},${y}`)) return true;
+      for (const [dx, dy] of Object.values(DIRS)) if (seenCells.has(`${x + dx},${y + dy}`)) return true;
+    }
+    return false;
+  };
+
+  search(false);
+  let seenCells = cellsOf();
+  for (let iter = 0; iter < 20; iter++) {
+    let changed = false;
+    for (const r of receptors) if (r.latch && everLit.has(r.id) && !g.latched.has(r.id)) { g.latched.add(r.id); g.log.push(`latched ${r.id}`); changed = true; }
+    const hasBlock = events.some((e) => e.type === 'block' && touchable(seenCells, e));
+    for (const b of blocks) if (!g.pushed.has(b.id) && touchable(seenCells, b)) { g.pushed.add(b.id); g.log.push(`pushed ${b.id} aside`); changed = true; }
+    for (const e of events) {
+      if (e.type === 'object' && e.breakable && !g.broken.has(e.id) && touchable(seenCells, e)) {
+        g.broken.add(e.id); for (const [x, y] of e.opens || []) if (inb(x, y)) g.openCells.add(idx(x, y));
+        g.log.push(`broke ${e.id}`); changed = true;
+      }
+      if (e.type === 'chest' || e.type === 'pot') {
+        if (e.item && /_key$/.test(e.item) && !g.keys.has(e.item) && touchable(seenCells, e)) { g.keys.add(e.item); g.log.push(`${e.item} from ${e.id}`); changed = true; }
+      }
+      if (e.type === 'object' && e.script === 'lantern_get' && !g.lantern && touchable(seenCells, e)) { g.lantern = true; g.log.push(`lantern from ${e.id}`); changed = true; }
+      if (e.type === 'locked_door' && !g.opened.has(e.id) && g.keys.has(e.key) && touchable(seenCells, e)) { g.opened.add(e.id); g.log.push(`unlocked ${e.id}`); changed = true; }
+      if ((e.type === 'gate' || e.type === 'shelf') && !g.opened.has(e.id) && !g.shelves.has(e.id)) {
+        const srcs = events.filter((s) => (s.type === 'switch' || s.type === 'plate') && toList(s.target).includes(e.id));
+        const recs = recSources(e.id);
+        if (!srcs.length && !recs.length) continue;
+        if (recs.length && !recs.every((r) => g.latched.has(r.id))) continue;   // receptor gates open per configuration
+        const ready = srcs.every((s) => touchable(seenCells, s) && !(s.hidden && !g.lantern) && !(s.type === 'plate' && !hasBlock));
+        if (ready) { (e.type === 'gate' ? g.opened : g.shelves).add(e.id); g.log.push(`opened ${e.id} via ${[...srcs, ...recs].map((s) => s.id).join('+')}`); changed = true; }
+      }
+    }
+    if (!changed) break;
+    search(false);
+    seenCells = cellsOf();
+  }
+  // final pass with edges for the softlock check
+  search(opts.softlock !== false);
+  seenCells = cellsOf();
+
+  const describe = (cid) => {
+    const c = cfgs[cid];
+    const states = {}, positions = {};
+    c.sys.turn.forEach((m, i) => { states[m.id] = c.st[i]; });
+    c.sys.move.forEach((m, j) => { positions[m.id] = [c.pos[j] % W, Math.floor(c.pos[j] / W)]; });
+    return { states, positions };
+  };
+  const startCfg = (sys) => cfgId(sys, sys.turn.map((m) => (m.state ? 1 : 0)), sys.move.map((m) => idx(m.x, m.y)));
+  const c0id = startCfg(sysList[0]);
+  const report = {
+    id: map.id, W, H, start, errors: sg.errors, opened: [...g.opened, ...g.shelves], keys: [...g.keys], lantern: g.lantern, log: g.log,
+    reachable: [...seenCells], events: [], marks: [], unreached: [],
+    beams: true, systems: sysList.map((s) => ({ sources: s.sources, mirrors: [...s.mir].map((m) => m.id) })),
+    configs: cfgs.length, states: statesTotal, latched: [...g.latched], litReceptors: [...everLit],
+    startLit: [...info(c0id).litReceptors],
+    receptorConfigs: Object.fromEntries(Object.entries(firstLit).map(([r, cid]) => [r, describe(cid)])),
+    // per configuration that first lit some bridge cell: the cells it lit first (tools: one view per bridge)
+    bridgeConfigs: (() => {
+      const by = new Map();
+      for (const [k, cid] of firstBridge) { if (!by.has(cid)) by.set(cid, []); by.get(cid).push(`${k % W},${Math.floor(k / W)}`); }
+      return [...by].map(([cid, cells]) => ({ ...describe(cid), cells }));
+    })(),
+    bridgeCells: [...firstBridge.keys()].map((k) => `${k % W},${Math.floor(k / W)}`),
+    softlocks: softlocks.length,
+    softlockSamples: softlocks.slice(0, 5).map((s) => ({ cell: [(s % N) % W, Math.floor((s % N) / W)], ...describe(Math.floor(s / N)) })),
+  };
+  const everLitCells = new Set();
+  for (const cid of cfgSeen) for (const k of info(cid).lit) everLitCells.add(k);
+  report.everLitCells = [...everLitCells].map((k) => `${k % W},${Math.floor(k / W)}`);
+  for (const e of events) {
+    const reached = e.on === 'enter' ? true : touchable(seenCells, e);
+    report.events.push({ id: e.id, type: e.type, reached });
+    if (!reached) report.unreached.push(e.id);
+  }
+  const c0 = info(c0id);
+  for (const [name, [x, y]] of Object.entries(map.marks || {})) {
+    const walkable = inb(x, y) && c0.code[idx(x, y)] === 'none';
+    report.marks.push({ name, x, y, walkable, reached: seenCells.has(`${x},${y}`) });
+  }
+  report.floorCells = 0;
+  report.grid = [];
+  for (let y = 0; y < H; y++) {
+    const row = [];
+    for (let x = 0; x < W; x++) { const cc = c0.code[idx(x, y)]; row.push(cc); if (cc === 'none') report.floorCells++; }
+    report.grid.push(row);
+  }
+  /** Beam trace for a described configuration { states, positions } (tools and tests). Not JSON. */
+  Object.defineProperty(report, 'traceOf', { enumerable: false, value: (desc = {}) => {
+    const all = { sys: { key: 'all', turn: turnables, move: movables } };
+    all.st = turnables.map((m) => (desc.states && desc.states[m.id] != null ? desc.states[m.id] : (m.state ? 1 : 0)));
+    all.pos = movables.map((m) => (desc.positions && desc.positions[m.id] ? idx(desc.positions[m.id][0], desc.positions[m.id][1]) : idx(m.x, m.y)));
+    return info(cfgId(all.sys, all.st, all.pos)).trace;
+  } });
+  return report;
+}
+
 const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 
 // ------------------------------------------------------------------------------------------------ STAGING checklist
-export function parseStagingChecklist(md) {
+export function parseStagingChecklist(md, { section = /^## 5\. Marks checklist/m, ep2 = false } = {}) {
   const out = {};
-  const sec = md.split(/^## 5\. Marks checklist/m)[1];
+  const sec = md.split(section)[1];
   if (!sec) return out;
   const body = sec.split(/^## /m)[0];
   for (const line of body.split('\n')) {
@@ -326,12 +758,14 @@ export function parseStagingChecklist(md) {
       // "objects `a`, `b`" (plural keyword) lists several names; "actor `x`, `mark`" (singular) names one.
       const parts = seg.split(',');
       const head = parts[0].split('`')[0].toLowerCase();
-      const plural = /npcs|objects|actors|chests|marks/.test(head);
+      const plural = /npcs|objects|actors|chests|marks/.test(head) || (ep2 && /signs|triggers|receptors|doors|events/.test(head));
       parts.forEach((part, i) => {
         const names = [...part.matchAll(/`([^`]+)`/g)].flatMap((m) => m[1].split(/\s+/));
         if (!names.length) return;
         const kw = (i === 0 || plural) ? head : '';
-        if (/npc/.test(kw)) entry.npcs.push(...names);
+        // STAGING_EP2.md also names signs, enemies, triggers, receptors and doors: all named events
+        if (ep2 && /sign|enem|trigger|receptor|door|event|book/.test(kw)) entry.objects.push(...names);
+        else if (/npc/.test(kw)) entry.npcs.push(...names);
         else if (/chest/.test(kw)) entry.chestFlags.push(...names);
         else if (/object/.test(kw)) entry.objects.push(...names);
         else if (/actor/.test(kw)) entry.actors.push(...names);
@@ -346,8 +780,13 @@ export function parseStagingChecklist(md) {
 // ------------------------------------------------------------------------------------------------ validation
 export const MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
   'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
+/** Episode 2 maps (EPISODE2_PLAN 2.1). */
+export const MAP_IDS_EP2 = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chapel', 'nh_inn', 'nh_shop', 'nh_smithy',
+  'court_f1', 'court_f2', 'court_f3', 'court_throne'];
 const EVENT_TYPES = new Set(['npc', 'actor', 'door', 'chest', 'sign', 'book', 'object', 'trigger', 'enemy', 'switch', 'plate',
-  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot']);
+  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor']);
+const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne'];
+const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog']);
 const CHEST_TIERS = new Set(['wood', 'iron', 'gold']);
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 
@@ -402,6 +841,9 @@ export function validate(map, db, maps, { staging = null } = {}) {
       case 'door': {
         if (!Array.isArray(e.to) || e.to.length < 3) E(`door ${e.id}: to must be [map,x,y,dir]`);
         else checkTarget(e.to, `door ${e.id}`, map, maps, db, E);
+        if (!DOOR_KINDS.has(e.kind || 'door')) E(`door ${e.id}: kind ${e.kind}`);
+        if (e.kind === 'mirror' && e.sprite && e.sprite !== 'mirror_tall') E(`door ${e.id}: a mirror door draws sprite mirror_tall (or none: the throne room's great mirror)`);
+        if (e.kind === 'fog' && (!e.to || e.to[0] !== map.id)) E(`door ${e.id}: a fog door is a same-map transfer`);
         break;
       }
       case 'chest': {
@@ -422,12 +864,28 @@ export function validate(map, db, maps, { staging = null } = {}) {
         break;
       }
       case 'trigger': if (!db.scenes[e.script]) E(`trigger ${e.id}: scene ${e.script} missing`); break;
-      case 'switch': case 'plate': {
+      case 'switch': case 'plate': case 'receptor': {
         for (const t of toList(e.target)) if (!(map.events || []).some((x) => x.id === t && ['gate', 'shelf', 'locked_door'].includes(x.type))) E(`${e.type} ${e.id}: target ${t} is not a gate/shelf`);
+        if (e.type === 'receptor') {
+          if (!['receptor', 'receptor_wall'].includes(e.sprite)) E(`receptor ${e.id}: sprite ${e.sprite}`);
+          if (e.face && !DIR_NAMES.has(e.face)) E(`receptor ${e.id}: face ${e.face}`);
+          if (e.script && !db.scenes[e.script]) E(`receptor ${e.id}: scene ${e.script} missing`);
+          if (e.flag && !db.FLAGS[e.flag]) E(`receptor ${e.id}: flag ${e.flag} not declared`);
+          if (e.flag && !e.latch) E(`receptor ${e.id}: a flag persists a latch, so it needs latch: true`);
+        }
         break;
       }
+      case 'beam':
+        if (!DIR_NAMES.has(e.dir)) E(`beam ${e.id}: dir ${e.dir}`);
+        if (!['beam_window', 'beam_lens'].includes(e.sprite)) E(`beam ${e.id}: sprite ${e.sprite}`);
+        break;
+      case 'mirror':
+        if (e.state !== 0 && e.state !== 1) E(`mirror ${e.id}: state must be 0 ('/') or 1 (backslash)`);
+        if (!['mirror_stand', 'mirror_heavy'].includes(e.sprite)) E(`mirror ${e.id}: sprite ${e.sprite}`);
+        if (e.heavy && e.sprite !== 'mirror_heavy') E(`mirror ${e.id}: a heavy mirror draws mirror_heavy`);
+        break;
       case 'gate': case 'locked_door': {
-        if (!['door_locked', 'door_key', 'door_boss'].includes(e.sprite)) E(`${e.type} ${e.id}: sprite ${e.sprite}`);
+        if (!GATE_SPRITE_IDS.includes(e.sprite)) E(`${e.type} ${e.id}: sprite ${e.sprite}`);
         if (e.to) checkTarget(e.to, `${e.type} ${e.id}`, map, maps, db, E);
         if (e.type === 'locked_door' && !db.ITEMS[e.key]) E(`locked_door ${e.id}: key ${e.key} unknown`);
         break;
@@ -438,6 +896,8 @@ export function validate(map, db, maps, { staging = null } = {}) {
     }
     for (const f of [...toList(e.if), ...toList(e.ifNot)]) if (!db.FLAGS[f]) E(`event ${e.id}: flag ${f} not declared`);
   }
+  for (const o of [...(map.overlays || []), ...(map.overhead || [])]) for (const f of [...toList(o.if), ...toList(o.ifNot)]) if (!db.FLAGS[f]) E(`overlay ${o.t} at ${o.x},${o.y}: flag ${f} not declared`);
+  for (const v of [map.music, map.lighting && map.lighting.tint]) if (Array.isArray(v)) for (const c of v) for (const f of [...toList(c.if), ...toList(c.ifNot)]) if (!db.FLAGS[f]) E(`conditional field: flag ${f} not declared`);
   if (map.pitTo) checkTarget(map.pitTo, 'pitTo', map, maps, db, E);
   for (const x of map.exits || []) {
     if (!Array.isArray(x.to)) E(`exit at ${x.x},${x.y} has no to`);
@@ -462,7 +922,10 @@ export function validate(map, db, maps, { staging = null } = {}) {
     for (const [encId, n] of zone.plan) {
       const enc = db.ENCOUNTERS[encId];
       if (enc.boss) {
-        const actors = (map.events || []).filter((e) => e.type === 'actor' && e.id === encId);
+        // a boss stands on the map as an actor with the encounter's id, or (the Other Selves) a step trigger runs the
+        // scene of that id, which spawns the fighters itself
+        let actors = (map.events || []).filter((e) => e.type === 'actor' && e.id === encId);
+        if (!actors.length) actors = (map.events || []).filter((e) => e.type === 'trigger' && e.script === encId);
         if (actors.length !== n) E(`boss ${encId}: ${actors.length} actor events, plan says ${n}`);
       } else if ((counts[encId] || 0) !== n) E(`enemy plan ${encId}: placed ${counts[encId] || 0}, plan says ${n}`);
     }
@@ -498,6 +961,21 @@ function checkTarget(to, label, map, maps, db, E) {
   if (!(x >= 0 && y >= 0 && x < g.W && y < g.H)) { E(`${label}: target ${mid} ${x},${y} is off the map`); return; }
   if (g.code[y][x] !== 'none') E(`${label}: target ${mid} ${x},${y} is ${g.code[y][x]} (${g.why[y][x]}), not walkable`);
 }
+/** STAGING.md section 5 (Episode 1) and STAGING_EP2.md section 4 (Episode 2), merged per map id (EP2 adds). */
+export function loadStaging() {
+  const rd = (f) => fs.readFileSync(path.join(NEXT, 'docs', 'story', f), 'utf8');
+  const ep1 = parseStagingChecklist(rd('STAGING.md'));
+  const ep2 = parseStagingChecklist(rd('STAGING_EP2.md'), { section: /^## 4\. Marks and named events checklist/m, ep2: true });
+  for (const [id, e] of Object.entries(ep2)) {
+    if (!ep1[id]) { ep1[id] = e; continue; }
+    for (const k of Object.keys(e)) ep1[id][k] = [...ep1[id][k], ...e[k]];
+  }
+  return ep1;
+}
+export function loadStagingEp2() {
+  return parseStagingChecklist(fs.readFileSync(path.join(NEXT, 'docs', 'story', 'STAGING_EP2.md'), 'utf8'),
+    { section: /^## 4\. Marks and named events checklist/m, ep2: true });
+}
 const _grids = new WeakMap();
 function gridFor(map, db) {
   if (!_grids.has(map)) _grids.set(map, buildGrid(map, db));
@@ -518,13 +996,13 @@ async function main() {
   const db = await loadDb();
   if (cmd === 'walk') {
     const m = await loadMap(rest[0]);
-    const r = walk(m, db);
+    const r = walk(m, db, rest[1] ? { flags: rest[1].split(',').filter(Boolean) } : {});
     process.stdout.write(JSON.stringify(r));
     return;
   }
   if (cmd === 'check') {
     const maps = await loadAll();
-    const staging = parseStagingChecklist(fs.readFileSync(path.join(NEXT, 'docs', 'story', 'STAGING.md'), 'utf8'));
+    const staging = loadStaging();
     let bad = 0;
     for (const id of rest.length ? rest : Object.keys(maps)) {
       const r = validate(maps[id], db, maps, { staging });
@@ -537,7 +1015,20 @@ async function main() {
     }
     process.exit(bad ? 1 : 0);
   }
-  console.log('usage: mapcheck.mjs list | dump <id> | walk <id> | check [ids]');
+  if (cmd === 'beams') {
+    // beam traces for the preview: the start configuration and, per receptor, the first configuration the walk found
+    // that lights it (with the bridges it lights); flags as a comma list in rest[1]
+    const m = await loadMap(rest[0]);
+    const flags = rest[1] ? rest[1].split(',').filter(Boolean) : null;
+    const r = walk(m, db, { lantern: true, ...(flags ? { flags } : {}) });
+    if (!r.beams) { process.stdout.write(JSON.stringify({ start: null, solved: [] })); return; }
+    const js = (t) => ({ beams: t.beams, lit: [...t.lit], litReceptors: [...t.litReceptors], splashes: t.splashes });
+    const solved = Object.entries(r.receptorConfigs).map(([rec, desc]) => ({ receptor: rec, ...desc, trace: js(r.traceOf(desc)) }));
+    for (const b of r.bridgeConfigs) solved.push({ receptor: `bridge ${b.cells[0]}`, ...b, trace: js(r.traceOf(b)) });
+    process.stdout.write(JSON.stringify({ start: js(r.traceOf({})), solved, latched: r.latched, softlocks: r.softlocks, states: r.states, configs: r.configs }));
+    return;
+  }
+  console.log('usage: mapcheck.mjs list | dump <id> | walk <id> | beams <id> [flags] | check [ids]');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

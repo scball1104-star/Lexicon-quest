@@ -6,6 +6,10 @@
                                                  red, unreachable events/marks are listed on stdout
     python preview.py archive_f1 --crop 0,0,24,14 --scale 4   (crop is in tiles)
     python preview.py hero_home --frame 1     (water/ink animation frame)
+    python preview.py court_f1 --solved       -> Episode 2 beams: draw, per receptor, the first configuration the walk
+                                                 found that lights it (default: the start configuration's beams)
+    python preview.py nameless_hollow --flags=nh_restored,court_entered   -> gated overlays/events under these flags
+                                                 (default: overlays as a fresh save sees them, every event drawn)
     python preview.py --all --previews        -> refresh tools/maps/previews/<id>.png (the annotated 2x overviews
                                                  docs/MAPS.md and the critiques look at; run after any map or art change)
 
@@ -140,7 +144,10 @@ MECH_SPRITES = {
     'plate': lambda e: 'plate_up',
     'switch': lambda e: e.get('sprite') or ('crystal_switch_%s' % e.get('color', 'blue') if e.get('kind') == 'crystal' else 'switch_off'),
     'gate': lambda e: '%s_%s' % (e['sprite'], e.get('state', 'closed')),
-    'locked_door': lambda e: 'door_key_closed',
+    'locked_door': lambda e: '%s_closed' % e.get('sprite', 'door_key'),
+    'beam': lambda e: e.get('sprite', 'beam_window'),
+    'mirror': lambda e: e.get('sprite', 'mirror_stand'),
+    'receptor': lambda e: e.get('sprite', 'receptor'),
     'shelf': lambda e: 'shelf_moving',
     'brazier': lambda e: 'brazier_lit' if e.get('lit') else 'brazier_unlit',
     'pot': lambda e: 'pot',
@@ -156,10 +163,104 @@ LABEL_COLORS = {
     'block': (120, 220, 255), 'gate': (255, 160, 60), 'locked_door': (255, 160, 60), 'shelf': (255, 160, 60),
     'actor': (255, 120, 255), 'pit': (255, 100, 100), 'ferry': (80, 220, 255), 'font': (120, 255, 200),
     'save': (120, 255, 200), 'brazier': (255, 180, 80), 'pot': (220, 200, 160), 'light': (255, 255, 180),
+    'beam': (238, 246, 255), 'mirror': (160, 230, 255), 'receptor': (138, 240, 232),
 }
 
 
-def render(mp, db, spr, atl, frame=0, npc_map=None):
+# ------------------------------------------------------------------ flags (Episode 2 gated overlays and events)
+def present(e, flags):
+    """A flag-gated entry under a set of flags (None = everything, the old behaviour for events)."""
+    if flags is None:
+        return True
+    iff = e.get('if')
+    ifn = e.get('ifNot')
+    iff = [] if iff is None else (iff if isinstance(iff, list) else [iff])
+    ifn = [] if ifn is None else (ifn if isinstance(ifn, list) else [ifn])
+    return all(f in flags for f in iff) and not any(f in flags for f in ifn)
+
+
+# ------------------------------------------------------------------ beams
+BEAM_CORE = (238, 246, 255, 255)
+BEAM_HALO = (138, 240, 232, 255)
+SIDE = {'up': (0, -8), 'down': (0, 8), 'left': (-8, 0), 'right': (8, 0)}
+OPPOSITE = {'up': 'down', 'down': 'up', 'left': 'right', 'right': 'left'}
+
+
+def draw_beam_traces(cv, trace):
+    """The field's look in miniature (EPISODE2_PLAN 5.1): a 2 px pale core along tile centres, a dithered cyan
+    halo, a sparkle on every bounce and a star where a beam splashes on a wall."""
+    if not trace:
+        return
+
+    def seg(ax, ay, bx, by):
+        if ax == bx:
+            for y in range(min(ay, by), max(ay, by) + 1):
+                cv.set(ax - 1, y, BEAM_CORE)
+                cv.set(ax, y, BEAM_CORE)
+                if y % 2 == 0:
+                    cv.put(ax - 2, y, BEAM_HALO)
+                    cv.put(ax + 1, y, BEAM_HALO)
+        else:
+            for x in range(min(ax, bx), max(ax, bx) + 1):
+                cv.set(x, ay - 1, BEAM_CORE)
+                cv.set(x, ay, BEAM_CORE)
+                if x % 2 == 0:
+                    cv.put(x, ay - 2, BEAM_HALO)
+                    cv.put(x, ay + 1, BEAM_HALO)
+    for b in trace['beams']:
+        for c in b['cells']:
+            cx, cy = c['x'] * 16 + 8, c['y'] * 16 + 8
+            for side in (c.get('from'), c.get('to')):
+                if side:
+                    dx, dy = SIDE[side]
+                    seg(cx, cy, cx + dx, cy + dy)
+            if c.get('from') and c.get('to') and c['from'] != OPPOSITE[c['to']]:
+                for (dx, dy) in ((0, -3), (0, 3), (-3, 0), (3, 0), (-2, -2), (2, 2), (2, -2), (-2, 2)):
+                    cv.put(cx + dx, cy + dy, (255, 255, 255, 220 if abs(dx) + abs(dy) == 3 else 140))
+    for sp in trace.get('splashes', []):
+        dx, dy = SIDE[sp['dir']]
+        cx, cy = sp['x'] * 16 + 8 + dx, sp['y'] * 16 + 8 + dy
+        for (ox, oy) in ((0, 0), (-1, 0), (1, 0), (0, -1), (0, 1), (-2, -2), (2, 2), (2, -2), (-2, 2), (-3, 0), (3, 0), (0, -3), (0, 3)):
+            cv.put(cx + ox, cy + oy, (255, 255, 255, 230 if abs(ox) + abs(oy) <= 1 else 150))
+
+
+def beam_data(map_id, flags=None):
+    args = ['beams', map_id] + ([','.join(sorted(flags))] if flags else [])
+    try:
+        return node(args, timeout=180)
+    except SystemExit as e:
+        print('beams:', e)
+        return None
+
+
+def merge_traces(traces):
+    out = {'beams': [], 'lit': [], 'litReceptors': [], 'splashes': []}
+    seen = set()
+    for t in traces:
+        for b in t['beams']:
+            k = json.dumps(b['cells'])
+            if k in seen:
+                continue
+            seen.add(k)
+            out['beams'].append(b)
+        out['lit'] += t['lit']
+        out['litReceptors'] += t['litReceptors']
+        out['splashes'] += t['splashes']
+    return out
+
+
+def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
+    ov_flags = flags if flags is not None else set()
+    lit = set(trace['lit']) if trace else set()
+    lit_rec = set(trace['litReceptors']) if trace else set()
+    mp = dict(mp, overlays=[dict(o) for o in mp.get('overlays', []) if present(o, ov_flags)],
+              overhead=[o for o in mp.get('overhead', []) if present(o, ov_flags)],
+              events=[e for e in mp.get('events', []) if present(e, flags)])
+    for o in mp['overlays']:
+        if o['t'].startswith('glass_bridge_') and o['t'].endswith('_dim') and ('%d,%d' % (o['x'], o['y'])) in lit:
+            o['t'] = o['t'][:-4] + '_lit'
+        if o.get('inlay') in lit_rec and not o['t'].endswith('_lit'):
+            o['t'] = o['t'] + '_lit'
     legend = mp['legend']
     rows = mp['ground']
     H, W = len(rows), len(rows[0])
@@ -202,13 +303,20 @@ def render(mp, db, spr, atl, frame=0, npc_map=None):
         t = e['type']
         if t in MECH_SPRITES:
             sid = MECH_SPRITES[t](e)
-            if sid and (sid in db.objects or spr.has(sid)):
-                st = e.get('state') if t == 'object' else None
+            if sid and sid not in db.objects and not spr.has(sid) and sid in db.tiles:
+                draw_tile(db, cv, sid, e['x'], e['y'], frame)      # a plain tile as an event sprite (portraits)
+            elif sid and (sid in db.objects or spr.has(sid)):
+                st = e.get('state') if t in ('object', 'mirror') else None
+                if t == 'receptor':
+                    st = 1 if e['id'] in lit_rec else 0
                 if t == 'shelf':
                     px, py = e['positions'][e.get('state', 0)]
                     objs.append({'t': sid, 'x': px, 'y': py})
                 else:
                     objs.append({'t': sid, 'x': e['x'], 'y': e['y'], 'state': st})
+        elif t == 'door' and e.get('kind') == 'mirror':
+            if e.get('sprite', 'mirror_tall'):
+                objs.append({'t': e.get('sprite', 'mirror_tall'), 'x': e['x'], 'y': e['y'], 'state': 1})
         elif t == 'npc':
             sprite = e.get('sprite') or (npc_map or {}).get(e['id'], [None])[0]
             if sprite:
@@ -239,6 +347,7 @@ def render(mp, db, spr, atl, frame=0, npc_map=None):
                 draw_prop(spr, cv, it, part='overhead')
     for o in mp.get('overhead', []):
         draw_tile(db, cv, o['t'], o['x'], o['y'], frame)
+    draw_beam_traces(cv, trace)
     return cv
 
 
@@ -397,9 +506,17 @@ def main(argv):
     atl = Atlases()
     npc_map = npc_sprites()
     os.makedirs(OUT, exist_ok=True)
+    flags = set(f for f in opt['flags'].split(',') if f) if isinstance(opt.get('flags'), str) else None
     for map_id in ids:
         mp = load_map(map_id)
-        cv = render(mp, db, spr, atl, frame=frame, npc_map=npc_map)
+        trace = None
+        if any(e['type'] in ('beam', 'mirror', 'receptor') for e in mp.get('events', [])):
+            bd = beam_data(map_id, flags)
+            if bd and bd.get('start'):
+                trace = merge_traces([x['trace'] for x in bd['solved']]) if opt.get('solved') else bd['start']
+                print('beams %s: %d configurations, %d states, latched %s, softlocks %d, solved %s' % (
+                    map_id, bd['configs'], bd['states'], bd['latched'], bd['softlocks'], [x['receptor'] for x in bd['solved']]))
+        cv = render(mp, db, spr, atl, frame=frame, npc_map=npc_map, flags=flags, trace=trace)
         img = cv.image()
         if 'crop' in opt:
             cx, cy, cw, ch = [int(v) for v in opt['crop'].split(',')]
@@ -412,7 +529,8 @@ def main(argv):
                 if e['type'] == 'shelf':
                     e['positions'] = [[px - cx, py - cy] for px, py in e['positions']]
         big = img.resize((img.width * scale, img.height * scale), Image.NEAREST)
-        suffix = '_crop' if 'crop' in opt else ''
+        suffix = ('_crop' if 'crop' in opt else '') + ('_solved' if opt.get('solved') else '') + \
+            (('_' + opt['tag']) if isinstance(opt.get('tag'), str) else '')
         clean = os.path.join(OUT, '%s%s_clean.png' % (map_id, suffix))
         big.save(clean)
         walk = walk_report(map_id, mp) if opt.get('walk') else None
@@ -422,7 +540,7 @@ def main(argv):
         print('wrote', out, '%dx%d tiles' % (len(mp['ground'][0]), len(mp['ground'])), 'and', clean)
         if previews and 'crop' not in opt:
             os.makedirs(PREVIEWS, exist_ok=True)
-            pv = os.path.join(PREVIEWS, '%s.png' % map_id)
+            pv = os.path.join(PREVIEWS, '%s%s.png' % (map_id, suffix))
             ann.save(pv)
             print('wrote', pv)
 

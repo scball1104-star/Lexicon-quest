@@ -134,7 +134,7 @@ export const EP2_ZONE_ORDER = ['east_road', 'court_f1', 'court_f2', 'court_f3', 
 // Every lookup by id works (ZONES.court_f1, the battle scene's backdropKey, chest ilvl, mapcheck's enemy plan check),
 // but until the Episode 2 maps exist the zones stay out of Object.keys(ZONES): qa/maps iterates ZONES and needs a map
 // per zone. E2-maps (wave 10c): once the five maps are in src/data/maps, set EP2_MAPS_LISTED to true.
-export const EP2_MAPS_LISTED = false;
+export const EP2_MAPS_LISTED = true;
 for (const [id, z] of Object.entries(EP2_ZONES)) {
   Object.defineProperty(ZONES, id, { value: z, enumerable: EP2_MAPS_LISTED, configurable: true, writable: true });
 }
