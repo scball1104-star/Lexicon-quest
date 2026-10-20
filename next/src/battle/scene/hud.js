@@ -182,10 +182,10 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
  * Enemy row under a foe: shield badge (count, or broken) + weakness slots (known icons, '?' for unknown,
  * resist frames) + status badges. know = b.knowledge(uid), unit = live rules unit.
  */
-export function drawEnemyRow(r, actor, know, unit, frame) {
+export function drawEnemyRow(r, actor, know, unit, frame, touch = false) {
   const ui = uiAtlas(r);
   if (!ui) return;
-  const { x, y } = enemyRowAnchor(actor);
+  const { x, y } = enemyRowAnchor(actor, touch);
   const badge = ui.frames[unit && unit.broken ? 'shield_badge_broken' : 'shield_badge'];
   if (badge) {
     r.sprite(ui, badge, x, y, { topLeft: true });

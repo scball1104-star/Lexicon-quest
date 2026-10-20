@@ -67,3 +67,16 @@ test('touch layout (W5): 15 px rows keep four command rows and the windows stay 
   assert.ok(CMD_WIN_TOUCH.y < CMD_WIN.y && CMD_WIN_TOUCH.y + CMD_WIN_TOUCH.h <= H);
   for (const b of Object.values(HELP_TOUCH_BTNS)) assert.ok(b.x >= HELP_WIN.x && b.x + b.w <= HELP_WIN.x + HELP_WIN.w && b.y >= HELP_WIN.y && b.y + b.h <= HELP_WIN.y + HELP_WIN.h, 'touch buttons sit inside the help window');
 });
+
+test('an enemy weakness row never sits under the command window (desktop and touch)', async () => {
+  const L = await import('../../src/battle/scene/layout.js');
+  for (const touch of [false, true]) {
+    const cw = L.cmdWin(touch);
+    for (let x = 10; x <= 200; x += 5) {
+      const { x: rx, y: ry } = L.enemyRowAnchor({ x, y: 146 }, touch);
+      const w = 12 + 15 * 4;
+      const overlapX = rx < cw.x + cw.w && rx + w > cw.x;
+      if (overlapX) assert.ok(ry + L.ENEMY_ROW_H <= cw.y, `row at x ${x} (touch ${touch}) overlaps the command window`);
+    }
+  }
+});

@@ -172,7 +172,23 @@ export class List {
       const p = input.pointer;
       // Fingers are wide: a touch within one row of the list still lands on the nearest row.
       const slop = p.type === 'touch' ? this.rowH : 0;
-      if (p.pressed) this._drag = { y: p.y, row: this.pointerRow(p.x, p.y, slop), moved: false, scroll0: this.scroll };
+      // The scroll arrows are tappable: one tap pages the list (a finger cannot be expected to know about drag).
+      if (p.pressed && this.maxScroll > 0) {
+        const cx = this.x + Math.floor(this.w / 2), yd = this.y + this.rows * this.rowH + 1, yu = this.y - 7;
+        const hit = (ay) => Math.abs(p.x - cx) <= 18 && p.y >= ay - 5 && p.y <= ay + 11;
+        const step = Math.max(1, this.rows - 1);
+        let moved = 0;
+        if (this.scroll < this.maxScroll && hit(yd)) moved = step;
+        else if (this.scroll > 0 && hit(yu)) moved = -step;
+        if (moved) {
+          this.scrollTo(this.scroll + moved);
+          if (!this.isVisible(this.index)) this.moveTo(Math.min(this.items.length - 1, this.scroll * this.columns + (moved > 0 ? 0 : this.rows * this.columns - 1)));
+          snd('cursor');
+          this._swallow = true;
+        }
+      }
+      if (this._swallow) { if (p.released) this._swallow = false; }
+      else if (p.pressed) this._drag = { y: p.y, row: this.pointerRow(p.x, p.y, slop), moved: false, scroll0: this.scroll };
       if (this._drag && p.down) {
         const dy = p.y - this._drag.y;
         if (Math.abs(dy) > 8 && this.maxScroll > 0) { this._drag.moved = true; this.scrollTo(this._drag.scroll0 - Math.round(dy / this.rowH)); }

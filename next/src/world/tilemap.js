@@ -400,15 +400,10 @@ export class TileMap {
     const pw = Math.max(1, this.w * TILE), ph = Math.max(1, this.h * TILE);
     this.ground = this.animPhases.map(() => r.createLayer(pw, ph));
     this.overhead = r.createLayer(pw, ph);
-    this.paintGround(this.ground[0].ctx, 0, 0, this.w - 1, this.h - 1, this.animPhases[0]);
-    for (let i = 1; i < this.animPhases.length; i++) {
-      const L = this.ground[i];
-      L.ctx.drawImage(this.ground[0].canvas, 0, 0);
-      for (const [x, y] of this.animated) {
-        L.ctx.clearRect(x * TILE, y * TILE, TILE, TILE);
-        this.paintTerrainCell(L.ctx, x, y, this.animPhases[i]);
-      }
-    }
+    // Every animation phase is painted in full. (Repainting only the terrain of animated cells wiped the
+    // overlays, tiles and building bases on top of animated water/ink in phases 1+, so bridges and hidden-ink
+    // traces blinked with the ripple.)
+    for (let i = 0; i < this.animPhases.length; i++) this.paintGround(this.ground[i].ctx, 0, 0, this.w - 1, this.h - 1, this.animPhases[i]);
     this.paintOverhead(this.overhead.ctx);
   }
 

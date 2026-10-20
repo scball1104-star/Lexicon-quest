@@ -60,7 +60,9 @@ export class CommandMenu {
     this.state = 'root';
     this.base = null; this.tInfo = null; this.preview = null;
     this.syncLayout();
-    const cmds = this.b.commands(unit).filter((c) => c.id !== 'combo' || c.visible);
+    // Combo shows only when it is possible; Swap only when this member carries a second weapon (a greyed Swap
+    // on the hero, who starts with a sword alone, read as a broken command).
+    const cmds = this.b.commands(unit).filter((c) => (c.id !== 'combo' || c.visible) && (c.id !== 'swap' || c.enabled));
     const items = cmds.map((c) => ({
       id: c.id, cmd: c, label: c.label || c.name, disabled: !c.enabled,
       color: c.id === 'fury' && c.enabled ? 'orange' : c.id === 'combo' ? 'cyan' : 'white',

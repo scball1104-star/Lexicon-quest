@@ -668,7 +668,7 @@ export class BattleScene {
     for (const uid of rows) {
       const a = this.actor(uid);
       if (!a || a.dead || a.side !== 'enemy') continue;
-      HUD.drawEnemyRow(r, a, this.b.knowledge(uid), this.unit(uid), frame);
+      HUD.drawEnemyRow(r, a, this.b.knowledge(uid), this.unit(uid), frame, touchUi(this.engine));
     }
     if (this.menu.state === 'target') {
       const t = this.menu.currentTarget();

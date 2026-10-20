@@ -7,6 +7,18 @@ import { PARTY, masteryLevel, masteryUnlocks, MASTERY_XP, MAX_MASTERY, expForLev
 import { SKILLS, FURY_ARTS } from '../../data/skills.js';
 import { equipKeys, isWeaponKey, equipped, gearName } from '../../game/inventory.js';
 import { cap, fmtGold } from '../text.js';
+import { memberStats } from '../../battle/rules.js';
+
+/** What the worn gear adds to each stat: totals minus the same member with nothing equipped. */
+export function gearBonus(m) {
+  try {
+    const full = memberStats(m);
+    const bare = memberStats({ ...m, equip: {} });
+    const out = {};
+    for (const k of ['atk', 'def', 'mag', 'spr', 'spd', 'luk', 'maxHp', 'maxMp']) out[k] = Math.round((full[k] || 0) - (bare[k] || 0));
+    return out;
+  } catch (e) { return {}; }
+}
 
 export class StatusScreen {
   constructor(menu) { this.menu = menu; this.engine = menu.engine; this.g = menu.g; }
@@ -48,6 +60,9 @@ export class StatusScreen {
     // Left bottom: equipment.
     drawWindow(r, 4, 106, 160, 76);
     r.text('Equipment', 12, 111, { color: 'gold' });
+    const hb = bonus => bonus ? (bonus > 0 ? '+' : '') + bonus : '';
+    const gb = gearBonus(m);
+    if (gb.maxHp || gb.maxMp) r.text(`HP ${hb(gb.maxHp) || '+0'}  MP ${hb(gb.maxMp) || '+0'}`, 156, 111, { align: 'right', color: 'green' });
     equipKeys(m).forEach((key, i) => {
       const it = equipped(m, key);
       const col = i % 2, row = Math.floor(i / 2);
@@ -59,11 +74,14 @@ export class StatusScreen {
     // Right top: stats.
     drawWindow(r, 168, 4, 212, 64);
     const rows = [['atk', 'ATK', s.atk], ['def', 'DEF', s.def], ['mag', 'MAG', s.mag], ['spr', 'SPR', s.spr], ['spd', 'SPD', s.spd], ['luk', 'LUK', s.luk]];
+    const bonus = gearBonus(m);   // green "+N" = what the equipped gear adds (red when an item lowers it)
     rows.forEach(([id, label, v], i) => {
       const col = i % 2, row = Math.floor(i / 2);
       const x = 178 + col * 100, y = 11 + row * 12;
       if (['atk', 'def', 'mag', 'spd'].includes(id)) drawLabel(r, id, x, y + 3); else r.text(label, x, y, { color: 'gold' });
       r.text(String(v), x + 54, y, { align: 'right' });
+      const b = bonus[id] || 0;
+      if (b) r.text((b > 0 ? '+' : '') + b, x + 58, y, { color: b > 0 ? 'green' : 'red' });
     });
     r.text(`Crit ${Math.round(4 + (s.luk || 0) / 5 + (s.crit || 0))}%`, 178, 49, { color: 'gray' });
     r.text(`Fury gain +${s.furyGain || 0}%`, 278, 49, { color: 'gray' });
