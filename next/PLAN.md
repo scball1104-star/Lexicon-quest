@@ -76,7 +76,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] Scott playtest: bridges blinking, weakness row under command window on phone, hero Swap greyed, gear bonuses on Status
 
 ## Wave 6: depth and polish (PARKED on wip/w5b-w6-partial, finish one at a time)
-- [ ] W6-pwa: loading screen, installable PWA with its own service worker, lazy music, size budget
+- [x] W6-pwa: loading screen, installable PWA with its own service worker, lazy music, size budget
 - [ ] W6-anim: enemy/boss attack, hurt, cast, death and stance frames; party breathe, crit, combo, level-up frames
 - [ ] W6-content: Whisperwood Hollow optional dungeon with the Briar Alpha mini-boss and the Thornwake unique
 - [ ] critic-3 after W6 lands; then publish
