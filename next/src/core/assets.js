@@ -3,18 +3,32 @@
 //   "images":  { "id": "assets/tiles/terrain.png", ... },
 //   "atlases": { "id": "assets/sprites/party_field.json", ... },   // JSON with "image" (relative to the JSON)
 //   "json":    { "id": "assets/palette.json", ... },
-//   "fonts":   { "main": "assets/ui/font.json", "large": "...", "num": "..." }
+//   "fonts":   { "main": "assets/ui/font.json", "large": "...", "num": "..." },
+//   "lazy":    { "story": ["dialog_keyart"], "world": ["terrain", ...], "battle": [...], "art": [...] }
 // }
 // An entry may also be { "path": "...", "optional": true }. Ids are file stems by convention.
 // Missing assets never crash the game: they log one console.warn and return a visible placeholder.
+//
+// Load order (W6-pwa): loadManifest() loads every id that is NOT in a "lazy" group (the critical set the
+// title needs), then loadLazy() loads the groups one after another in manifest order (world, portraits,
+// battle, ...) while the player sits on the title / name entry / prologue. Scenes keep using img() /
+// atlas() / has() as before; a lazy asset that has not arrived yet behaves like a missing one (placeholder,
+// has() false) and the scenes' existing fallbacks cover that window.
 //
 //   assets.img(id)            HTMLImageElement or a magenta checker placeholder
 //   assets.atlas(id)          normalized atlas (see normalizeAtlas) or a placeholder atlas
 //   assets.json(id, fallback) parsed JSON or fallback (default null)
 //   assets.has(id)            true if loaded for real (any kind)
+//   assets.loadGroup('battle') -> Promise (idempotent), assets.whenLoaded('battle') -> Promise
+//   assets.groupState('battle') -> 'pending' | 'loading' | 'done' | 'unknown'
+//   assets.criticalMissing()  ['image:town', ...] eager, non-optional entries that failed (plus 'manifest')
+//   assets.retryMissing(onProgress) -> Promise: reloads every entry in `missing`
 
 /** URL of the next/ folder (this file lives in next/src/core/). */
 export const BASE_URL = new URL('../../', import.meta.url).href;
+
+export const KINDS = ['images', 'json', 'atlases', 'fonts'];
+const KIND_NAME = { images: 'image', json: 'json', atlases: 'atlas', fonts: 'font' };
 
 /**
  * Normalize an atlas JSON into { id, image, frames: {name: {x,y,w,h,ox,oy,...extra}}, anims, origin, cell, meta,
@@ -70,8 +84,44 @@ export function animFrameAt(anim, t) {
   return anim.frames[anim.loop === false ? Math.min(i, n - 1) : i % n];
 }
 
-function entryPath(e) { return typeof e === 'string' ? e : e && e.path; }
-function entryOptional(e) { return !!(e && typeof e === 'object' && e.optional); }
+export function entryPath(e) { return typeof e === 'string' ? e : e && e.path; }
+export function entryOptional(e) { return !!(e && typeof e === 'object' && e.optional); }
+
+/**
+ * Split a manifest into the eager part and its lazy groups. Pure (node-testable).
+ * Returns { eager: {images, json, atlases, fonts}, groups: [{ name, manifest, ids }], lazyIds: Set }.
+ * Ids listed under "lazy" that no kind defines are ignored (reported in `unknown`).
+ */
+export function splitManifest(m) {
+  const lazy = (m && m.lazy && typeof m.lazy === 'object') ? m.lazy : {};
+  const lazyIds = new Set();
+  const unknown = [];
+  const groups = [];
+  for (const [name, ids] of Object.entries(lazy)) {
+    const gm = { images: {}, json: {}, atlases: {}, fonts: {} };
+    const found = [];
+    for (const id of Array.isArray(ids) ? ids : []) {
+      let hit = false;
+      for (const kind of KINDS) {
+        if (m[kind] && Object.prototype.hasOwnProperty.call(m[kind], id)) { gm[kind][id] = m[kind][id]; hit = true; }
+      }
+      if (hit) { lazyIds.add(id); found.push(id); } else unknown.push(`${name}:${id}`);
+    }
+    groups.push({ name, manifest: gm, ids: found });
+  }
+  const eager = { images: {}, json: {}, atlases: {}, fonts: {} };
+  for (const kind of KINDS) {
+    for (const [id, e] of Object.entries((m && m[kind]) || {})) if (!lazyIds.has(id)) eager[kind][id] = e;
+  }
+  return { eager, groups, lazyIds, unknown };
+}
+
+/** Number of load jobs a manifest object describes (one per entry, any kind). Pure. */
+export function countJobs(m) {
+  let n = 0;
+  for (const kind of KINDS) n += Object.keys((m && m[kind]) || {}).length;
+  return n;
+}
 
 let placeholderImg = null;
 function placeholder() {
@@ -94,7 +144,11 @@ export function createAssets(opts = {}) {
   const images = new Map(), atlases = new Map(), jsons = new Map(), fonts = new Map();
   const missing = new Set();
   const warned = new Set();
+  const groupPromises = new Map();   // group name -> Promise
+  const groupStates = new Map();     // group name -> 'pending' | 'loading' | 'done'
   let placeholderAtlas = null;
+  let split = null;                  // splitManifest(api.manifest)
+  let lazyAll = null;                // Promise from loadLazy()
 
   const url = (p) => new URL(p, base).href;
 
@@ -122,36 +176,65 @@ export function createAssets(opts = {}) {
     return res.json();
   }
 
+  const stores = { images, json: jsons, atlases, fonts };
+  function loadedKind(kind, id) { return stores[kind].has(id); }
+
   const api = {
     base,
     url,
     manifest: null,
     missing,
+    /** Set when the manifest JSON itself could not be fetched (offline first visit, bad deploy). */
+    manifestError: null,
+    /** Promise for the parsed manifest JSON (resolves to {} when it could not be fetched). Set by loadManifest(). */
+    manifestReady: null,
 
-    /** Fetch a manifest JSON (path relative to next/) and load everything in it. */
+    /**
+     * Fetch a manifest JSON (path relative to next/) and load its EAGER entries (everything not in a lazy
+     * group). onProgress(done, total) counts load jobs. Lazy groups load later via loadLazy() / loadGroup().
+     */
     async loadManifest(path = 'assets/manifest.json', onProgress) {
       let m;
-      try { m = await loadJson(url(path)); }
-      catch (e) { warnOnce('manifest', `manifest not loaded (${e.message}); continuing with no assets`); m = {}; }
+      let resolveReady;
+      api.manifestReady = new Promise((r) => { resolveReady = r; });
+      api.manifestError = null;
+      try { m = await loadJson(url(path)); missing.delete('manifest'); }
+      catch (e) {
+        api.manifestError = e;
+        missing.add('manifest');
+        warnOnce('manifest', `manifest not loaded (${e.message}); continuing with no assets`);
+        m = {};
+      }
       api.manifest = m;
-      await api.load(m, onProgress);
+      api.manifestPath = path;
+      resolveReady(m);
+      split = splitManifest(m);
+      for (const u of split.unknown) warnOnce(`lazy:${u}`, `manifest lazy group lists unknown id ${u}`);
+      for (const g of split.groups) if (!groupStates.has(g.name)) groupStates.set(g.name, 'pending');
+      await api.load(split.eager, onProgress);
       return m;
     },
 
-    /** Load a manifest object (can be called again later for extra assets). onProgress(done, total). */
-    async load(m, onProgress) {
+    /**
+     * Load a manifest object (can be called again later for extra assets). onProgress(done, total).
+     * Entries already loaded under the same kind and id are skipped unless opts.force.
+     */
+    async load(m, onProgress, o = {}) {
       const jobs = [];
-      const add = (kind, id, entry, fn) => jobs.push({ kind, id, entry, fn });
-      for (const [id, e] of Object.entries(m.images || {})) add('image', id, e, async () => images.set(id, await loadImage(url(entryPath(e)))));
+      const add = (kind, id, entry, fn) => {
+        if (!o.force && loadedKind(kind, id)) return;
+        jobs.push({ kind: KIND_NAME[kind], id, entry, fn });
+      };
+      for (const [id, e] of Object.entries(m.images || {})) add('images', id, e, async () => images.set(id, await loadImage(url(entryPath(e)))));
       for (const [id, e] of Object.entries(m.json || {})) add('json', id, e, async () => jsons.set(id, await loadJson(url(entryPath(e)))));
-      for (const [id, e] of Object.entries(m.atlases || {})) add('atlas', id, e, async () => {
+      for (const [id, e] of Object.entries(m.atlases || {})) add('atlases', id, e, async () => {
         const p = entryPath(e);
         const json = await loadJson(url(p));
         let img = null;
         if (json.image) img = await loadImage(new URL(json.image, url(p)).href);
         atlases.set(id, normalizeAtlas(json, img, id));
       });
-      for (const [id, e] of Object.entries(m.fonts || {})) add('font', id, e, async () => {
+      for (const [id, e] of Object.entries(m.fonts || {})) add('fonts', id, e, async () => {
         const p = entryPath(e);
         const json = await loadJson(url(p));
         const img = json.image ? await loadImage(new URL(json.image, url(p)).href) : null;
@@ -161,14 +244,103 @@ export function createAssets(opts = {}) {
       let done = 0;
       if (onProgress) onProgress(0, total);
       await Promise.all(jobs.map(async (j) => {
-        try { await j.fn(); }
+        const key = `${j.kind}:${j.id}`;
+        try { await j.fn(); missing.delete(key); }
         catch (err) {
-          missing.add(`${j.kind}:${j.id}`);
-          warnOnce(`${j.kind}:${j.id}`, `${entryOptional(j.entry) ? 'optional ' : ''}${j.kind} "${j.id}" missing (${err.message})`);
+          missing.add(key);
+          warnOnce(key, `${entryOptional(j.entry) ? 'optional ' : ''}${j.kind} "${j.id}" missing (${err.message})`);
         }
         done++;
         if (onProgress) onProgress(done, total);
       }));
+      return { done, total };
+    },
+
+    // ---------------------------------------------------------------- lazy groups
+    /** Names of the lazy groups in manifest order. */
+    groupNames() { return split ? split.groups.map((g) => g.name) : []; },
+    /** 'pending' | 'loading' | 'done' | 'unknown'. */
+    groupState(name) { return groupStates.get(name) || 'unknown'; },
+    /** True when the id is listed in a lazy group. */
+    isLazy(id) { return !!(split && split.lazyIds.has(id)); },
+    /** Group an id belongs to, or null. */
+    groupOf(id) {
+      if (!split) return null;
+      for (const g of split.groups) if (g.ids.includes(id)) return g.name;
+      return null;
+    },
+    /** Load one lazy group (idempotent). Resolves to { done, total } (or null for an unknown group). */
+    loadGroup(name, onProgress) {
+      if (groupPromises.has(name)) return groupPromises.get(name);
+      const g = split && split.groups.find((x) => x.name === name);
+      if (!g) { warnOnce(`group:${name}`, `loadGroup("${name}"): no such lazy group`); return Promise.resolve(null); }
+      groupStates.set(name, 'loading');
+      const p = api.load(g.manifest, onProgress).then((r) => { groupStates.set(name, 'done'); return r; });
+      groupPromises.set(name, p);
+      return p;
+    },
+    /** Load every lazy group one after another in manifest order (priority). Idempotent. onProgress(done, total, group). */
+    loadLazy(onProgress) {
+      if (lazyAll) return lazyAll;
+      lazyAll = (async () => {
+        const groups = split ? split.groups : [];
+        const total = groups.reduce((n, g) => n + countJobs(g.manifest), 0);
+        let base_ = 0;
+        for (const g of groups) {
+          const n = countJobs(g.manifest);
+          await api.loadGroup(g.name, (d) => { if (onProgress) onProgress(base_ + d, total, g.name); });
+          base_ += n;
+        }
+        if (onProgress) onProgress(total, total, null);
+        return { total };
+      })();
+      return lazyAll;
+    },
+    /** Promise that resolves when the group is loaded (starts it when nobody has). */
+    whenLoaded(name) { return api.loadGroup(name).then(() => true); },
+    /** True once every lazy group has finished. */
+    lazyDone() { return !!split && split.groups.every((g) => groupStates.get(g.name) === 'done'); },
+
+    // ---------------------------------------------------------------- failures and retry
+    /** Eager, non-optional entries that failed ('kind:id'), plus 'manifest' when the manifest did not load. */
+    criticalMissing() {
+      const out = [];
+      if (missing.has('manifest')) out.push('manifest');
+      if (!split) return out;
+      for (const key of missing) {
+        if (key === 'manifest') continue;
+        const i = key.indexOf(':');
+        const kindName = key.slice(0, i), id = key.slice(i + 1);
+        const kind = Object.keys(KIND_NAME).find((k) => KIND_NAME[k] === kindName);
+        const e = kind && split.eager[kind][id];
+        if (e !== undefined && !entryOptional(e)) out.push(key);
+      }
+      return out;
+    },
+    /** Reload every entry in `missing` (the manifest itself first when it failed). onProgress(done, total). */
+    async retryMissing(onProgress) {
+      if (missing.has('manifest') || !api.manifest || !split) {
+        await api.loadManifest(api.manifestPath || 'assets/manifest.json', onProgress);
+        return { retried: true };
+      }
+      const m = { images: {}, json: {}, atlases: {}, fonts: {} };
+      const all = { images: {}, json: {}, atlases: {}, fonts: {} };
+      for (const kind of KINDS) {
+        Object.assign(all[kind], split.eager[kind]);
+        for (const g of split.groups) if (groupStates.get(g.name) !== 'pending') Object.assign(all[kind], g.manifest[kind]);
+      }
+      let n = 0;
+      for (const key of [...missing]) {
+        const i = key.indexOf(':');
+        const kindName = key.slice(0, i), id = key.slice(i + 1);
+        const kind = Object.keys(KIND_NAME).find((k) => KIND_NAME[k] === kindName);
+        if (kind && all[kind][id] !== undefined) { m[kind][id] = all[kind][id]; n++; }
+      }
+      if (!n) { if (onProgress) onProgress(0, 0); return { retried: false }; }
+      // The earlier failures were logged once; a retry that fails again should say so again.
+      for (const key of [...missing]) warned.delete(key);
+      await api.load(m, onProgress, { force: true });
+      return { retried: true, count: n };
     },
 
     /** Load a single image by URL path at runtime (cached by id). */
@@ -215,6 +387,12 @@ export function createAssets(opts = {}) {
     setImage(id, img) { images.set(id, img); },
     setAtlas(id, json, img) { const a = normalizeAtlas(json, img, id); atlases.set(id, a); return a; },
     setJson(id, data) { jsons.set(id, data); },
+    /** Snapshot for LQ_DEBUG.state(): groups and their states, missing ids. */
+    debugState() {
+      const groups = {};
+      for (const [k, v] of groupStates) groups[k] = v;
+      return { groups, missing: [...missing], critical: api.criticalMissing(), manifest: !!api.manifest && !api.manifestError };
+    },
   };
   return api;
 }

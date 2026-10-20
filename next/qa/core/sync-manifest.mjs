@@ -12,6 +12,8 @@
 // Audio is not listed: src/core/audio.js loads assets/audio/manifest.json itself.
 // "scenes": "src/scenes/registry.js" is set when that file exists (main.js imports it only when listed).
 // "touch": { dpad, dpad_up, ..., a, a_pressed, ... } lists assets/ui/touch/*.png (the touch-control skin).
+// "lazy": { group: [ids] } is hand-maintained (W6-pwa load order) and kept as-is; ids that no longer exist in any
+// kind are dropped and reported. Lazy ids are loaded after the title is up (engine.lazyLoad), in group order.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -100,6 +102,14 @@ export function sync({ write = true } = {}) {
   const reg = fs.existsSync(path.join(NEXT, REGISTRY)) ? REGISTRY : null;
   if ((current.scenes || null) !== reg) problems.push(reg ? `+ scenes = ${reg}` : `- scenes (${current.scenes} no longer exists)`);
   if (reg) out.scenes = reg;
+  // Lazy groups: keep the hand-written lists, dropping ids that vanished.
+  const lazy = {};
+  for (const [name, ids] of Object.entries(current.lazy || {})) {
+    const keep = (Array.isArray(ids) ? ids : []).filter((id) => KINDS.some((k) => out[k][id]));
+    for (const id of (Array.isArray(ids) ? ids : [])) if (!keep.includes(id)) problems.push(`- lazy.${name} lists unknown id ${id}`);
+    if (keep.length) lazy[name] = keep;
+  }
+  if (Object.keys(lazy).length) out.lazy = lazy;
   if (write) fs.writeFileSync(MANIFEST, JSON.stringify(out, null, 2) + '\n');
   return { manifest: out, changes: problems };
 }

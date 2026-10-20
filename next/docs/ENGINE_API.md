@@ -22,7 +22,28 @@ usage comment). Reference implementations: `src/scenes/_devTitle.js` (menus, inp
 (loads `assets/manifest.json`, fonts, UI art, audio, then the scene registry) and pushes the first scene:
 `?scene=` if registered, else `title`, else `_devTitle`.
 
-URL params: `?debug=1` (FPS overlay, F3 toggles), `&fps=0`, `&scene=name`, `&seed=n`, `&speed=x`, `&touch=on|off`.
+URL params: `?debug=1` (FPS overlay, F3 toggles), `&fps=0`, `&scene=name`, `&seed=n`, `&speed=x`, `&touch=on|off`,
+`&gate=0` (skip the "Tap or press any key" gate on a normal run).
+
+### Loading (W6-pwa; the PWA side is in `docs/PWA.md`)
+`engine.boot(opts)` draws the loading screen itself (`BootScene` in `engine.js`: logo, gold bar, status line,
+rotating story lines, retry prompt). Order: logo + main font first; then the manifest's eager assets in parallel with
+`opts.scenes` (main.js passes `loadRegistry`, which awaits `assets.manifestReady`); then the audio runtime (its SFX
+prefetch starts only now); then fonts and UI art, `engine.loaded = true`, and the lazy groups start in the
+background (`engine.lazyLoad` is the Promise, `lazyloaded` is emitted); then, with `opts.gate`, "Tap or press any
+key" (that press also unlocks audio). main.js sets `gate` on normal runs only, and on `?debug=1` runs it also awaits
+`engine.lazyLoad` before `LQ_DEBUG.ready()` resolves, so QA never sees a half-loaded game.
+`opts`: `{ manifest, audio: true, scenes: async fn, gate: false, flavor: [lines], lazy: true }`.
+A critical (eager, non-optional) asset that fails to load shows "Some pages did not load." with a retry prompt;
+a press reloads only what is missing (`assets.retryMissing`). Debug: `engine.bootScene.debugState()`.
+
+**Lazy groups.** `assets/manifest.json` may list `"lazy": { "story": [ids], "battle": [ids], "art": [ids] }`
+(hand-written; `sync-manifest.mjs` keeps it and drops unknown ids). Ids in a group are NOT loaded at boot; they load
+after it, group by group in manifest order. Until a lazy asset arrives, `assets.has(id)` is false and `img` / `atlas`
+return the placeholder, so scenes must keep guarding with `has()` (every current scene does). Need one early:
+`await engine.assets.whenLoaded('battle')`. Today: `story` = portraits, dialog_keyart; `battle` = enemies_battle,
+bosses_battle, party_battle; `art` = environments (the 675 KB painted sheet). Anything the title, name entry or the
+first field frame draws must stay eager; `qa/pwa/precache.test.mjs` pins the boot-critical ids.
 
 ### Scene registry (W2 agents)
 Create `src/scenes/registry.js`, then run `node qa/core/sync-manifest.mjs` (it adds `"scenes"` to the

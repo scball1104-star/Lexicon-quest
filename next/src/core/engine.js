@@ -14,7 +14,7 @@
 import { Renderer, GAME_W, GAME_H } from './renderer.js';
 import { Input } from './input.js';
 import { TouchControls } from './touch.js';
-import { createAssets, BASE_URL } from './assets.js';
+import { createAssets, BASE_URL, animFrameAt } from './assets.js';
 import { createSave, DEFAULT_SETTINGS } from './save.js';
 import { createRng } from './rng.js';
 import { createTweens, ease } from './tween.js';
@@ -47,6 +47,20 @@ export function safeAudio(impl) {
   return out;
 }
 
+/**
+ * Audio stand-in used until boot() has initialised the real runtime: `preload`, `music`, `pushMusic` and
+ * `ambience` calls made meanwhile (scene installs run in parallel with the asset load) are queued and
+ * replayed once the runtime is up, so nothing is lost. Everything else is a silent no-op.
+ */
+function deferredAudio(queue) {
+  const out = safeAudio(null);
+  for (const m of ['preload', 'music', 'pushMusic', 'ambience']) {
+    out[m] = (...args) => { queue.push([m, args]); return m === 'preload' ? Promise.resolve(null) : null; };
+  }
+  out.deferred = true;
+  return out;
+}
+
 // ------------------------------------------------------------------ transitions
 /**
  * Built-in transition styles. Each draws the covering amount (0 = clear, 1 = fully covered).
@@ -72,18 +86,192 @@ export const TRANSITIONS = {
 };
 
 // ------------------------------------------------------------------ boot scene (loading screen)
-class BootScene {
-  constructor(engine) { this.engine = engine; this.done = 0; this.total = 0; this.t = 0; }
-  update(dt) { this.t += dt; }
+// The loading screen the engine draws while boot() loads (W6-pwa): the logo (loaded before anything else),
+// a gold pixel progress bar, a status line, a rotating story line, then "Tap or press any key" (that press
+// also unlocks audio). On a failed critical asset it shows a retry prompt instead of a blank canvas.
+// Colors are palette.json ramps (ink, gold) written as hex: ui.json's named colors are not installed yet.
+export const BOOT_BG = '#14101e';
+const BOOT_INK = { deep: '#0d0a16', dark: '#14101e', low: '#1a1334', mid: '#292657', high: '#3f4186', glow: '#7162bd' };
+const BOOT_GOLD = { shade: '#8f5533', dark: '#c38334', mid: '#eba14d', light: '#f9d77a', pale: '#fff7d6' };
+const BOOT_TEXT = { body: '#b3b6c4', dim: '#8e8997', cream: '#fff7d6', red: '#e06b39' };
+/** Story lines shown under the bar (verbatim from data/story/ep1.js PROLOGUE and the valley milestone). */
+export const BOOT_FLAVOR = [
+  'In Aethelgard, every name is a promise.',
+  'A promise that someone, somewhere, will remember.',
+  'The Keepers wrote every name in the Book of Names, and the world held its shape.',
+  'Now, in the river valley of Willowmere, names have begun to fade.',
+  'And last night, in a tower that holds twelve bells, a thirteenth bell rang.',
+  'Every name is a promise that something will not be forgotten.',
+];
+const BOOT_STATUS = {
+  boot: 'Opening the Book of Names...',
+  assets: 'Loading the Archive...',
+  scenes: 'Waking Willowmere...',
+  audio: 'Tuning the bells...',
+  ready: 'Tap or press any key',
+  error: 'Some pages did not load.',
+};
+const BAR = { w: 160, h: 6, y: 146 };
+const MOTES = 26;
+
+export class BootScene {
+  constructor(engine, o = {}) {
+    this.engine = engine; this.name = '_boot';
+    this.t = 0; this.frame = 0;
+    this.target = 0;            // progress reported by boot(), 0..1
+    this.ceiling = 0;           // the bar may crawl toward this while a long job (scene modules) is in flight
+    this.shown = 0;             // eased bar value actually drawn
+    this.phase = 'boot';        // boot | assets | scenes | audio | ready | error
+    this.failed = [];           // critical asset keys that failed (error phase)
+    this.gate = !!o.gate;
+    this.waiting = false; this._resolvePress = null;
+    this.flavor = (Array.isArray(o.flavor) && o.flavor.length ? o.flavor : BOOT_FLAVOR).slice();
+    this.flavorIndex = 0; this.flavorT = 0;
+    this.sparkle = null;        // { x, y, t } at the bar head
+    this.nextSparkle = 0.4;
+    this.retries = 0;
+    this._seed = 0x9e3779b9;
+    this.motes = [];
+    for (let i = 0; i < MOTES; i++) this.motes.push(this.newMote(true));
+  }
+
+  // Tiny local RNG so the loading screen never consumes the game's seeded sequence.
+  rand() {
+    this._seed = (this._seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(this._seed ^ (this._seed >>> 15), 1 | this._seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  newMote(anywhere) {
+    const r = this.rand();
+    return {
+      x: this.rand() * GAME_W, y: anywhere ? this.rand() * GAME_H : GAME_H + 2,
+      vy: 3 + this.rand() * 6, sway: this.rand() * Math.PI * 2, swayR: 2 + this.rand() * 6,
+      color: r < 0.08 ? BOOT_GOLD.dark : r < 0.35 ? BOOT_INK.high : BOOT_INK.mid,
+      alpha: r < 0.08 ? 0.55 : 0.8,
+    };
+  }
+
+  /** Progress 0..1; `ceiling` (>= k) lets the bar crawl a little further while waiting on an atomic job. */
+  setProgress(k, ceiling) {
+    this.target = Math.max(0, Math.min(1, k));
+    this.ceiling = Math.max(this.target, Math.min(1, ceiling == null ? this.target : ceiling));
+  }
+  /** Resolves on the next confirm/any key/tap (the gate, and the retry prompt). */
+  waitPress() {
+    return new Promise((resolve) => { this.waiting = true; this._resolvePress = resolve; });
+  }
+  get percent() { return Math.round(this.shown * 100); }
+
+  update(dt) {
+    this.t += dt; this.frame++;
+    // The bar moves toward the reported progress quickly and toward the ceiling slowly (asymptotic), never past it.
+    if (this.shown < this.target) this.shown = Math.min(this.target, this.shown + Math.max((this.target - this.shown) * 0.12, 1 / (BAR.w * 2)));
+    else if (this.shown < this.ceiling) this.shown = Math.min(this.ceiling, this.shown + (this.ceiling - this.shown) * 0.012);
+    this.flavorT += dt;
+    if (this.flavorT >= 3.4) { this.flavorT = 0; this.flavorIndex = (this.flavorIndex + 1) % this.flavor.length; }
+    const motion = !this.engine.settings.reduceMotion;
+    if (motion) {
+      for (let i = 0; i < this.motes.length; i++) {
+        const m = this.motes[i];
+        m.y -= m.vy * dt; m.sway += dt * 0.9;
+        if (m.y < -2) this.motes[i] = this.newMote(false);
+      }
+    }
+    if (this.sparkle) { this.sparkle.t += dt; if (this.sparkle.t > 0.34) this.sparkle = null; }
+    this.nextSparkle -= dt;
+    if (!this.sparkle && this.nextSparkle <= 0 && (this.shown < this.target || this.phase === 'ready')) {
+      this.nextSparkle = this.phase === 'ready' ? 0.9 + this.rand() * 0.8 : 0.35 + this.rand() * 0.5;
+      const x = Math.round((GAME_W - BAR.w) / 2) + Math.round(BAR.w * this.shown);
+      this.sparkle = { x: this.phase === 'ready' ? x - 2 - Math.round(this.rand() * 20) : x, y: BAR.y + 1 + Math.round(this.rand() * 4), t: 0 };
+    }
+    if (this.waiting) {
+      const input = this.engine.input;
+      if (input.anyPressed() || input.pointer.pressed) {
+        this.waiting = false;
+        input.consumeAll();
+        const resolve = this._resolvePress; this._resolvePress = null;
+        if (resolve) resolve();
+      }
+    }
+  }
+
   draw(r) {
-    r.clear('#0d0b16');
-    const w = 120, h = 4, x = Math.round((r.W - w) / 2), y = Math.round(r.H / 2 + 6);
-    const k = this.total ? this.done / this.total : 0;
-    r.text('LOADING', r.W / 2, y - 16, { align: 'center', color: '#8c84a8' });
-    r.rect(x - 1, y - 1, w + 2, h + 2, '#2a2440');
-    r.rect(x, y, w, h, '#14101e');
-    r.rect(x, y, Math.round(w * k), h, '#b9a6ff');
-    r.rect(x, y, Math.round(w * k), 1, '#e6deff');
+    const W = r.W, H = r.H;
+    r.gradientV(0, 0, W, H, '#1b1638', BOOT_INK.deep, 9);
+    r.ditherEllipse(W / 2, 66, 176, 52, '#241d4a', 0.4);
+    r.ditherEllipse(W / 2, 66, 120, 32, '#2b2458', 0.3);
+    for (const m of this.motes) {
+      const x = Math.round(m.x + Math.sin(m.sway) * m.swayR), y = Math.round(m.y);
+      if (x < 0 || x >= W || y < 0 || y >= H) continue;
+      r.withAlpha(m.alpha, () => r.pixel(x, y, m.color));
+    }
+    const assets = this.engine.assets;
+    const logo = assets.has('logo') ? assets.atlas('logo') : null;
+    const f = logo && logo.frames.logo;
+    let logoBottom = 90;
+    if (f) {
+      const lx = Math.round((W - f.w) / 2), ly = 36;
+      r.sprite(logo, f, lx, ly, { topLeft: true });
+      const sub = logo.frames.subtitle;
+      if (sub) { r.sprite(logo, sub, Math.round((W - sub.w) / 2), ly + f.h + 3, { topLeft: true }); logoBottom = ly + f.h + 3 + sub.h; }
+      else logoBottom = ly + f.h;
+    } else {
+      r.text('LEXICON QUEST', W / 2, 52, { font: 'large', align: 'center', color: BOOT_GOLD.light, outline: BOOT_INK.dark });
+      r.text('The Reforged Realms', W / 2, 74, { align: 'center', color: BOOT_TEXT.cream });
+    }
+    // Progress bar: ink track with a 1 px bevel, gold fill with a pale top highlight and a bright head.
+    const bx = Math.round((W - BAR.w) / 2), by = BAR.y, bw = BAR.w, bh = BAR.h;
+    r.rect(bx - 2, by - 2, bw + 4, bh + 4, BOOT_INK.deep);
+    r.rect(bx - 1, by - 1, bw + 2, bh + 2, BOOT_INK.mid);
+    r.rect(bx - 1, by - 1, bw + 2, 1, BOOT_INK.high);
+    r.rect(bx - 1, by - 1, 1, bh + 2, BOOT_INK.high);
+    r.rect(bx, by, bw, bh, BOOT_INK.low);
+    const fill = Math.round(bw * this.shown);
+    if (fill > 0) {
+      r.rect(bx, by, fill, bh, BOOT_GOLD.mid);
+      r.rect(bx, by, fill, 1, BOOT_GOLD.pale);
+      r.rect(bx, by + 1, fill, 2, BOOT_GOLD.light);
+      r.rect(bx, by + bh - 1, fill, 1, BOOT_GOLD.dark);
+      if (fill < bw) r.rect(bx + fill - 1, by, 1, bh, BOOT_GOLD.pale);
+      if (this.phase === 'ready') {
+        const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
+        r.withAlpha(0.35 * pulse, () => r.rect(bx, by, bw, bh, BOOT_GOLD.pale));
+      }
+    }
+    if (this.sparkle && logo && logo.anims && logo.anims.sparkle) {
+      const name = animFrameAt(logo.anims.sparkle, this.sparkle.t);
+      if (name) r.sprite(logo, name, this.sparkle.x, this.sparkle.y);
+    }
+    r.text(`${this.percent}%`, bx + bw + 6, by - 2, { color: BOOT_TEXT.dim });
+    // Status and story lines.
+    const sy = by + bh + 10;
+    if (this.phase === 'error') {
+      const n = this.failed.length;
+      r.text(`${BOOT_STATUS.error}${n ? ` (${n})` : ''}`, W / 2, sy, { align: 'center', color: BOOT_TEXT.red });
+      if (this.waiting && (this.frame % 56) < 42) r.text('Tap or press any key to retry', W / 2, sy + 13, { align: 'center', color: BOOT_GOLD.light });
+      const first = this.failed[0] ? String(this.failed[0]).replace(/^[a-z]+:/, '') : '';
+      if (first) r.text(`Missing: ${first}${n > 1 ? ' and more' : ''}`, W / 2, sy + 28, { align: 'center', color: BOOT_TEXT.dim });
+    } else if (this.phase === 'ready' && this.waiting) {
+      if ((this.frame % 56) < 42) r.text(BOOT_STATUS.ready, W / 2, sy, { align: 'center', color: BOOT_GOLD.light });
+    } else {
+      r.text(BOOT_STATUS[this.phase] || BOOT_STATUS.assets, W / 2, sy, { align: 'center', color: BOOT_TEXT.body });
+    }
+    if (this.phase !== 'error') {
+      // Story line: fades in and out around each rotation.
+      const k = this.flavorT < 0.4 ? this.flavorT / 0.4 : this.flavorT > 3.0 ? Math.max(0, (3.4 - this.flavorT) / 0.4) : 1;
+      const lines = r.wrap(this.flavor[this.flavorIndex] || '', W - 64);
+      const fy = Math.max(sy + 17, H - 12 - lines.length * 11);
+      lines.forEach((l, i) => r.text(l, W / 2, fy + i * 11, { align: 'center', color: BOOT_TEXT.dim, alpha: 0.9 * k }));
+    }
+    void logoBottom;
+  }
+
+  debugState() {
+    return {
+      phase: this.phase, progress: Math.round(this.target * 1000) / 1000, shown: Math.round(this.shown * 1000) / 1000,
+      percent: this.percent, failed: this.failed.slice(), gate: this.gate, waiting: this.waiting, retries: this.retries,
+    };
   }
 }
 
@@ -125,7 +313,10 @@ export class Engine {
     this.tweens = createTweens();
     this.fonts = createFonts();
     this.assets = createAssets();
-    this.audio = safeAudio(null);
+    this._audioQueue = [];
+    this.audio = deferredAudio(this._audioQueue);   // replaced by the real runtime in boot()
+    this.bootScene = null;
+    this.lazyLoad = Promise.resolve();
     this.canvas = opts.canvas;
     this.renderer = new Renderer(opts.canvas, { width: this.W, height: this.H, fonts: this.fonts, assets: this.assets, settings: this.settings });
     this.r = this.renderer;
@@ -480,27 +671,101 @@ export class Engine {
 
   // ---------------------------------------------------------------- boot
   /**
-   * Load the asset manifest (showing a loading bar), install loaded fonts, start audio.
-   * opts: { manifest: 'assets/manifest.json', audio: true }
+   * Boot with the loading screen (W6-pwa; see docs/ENGINE_API.md "Loading"):
+   *   1. logo + main font (so the screen itself looks right), then
+   *   2. the manifest's critical assets (everything not in a lazy group) in PARALLEL with `opts.scenes`
+   *      (main.js's scene-registry import: the 1.3 MB of modules the title needs anyway), then
+   *   3. the audio runtime (after the assets and scene modules, so its 2.8 MB SFX prefetch never competes with them),
+   *   4. fonts + UI art installed, `loaded` = true, 'loaded' emitted, lazy groups started in the background
+   *      (engine.lazyLoad resolves when they are all in), then
+   *   5. with `opts.gate`, "Tap or press any key" (the press also unlocks audio) before boot() resolves.
+   * A critical asset that fails shows a retry prompt; the retry reloads only what is missing.
+   * opts: { manifest: 'assets/manifest.json', audio: true, scenes: async fn | null, gate: false, flavor: [lines], lazy: true }
    */
   async boot(opts = {}) {
-    const bootScene = new BootScene(this);
-    bootScene.name = '_boot';
+    const o = { manifest: 'assets/manifest.json', audio: true, scenes: null, gate: false, flavor: null, lazy: true, ...opts };
+    const bootScene = new BootScene(this, { gate: o.gate, flavor: o.flavor });
+    this.bootScene = bootScene;
     this.stack.push(bootScene);
     this.start();
-    const audioReady = opts.audio === false ? Promise.resolve() : this._initAudio();
-    await this.assets.loadManifest(opts.manifest || 'assets/manifest.json', (done, total) => { bootScene.done = done; bootScene.total = total; });
+
+    // Bar bookkeeping: stage 1 is 6 % of the bar; the rest is shared by asset jobs, the scene modules
+    // (worth SCENE_W jobs) and the audio manifest (AUDIO_W). The scene import is atomic, so while it is the
+    // last thing outstanding the bar crawls toward its share instead of sitting still.
+    const SCENE_W = 8, AUDIO_W = 1;
+    const prog = { stage0: 0, assets: 0, assetsTotal: 1, scenes: o.scenes ? 0 : 1, audio: o.audio === false ? 1 : 0 };
+    const report = () => {
+      const total = prog.assetsTotal + (o.scenes ? SCENE_W : 0) + (o.audio === false ? 0 : AUDIO_W);
+      const done = prog.assets + (o.scenes ? prog.scenes * SCENE_W : 0) + (o.audio === false ? 0 : prog.audio * AUDIO_W);
+      const k = 0.06 * prog.stage0 + 0.94 * (done / total);
+      const ceiling = prog.scenes < 1 ? 0.06 * prog.stage0 + 0.94 * ((done + SCENE_W * 0.85) / total) : k;
+      bootScene.setProgress(k, ceiling);
+      if (bootScene.phase !== 'error') {
+        bootScene.phase = prog.assets < prog.assetsTotal ? 'assets' : prog.scenes < 1 ? 'scenes' : prog.audio < 1 ? 'audio' : bootScene.phase;
+      }
+    };
+
+    // 1. The logo and the main font first (failures are tolerated: the screen falls back to text).
+    try {
+      await this.assets.load({ atlases: { logo: 'assets/ui/logo.json' }, fonts: { main: 'assets/ui/font.json' } });
+      const f = this.assets.font('main');
+      if (f && f.image) this.fonts.register('main', f.def, f.image);
+    } catch (e) { console.warn('[engine] boot stage 1', e); }
+    prog.stage0 = 1; bootScene.phase = 'assets'; report();
+
+    // 2. Critical assets and the scene modules together.
+    let sceneError = null;
+    const onAssets = (d, t) => { prog.assets = d; prog.assetsTotal = Math.max(1, t); report(); };
+    // The manifest task starts first so `opts.scenes` can await assets.manifestReady (its sync part sets it).
+    const manifestTask = this.assets.loadManifest(o.manifest, onAssets);
+    const sceneTask = o.scenes
+      ? (async () => { try { await o.scenes(); } catch (e) { sceneError = e; } prog.scenes = 1; report(); })()
+      : Promise.resolve();
+    await manifestTask;
+    while (this.assets.criticalMissing().length) {
+      bootScene.failed = this.assets.criticalMissing();
+      bootScene.phase = 'error';
+      console.warn('[engine] boot: critical assets missing', bootScene.failed);
+      await bootScene.waitPress();
+      bootScene.retries++;
+      bootScene.failed = [];
+      bootScene.phase = 'assets';
+      const before = prog.assets;
+      await this.assets.retryMissing((d, t) => { prog.assets = Math.min(prog.assetsTotal, before + d); report(); void t; });
+      prog.assets = prog.assetsTotal; report();
+    }
+    prog.assets = prog.assetsTotal; report();
+
+    // 3. Audio only after the critical assets AND the scene modules are in: its SFX prefetch (2.8 MB, fire and
+    //    forget) then fills the idle line while the player reads the prompt instead of delaying it.
+    await sceneTask;
+    if (o.audio !== false) { await this._initAudio(); prog.audio = 1; report(); }
+    if (sceneError) console.error('[engine] scene modules failed to load', sceneError);
+    for (const [m, args] of this._audioQueue.splice(0)) { try { this.audio[m](...args); } catch (e) { console.warn('[engine] audio replay', m, e); } }
+
+    // 4. Install fonts and UI art; the game may start.
     for (const id of this.assets.fontIds()) {
       const f = this.assets.font(id);
       if (f && f.image) this.fonts.register(id, f.def, f.image);
     }
     this._installUiArt();
-    await audioReady;
-    const i = this.stack.indexOf(bootScene);
-    if (i >= 0) this.stack.splice(i, 1);
     this.loaded = true;
     this.loadedAtRender = this.renderedFrames;
     this.emit('loaded');
+    this.lazyLoad = o.lazy === false ? Promise.resolve(null)
+      : this.assets.loadLazy().then((r) => { this.emit('lazyloaded', r); return r; }).catch((e) => { console.warn('[engine] lazy assets', e); return null; });
+
+    // 5. The gate: the press that continues also unlocks audio (engine.unlock listeners).
+    bootScene.setProgress(1, 1);
+    bootScene.phase = 'ready';
+    if (o.gate) {
+      // Let the bar visibly reach 100 % before asking.
+      await this.waitFrames(8);
+      await bootScene.waitPress();
+    }
+    const i = this.stack.indexOf(bootScene);
+    if (i >= 0) this.stack.splice(i, 1);
+    this._dirty = true;
   }
 
   /**
