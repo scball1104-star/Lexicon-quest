@@ -4,9 +4,10 @@
 // engine.game, then the prologue.
 
 import { List, rowHeightFor, touchUi } from '../ui/list.js';
-import { drawWindow, drawPortrait, btn } from '../ui/index.js';
+import { drawWindow, drawPortrait } from '../ui/index.js';
+import { btn, hasBtn } from '../ui/glyphs.js';
 import { drawHelpBar } from '../ui/help.js';
-import { KeyArt } from '../ui/keyart.js';
+import { KeyArt, DARK } from '../ui/keyart.js';
 import { createGame, cleanName } from '../game/state.js';
 
 const MAX = 8;
@@ -14,7 +15,7 @@ const ROWS = [
   'ABCDEFGHIJKLM', 'NOPQRSTUVWXYZ', 'abcdefghijklm', 'nopqrstuvwxyz', '0123456789 ←✓',
 ];
 const GRID = { cols: 13, cellW: 14, cellH: 13 };
-const HELP_RECT = { y: 192, h: 22 };
+const HELP_RECT = { y: 188, h: 26 };   // 26 tall: the key-cap glyph line keeps 6 px above and below (D6)
 
 export class NameEntryScene {
   constructor(engine) { this.engine = engine; this.name = 'nameEntry'; }
@@ -99,11 +100,11 @@ export class NameEntryScene {
 
   draw(r) {
     const e = this.engine;
-    this.art.draw(r, { dark: 0.35, vignette: true });
+    this.art.draw(r, { dark: this.art.usesBackdrop ? DARK.one : 0.35, vignette: true });
     r.text('What is your name?', r.W / 2, this.titleY, { font: 'large', align: 'center', color: 'cream' });
     // Name window: portrait + 8 cells.
     const { x: nx, y: ny, w: nw, h: nh } = this.nameRect;
-    drawWindow(r, nx, ny, nw, nh, { alpha: 0.94 });
+    drawWindow(r, nx, ny, nw, nh);   // opaque over the key art (D1)
     drawPortrait(r, 'hero', nx + 6, ny + 4, 48);
     const cx = nx + 66, cy = ny + 20;
     for (let i = 0; i < MAX; i++) {
@@ -116,9 +117,10 @@ export class NameEntryScene {
     r.text(`${this.value.length}/${MAX}`, nx + nw - 8, ny + 42, { align: 'right', color: 'dim' });
     // Grid.
     const g = this.gridRect;
-    drawWindow(r, g.x, g.y, g.w, g.h, { alpha: 0.94 });
+    drawWindow(r, g.x, g.y, g.w, g.h);
     this.grid.draw(r, { frame: this.frame });
-    drawHelpBar(r, `${btn('confirm')} pick   ${btn('cancel')} erase   ✓ or Enter when done`, { y: HELP_RECT.y, h: HELP_RECT.h });
+    const help = hasBtn('confirm', e) ? `${btn('confirm')} pick   ${btn('cancel')} erase   ✓ or Enter when done` : 'Tap a letter   ← erase   ✓ when done';
+    drawHelpBar(r, help, { y: HELP_RECT.y, h: HELP_RECT.h });
     void e;
   }
 

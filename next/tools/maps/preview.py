@@ -6,6 +6,8 @@
                                                  red, unreachable events/marks are listed on stdout
     python preview.py archive_f1 --crop 0,0,24,14 --scale 4   (crop is in tiles)
     python preview.py hero_home --frame 1     (water/ink animation frame)
+    python preview.py --all --previews        -> refresh tools/maps/previews/<id>.png (the annotated 2x overviews
+                                                 docs/MAPS.md and the critiques look at; run after any map or art change)
 
 The map module is resolved by node (tools/maps/mapcheck.mjs dump), so helpers in _kit.js are fine.
 Rendering reuses tools/art/tiles/compose.py (terrain layering, wall faces, objects, props) and adds
@@ -22,6 +24,8 @@ NEXT = os.path.normpath(os.path.join(HERE, '..', '..'))
 TILES_TOOLS = os.path.join(NEXT, 'tools', 'art', 'tiles')
 SPRITES = os.path.join(NEXT, 'assets', 'sprites')
 OUT = os.path.join(HERE, 'out')
+PREVIEWS = os.path.join(HERE, 'previews')
+PREVIEW_SCALE = 2
 sys.path.insert(0, TILES_TOOLS)
 
 import pxlib                                             # noqa: E402
@@ -382,7 +386,8 @@ def main(argv):
     for k in ('scale', 'crop', 'frame'):
         if k in opt and opt[k] is True:
             raise SystemExit('use --%s=value' % k)
-    scale = int(opt.get('scale', 3))
+    previews = bool(opt.get('previews'))
+    scale = int(opt.get('scale', PREVIEW_SCALE if previews else 3))
     frame = int(opt.get('frame', 0))
     ids = list_maps() if opt.get('all') else args
     if not ids:
@@ -415,6 +420,11 @@ def main(argv):
         out = os.path.join(OUT, '%s%s.png' % (map_id, suffix))
         ann.save(out)
         print('wrote', out, '%dx%d tiles' % (len(mp['ground'][0]), len(mp['ground'])), 'and', clean)
+        if previews and 'crop' not in opt:
+            os.makedirs(PREVIEWS, exist_ok=True)
+            pv = os.path.join(PREVIEWS, '%s.png' % map_id)
+            ann.save(pv)
+            print('wrote', pv)
 
 
 if __name__ == '__main__':

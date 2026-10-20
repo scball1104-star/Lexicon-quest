@@ -1,6 +1,7 @@
 // Status screen: full stats, EXP, mastery per weapon with the next unlock, equipment summary.
 
 import { drawWindow, drawPortrait, drawLabel, drawGauge, drawIcon, drawDivider } from '../window.js';
+import { btn, hasBtn } from '../glyphs.js';
 import { drawHelpBar } from '../help.js';
 import { memberInfo, memberName, WEAPON_ICON, SLOT_ICON, SLOT_NAMES } from '../party.js';
 import { PARTY, masteryLevel, masteryUnlocks, MASTERY_XP, MAX_MASTERY, expForLevel } from '../../data/party.js';
@@ -48,15 +49,15 @@ export class StatusScreen {
     r.text(memberName(m), 68, 10, { color: 'white' });
     r.text(PARTY[m.id].role, 68, 21, { color: 'gray' });
     drawLabel(r, 'lv', 68, 36); r.text(String(m.level || 1), 80, 33);
-    drawLabel(r, 'exp', 104, 36); r.text(fmtGold(m.exp || 0), 158, 33, { align: 'right' });
-    drawLabel(r, 'next', 104, 47); r.text(fmtGold(info.toNext), 158, 44, { align: 'right', color: 'gray' });
+    drawLabel(r, 'exp', 104, 36); r.text(fmtGold(m.exp || 0), 156, 33, { align: 'right' });
+    drawLabel(r, 'next', 104, 47); r.text(fmtGold(info.toNext), 156, 44, { align: 'right', color: 'gray' });
     drawGauge(r, 68, 56, 90, info.expFrac, 'exp', { thin: true });
     drawLabel(r, 'hp', 10, 68); r.text(`${info.hp}/${info.maxHp}`, 80, 65, { align: 'right', color: info.hpFrac <= 0.25 ? 'red' : 'white' });
     drawGauge(r, 10, 77, 70, info.hpFrac, 'hp');
-    drawLabel(r, 'mp', 88, 68); r.text(`${info.mp}/${info.maxMp}`, 158, 65, { align: 'right' });
+    drawLabel(r, 'mp', 88, 68); r.text(`${info.mp}/${info.maxMp}`, 156, 65, { align: 'right' });
     drawGauge(r, 88, 77, 70, info.mpFrac, 'mp');
     drawLabel(r, 'fury', 10, 88); drawGauge(r, 34, 89, 46, info.furyFrac, 'fury', { thin: true, glow: info.furyFrac >= 1 });
-    r.text(`${Math.round(m.fury || 0)}%`, 158, 86, { align: 'right', color: 'orange' });
+    r.text(`${Math.round(m.fury || 0)}%`, 156, 86, { align: 'right', color: 'orange' });
     // Left bottom: equipment.
     drawWindow(r, 4, 106, 160, 76);
     r.text('Equipment', 12, 111, { color: 'gold' });
@@ -105,10 +106,10 @@ export class StatusScreen {
       if (art && SKILLS[art]) r.text(`Fury art: ${SKILLS[art].name}`, 193, y + 22, { color: lv >= 2 ? 'orange' : 'dim' });
       if (i === 0) drawDivider(r, 174, y + 34, 200);
     });
-    drawHelpBar(r, `${btnHint()} other members`, { right: 'Status' });
+    drawHelpBar(r, `${btnHint(this.engine)} other members`, { right: 'Status' });
   }
   debugState() { return { screen: 'status', member: this.member.id }; }
 }
 
-function btnHint() { return '{i:btn_pageL} {i:btn_pageR} or Left / Right:'; }
+function btnHint(engine) { return hasBtn('pageL', engine) ? `${btn('pageL')} ${btn('pageR')} or Left / Right:` : 'Left / Right:'; }
 export { expForLevel };

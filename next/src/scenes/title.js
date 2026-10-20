@@ -4,8 +4,9 @@
 // the stats provider, and LQ_DEBUG.newGame / give / uiStage.
 
 import { List, rowHeightFor } from '../ui/list.js';
-import { drawWindow, installToasts, ChoiceScene } from '../ui/index.js';
-import { KeyArt } from '../ui/keyart.js';
+import { drawWindow, installToasts, ChoiceScene, uiAudit } from '../ui/index.js';
+import { KeyArt, DARK } from '../ui/keyart.js';
+import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
 import { animFrameAt } from '../core/assets.js';
 import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear } from '../game/state.js';
@@ -98,8 +99,9 @@ export class TitleScene {
 
   draw(r) {
     const e = this.engine;
-    // The quantized backdrop already has its sky shaded for the logo; the painted crop needs the extra dark.
-    this.art.draw(r, { dark: this.art.usesBackdrop ? 0.06 : 0.18, vignette: true });
+    // The quantized backdrop already has its sky shaded for the logo and its vignette is dithered to its own
+    // palette (keyart.js); the painted crop fallback needs the extra alpha dark.
+    this.art.draw(r, { dark: this.art.usesBackdrop ? DARK.none : 0.18, vignette: true });
     const logo = e.assets.has('logo') ? e.assets.atlas('logo') : null;
     const f = logo && logo.frames.logo;
     if (f) {
@@ -116,7 +118,8 @@ export class TitleScene {
       r.text('LEXICON QUEST', r.W / 2, 34, { font: 'large', align: 'center', color: 'gold', outline: '#14101e' });
       r.text('The Reforged Realms', r.W / 2, 56, { align: 'center', color: 'cream' });
     }
-    drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h, { alpha: 0.92 });
+    // Opaque: a translucent window over the key art would blend hundreds of off-palette colours (D1).
+    drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h);
     this.menu.draw(r, { frame: this.frame, bar: false });
     r.text(VERSION, 4, 205, { color: 'gray' });
   }
@@ -127,6 +130,7 @@ export class TitleScene {
 // ---------------------------------------------------------------- install (runs once at boot from the registry)
 export async function install(engine) {
   installToasts(engine);
+  bindGlyphs(engine);   // device-aware {i:btn_*} glyphs everywhere (D10)
   if (!engine.hasScene('choice')) engine.registerScene('choice', ChoiceScene);
   if (!engine.hasScene('_uiStage')) engine.registerScene('_uiStage', UiStageScene);
   setStatsProvider((m) => { const s = memberStats(m); return { hp: s.maxHp, mp: s.maxMp }; });
@@ -166,6 +170,12 @@ export async function install(engine) {
     throw new Error('unknown item ' + id);
   });
   D.register('uiStage', (data) => { engine.reset('_uiStage', data || {}); return '_uiStage'; });
+  /** LQ_DEBUG.uiAudit('on' | 'off' | 'windows'): window rects of the last drawn frame (qa/ui/padding.py). */
+  D.register('uiAudit', (cmd = 'windows') => {
+    if (cmd === 'on') { uiAudit.on = true; return true; }
+    if (cmd === 'off') { uiAudit.on = false; uiAudit.windows = []; return false; }
+    return { frame: uiAudit.frame, windows: uiAudit.windows.slice() };
+  });
   D.register('toast', (text, icon) => engine.toasts.show({ text, icon }) && true);
 }
 

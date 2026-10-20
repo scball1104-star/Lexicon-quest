@@ -36,6 +36,18 @@ const DEFAULT_COLORS = {
 };
 const INK = '#14101e';
 
+/**
+ * QA hook (qa/ui/padding.py): while `on`, drawWindow records every window rect of the current frame so the
+ * audit can measure the gap between each window's frame and the text drawn inside it (CRITIQUE_2 D6).
+ */
+export const uiAudit = {
+  on: false, frame: -1, windows: [],
+  record(r, rect) {
+    if (r.frame !== this.frame) { this.frame = r.frame; this.windows = []; }
+    this.windows.push(rect);
+  },
+};
+
 export function uiAtlas(r) { return r && r.assets && r.assets.has('ui') ? r.assets.atlas('ui') : null; }
 export function windowAtlas(r) { return r && r.assets && r.assets.has('window') ? r.assets.atlas('window') : null; }
 export function currentScheme(r) {
@@ -50,6 +62,10 @@ export function schemeColors(r, scheme) {
 }
 
 // ---------------------------------------------------------------- gradient fill (top -> mid at 45% -> bottom)
+// The blend position is quantized to GRADIENT_STEPS so every window, whatever its height, draws from the same
+// GRADIENT_STEPS + 1 colours per scheme (one pixel density next to the quantized key art, CRITIQUE_2 D1). At
+// 32 steps the rows of a 178 px panel differ by under 4 units per channel: no visible banding.
+export const GRADIENT_STEPS = 32;
 const gradCache = new Map();
 function gradientRows(colors, h) {
   const key = `${colors.top}|${colors.mid}|${colors.bottom}|${h}`;
@@ -58,7 +74,7 @@ function gradientRows(colors, h) {
   const A = parseColor(colors.top), M = parseColor(colors.mid), B = parseColor(colors.bottom);
   rows = [];
   for (let i = 0; i < h; i++) {
-    const t = h <= 1 ? 0 : i / (h - 1);
+    const t = h <= 1 ? 0 : Math.round((i / (h - 1)) * GRADIENT_STEPS) / GRADIENT_STEPS;
     let c0, c1, k;
     if (t < 0.45) { c0 = A; c1 = M; k = t / 0.45; } else { c0 = M; c1 = B; k = (t - 0.45) / 0.55; }
     const rr = Math.round(c0[0] + (c1[0] - c0[0]) * k), g = Math.round(c0[1] + (c1[1] - c0[1]) * k), b = Math.round(c0[2] + (c1[2] - c0[2]) * k);
@@ -113,6 +129,7 @@ export function drawWindow(r, x, y, w, h, o = {}) {
   if (fdef) r.nineSlice(atlas.image, [fdef.x, fdef.y, fdef.w, fdef.h], fdef.border || 4, x, y, w, h, { center: false });
   else fallbackFrame(r, x, y, w, h, kind);
   const rect = { x, y, w, h, inset };
+  if (uiAudit.on) uiAudit.record(r, { x, y, w, h, kind, open: k });
   if (o.tail && k >= 1) drawTail(r, rect, o.tail.x, o.tail.dir || 'down', { scheme, field: kind === 'field', alpha: o.tail.alpha ?? alpha });
   return rect;
 }
@@ -276,14 +293,19 @@ export function drawDivider(r, x, y, w, o = {}) {
   r.rect(x, y + 1, w, 1, c.bottom);
 }
 
-/** Small 'more' / 'end' marks for text boxes. kind: 'more' (bouncing arrow) or 'end' (blinking mark). */
+/**
+ * The advance mark of a text box: one bobbing triangle everywhere (CRITIQUE_2 D10), whether more pages follow
+ * ('more') or the box closes on the next press ('end'). `kind` is kept for callers; both draw the same mark.
+ */
 export function drawTextMark(r, kind, x, y, o = {}) {
   const ui = uiAtlas(r);
   const frame = o.frame ?? r.frame;
-  const name = ui && animFrameAt(ui.anims[kind], frame / 60);
+  const name = ui && ui.anims.more && animFrameAt(ui.anims.more, frame / 60);
   const f = name && ui.frames[name];
   if (f) { r.sprite(ui, f, x, y, { topLeft: true, alpha: o.alpha }); return; }
-  if (Math.floor(frame / 16) % 2 === 0) r.text(kind === 'end' ? '●' : '▼', x, y - 2, { color: 'white', alpha: o.alpha });
+  const bob = Math.floor(frame / 10) % 2;
+  r.text('▼', x, y - 2 + bob, { color: 'white', alpha: o.alpha });
+  void kind;
 }
 
 /** Scroll arrows above/below a list. dir 'up' | 'down'; (cx, y) = center x, top y. */
@@ -322,8 +344,8 @@ export function drawDelta(r, delta, x, y, o = {}) {
   else r.text(delta > 0 ? '+' : delta < 0 ? '-' : '=', x, y - 2, { color: delta > 0 ? 'green' : delta < 0 ? 'red' : 'white' });
 }
 
-/** Device-aware inline button glyph id for {i:...} text codes (btn_confirm, btn_cancel, ...). */
-export function btn(action) { return `{i:btn_${action}}`; }
+/** Device-aware inline button glyph id for {i:...} text codes: see ui/glyphs.js (re-exported here). */
+export { btn } from './glyphs.js';
 
 /** Open/close grow animation driven by the owning scene's update(). */
 export class WindowAnim {

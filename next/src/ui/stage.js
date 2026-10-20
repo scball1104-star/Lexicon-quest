@@ -2,7 +2,7 @@
 // a hero sprite, so menus and dialogs have something living underneath. Registered as '_uiStage'.
 // `menu` opens the field menu, `confirm` shows a sample dialog with a choice, `cancel` does nothing.
 
-import { KeyArt } from './keyart.js';
+import { KeyArt, DARK } from './keyart.js';
 import { drawBanner } from './window.js';
 import { BANNERS } from '../data/text.js';
 import { animFrameAt } from '../core/assets.js';
@@ -32,7 +32,7 @@ export class UiStageScene {
     }
   }
   draw(r) {
-    this.art.draw(r, { dark: 0.12, vignette: true });
+    this.art.draw(r, { dark: this.art.usesBackdrop ? DARK.none : 0.12, vignette: true });
     const e = this.engine;
     const atlas = e.assets.has('party_field') ? e.assets.atlas('party_field') : null;
     const ids = e.game ? e.game.party.map((m) => m.id) : ['hero'];

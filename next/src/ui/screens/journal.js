@@ -27,12 +27,13 @@ export class JournalScreen {
     this.tab = 0;
     const ids = Object.keys(BESTIARY);
     const rowH = rowHeightFor(this.engine, 12);
-    this.beasts = new List({ x: 10, y: 34, w: 138, rowH, rows: Math.min(12, rowsThatFit(144, rowH)), items: ids.map((id) => {
+    this.beasts = new List({ x: 24, y: 34, w: 124, rowH, rows: Math.min(12, rowsThatFit(144, rowH)), items: ids.map((id) => {   // x 24: glove inside the screen (D7)
       const e = bestiaryEntry(this.g, id);
       const known = e.seen > 0 || e.killed > 0;
       return { id, label: known ? BESTIARY[id].name : '???', color: known ? (e.killed ? 'white' : 'gray') : 'dim', known, entry: e };
     }) });
     this.scroll = 0;
+    this.loreScroll = 0; this.loreMax = 0; this.loreRows = []; this.loreFor = null;
   }
   switchTab(d) { this.tab = (this.tab + d + TABS.length) % TABS.length; this.engine.audio.sfx('cursor'); }
   update() {
@@ -41,6 +42,19 @@ export class JournalScreen {
       const act = this.beasts.update(input, audio);
       if (act === 'cancel') return 'back';
       if (act === 'pageL' || act === 'pageR') this.switchTab(act === 'pageL' ? -1 : 1);
+      // Left / Right read a lore entry that is taller than its box; a different beast starts at the top again.
+      const id = this.beasts.item ? this.beasts.item.id : null;
+      if (id !== this.loreFor) { this.loreFor = id; this.loreScroll = 0; }
+      const rows = this.loreRows || [];
+      if (input.pressed('right') && (this.loreScroll || 0) < (this.loreMax || 0)) {
+        this.loreScroll = (this.loreScroll || 0) + 1;
+        if (rows[this.loreScroll] === null) this.loreScroll++;
+        audio.sfx('cursor');
+      } else if (input.pressed('left') && (this.loreScroll || 0) > 0) {
+        this.loreScroll--;
+        if (rows[this.loreScroll] === null) this.loreScroll--;
+        audio.sfx('cursor');
+      }
       return null;
     }
     if (input.pressed('cancel')) { audio.sfx('cancel'); return 'back'; }
@@ -55,25 +69,31 @@ export class JournalScreen {
     const g = this.g;
     const j = journal((f) => hasFlag(g, f));
     drawWindow(r, 4, 30, 376, 150);
-    r.pushClip(8, 34, 368, 137);
+    r.pushClip(8, 34, 368, 140);
+    // Only whole lines are drawn (never one cut by the bottom edge): a row shows when its top is in 34..164.
+    let end = 0;   // top of the last row, so the scroll limit lands on it
+    const seen = (yy) => { if (yy > end) end = yy; return yy >= 34 && yy <= 164; };
     let y = 38 - this.scroll * 11;
-    drawIcon(r, 'quest', 12, y - 1);
-    r.text(j.main.title, 27, y, { font: 'large', color: 'gold' }); y += 17;
-    r.text(j.main.step, 14, y, { color: 'cream' }); y += 12;
-    for (const line of r.wrap(fillHero(j.main.text, g), 356)) { r.text(line, 14, y); y += 11; }
+    if (seen(y)) { drawIcon(r, 'quest', 12, y - 1); r.text(j.main.title, 27, y, { font: 'large', color: 'gold' }); }
+    y += 17;
+    if (seen(y)) r.text(j.main.step, 14, y, { color: 'cream' });
+    y += 12;
+    for (const line of r.wrap(fillHero(j.main.text, g), 356)) { if (seen(y)) r.text(line, 14, y); y += 11; }
     y += 4;
-    if (j.side.length) { drawDivider(r, 10, y, 364); y += 6; r.text('Errands', 14, y, { color: 'gold' }); y += 12; }
+    if (j.side.length) { if (seen(y)) drawDivider(r, 10, y, 364); y += 6; if (seen(y)) r.text('Errands', 14, y, { color: 'gold' }); y += 12; }
     for (const q of j.side) {
-      drawIcon(r, q.done ? 'star' : 'letter', 12, y - 1, { alpha: q.done ? 0.6 : 1 });
-      r.text(q.title, 27, y, { color: q.done ? 'dim' : 'cream' });
-      if (q.counter) r.text(`${q.counter.label} ${q.counter.value}/${q.counter.max}`, 370, y, { align: 'right', color: q.done ? 'dim' : 'gray' });
+      if (seen(y)) {
+        drawIcon(r, q.done ? 'star' : 'letter', 12, y - 1, { alpha: q.done ? 0.6 : 1 });
+        r.text(q.title, 27, y, { color: q.done ? 'dim' : 'cream' });
+        if (q.counter) r.text(`${q.counter.label} ${q.counter.value}/${q.counter.max}`, 370, y, { align: 'right', color: q.done ? 'dim' : 'gray' });
+      }
       y += 11;
-      for (const line of r.wrap(fillHero(q.text, g), 350)) { r.text(line, 27, y, { color: q.done ? 'dim' : 'white' }); y += 11; }
+      for (const line of r.wrap(fillHero(q.text, g), 344)) { if (seen(y)) r.text(line, 27, y, { color: q.done ? 'dim' : 'white' }); y += 11; }
       y += 3;
     }
-    if (!j.side.length) { r.text('No errands yet. Talk to the people of Willowmere.', 14, y, { color: 'dim' }); }
+    if (!j.side.length && seen(y)) { r.text('No errands yet. Talk to the people of Willowmere.', 14, y, { color: 'dim' }); }
     r.popClip();
-    this.maxScroll = Math.max(0, Math.ceil((y - 171) / 11));
+    this.maxScroll = Math.max(0, Math.ceil((end - 164) / 11));
     if (this.scroll < this.maxScroll) drawScrollArrow(r, 'down', 192, 172);
     if (this.scroll > 0) drawScrollArrow(r, 'up', 192, 30);
   }
@@ -101,13 +121,25 @@ export class JournalScreen {
       for (const t of d.resist) { drawIcon(r, WEAK_ICON[t] || t, wx, 68, { alpha: e.resist.includes(t) ? 1 : 0.35 }); wx += 14; }
     }
     if (d) r.text(`Lv ${d.level}   HP ${e.killed ? d.hp : '???'}   Shields ${d.shields}`, x, 82, { color: 'gray' });
-    let y = 96;
+    // Lore sits in a box from y 95 down to 174 (6 px above the frame); only whole lines are drawn, never a cut
+    // one. Left / Right scroll an entry that is taller than the box.
     const lore = e.killed ? b.lore : b.lore.slice(0, 1);
-    for (const para of lore) {
-      for (const line of r.wrap(para, 204)) { r.text(line, x, y, { color: 'white' }); y += 11; }
-      y += 3;
-      if (y > 170) break;
+    const rows = this.loreRows = [];
+    lore.forEach((para, pi) => { if (pi) rows.push(null); for (const line of r.wrap(para, 204)) rows.push(line); });
+    const LINE = 11, GAP = 4, TOP = 95, LAST_Y = 164;   // a line is drawn only when y <= LAST_Y (its descenders end by 174)
+    const fits = (from) => { let y = TOP; for (let i = from; i < rows.length; i++) { if (rows[i] === null) { y += GAP; continue; } if (y > LAST_Y) return false; y += LINE; } return true; };
+    this.loreMax = 0;
+    while (this.loreMax < rows.length && !fits(this.loreMax)) this.loreMax++;
+    this.loreScroll = Math.min(this.loreScroll || 0, this.loreMax);
+    let y = TOP;
+    for (let i = this.loreScroll; i < rows.length; i++) {
+      if (rows[i] === null) { y += GAP; continue; }
+      if (y > LAST_Y) break;
+      r.text(rows[i], x, y, { color: 'white' });
+      y += LINE;
     }
+    if (this.loreScroll < this.loreMax) drawScrollArrow(r, 'down', 372, 169);
+    if (this.loreScroll > 0) drawScrollArrow(r, 'up', 372, 92);
     if (!e.killed) r.text('Defeat one to read more.', x, 168, { color: 'dim' });
   }
   draw(r) {

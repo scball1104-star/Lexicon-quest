@@ -210,9 +210,12 @@ export class DialogScene {
     if (this.choiceBox) this.choiceBox.draw(r);
   }
 
+  /** True once the window is open and the current page is fully typed (qa/shots.py waits for this). */
+  get done() { return this.anim.isOpen && !this.typing; }
+
   debugState() {
     return { who: this.who, speaker: this.speaker, portrait: this.portrait, page: this.page, pages: this.pages.length, shown: Math.floor(this.shown), total: this.total,
-      typing: this.typing, choices: this.choices, choiceIndex: this.choiceBox ? this.choiceBox.index : null, box: this.boxIndex, boxes: this.boxes.length };
+      typing: this.typing, done: this.done, choices: this.choices, choiceIndex: this.choiceBox ? this.choiceBox.index : null, box: this.boxIndex, boxes: this.boxes.length };
   }
 }
 

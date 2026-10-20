@@ -169,10 +169,10 @@ export class MenuScene {
     lines.push(['Time', fmtTime(g.playtime)]);
     if (!this.touch || quest) lines.push(quest ? ['Letters', `${letters}/3`] : ['Party', String(g.party.length)]);
     if (!this.touch || !quest) lines.push(['Chapter', roman(g.chapter || 1)]);
-    drawIcon(r, 'gold', x, I.y + 5);
-    r.text(fmtGold(g.gold), rx, I.y + 6, { align: 'right', color: 'gold' });
+    drawIcon(r, 'gold', x, I.y + 4);
+    r.text(fmtGold(g.gold), rx, I.y + 5, { align: 'right', color: 'gold' });
     lines.forEach(([k, v], i) => {
-      const y = I.y + 18 + i * 11;
+      const y = I.y + 16 + i * 10;   // 10 px apart: the last baseline keeps 8 px under it (D6)
       r.text(k, x, y, { color: 'gray' });
       r.text(v, rx, y, { align: 'right' });
     });

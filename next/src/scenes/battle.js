@@ -753,7 +753,15 @@ export class BattleScene {
     if (R.intro > 0) return;
     if (page.kind === 'main') {
       const w = REWARD_WIN;
-      drawWindow(r, w.x, w.y, w.w, w.h, { open: k });
+      // Sized to its content (CRITIQUE_2 D11): title + rule 28, the EXP line 13, each drop row 12 (+11 for a
+      // description line), one "No drops" line when nothing dropped, and 16 under the last line for the glyph.
+      const rows = [];
+      for (const c of s.consumables) rows.push({ icon: c.icon, text: `Received {c:gold}${c.name}{/c} x${c.qty}` });
+      for (const it of s.items) rows.push({ icon16: true, icon: iconForGear(it.inst), text: `Found {c:${it.rarity}}${it.name}{/c}!`, sub: describe(it.inst) });
+      const shown = rows.slice(0, 3);
+      const bodyH = shown.length ? shown.reduce((acc, row) => acc + (row.sub ? 23 : 12), 0) : 12;
+      const wh = 28 + 13 + bodyH + 16;
+      drawWindow(r, w.x, w.y, w.w, wh, { open: k });
       if (k < 1) return;
       r.text('Victory!', w.x + w.w / 2, w.y + 5, { font: 'large', align: 'center', color: 'cream' });
       drawDivider(r, w.x + 8, w.y + 23, w.w - 16);
@@ -768,17 +776,14 @@ export class BattleScene {
         for (const [wpn, n] of Object.entries(pts)) { if (!n || mx > w.x + w.w - 30) continue; drawIcon(r, WEAPON_ICON[wpn] || 'sword', mx, y - 1); r.text(`+${n}`, mx + 13, y, { color: 'violet' }); mx += 30; }
       }
       y += 13;
-      const rows = [];
-      for (const c of s.consumables) rows.push({ icon: c.icon, text: `Received {c:gold}${c.name}{/c} x${c.qty}` });
-      for (const it of s.items) rows.push({ icon16: true, icon: iconForGear(it.inst), text: `Found {c:${it.rarity}}${it.name}{/c}!`, sub: describe(it.inst) });
-      if (!rows.length) r.text('{c:gray}No drops this time.{/c}', x, y + 2);
-      for (const row of rows.slice(0, 3)) {
+      if (!rows.length) r.text('{c:dim}No drops{/c}', x, y + 1);
+      for (const row of shown) {
         if (row.icon16 && ui) drawIcon16(r, row.icon, x, y); else drawIcon(r, row.icon, x + 2, y);
         r.text(row.text, x + 20, y + 1);
         y += row.sub ? 11 : 12;
         if (row.sub) { r.text(`{c:gray}${row.sub}{/c}`, x + 20, y); y += 11; }
       }
-      if (ui && ui.frames.btn_key_z && Math.floor(this.frame / 20) % 2 === 0) r.text('{i:btn_confirm}', w.x + w.w - 18, w.y + w.h - 14);
+      if (ui && ui.frames.btn_key_z && Math.floor(this.frame / 20) % 2 === 0) r.text('{i:btn_confirm}', w.x + w.w - 18, w.y + wh - 14);
       return;
     }
     if (page.kind === 'level') {

@@ -108,3 +108,9 @@ gear, flags, hp (fraction), fury, playtime, map, banner })`, `LQ_DEBUG.give(item
   statuses between battles in Episode 1; they work in battle.
 - Tents are refused outside a save point ("Only at a save point"); the world scene owns save-point rests.
 - The shop keeper line is a fixed per-kind line; NPC talk lines are shown by the field before pushing `shop`.
+
+## Text padding audit (D6) and colour count (D1)
+
+- `python next/qa/ui/padding.py [--story] [--only a,b] [--device desktop,phone]` measures every window rect against the ink of every text drawn inside it (clipped text and text under a later window are ignored). Rule: 8 px left and right, 6 px top and bottom (a one-line header or help window is 20 to 26 px tall, so 6 is the most a centred line can have), 4 px in thin windows. Exit 1 on any violation.
+- `python next/qa/ui/colors.py --limit 150` counts distinct colours of the rendered 384x216 frame for the key-art screens (title, prologue, name entry, credits, title card); the title logo is masked.
+- Bestiary lore and the quest list draw only whole lines; Left / Right scroll a taller lore entry.

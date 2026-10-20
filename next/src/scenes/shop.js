@@ -40,7 +40,8 @@ export class ShopScene {
     this.note = null;
     this.frame = 0;
     const rowH = rowHeightFor(e, 12);
-    this.list = new List({ x: STOCK.x + 6, y: STOCK.y + 6, w: STOCK.w - 10, rowH, rows: rowsThatFit(STOCK.h - 10, rowH), items: [], textX: 19 });
+    // Rows start 20 px in so the glove (18 px, fingertip 2 px left of the row) sits inside the screen (D7).
+    this.list = new List({ x: STOCK.x + 20, y: STOCK.y + 6, w: STOCK.w - 24, rowH, rows: rowsThatFit(STOCK.h - 10, rowH), items: [], textX: 19 });
     this.list.active = false;
     this.refresh(false);
     if (!this.g || !this.shop) { this.dead = true; }

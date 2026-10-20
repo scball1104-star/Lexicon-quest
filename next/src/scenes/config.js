@@ -8,7 +8,8 @@
 // inside a slider sets it to that point.
 
 import { List, rowHeightFor, rowsThatFit, touchUi } from '../ui/list.js';
-import { drawWindow, drawGauge, SCHEMES, SCHEME_NAMES, drawPageArrow, btn } from '../ui/window.js';
+import { drawWindow, drawGauge, SCHEMES, SCHEME_NAMES, drawPageArrow } from '../ui/window.js';
+import { btn } from '../ui/glyphs.js';
 import { drawHelpBar } from '../ui/help.js';
 import { HELP } from '../data/text.js';
 import { DEFAULT_SETTINGS } from '../core/save.js';
@@ -28,9 +29,9 @@ export const ROWS = [
   { key: 'ambience', label: 'Ambience', kind: 'slider', help: 'Rivers, birds, wind and the Archive hush.' },
   { key: 'textSpeed', label: 'Text speed', kind: 'choice', values: [1, 2, 3, 4], names: TEXT_SPEEDS, help: 'How quickly dialogue appears. Instant shows it all.' },
   { key: 'battleSpeed', label: 'Battle speed', kind: 'choice', values: [1, 2], names: ['1x', '2x'],
-    help: (e) => (touchUi(e) ? 'How fast battle plays.' : `How fast battle plays. In battle: ${btn('pageR')} toggles.`) },
+    help: (e) => (touchUi(e) ? 'How fast battle plays. In battle: tap Speed.' : `How fast battle plays. In battle: ${btn('pageR')} toggles.`) },
   { key: 'autoBattle', label: 'Auto battle', kind: 'choice', values: [false, true], names: ONOFF,
-    help: (e) => (touchUi(e) ? 'The party fights on its own.' : `The party fights on its own. In battle: ${btn('start')}.`) },
+    help: (e) => (touchUi(e) ? 'The party fights on its own. In battle: tap Auto.' : `The party fights on its own. In battle: ${btn('start')}.`) },
   { key: 'equipPrompts', label: 'Equip prompts', kind: 'choice', values: [false, true], names: ONOFF, help: 'Offer to wear better gear as it is found.' },
   { key: 'windowColor', label: 'Window color', kind: 'choice', values: SCHEMES, names: SCHEMES.map((s) => SCHEME_NAMES[s]), help: HELP.config.windowColor },
   { key: 'alwaysRun', label: 'Always run', kind: 'choice', values: [false, true], names: ONOFF, help: 'Walk by holding the run button instead.' },
@@ -123,7 +124,7 @@ export class ConfigScene {
     const e = this.engine;
     r.withAlpha(0.7, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
     drawWindow(r, WIN.x, WIN.y, WIN.w, WIN.h);
-    r.text('Config', 192, 9, { font: 'large', align: 'center', color: 'cream' });
+    r.text('Config', 192, 10, { font: 'large', align: 'center', color: 'cream' });
     this.list.draw(r, { frame: this.frame, bar: true });
     const dy = this.list.textDy;
     ROWS.forEach((row, i) => {

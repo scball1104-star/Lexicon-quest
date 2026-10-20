@@ -166,8 +166,10 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     drawGauge(r, L.mpGauge[0], L.mpGauge[1], L.mpGauge[2], a.maxMp ? a.shownMp / a.maxMp : 0, 'mp', { thin: true });
     drawLabel(r, ko ? 'ko' : 'fury', L.furyLbl[0], L.furyLbl[1]);
     const full = a.fury >= 100 && !ko;
-    drawGauge(r, L.furyGauge[0], L.furyGauge[1], L.furyGauge[2], Math.min(1, a.shownFury / 100), 'fury', { thin: true, glow: full, frame });
-    if (full && (a.furyFlash === 0 || Math.floor(frame / 4) % 2 === 0)) drawLabel(r, 'ready', L.ready[0], L.ready[1]);
+    // READY sits beside the gauge on the gauge line (D11): the gauge gives up 25 px for the 21 px label.
+    const furyW = L.furyGauge[2] - (full ? 25 : 0);
+    drawGauge(r, L.furyGauge[0], L.furyGauge[1], furyW, Math.min(1, a.shownFury / 100), 'fury', { thin: true, glow: full, frame });
+    if (full && (a.furyFlash === 0 || Math.floor(frame / 4) % 2 === 0)) drawLabel(r, 'ready', L.furyGauge[0] + furyW + 4, L.furyGauge[1] - 1);
     let ix = L.status[0];
     const ids = PARTY_STATUS_ORDER.filter((s) => a.statuses[s]);
     for (const s of ids.slice(0, 5)) {

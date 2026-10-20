@@ -4,7 +4,7 @@
 // text, so it looks the same over the field, the prologue or a black fade; `backdrop: false` or a missing
 // atlas gives the flat `bg` color (default near-black).
 
-import { drawBackdrop } from '../ui/keyart.js';
+import { drawBackdrop, DARK } from '../ui/keyart.js';
 
 const FADE = 20;
 
@@ -36,7 +36,7 @@ export class TitleCardScene {
   }
   draw(r) {
     r.clear(this.bg);
-    if (this.backdropId) drawBackdrop(r, this.backdropId, { dark: 0.55 });
+    if (this.backdropId) drawBackdrop(r, this.backdropId, { dark: DARK.three });
     const a = this.alpha();
     const lines = r.wrap(this.text, 320, 'large');
     const lh = 18;

@@ -79,7 +79,7 @@ export class LoadGameScene {
       drawWindow(r, x, y, w, h, { alpha: 0.94 });
       const title = s.slot === 0 ? 'Autosave' : `Record ${s.slot}`;
       r.text(title, x + 10, y + 5, { color: 'gold' });
-      if (!s.exists) { r.text('No record.', x + 10, y + 18, { color: 'dim' }); return; }
+      if (!s.exists) { r.text('No record.', x + 10, y + 17, { color: 'dim' }); return; }
       const m = s.meta || {};
       (m.party || ['hero']).slice(0, 3).forEach((id, k) => drawPortrait(r, id, x + 60 + k * 38, y + 5, 32));
       const tx = x + 180;
@@ -89,16 +89,16 @@ export class LoadGameScene {
       r.text(String(m.level || 1), tx + r.measure(name) + 17, y + 5);
       r.text(`Chapter ${roman(m.chapter || 1)}`, x + w - 10, y + 5, { align: 'right', color: 'gray' });
       const b = BANNERS[m.map];
-      r.text(b ? b.title : (m.map || ''), x + w - 10, y + 18, { align: 'right', color: 'cream' });
-      r.text(fmtTime(m.playtime || 0), tx, y + 18, { color: 'gray' });
-      drawIcon(r, 'gold', tx, y + 29);
-      r.text(fmtGold(m.gold || 0), tx + 14, y + 31, { color: 'gold' });
+      r.text(b ? b.title : (m.map || ''), x + w - 10, y + 17, { align: 'right', color: 'cream' });
+      r.text(fmtTime(m.playtime || 0), tx, y + 17, { color: 'gray' });
+      drawIcon(r, 'gold', tx, y + 27);
+      r.text(fmtGold(m.gold || 0), tx + 14, y + 29, { color: 'gold' });
       const when = s.savedAt ? new Date(s.savedAt) : null;
-      if (when && !isNaN(when)) r.text(when.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), x + w - 10, y + 31, { align: 'right', color: 'dim' });
+      if (when && !isNaN(when)) r.text(when.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), x + w - 10, y + 29, { align: 'right', color: 'dim' });
     });
     this.list.draw(r, { frame: r.frame, bar: false, cursor: !this.busy });
     const hint = this.note || (this.mode === 'load' ? 'Choose a record to continue.' : HELP.save.prompt);
-    drawHelpBar(r, hint, { y: 194, h: 20, right: this.mode === 'load' ? 'Load' : 'Save' });
+    drawHelpBar(r, hint, { y: 190, h: 24, right: this.mode === 'load' ? 'Load' : 'Save' });
   }
   debugState() { return { mode: this.mode, index: this.list.index, slots: this.slots.map((s) => ({ slot: s.slot, exists: s.exists })), busy: this.busy }; }
 }

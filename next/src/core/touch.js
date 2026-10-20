@@ -11,7 +11,9 @@
 
 import { createFonts } from './font.js';
 
-const ART = { dpad: 33, button: 19, pillH: 11 };
+const ART = { dpad: 33, button: 19, pillH: 16 };
+/** RUN and MENU are finger targets: never under this many css px tall (CRITIQUE_2 D8). */
+export const PILL_MIN_H = 36;
 
 function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 
@@ -83,7 +85,7 @@ function drawPill(label, on, fonts) {
   px(g, 1, 0, W - 2, H, edge); px(g, 0, 1, W, H - 2, edge);
   px(g, 1, 1, W - 2, H - 2, on ? 'rgba(120,92,20,0.92)' : 'rgba(24,20,44,0.82)');
   px(g, 2, 1, W - 4, 1, on ? 'rgba(255,230,140,0.5)' : 'rgba(120,108,190,0.5)');
-  f.draw(g, label, 4, 1, { color: on ? '#fff6cf' : '#f8f4ec' });
+  f.draw(g, label, 4, Math.round((H - 9) / 2), { color: on ? '#fff6cf' : '#f8f4ec' });   // 7 px caps centred
   return { url: c.toDataURL(), w: W, h: H };
 }
 
@@ -358,16 +360,24 @@ export class TouchControls {
    * Size and place one control. cssSize is the wanted visual width; the art is scaled by a whole number of
    * DEVICE pixels per art pixel (crisp). pad = invisible touch margin around the visual (css px).
    */
-  _place(el, key, cx, cy, cssSize, alpha, pad = 0, round = Math.floor) {
+  _place(el, key, cx, cy, cssSize, alpha, pad = 0, round = Math.floor, minCssH = 0) {
     const v = this.renderer.view;
     const [aw, ah] = this.artSize[key];
-    const k = Math.max(1, round((cssSize * v.dpr) / aw));
+    let k = Math.max(1, round((cssSize * v.dpr) / aw));
+    if (minCssH) k = Math.max(k, Math.ceil((minCssH * v.dpr) / ah));
     const w = (aw * k) / v.dpr, h = (ah * k) / v.dpr;
     const snap = (n) => Math.round(n * v.dpr) / v.dpr;
     const x = snap(cx - w / 2 - pad), y = snap(cy - h / 2 - pad);
     el._vis = { w, h, pad };
     Object.assign(el.style, { left: `${x}px`, top: `${y}px`, width: `${w + pad * 2}px`, height: `${h + pad * 2}px`, opacity: String(alpha) });
     return { x: x + pad, y: y + pad, w, h };
+  }
+
+  /** A RUN / MENU pill: at least PILL_MIN_H css px tall, its centre kept at or below `minCy` (clear of the game). */
+  _placePill(el, key, cx, cy, cssW, alpha, minCy = -Infinity) {
+    const first = this._place(el, key, cx, cy, cssW, alpha, 8, Math.round, PILL_MIN_H);
+    const wantCy = Math.max(cy, minCy + first.h / 2);
+    return wantCy === cy ? first : this._place(el, key, cx, wantCy, cssW, alpha, 8, Math.round, PILL_MIN_H);
   }
 
   layout() {
@@ -392,8 +402,8 @@ export class TouchControls {
       const off = Math.min(0.48, Math.max(0.18, (rw - s.r - 6 - ra.w) / (2 * ra.w)));
       this._place(e.a, 'a', rcx + ra.w * off, cy - ra.w * 0.42, bd, base, 6, Math.ceil);
       this._place(e.b, 'b', rcx - ra.w * off, cy + ra.w * 0.5, bd, base, 6, Math.ceil);
-      this._place(e.menu, 'menu', rcx, s.t + 24, Math.min(70, Math.max(48, rw * 0.56)), base, 8, R);
-      this._place(e.run, 'run', lcx, cy - dp / 2 - 30, Math.min(56, Math.max(40, lw * 0.44)), base, 8, R);
+      this._placePill(e.menu, 'menu', rcx, s.t + 24, Math.min(70, Math.max(48, rw * 0.56)), base, s.t + 4);
+      this._placePill(e.run, 'run', lcx, cy - dp / 2 - 34, Math.min(56, Math.max(40, lw * 0.44)), base);
       this._place(e.fullscreen, 'fullscreen', lcx, s.t + 24, 24, base * 0.8, 8, R);
     } else if (v.touchMode === 'below') {
       // Under the game (portrait): a handheld layout.
@@ -407,8 +417,8 @@ export class TouchControls {
       this._place(e.a, 'a', rcx + bd * 0.55, cy - bd * 0.45, bd, base, 8, R);
       this._place(e.b, 'b', rcx - bd * 0.55, cy + bd * 0.45, bd, base, 8, R);
       const py = top + Math.min(44, room * 0.13);
-      this._place(e.run, 'run', W / 2 - 38, py, 52, base, 8, R);
-      this._place(e.menu, 'menu', W / 2 + 38, py, 62, base, 8, R);
+      this._placePill(e.run, 'run', W / 2 - 52, py, 52, base, top + 4);
+      this._placePill(e.menu, 'menu', W / 2 + 52, py, 62, base, top + 4);
       this._place(e.fullscreen, 'fullscreen', W / 2, bottom - 30, 26, base * 0.8, 8, R);
     } else {
       // Overlay: translucent, as small as comfortable, hugging the corners.
@@ -420,8 +430,8 @@ export class TouchControls {
       const cy = H - s.b - 12 - dp / 2;
       this._place(e.a, 'a', rcx + bd * 0.55, cy - bd * 0.4, bd, a, 6, R);
       this._place(e.b, 'b', rcx - bd * 0.55, cy + bd * 0.45, bd, a, 6, R);
-      this._place(e.menu, 'menu', W - s.r - 40, s.t + 18, 54, a, 8, R);
-      this._place(e.run, 'run', s.l + 14 + dp / 2, H - s.b - 24 - dp, 44, a, 8, R);
+      this._placePill(e.menu, 'menu', W - s.r - 48, s.t + 18, 54, a, s.t + 4);
+      this._placePill(e.run, 'run', s.l + 14 + dp / 2, H - s.b - 28 - dp, 44, a);
       this._place(e.fullscreen, 'fullscreen', s.l + 22, s.t + 18, 24, a * 0.8, 8, R);
     }
     this._paint();

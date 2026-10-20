@@ -1,7 +1,8 @@
 // Items screen: consumables (use on a member) and key items, two tabs.
 
 import { List, rowHeightFor, rowsThatFit, touchUi } from '../list.js';
-import { drawWindow, btn } from '../window.js';
+import { drawWindow } from '../window.js';
+import { btn, hasBtn } from '../glyphs.js';
 import { drawHelpBar } from '../help.js';
 import { MemberPicker, drawTabs } from './common.js';
 import { CONSUMABLES, KEY_ITEMS } from '../../data/items.js';
@@ -15,7 +16,7 @@ export class ItemsScreen {
     this.tab = 0;
     this.picker = null;
     const rowH = rowHeightFor(this.engine, 12);
-    this.list = new List({ x: 10, y: 36, w: 364, rowH, rows: rowsThatFit(138, rowH), columns: 2, items: [], textX: 19 });
+    this.list = new List({ x: 24, y: 36, w: 350, rowH, rows: rowsThatFit(138, rowH), columns: 2, items: [], textX: 19 });   // x 24: glove inside the screen (D7)
     this.refresh(false);
     this.note = null;
   }
@@ -31,7 +32,7 @@ export class ItemsScreen {
         const d = KEY_ITEMS[id];
         if (!d) continue;
         // the Lantern names its button (PLAYTEST 2.4): the pageR glyph, or the touch layout's Lantern button
-        const help = id !== 'lantern_of_recall' ? d.desc : touchUi(this.engine) ? 'Reveals ink that wants to be forgotten. Raise it: the Lantern button.' : `${d.desc} Raise it: ${btn('pageR')}.`;
+        const help = id !== 'lantern_of_recall' ? d.desc : touchUi(this.engine) || !hasBtn('pageR', this.engine) ? 'Reveals ink that wants to be forgotten. Raise it: the Lantern button.' : `${d.desc} Raise it: ${btn('pageR')}.`;
         items.push({ id, label: d.name, icon: d.icon, right: d.counted && g.items[id] > 1 ? `x${g.items[id]}` : '', help, disabled: false });
       }
     }

@@ -4,7 +4,8 @@
 // enter({ attract: true }) plays the cards as the title's attract mode and pops back on any input.
 
 import { PROLOGUE } from '../data/story/ep1.js';
-import { KeyArt } from '../ui/keyart.js';
+import { KeyArt, DARK } from '../ui/keyart.js';
+import { deviceOf } from '../ui/glyphs.js';
 import { START_MAP, START_POS } from '../game/state.js';
 
 const FADE = 30, HOLD = 240;
@@ -62,19 +63,20 @@ export class PrologueScene {
   }
 
   draw(r) {
-    // dialog_keyart is already at 62 percent brightness with a baked vignette; the crop fallback is not.
-    if (this.art.usesBackdrop) this.art.draw(r, { dark: 0.22 });
-    else this.art.draw(r, { dark: 0.5, vignette: true });
     const card = this.cards[this.index];
-    if (!card) return;
-    const a = this.alpha();
-    const lines = r.wrap(card, 300, 'large');
+    const a = card ? this.alpha() : 0;
+    const lines = card ? r.wrap(card, 300, 'large') : [];
     const lh = 18;
     const y0 = Math.round(r.H / 2 - (lines.length * lh) / 2) - 4;
+    // dialog_keyart is already at 62 percent brightness with a baked vignette; one rung darker under the
+    // cards, and the text strip is a band two rungs darker drawn in the backdrop's own colours (no alpha).
+    const band = card ? { y: y0 - 10, h: lines.length * lh + 20, dark: DARK.two, alpha: a } : null;
+    if (this.art.usesBackdrop) this.art.draw(r, { dark: DARK.one, band });
+    else this.art.draw(r, { dark: 0.5, vignette: true, band });
+    if (!card) return;
     const dy = this.phase === 'in' ? Math.round((1 - a) * 4) : 0;
-    r.withAlpha(0.45 * a, () => r.rect(0, y0 - 10, r.W, lines.length * lh + 20, '#08060f'));
     lines.forEach((l, i) => r.text(l, r.W / 2, y0 + i * lh + dy, { font: 'large', align: 'center', color: 'cream', alpha: a }));
-    const hint = this.attract ? 'Press any button' : `${this.index + 1} / ${this.cards.length}`;
+    const hint = this.attract ? (deviceOf(this.engine) === 'touch' ? 'Tap to return' : 'Press any button') : `${this.index + 1} / ${this.cards.length}`;
     r.text(hint, r.W - 6, r.H - 13, { align: 'right', color: 'dim', alpha: 0.8 });
   }
 

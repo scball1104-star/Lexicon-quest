@@ -21,7 +21,7 @@ export class EquipScreen {
     this.focus = 'slots';
     // Touch rows: the slot list (9 rows) scrolls inside its 112 px window; the candidate list shows 5 rows.
     const slotH = rowHeightFor(this.engine, 11), candH = rowHeightFor(this.engine, 12);
-    this.slots = new List({ x: 10, y: 56, w: 152, rowH: slotH, rows: Math.min(9, rowsThatFit(104, slotH)), items: [], iconX: 2, textX: 17 });
+    this.slots = new List({ x: 24, y: 56, w: 138, rowH: slotH, rows: Math.min(9, rowsThatFit(104, slotH)), items: [], iconX: 2, textX: 17 });   // x 24: glove inside the screen (D7)
     this.cands = new List({ x: 174, y: 30, w: 200, rowH: candH, rows: rowsThatFit(74, candH), items: [], textX: 19 });
     this.cands.active = false;
     this.note = null;
@@ -132,7 +132,7 @@ export class EquipScreen {
     else if (slot && slot.item) { item = slot.item; name = gearName(item); color = item.rarity || 'common'; line = itemLine(item); }
     else if (slot && slot.key) { name = `${this.keyLabel(slot.key)}: empty`; color = 'dim'; line = ''; }
     else { name = slot ? slot.label : ''; color = 'cream'; line = slot ? slot.help : ''; }
-    r.text(name || '', x + 8, y + 4, { color });
+    r.text(name || '', x + 8, y + 5, { color });
     const base = item ? baseOf(item) : null;
     const setId = base && base.set;
     let line2 = line || (base ? base.desc : '');
@@ -143,12 +143,12 @@ export class EquipScreen {
       line2 = `${line ? line + '. ' : ''}${set.name} ${worn}/${set.pieces.length}`;
       line2Color = 'set';
     }
-    r.text(line2, x + 8, y + 15, { color: line2Color, width: w - 16 });
-    drawDivider(r, x + 6, y + 27, w - 12);
+    r.text(line2, x + 8, y + 16, { color: line2Color, width: w - 16 });
+    drawDivider(r, x + 6, y + 28, w - 12);
     // Compare table: 2 columns x 3 rows.
     const colW = Math.floor((w - 16) / 2);
     COMPARE.forEach(([k, label], i) => {
-      const cx = x + 8 + (i % 2) * colW, cy = y + 31 + Math.floor(i / 2) * 11;
+      const cx = x + 8 + (i % 2) * colW, cy = y + 32 + Math.floor(i / 2) * 11;
       const cur = before[k] || 0;
       const d = delta ? (delta[k] || 0) : 0;
       r.text(label, cx, cy, { color: 'gold' });
@@ -167,7 +167,7 @@ export class EquipScreen {
     drawMemberHeader(r, m, 4, 4, 164, 44, { mastery: true });
     drawWindow(r, 4, 50, 164, 112);
     this.slots.draw(r, { frame: r.frame, cursor: this.focus === 'slots', bar: this.focus === 'slots' });
-    if (this.slots.isVisible(this.keys.length)) { const divY = this.slots.rowRect(this.keys.length).y - 1; drawDivider(r, 10, divY, 152); }
+    if (this.slots.isVisible(this.keys.length)) { const divY = this.slots.rowRect(this.keys.length).y - 1; drawDivider(r, 10, divY, 152); }   // the rule spans the window, not the list
     // Candidate list with a title.
     drawWindow(r, 168, 4, 212, 104);
     const slot = this.slots.item;

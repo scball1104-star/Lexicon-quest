@@ -7,6 +7,7 @@ fails the run (exit code 1). A JSON report with timings goes to next/qa/out/shot
 
   python next/qa/shots.py                      default devices x all shots
   python next/qa/shots.py --only title_dev,field_dev
+  python next/qa/shots.py --only "ui_*,story_*"    (glob patterns are fine)
   python next/qa/shots.py --device phone       (comma list; 'all' = every device in shots.json)
   python next/qa/shots.py --list
   python next/qa/shots.py --fps                keep the FPS overlay in the screenshots
@@ -29,9 +30,11 @@ Step vocabulary (shots.json):
   {"zoom": [x, y, w, h], "scale": 4}        save a nearest-neighbor zoom crop (screenshot px) for pixel checks
 Shot options: "devices": [...] limit to devices, "query": "&scene=x" extra URL params, "settings": {...}
 (applied after boot), "storage": {"lq-next-slot-1": {...}} (localStorage is cleared, then seeded, before load),
-"settle": ms before the final screenshot.
+"settle": ms before the final screenshot, "settleText": false to capture a dialog mid-typewriter (by default a
+shot that ends on the dialog scene waits until its page is fully typed: LQ_DEBUG.state().sceneState.done).
 """
 import argparse
+import fnmatch
 import http.server
 import json
 import os
@@ -188,6 +191,50 @@ def run_step(page, step, ctx):
     return None
 
 
+TEXT_DONE_JS = "(() => { const s = LQ_DEBUG.state(); return s.scene !== 'dialog' || !!(s.sceneState && s.sceneState.done); })()"
+
+
+def settle_text(page, shot, timeout=10000):
+    """Wait for a dialog on top to finish its typewriter (D12), unless the shot opts out with settleText: false."""
+    if shot.get('settleText', True) is False:
+        return
+    page.wait_for_function(TEXT_DONE_JS, timeout=timeout, polling=50)
+
+
+def drive(page, shot, ctx, base):
+    """Load the game for one shot and run its steps (shared with qa/ui/padding.py)."""
+    url = base + shot.get('query', '')
+    page.goto(url, wait_until='load')
+    page.wait_for_function('window.LQ_DEBUG && true', timeout=15000)
+    page.evaluate('Promise.race([LQ_DEBUG.ready(), new Promise((_, no) => setTimeout(() => no(new Error("LQ_DEBUG.ready() timed out after 20 s")), 20000))])')
+    if shot.get('settings'):
+        page.evaluate('(s) => LQ_DEBUG.settings(s)', shot['settings'])
+    for step in shot.get('steps', []):
+        run_step(page, step, ctx)
+    settle_text(page, shot)
+    page.wait_for_timeout(shot.get('settle', 120))
+
+
+def select_shots(shots, only):
+    """Filter shots by names or glob patterns; returns (shots, unknown patterns)."""
+    if not only:
+        return shots, []
+    names = {s['name'] for s in shots}
+    unknown = [p for p in only if not any(fnmatch.fnmatchcase(n, p) for n in names)]
+    picked = [s for s in shots if any(fnmatch.fnmatchcase(s['name'], p) for p in only)]
+    return picked, unknown
+
+
+def new_page(context, shot):
+    """A page with clean, seeded storage and console/page error capture (returns page, errors list)."""
+    page = context.new_page()
+    seed = {k: (v if isinstance(v, str) else json.dumps(v)) for k, v in shot.get('storage', {}).items()}
+    page.add_init_script('(() => { try { localStorage.clear(); const s = ' + json.dumps(seed)
+                         + '; for (const k in s) localStorage.setItem(k, s[k]); } catch (e) {} })()')
+    errors = []
+    return page, errors
+
+
 def save_zooms(png_path, zooms, files):
     if not zooms:
         return
@@ -222,13 +269,11 @@ def main():
         for s in shots:
             print(f"  {s['name']:<22} {s.get('note', '')}")
         return 0
-    only = {n.strip() for o in args.only for n in o.split(',') if n.strip()}
-    if only:
-        unknown = only - {s['name'] for s in shots}
-        if unknown:
-            print('unknown shot(s):', ', '.join(sorted(unknown)))
-            return 2
-        shots = [s for s in shots if s['name'] in only]
+    only = [n.strip() for o in args.only for n in o.split(',') if n.strip()]
+    shots, unknown = select_shots(shots, only)
+    if unknown:
+        print('unknown shot(s):', ', '.join(sorted(unknown)))
+        return 2
     dev_names = spec['defaultDevices'] if not args.device else (list(devices) if args.device == 'all' else [d.strip() for d in args.device.split(',')])
     for d in dev_names:
         if d not in devices:
@@ -289,15 +334,7 @@ def main():
                 png = OUT / f'{dname}-{name}.png'
                 perf = None
                 try:
-                    url = base + shot.get('query', '')
-                    page.goto(url, wait_until='load')
-                    page.wait_for_function('window.LQ_DEBUG && true', timeout=15000)
-                    page.evaluate('Promise.race([LQ_DEBUG.ready(), new Promise((_, no) => setTimeout(() => no(new Error("LQ_DEBUG.ready() timed out after 20 s")), 20000))])')
-                    if shot.get('settings'):
-                        page.evaluate('(s) => LQ_DEBUG.settings(s)', shot['settings'])
-                    for step in shot.get('steps', []):
-                        run_step(page, step, ctx)
-                    page.wait_for_timeout(shot.get('settle', 120))
+                    drive(page, shot, ctx, base)
                     page.screenshot(path=str(png))
                     ctx['files'].insert(0, str(png))
                     save_zooms(png, ctx['zooms'], ctx['files'])

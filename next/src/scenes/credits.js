@@ -3,7 +3,7 @@
 // card has held centered for 4 s. start skips, confirm hurries.
 
 import { CREDITS } from '../data/text.js';
-import { KeyArt } from '../ui/keyart.js';
+import { KeyArt, DARK } from '../ui/keyart.js';
 import { fillHero } from '../ui/text.js';
 
 const SPEED = 0.55;      // px per frame
@@ -48,7 +48,7 @@ export class CreditsScene {
     this.y += SPEED * (hurry ? 4 : 1);
   }
   draw(r) {
-    if (this.art.usesBackdrop) this.art.draw(r, { dark: 0.3 });
+    if (this.art.usesBackdrop) this.art.draw(r, { dark: DARK.one });
     else this.art.draw(r, { dark: 0.55, vignette: true });
     this.cards.forEach((c, i) => {
       const L = this.layout[i];
