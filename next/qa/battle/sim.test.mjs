@@ -46,3 +46,15 @@ test('economy: Rook\'s salvage is affordable when the party reaches it and can a
   assert.deepEqual(checkEconomy(e), []);
   assert.ok(e.atRook >= e.cheapestT3 && e.sinkTotal >= e.earned);
 });
+
+// Episode 2 (E2-battle): every ordinary fight, the Other Selves, the Nameless King, the EXP curve continued from Episode 1
+// and the Hollow's gold all hold their targets (smaller sample than the full report).
+test('Episode 2: ordinary fights, the Other Selves, the Nameless King, the EXP curve and the gold meet the targets', async () => {
+  const { EP2_ZONE_ORDER } = await import('../../src/data/encounters.js');
+  const { economy2, checkEconomy2 } = await import('../../tools/sim/simulate.mjs');
+  const rows = runSuite({ n: 60, zones: EP2_ZONE_ORDER, elites: false });
+  assert.deepEqual(checkTargets(rows, [...progression(1, 2), ...progression(0.8, 2)]), []);
+  assert.deepEqual(checkEconomy2(economy2()), []);
+  const kingRows = rows.filter((r) => r.encounter === 'nameless_king');
+  assert.ok(kingRows.some((r) => r.policy === 'reckless'), 'ignoring telegraphs is measured');
+});

@@ -1,4 +1,5 @@
-// Shops: Willowmere item shop, the smithy, a valley peddler and Rook's salvage in the Rootbound Stacks. Pure data.
+// Shops: Willowmere item shop, the smithy, a valley peddler, Rook's salvage in the Rootbound Stacks, and Episode 2's
+// Waystation peddler, Hollow Provisioner and Silverglass Smithy. Pure data.
 //
 // stock entries: { item, price?, ifFlag?, ifNotFlag? }  (price defaults to the item's price; flags are
 // story flags from COMMON.md / data/quests.js). Selling pays battle/loot.js itemValue() for gear and
@@ -44,6 +45,13 @@ export const SHOPS = {
       { item: 'runed_saber', ifFlag: 'archive_f2_done' }, { item: 'bearded_axe', ifFlag: 'archive_f2_done' },
       { item: 'winged_lance', ifFlag: 'archive_f2_done' }, { item: 'archivist_staff', ifFlag: 'archive_f2_done' },
       { item: 'yew_longbow', ifFlag: 'archive_f2_done' },
+      // Episode 2 restock (Garrick, EPISODE2_PLAN.md 7.6): the tier 3 weapons for a save that starts at ep1_complete
+      // (newGameEp2 may not carry archive_f2_done); ifNotFlag keeps an Episode 1 save from listing them twice.
+      { item: 'runed_saber', ifFlag: 'ep1_complete', ifNotFlag: 'archive_f2_done' },
+      { item: 'bearded_axe', ifFlag: 'ep1_complete', ifNotFlag: 'archive_f2_done' },
+      { item: 'winged_lance', ifFlag: 'ep1_complete', ifNotFlag: 'archive_f2_done' },
+      { item: 'archivist_staff', ifFlag: 'ep1_complete', ifNotFlag: 'archive_f2_done' },
+      { item: 'yew_longbow', ifFlag: 'ep1_complete', ifNotFlag: 'archive_f2_done' },
     ],
   },
   // W10: the gold sink inside the Archive. Rook camps by the Keeper's font in the great door hall (F3), so the
@@ -70,6 +78,43 @@ export const SHOPS = {
       { item: 'phoenix_feather', price: 170 },
       { item: 'leather_boots', price: 110 },
       { item: 'hatchet', price: 100 },
+    ],
+  },
+
+  // ---------------------------------------------------------------- Episode 2 (EPISODE2_PLAN.md 7.6)
+  // Penny at the Waystation on the Fading Road: road prices, and the first look at tier 3 boots.
+  east_peddler: {
+    id: 'east_peddler', name: "Penny's Cart", map: 'east_road', keeper: 'penny_e', kind: 'items',
+    stock: [
+      { item: 'potion', price: 24 }, { item: 'hi_potion', price: 100 }, { item: 'ether', price: 70 },
+      { item: 'hi_ether', price: 230 }, { item: 'antidote', price: 12 }, { item: 'eye_drops', price: 14 },
+      { item: 'echo_herb', price: 30 }, { item: 'phoenix_feather', price: 170 }, { item: 'tent', price: 90 },
+      { item: 'strider_boots', price: 520 },
+    ],
+  },
+  // Fitch's Hollow Provisioner (nh_shop). The Silver Salve appears once the Court is open (the King's Keeping).
+  hollow_items: {
+    id: 'hollow_items', name: 'Hollow Provisioner', map: 'nh_shop', keeper: 'fitch', kind: 'items',
+    stock: [
+      { item: 'potion' }, { item: 'hi_potion' }, { item: 'ether' }, { item: 'hi_ether' }, { item: 'antidote' },
+      { item: 'eye_drops' }, { item: 'echo_herb' }, { item: 'phoenix_feather' }, { item: 'tent' },
+      { item: 'silver_salve', ifFlag: 'court_entered' },
+      { item: 'lantern_charm' }, { item: 'mirror_charm' }, { item: 'clock_charm' },
+    ],
+  },
+  // Vessa's Silverglass Smithy (nh_smithy): tier 3 from arrival, tier 4 once the Hall of Other Selves is crossed.
+  hollow_smithy: {
+    id: 'hollow_smithy', name: 'Silverglass Smithy', map: 'nh_smithy', keeper: 'vessa', kind: 'equipment',
+    stock: [
+      { item: 'runed_saber' }, { item: 'bearded_axe' }, { item: 'winged_lance' }, { item: 'archivist_staff' },
+      { item: 'yew_longbow' }, { item: 'steel_cuirass' }, { item: 'sage_robe' }, { item: 'steel_helm' },
+      { item: 'moon_circlet' }, { item: 'ranger_mantle' }, { item: 'strider_boots' }, { item: 'bronze_plate' },
+      { item: 'silverglass_blade', ifFlag: 'court_f2_done' }, { item: 'moonsteel_axe', ifFlag: 'court_f2_done' },
+      { item: 'mere_pike', ifFlag: 'court_f2_done' }, { item: 'mirror_rod', ifFlag: 'court_f2_done' },
+      { item: 'glasswing_bow', ifFlag: 'court_f2_done' }, { item: 'silver_mail', ifFlag: 'court_f2_done' },
+      { item: 'mirrorweave_robe', ifFlag: 'court_f2_done' }, { item: 'glass_helm', ifFlag: 'court_f2_done' },
+      { item: 'mirror_circlet', ifFlag: 'court_f2_done' }, { item: 'mere_boots', ifFlag: 'court_f2_done' },
+      { item: 'veil_mantle', ifFlag: 'court_f2_done' },
     ],
   },
 };

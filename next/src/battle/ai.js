@@ -18,7 +18,7 @@ const DEVOUR_EMPOWER = 0.2;      // ATK and MAG gained per name devoured
 
 // =============================================================================== targeting
 function pickTarget(ctx, u, rule = 'random') {
-  const foes = ctx.living('party');
+  const foes = ctx.living('party').filter((p) => !ctx.has(p, 'kept'));
   if (!foes.length) return null;
   const R = ctx.R;
   switch (rule) {
@@ -45,6 +45,9 @@ function moveOk(ctx, u, m) {
     case 'notProtected': return !ctx.has(u, 'protect');
     case 'allyHurt': return ctx.living('enemy').some((e) => e.hp < e.maxHp * 0.7);
     case 'bossHurt': return ctx.living('enemy').some((e) => e.boss && e.hp < e.maxHp * 0.97);
+    case 'hasAlly': return ctx.living('enemy').some((e) => e.uid !== u.uid);
+    case 'notTaunting': return !ctx.has(u, 'taunt');
+    case 'notFocused': return !ctx.has(u, 'focus');
     default: return true;
   }
 }
@@ -62,13 +65,22 @@ function planFromMove(ctx, u, m) {
   if (!m) return null;
   u.ai.used[m.skill] = true;
   const sk = SKILLS[m.skill];
-  const target = sk.target === 'enemy' ? pickTarget(ctx, u, m.target) : null;
+  let target = sk.target === 'enemy' ? pickTarget(ctx, u, m.target) : null;
+  if (sk.target === 'ally') {
+    // enemy support moves (a reflection's Mend): the most hurt ally, itself included
+    const pool = ctx.living(u.side);
+    target = pool.length ? pool.reduce((a, b) => (b.hp / b.maxHp < a.hp / a.maxHp ? b : a)).uid : null;
+  }
   return { skill: m.skill, target };
 }
 
 // =============================================================================== scripts
 const basic = {
-  decide(ctx, u, d) { return planFromMove(ctx, u, weightedMove(ctx, u, d.moves)); },
+  decide(ctx, u, d) {
+    // `opener`: a forced first move (the Glassback opens with Harden so its reflect is taught at once)
+    if (d.opener && u.ai.turns <= 1 && !u.ai.used[d.opener]) { u.ai.used[d.opener] = true; return { skill: d.opener, target: null }; }
+    return planFromMove(ctx, u, weightedMove(ctx, u, d.moves));
+  },
   afterTurn(ctx, u, d) {
     if (!d.charge || u.charging || u.broken) return;
     const at = u.ai.chargeAt ?? d.charge.first;
@@ -179,7 +191,7 @@ const archivore = {
     const ph = u.ai.phase;
     if (t < (u.ai.nextChargeAt ?? 0)) return; // breathing room between big moves
     const devourTarget = () => {
-      const foes = ctx.living('party');
+      const foes = ctx.living('party').filter((p) => !ctx.has(p, 'kept'));
       const fresh = foes.filter((f) => !ctx.has(f, 'nameless'));
       const pool = fresh.length ? fresh : foes;
       const mira = pool.find((f) => f.id === 'mira');
@@ -304,7 +316,278 @@ const phased = {
   },
 };
 
-const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased };
+
+// =============================================================================== Episode 2 scripts (E2-battle)
+const partyFoes = (ctx) => ctx.living('party').filter((p) => !ctx.has(p, 'kept'));
+const cap1 = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+// --- Borrowed Shadow (ai 'mimic'): borrows the type that last hit it -------------------------------------------
+// A hit of a type it is not weak to becomes its borrowed type: it takes half damage from that type until a hit of
+// another type lands, and on its turn it throws a shadow copy of it back at whoever hit it last. A weakness hit
+// (light, bow) clears the borrowed type. Party healing in front of it gets copied too (Shadow Mend on itself).
+const SHADOW_COPY = { sword: 'shadow_strike', axe: 'shadow_strike', spear: 'shadow_strike', staff: 'shadow_strike',
+  bow: 'shadow_strike', fire: 'shadow_ember', ice: 'shadow_frost', thunder: 'shadow_spark' };
+export const MIMIC_MULT = 0.5;
+const mimic = {
+  decide(ctx, u, d) {
+    const sawHeal = u.ai.sawHeal;
+    u.ai.sawHeal = false;
+    if (sawHeal && u.hp < u.maxHp * 0.8) { u.ai.used.shadow_mend = true; return { skill: 'shadow_mend', target: null }; }
+    const copy = u.ai.adapt && SHADOW_COPY[u.ai.adapt];
+    if (copy) {
+      const foes = partyFoes(ctx);
+      const att = foes.find((f) => f.uid === u.ai.lastAttacker);
+      return { skill: copy, target: att ? att.uid : pickTarget(ctx, u) };
+    }
+    return basic.decide(ctx, u, d);
+  },
+  afterTurn: (ctx, u, d) => basic.afterTurn(ctx, u, d),
+  onChargeFired: (ctx, u, d) => basic.onChargeFired(ctx, u, d),
+  onChargeCancelled: (ctx, u, d) => basic.onChargeCancelled(ctx, u, d),
+  onHit(ctx, u, src, types, weakHit) {
+    if (src && src.side === 'party') u.ai.lastAttacker = src.uid;
+    if (!weakHit && u.ai.adapt && types.includes(u.ai.adapt)) return;
+    const prev = u.ai.adapt || null;
+    u.ai.adapt = weakHit ? null : (types.find((t) => SHADOW_COPY[t] && !u.weak.includes(t)) || null);
+    if (u.ai.adapt && u.ai.adapt !== prev) {
+      ctx.emit({ type: 'message', text: `${u.name} borrows the shape of your ${u.ai.adapt}. (${cap1(u.ai.adapt)} is halved.)`,
+        kind: 'adapt', target: u.uid, adapted: u.ai.adapt });
+    }
+  },
+  damageTakenMult(ctx, u, part, types) {
+    if (!u.ai.adapt || !types || !types.includes(u.ai.adapt) || types.some((t) => u.weak.includes(t))) return 1;
+    return MIMIC_MULT;
+  },
+};
+
+// --- The Other Selves (ai 'reflections'): the Mirrored Combo --------------------------------------------------
+// At the end of a reflection's turn, if its next slot on the timeline is immediately followed by another living
+// reflection's (no party member between) and a party member acts first, it announces the reversed party combo of
+// that pair. On its next turn the combo fires (both spend their turn) unless since the announcement either member
+// was pushed back on the timeline or the partner lost or spent its turn (Break, Stun, KO): then "they fall out of
+// step" and it takes an ordinary turn. Answers: Pin Shot, Lunge, Break or Stun either one, Defend, or kill one.
+export const MIRROR_COMBOS = [
+  ['refl_hero', 'refl_mira', 'mirror_cinder_edge'],
+  ['refl_hero', 'refl_bram', 'mirror_cross_shatter'],
+  ['refl_mira', 'refl_bram', 'mirror_glass_bulwark'],
+];
+const COMBO_REST = 1;   // each member's own turns before it can start another Mirrored Combo
+export const MIRROR_EMPOWER = 0.15;   // ATK and MAG the reflections gain per Mirrored Combo that lands
+function mirrorComboFor(a, b) {
+  const row = MIRROR_COMBOS.find(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  return row ? row[2] : null;
+}
+const isReflection = (e) => e && e.side === 'enemy' && ENEMIES[e.id] && ENEMIES[e.id].ai === 'reflections';
+const reflections = {
+  decide: (ctx, u, d) => basic.decide(ctx, u, d),
+  afterTurn(ctx, u) {
+    if ((u.ai.comboRest || 0) > 0) u.ai.comboRest--;
+    if (u.broken) return;
+    const refls = ctx.living('enemy').filter(isReflection);
+    if (refls.some((r) => r.charging && SKILLS[r.charging.skill].mirrorCombo)) return;
+    // Two consecutive slots held by reflections, one of them this reflection's next turn, each the first turn that
+    // reflection has on the timeline, with a party turn before them: the first of the pair carries the combo.
+    const order = ctx.timeline(10).map((r) => r.uid);
+    const i = order.indexOf(u.uid);
+    if (i < 0) return;
+    const firstAt = (uid) => order.indexOf(uid);
+    let pair = null;
+    for (const [j, k] of [[i, i + 1], [i - 1, i]]) {
+      if (j < 1 || k >= order.length) continue;
+      const x = ctx.U(order[j]), y = ctx.U(order[k]);
+      if (!isReflection(x) || !isReflection(y) || x.uid === y.uid) continue;
+      if (firstAt(x.uid) !== j || firstAt(y.uid) !== k) continue;
+      if (x.charging || y.charging || (x.ai.comboRest || 0) > 0 || (y.ai.comboRest || 0) > 0) continue;
+      if (!order.slice(0, j).some((id) => { const p = ctx.U(id); return p.side === 'party' && !ctx.has(p, 'kept'); })) continue;
+      if (!mirrorComboFor(x.id, y.id)) continue;
+      pair = [x, y];
+      break;
+    }
+    if (!pair) return;
+    const [a, b] = pair;
+    const skillId = mirrorComboFor(a.id, b.id);
+    const sk = SKILLS[skillId];
+    const target = sk.target === 'enemy' ? pickTarget(ctx, a, 'lowestHpPct') : null;
+    a.ai.comboPartner = b.uid;
+    // what must still hold when it fires: neither member pushed back, the partner's turn not yet spent
+    const data = { partner: b.uid, partnerActed: b.acted || 0, partnerDelayed: b.delayed || 0, selfDelayed: a.delayed || 0 };
+    ctx.planCharge(a, skillId, target, { data, vars: { partner: b.name }, event: { partner: b.uid, mirrorCombo: true } });
+  },
+  onChargeEnd(ctx, u) {
+    const p = u.ai.comboPartner ? ctx.U(u.ai.comboPartner) : null;
+    u.ai.comboRest = COMBO_REST;
+    if (p) p.ai.comboRest = COMBO_REST;
+  },
+  special(ctx, u, sk, e) {
+    if (!e.mirrorCombo) return null;
+    const c = e.charge || {};
+    const b = c.partner ? ctx.U(c.partner) : null;
+    u.ai.comboRest = COMBO_REST;
+    if (b) b.ai.comboRest = COMBO_REST;
+    const ready = b && b.alive && !b.broken && !ctx.has(b, 'stun') && (b.acted || 0) === c.partnerActed
+      && (b.delayed || 0) === c.partnerDelayed && (u.delayed || 0) === c.selfDelayed;
+    if (!ready) {
+      ctx.emit({ type: 'telegraph_cancel', actor: u.uid, skill: sk.id, reason: 'split' });
+      ctx.emit({ type: 'message', text: `${u.name} and ${b ? b.name : 'its partner'} fall out of step!`, kind: 'interrupt' });
+      const plan = basic.decide(ctx, u, ENEMIES[u.id]);
+      if (!plan || !plan.skill) return 100;
+      ctx.useSkill(u, SKILLS[plan.skill], plan.target);
+      return SKILLS[plan.skill].rank;
+    }
+    const mc = sk.mirrorCombo;
+    let target = null;
+    if (sk.target === 'enemy') {
+      target = c.target ? ctx.U(c.target) : null;
+      if (!target || !target.alive || ctx.has(target, 'kept')) target = ctx.U(pickTarget(ctx, u));
+      if (target) target = ctx.redirect(target, sk);
+    }
+    ctx.emit({ type: 'action_start', actor: u.uid, action: { type: 'enemy', skill: sk.id, name: sk.name, members: [u.uid, b.uid] },
+      targets: target ? [target.uid] : ctx.living('enemy').filter(isReflection).map((r) => r.uid), fx: sk.fx || null,
+      sfx: sk.sfx || null, charged: true, weapon: null });
+    for (const part of mc.parts) {
+      if (!target || !target.alive) break;
+      const by = [u, b].find((x) => x.id === part.by) || u;
+      if (part.formula === 'phys') ctx.emit({ type: 'move_to', actor: by.uid, target: target.uid });
+      ctx.strike(by, target, { id: sk.id, ...part }, null);
+    }
+    if (mc.buff) for (const r of ctx.living('enemy').filter(isReflection)) for (const [st, turns] of mc.buff) ctx.addStatus(r, st, turns, u);
+    // every combo that lands teaches them your rhythm: the reflections grow stronger for the rest of the fight (the
+    // Devour Name rule: ignoring the telegraph snowballs)
+    u.ai.combosLanded = (u.ai.combosLanded || 0) + 1;
+    const n = ctx.living('enemy').filter(isReflection).reduce((m, r) => Math.max(m, r.ai.combosLanded || 0), 0);
+    ctx.emit({ type: 'message', text: 'The reflections learn your rhythm. They grow stronger!', kind: 'mirror_combo' });
+    for (const r of ctx.living('enemy').filter(isReflection)) {
+      r.ai.combosLanded = n;
+      ctx.addMod(r, 'atk', 1 + MIRROR_EMPOWER, 99, `mirror${n}`);
+      ctx.addMod(r, 'mag', 1 + MIRROR_EMPOWER, 99, `mirror${n}`);
+    }
+    if (b.alive) ctx.endTurnOf(b, sk.rank);   // the partner's turn went into the combo
+    return sk.rank;
+  },
+};
+
+// --- The Nameless King (ai 'nameless_king') --------------------------------------------------------------------
+// 1 The Veiled King (100 to 66%): Keeping from his 2nd turn, then every 4. 2 The Shattered Court (from 66%): Sorrow
+// and Pride and the Mirror Ward (25% damage, shields locked, HP stops at 34%); Mirror Rain every 3, Keeping every 5.
+// Both adds down: the ward shatters, he is Broken for a turn (every Kept member is freed) and 3 Aurel Unmasked
+// begins (Haste; Keeping and Last Decree alternate with ordinary turns between).
+export const KEEP_EMPOWER = 0.25;    // ATK and MAG gained per member kept
+export const WARD_MULT = 0.25;       // damage taken under the Mirror Ward
+export const KEEP_TURNS = 2;
+const KING_ADDS = ['false_sorrow', 'false_pride'];
+const KEEP_EVERY = [4, 5, 3];
+const kingAdds = (ctx) => ctx.living('enemy').filter((e) => KING_ADDS.includes(e.id));
+function enterKingPhase(ctx, u, idx) {
+  const p = ENEMIES[u.id].phases[idx];
+  u.ai.phase = idx;
+  // a Keeping already announced survives the court's arrival (the mirror stays turned); anything else is dropped
+  if (!(idx === 1 && u.charging && u.charging.skill === 'keeping')) ctx.cancelCharge(u, 'phase');
+  ctx.emit({ type: 'phase', actor: u.uid, phase: idx + 1, id: p.id, name: p.name, text: p.text, sprite: p.sprite || null });
+  ctx.setWeak(u, p.weak, p.resist, idx < 2 ? `${u.id}:veiled` : `${u.id}:${p.id}`);
+  if (idx > 0) ctx.setShields(u, p.shields);
+  if (p.summon) p.summon.forEach((id, i) => ctx.summon(id, { by: u, summoned: true, firstTurn: 0.4 + 0.3 * i }));
+  if (p.ward) {
+    u.ai.ward = true;
+    ctx.emit({ type: 'message', text: 'A Mirror Ward rises around the King. While his court stands, little reaches him.', kind: 'ward', target: u.uid });
+  }
+  if (p.haste) ctx.addStatus(u, 'haste', 99, u);
+  const t = u.ai.turns;
+  if (idx === 1) { u.ai.rainAt = t + 2; u.ai.keepAt = Math.max(u.ai.keepAt ?? 0, t + 4); u.ai.nextChargeAt = t + 1; }
+  if (idx === 2) { u.ai.lastCharge = 'keeping'; u.ai.nextChargeAt = t + 1; }   // the unmasked King opens with Last Decree
+}
+function shatterWard(ctx, u) {
+  u.ai.ward = false;
+  ctx.emit({ type: 'message', text: 'The Mirror Ward shatters!', kind: 'ward_break', target: u.uid });
+  enterKingPhase(ctx, u, 2);
+  ctx.breakUnit(u);
+}
+function keepTarget(ctx) {
+  const pool = partyFoes(ctx);
+  if (!pool.length) return null;
+  const mira = pool.find((f) => f.id === 'mira');
+  if (mira && ctx.R() < 0.4) return mira.uid;
+  return pool[Math.floor(ctx.R() * pool.length)].uid;
+}
+const namelessKing = {
+  start(ctx, u) {
+    u.ai.phase = 0;
+    u.ai.keepAt = 1;     // announced at the end of his first turn: the first Keeping lands on his 2nd turn
+    u.ai.rainAt = 99;
+    const p = ENEMIES[u.id].phases[0];
+    ctx.emit({ type: 'phase', actor: u.uid, phase: 1, id: p.id, name: p.name, text: p.text, sprite: null });
+    ctx.setWeak(u, p.weak, p.resist, `${u.id}:veiled`);
+  },
+  decide(ctx, u, d) {
+    const p = d.phases[u.ai.phase ?? 0];
+    return planFromMove(ctx, u, weightedMove(ctx, u, (p && p.moves) || d.moves));
+  },
+  afterTurn(ctx, u) {
+    if (u.charging || u.broken) return;
+    const t = u.ai.turns;
+    const ph = u.ai.phase ?? 0;
+    if (t < (u.ai.nextChargeAt ?? 0)) return;
+    if (ph === 2) {
+      const next = u.ai.lastCharge === 'keeping' ? 'last_decree' : 'keeping';
+      ctx.planCharge(u, next, next === 'keeping' ? keepTarget(ctx) : null);
+      return;
+    }
+    if (ph === 1 && t >= (u.ai.rainAt ?? 99)) { ctx.planCharge(u, 'mirror_rain'); return; }
+    if (t >= (u.ai.keepAt ?? 99)) { const tg = keepTarget(ctx); if (tg) ctx.planCharge(u, 'keeping', tg); }
+  },
+  onChargeEnd(ctx, u, reason, skillId) {
+    const t = u.ai.turns;
+    const ph = u.ai.phase ?? 0;
+    u.ai.lastCharge = skillId;
+    if (skillId === 'keeping') u.ai.keepAt = t + KEEP_EVERY[ph];
+    if (skillId === 'mirror_rain') u.ai.rainAt = t + 3;
+    // at least one ordinary turn between telegraphed moves (the unmasked King: exactly one)
+    u.ai.nextChargeAt = t + (ph === 2 ? 1 : 2);
+  },
+  clampDamage(ctx, u, amt) {
+    const d = ENEMIES[u.id];
+    const ph = u.ai.phase ?? 0;
+    let floorHp = null;
+    if (ph === 0) floorHp = Math.floor(u.maxHp * d.phases[1].at);
+    else if (ph === 1 && u.ai.ward) floorHp = Math.floor(u.maxHp * d.phases[1].floor);
+    if (floorHp === null) return amt;
+    return u.hp - amt < floorHp ? Math.max(0, u.hp - floorHp) : amt;
+  },
+  onDamaged(ctx, u) {
+    if ((u.ai.phase ?? 0) === 0 && u.hp <= Math.floor(u.maxHp * ENEMIES[u.id].phases[1].at)) enterKingPhase(ctx, u, 1);
+  },
+  damageTakenMult(ctx, u) { return u.ai.ward ? WARD_MULT : 1; },
+  shieldLocked(ctx, u) { return !!u.ai.ward; },
+  onBreak(ctx, u) {
+    const held = ctx.living('party').filter((p) => ctx.has(p, 'kept'));
+    if (!held.length) return;
+    ctx.emit({ type: 'message', text: 'The mirror cracks!', kind: 'kept_break', target: u.uid });
+    for (const p of held) ctx.removeStatus(p, 'kept', 'freed');
+  },
+  onDeath(ctx, dead) {
+    if (!KING_ADDS.includes(dead.id)) return;
+    const king = ctx.living('enemy').find((e) => e.id === 'nameless_king');
+    if (king && king.ai.ward && !kingAdds(ctx).length) shatterWard(ctx, king);
+  },
+  special(ctx, u, sk, e, targets) {
+    if (!e.keep) return null;
+    for (const t of targets) {
+      if (!t || !t.alive || ctx.has(t, 'kept')) continue;
+      if (t.defending) {
+        ctx.emit({ type: 'message', text: `${t.name} looks away from the mirror!`, kind: 'kept_hold', target: t.uid });
+        continue;
+      }
+      if (!ctx.addStatus(t, 'kept', KEEP_TURNS, u)) continue;
+      ctx.emit({ type: 'message', text: `${t.name} is kept in the mirror!`, kind: 'kept', target: t.uid });
+      u.ai.keptCount = (u.ai.keptCount || 0) + 1;
+      ctx.addMod(u, 'atk', 1 + KEEP_EMPOWER, 99, `keep${u.ai.keptCount}`);
+      ctx.addMod(u, 'mag', 1 + KEEP_EMPOWER, 99, `keep${u.ai.keptCount}`);
+    }
+    return null;
+  },
+};
+
+const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased, mimic, reflections,
+  nameless_king: namelessKing };
 function scriptOf(u) {
   const d = ENEMIES[u.id];
   return (d && SCRIPTS[d.ai]) || basic;
@@ -319,18 +602,49 @@ export function afterTurn(ctx, u) { const s = scriptOf(u); if (s.afterTurn) s.af
 export function onChargeFired(ctx, u, sk) {
   u.ai.lastCharge = sk.id;
   const s = scriptOf(u);
-  if (s.onChargeFired) s.onChargeFired(ctx, u, s === archivore ? sk : ENEMIES[u.id]);
+  if (s.onChargeEnd) s.onChargeEnd(ctx, u, null, sk.id);
+  else if (s.onChargeFired) s.onChargeFired(ctx, u, s === archivore ? sk : ENEMIES[u.id]);
 }
 export function onChargeCancelled(ctx, u, reason, skillId) {
   if (u.side !== 'enemy') return;
   const s = scriptOf(u);
-  if (s === archivore) archivore.onChargeCancelled(ctx, u, reason, skillId);
+  if (s.onChargeEnd) s.onChargeEnd(ctx, u, reason, skillId);
+  else if (s === archivore) archivore.onChargeCancelled(ctx, u, reason, skillId);
   else if (s.onChargeCancelled) s.onChargeCancelled(ctx, u, ENEMIES[u.id]);
 }
 export function onBreak(ctx, u) { const s = scriptOf(u); if (s.onBreak) s.onBreak(ctx, u); }
 export function onRecover(ctx, u) { const s = scriptOf(u); if (s.onRecover) s.onRecover(ctx, u); }
+/** A unit died: every script that watches deaths hears it (the Archivore's pages, the Nameless King's court). */
 export function onDeath(ctx, u) {
-  for (const s of [archivore]) s.onDeath(ctx, u);
+  for (const s of [archivore, namelessKing]) s.onDeath(ctx, u);
+}
+/** An enemy was hit (after the damage): the Borrowed Shadow learns the type. */
+export function onHit(ctx, u, src, types, weakHit) {
+  if (u.side !== 'enemy') return;
+  const s = scriptOf(u);
+  if (s.onHit) s.onHit(ctx, u, src, types, weakHit);
+}
+/** A party member was healed by a party skill or item: every Borrowed Shadow saw it. */
+export function onPartyHeal(ctx) {
+  for (const e of ctx.living('enemy')) if (scriptOf(e) === mimic) e.ai.sawHeal = true;
+}
+/** Shields that cannot be chipped right now (the Nameless King under the Mirror Ward). */
+export function shieldLocked(ctx, u) {
+  if (!u || u.side !== 'enemy') return false;
+  const s = scriptOf(u);
+  return !!(s.shieldLocked && s.shieldLocked(ctx, u));
+}
+/** The reflect a foe has up right now, for the weakness row: 'magic' | 'phys' | null. */
+export function reflectState(ctx, u) {
+  if (!u || u.side !== 'enemy' || u.broken) return null;
+  const d = ENEMIES[u.id];
+  if (d && d.reflectWhileProtected && ctx.has(u, 'protect')) return d.reflectWhileProtected;
+  if (d && d.stances && u.ai && u.ai.stance && d.stances[u.ai.stance]) return d.stances[u.ai.stance].reflect || null;
+  return null;
+}
+/** The Borrowed Shadow's borrowed type (half damage from it), or null. */
+export function adaptedType(ctx, u) {
+  return u && u.side === 'enemy' && scriptOf(u) === mimic ? u.ai.adapt || null : null;
 }
 export function onDamaged(ctx, u) { const s = scriptOf(u); if (u.side === 'enemy' && s.onDamaged) s.onDamaged(ctx, u); }
 export function clampDamage(ctx, u, amt) {
@@ -338,20 +652,24 @@ export function clampDamage(ctx, u, amt) {
   const s = scriptOf(u);
   return s.clampDamage ? s.clampDamage(ctx, u, amt) : amt;
 }
-export function damageTakenMult(ctx, u, part) {
+export function damageTakenMult(ctx, u, part, types) {
   let m = 1;
-  if (u.side === 'enemy') { const s = scriptOf(u); if (s.damageTakenMult) m *= s.damageTakenMult(ctx, u, part); }
+  if (u.side === 'enemy') { const s = scriptOf(u); if (s.damageTakenMult) m *= s.damageTakenMult(ctx, u, part, types); }
   if (part && part.id === 'devour_name' && u.defending) m *= DEVOUR_GUARDED;
   return m;
 }
 export function reflect(ctx, tgt, part) {
   if (tgt.side !== 'enemy') return null;
+  // trait `reflectWhileProtected` (the Glassback): while it has Protect and is not Broken, spells rebound
+  const d = ENEMIES[tgt.id];
+  if (d && d.reflectWhileProtected === 'magic' && !tgt.broken && ctx.has(tgt, 'protect') && part.formula === 'mag') return 'magic';
   const s = scriptOf(tgt);
   return s.reflect ? s.reflect(ctx, tgt, part) : null;
 }
+/** Script specials (Devour Name, Feast, Keeping, the Mirrored Combo). May return a timeline rank. */
 export function special(ctx, u, sk, e, targets) {
   const s = scriptOf(u);
-  if (s.special) s.special(ctx, u, sk, e, targets);
+  return s.special ? s.special(ctx, u, sk, e, targets) : null;
 }
 
 // =============================================================================== party policies
@@ -363,9 +681,13 @@ function cmdEntry(cmds, group, key, id) {
   return c.list.find((x) => x[key] === id) || null;
 }
 
-/** Stance reflection known to the player (the stance is shown on screen). */
+/** Reflection known to the player (the Warden's stance, the Glassback's Protect: both are on screen). */
 function reflectsAgainst(foe, formula) {
-  if (foe.id !== 'echo_warden' || foe.broken || !foe.ai || !foe.ai.stance) return false;
+  if (!foe || foe.broken) return false;
+  const d = ENEMIES[foe.id];
+  if (d && d.reflectWhileProtected === 'magic' && formula === 'mag' && foe.statuses && foe.statuses.protect
+    && foe.statuses.protect.turns > 0) return true;
+  if (foe.id !== 'echo_warden' || !foe.ai || !foe.ai.stance) return false;
   const s = ENEMIES.echo_warden.stances[foe.ai.stance];
   return (s.reflect === 'magic' && formula === 'mag') || (s.reflect === 'phys' && formula === 'phys');
 }
@@ -413,7 +735,7 @@ function partyTurnsBefore(b, uid) {
 /** The healer (Mira) can act usefully within the next three slots: alive, not silenced, has MP for a Mend. */
 function healerReady(b, order) {
   const m = b.unit('mira');
-  if (!m || !m.alive || (m.statuses && m.statuses.silence) || m.mp < 4) return false;
+  if (!m || !m.alive || (m.statuses && (m.statuses.silence || m.statuses.kept)) || m.mp < 4) return false;
   const idx = order.indexOf('mira');
   return idx >= 0 && idx <= 3;
 }
@@ -433,7 +755,9 @@ function finishingBlow(b, me, foes) {
 export function competentPolicy(b, me, opts = {}) {
   const cmds = b.commands(me);
   const foes = b.living('enemy');
-  const allies = b.living('party');
+  const isKept = (u) => !!(u.statuses && u.statuses.kept && u.statuses.kept.turns > 0);
+  const keptAllies = b.living('party').filter(isKept);
+  const allies = b.living('party').filter((u) => !isKept(u));   // a Kept member cannot be healed or guarded
   const st = b.state;
   const isBossFight = foes.some((f) => f.boss) || st.options.boss;
   const can = (group, key, id) => { const e = cmdEntry(cmds, group, key, id); return !!(e && e.enabled); };
@@ -455,6 +779,9 @@ export function competentPolicy(b, me, opts = {}) {
     const breakAct = bestBreakAction(b, me, t.foe, canSkill);
     if (breakAct) return breakAct;
     if (!t.foe.boss && canSkill('lunge') && me.weapon === 'spear') return { type: 'skill', skill: 'lunge', target: t.foe.uid };
+    // a Mirrored Combo falls apart when either reflection is pushed back: Lunge knocks even a boss back
+    if (t.skill.mirrorCombo && me.weapon === 'spear' && canSkill('lunge')) return { type: 'skill', skill: 'lunge', target: t.foe.uid };
+    if (t.skill.mirrorCombo && me.weapon === 'bow' && canSkill('pin_shot')) return { type: 'skill', skill: 'pin_shot', target: t.foe.uid };
     // No break in one hit: chip its shields with a known weakness when the party has enough turns to finish the
     // Break before the charge fires (a Break cancels the telegraph).
     const chip = bestChipAction(b, me, t.foe, canSkill);
@@ -466,14 +793,20 @@ export function competentPolicy(b, me, opts = {}) {
     const hitsBeforeMyTurn = foeIdx >= 0 && (mineIdx < 0 || foeIdx < mineIdx);
     if (t.victims.includes(me.uid) && hitsBeforeMyTurn) {
       const dmg = threatDamage(t.foe, t.skill, me);
-      if (t.skill.id === 'devour_name' || dmg > me.hp * 0.3 || t.skill.target === 'enemy') return { type: 'defend' };
+      // Defend halves it; when even half would finish me, a potion that keeps me standing is the better answer
+      if (dmg / 2 >= me.hp && t.skill.id !== 'keeping' && t.skill.id !== 'devour_name') {
+        const missing = me.maxHp - me.hp;
+        if (hasItem('hi_potion') && me.hp + Math.min(180, missing) > dmg) return { type: 'item', item: 'hi_potion', target: me.uid };
+        if (hasItem('potion') && me.hp + Math.min(60, missing) > dmg) return { type: 'item', item: 'potion', target: me.uid };
+      }
+      if (t.skill.id === 'devour_name' || t.skill.id === 'keeping' || dmg > me.hp * 0.3 || t.skill.target === 'enemy') return { type: 'defend' };
     }
     // Bram guards a single-target victim who cannot defend in time
     if (me.id === 'bram' && t.skill.target === 'enemy' && t.victims[0] && t.victims[0] !== me.uid && canSkill('guard')) {
       const v = b.unit(t.victims[0]);
       const vIdx = order.indexOf(v.uid);
       const fIdx = order.indexOf(t.foe.uid);
-      if (v && v.alive && (vIdx < 0 || vIdx > fIdx || v.id === 'mira' || t.skill.id === 'devour_name')) {
+      if (v && v.alive && (vIdx < 0 || vIdx > fIdx || v.id === 'mira' || t.skill.id === 'devour_name' || t.skill.id === 'keeping')) {
         // Guard lasts until Bram's next turn: make sure that comes after the foe acts
         const p = b.previewTimeline(me, { type: 'skill', skill: 'guard', target: v.uid });
         const bIdx = p.order.findIndex((r) => r.uid === me.uid);
@@ -489,6 +822,15 @@ export function competentPolicy(b, me, opts = {}) {
   const down = st.order.map((id) => st.units[id]).filter((u) => u.side === 'party' && !u.alive);
   if (down.length && foes.length && hasItem('phoenix_feather') && !finishingBlow(b, me, foes)) {
     return { type: 'item', item: 'phoenix_feather', target: down[0].uid };
+  }
+  // Free a Kept member (Episode 2): Mira's Recall, or a Silver Salve when she cannot (Kept, silenced, out of MP or far).
+  if (keptAllies.length && foes.length && !finishingBlow(b, me, foes)) {
+    const k = keptAllies.slice().sort((a, c) => c.statuses.kept.turns - a.statuses.kept.turns)[0];
+    if (me.id === 'mira' && canSkill('recall')) return { type: 'skill', skill: 'recall', target: k.uid };
+    const m = b.unit('mira');
+    const miraFree = m && m.alive && !isKept(m) && !(m.statuses && m.statuses.silence) && m.mp >= 5 && order.indexOf('mira') >= 0
+      && order.indexOf('mira') <= 2;
+    if (!miraFree && hasItem('silver_salve')) return { type: 'item', item: 'silver_salve', target: k.uid };
   }
   // Groups of three or more Archive-grade foes (level 4+) wear the party down between Mira's turns: heal at 55%
   // there. Valley packs are not that dangerous and an early Mend only drags the fight past the 5-round target.
@@ -527,7 +869,7 @@ export function competentPolicy(b, me, opts = {}) {
   }
   // Mira silenced in a long fight: an Echo Herb gets the healer back
   const mira = b.unit('mira');
-  if (mira && mira.alive && mira.statuses.silence && mira.statuses.silence.turns > 1 && (isBossFight || foes.length > 1)
+  if (mira && mira.alive && !isKept(mira) && mira.statuses.silence && mira.statuses.silence.turns > 1 && (isBossFight || foes.length > 1)
     && me.uid !== 'mira' && hasItem('echo_herb')) return { type: 'item', item: 'echo_herb', target: 'mira' };
   if (me.id === 'mira' && me.mp < 6 && hasItem('ether') && isBossFight) return { type: 'item', item: 'ether', target: me.uid };
 
@@ -640,9 +982,9 @@ function damageOptions(b, me, cmds, canSkill) {
     const gain = !boss && me.maxMp ? Math.min(mpGainOf(sk), me.maxMp - me.mp) * mpWeight : 0;
     if (sk.target === 'enemy') {
       for (const f of foes) {
-        if (reflectsAgainst(f, sk.formula)) continue;
+        if (!sk.trueStrike && reflectsAgainst(f, sk.formula)) continue;
         const est = b.estimate(me, { ...a, target: f.uid })[0];
-        if (!est) continue;
+        if (!est || est.redirect) continue;   // a Taunt or Cover sends it to another foe: that foe's own option counts
         out.push({ action: { ...a, target: f.uid }, score: scoreHit(b, me, f, est, sk) / rank - cost * mpWeight + gain });
       }
     } else {
@@ -679,9 +1021,15 @@ function scoreHit(b, me, f, est, sk) {
   } else if (est.weak === '?' && !f.broken) {
     s += 4; // curiosity: unknown types are worth testing
   }
+  // Shatter's extra glass chips (Episode 2)
+  if (est.weak !== true && est.chip && !f.broken) {
+    s += Math.min(est.chip, f.shields) * (8 + f.maxHp * 0.04);
+    if (est.breaks) s += 20 + f.maxHp * 0.12 + (f.charging ? 60 : 0);
+  }
   if (f.charging) s *= 1.25;
   if (f.broken) s *= 1.1;
   if (f.id === 'lost_page') s *= 1.6;
+  if (f.id === 'false_sorrow') s *= 1.5;   // she heals the King: the court's first target
   if (f.charging && f.charging.skill === 'feast') s *= 1.5;
   if (f.elite) s *= 1.1;
   return s;
@@ -691,7 +1039,7 @@ function bestTarget(b, me, action) {
   let best = null;
   for (const f of b.living('enemy')) {
     const est = b.estimate(me, { ...action, target: f.uid }).find((e) => e.target === f.uid);
-    if (!est) continue;
+    if (!est || est.redirect) continue;
     const sc = scoreHit(b, me, f, est, SKILLS[action.skill] || SKILLS.attack);
     if (!best || sc > best.score) best = { foe: f, est, score: sc };
   }
@@ -712,7 +1060,7 @@ function bestBreakAction(b, me, foe, canSkill) {
     if (sk.target === 'random') continue;
     if (reflectsAgainst(foe, sk.formula) || (sk.parts && sk.parts.some((p) => reflectsAgainst(foe, p.formula)))) continue;
     const est = b.estimate(me, { ...a, target: foe.uid }).find((e) => e.target === foe.uid);
-    if (est && est.breaks && est.weak !== '?') return { ...a, target: foe.uid };
+    if (est && !est.redirect && est.breaks && est.weak !== '?') return { ...a, target: foe.uid };
   }
   return null;
 }
@@ -732,7 +1080,7 @@ function bestChipAction(b, me, foe, canSkill) {
     if (!(sk.formula === 'phys' || sk.formula === 'mag') || sk.target === 'random') continue;
     if (reflectsAgainst(foe, sk.formula)) continue;
     const est = b.estimate(me, { ...a, target: foe.uid }).find((e) => e.target === foe.uid);
-    if (!est || est.weak !== true) continue;
+    if (!est || est.redirect || est.weak !== true) continue;
     const score = Math.min(est.hits || sk.hits || 1, foe.shields) * 10 + est.avg * 0.1 - (sk.mp || 0) * 0.5;
     if (!best || score > best.score) best = { action: { ...a, target: foe.uid }, score };
   }

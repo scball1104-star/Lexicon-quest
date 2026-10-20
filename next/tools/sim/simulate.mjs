@@ -5,7 +5,9 @@
 //   node tools/sim/simulate.mjs                 full report (400 battles per encounter and policy)
 //   node tools/sim/simulate.mjs --n 100         fewer battles
 //   node tools/sim/simulate.mjs --zone valley   one zone (valley | archive_f1 | archive_f2 | archive_f3 | archive_boss
-//                                               | whisperwood_hollow, the optional side dungeon; included by default)
+//                                               | whisperwood_hollow, the optional side dungeon; included by default
+//                                               | Episode 2: east_road | court_f1 | court_f2 | court_f3 | court_throne)
+//   node tools/sim/simulate.mjs --episode 2     one episode (1 = Episode 1 and Whisperwood, 2 = Episode 2)
 //   node tools/sim/simulate.mjs --check         exit 1 if a target is missed (also runs the route and economy checks)
 //   node tools/sim/simulate.mjs --json          also write tools/sim/out/sim.json
 //   node tools/sim/simulate.mjs --trace enc seed policy   print one battle's events
@@ -15,7 +17,7 @@
 import { createBattle, makeRng } from '../../src/battle/rules.js';
 import { partyAction } from '../../src/battle/ai.js';
 import { newMember, expForLevel, levelForExp } from '../../src/data/party.js';
-import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, rollEncounter, encounterExp } from '../../src/data/encounters.js';
+import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, EP2_ZONE_ORDER, rollEncounter, encounterExp } from '../../src/data/encounters.js';
 import { ENEMIES } from '../../src/data/enemies.js';
 import { ITEMS } from '../../src/data/items.js';
 import { SHOPS } from '../../src/data/shops.js';
@@ -30,6 +32,9 @@ export const TARGETS = {
   archivore: { roundsMin: 8, roundsMax: 12, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15 },
   // W6-content: the Briar Alpha (Whisperwood Hollow mini-boss) at Lv 6-7; naive play (attack only) loses often.
   whisperwood_alpha: { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6 },
+  // Episode 2 (EPISODE2_PLAN.md 6.4, 6.5, 6.8). keptMax: careful play averages one Kept member or fewer per fight.
+  other_selves: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
+  nameless_king: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, keptMax: 1 },
   // Party level on entering and leaving each zone if the player fights each zone's plan once
   // (brief: valley Lv 2-3, Archive F1 Lv 4, F2 Lv 5-6, F3 Lv 7, Archivore Lv 8). Also checked at 80%
   // of the plan ("most visible enemies") with a one-level allowance below.
@@ -39,8 +44,24 @@ export const TARGETS = {
     archive_f2: { start: [4, 5], end: [6, 6] },
     archive_f3: { start: [6, 6], end: [7, 8] },
     archive_boss: { start: [8, 8], end: [8, 10] },
+    // Episode 2 continues from Episode 1's last EXP (6.1): road 9 -> 10, F1 10 -> 11, F2 11 -> 12, F3 12 -> 13, King 13.
+    east_road: { start: [9, 9], end: [10, 10] },
+    court_f1: { start: [10, 10], end: [11, 11] },
+    court_f2: { start: [11, 11], end: [12, 12] },
+    court_f3: { start: [12, 12], end: [13, 13] },
+    court_throne: { start: [13, 13], end: [13, 14] },
   },
 };
+/** Boss encounters measured like the Archivore: careful vs attack-only vs ignoring telegraphs. */
+export const BOSS_TARGETS = ['archivore', 'other_selves', 'nameless_king'];
+// Party levels the suite plays each zone at, and boss fights at (the level the player meets them).
+export const SUITE_LEVELS = {
+  valley: [2, 3], archive_f1: [4], archive_f2: [5, 6], archive_f3: [7], archive_boss: [8], whisperwood_hollow: [6, 7],
+  east_road: [9, 10], court_f1: [10, 11], court_f2: [11, 12], court_f3: [12, 13], court_throne: [13],
+};
+// The first level is where the plan meets the boss (fighting every plan fight); reckless play is measured there.
+export const BOSS_LEVELS = { echo_warden: [5, 6], whisperwood_alpha: [6, 7], archivore: [8], other_selves: [11, 12], nameless_king: [13] };
+export const EPISODES = { 1: [...ZONE_ORDER, ...OPTIONAL_ZONES], 2: EP2_ZONE_ORDER };
 
 export function makeParty(zone, level) {
   const L = LOADOUTS[zone];
@@ -72,7 +93,13 @@ export function runBattle({ zone, level, encounter, seed, policy = 'competent', 
   const log = trace ? [...b.startEvents] : null;
   let steps = 0;
   let kos = 0;
-  const count = (evs) => { for (const ev of evs) if (ev.type === 'ko' && b.unit(ev.target).side === 'party') kos++; };
+  let kept = 0;
+  const count = (evs) => {
+    for (const ev of evs) {
+      if (ev.type === 'ko' && b.unit(ev.target).side === 'party') kos++;
+      if (ev.type === 'status_add' && ev.status === 'kept') kept++;
+    }
+  };
   count(b.startEvents);
   while (!b.isOver() && steps++ < 1500) {
     const u = b.current();
@@ -94,7 +121,7 @@ export function runBattle({ zone, level, encounter, seed, policy = 'competent', 
   const maxHp = units.reduce((s, x) => s + x.maxHp, 0);
   const hpEnd = units.reduce((s, x) => s + (x.alive ? x.hp : 0), 0);
   const itemsUsed = Object.values(r.itemsUsed || {}).reduce((s, v) => s + v, 0);
-  return { outcome: r.outcome, win: r.outcome === 'victory', rounds: r.rounds, hpLoss: 1 - hpEnd / maxHp, kos, itemsUsed,
+  return { outcome: r.outcome, win: r.outcome === 'victory', rounds: r.rounds, hpLoss: 1 - hpEnd / maxHp, kos, kept, itemsUsed,
     exp: r.exp, log };
 }
 
@@ -110,6 +137,7 @@ export function runSet({ zone, level, encounter, n, policy, elite = false, seed0
     p10: quantile(rows.map((r) => r.rounds), 0.1), p90: quantile(rows.map((r) => r.rounds), 0.9),
     hpLoss: rows.reduce((s, r) => s + r.hpLoss, 0) / n,
     kos: rows.reduce((s, r) => s + r.kos, 0) / n,
+    kept: rows.reduce((s, r) => s + r.kept, 0) / n,
     items: rows.reduce((s, r) => s + r.itemsUsed, 0) / n,
   };
 }
@@ -119,12 +147,13 @@ export function runSuite({ n = 400, zones = ZONE_ORDER, policies = ['competent',
   const out = [];
   for (const z of zones) {
     const zone = ZONES[z];
-    const levels = z === 'archive_f2' ? [5, 6] : z === 'valley' ? [2, 3] : z === 'whisperwood_hollow' ? [6, 7] : [zone.level[0]];
+    const levels = SUITE_LEVELS[z] || [zone.level[0]];
     for (const [enc] of zone.plan) {
       const isBoss = ENCOUNTERS[enc].boss;
-      const lv = enc === 'echo_warden' ? [5, 6] : enc === 'whisperwood_alpha' ? [6, 7] : isBoss ? [8] : levels;
-      const pols = enc === 'archivore' ? [...new Set([...policies, 'reckless'])] : policies;
-      for (const level of lv) for (const policy of pols) out.push(runSet({ zone: z, level, encounter: enc, n, policy }));
+      const lv = BOSS_LEVELS[enc] || (isBoss ? [zone.level[0]] : levels);
+      // reckless (ignoring telegraphs) is measured at the level the plan fights the boss at (the first listed)
+      const pols = (level) => (BOSS_TARGETS.includes(enc) && level === lv[0] ? [...new Set([...policies, 'reckless'])] : policies);
+      for (const level of lv) for (const policy of pols(level)) out.push(runSet({ zone: z, level, encounter: enc, n, policy }));
       if (elites && !isBoss) out.push(runSet({ zone: z, level: lv[lv.length - 1], encounter: enc, n: Math.max(20, Math.floor(n / 4)), policy: 'competent', elite: true }));
     }
     if (z === 'whisperwood_hollow') {
@@ -136,11 +165,15 @@ export function runSuite({ n = 400, zones = ZONE_ORDER, policies = ['competent',
   return out;
 }
 
-/** Party level through Episode 1 if the player fights `share` of each zone's plan (no elites). */
-export function progression(share = 1) {
+/**
+ * Party level through Episode 1 if the player fights `share` of each zone's plan (no elites). episode 2 continues from
+ * Episode 1's last EXP at the same share through EP2_ZONE_ORDER.
+ */
+export function progression(share = 1, episode = 1) {
   let exp = 0;
   const rows = [];
-  for (const z of ZONE_ORDER) {
+  if (episode === 2) exp = progression(share, 1).slice(-1)[0].exp;
+  for (const z of episode === 2 ? EP2_ZONE_ORDER : ZONE_ORDER) {
     const startLv = levelForExp(exp);
     let fights = 0;
     for (const [enc, count] of ZONES[z].plan) {
@@ -191,16 +224,25 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
     }
     if (r.policy === 'naive' && r.win > t.naiveWinMax) fails.push(`${r.encounter} Lv${r.level}: naive wins ${pct(r.win)} > ${pct(t.naiveWinMax)}`);
   }
-  const arch = rows.filter((x) => x.encounter === 'archivore');
-  const ac = arch.find((r) => r.policy === 'competent');
-  const an = arch.find((r) => r.policy === 'naive');
-  const ar = arch.find((r) => r.policy === 'reckless');
-  if (ac) {
-    if (ac.win < T.archivore.winMin) fails.push(`archivore: competent win ${pct(ac.win)} < ${pct(T.archivore.winMin)}`);
-    if (ac.rounds < T.archivore.roundsMin || ac.rounds > T.archivore.roundsMax) fails.push(`archivore: rounds ${ac.rounds.toFixed(2)} outside 8-12`);
+  // the Archivore, the Other Selves and the Nameless King: careful wins in the round band, attack-only does not, and
+  // ignoring telegraphs costs win rate (every level the suite plays the boss at)
+  for (const id of BOSS_TARGETS) {
+    const t = T[id];
+    for (const level of [...new Set(rows.filter((x) => x.encounter === id).map((x) => x.level))]) {
+      const at = rows.filter((x) => x.encounter === id && x.level === level);
+      const ac = at.find((r) => r.policy === 'competent');
+      const an = at.find((r) => r.policy === 'naive');
+      const ar = at.find((r) => r.policy === 'reckless');
+      const tag = `${id} Lv${level}`;
+      if (ac) {
+        if (ac.win < t.winMin) fails.push(`${tag}: competent win ${pct(ac.win)} < ${pct(t.winMin)}`);
+        if (ac.rounds < t.roundsMin || ac.rounds > t.roundsMax) fails.push(`${tag}: rounds ${ac.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
+        if (t.keptMax !== undefined && ac.kept > t.keptMax) fails.push(`${tag}: careful play is Kept ${ac.kept.toFixed(2)} times per fight (want <= ${t.keptMax})`);
+      }
+      if (an && an.win > t.naiveWinMax) fails.push(`${tag}: naive wins ${pct(an.win)} > ${pct(t.naiveWinMax)}`);
+      if (ac && ar && ac.win - ar.win < t.recklessWorse) fails.push(`${tag}: ignoring telegraphs only costs ${pct(ac.win - ar.win)} win rate`);
+    }
   }
-  if (an && an.win > T.archivore.naiveWinMax) fails.push(`archivore: naive wins ${pct(an.win)} > ${pct(T.archivore.naiveWinMax)}`);
-  if (ac && ar && ac.win - ar.win < T.archivore.recklessWorse) fails.push(`archivore: ignoring telegraphs only costs ${pct(ac.win - ar.win)} win rate`);
   for (const p of prog) {
     const t = T.levels[p.zone];
     const slack = p.share < 1 ? 1 : 0;
@@ -251,12 +293,40 @@ export function checkEconomy(e = economy()) {
   return fails;
 }
 
+/**
+ * Episode 2 gold (EPISODE2_PLAN.md 7.6): battle gold per zone from Episode 1's leftover, against the Hollow's prices.
+ * The plan: enough for two tier 3 pieces on reaching the Hollow and two tier 4 pieces before F3, never everything.
+ * (A floor: chests, sales and drops come on top, which is what the LOADOUTS' fuller kit leans on.)
+ */
+export function economy2({ startGold = economy().end } = {}) {
+  const zoneGold = (z) => ZONES[z].plan.reduce((g, [enc, n]) => g + ENCOUNTERS[enc].enemies.reduce((s, e) => s + ENEMIES[e].gold, 0) * n, 0);
+  const rows = [];
+  let gold = startGold;
+  for (const z of EP2_ZONE_ORDER) { rows.push({ zone: z, arrive: gold, earned: zoneGold(z) }); gold += zoneGold(z); }
+  const price = (id) => ITEMS[id].price;
+  const smithy = SHOPS.hollow_smithy.stock;
+  const t3 = smithy.filter((x) => !x.ifFlag && ITEMS[x.item].ilvl >= 9).map((x) => price(x.item)).sort((a, b) => a - b);
+  const t4 = smithy.filter((x) => x.ifFlag === 'court_f2_done').map((x) => price(x.item)).sort((a, b) => a - b);
+  const atHollow = rows[1].arrive;                       // after the Fading Road
+  const beforeF3 = rows[3].arrive;                       // after F1, F2 and the Other Selves (nothing spent)
+  const typicalT3 = price('steel_cuirass') + price('sage_robe');
+  const typicalT4 = price('silverglass_blade') + price('mirror_rod');
+  return { rows, end: gold, atHollow, beforeF3, typicalT3, typicalT4, everything: [...t3, ...t4].reduce((a, b) => a + b, 0) };
+}
+export function checkEconomy2(e = economy2()) {
+  const fails = [];
+  if (e.atHollow < e.typicalT3) fails.push(`economy (Episode 2): ${e.atHollow} gold at the Hollow, two tier 3 pieces cost ${e.typicalT3}`);
+  if (e.beforeF3 - e.typicalT3 < e.typicalT4) fails.push(`economy (Episode 2): ${e.beforeF3 - e.typicalT3} gold before F3 after the Hollow buys, two tier 4 pieces cost ${e.typicalT4}`);
+  if (e.end >= e.everything) fails.push(`economy (Episode 2): ${e.end} gold by the end buys the whole Silverglass Smithy (${e.everything})`);
+  return fails;
+}
+
 export function formatTable(rows) {
-  const head = ['zone', 'encounter', 'Lv', 'policy', 'win', 'rounds', 'p10-p90', 'hp lost', 'KOs', 'items'];
+  const head = ['zone', 'encounter', 'Lv', 'policy', 'win', 'rounds', 'p10-p90', 'hp lost', 'KOs', 'items', 'kept'];
   const lines = [head.join(' | '), head.map(() => '---').join(' | ')];
   for (const r of rows) {
     lines.push([r.zone, r.encounter + (r.elite ? ' (elite)' : ''), r.level, r.policy, pct(r.win), r.rounds.toFixed(2),
-      `${r.p10.toFixed(1)}-${r.p90.toFixed(1)}`, pct(r.hpLoss), r.kos.toFixed(2), r.items.toFixed(2)].join(' | '));
+      `${r.p10.toFixed(1)}-${r.p90.toFixed(1)}`, pct(r.hpLoss), r.kos.toFixed(2), r.items.toFixed(2), (r.kept || 0).toFixed(2)].join(' | '));
   }
   return lines.join('\n');
 }
@@ -272,7 +342,7 @@ if (isMain) {
     const seed = Number(args[i + 2] || 1);
     const policy = args[i + 3] || 'competent';
     const z = ENCOUNTERS[enc].zone;
-    const level = Number(get('--level', ZONES[z].level[ZONES[z].level.length - 1]));
+    const level = Number(get('--level', (BOSS_LEVELS[enc] || ZONES[z].level).slice(-1)[0]));
     const r = runBattle({ zone: z, level, encounter: enc, seed, policy, trace: true });
     for (const ev of r.log) {
       if (ev.type === 'timeline') continue;
@@ -283,14 +353,16 @@ if (isMain) {
   } else {
     const n = Number(get('--n', 400));
     const zone = get('--zone', null);
+    const episode = get('--episode', null);
     const t0 = Date.now();
-    const rows = runSuite({ n, zones: zone ? [zone] : [...ZONE_ORDER, ...OPTIONAL_ZONES] });
-    const prog = [...progression(1), ...progression(0.8)];
+    const zones = zone ? [zone] : episode ? EPISODES[episode] : [...EPISODES[1], ...EPISODES[2]];
+    const rows = runSuite({ n, zones });
+    const prog = [...progression(1), ...progression(0.8), ...progression(1, 2), ...progression(0.8, 2)];
     console.log(formatTable(rows));
-    console.log('\nProgression (fight each zone plan once, then 80% of it):');
+    console.log('\nProgression (fight each zone plan once, then 80% of it; Episode 2 continues from Episode 1):');
     for (const p of prog) console.log(`  ${pct(p.share).padStart(4)} ${p.zone.padEnd(13)} ${String(p.fights).padStart(4)} fights  Lv ${p.startLevel} -> ${p.endLevel}  (total EXP ${p.exp})`);
-    const fails = checkTargets(rows, zone ? prog.filter((p) => p.zone === zone) : prog);
-    if (!zone) {
+    const fails = checkTargets(rows, prog.filter((p) => zones.includes(p.zone)));
+    if (!zone && episode !== '2') {
       // W10: the route (HP and MP carried between fights, elites at the live rate) and the gold flow
       const { routeSummary, checkRoute, REST_PLANS } = await import('./route.mjs');
       const careful = routeSummary({ n: 100, rests: REST_PLANS.current });
@@ -302,6 +374,12 @@ if (isMain) {
       const eco = economy();
       console.log(`Economy: ${eco.earned} battle gold on the route, ${eco.atRook} at Rook's salvage, tier-3 stock ${eco.sinkTotal}`);
       fails.push(...checkEconomy(eco));
+    }
+    if (!zone && episode !== '1') {
+      const e2 = economy2();
+      console.log(`Economy (Episode 2): ${e2.rows.map((r) => `${r.zone} arrive ${r.arrive} +${r.earned}`).join(', ')}; at the Hollow ${e2.atHollow} `
+        + `(two tier 3: ${e2.typicalT3}), before F3 ${e2.beforeF3} (two tier 4: ${e2.typicalT4}), end ${e2.end} (the whole smithy: ${e2.everything})`);
+      fails.push(...checkEconomy2(e2));
     }
     console.log(`\n${fails.length ? 'TARGETS MISSED:\n  ' + fails.join('\n  ') : 'All targets met.'}`);
     console.log(`(${rows.reduce((s, r) => s + r.n, 0)} battles in ${((Date.now() - t0) / 1000).toFixed(1)} s)`);

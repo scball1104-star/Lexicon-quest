@@ -70,6 +70,52 @@ export const ALPHA_TIER_RUNS = [
  */
 export function knownBestiary() {
   const out = {};
-  for (const e of Object.values(ENEMIES)) if (!e.boss && e.id !== 'lost_page') out[e.id] = [...e.weak, ...e.resist, ...e.immune, ...e.absorb];
+  // boss adds are met first inside their boss fight (the Archivore's pages, the Nameless King's Sorrow and Pride)
+  const adds = ['lost_page', 'false_sorrow', 'false_pride'];
+  for (const e of Object.values(ENEMIES)) if (!e.boss && !adds.includes(e.id)) out[e.id] = [...e.weak, ...e.resist, ...e.immune, ...e.absorb];
   return out;
 }
+
+// ------------------------------------------------------------------ Episode 2 (EPISODE2_PLAN.md 6.8)
+// east_road: the Archivore's loadout with Lanternheart on the hero, mastery about 10% up, one Hi-Ether more.
+// court_f1: + Bearded Axe (hero), Archivist's Staff and Hunter's Bow (Mira), Winged Lance and Bronze Plate (Bram), an Iron
+// Helm and Traveler's Boots (hero), Silver Circlet and Owl Charm (Mira) (the plan's calibration stats need the helm).
+// court_f2: + a tier 3 helm and body (Steel Helm, Steel Cuirass on the hero; Moon Circlet on Mira). court_f3: + Mere Pike
+// (Bram), Mirror Rod (Mira), Silver Mail (hero). court_throne: + the Twinfold Charm (hero), mastery up a step.
+// Mastery climbs from M5 (240) to about M6 (380) across the episode.
+const AB = LOADOUTS.archive_boss;
+LOADOUTS.east_road = {
+  hero: { weapon: 'sword', equip: { ...AB.hero.equip, sword: 'lanternheart' }, mastery: { sword: 245, axe: 70 } },
+  mira: { weapon: 'staff', equip: { ...AB.mira.equip }, mastery: { staff: 160, bow: 50 } },
+  bram: { weapon: 'spear', equip: { ...AB.bram.equip }, mastery: { spear: 245, axe: 70 } },
+  inventory: { potion: 6, hi_potion: 3, ether: 3, hi_ether: 1, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2 },
+};
+const ER = LOADOUTS.east_road;
+LOADOUTS.court_f1 = {
+  hero: { weapon: 'sword', equip: { ...ER.hero.equip, axe: 'bearded_axe', head: 'iron_helm', boots: 'traveler_boots' }, mastery: { sword: 290, axe: 90 } },
+  mira: { weapon: 'staff', equip: { ...ER.mira.equip, staff: 'archivist_staff', bow: 'hunters_bow', head: 'silver_circlet', charm: 'owl_charm' },
+    mastery: { staff: 200, bow: 70 } },
+  bram: { weapon: 'spear', equip: { ...ER.bram.equip, spear: 'winged_lance', body: 'bronze_plate' }, mastery: { spear: 290, axe: 90 } },
+  inventory: { potion: 6, hi_potion: 4, ether: 3, hi_ether: 1, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2, silver_salve: 1 },
+};
+const C1 = LOADOUTS.court_f1;
+LOADOUTS.court_f2 = {
+  hero: { weapon: 'sword', equip: { ...C1.hero.equip, head: 'steel_helm', body: 'steel_cuirass' }, mastery: { sword: 330, axe: 110 } },
+  mira: { weapon: 'staff', equip: { ...C1.mira.equip, head: 'moon_circlet' }, mastery: { staff: 240, bow: 90 } },
+  bram: { weapon: 'spear', equip: { ...C1.bram.equip }, mastery: { spear: 330, axe: 110 } },
+  inventory: { potion: 6, hi_potion: 4, ether: 3, hi_ether: 2, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2, silver_salve: 1 },
+};
+const C2 = LOADOUTS.court_f2;
+LOADOUTS.court_f3 = {
+  hero: { weapon: 'sword', equip: { ...C2.hero.equip, body: 'silver_mail' }, mastery: { sword: 380, axe: 130 } },
+  mira: { weapon: 'staff', equip: { ...C2.mira.equip, staff: 'mirror_rod' }, mastery: { staff: 280, bow: 110 } },
+  bram: { weapon: 'spear', equip: { ...C2.bram.equip, spear: 'mere_pike' }, mastery: { spear: 380, axe: 130 } },
+  inventory: { potion: 6, hi_potion: 5, ether: 3, hi_ether: 2, antidote: 1, eye_drops: 3, echo_herb: 3, phoenix_feather: 2, silver_salve: 2 },
+};
+const C3 = LOADOUTS.court_f3;
+LOADOUTS.court_throne = {
+  hero: { weapon: 'sword', equip: { ...C3.hero.equip, charm: 'twinfold_charm' }, mastery: { sword: 420, axe: 150 } },
+  mira: { weapon: 'staff', equip: { ...C3.mira.equip }, mastery: { staff: 320, bow: 130 } },
+  bram: { weapon: 'spear', equip: { ...C3.bram.equip }, mastery: { spear: 420, axe: 150 } },
+  inventory: { potion: 5, hi_potion: 5, ether: 3, hi_ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 3, silver_salve: 2 },
+};

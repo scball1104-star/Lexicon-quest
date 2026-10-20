@@ -30,8 +30,10 @@ function randomAction(b, rng) {
 
 test('random play never breaks the rules engine', () => {
   const zoneOf = { valley: 'valley', archive_f1: 'archive_f1', archive_f2: 'archive_f2', archive_f3: 'archive_f3', archive_boss: 'archive_boss',
-    whisperwood_hollow: 'whisperwood_hollow' };
-  const levels = { valley: 3, archive_f1: 4, archive_f2: 6, archive_f3: 7, archive_boss: 8, whisperwood_hollow: 7 };
+    whisperwood_hollow: 'whisperwood_hollow', east_road: 'east_road', court_f1: 'court_f1', court_f2: 'court_f2', court_f3: 'court_f3',
+    court_throne: 'court_throne' };
+  const levels = { valley: 3, archive_f1: 4, archive_f2: 6, archive_f3: 7, archive_boss: 8, whisperwood_hollow: 7,
+    east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13 };
   let battles = 0;
   for (const enc of Object.values(ENCOUNTERS)) {
     for (let seed = 1; seed <= 14; seed++) {
@@ -39,7 +41,7 @@ test('random play never breaks the rules engine', () => {
       const zone = zoneOf[enc.zone];
       const { battle: b } = createEncounterBattle(enc.id, {
         party: makeParty(zone, levels[zone]), rng, eliteRate: 1,
-        inventory: { potion: 3, hi_potion: 1, ether: 2, phoenix_feather: 2, echo_herb: 1, antidote: 1, eye_drops: 1 },
+        inventory: { potion: 3, hi_potion: 1, ether: 2, phoenix_feather: 2, echo_herb: 1, antidote: 1, eye_drops: 1, silver_salve: 1, hi_ether: 1 },
       });
       const pick = makeRng(seed + 1000);
       let steps = 0;

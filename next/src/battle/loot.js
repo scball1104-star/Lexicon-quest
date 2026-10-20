@@ -8,7 +8,7 @@
 //     affixes: [{ id: 'gleaming', tier: 2, value: 5 }, { id: 'of_embers', tier: 2, value: 14 }] }
 //   uniques/sets: { base: 'lanternheart', rarity: 'legendary', unique: true, name: 'Lanternheart', affixes: [] }
 
-import { EQUIPMENT, UNIQUES, SETS, AFFIXES, RARITIES, RARE_NAME_A, RARE_NAME_B, CONSUMABLES } from '../data/items.js';
+import { EQUIPMENT, UNIQUES, SETS, AFFIXES, RARITIES, RARE_NAME_A, RARE_NAME_A_EP2, RARE_NAME_B, CONSUMABLES } from '../data/items.js';
 import { RARITY_TABLES, ZONE_LOOT, SLOT_WEIGHTS, BOSS_LOOT, CHEST_TIERS, AFFIX_COUNTS, RARITY_SELL_MULT } from '../data/loot-tables.js';
 
 function rand(rng) { return typeof rng === 'function' ? rng() : rng.next(); }
@@ -66,8 +66,11 @@ export function rollBase(rng, { slot, ilvl = 1, type } = {}) {
   return weighted(rng, pool.map((b) => [b, 1 + b.ilvl]));
 }
 
-function rareName(rng, base) {
-  const a = RARE_NAME_A[int(rng, 0, RARE_NAME_A.length - 1)];
+// Item level 9 and up (Episode 2) also draws the Episode 2 words; below it the Episode 1 pool rolls exactly as before.
+const EP2_NAME_ILVL = 9;
+function rareName(rng, base, ilvl = 1) {
+  const pool = ilvl >= EP2_NAME_ILVL ? RARE_NAME_A.concat(RARE_NAME_A_EP2) : RARE_NAME_A;
+  const a = pool[int(rng, 0, pool.length - 1)];
   const list = RARE_NAME_B[base.slot] || RARE_NAME_B.weapon;
   const b = list[int(rng, 0, list.length - 1)];
   return `${a} ${b}`;
@@ -111,7 +114,7 @@ export function itemName(item, rng) {
   const base = baseOf(item);
   if (!base) return '???';
   if (item.unique || item.rarity === 'legendary' || item.rarity === 'set') return base.name;
-  if (item.rarity === 'rare') return item.name && item.name !== base.name ? item.name : (rng ? rareName(rng, base) : base.name);
+  if (item.rarity === 'rare') return item.name && item.name !== base.name ? item.name : (rng ? rareName(rng, base, item.ilvl) : base.name);
   if (item.rarity === 'magic') {
     const pre = item.affixes.find((a) => AFFIXES[a.id] && AFFIXES[a.id].kind === 'prefix');
     const suf = item.affixes.find((a) => AFFIXES[a.id] && AFFIXES[a.id].kind === 'suffix');
@@ -202,6 +205,7 @@ export function itemValue(item) {
 
 /**
  * Battle drops. killed: [{ id, elite: [...]|null, lootZone, drops: [{item, chance}], boss, uniqueDrop }].
+ * opts: { zone, encounter } (a group boss's loot is keyed by its encounter id and drops once: the Other Selves).
  * Returns { items: [instances], consumables: [{ item, qty }] }.
  */
 export function rollBattleDrops(rng, killed, opts = {}) {
@@ -217,14 +221,17 @@ export function rollBattleDrops(rng, killed, opts = {}) {
       items.push(rollItem(rng, { ilvl: z.ilvl + 1, table: 'elite' }));
     }
     const boss = BOSS_LOOT[k.id];
-    if (boss) {
-      if (boss.unique) items.push(makeUnique(boss.unique));
-      for (let i = 0; i < boss.rolls; i++) items.push(rollItem(rng, { ilvl: boss.ilvl, table: boss.table }));
-      for (const c of boss.consumables || []) addC(c.item, c.qty);
-    }
+    if (boss && !boss.encounter) dropBoss(boss);
+  }
+  const groupBoss = opts.encounter && BOSS_LOOT[opts.encounter] && BOSS_LOOT[opts.encounter].encounter ? BOSS_LOOT[opts.encounter] : null;
+  if (groupBoss) dropBoss(groupBoss);
+  function dropBoss(boss) {
+    if (boss.unique) items.push(makeUnique(boss.unique));
+    for (let i = 0; i < boss.rolls; i++) items.push(rollItem(rng, { ilvl: boss.ilvl, table: boss.table }));
+    for (const c of boss.consumables || []) addC(c.item, c.qty);
   }
   const z = ZONE_LOOT[zone];
-  const anyBoss = killed.some((k) => BOSS_LOOT[k.id]);
+  const anyBoss = !!groupBoss || killed.some((k) => BOSS_LOOT[k.id] && !BOSS_LOOT[k.id].encounter);
   if (z && !anyBoss && rand(rng) < z.equipChance) items.push(rollItem(rng, { ilvl: z.ilvl, table: 'normal' }));
   return { items, consumables: Object.entries(consumables).map(([item, qty]) => ({ item, qty })) };
 }

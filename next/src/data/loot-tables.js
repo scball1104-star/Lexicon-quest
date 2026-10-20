@@ -21,12 +21,17 @@ export const ZONE_LOOT = {
   archive_f2: { ilvl: 5, equipChance: 0.14 },
   archive_f3: { ilvl: 7, equipChance: 0.15 },
   whisperwood_hollow: { ilvl: 6, equipChance: 0.15 },   // optional side dungeon (Lv 6-7)
+  // Episode 2 (EPISODE2_PLAN.md 7.5). Random tables still never roll legendaries.
+  east_road:  { ilvl: 9, equipChance: 0.15 },
+  court_f1:   { ilvl: 10, equipChance: 0.15 },
+  court_f2:   { ilvl: 11, equipChance: 0.16 },
+  court_f3:   { ilvl: 12, equipChance: 0.18 },
 };
 
 // Which slot a random equipment drop fills.
 export const SLOT_WEIGHTS = { weapon: 34, body: 14, head: 14, charm: 14, boots: 12, mantle: 12 };
 
-// Bosses: guaranteed unique + rolled rares.
+// Bosses: guaranteed unique + rolled rares. Keyed by enemy id, or by encounter id for a group boss (`encounter: true`).
 export const BOSS_LOOT = {
   echo_warden: { unique: 'mirrorguard_mail', rolls: 1, table: 'boss', ilvl: 6,
     consumables: [{ item: 'hi_potion', qty: 2 }, { item: 'ether', qty: 2 }] },
@@ -36,6 +41,12 @@ export const BOSS_LOOT = {
   // Whisperwood Hollow mini-boss: the axe is its guaranteed drop (the gold chest behind it rolls a rare).
   briar_alpha: { unique: 'thornwake', rolls: 1, table: 'boss', ilvl: 6,
     consumables: [{ item: 'hi_potion', qty: 1 }, { item: 'antidote', qty: 2 }] },
+  // Episode 2. The Other Selves are three enemies, so their loot is keyed by the ENCOUNTER id and drops once per
+  // victory (rollBattleDrops opts.encounter). The King's Kept Promise is staged in king_after (like Lanternheart).
+  other_selves: { unique: 'twinfold_charm', rolls: 1, table: 'boss', ilvl: 11, encounter: true,
+    consumables: [{ item: 'hi_potion', qty: 2 }, { item: 'hi_ether', qty: 1 }] },
+  nameless_king: { unique: null, rolls: 2, table: 'boss', ilvl: 13,
+    consumables: [{ item: 'phoenix_feather', qty: 1 }, { item: 'hi_ether', qty: 2 }] },
 };
 
 // Chest tiers for map authors: { type:'chest', tier:'wood'|'iron'|'gold', ... }. A chest may also

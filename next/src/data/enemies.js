@@ -1,4 +1,5 @@
-// Enemies of Episode 1 (ids from COMMON.md), elite modifiers, Lost Page variants. Pure data.
+// Enemies of Episodes 1 and 2 (ids from COMMON.md and EPISODE2_PLAN.md 2.4), elite modifiers, Lost Page variants.
+// Pure data.
 //
 // Enemy schema:
 //   id, name, family, level, size ('small' | 'medium' | 'large' | 'boss'), flying
@@ -13,7 +14,8 @@
 //                        if: 'notHasted' | 'notProtected' | 'allyHurt' | 'hasPages'
 //   charge               telegraphed move: { skill, first, cooldown, target? } -- announced at the end
 //                        of the enemy's turn number `first`, then every `cooldown` turns after it fires
-//   ai                   'basic' | 'echo_warden' | 'archivore' | 'lost_page' (battle/ai.js)
+//   ai                   'basic' | 'echo_warden' | 'archivore' | 'lost_page' | 'phased' | 'mimic' | 'reflections'
+//                        | 'nameless_king' (battle/ai.js)
 //   drops                consumable drops [{ item, chance }]; equipment comes from loot-tables.js
 //   lootZone             zone loot table for equipment drops
 //   sprite               presentation hint: atlas + frame ids from W1-sprites (frame id = enemy id)
@@ -22,7 +24,7 @@
 export const ENEMIES = {};
 function enemy(id, o) {
   ENEMIES[id] = {
-    id, flying: false, size: 'medium', weak: [], resist: [], immune: [], absorb: [], statusImmune: [],
+    id, flying: false, size: 'medium', tags: [], weak: [], resist: [], immune: [], absorb: [], statusImmune: [],
     evade: 0, luk: 5, mp: 0, ai: 'basic', drops: [], boss: false, charge: null,
     sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: id }, ...o,
   };
@@ -203,6 +205,196 @@ enemy('briar_alpha', {
   // W8-art: its own 1x frame, drawn larger from the painting (no 1.3x upscale, no tint).
   sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_alpha' },
   flavor: "The pack's first and oldest. It kept the lost bridge for years, and nobody told it to stop.",
+});
+
+// =============================================================================================
+// Episode 2: The Town Without a Name (E2-battle; EPISODE2_PLAN.md section 6). Names and flavors are mirrored
+// by the bestiary in data/text.js (E2-story). New traits, all handled in battle/ai.js:
+//   tags: ['glass']                  family tag: Bram's Shatter cracks 2 shields on glass foes
+//   opener: skillId                  forced first move (the Glassback teaches its reflect by opening with Harden)
+//   reflectWhileProtected: 'magic'   while it has Protect (and is not Broken) spells rebound onto a random ally
+//   split: { into, hp }              innate split on first defeat into two `into` foes at hp x the parent's max HP
+//   ai 'mimic'                       the Borrowed Shadow: adapts to the type that last hit it (half damage from it)
+//                                    and answers with a shadow copy of it
+//   ai 'reflections'                 the Other Selves: Mirrored Combo telegraph when two hold consecutive slots
+//   ai 'nameless_king'               three phases, Keeping (status kept), the Mirror Ward and its two adds
+// Field sprite for a map enemy event = the encounter's leader id (enemies_field), battle frames = the enemy id.
+// =============================================================================================
+
+// ---------------------------------------------------------------- The Fading Road (Lv 9-10)
+enemy('mist_wolf', {
+  name: 'Mist Wolf', family: 'beast', level: 9,
+  hp: 280, atk: 31, def: 12, mag: 7, spr: 8, spd: 16, luk: 7,
+  shields: 2, weak: ['fire', 'spear'], evade: 0.1,
+  exp: 11, gold: 45, masteryPts: 4,
+  moves: [{ skill: 'bite', weight: 50, target: 'lowestHpPct' }, { skill: 'mist_bite', weight: 35 },
+          { skill: 'howl', weight: 15, once: true, if: 'notHasted' }],
+  drops: [{ item: 'potion', chance: 0.12 }, { item: 'eye_drops', chance: 0.1 }], lootZone: 'east_road',
+  flavor: 'A wolf made mostly of morning fog. The bite is real.',
+});
+enemy('glassback', {
+  name: 'Glassback Beetle', family: 'insect', tags: ['glass'], level: 9,
+  hp: 180, atk: 34, def: 22, mag: 7, spr: 14, spd: 8, luk: 4,
+  shields: 3, weak: ['axe', 'thunder'], resist: ['sword', 'bow', 'ice'],
+  exp: 14, gold: 54, masteryPts: 4,
+  opener: 'harden', reflectWhileProtected: 'magic',
+  moves: [{ skill: 'shell_bash', weight: 70 }, { skill: 'harden', weight: 30, if: 'notProtected' }],
+  charge: { skill: 'glass_ram', first: 2, cooldown: 3 },
+  drops: [{ item: 'potion', chance: 0.15 }, { item: 'hi_potion', chance: 0.04 }], lootZone: 'east_road',
+  flavor: 'Its shell is old silverglass. While it glitters, spells bounce.',
+});
+enemy('quicksilver', {
+  name: 'Quicksilver', family: 'ooze', level: 9, size: 'small',
+  hp: 110, atk: 30, def: 8, mag: 40, spr: 10, spd: 10, luk: 4,
+  shields: 2, weak: ['thunder', 'ice'], resist: ['fire'], statusImmune: ['poison'],
+  exp: 8, gold: 33, masteryPts: 3,
+  split: { into: 'quicksilver_bead', hp: 0.35 },
+  moves: [{ skill: 'slime_tackle', weight: 55 }, { skill: 'mercury_spit', weight: 45 }],
+  drops: [{ item: 'antidote', chance: 0.12 }, { item: 'ether', chance: 0.06 }], lootZone: 'east_road',
+  flavor: 'A bead of mercury that rolled off a mirror and kept rolling.',
+});
+enemy('quicksilver_bead', {
+  name: 'Quicksilver Bead', family: 'ooze', level: 9, size: 'small',
+  hp: 39, atk: 30, def: 8, mag: 40, spr: 10, spd: 12, luk: 4,
+  shields: 1, weak: ['thunder', 'ice'], resist: ['fire'], statusImmune: ['poison'],
+  exp: 0, gold: 0, masteryPts: 1,
+  moves: [{ skill: 'slime_tackle', weight: 100 }],
+  drops: [], lootZone: null,
+  flavor: 'A drop of Quicksilver that broke away. It wants to roll back.',
+});
+
+// ---------------------------------------------------------------- Court of Mirrors F1 (Lv 10-11)
+enemy('glint_wisp', {
+  name: 'Glint Wisp', family: 'spirit', level: 10, flying: true, size: 'small',
+  hp: 205, atk: 26, def: 9, mag: 51, spr: 18, spd: 14, luk: 8,
+  shields: 2, weak: ['bow', 'thunder'], resist: ['fire', 'light'], evade: 0.2,
+  exp: 20, gold: 66, masteryPts: 4,
+  moves: [{ skill: 'glint', weight: 50 }, { skill: 'mirror_dust', weight: 30 }, { skill: 'e_strike', weight: 20 }],
+  charge: { skill: 'prism_burst', first: 3, cooldown: 4 },
+  drops: [{ item: 'eye_drops', chance: 0.12 }, { item: 'ether', chance: 0.08 }], lootZone: 'court_f1',
+  flavor: 'A glint of light that came loose from the glass and lost its way.',
+});
+enemy('glass_sentinel', {
+  name: 'Glass Sentinel', family: 'construct', tags: ['glass'], level: 10, size: 'large',
+  hp: 290, atk: 55, def: 22, mag: 13, spr: 10, spd: 7, luk: 3,
+  shields: 4, weak: ['thunder', 'axe'], resist: ['sword', 'spear'], statusImmune: ['poison'],
+  exp: 26, gold: 90, masteryPts: 6,
+  moves: [{ skill: 'shard_fist', weight: 70 }, { skill: 'glass_guard', weight: 30, if: 'notProtected' }],
+  charge: { skill: 'shatter_quake', first: 2, cooldown: 3 },
+  drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'potion', chance: 0.2 }], lootZone: 'court_f1',
+  flavor: 'A sentry of the Court, built of silverglass and very old orders.',
+});
+
+// ---------------------------------------------------------------- Court of Mirrors F2 (Lv 11-12)
+enemy('borrowed_shadow', {
+  name: 'Borrowed Shadow', family: 'spirit', level: 11, ai: 'mimic',
+  hp: 370, atk: 44, def: 12, mag: 62, spr: 20, spd: 13, luk: 8,
+  shields: 3, weak: ['light', 'bow'],
+  exp: 20, gold: 84, masteryPts: 5,
+  // ai 'mimic' answers with shadow_strike / shadow_ember / shadow_frost / shadow_spark / shadow_mend (see ai.js)
+  moves: [{ skill: 'dusk_touch', weight: 100 }],
+  drops: [{ item: 'echo_herb', chance: 0.12 }, { item: 'ether', chance: 0.1 }], lootZone: 'court_f2',
+  flavor: 'A shadow with nobody to belong to. It borrows whatever hits it.',
+});
+enemy('faceless_knight', {
+  name: 'Faceless Knight', family: 'construct', level: 11, size: 'large',
+  hp: 280, atk: 66, def: 24, mag: 26, spr: 14, spd: 10, luk: 5,
+  shields: 5, weak: ['axe', 'thunder', 'light'], resist: ['sword', 'spear'], statusImmune: ['poison'],
+  exp: 26, gold: 105, masteryPts: 6,
+  moves: [{ skill: 'blank_blade', weight: 70 }, { skill: 'knight_cover', weight: 30, if: 'hasAlly' }],
+  charge: { skill: 'judgement', first: 2, cooldown: 3 },
+  drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'phoenix_feather', chance: 0.03 }], lootZone: 'court_f2',
+  flavor: 'A knight of the Court with a blank visor. It guards the weakest.',
+});
+
+// ---------------------------------------------------------------- Court of Mirrors F3 (Lv 12-13)
+enemy('shard_swarm', {
+  name: 'Shard Swarm', family: 'construct', tags: ['glass'], level: 12, size: 'small', flying: true,
+  hp: 320, atk: 42, def: 10, mag: 51, spr: 12, spd: 17, luk: 6,
+  shields: 2, weak: ['thunder', 'axe', 'light'], resist: ['spear', 'bow'], evade: 0.25, statusImmune: ['poison'],
+  exp: 26, gold: 93, masteryPts: 5,
+  moves: [{ skill: 'shard_rain', weight: 60 }, { skill: 'glitter', weight: 40 }],
+  charge: { skill: 'shard_storm', first: 3, cooldown: 4 },
+  drops: [{ item: 'eye_drops', chance: 0.12 }, { item: 'hi_ether', chance: 0.04 }], lootZone: 'court_f3',
+  flavor: 'Pieces of a broken mirror that still fly in formation.',
+});
+
+// ---------------------------------------------------------------- The Other Selves (F2 mini-boss, Lv 11-12)
+// "Everything you are not": each reflection is weak to every weapon type its owner does not carry and resists
+// its owner's own. Battle art: party_battle frames flipped and glass-recolored (E2-sprites), frame id = enemy id.
+const REFLECTION = { boss: true, size: 'medium', family: 'reflection', ai: 'reflections', statusImmune: ['poison'],
+  drops: [], lootZone: 'court_f2' };
+enemy('refl_hero', {
+  ...REFLECTION, name: 'Nameless Reflection', level: 11,
+  hp: 365, atk: 100, def: 18, mag: 24, spr: 14, spd: 16, luk: 8,
+  shields: 4, weak: ['spear', 'staff', 'bow'], resist: ['sword', 'axe'],
+  exp: 40, gold: 134, masteryPts: 5,
+  moves: [{ skill: 'mirror_slash', weight: 55 }, { skill: 'risen_slash', weight: 30 },
+          { skill: 'refl_steady', weight: 15, if: 'notFocused' }],
+  flavor: 'Your reflection, stepped out of the glass. It has no face.',
+});
+enemy('refl_mira', {
+  ...REFLECTION, name: "Mira's Reflection", level: 11,
+  hp: 285, atk: 40, def: 12, mag: 102, spr: 22, spd: 15, luk: 8,
+  shields: 3, weak: ['sword', 'axe', 'spear'], resist: ['staff', 'bow'],
+  exp: 40, gold: 133, masteryPts: 5,
+  moves: [{ skill: 'refl_ember', weight: 40 }, { skill: 'refl_frost', weight: 35 },
+          { skill: 'refl_mend', weight: 25, if: 'allyHurt' }],
+  flavor: 'Mira, backwards. It says what she is afraid of.',
+});
+enemy('refl_bram', {
+  ...REFLECTION, name: "Bram's Reflection", level: 11,
+  hp: 375, atk: 88, def: 26, mag: 19, spr: 16, spd: 12, luk: 6,
+  shields: 5, weak: ['sword', 'staff', 'bow'], resist: ['spear', 'axe'],
+  exp: 40, gold: 133, masteryPts: 4,
+  moves: [{ skill: 'refl_lunge', weight: 55 }, { skill: 'refl_guard', weight: 25, if: 'allyHurt' },
+          { skill: 'refl_taunt', weight: 20, if: 'notTaunting' }],
+  flavor: 'Bram, backwards. It stands still, the way guards are taught.',
+});
+
+// ---------------------------------------------------------------- The Nameless King (Lv 13) and his court
+enemy('nameless_king', {
+  name: 'The Nameless King', family: 'king', tags: ['glass'], level: 13, size: 'boss', boss: true, ai: 'nameless_king',
+  hp: 1400, mp: 99, atk: 158, def: 22, mag: 149, spr: 20, spd: 13, luk: 10,
+  shields: 6, weak: ['thunder', 'spear'], resist: ['ice'],
+  statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],
+  exp: 500, gold: 800, masteryPts: 24,
+  moves: [{ skill: 'glass_sword', weight: 60 }, { skill: 'cold_mirror', weight: 40 }],
+  // Phases by HP fraction (ai.js nameless_king). HP locks: phase 1 stops at 66%; under the Mirror Ward (phase 2,
+  // while Sorrow or Pride stands) he takes 25% damage, his shields cannot be chipped and his HP stops at 34%. When
+  // both adds fall the ward shatters: he is Broken for a turn (freeing every Kept member) and phase 3 begins.
+  phases: [
+    { id: 'veiled', name: 'The Veiled King', at: 1.0, weak: ['thunder', 'spear'], resist: ['ice'], shields: 6,
+      text: 'The King rises from the throne. His mirror shows everything except himself.' },
+    { id: 'shattered_court', name: 'The Shattered Court', at: 0.66, weak: ['thunder', 'spear'], resist: ['ice'], shields: 6,
+      summon: ['false_sorrow', 'false_pride'], ward: true, floor: 0.34,
+      moves: [{ skill: 'glass_sword', weight: 70 }, { skill: 'cold_mirror', weight: 30 }],
+      text: 'His mirror breaks into a court of faces. Sorrow and Pride step out to guard him.' },
+    { id: 'unmasked', name: 'Aurel Unmasked', at: 0, weak: ['fire', 'light', 'spear'], resist: [], shields: 8, haste: true,
+      sprite: 'nameless_king_unmasked', moves: [{ skill: 'glass_sword', weight: 100 }],
+      text: "The glass veil shatters. Under the glass is a tired man's face." },
+  ],
+  drops: [], lootZone: 'court_f3',
+  flavor: 'The lord of the Court of Mirrors. He keeps everything.',
+});
+enemy('false_sorrow', {
+  name: 'Sorrow', family: 'reflection', level: 13,
+  hp: 240, atk: 40, def: 10, mag: 74, spr: 22, spd: 12, luk: 6,
+  shields: 2, weak: ['fire', 'bow'], resist: ['ice'], statusImmune: ['poison'],
+  exp: 0, gold: 0, masteryPts: 2,
+  moves: [{ skill: 'weep', weight: 100 }],
+  charge: { skill: 'lament', first: 3, cooldown: 3 },
+  drops: [], lootZone: null,
+  flavor: 'A reflection of grief. While it weeps, the King mends.',
+});
+enemy('false_pride', {
+  name: 'Pride', family: 'reflection', level: 13,
+  hp: 280, atk: 86, def: 26, mag: 25, spr: 12, spd: 11, luk: 6,
+  shields: 4, weak: ['spear', 'thunder'], resist: ['fire', 'sword'], statusImmune: ['poison'],
+  exp: 0, gold: 0, masteryPts: 2,
+  moves: [{ skill: 'proud_stance', weight: 35, if: 'notTaunting' }, { skill: 'glass_lance', weight: 65 }],
+  drops: [], lootZone: null,
+  flavor: 'A reflection of pride. It stands in front of what it guards.',
 });
 
 // Lost Page variants: each summon picks distinct variants so the pages want different answers.

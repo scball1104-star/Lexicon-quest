@@ -66,6 +66,35 @@ export function alphaEncounter(hasFlag) {
   return 'whisperwood_alpha';
 }
 
+// ---------------------------------------------------------------- Episode 2 (EPISODE2_PLAN.md 6.7)
+// The Fading Road. road_mixed is the scripted first fight of the episode (ep2.js passes canFlee false).
+enc('road_wolves', { zone: 'east_road', leader: 'mist_wolf', enemies: ['mist_wolf', 'mist_wolf'] });
+enc('road_beetles', { zone: 'east_road', leader: 'glassback', enemies: ['glassback', 'quicksilver'] });
+enc('road_quick', { zone: 'east_road', leader: 'quicksilver', enemies: ['quicksilver', 'quicksilver', 'quicksilver'] });
+enc('road_mixed', { zone: 'east_road', leader: 'mist_wolf', enemies: ['mist_wolf', 'glassback'] });
+enc('road_pack', { zone: 'east_road', leader: 'mist_wolf', enemies: ['mist_wolf', 'mist_wolf', 'mist_wolf'] });
+// Court of Mirrors F1: The Silverglass Antechamber
+enc('c1_quick', { zone: 'court_f1', leader: 'quicksilver', enemies: ['quicksilver', 'quicksilver', 'glint_wisp'] });
+enc('c1_wisps', { zone: 'court_f1', leader: 'glint_wisp', enemies: ['glint_wisp', 'glint_wisp'] });
+enc('c1_sentinel', { zone: 'court_f1', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'quicksilver'] });
+enc('c1_mixed', { zone: 'court_f1', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'glint_wisp'] });
+// F2: The Hall of Other Selves
+enc('c2_shadows', { zone: 'court_f2', leader: 'borrowed_shadow', enemies: ['borrowed_shadow', 'borrowed_shadow'] });
+enc('c2_knight', { zone: 'court_f2', leader: 'faceless_knight', enemies: ['faceless_knight', 'glint_wisp'] });
+enc('c2_sentinel', { zone: 'court_f2', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'borrowed_shadow'] });
+enc('c2_mixed', { zone: 'court_f2', leader: 'faceless_knight', enemies: ['faceless_knight', 'borrowed_shadow'] });
+// The mini-boss: the party's own reflections. Boss loot is keyed by the encounter (loot-tables BOSS_LOOT.other_selves).
+enc('other_selves', { zone: 'court_f2', leader: 'refl_hero', enemies: ['refl_hero', 'refl_mira', 'refl_bram'], boss: true,
+  noFlee: true, music: 'battle', noElite: true, flag: 'other_selves_defeated', backdrop: 'court', bossLoot: 'other_selves' });
+// F3: The Unnamed Throne
+enc('c3_shards', { zone: 'court_f3', leader: 'shard_swarm', enemies: ['shard_swarm', 'shard_swarm'] });
+enc('c3_knights', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'faceless_knight'] });
+enc('c3_shadow', { zone: 'court_f3', leader: 'borrowed_shadow', enemies: ['borrowed_shadow', 'shard_swarm'] });
+enc('c3_mixed', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'glass_sentinel', 'shard_swarm'] });
+// The King's Mirror. startFury: with the story flag set the party starts with +25 Fury (the Fountain of Faces).
+enc('nameless_king', { zone: 'court_throne', leader: 'nameless_king', enemies: ['nameless_king'], boss: true, noFlee: true,
+  music: 'boss_king', noElite: true, flag: 'nameless_king_defeated', startFury: { flag: 'fountain_done', amount: 25 } });
+
 // ---------------------------------------------------------------- Zones
 // level: the party level the zone is tuned for. plan: [encounterId, count] visible enemies to place.
 export const ZONES = {
@@ -86,6 +115,31 @@ export const ZONES = {
 export const ZONE_ORDER = ['valley', 'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
 /** Side zones the story does not require (the simulator runs them, progression() does not count them). */
 export const OPTIONAL_ZONES = ['whisperwood_hollow'];
+
+// ---------------------------------------------------------------- Episode 2 zones
+// EP2_ZONE_ORDER continues progression() from Episode 1's last EXP (tools/sim). Episode 1's ZONE_ORDER is untouched.
+export const EP2_ZONES = {
+  east_road: { id: 'east_road', name: 'The Fading Road', level: [9, 10], backdrop: 'east_road', music: 'battle', episode: 2,
+    plan: [['road_wolves', 2], ['road_beetles', 2], ['road_quick', 1], ['road_mixed', 1], ['road_pack', 1]] },
+  court_f1: { id: 'court_f1', name: 'The Silverglass Antechamber', level: [10, 11], backdrop: 'court', music: 'battle', episode: 2,
+    plan: [['c1_quick', 2], ['c1_wisps', 2], ['c1_sentinel', 2], ['c1_mixed', 2]] },
+  court_f2: { id: 'court_f2', name: 'The Hall of Other Selves', level: [11, 12], backdrop: 'court', music: 'battle', episode: 2,
+    plan: [['c2_shadows', 2], ['c2_knight', 2], ['c2_sentinel', 2], ['c2_mixed', 2], ['other_selves', 1]] },
+  court_f3: { id: 'court_f3', name: 'The Unnamed Throne', level: [12, 13], backdrop: 'court_deep', music: 'battle', episode: 2,
+    plan: [['c3_shards', 2], ['c3_knights', 2], ['c3_shadow', 2], ['c3_mixed', 2]] },
+  court_throne: { id: 'court_throne', name: "The King's Mirror", level: [13, 13], backdrop: 'throne', music: 'boss_king', episode: 2,
+    plan: [['nameless_king', 1]] },
+};
+export const EP2_ZONE_ORDER = ['east_road', 'court_f1', 'court_f2', 'court_f3', 'court_throne'];
+// Every lookup by id works (ZONES.court_f1, the battle scene's backdropKey, chest ilvl, mapcheck's enemy plan check),
+// but until the Episode 2 maps exist the zones stay out of Object.keys(ZONES): qa/maps iterates ZONES and needs a map
+// per zone. E2-maps (wave 10c): once the five maps are in src/data/maps, set EP2_MAPS_LISTED to true.
+export const EP2_MAPS_LISTED = false;
+for (const [id, z] of Object.entries(EP2_ZONES)) {
+  Object.defineProperty(ZONES, id, { value: z, enumerable: EP2_MAPS_LISTED, configurable: true, writable: true });
+}
+/** Zone order of an episode (1 or 2). */
+export function zoneOrder(episode = 1) { return episode === 2 ? EP2_ZONE_ORDER : ZONE_ORDER; }
 
 function rand(rng) { return typeof rng === 'function' ? rng() : rng.next(); }
 

@@ -57,6 +57,13 @@ export const CONSUMABLES = {
                      field: true, target: 'ko_ally', effect: { revive: 0.3 }, desc: 'Revives a fallen ally (30% HP).' },
   tent:            { id: 'tent', name: 'Tent', icon: 'star', price: 80, battle: false, field: true, savePointOnly: true,
                      target: 'party', effect: { healPct: 1, mpPct: 1 }, desc: 'Rest at a save point. Full recovery.' },
+  // Episode 2 (EPISODE2_PLAN.md 7.1). A Silver Salve is the item answer to the Nameless King's Keeping: it can be
+  // used on a Kept ally (`canTargetKept`), which no other item can.
+  hi_ether:        { id: 'hi_ether', name: 'Hi-Ether', icon: 'ether', price: 200, battle: true, field: true,
+                     target: 'ally', effect: { mp: 40 }, desc: 'Restores 40 MP.' },
+  silver_salve:    { id: 'silver_salve', name: 'Silver Salve', icon: 'potion', price: 120, battle: true, field: true,
+                     target: 'ally', canTargetKept: true, effect: { cure: ['kept', 'nameless', 'silence'] },
+                     desc: 'Cures Kept, Nameless and Silence.' },
 };
 // Battle item use costs this timeline rank (a bit quicker than an attack).
 export const ITEM_RANK = 80;
@@ -79,17 +86,32 @@ export const KEY_ITEMS = {
     desc: 'An undelivered letter, addressed to Tess.' },
   name_fragment_1:   { id: 'name_fragment_1', name: 'Name Fragment', icon: 'book', key: true,
     desc: 'The first fragment of the Book of Names.' },
+  // Episode 2 (EPISODE2_PLAN.md 2.3). Icons `sigil` and `feather` are new (E2-sprites); the UI falls back without them.
+  mael_letter:       { id: 'mael_letter', name: 'Letter to the Hollow', icon: 'letter', key: true,
+    desc: "A letter of introduction. The town's name is a blank line." },
+  glass_key:         { id: 'glass_key', name: 'Glass Key', icon: 'key', key: true, counted: true,
+    desc: 'A key of cold glass. Opens one door in the Court.' },
+  name_fragment_2:   { id: 'name_fragment_2', name: 'Second Name Fragment', icon: 'book', key: true,
+    desc: 'The second fragment of the Book of Names.' },
+  mirror_sigil:      { id: 'mirror_sigil', name: 'Mirror Sigil', icon: 'sigil', key: true,
+    desc: "Aurel's sigil. Keeper mirrors open for whoever carries it." },
+  courier_satchel:   { id: 'courier_satchel', name: "Courier's Satchel", icon: 'letter', key: true,
+    desc: 'Willowmere post marks. A route book inside.' },
+  elian_reply:       { id: 'elian_reply', name: "Elian's Reply", icon: 'letter', key: true,
+    desc: 'Signed: Elian, Mayor of Hollowmere. For Mael.' },
+  black_feather:     { id: 'black_feather', name: 'Black Feather', icon: 'feather', key: true,
+    desc: 'Left where a list used to be.' },
 };
 
 // ---------------------------------------------------------------------------------------------
-// Equipment bases. tier 1..3, ilvl = item level used by affix tiers and drop pools.
+// Equipment bases. tier 1..4, ilvl = item level used by affix tiers and drop pools.
 // who: character ids that can equip it (weapons: derived from weapon type).
 // ---------------------------------------------------------------------------------------------
 const ALL = ['hero', 'mira', 'bram'];
 export const EQUIPMENT = {};
 function eq(id, o) { EQUIPMENT[id] = { id, ...o, stats: o.stats || {} }; }
 function weapon(id, type, tier, name, price, stats, desc) {
-  eq(id, { name, slot: 'weapon', type, tier, ilvl: [0, 2, 5, 8][tier], price, stats, icon: type, desc });
+  eq(id, { name, slot: 'weapon', type, tier, ilvl: [0, 2, 5, 8, 11][tier], price, stats, icon: type, desc });
 }
 
 // Swords (hero): fast and reliable, small crit bonus.
@@ -150,6 +172,49 @@ eq('wool_mantle', { name: 'Wool Mantle', slot: 'mantle', tier: 1, ilvl: 1, price
 eq('scout_mantle', { name: 'Scout\'s Mantle', slot: 'mantle', tier: 2, ilvl: 4, price: 220, who: ALL, icon: 'mantle',
   stats: { def: 2, luk: 3 }, desc: 'Hooded green wool, hard to spot.' });
 
+// --- Episode 2 (EPISODE2_PLAN.md 7.2) ------------------------------------------------------------
+// Tier 3 armor and charms, sold in the Hollow from arrival. ilvl 9 (the plan said 8): Episode 1 rolls loot at item
+// level 8 at most, so at 9 none of these enter an Episode 1 drop or chest pool and its loot stays exactly as tuned.
+const HB = ['hero', 'bram'];
+eq('steel_cuirass', { name: 'Steel Cuirass', slot: 'body', tier: 3, ilvl: 9, price: 700, who: HB, icon: 'armor',
+  stats: { def: 13 }, desc: 'Plate over mail, forged in the Hollow.' });
+eq('sage_robe', { name: "Sage's Robe", slot: 'body', tier: 3, ilvl: 9, price: 680, who: ['mira'], icon: 'armor',
+  stats: { def: 8, spr: 7, mag: 3 }, desc: 'Grey wool stitched with silver thread.' });
+eq('steel_helm', { name: 'Steel Helm', slot: 'head', tier: 3, ilvl: 9, price: 420, who: HB, icon: 'helm',
+  stats: { def: 6, spr: 1 }, desc: 'A round helm with a long nasal.' });
+eq('moon_circlet', { name: 'Moon Circlet', slot: 'head', tier: 3, ilvl: 9, price: 450, who: ['mira'], icon: 'helm',
+  stats: { def: 3, spr: 5, mag: 3 }, desc: 'A crescent of pale silver.' });
+eq('strider_boots', { name: 'Strider Boots', slot: 'boots', tier: 3, ilvl: 9, price: 480, who: ALL, icon: 'boots',
+  stats: { spd: 2, def: 1 }, desc: 'Long-laced boots for a long road.' });
+eq('ranger_mantle', { name: "Ranger's Mantle", slot: 'mantle', tier: 3, ilvl: 9, price: 420, who: ALL, icon: 'mantle',
+  stats: { def: 3, spr: 2, luk: 3 }, desc: 'Oiled canvas the color of fog.' });
+eq('lantern_charm', { name: 'Lantern Charm', slot: 'charm', tier: 3, ilvl: 9, price: 380, who: ALL, icon: 'charm',
+  stats: { spr: 3, inkRes: 15 }, desc: 'A tiny brass lantern. It stays lit.' });
+eq('mirror_charm', { name: 'Mirror Charm', slot: 'charm', tier: 3, ilvl: 9, price: 400, who: ALL, icon: 'charm',
+  stats: { mag: 3, resSilence: 50 }, desc: 'A hand mirror the size of a coin.' });
+eq('clock_charm', { name: 'Clock Charm', slot: 'charm', tier: 3, ilvl: 9, price: 360, who: ALL, icon: 'charm',
+  stats: { spd: 1, luk: 4 }, desc: 'A watch that ticks a little fast.' });
+// Tier 4 (ilvl 11), the Silverglass Smithy after court_f2_done. The Silverglass Blade (ATK +29, crit) against
+// Lanternheart (ATK +24, strikes as light) is a real choice: light still matters to the Borrowed Shadow and the
+// King's last phase.
+weapon('silverglass_blade', 'sword', 4, 'Silverglass Blade', 1500, { atk: 29, crit: 6 }, 'A blade of silverglass. It never dulls.');
+weapon('moonsteel_axe', 'axe', 4, 'Moonsteel Axe', 1550, { atk: 34, spd: -1 }, 'Pale steel, folded under a full moon.');
+weapon('mere_pike', 'spear', 4, 'Mere Pike', 1520, { atk: 30, def: 3 }, 'A pike as straight as still water.');
+weapon('mirror_rod', 'staff', 4, 'Mirror Rod', 1500, { atk: 9, mag: 25, spr: 4, mp: 8 }, 'A rod capped with a disc of glass.');
+weapon('glasswing_bow', 'bow', 4, 'Glasswing Bow', 1500, { atk: 26, spd: 1, crit: 3 }, 'Limbs of clear glass. Lighter than it looks.');
+eq('silver_mail', { name: 'Silver Mail', slot: 'body', tier: 4, ilvl: 11, price: 1300, who: HB, icon: 'armor',
+  stats: { def: 18, spr: 3 }, desc: 'Fine silver rings over quilted silk.' });
+eq('mirrorweave_robe', { name: 'Mirrorweave Robe', slot: 'body', tier: 4, ilvl: 11, price: 1250, who: ['mira'], icon: 'armor',
+  stats: { def: 11, spr: 10, mag: 4 }, desc: 'Cloth that shows the room behind you.' });
+eq('glass_helm', { name: 'Glass Helm', slot: 'head', tier: 4, ilvl: 11, price: 650, who: HB, icon: 'helm',
+  stats: { def: 8, spr: 2 }, desc: 'Silverglass over a steel cap.' });
+eq('mirror_circlet', { name: 'Mirror Circlet', slot: 'head', tier: 4, ilvl: 11, price: 700, who: ['mira'], icon: 'helm',
+  stats: { def: 4, spr: 7, mag: 4 }, desc: 'A band of tiny mirrors.' });
+eq('mere_boots', { name: 'Mere Boots', slot: 'boots', tier: 4, ilvl: 11, price: 700, who: ALL, icon: 'boots',
+  stats: { spd: 2, def: 2, hp: 15 }, desc: 'They leave no print on wet stone.' });
+eq('veil_mantle', { name: 'Veil Mantle', slot: 'mantle', tier: 4, ilvl: 11, price: 650, who: ALL, icon: 'mantle',
+  stats: { def: 4, spr: 4, inkRes: 10 }, desc: 'A mantle like a fold of mist.' });
+
 // ---------------------------------------------------------------------------------------------
 // Uniques (legendary) and sets for Episode 1. Fixed stats; placed, not randomly dropped.
 // ---------------------------------------------------------------------------------------------
@@ -185,6 +250,35 @@ export const UNIQUES = {
     slot: 'mantle', ilvl: 4, price: 700, icon: 'mantle', who: ALL,
     stats: { def: 2, spr: 3, luk: 3 },
     source: 'Archive F1 secret chest', desc: 'A courier\'s mantle, salt-stained at the hem.' },
+  // ---- Episode 2 (EPISODE2_PLAN.md 7.3): placed, never random.
+  twinfold_charm: { id: 'twinfold_charm', name: 'Twinfold Charm', rarity: 'legendary', slot: 'charm',
+    ilvl: 11, price: 1800, icon: 'charm', who: ALL,
+    stats: { atk: 4, mag: 4, spd: 1, furyGain: 20 },
+    source: 'The Other Selves (guaranteed)', desc: 'Two charms grown into one. It hums when you are near a mirror.' },
+  kept_promise: { id: 'kept_promise', name: 'Kept Promise', rarity: 'legendary', slot: 'weapon', type: 'bow',
+    ilvl: 13, price: 2400, icon: 'bow',
+    stats: { atk: 28, spd: 1, crit: 6, lightDmg: 15 },
+    source: 'Elian, after the King (king_after scene)', desc: 'A bow made for a promise. It was kept.' },
+  hollowcrown: { id: 'hollowcrown', name: 'Hollowcrown', rarity: 'legendary', slot: 'weapon', type: 'axe',
+    ilvl: 12, price: 2200, icon: 'axe',
+    stats: { atk: 33, spd: -1, crit: 5, furyGain: 15 },
+    source: 'Court F3 Courage wing (Lantern secret)', desc: 'A crown beaten into an axe. It still remembers a king.' },
+  merewarden_helm: { id: 'merewarden_helm', name: 'Merewarden Helm', rarity: 'set', set: 'merewardens_watch',
+    slot: 'head', ilvl: 10, price: 900, icon: 'helm', who: ALL,
+    stats: { def: 7, spr: 4, hp: 15 },
+    source: 'Court F1 secret (Dash Strike)', desc: 'The helm of the old mere watch.' },
+  merewarden_mantle: { id: 'merewarden_mantle', name: 'Merewarden Mantle', rarity: 'set', set: 'merewardens_watch',
+    slot: 'mantle', ilvl: 10, price: 800, icon: 'mantle', who: ALL,
+    stats: { def: 4, spr: 4, inkRes: 10 },
+    source: 'The Fountain of Faces (side story)', desc: 'A watchman\'s mantle, grey as the mere.' },
+  paper_crown: { id: 'paper_crown', name: 'Paper Crown', rarity: 'rare', slot: 'head',
+    ilvl: 10, price: 600, icon: 'helm', who: ALL,
+    stats: { spr: 5, luk: 8 },
+    source: "Court F3 Belonging alcove (Nico's Crowns)", desc: 'Folded from a proclamation. It fits anyone.' },
+  courier_knot: { id: 'courier_knot', name: "Courier's Knot", rarity: 'rare', slot: 'charm',
+    ilvl: 10, price: 500, icon: 'charm', who: ALL,
+    stats: { spd: 1, luk: 4, resBlind: 30 },
+    source: 'The Last Route (Tess)', desc: 'A cord tied in a courier\'s knot. It never slips.' },
 };
 
 export const SETS = {
@@ -192,45 +286,52 @@ export const SETS = {
     pieces: ['wayfarer_boots', 'wayfarer_mantle'],
     bonus: { 2: { spd: 1, startHaste: 2 } },
     desc: 'Both pieces: +1 SPD and start battles with Haste.' },
+  merewardens_watch: { id: 'merewardens_watch', name: "Merewarden's Watch",
+    pieces: ['merewarden_helm', 'merewarden_mantle'],
+    bonus: { 2: { spr: 3, def: 2, healPow: 10 } },
+    desc: 'Both pieces: +3 SPR, +2 DEF and +10% healing.' },
 };
 
 // ---------------------------------------------------------------------------------------------
 // Affixes (Diablo). tiers: [minIlvl, min, max]. groups: where it can roll:
 //   'weapon' (any weapon), a weapon type ('staff'), 'body', 'head', 'charm', 'boots', 'mantle'.
 // A magic item has 1 to 2 affixes (max one prefix, one suffix); rare has 3 to 4 (max two each).
+// Episode 2 added a top tier at ilvl 10 to every affix (Episode 1 never rolls above ilvl 8 or 9).
 // ---------------------------------------------------------------------------------------------
 export const AFFIXES = {};
 function affix(id, kind, name, stat, groups, tiers, weight = 10) {
   AFFIXES[id] = { id, kind, name, stat, groups, tiers, weight };
 }
 // Prefixes
-affix('gleaming', 'prefix', 'Gleaming', 'atk', ['weapon'], [[1, 2, 3], [4, 4, 6], [7, 7, 9]], 14);
-affix('keen', 'prefix', 'Keen', 'crit', ['sword', 'axe', 'spear', 'bow'], [[1, 3, 5], [4, 6, 8], [7, 9, 12]], 8);
-affix('runed', 'prefix', 'Runed', 'mag', ['staff', 'head', 'charm'], [[1, 2, 3], [4, 4, 6], [7, 7, 9]], 10);
-affix('sturdy', 'prefix', 'Sturdy', 'def', ['body', 'head', 'mantle'], [[1, 1, 2], [4, 3, 4], [7, 5, 7]], 14);
-affix('vital', 'prefix', 'Vital', 'hp', ['body', 'head', 'charm', 'mantle'], [[1, 8, 12], [4, 15, 22], [7, 25, 35]], 12);
-affix('fleet', 'prefix', 'Fleet', 'spd', ['boots', 'mantle', 'bow'], [[1, 1, 1], [4, 1, 2], [7, 2, 3]], 8);
-affix('furious', 'prefix', 'Furious', 'furyGain', ['weapon', 'charm'], [[1, 10, 15], [4, 16, 22], [7, 23, 30]], 7);
-affix('lucky', 'prefix', 'Lucky', 'luk', ['charm', 'boots'], [[1, 2, 3], [4, 4, 5], [7, 6, 8]], 6);
+affix('gleaming', 'prefix', 'Gleaming', 'atk', ['weapon'], [[1, 2, 3], [4, 4, 6], [7, 7, 9], [10, 10, 12]], 14);
+affix('keen', 'prefix', 'Keen', 'crit', ['sword', 'axe', 'spear', 'bow'], [[1, 3, 5], [4, 6, 8], [7, 9, 12], [10, 13, 16]], 8);
+affix('runed', 'prefix', 'Runed', 'mag', ['staff', 'head', 'charm'], [[1, 2, 3], [4, 4, 6], [7, 7, 9], [10, 10, 12]], 10);
+affix('sturdy', 'prefix', 'Sturdy', 'def', ['body', 'head', 'mantle'], [[1, 1, 2], [4, 3, 4], [7, 5, 7], [10, 8, 10]], 14);
+affix('vital', 'prefix', 'Vital', 'hp', ['body', 'head', 'charm', 'mantle'], [[1, 8, 12], [4, 15, 22], [7, 25, 35], [10, 40, 52]], 12);
+affix('fleet', 'prefix', 'Fleet', 'spd', ['boots', 'mantle', 'bow'], [[1, 1, 1], [4, 1, 2], [7, 2, 3], [10, 3, 3]], 8);
+affix('furious', 'prefix', 'Furious', 'furyGain', ['weapon', 'charm'], [[1, 10, 15], [4, 16, 22], [7, 23, 30], [10, 31, 38]], 7);
+affix('lucky', 'prefix', 'Lucky', 'luk', ['charm', 'boots'], [[1, 2, 3], [4, 4, 5], [7, 6, 8], [10, 9, 11]], 6);
 // Suffixes
-affix('of_embers', 'suffix', 'of Embers', 'fireDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25]], 9);
-affix('of_frost', 'suffix', 'of Frost', 'iceDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25]], 9);
-affix('of_storms', 'suffix', 'of Storms', 'thunderDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25]], 9);
-affix('of_dawn', 'suffix', 'of Dawn', 'lightDmg', ['weapon', 'charm'], [[4, 10, 15], [7, 16, 22]], 5);
-affix('of_the_bear', 'suffix', 'of the Bear', 'hp', ['body', 'mantle', 'boots'], [[1, 8, 12], [4, 15, 22], [7, 25, 35]], 10);
-affix('of_warding', 'suffix', 'of Warding', 'spr', ['body', 'head', 'mantle', 'charm'], [[1, 1, 2], [4, 3, 4], [7, 5, 7]], 10);
-affix('of_echoes', 'suffix', 'of Echoes', 'mp', ['staff', 'head', 'charm'], [[1, 3, 5], [4, 6, 9], [7, 10, 14]], 9);
-affix('of_leeching', 'suffix', 'of Leeching', 'lifesteal', ['sword', 'axe', 'spear'], [[1, 3, 4], [4, 5, 6], [7, 7, 9]], 6);
-affix('of_mending', 'suffix', 'of Mending', 'healPow', ['staff', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25]], 7);
-affix('of_the_lantern', 'suffix', 'of the Lantern', 'inkRes', ['head', 'mantle', 'charm', 'body'], [[1, 5, 8], [4, 9, 12], [7, 13, 18]], 8);
-affix('of_clarity', 'suffix', 'of Clarity', 'resSilence', ['head', 'charm'], [[1, 30, 50], [4, 50, 70], [7, 70, 100]], 6);
-affix('of_the_root', 'suffix', 'of the Root', 'resPoison', ['boots', 'charm', 'body'], [[1, 30, 50], [4, 50, 70], [7, 70, 100]], 6);
-affix('of_sight', 'suffix', 'of Sight', 'resBlind', ['head', 'charm'], [[1, 30, 50], [4, 50, 70], [7, 70, 100]], 6);
-affix('of_haste', 'suffix', 'of Haste', 'spd', ['boots', 'mantle'], [[1, 1, 1], [4, 1, 2], [7, 2, 3]], 6);
+affix('of_embers', 'suffix', 'of Embers', 'fireDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25], [10, 26, 32]], 9);
+affix('of_frost', 'suffix', 'of Frost', 'iceDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25], [10, 26, 32]], 9);
+affix('of_storms', 'suffix', 'of Storms', 'thunderDmg', ['weapon', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25], [10, 26, 32]], 9);
+affix('of_dawn', 'suffix', 'of Dawn', 'lightDmg', ['weapon', 'charm'], [[4, 10, 15], [7, 16, 22], [10, 23, 28]], 5);
+affix('of_the_bear', 'suffix', 'of the Bear', 'hp', ['body', 'mantle', 'boots'], [[1, 8, 12], [4, 15, 22], [7, 25, 35], [10, 40, 52]], 10);
+affix('of_warding', 'suffix', 'of Warding', 'spr', ['body', 'head', 'mantle', 'charm'], [[1, 1, 2], [4, 3, 4], [7, 5, 7], [10, 8, 10]], 10);
+affix('of_echoes', 'suffix', 'of Echoes', 'mp', ['staff', 'head', 'charm'], [[1, 3, 5], [4, 6, 9], [7, 10, 14], [10, 15, 19]], 9);
+affix('of_leeching', 'suffix', 'of Leeching', 'lifesteal', ['sword', 'axe', 'spear'], [[1, 3, 4], [4, 5, 6], [7, 7, 9], [10, 10, 12]], 6);
+affix('of_mending', 'suffix', 'of Mending', 'healPow', ['staff', 'charm'], [[1, 8, 12], [4, 13, 18], [7, 19, 25], [10, 26, 32]], 7);
+affix('of_the_lantern', 'suffix', 'of the Lantern', 'inkRes', ['head', 'mantle', 'charm', 'body'], [[1, 5, 8], [4, 9, 12], [7, 13, 18], [10, 19, 24]], 8);
+affix('of_clarity', 'suffix', 'of Clarity', 'resSilence', ['head', 'charm'], [[1, 30, 50], [4, 50, 70], [7, 70, 100], [10, 90, 100]], 6);
+affix('of_the_root', 'suffix', 'of the Root', 'resPoison', ['boots', 'charm', 'body'], [[1, 30, 50], [4, 50, 70], [7, 70, 100], [10, 90, 100]], 6);
+affix('of_sight', 'suffix', 'of Sight', 'resBlind', ['head', 'charm'], [[1, 30, 50], [4, 50, 70], [7, 70, 100], [10, 90, 100]], 6);
+affix('of_haste', 'suffix', 'of Haste', 'spd', ['boots', 'mantle'], [[1, 1, 1], [4, 1, 2], [7, 2, 3], [10, 3, 3]], 6);
 
 // Rare item names (Diablo style two-word names), themed on names, books and the valley.
 export const RARE_NAME_A = ['Ember', 'Hollow', 'Quill', 'Thorn', 'Dusk', 'Willow', 'Bell', 'Root', 'Ash', 'Lantern',
   'Ink', 'River', 'Vellum', 'Echo', 'Dawn', 'Moss', 'Iron', 'Silent', 'Gilded', 'Bramble'];
+// Episode 2 words, added to the pool for items of ilvl 9 and up only (battle/loot.js), so Episode 1 names roll as before.
+export const RARE_NAME_A_EP2 = ['Silver', 'Glass', 'Mere', 'Mirror', 'Veiled', 'Still'];
 export const RARE_NAME_B = {
   weapon: ['Fang', 'Song', 'Bite', 'Edge', 'Verse', 'Mark', 'Thorn', 'Wake', 'Oath', 'Call'],
   body: ['Ward', 'Shroud', 'Coat', 'Hide', 'Shell', 'Mantle'],

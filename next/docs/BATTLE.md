@@ -20,7 +20,7 @@ with no DOM, canvas, audio or timers; every random roll goes through an injected
 | `tools/sim/simulate.mjs` | the balance simulator; `tools/sim/tables.mjs` prints the tables below from the data |
 | `tools/sim/route.mjs` | W10: the whole main route as one run (HP/MP carried, elites, field care, rest points) |
 | `tools/sim/loadouts.mjs` | W10: the expected party per zone (`LOADOUTS`, `knownBestiary`), shared by both |
-| `qa/battle/*.test.mjs` | 55 node tests in 9 files (about 6 s), including a fuzz pass of 252 random battles |
+| `qa/battle/*.test.mjs` | node tests in 10 files (Episode 2 in `ep2.test.mjs`), including a fuzz pass over every encounter |
 
 ---
 
@@ -446,3 +446,180 @@ bronze plate, Hi-Potion 110, Ether 80, Phoenix Feather 180. The smithy gets the 
 reaches Rook with about 1,490 (one tier 3 weapon); the salvage stock (5,210) can absorb the whole route's gold.
 With tier 3 weapons bought (hero and Bram, or all three) the Archivore takes 9.1 / 8.7 rounds (careful, 98 to
 100%) and reckless play still loses 10 to 14% of the time; F3 mixed groups drop from 5.2 to 4.2 to 4.4 rounds.
+
+---
+
+## 10. Episode 2: The Town Without a Name (E2-battle, wave 10a)
+
+Design: `docs/EPISODE2_PLAN.md` sections 6 and 7. Nothing in Episode 1's data, order or targets moved: its rows in
+section 8 still hold and `simulate.mjs --check` passes both episodes.
+
+### 10.1 Enemies (final numbers after tuning)
+
+| Enemy | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold), trait |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Mist Wolf | 9 | 280 | 31/7 | 12/8 | 16 | 2 | fire, spear | - | 11 / 45 | Bite, Mist Bite (Blind 20%), Howl; evade 10% |
+| Glassback Beetle | 9 | 180 | 34/7 | 22/14 | 8 | 3 | axe, thunder | sword, bow, ice | 14 / 54 | Harden (forced opener), Shell Bash, **Glass Ram**; reflects spells while Protected; glass |
+| Quicksilver | 9 | 110 | 30/40 | 8/10 | 10 | 2 | thunder, ice | fire | 8 / 33 | Tackle, Mercury Spit (Poison 25%); splits into 2 beads at 35% |
+| Quicksilver Bead | 9 | 35% of parent | 30/40 | 8/10 | 12 | 1 | thunder, ice | fire | 0 / 0 | Tackle |
+| Glint Wisp | 10 | 205 | 26/51 | 9/18 | 14 | 2 | bow, thunder | fire, light | 20 / 66 | Glint, Mirror Dust, Strike, **Prism Burst**; flying, evade 20% |
+| Glass Sentinel | 10 | 290 | 55/13 | 22/10 | 7 | 4 | thunder, axe | sword, spear | 26 / 90 | Shard Fist, Glass Guard, **Shatter Quake**; glass |
+| Borrowed Shadow | 11 | 370 | 44/62 | 12/20 | 13 | 3 | light, bow | adaptive | 20 / 84 | Dusk Touch, shadow copies; ai `mimic` |
+| Faceless Knight | 11 | 280 | 66/26 | 24/14 | 10 | 5 | axe, thunder, light | sword, spear | 26 / 105 | Blank Blade, Cover, **Judgement** |
+| Shard Swarm | 12 | 320 | 42/51 | 10/12 | 17 | 2 | thunder, axe, light | spear, bow | 26 / 93 | Shard Rain, Glitter, **Shard Storm**; flying, evade 25%; glass |
+| Nameless Reflection | 11 | 365 | 100/24 | 18/14 | 16 | 4 | spear, staff, bow | sword, axe | 40 / 134 | Mirror Slash, Risen Slash, Steady |
+| Mira's Reflection | 11 | 285 | 40/102 | 12/22 | 15 | 3 | sword, axe, spear | staff, bow | 40 / 133 | Ember, Frost, Mend |
+| Bram's Reflection | 11 | 375 | 88/19 | 26/16 | 12 | 5 | sword, staff, bow | spear, axe | 40 / 133 | Lunge, Guard, Taunt |
+| The Nameless King | 13 | 1400 | 158/149 | 22/20 | 13 | 6/6/8 | by phase | ice (1-2) | 500 / 800 | Glass Sword, Cold Mirror, **Keeping**, **Mirror Rain**, **Last Decree**; glass |
+| Sorrow | 13 | 240 | 40/74 | 10/22 | 12 | 2 | fire, bow | ice | 0 / 0 | Weep (heals the King 5%), **Lament** (King +15%, cleansed) |
+| Pride | 13 | 280 | 86/25 | 26/12 | 11 | 4 | spear, thunder | fire, sword | 0 / 0 | Proud Stance (Taunt 2), Glass Lance |
+
+Data keys (enemies.js): `tags: ['glass']`, `opener`, `reflectWhileProtected: 'magic'`, `split: { into, hp }`, ai `mimic`,
+`reflections`, `nameless_king`. The reflections are `boss: true` (30% DoT; Lunge knocks them back 35% instead of
+cancelling); Sorrow and Pride are not (Lunge cancels Lament).
+
+### 10.2 New rules
+
+- **Kept** (`kept`, 2 turns, icon `icon_kept`). The member skips its turns (`skip` reason `kept`, no Poison/Regen ticks),
+  foes cannot target it (single, random and party-wide hits pass it by; a charged hit on it re-targets), and party-wide
+  support (Mending Rain, Rally, Wellspring, Dawnname's heal) skips it. Only actions with `canTargetKept` reach it: Mira's
+  **Recall** and the **Silver Salve** (both cure Kept, Nameless, Silence). It also ends when the King is **Broken**
+  ("The mirror cracks!", `status_remove` reason `freed`). Every living member Kept (or KO) is a defeat ("THE KING KEEPS
+  YOU ALL."). The timeline marks a Kept member's next turns `skip: 'kept'`. A Kept partner cannot join a combo.
+- **Enemy Taunt and Cover.** A party single-target hit (attack, tech, spell, single-target combo) is pulled by a
+  taunting foe (Pride, Bram's Reflection), then taken by a foe covering its target (the Knight's Cover; Bram's
+  Reflection's Guard, which also defends). Party-wide and random hits are not. **True Strike** (`trueStrike`) ignores
+  Taunt, Cover and reflection. `estimate()` keeps `target` as chosen and adds `redirect: <uid>` when the hit would land
+  elsewhere, with the numbers for the foe that really takes it.
+- **Reflect while Protected** (Glassback): spells rebound on a random (non-Kept) ally while it has Protect and is not
+  Broken. Its first turn is always Harden. `knowledge(uid).reflect` is `'magic'` then (also the Warden's stance reflect).
+- **Innate split** (Quicksilver): on its first defeat, two Quicksilver Beads at 35% of its max HP (`split` event).
+- **Mimic** (Borrowed Shadow): a hit of a type it is not weak to becomes its borrowed type (`knowledge(uid).adapted`,
+  `message` kind `adapt`); it takes half damage from that type until another type lands (a weakness hit clears it), and
+  its turn throws a copy back at the last attacker (weapon types: Shadow Strike; fire, ice, thunder: Shadow Ember, Frost,
+  Spark). After a party heal it Shadow Mends itself (18%). Nothing borrowed: Dusk Touch.
+- **Shatter** (`glassChip: 2`): a glass foe loses 2 shields in all (its weakness hit's shield counts toward them).
+- **Fountain blessing**: `createEncounterBattle(id, { flags })` reads the encounter's `startFury: { flag, amount }`
+  (the King: `fountain_done`, +25); `flags` is a Set, array, `{flag: true}` or a function; a number in `opts.startFury`
+  overrides. A `message` kind `blessing` announces it. **The battle scene must pass `flags`** (today it does not).
+
+### 10.3 The Other Selves (`other_selves`)
+
+"Everything you are not": each reflection is weak to the weapon types its owner does not carry. **Mirrored Combo**: at
+the end of a reflection's turn, if its next timeline slot and another reflection's first slot are consecutive (either
+order, no party member between) and a party member acts first, the first of the pair telegraphs the reversed combo of
+that pair (`telegraph` with `partner: <uid>`, `mirrorCombo: true`; "{a} and {b} move as one..."): Cinder Edge (hero +
+Mira, phys 230 + fire 250), Cross Shatter (hero + Bram, phys 230 x 2), Glass Bulwark (Mira + Bram: Protect, Regen and
+Focus on every reflection). It fires on the announcer's turn as one `action_start` with `members: [a, b]` and spends the
+partner's coming turn, unless either was pushed back (Pin Shot, Lunge, any `delay`) or the partner lost or spent a turn
+(Break, Stun, KO): then `telegraph_cancel` reason `split` and "{a} and {b} fall out of step!". A combo that lands makes
+every reflection +15% ATK and MAG for the fight ("The reflections learn your rhythm."): the Devour Name rule, and what
+makes ignoring it cost. Loot: `BOSS_LOOT.other_selves` (keyed by the encounter, dropped once): Twinfold Charm, one rare
+(ilvl 11), Hi-Potion 2, Hi-Ether 1. 120 EXP, 400 gold.
+
+### 10.4 The Nameless King (`nameless_king`)
+
+1. **The Veiled King** (to 66%, HP locked there): Glass Sword, Cold Mirror; **Keeping** announced at the end of his first
+   turn, then every 4 of his turns. A Keeping already announced survives the move to phase 2.
+2. **The Shattered Court** (from 66%): Sorrow and Pride appear; the **Mirror Ward** (`message` kind `ward`) makes him take
+   25% damage, locks his shields and stops his HP at 34%. Mirror Rain (party mag 190%) two turns in, then every 3;
+   Keeping every 5. When both adds fall: "The Mirror Ward shatters!" (kind `ward_break`), phase 3 begins, he is Broken.
+3. **Aurel Unmasked**: `phase` event with `sprite: 'nameless_king_unmasked'`; weak fire, light, spear; 8 shields;
+   permanent Haste; Last Decree (party phys 260%) first, then Keeping and Last Decree alternate with exactly one ordinary
+   turn between.
+
+**Keeping** (mag 70): Defending (or Guarded by a defending Bram) holds ("{name} looks away from the mirror!", kind
+`kept_hold`); otherwise Kept for 2 turns and the King gains **+25%** ATK and MAG for the fight. Rewards: 500 EXP, 800
+gold; `BOSS_LOOT.nameless_king`: two rares (ilvl 13), a Phoenix Feather, 2 Hi-Ethers; the Kept Promise is `king_after`'s.
+
+### 10.5 Items, shops, loot
+
+Consumables `hi_ether` (40 MP, 200) and `silver_salve` (cures Kept, Nameless, Silence; 120; `canTargetKept`). Key items
+`mael_letter`, `glass_key` (counted), `name_fragment_2`, `mirror_sigil`, `courier_satchel`, `elian_reply`, `black_feather`
+(icons `sigil` and `feather` are new). Tier 3 armor and charms at **ilvl 9** (the plan said 8: Episode 1 rolls loot at item
+level 8 at most, so its pools stay exactly as tuned) and tier 4 at ilvl 11, as plan 7.2. Uniques `twinfold_charm`,
+`kept_promise`, `hollowcrown`, `paper_crown`, `courier_knot`; set `merewardens_watch` (`merewarden_helm`,
+`merewarden_mantle`: +3 SPR, +2 DEF, +10% healing). Every affix has a fourth tier at ilvl 10. Rare names draw
+`RARE_NAME_A_EP2` (Silver, Glass, Mere, Mirror, Veiled, Still) only at ilvl 9 and up. `ZONE_LOOT`: east_road 9 / 0.15,
+court_f1 10 / 0.15, court_f2 11 / 0.16, court_f3 12 / 0.18. Shops: `east_peddler` (Penny's Cart, keeper `penny_e`),
+`hollow_items` (Fitch; Silver Salve after `court_entered`), `hollow_smithy` (Vessa; tier 4 after `court_f2_done`),
+Garrick's tier 3 restock on `ep1_complete`. `rollBattleDrops(rng, killed, { zone, encounter })` (called by rules.js).
+
+### 10.6 Zones, encounters, the scene contract
+
+`EP2_ZONES` and `EP2_ZONE_ORDER` (east_road, court_f1, court_f2, court_f3, court_throne; backdrops `east_road`, `court`,
+`court`, `court_deep`, `throne`). They resolve through `ZONES[id]` but stay **non-enumerable** until the Episode 2 maps
+exist (qa/maps checks a map per listed zone): **E2-maps sets `EP2_MAPS_LISTED = true` in encounters.js** when the five
+maps land; mapcheck's enemy-plan check covers them by id already. Encounter groups are plan 6.7 exactly.
+
+New for the scene (all additive): `skip` reason `kept`; `status_remove` reason `freed`; `telegraph.partner` and
+`telegraph.mirrorCombo`; `telegraph_cancel` reason `split`; enemy `action_start.action.members`; `phase.sprite`; `guard`
+from an enemy (actor = the coverer); `stat_mod` with `reason: 'cleansed'`, `mult: 1`; `message` kinds `ward`,
+`ward_break`, `kept`, `kept_hold`, `kept_break`, `adapt`, `mirror_combo`, `blessing`; `knowledge()` fields `reflect` and
+`adapted`; `estimate()` fields `redirect` and `chip`; `timeline()` rows with `skip: 'kept'`.
+
+### 10.7 Auto (the competent policy) in Episode 2
+
+Recall (Mira) or a Silver Salve (anyone, when Mira cannot) on a Kept ally, right after revives; Defend or Guard against
+Keeping as against Devour Name; when even a halved telegraph would finish the member, a potion that keeps it standing
+instead (shared with Episode 1, where the suite never meets that case); single-target options that a Taunt or Cover would
+send elsewhere are skipped, so party-wide skills and True Strike reach Sorrow (scored x1.5); no spells at a Protected
+Glassback; the Borrowed Shadow's halved type shows in the estimate, so Auto varies its attacks; Lunge (or Pin Shot) on a
+Mirrored Combo announcer even when it is a boss; Shatter's glass chips scored as shields.
+
+### 10.8 Simulator and the final table
+
+`node tools/sim/simulate.mjs` runs both episodes (`--episode 1|2`, `--zone court_f2`, `--trace nameless_king 3 reckless`).
+`LOADOUTS` east_road to court_throne follow plan 6.8 (party stats match its calibration table within 2 points; the hero
+needs an Iron Helm at F1 for the plan's DEF). Levels: road [9, 10], F1 [10, 11], F2 [11, 12], F3 [12, 13], the Other
+Selves [11, 12] (reckless measured at 11, where the plan meets them), the King [13]. `progression(share, 2)` continues
+from Episode 1's EXP. `economy2()` / `checkEconomy2()`: from Episode 1's 1,346 leftover, 2,033 battle gold at the Hollow
+(two tier 3 pieces: 1,380), 4,923 before F3 (two tier 4 pieces: 3,000), 7,445 at the end (the whole smithy: 15,970).
+
+Final run, 400 battles per row (64,800 battles in 111 s), **all targets met for both episodes**:
+
+| Encounter | Lv | Careful: win / rounds (p10-p90) / HP lost; next level | Attack-only: win / rounds | Elite (careful) |
+|---|---|---|---|---|
+| road_wolves | 9 / 10 | 100% / 2.9 (2.3-3.7) / 14%; 2.8 | 100% / 6.1 | 4.1 |
+| road_beetles | 9 / 10 | 100% / 4.1 (3.7-4.7) / 15%; 4.0 | 100% / 6.5 | 4.9 |
+| road_quick | 9 / 10 | 100% / 4.3 (3.0-5.7) / 25%; 4.1 | 93% / 6.9 | 5.0 |
+| road_mixed | 9 / 10 | 100% / 4.2 (3.7-5.0) / 12%; 4.1 | 100% / 6.7 | 5.4 |
+| road_pack | 9 / 10 | 100% / 5.0 (4.0-6.0) / 16%; 4.6 | 100% / 8.8 | 6.3 |
+| c1_quick | 10 / 11 | 100% / 4.4 (3.0-5.7) / 26%; 3.7 | 64% / 6.7 | 5.1 |
+| c1_wisps | 10 / 11 | 100% / 3.4 (2.7-4.3) / 21%; 3.2 | 96% / 6.8 | 4.6 |
+| c1_sentinel | 10 / 11 | 100% / 3.8 (3.0-4.7) / 17%; 3.4 | 100% / 8.6 | 4.6 |
+| c1_mixed | 10 / 11 | 100% / 3.9 (3.0-5.0) / 21%; 3.7 | 45% / 9.3 | 5.4 |
+| c2_shadows | 11 / 12 | 100% / 3.6 (3.0-4.3) / 18%; 3.4 | 100% / 6.1 | 5.2 |
+| c2_knight | 11 / 12 | 100% / 3.1 (2.3-4.0) / 14%; 3.0 | 100% / 6.8 | 4.4 |
+| c2_sentinel | 11 / 12 | 100% / 4.0 (3.7-4.7) / 13%; 3.8 | 100% / 9.6 | 5.6 |
+| c2_mixed | 11 / 12 | 100% / 3.5 (3.0-4.0) / 12%; 3.3 | 100% / 6.6 | 4.9 |
+| c3_shards | 12 / 13 | 100% / 3.0 (2.3-4.0) / 12%; 2.8 | 100% / 6.8 | 4.1 |
+| c3_knights | 12 / 13 | 100% / 3.3 (2.7-3.7) / 9%; 3.2 | 100% / 6.1 | 4.1 |
+| c3_shadow | 12 / 13 | 100% / 3.0 (2.3-3.7) / 13%; 2.9 | 100% / 6.1 | 4.3 |
+| c3_mixed | 12 / 13 | 100% / 5.3 (4.3-6.7) / 17%; 5.1 | 61% / 11.2 | 6.4 |
+| **other_selves** | 11 | 92% / 8.0 (6.0-10.0) / 25%, 0.8 KOs | 0% / 3.3 | ignoring telegraphs: 82% |
+| **other_selves** | 12 | 99% / 7.7 (6.0-9.7) / 20% | 0% / 3.8 | - |
+| **nameless_king** | 13 | 98% / 12.3 (8.7-16.3) / 22%, Kept 0.34 a fight | 0% / 6.7 | ignoring telegraphs: 74%, Kept 1.47 |
+
+Episode 2 level curve (all fights / 80%): road 9 to 10 / 9 to 9, F1 10 to 11 / 9 to 10, F2 11 to 12 / 10 to 11, F3
+12 to 13 / 11 to 12, the King at 13, leaving at 14 / at 12, leaving at 13 (total EXP 3,347 / 2,895).
+
+Tuning notes (what moved from the plan's first pass, and why):
+- Light is everywhere in the Court (Lanternheart's sword hits count as light): the Borrowed Shadow (235 to 370) and the
+  Shard Swarm (220 to 320) died in 2 rounds, and so did the Mist Wolf (185 to 280). The Quicksilver (150 to 110, beads 39)
+  took 6 rounds as three of them split into nine bodies. The Sentinel (330 to 290) and the Knight (320 to 280) brought
+  c3_mixed (three large foes) from 5.9 to 5.3.
+- The King, first pass: 12 rounds and ignoring telegraphs cost nothing; phase 1 lasted 1.5 rounds, so Keeping almost
+  never landed. Now: Keeping from his first turn and surviving the phase change, Mirror Rain 120 to 190, Last Decree 230
+  to 260, phase 3 opens with Last Decree with one ordinary turn between telegraphs, HP 1600 to 1400 with DEF/SPR 22/20,
+  adds 300/340 to 240/280, and **each Keeping +25% ATK and MAG** (the plan's +10% left reckless play within 10 points of
+  careful play and +20% within 13 to 18; the Archivore's Devour Name is +20% plus a heal).
+- The Other Selves, first pass: the Mirrored Combo fired 0.2 times a fight (the partner was usually the very next actor,
+  so it had already acted). It now takes any two consecutive first slots, survives faster party actions, falls apart only
+  on a push or a lost turn, hits at 230 to 250% and empowers the reflections +15% when it lands; reflection ATK/MAG +15%.
+- Episode 2 gold is about 1.5x the plan's per-enemy numbers so the totals match its gold column.
+
+Known gaps: no Episode 2 route simulation (`route.mjs` carries HP and MP through Episode 1 only). The plan 6.8 `LOADOUTS`
+assume more gear than battle gold buys (about 10,400 of purchases against 5,800 of gold): chests, drops and sales must
+cover the rest, or fights run longer for a thrifty player. The scene does not pass `flags` yet, so the Fountain's Fury
+is off until E2-scene-ui adds `flags` (the save's story flags) to its `createEncounterBattle` call.

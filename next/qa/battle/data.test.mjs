@@ -8,7 +8,7 @@ import { PARTY, PARTY_IDS, statsAt, STAT_KEYS, expForLevel, levelForExp, MASTERY
   grantExp, grantMastery } from '../../src/data/party.js';
 import { ITEMS, EQUIPMENT, UNIQUES, SETS, AFFIXES, CONSUMABLES, KEY_ITEMS, RARITIES, canEquip } from '../../src/data/items.js';
 import { ENEMIES, ELITE_MODS, LOST_PAGE_VARIANTS, ELITE_BASE, RANDOM_ELITE_MODS } from '../../src/data/enemies.js';
-import { ENCOUNTERS, ZONES, ZONE_ORDER, rollEncounter } from '../../src/data/encounters.js';
+import { ENCOUNTERS, ZONES, ZONE_ORDER, EP2_ZONE_ORDER, rollEncounter } from '../../src/data/encounters.js';
 import { SHOPS } from '../../src/data/shops.js';
 import { BOSS_LOOT, RARITY_TABLES, ZONE_LOOT } from '../../src/data/loot-tables.js';
 import { memberStats, DEF_K, VARIANCE, ENEMY_CRIT, CRIT_MULT, makeRng } from '../../src/battle/rules.js';
@@ -85,7 +85,7 @@ test('encounters, zones, shops, loot tables and party kits reference real ids', 
     assert.ok(enc.enemies.includes(enc.leader), `${enc.id} leader`);
     assert.ok(ZONES[enc.zone], `${enc.id} zone`);
   }
-  for (const z of ZONE_ORDER) for (const [enc, n] of ZONES[z].plan) assert.ok(ENCOUNTERS[enc] && n > 0, `${z} ${enc}`);
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc, n] of ZONES[z].plan) assert.ok(ENCOUNTERS[enc] && n > 0, `${z} ${enc}`);
   for (const shop of Object.values(SHOPS)) {
     for (const s of shop.stock) {
       const it = ITEMS[s.item];
@@ -94,7 +94,9 @@ test('encounters, zones, shops, loot tables and party kits reference real ids', 
     }
   }
   for (const [boss, rule] of Object.entries(BOSS_LOOT)) {
-    assert.ok(ENEMIES[boss] && (rule.unique === null || UNIQUES[rule.unique]) && RARITY_TABLES[rule.table]);
+    // keyed by the boss's enemy id, or by the encounter id for a group boss (Episode 2: the Other Selves)
+    assert.ok((rule.encounter ? ENCOUNTERS[boss] && ENCOUNTERS[boss].boss : ENEMIES[boss]) && (rule.unique === null || UNIQUES[rule.unique])
+      && RARITY_TABLES[rule.table], boss);
     for (const c of rule.consumables) assert.ok(CONSUMABLES[c.item]);
   }
   for (const id of PARTY_IDS) {
@@ -146,7 +148,8 @@ test('growth: stats never drop, EXP and mastery curves rise, level helpers agree
 test('no em dashes in battle data, rules, tools or docs', () => {
   const files = ['src/data/skills.js', 'src/data/party.js', 'src/data/items.js', 'src/data/enemies.js',
     'src/data/encounters.js', 'src/data/loot-tables.js', 'src/data/shops.js', 'src/battle/rules.js', 'src/battle/ctb.js',
-    'src/battle/ai.js', 'src/battle/loot.js', 'src/battle/status.js', 'tools/sim/simulate.mjs', 'docs/BATTLE.md'];
+    'src/battle/ai.js', 'src/battle/loot.js', 'src/battle/status.js', 'tools/sim/simulate.mjs', 'tools/sim/loadouts.mjs',
+    'tools/sim/route.mjs', 'docs/BATTLE.md'];
   for (const f of files) {
     const url = new URL(`../../${f}`, import.meta.url);
     if (!fs.existsSync(url)) continue;
@@ -157,9 +160,13 @@ test('no em dashes in battle data, rules, tools or docs', () => {
 test('a full-HP party at the expected level survives any single non-telegraphed enemy action', () => {
   // first zone each enemy appears in, and the party's level on entering it (one level lower too)
   const firstZone = {};
-  for (const z of ZONE_ORDER) for (const [enc] of ZONES[z].plan) for (const id of ENCOUNTERS[enc].enemies) firstZone[id] = firstZone[id] || z;
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) for (const id of ENCOUNTERS[enc].enemies) firstZone[id] = firstZone[id] || z;
   firstZone.lost_page = 'archive_boss';
-  const entry = Object.fromEntries(progression(1).map((p) => [p.zone, p.startLevel]));
+  // Episode 2's summoned and split foes, met where their parent is
+  firstZone.quicksilver_bead = 'east_road';
+  firstZone.false_sorrow = 'court_throne';
+  firstZone.false_pride = 'court_throne';
+  const entry = Object.fromEntries([...progression(1), ...progression(1, 2)].map((p) => [p.zone, p.startLevel]));
   for (const [id, zone] of Object.entries(firstZone)) {
     const e = ENEMIES[id];
     const boost = e.boss ? 1 : ELITE_BASE.atk; // assume an elite

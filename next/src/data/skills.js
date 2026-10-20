@@ -69,6 +69,11 @@ export const STATUSES = {
               help: 'Foes aim single attacks here.' },
   nameless: { id: 'nameless', name: 'Nameless', icon: 'nameless', kind: 'bad', turns: 99,
               help: 'Name devoured: ATK and MAG -20%.' },
+  // Episode 2: the Nameless King's signature. The member is sealed in a mirror shard: it skips its turns, cannot
+  // be targeted and ignores party-wide hits. Ends after 2 of its turns, on Recall or a Silver Salve, or when the
+  // King is Broken. Every living member Kept (or KO) loses the battle.
+  kept:     { id: 'kept', name: 'Kept', icon: 'kept', kind: 'bad', turns: 2,
+              help: 'Sealed in a mirror. Skips its turns.' },
 };
 
 // Statuses a cleanse (Purify, Wellspring, items) can remove. Nameless lifts when the battle ends.
@@ -184,6 +189,20 @@ def('lumen', { name: 'Lumen', kind: 'magic', user: 'mira', learn: { level: 6 }, 
 def('mending_rain', { name: 'Mending Rain', kind: 'magic', user: 'mira', learn: { level: 7 }, mp: 10,
   target: 'allies', formula: 'heal', power: 140, rank: 110,
   help: 'Restore HP to the whole party.', fx: 'heal_all', sfx: 'heal' });
+
+// --- Episode 2 (E2-battle) -------------------------------------------------------------------
+// Recall reaches a Kept ally (`canTargetKept`); Shatter cracks glass (`glassChip`: 2 shields on a `glass` foe,
+// counting a weakness hit's own shield); True Strike ignores Taunt, Cover and Reflect (`trueStrike`).
+def('recall', { name: 'Recall', kind: 'magic', user: 'mira', learn: { level: 9 }, mp: 5,
+  target: 'ally', formula: 'none', rank: 80, canTargetKept: true,
+  effects: [{ heal: 0.15 }, { cure: ['kept', 'nameless', 'silence'] }],
+  help: "Speak an ally's name. Frees the Kept.", fx: 'recall', sfx: 'heal' });
+def('shatter', { name: 'Shatter', kind: 'tech', user: 'bram', learn: { level: 10 }, mp: 6,
+  target: 'enemy', formula: 'phys', power: 150, types: ['$weapon'], rank: 110, effects: [{ glassChip: 2 }],
+  help: 'Heavy blow. Cracks glass: 2 shields.', fx: 'chop', sfx: 'glass_break' });
+def('true_strike', { name: 'True Strike', kind: 'tech', user: 'hero', learn: { level: 11 }, mp: 5,
+  target: 'enemy', formula: 'phys', power: 170, types: ['$weapon'], trueStrike: true,
+  help: 'A strike that goes where it is aimed.', fx: 'dash_cut', sfx: 'sword_slash' });
 
 // --- Fury arts (one per weapon type, unlocked at mastery 2) ---------------------------------
 def('fury_dawnsplitter', { name: 'Dawnsplitter', kind: 'fury', weapon: 'sword', learn: { mastery: 2 },
@@ -306,6 +325,108 @@ foe('summon_pages', { name: 'Tear the Book', target: 'none', formula: 'none', ra
   help: 'Lost Pages spill out.', fx: 'summon' });
 foe('feast', { name: 'Feast', target: 'none', formula: 'none', rank: 90, effects: [{ feast: 0.07 }],
   telegraph: '{name} turns its maw toward the Lost Pages...', help: 'Devours its pages to heal.', fx: 'feast' });
+
+// ---------------------------------------------------------------------------------------------
+// Episode 2 enemy skills (E2-battle). New effect keys: {keep: true} (the King's Keeping), {bossHeal: f} (heal the
+// boss on the user's side), {cleanse: true} (remove bad statuses and stat cuts), {coverAlly: true, defend?}
+// (guard the lowest-HP ally: party single-target hits on it go to the user until the user's next turn).
+// Mirrored Combo skills carry `mirrorCombo` (ai.js `reflections` fires them with both reflections).
+// ---------------------------------------------------------------------------------------------
+// Mist Wolf
+foe('mist_bite', { name: 'Mist Bite', target: 'enemy', formula: 'phys', power: 90,
+  effects: [{ status: 'blind', chance: 0.2 }], help: 'A bite out of the fog. May Blind.', fx: 'bite' });
+// Glassback Beetle
+foe('glass_ram', { name: 'Glass Ram', target: 'enemy', formula: 'phys', power: 200,
+  telegraph: '{name} lowers its glass horn at {target}.', help: 'A charging ram of silverglass.', fx: 'charge' });
+// Quicksilver
+foe('mercury_spit', { name: 'Mercury Spit', target: 'enemy', formula: 'mag', power: 90,
+  effects: [{ status: 'poison', chance: 0.25 }], help: 'Spits mercury. May Poison.', fx: 'ink_spit' });
+// Glint Wisp
+foe('glint', { name: 'Glint', target: 'enemy', formula: 'mag', power: 85,
+  effects: [{ status: 'blind', chance: 0.3 }], help: 'A sharp flash. May Blind.', fx: 'light' });
+foe('mirror_dust', { name: 'Mirror Dust', target: 'enemies', formula: 'mag', power: 45,
+  effects: [{ status: 'blind', chance: 0.15 }], help: 'Glittering dust over all.', fx: 'scan' });
+foe('prism_burst', { name: 'Prism Burst', target: 'enemies', formula: 'mag', power: 120,
+  telegraph: 'Light bends and gathers inside {name}...', help: 'Light breaks over the party.', fx: 'light' });
+// Glass Sentinel
+foe('shard_fist', { name: 'Shard Fist', target: 'enemy', formula: 'phys', power: 105, help: 'A fist of cut glass.', fx: 'slam' });
+foe('glass_guard', { name: 'Glass Guard', target: 'self', formula: 'none', rank: 80,
+  effects: [{ status: 'protect', turns: 3 }], help: 'Its glass thickens.', fx: 'buff' });
+foe('shatter_quake', { name: 'Shatter Quake', target: 'enemies', formula: 'phys', power: 125,
+  effects: [{ status: 'stun', chance: 0.2 }],
+  telegraph: '{name} raises both fists. The glass floor hums...', help: 'The floor cracks. May Stun.', fx: 'quake' });
+// Borrowed Shadow (ai 'mimic': copies the type that last hit it)
+foe('dusk_touch', { name: 'Dusk Touch', target: 'enemy', formula: 'mag', power: 85,
+  effects: [{ status: 'blind', chance: 0.2 }], help: 'A cold hand of dusk. May Blind.', fx: 'drain' });
+foe('shadow_strike', { name: 'Shadow Strike', target: 'enemy', formula: 'phys', power: 110,
+  help: 'Your own blow, borrowed.', fx: 'slash' });
+foe('shadow_ember', { name: 'Shadow Ember', target: 'enemy', formula: 'mag', power: 120, types: ['fire'],
+  help: 'Your own fire, borrowed.', fx: 'fire' });
+foe('shadow_frost', { name: 'Shadow Frost', target: 'enemy', formula: 'mag', power: 120, types: ['ice'],
+  effects: [{ status: 'chill', chance: 0.2 }], help: 'Your own frost, borrowed.', fx: 'ice' });
+foe('shadow_spark', { name: 'Shadow Spark', target: 'enemy', formula: 'mag', power: 125, types: ['thunder'],
+  help: 'Your own thunder, borrowed.', fx: 'thunder' });
+foe('shadow_mend', { name: 'Shadow Mend', target: 'self', formula: 'none', rank: 90, effects: [{ heal: 0.18 }],
+  help: 'Your own healing, borrowed.', fx: 'heal' });
+// Faceless Knight
+foe('blank_blade', { name: 'Blank Blade', target: 'enemy', formula: 'phys', power: 110, help: 'A blade with no crest.', fx: 'slash' });
+foe('knight_cover', { name: 'Cover', target: 'none', formula: 'none', rank: 80, effects: [{ coverAlly: true }],
+  help: 'Stands before the weakest ally.', fx: 'guard' });
+foe('judgement', { name: 'Judgement', target: 'enemy', formula: 'phys', power: 220,
+  telegraph: '{name} lifts its blade toward {target}. Judgement is coming.', help: 'A sentence carried out.', fx: 'slash' });
+// Shard Swarm
+foe('shard_rain', { name: 'Shard Rain', target: 'random', formula: 'phys', power: 45, hits: 3,
+  help: 'Three shards at random.', fx: 'cut' });
+foe('glitter', { name: 'Glitter', target: 'enemy', formula: 'mag', power: 70,
+  effects: [{ status: 'blind', chance: 0.25 }], help: 'Blinding glitter. May Blind.', fx: 'scan' });
+foe('shard_storm', { name: 'Shard Storm', target: 'enemies', formula: 'phys', power: 140,
+  telegraph: 'The shards spin faster and faster around {name}...', help: 'A storm of broken glass.', fx: 'pages' });
+// The Other Selves (ai 'reflections')
+foe('mirror_slash', { name: 'Mirror Slash', target: 'enemy', formula: 'phys', power: 110, help: 'Your own cut, reversed.', fx: 'slash' });
+foe('risen_slash', { name: 'Risen Slash', target: 'enemy', formula: 'phys', power: 160, help: 'A rising cut, reversed.', fx: 'slash_up' });
+foe('refl_steady', { name: 'Steady', target: 'self', formula: 'none', rank: 60, effects: [{ status: 'focus' }],
+  help: 'It steadies, as you would.', fx: 'focus' });
+foe('refl_ember', { name: 'Ember', target: 'enemy', formula: 'mag', power: 140, types: ['fire'],
+  help: 'Fire magic, reversed.', fx: 'fire' });
+foe('refl_frost', { name: 'Frost', target: 'enemy', formula: 'mag', power: 140, types: ['ice'],
+  effects: [{ status: 'chill', chance: 0.25 }], help: 'Ice magic, reversed.', fx: 'ice' });
+foe('refl_mend', { name: 'Mend', target: 'ally', formula: 'none', rank: 90, effects: [{ heal: 0.22 }],
+  help: 'Mends a reflection.', fx: 'heal' });
+foe('refl_guard', { name: 'Guard', target: 'none', formula: 'none', rank: 70, effects: [{ coverAlly: true, defend: true }],
+  help: 'Shields a reflection.', fx: 'guard' });
+foe('refl_lunge', { name: 'Lunge', target: 'enemy', formula: 'phys', power: 145, pierce: 0.5,
+  help: 'A piercing thrust, reversed.', fx: 'thrust' });
+foe('refl_taunt', { name: 'Taunt', target: 'self', formula: 'none', rank: 80, effects: [{ status: 'taunt', turns: 2 }],
+  help: 'It draws your single attacks.', fx: 'taunt' });
+foe('mirror_cinder_edge', { name: 'Cinder Edge', target: 'enemy', formula: 'none', rank: 110,
+  mirrorCombo: { pair: ['refl_hero', 'refl_mira'],
+    parts: [{ by: 'refl_hero', formula: 'phys', power: 230, types: [] }, { by: 'refl_mira', formula: 'mag', power: 250, types: ['fire'] }] },
+  telegraph: '{name} and {partner} move as one...', help: 'A blade wreathed in fire, reversed.', fx: 'combo_ember' });
+foe('mirror_cross_shatter', { name: 'Cross Shatter', target: 'enemy', formula: 'none', rank: 110,
+  mirrorCombo: { pair: ['refl_hero', 'refl_bram'],
+    parts: [{ by: 'refl_hero', formula: 'phys', power: 230, types: [] }, { by: 'refl_bram', formula: 'phys', power: 230, types: [], pierce: 0.3 }] },
+  telegraph: '{name} and {partner} move as one...', help: 'An X-cut of glass, reversed.', fx: 'combo_cross' });
+foe('mirror_glass_bulwark', { name: 'Glass Bulwark', target: 'none', formula: 'none', rank: 100,
+  mirrorCombo: { pair: ['refl_mira', 'refl_bram'], parts: [], buff: [['protect', 3], ['regen', 3], ['focus', 99]] },
+  telegraph: '{name} and {partner} move as one...', help: 'Protect, Regen and Focus, reversed.', fx: 'combo_thorn' });
+// The Nameless King (ai 'nameless_king') and his court
+foe('glass_sword', { name: 'Glass Sword', target: 'enemy', formula: 'phys', power: 110, help: 'A cut of cold glass.', fx: 'slash' });
+foe('cold_mirror', { name: 'Cold Mirror', target: 'enemy', formula: 'mag', power: 105, types: ['ice'],
+  effects: [{ status: 'chill', chance: 0.3 }], help: 'A mirror of frost. May Chill.', fx: 'ice' });
+foe('keeping', { name: 'Keeping', target: 'enemy', formula: 'mag', power: 70, effects: [{ keep: true }],
+  telegraph: '{name} turns his mirror toward {target}. He means to keep them.',
+  help: 'Seals a foe in a mirror shard.', fx: 'keeping', sfx: 'kept' });
+foe('mirror_rain', { name: 'Mirror Rain', target: 'enemies', formula: 'mag', power: 190,
+  telegraph: 'Every shard in the hall turns toward you...', help: 'Glass rains on the party.', fx: 'ink_storm' });
+foe('last_decree', { name: 'Last Decree', target: 'enemies', formula: 'phys', power: 260,
+  telegraph: 'The King raises his glass sword. NOTHING MORE WILL BE TAKEN.', help: 'The final sentence.', fx: 'shockwave' });
+foe('weep', { name: 'Weep', target: 'enemy', formula: 'mag', power: 55, types: ['ice'],
+  effects: [{ status: 'chill', chance: 0.3 }, { bossHeal: 0.05 }], help: 'Tears that mend the King.', fx: 'ice' });
+foe('lament', { name: 'Lament', target: 'boss', formula: 'none', rank: 90, effects: [{ heal: 0.15 }, { cleanse: true }],
+  telegraph: '{name} begins to weep for the King...', help: 'Heals and cleanses the King.', fx: 'heal' });
+foe('proud_stance', { name: 'Proud Stance', target: 'self', formula: 'none', rank: 80, effects: [{ status: 'taunt', turns: 2 }],
+  help: 'Pride stands in front.', fx: 'taunt' });
+foe('glass_lance', { name: 'Glass Lance', target: 'enemy', formula: 'phys', power: 120, help: 'A lance of silverglass.', fx: 'thrust' });
 
 export const SKILLS = S;
 
