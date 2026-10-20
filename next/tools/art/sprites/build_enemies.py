@@ -107,12 +107,24 @@ def build_battle():
     for eid in ENEMIES:
         sh.add(eid, e[eid])
     sheet, rects = sh.render()
-    save_png(sheet, os.path.join(DST, 'enemies_battle.png'))
+    origin = {n: [r[2] // 2, r[3] - 1] for n, r in rects.items()}
+    # W6-anim: derived frames (<id>_idle_1, _attack, _hurt, _cast for casters, _die_0..2) packed under the
+    # base frames; the base frames keep their rects
+    import anim_frames as AF, anim_atlas as AA
+    derived, anims = [], {}
+    for eid in ENEMIES:
+        fr = AF.derive_enemy(eid, e[eid])
+        derived += [(f'{eid}_{n}', *fr[n]) for n in AF.ORDER if n in fr]
+    sheet, rects, origin = AA.append(sheet, rects, origin, derived)
+    for eid in ENEMIES:
+        anims.update(AA.enemy_anims(eid, rects))
+    AA.save_indexed(sheet, os.path.join(DST, 'enemies_battle.png'))
     meta = {'image': 'enemies_battle.png', 'frames': rects,
-            'origin': {n: [r[2] // 2, r[3] - 1] for n, r in rects.items()},
+            'origin': origin,
+            'anims': anims,
             'facing': 'right',
             'external': {'echo_warden': 'bosses_battle', 'archivore': 'bosses_battle', 'lost_page': 'bosses_battle'},
-            'notes': 'One frame per enemy, facing RIGHT toward the party. origin = bottom-centre. Idle breathe, hit flash and death dissolve are procedural in code. echo_warden, archivore and lost_page live in bosses_battle.json.'}
+            'notes': 'Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json.'}
     write_json(os.path.join(DST, 'enemies_battle.json'), meta)
     contact(list(e.items()), os.path.join(OUT, 'enemies_battle_4x.png'), scale=4, cols=4, title='enemies_battle at 4x (facing right)')
     return meta

@@ -13,6 +13,9 @@ start to 'win' in under 60 s wall clock), e2e_lose (scripted defeat), e2e_all (e
 W4-battle-polish adds: stage (one shot per backdrop with the band, baselines and shadows, plus feet zooms),
 strip_intro (the mosaic + slice transition at 2-frame steps), strip_impact (1-frame strips of a sword slash,
 a spear thrust, Ember, an axe chop and an arrow, zoomed on the target), and _zoom_timeline.png from command.
+W6-anim adds anim_enemy (lunge + hurt), anim_cast, anim_death (die_0..2, flash, dissolve), anim_devour,
+anim_stance (Echo Warden Mirror -> Bulwark) and anim_party (crit, combo, level-up hop): zoomed strips with the
+frame name each actor drew under every tile, failing when a generator frame never reaches the screen.
 """
 import argparse
 import json
@@ -420,16 +423,16 @@ def sc_strip_death(page, ctx):
     page.evaluate("LQ_DEBUG.setSpeed(0)")
     page.evaluate("LQ_DEBUG.battle('f1_slimes', { fresh: true, seed: 5, level: 15 })")
     page.evaluate(ADVANCE.format(60))
-    page.evaluate("LQ_DEBUG.battleUntil('hero')")
-    advance_until(page, WAIT_MENU + " && LQ_DEBUG.state().battle.current === 'hero'")
-    page.evaluate("LQ_DEBUG.battleAct({ type: 'swap' })")
-    page.evaluate("LQ_DEBUG.battleUntil('hero')")
-    advance_until(page, WAIT_MENU + " && LQ_DEBUG.state().battle.current === 'hero'")
-    page.evaluate("LQ_DEBUG.battleAct({ type: 'skill', skill: 'heavy_chop', target: 'e0' })")
-    filmstrip(page, ctx, 'kill', 12, 6)
-    s = bstate(page)
-    e0 = next(u for u in s['units'] if u['uid'] == 'e0')
-    assert e0['ko'] or e0['dead'], e0
+    # W6-anim: the hero's own swings film the kill (the last strip is kept). The old swap-then-Heavy-Chop route
+    # let the level-15 allies wipe the room during the fast-forward, so the hero's second turn never came.
+    uid, _x = _living_foe(page)
+    for _ in range(3):
+        _act_when(page, 'hero', {'type': 'attack', 'target': uid})
+        filmstrip(page, ctx, 'kill', 12, 6)
+        foe = next(u for u in bstate(page)['units'] if u['uid'] == uid)
+        if foe['ko'] or foe['dead']:
+            break
+    assert foe['ko'] or foe['dead'], foe
 
 
 def sc_e2e_win(page, ctx):
@@ -545,6 +548,197 @@ def sc_boss_death(page, ctx):
     page.evaluate("LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1 })")
 
 
+
+# ------------------------------------------------------------------------------------------ W6-anim strips
+# Each strip is a zoomed grid of game frames around one actor plus the frame NAME the actor drew in each tile
+# (read back from LQ_ENGINE), so the run fails when a generator frame never reaches the screen.
+ACTORS_JS = """(() => { const s = LQ_ENGINE.scene; if (!s || !s.actors) return [];
+  return [...s.actors.values()].map((a) => { const f = a.dead ? null : (a.side === 'enemy' ? a.enemyFrame() : a.partyFrame());
+    return { uid: a.uid, id: a.id, side: a.side, pose: a.pose, stance: a.stance || null, ko: a.ko, dead: a.dead,
+      x: Math.round(a.x), y: Math.round(a.y), w: a.w, h: a.h, frame: f ? f.name : null }; }); })()"""
+
+
+def actors(page):
+    return page.evaluate(ACTORS_JS)
+
+
+def actor(page, pred):
+    return next((a for a in actors(page) if pred(a)), None)
+
+
+def until_actor(page, pred, max_frames=900, step=1):
+    used = 0
+    while used <= max_frames:
+        a = actor(page, pred)
+        if a:
+            return a
+        page.evaluate(ADVANCE.format(step))
+        used += step
+    return None
+
+
+def region_of(a, pad=18, top=14, scale_w=1.0):
+    w = int(a['w'] * scale_w) + pad * 2
+    h = a['h'] + top + 10
+    x = max(0, min(384 - w, a['x'] - w // 2))
+    y = max(0, min(216 - h, a['y'] - a['h'] - top))
+    return (x, y, min(w, 384), min(h, 216))
+
+
+def anim_strip(page, ctx, name, frames, step, region, uid, scale=3, cols=6):
+    """micro_strip that also records the frame name `uid` drew in every tile (written under the strip)."""
+    from PIL import Image, ImageDraw
+    v = page.evaluate('LQ_DEBUG.view()')
+    x0, y0, k = v['cssX'], v['cssY'], v['cssScale']
+    gx, gy, gw, gh = region
+    tiles, names = [], []
+    for i in range(frames):
+        page.evaluate(ADVANCE.format(step))
+        a = actor(page, lambda a: a['uid'] == uid)
+        names.append(a['frame'] if a else None)
+        p = OUT / '_strip_tmp.png'
+        page.screenshot(path=str(p))
+        im = Image.open(p)
+        crop = im.crop((int(x0 + gx * k), int(y0 + gy * k), int(x0 + (gx + gw) * k), int(y0 + (gy + gh) * k)))
+        tiles.append(crop.resize((gw * scale, gh * scale), Image.NEAREST))
+        im.close(); p.unlink()
+    tw, th = tiles[0].size
+    rows = (len(tiles) + cols - 1) // cols
+    sheet = Image.new('RGB', (cols * tw + (cols - 1) * 4, rows * (th + 14) + (rows - 1) * 4), (20, 16, 30))
+    d = ImageDraw.Draw(sheet)
+    for i, t in enumerate(tiles):
+        x, y = (i % cols) * (tw + 4), (i // cols) * (th + 18)
+        sheet.paste(t, (x, y))
+        d.text((x + 3, y + th + 1), f'{i * step + step}f  {names[i] or "-"}', fill=(235, 235, 210))
+    path = OUT / f"{ctx['device']}-{ctx['name']}-{name}.png"
+    sheet.save(path)
+    ctx['files'].append(str(path))
+    return names
+
+
+def _enemy_turns_until(page, pred, turns=14):
+    """Fast-forward to enemy turns until an enemy actor matches pred during one; returns that actor or None."""
+    for _ in range(turns):
+        page.evaluate("LQ_DEBUG.battleUntil('enemy')")
+        advance_until(page, "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.current && LQ_DEBUG.state().battle.current[0] === 'e' && !LQ_DEBUG.state().battle.fast", max_frames=3000, step=2)
+        used = 0
+        while used < 400:
+            a = actor(page, pred)
+            if a:
+                return a
+            page.evaluate(ADVANCE.format(1)); used += 1
+            s = bstate(page)
+            if not s or s.get('phase') != 'play' or (s.get('menu') and s['menu'] != 'closed'):
+                break
+    return None
+
+
+def sc_anim_enemy(page, ctx):
+    """An enemy lunge (attack frame) and the party member's hurt, then the enemy's own hurt frame under a hit."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('valley_wolves', { fresh: true, seed: 2 })")
+    page.evaluate(ADVANCE.format(60))
+    a = _enemy_turns_until(page, lambda a: a['side'] == 'enemy' and a['pose'] == 'attack')
+    assert a, 'no enemy lunge seen'
+    names = anim_strip(page, ctx, 'lunge', 12, 2, (0, 44, 384, 120), a['uid'], scale=2, cols=4)
+    assert 'briar_wolf_attack' in names, names
+    page.evaluate("LQ_DEBUG.battle('f1_slimes', { fresh: true, seed: 5 })")
+    page.evaluate(ADVANCE.format(60))
+    _act_when(page, 'hero', {'type': 'attack', 'target': 'e0'})
+    a = until_actor(page, lambda a: a['uid'] == 'e0' and a['pose'] == 'hurt', 300)
+    assert a, 'e0 never hurt'
+    names = anim_strip(page, ctx, 'hurt', 12, 2, region_of(a), 'e0')
+    assert any(n and n.endswith('_hurt') for n in names), names
+    ctx['note'] = f'lunge + hurt frames: {sorted(set(n for n in names if n))}'
+
+
+def sc_anim_cast(page, ctx):
+    """A caster's spell (cast frame with the glow) in the deep archive."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('f3_ink', { fresh: true, seed: 3, level: 9 })")
+    page.evaluate(ADVANCE.format(60))
+    a = _enemy_turns_until(page, lambda a: a['side'] == 'enemy' and a['pose'] == 'cast' and (a['frame'] or '').endswith('_cast'))
+    assert a, 'no enemy cast frame seen'
+    names = anim_strip(page, ctx, 'cast', 12, 2, region_of(a, pad=24, top=20), a['uid'])
+    assert any(n and n.endswith('_cast') for n in names), names
+    ctx['note'] = f"{a['id']}: {sorted(set(n for n in names if n))}"
+
+
+def sc_anim_death(page, ctx):
+    """die_0..2 crumble, the white flash and the dissolve, 2 frames a tile."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('f1_slimes', { fresh: true, seed: 5, level: 15 })")
+    page.evaluate(ADVANCE.format(60))
+    a = None
+    for _ in range(3):
+        _act_when(page, 'hero', {'type': 'attack', 'target': '*'})
+        a = until_actor(page, lambda a: a['side'] == 'enemy' and a['pose'] == 'die' and not a['dead'], 240)
+        if a:
+            break
+    assert a, 'no enemy entered the die pose'
+    names = anim_strip(page, ctx, 'die', 18, 2, region_of(a), a['uid'])
+    for k in range(3):
+        assert any(n and n.endswith(f'_die_{k}') for n in names), names
+
+
+def sc_anim_devour(page, ctx):
+    """The Archivore's devour: eye swells, tendrils reach (several enemy turns until it devours)."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('archivore', { fresh: true, seed: 2, level: 9 })")
+    page.evaluate(ADVANCE.format(60))
+    a = _enemy_turns_until(page, lambda a: a['id'] == 'archivore' and a['pose'] == 'devour', turns=24)
+    if not a:
+        # devour depends on the boss AI's dice: show the cast (ink inhale) instead and say so
+        a = _enemy_turns_until(page, lambda a: a['id'] == 'archivore' and a['pose'] == 'cast', turns=6)
+        assert a, 'the Archivore never cast or devoured'
+        ctx['note'] = 'no devour within 24 enemy turns: filmed its cast'
+    names = anim_strip(page, ctx, 'devour', 12, 3, region_of(a, pad=10, top=12), a['uid'], scale=2, cols=4)
+    assert any(n and (n.endswith('_devour') or n.endswith('_cast')) for n in names), names
+    ctx.setdefault('note', f'frames: {sorted(set(n for n in names if n))}')
+
+
+def sc_anim_stance(page, ctx):
+    """Echo Warden: the opening Mirror stance, then the swap to Bulwark (charged shield, then the new set)."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('echo_warden', { fresh: true, seed: 3, level: 8 })")
+    a = until_actor(page, lambda a: a['id'] == 'echo_warden' and a['stance'] == 'mirror', 300)
+    assert a, 'the Warden never took its Mirror stance'
+    names0 = anim_strip(page, ctx, 'mirror', 6, 6, region_of(a, pad=16, top=16), a['uid'])
+    a = _enemy_turns_until(page, lambda a: a['id'] == 'echo_warden' and a['stance'] == 'bulwark', turns=12)
+    assert a, 'no stance swap within 12 enemy turns'
+    names = anim_strip(page, ctx, 'swap', 12, 3, region_of(a, pad=16, top=16), a['uid'])
+    assert any(n and n.startswith('echo_warden_mirror') for n in names0), names0
+    assert any(n and n.startswith('echo_warden_bulwark') for n in names), names
+    ctx['note'] = f'mirror {sorted(set(n for n in names0 if n))} -> {sorted(set(n for n in names if n))}'
+
+
+def sc_anim_party(page, ctx):
+    """Party extras in the real renderer: crit and combo poses on all three, then the level-up hop."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('valley_slimes', { fresh: true, seed: 4, level: 1 })")
+    advance_until(page, WAIT_MENU)
+    seen = []
+    ps = [a for a in actors(page) if a['side'] == 'party']
+    x0 = max(0, min(a['x'] for a in ps) - 24); y0 = max(0, min(a['y'] - a['h'] for a in ps) - 12)
+    box = (x0, y0, min(384 - x0, max(a['x'] for a in ps) + 24 - x0), min(216 - y0, max(a['y'] for a in ps) + 8 - y0))
+    for pose in ('crit', 'combo'):
+        page.evaluate("(() => { for (const a of LQ_ENGINE.scene.actors.values()) if (a.side === 'party') a.setPose('%s'); })()" % pose)
+        page.evaluate(ADVANCE.format(1))
+        seen += [a['frame'] for a in actors(page) if a['side'] == 'party']
+        zoom(page, ctx, f'party_{pose}', box, 4)
+    assert all(any(n and n.endswith(s) for n in seen) for s in ('_crit', '_combo')), seen
+    page.evaluate("LQ_DEBUG.battle('valley_slimes', { fresh: true, seed: 4, level: 1, fast: 'end' })")
+    advance_until(page, "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.phase === 'rewards'", max_frames=6000)
+    page.evaluate(ADVANCE.format(70))
+    page.evaluate("LQ_DEBUG.press('confirm')")
+    uid = page.evaluate("(() => { const R = LQ_ENGINE.scene.rewards; const p = R && R.pages[R.index + 1]; return p && p.uid; })()") or 'hero'
+    names = anim_strip(page, ctx, 'levelup', 12, 2, (box[0], max(0, box[1] - 10), box[2], box[3] + 10), uid, scale=3, cols=6)
+    s = bstate(page)
+    assert s['rewards'] and s['rewards']['page'] == 'level', s
+    assert any(n and n.endswith('_levelup') for n in names), names
+    ctx['note'] = f'{uid} level-up frames: {sorted(set(n for n in names if n))}'
+
+
 SCENARIOS = {
     'start': (sc_start, ['desktop', 'phone']),
     'stage': (sc_stage, ['desktop']),
@@ -569,6 +763,12 @@ SCENARIOS = {
     'e2e_win': (sc_e2e_win, ['desktop']),
     'e2e_lose': (sc_e2e_lose, ['desktop']),
     'e2e_all': (sc_e2e_all, ['desktop']),
+    'anim_enemy': (sc_anim_enemy, ['desktop']),
+    'anim_cast': (sc_anim_cast, ['desktop']),
+    'anim_death': (sc_anim_death, ['desktop']),
+    'anim_devour': (sc_anim_devour, ['desktop']),
+    'anim_stance': (sc_anim_stance, ['desktop']),
+    'anim_party': (sc_anim_party, ['desktop']),
 }
 
 

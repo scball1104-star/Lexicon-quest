@@ -187,3 +187,51 @@ test('createBattle events with a scripted defeat still end in a defeat op', () =
   assert.ok(ops.some((o) => o.op === 'defeat'));
   assert.ok(ops.some((o) => o.op === 'fall' && o.uid === 'hero'));
 });
+
+test('W6-anim frame selection: enemy lunge / cast / devour / die poses, stance, party crit and combo', () => {
+  const units = unitInfo([
+    { uid: 'hero', id: 'hero', side: 'party', name: 'Hero', weapon: 'sword', maxHp: 50 },
+    { uid: 'mira', id: 'mira', side: 'party', name: 'Mira', weapon: 'staff', maxHp: 40 },
+    { uid: 'e0', id: 'briar_wolf', side: 'enemy', name: 'Briar Wolf', maxHp: 80 },
+    { uid: 'e1', id: 'echo_warden', side: 'enemy', name: 'Echo Warden', maxHp: 400 },
+    { uid: 'e2', id: 'archivore', side: 'enemy', name: 'Archivore', maxHp: 900, boss: true }]);
+  const poses = (ops, uid) => ops.filter((o) => o.op === 'pose' && o.uid === uid).map((o) => o.pose);
+  // enemy melee: the lunge frame before it moves, idle again at the end
+  let ops = planEvents([
+    { type: 'action_start', actor: 'e0', action: { type: 'skill', name: 'Bite' }, targets: ['hero'], fx: 'bite' },
+    { type: 'move_to', actor: 'e0', target: 'hero' },
+    { type: 'damage', source: 'e0', target: 'hero', amount: 9, hp: 41, maxHp: 50, kind: 'phys' }], { units });
+  assert.deepEqual(poses(ops, 'e0'), ['attack', 'idle']);
+  assert.ok(ops.findIndex((o) => o.op === 'pose' && o.pose === 'attack') < ops.findIndex((o) => o.op === 'move' && o.uid === 'e0'));
+  // enemy spell and telegraph: cast
+  ops = planEvents([{ type: 'action_start', actor: 'e1', action: { type: 'skill', name: 'Reverberate' }, targets: ['hero'], fx: 'shockwave' },
+    { type: 'damage', source: 'e1', target: 'hero', amount: 9, hp: 41, maxHp: 50, kind: 'magic' }], { units });
+  assert.equal(poses(ops, 'e1')[0], 'cast');
+  ops = planEvents([{ type: 'telegraph', actor: 'e1', skill: 'reverberate', name: 'Reverberate', text: 'It hums.', targets: [] }], { units });
+  assert.equal(poses(ops, 'e1')[0], 'cast');
+  // devour: the Archivore's own frame
+  ops = planEvents([{ type: 'action_start', actor: 'e2', action: { type: 'skill', name: 'Devour Name' }, targets: ['mira'], fx: 'devour' },
+    { type: 'devour', actor: 'e2', target: 'mira', success: true }], { units });
+  assert.ok(poses(ops, 'e2').includes('devour'));
+  // stance change: a stance_<name> pose that never enters the idle bookkeeping
+  ops = planEvents([{ type: 'stance', actor: 'e1', stance: 'bulwark', name: 'Bulwark' }], { units });
+  assert.deepEqual(poses(ops, 'e1'), ['stance_bulwark']);
+  // enemy death: die (with its own wait) strictly before the ko and the white flash
+  ops = planEvents([{ type: 'ko', target: 'e0' }], { units });
+  const die = ops.findIndex((o) => o.op === 'pose' && o.uid === 'e0' && o.pose === 'die');
+  const ko = ops.findIndex((o) => o.op === 'ko');
+  const flash = ops.findIndex((o) => o.op === 'flash' && o.hold);
+  assert.ok(die >= 0 && die < ko && ko < flash, 'die steps, then ko, then the flash');
+  assert.ok(ops.slice(die, ko).some((o) => o.op === 'wait' && o.frames === FRAMES.dieSteps));
+  // party crit: the bigger wind-up replaces windup only when a hit crits
+  const swing = (crit) => planEvents([
+    { type: 'action_start', actor: 'hero', action: { type: 'attack', skill: 'attack', name: 'Attack' }, targets: ['e0'], fx: 'weapon', weapon: 'sword' },
+    { type: 'move_to', actor: 'hero', target: 'e0' },
+    { type: 'damage', source: 'hero', target: 'e0', amount: 30, hp: 50, maxHp: 80, kind: 'phys', crit }], { units });
+  assert.ok(poses(swing(true), 'hero').includes('crit') && !poses(swing(true), 'hero').includes('windup'));
+  assert.ok(poses(swing(false), 'hero').includes('windup') && !poses(swing(false), 'hero').includes('crit'));
+  // combo: members gather in the combo pose
+  ops = planEvents([{ type: 'action_start', actor: 'hero', action: { type: 'combo', name: 'Cross Edge', members: ['hero', 'mira'] }, targets: ['e0'], fx: 'combo_cross' }], { units });
+  assert.equal(poses(ops, 'hero')[0], 'combo');
+  assert.equal(poses(ops, 'mira')[0], 'combo');
+});

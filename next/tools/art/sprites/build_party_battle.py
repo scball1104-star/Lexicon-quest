@@ -266,8 +266,20 @@ def build():
         per_char[c] = fr
         allf += [(f'{c}_{n}', f) for n, f in fr]
     cols = 8
-    sheet, rects = pack_rows(allf, CELL, cols)
-    save_png(sheet, os.path.join(DST, 'party_battle.png'))
+    # W6-anim extras appended after the original 51 cells, so every existing cell keeps its rect
+    import anim_party as AP
+    extra, alias = [], {}
+    for c in ('hero', 'mira', 'bram'):
+        for n, f in AP.extra_frames(c):
+            if n in ('combo', 'levelup'):
+                alias[f'{c}_{n}'] = f'{c}_{WEAPONS_OF[c][0]}_{n}'
+            else:
+                extra.append((f'{c}_{n}', f))
+    sheet, rects = pack_rows(allf + extra, CELL, cols)
+    for k, v in alias.items():
+        rects[k] = list(rects[v])
+    import anim_atlas as AA
+    AA.save_indexed(sheet, os.path.join(DST, 'party_battle.png'))
     anims = {}
     for c in ('hero', 'mira', 'bram'):
         for w in WEAPONS_OF[c]:
@@ -275,10 +287,10 @@ def build():
             anims[f'{c}_{w}_attack'] = {'frames': [f'{c}_{w}_ready', f'{c}_{w}_windup', f'{c}_{w}_strike', f'{c}_{w}_strike'], 'fps': 10, 'loop': False}
     meta = {'image': 'party_battle.png', 'cell': list(CELL), 'origin': [OX + 12, OY + 31], 'facing': 'left',
             'weapons': WEAPONS_OF,
-            'poses': 'per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory}; shared: <char>_{cast,hurt,defend,kneel,ko}',
+            'poses': 'per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory,crit,combo,levelup}; shared: <char>_{cast,hurt,defend,kneel,ko,combo,levelup} (combo and levelup alias the primary weapon frame)',
             'frames': rects, 'anims': anims}
     write_json(os.path.join(DST, 'party_battle.json'), meta)
-    contact([(n, f) for n, f in allf], os.path.join(OUT, 'party_battle_4x.png'), scale=4, cols=11,
+    contact([(n, f) for n, f in allf + extra], os.path.join(OUT, 'party_battle_4x.png'), scale=4, cols=11,
             title='party_battle 32x40 at 4x (facing left)')
     return allf, per_char
 

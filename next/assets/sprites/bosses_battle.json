@@ -36,6 +36,174 @@
    141,
    26,
    24
+  ],
+  "archivore_idle_1": [
+   149,
+   167,
+   147,
+   138
+  ],
+  "archivore_attack": [
+   298,
+   167,
+   153,
+   138
+  ],
+  "archivore_hurt": [
+   152,
+   311,
+   155,
+   136
+  ],
+  "archivore_cast": [
+   309,
+   311,
+   139,
+   135
+  ],
+  "archivore_devour": [
+   0,
+   311,
+   150,
+   138
+  ],
+  "archivore_die_0": [
+   0,
+   167,
+   147,
+   142
+  ],
+  "archivore_die_1": [
+   0,
+   451,
+   147,
+   133
+  ],
+  "archivore_die_2": [
+   0,
+   586,
+   143,
+   100
+  ],
+  "echo_warden_idle_1": [
+   242,
+   586,
+   95,
+   99
+  ],
+  "echo_warden_attack": [
+   0,
+   688,
+   112,
+   98
+  ],
+  "echo_warden_hurt": [
+   222,
+   788,
+   97,
+   96
+  ],
+  "echo_warden_cast": [
+   149,
+   451,
+   110,
+   110
+  ],
+  "echo_warden_mirror": [
+   114,
+   688,
+   95,
+   98
+  ],
+  "echo_warden_mirror_idle_1": [
+   339,
+   586,
+   95,
+   99
+  ],
+  "echo_warden_mirror_attack": [
+   211,
+   688,
+   112,
+   98
+  ],
+  "echo_warden_mirror_hurt": [
+   321,
+   788,
+   97,
+   96
+  ],
+  "echo_warden_mirror_cast": [
+   261,
+   451,
+   110,
+   110
+  ],
+  "echo_warden_bulwark": [
+   0,
+   788,
+   106,
+   97
+  ],
+  "echo_warden_bulwark_idle_1": [
+   325,
+   688,
+   106,
+   98
+  ],
+  "echo_warden_bulwark_attack": [
+   108,
+   788,
+   112,
+   97
+  ],
+  "echo_warden_bulwark_hurt": [
+   0,
+   887,
+   108,
+   95
+  ],
+  "echo_warden_bulwark_cast": [
+   373,
+   451,
+   112,
+   110
+  ],
+  "echo_warden_die_0": [
+   145,
+   586,
+   95,
+   100
+  ],
+  "echo_warden_die_1": [
+   110,
+   887,
+   95,
+   89
+  ],
+  "echo_warden_die_2": [
+   207,
+   887,
+   95,
+   71
+  ],
+  "lost_page_die_0": [
+   304,
+   887,
+   22,
+   24
+  ],
+  "lost_page_die_1": [
+   328,
+   887,
+   22,
+   21
+  ],
+  "lost_page_die_2": [
+   352,
+   887,
+   22,
+   19
   ]
  },
  "origin": {
@@ -62,6 +230,118 @@
   "lost_page": [
    13,
    23
+  ],
+  "archivore_idle_1": [
+   74,
+   137
+  ],
+  "archivore_attack": [
+   76,
+   137
+  ],
+  "archivore_hurt": [
+   79,
+   135
+  ],
+  "archivore_cast": [
+   69,
+   134
+  ],
+  "archivore_devour": [
+   73,
+   137
+  ],
+  "archivore_die_0": [
+   73,
+   141
+  ],
+  "archivore_die_1": [
+   73,
+   132
+  ],
+  "archivore_die_2": [
+   73,
+   99
+  ],
+  "echo_warden_idle_1": [
+   48,
+   98
+  ],
+  "echo_warden_attack": [
+   48,
+   97
+  ],
+  "echo_warden_hurt": [
+   49,
+   95
+  ],
+  "echo_warden_cast": [
+   48,
+   109
+  ],
+  "echo_warden_mirror": [
+   48,
+   97
+  ],
+  "echo_warden_mirror_idle_1": [
+   48,
+   98
+  ],
+  "echo_warden_mirror_attack": [
+   48,
+   97
+  ],
+  "echo_warden_mirror_hurt": [
+   49,
+   95
+  ],
+  "echo_warden_mirror_cast": [
+   48,
+   109
+  ],
+  "echo_warden_bulwark": [
+   48,
+   96
+  ],
+  "echo_warden_bulwark_idle_1": [
+   48,
+   97
+  ],
+  "echo_warden_bulwark_attack": [
+   48,
+   96
+  ],
+  "echo_warden_bulwark_hurt": [
+   49,
+   94
+  ],
+  "echo_warden_bulwark_cast": [
+   48,
+   109
+  ],
+  "echo_warden_die_0": [
+   48,
+   99
+  ],
+  "echo_warden_die_1": [
+   48,
+   88
+  ],
+  "echo_warden_die_2": [
+   48,
+   70
+  ],
+  "lost_page_die_0": [
+   11,
+   23
+  ],
+  "lost_page_die_1": [
+   11,
+   20
+  ],
+  "lost_page_die_2": [
+   11,
+   18
   ]
  },
  "aliases": {
@@ -77,7 +357,66 @@
    ],
    "fps": 8,
    "loop": true
+  },
+  "archivore_idle": {
+   "frames": [
+    "archivore",
+    "archivore_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "archivore_die": {
+   "frames": [
+    "archivore_die_0",
+    "archivore_die_1",
+    "archivore_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "echo_warden_idle": {
+   "frames": [
+    "echo_warden",
+    "echo_warden_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "echo_warden_die": {
+   "frames": [
+    "echo_warden_die_0",
+    "echo_warden_die_1",
+    "echo_warden_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "lost_page_die": {
+   "frames": [
+    "lost_page_die_0",
+    "lost_page_die_1",
+    "lost_page_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "echo_warden_mirror_idle": {
+   "frames": [
+    "echo_warden_mirror",
+    "echo_warden_mirror_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "echo_warden_bulwark_idle": {
+   "frames": [
+    "echo_warden_bulwark",
+    "echo_warden_bulwark_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
   }
  },
- "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre. Idle motion is procedural in code."
+ "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin."
 }

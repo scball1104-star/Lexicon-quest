@@ -87,13 +87,25 @@ def build():
         sh.add(n, f)
     sheet, rects = sh.render()
     rects['lost_page'] = rects['lost_page_1']
-    save_png(sheet, os.path.join(DST, 'bosses_battle.png'))
+    origin = {n: [r[2] // 2, r[3] - 1] for n, r in rects.items()}
+    anims = {'lost_page_flutter': {'frames': ['lost_page_0', 'lost_page_1', 'lost_page_2', 'lost_page_1'], 'fps': 8, 'loop': True}}
+    # W6-anim: derived frames packed under the base frames (the base rects never move)
+    import anim_frames as AF, anim_atlas as AA
+    derived = []
+    for bid, fr in (('archivore', AF.archivore_frames(a)), ('echo_warden', AF.echo_warden_frames(w)), ('lost_page', AF.lost_page_frames(lp[1]))):
+        derived += [(f'{bid}_{n}', *fr[n]) for n in AF.ORDER if n in fr]
+    sheet, rects, origin = AA.append(sheet, rects, origin, derived)
+    for bid in ('archivore', 'echo_warden', 'lost_page'):
+        anims.update(AA.enemy_anims(bid, rects))
+    for st in ('mirror', 'bulwark'):
+        anims[f'echo_warden_{st}_idle'] = {'frames': [f'echo_warden_{st}', f'echo_warden_{st}_idle_1'], 'fps': AA.IDLE_FPS, 'loop': True}
+    AA.save_indexed(sheet, os.path.join(DST, 'bosses_battle.png'))
     meta = {'image': 'bosses_battle.png',
             'frames': rects,
-            'origin': {n: [r[2] // 2, r[3] - 1] for n, r in rects.items()},
+            'origin': origin,
             'aliases': {'lost_page': 'lost_page_1'},
-            'anims': {'lost_page_flutter': {'frames': ['lost_page_0', 'lost_page_1', 'lost_page_2', 'lost_page_1'], 'fps': 8, 'loop': True}},
-            'notes': 'Battle sprites face RIGHT (toward the party). origin = bottom-centre. Idle motion is procedural in code.'}
+            'anims': anims,
+            'notes': 'Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin.'}
     write_json(os.path.join(DST, 'bosses_battle.json'), meta)
     contact(frames, os.path.join(OUT, 'bosses_battle_4x.png'), scale=4, cols=5, title='bosses_battle at 4x')
     contact([(n, f) for n, f in frames if n.startswith('lost')], os.path.join(OUT, 'lost_page_8x.png'), scale=8, cols=3)

@@ -1,16 +1,35 @@
 // Battle actors: the on-screen view of every unit (position, pose, flash, dissolve, bob) and how it is
 // drawn. Data-driven by atlas frame names (assets/sprites/README.md): party_battle `<id>_<weapon>_<pose>`
-// plus shared `<id>_{cast,hurt,defend,kneel,ko}`; enemies_battle `<id>` facing right, bosses_battle via
-// enemies_battle.json `external`; lost_page uses its flutter anim. Nothing here touches the rules.
+// plus shared `<id>_{cast,hurt,defend,kneel,ko,combo,levelup}`; enemies_battle `<id>` facing right, bosses_battle
+// via enemies_battle.json `external`; lost_page uses its flutter anim. Nothing here touches the rules.
+//
+// W6-anim: enemies play generator-made frames when the atlas has them, `<stem>_<state>` with stem = the enemy
+// id or its ENEMIES[id].sprite.frame (an enemy that borrows another's art): idle_1 (2-frame breathe, a beat
+// every BREATHE frames), attack (pose 'attack'), hurt, cast (pose 'cast', telegraphs, falls back to attack),
+// devour (falls back to cast), die_0..2 (pose 'die', DIE_STEP frames each, held through the white flash and
+// dissolved from die_2), and Echo Warden stance sets `<stem>_<stance>[_<state>]` (pose 'stance_<name>',
+// dropped while broken). Any missing frame falls back to the code-driven bob / squash / breathe.
 
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { partySlots, enemySlots, summonSlot, BOSS_SLOT, shadowFor } from './layout.js';
 
-const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory']);
-const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko']);
+const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory', 'crit', 'combo', 'levelup']);
+const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko', 'combo', 'levelup']);
+/** Party poses added by W6-anim fall back to the closest original pose when an atlas lacks them. */
+const POSE_FALLBACK = { crit: 'windup', combo: 'ready', levelup: 'victory' };
+/** Enemy state -> frame suffixes to try, in order. */
+const ENEMY_STATES = {
+  attack: ['attack'], cast: ['cast', 'attack'], devour: ['devour', 'cast', 'attack'], hurt: ['hurt'], idle_1: ['idle_1'],
+  die_0: ['die_0'], die_1: ['die_1'], die_2: ['die_2'],
+};
 const HURT_FRAMES = 10;
+export const ENEMY_HURT_FRAMES = 16;   // an enemy with a hurt frame holds it past the white hit flash
+export const BREATHE = 36;             // game frames per idle beat (2-frame breathe, both sides)
+export const DIE_STEP = 4;             // game frames per die_0..2 step
+export const STANCE_FLASH = 20;        // frames the Warden shows its new stance charged (_cast) after a swap
+export const LEVELUP_FRAMES = 26;      // the level-up hop
 export const ENTER_FRAMES = 22;
 
 /** Origin of a frame: per-frame origin table (object `origin` in the JSON) wins, else the normalized one. */
@@ -28,7 +47,8 @@ export class Actor {
     this.variant = unit.variant || null; this.tint = unit.tint || null;
     this.weapon = unit.weapon || null;
     this.homeX = slot.x; this.homeY = slot.y; this.x = slot.x; this.y = slot.y;
-    this.pose = 'idle'; this.poseT = 0; this.hurtT = 0;
+    this.pose = 'idle'; this.poseT = 0; this.hurtT = 0; this.hurtMax = HURT_FRAMES;
+    this.stance = null; this.stanceT = 0;
     this.flash = null; this.dissolve = null; this.dead = false; this.ko = false;
     this.move = null; this.fallT = 0; this.enterT = 0;
     this.hp = unit.hp; this.maxHp = unit.maxHp; this.mp = unit.mp; this.maxMp = unit.maxMp; this.fury = unit.fury || 0;
@@ -40,6 +60,10 @@ export class Actor {
     this.def = unit.side === 'enemy' ? ENEMIES[unit.id] || null : null;
     this.size = this.def ? this.def.size : 'medium';
     this.flying = !!(this.def && this.def.flying);
+    // Borrowed art (ENEMIES[id].sprite = { frame, scale, tint }): drawn scaled, and tinted when the unit has no tint.
+    const spr = (this.def && this.def.sprite) || null;
+    this.scale = spr && spr.scale > 0 ? spr.scale : 1;
+    if (!this.tint && spr && spr.tint) this.tint = spr.tint;
     this.resolveArt();
   }
 
@@ -53,16 +77,25 @@ export class Actor {
       this.w = f ? f.w : 32; this.h = f ? f.h : 40;
       return;
     }
-    let atlasId = 'enemies_battle';
     const en = assets.has('enemies_battle') ? assets.atlas('enemies_battle') : null;
-    if (en && !en.frames[this.id] && en.meta && en.meta.external && en.meta.external[this.id]) atlasId = en.meta.external[this.id];
-    else if (en && !en.frames[this.id] && assets.has('bosses_battle') && assets.atlas('bosses_battle').frames[this.id]) atlasId = 'bosses_battle';
+    const bo = assets.has('bosses_battle') ? assets.atlas('bosses_battle') : null;
+    const ext = (en && en.meta && en.meta.external) || {};
+    // The frame stem: the enemy's own frame, else the frame it borrows (ENEMIES[id].sprite.frame).
+    const spr = (this.def && this.def.sprite) || null;
+    const stems = [this.id];
+    if (spr && spr.frame && spr.frame !== this.id) stems.push(spr.frame);
+    let atlasId = 'enemies_battle', stem = this.id;
+    for (const c of stems) {
+      if (en && en.frames[c]) { atlasId = 'enemies_battle'; stem = c; break; }
+      if (ext[c] && assets.has(ext[c])) { atlasId = ext[c]; stem = c; break; }
+      if (bo && bo.frames[c]) { atlasId = 'bosses_battle'; stem = c; break; }
+    }
     this.atlasId = atlasId;
+    this.stem = stem;
     this.atlas = assets.has(atlasId) ? assets.atlas(atlasId) : null;
-    this.anim = this.atlas && this.atlas.anims[`${this.id}_flutter`] ? this.atlas.anims[`${this.id}_flutter`] : null;
-    const f = this.atlas && (this.atlas.frames[this.id] || (this.anim && this.atlas.frames[this.anim.frames[0]]));
-    this.w = f ? f.w : 48; this.h = f ? f.h : 48;
-    if (!f) { this.w = 48; this.h = 48; }
+    this.anim = this.atlas && this.atlas.anims[`${stem}_flutter`] ? this.atlas.anims[`${stem}_flutter`] : null;
+    const f = this.atlas && (this.atlas.frames[stem] || (this.anim && this.atlas.frames[this.anim.frames[0]]));
+    this.w = f ? Math.round(f.w * this.scale) : 48; this.h = f ? Math.round(f.h * this.scale) : 48;
   }
 
   get alive() { return !this.dead && !this.ko; }
@@ -72,9 +105,40 @@ export class Actor {
   get top() { return Math.round(this.y - this.h); }
 
   setPose(p) {
-    if (p === 'hurt') { if (this.ko || this.dead) return; this.hurtT = HURT_FRAMES; this.pose = 'hurt'; this.poseT = 0; return; }
+    // 'stance_<name>' (animator ev_stance) switches the Echo Warden's frame set; the pose itself is unchanged.
+    if (typeof p === 'string' && p.startsWith('stance_')) { this.stance = p.slice(7) || null; this.stanceT = STANCE_FLASH; return; }
+    if (p === 'hurt') {
+      if (this.ko || this.dead) return;
+      this.hurtMax = this.side === 'enemy' && this.enemyName(['hurt'], false) ? ENEMY_HURT_FRAMES : HURT_FRAMES;
+      this.hurtT = this.hurtMax; this.pose = 'hurt'; this.poseT = 0; return;
+    }
     if (p === 'idle' && this.ko) { this.pose = 'ko'; return; }
+    // The rewards' level-up page re-sends 'victory' to the unit that levelled: play the level-up hop.
+    if (p === 'victory' && this.side === 'party' && (this.pose === 'victory' || this.pose === 'levelup')) { this.pose = 'levelup'; this.poseT = 0; this.hurtT = 0; return; }
     this.pose = p; this.poseT = 0; this.hurtT = 0;
+  }
+  /** The first `<stem>[_<stance>]_<suffix>` frame the atlas has for these suffixes; else the base frame (or null). */
+  enemyName(suffixes, base = true) {
+    const a = this.atlas;
+    if (!a) return null;
+    const stem = this.stem || this.id;
+    const st = this.stance && !this.broken && a.frames[`${stem}_${this.stance}`] ? `${stem}_${this.stance}` : null;
+    for (const sfx of suffixes) {
+      if (st && a.frames[`${st}_${sfx}`]) return `${st}_${sfx}`;
+      if (a.frames[`${stem}_${sfx}`]) return `${stem}_${sfx}`;
+    }
+    if (!base) return null;
+    return st || (a.frames[stem] ? stem : null);
+  }
+  /** Which enemy state shows now: a key of ENEMY_STATES, or null for the base (idle) frame. */
+  enemyState() {
+    if (this.pose === 'die') return `die_${Math.min(2, Math.floor(this.poseT / DIE_STEP))}`;
+    if (this.ko || this.dissolve) return null;
+    if (this.hurtT > 0) return 'hurt';
+    if (this.pose === 'attack' || this.pose === 'cast' || this.pose === 'devour') return this.pose;
+    if (this.stanceT > 0) return 'cast';
+    if (this.alive && !this.move) return Math.floor((this.engine.frame + this.bobPhase) / BREATHE) % 2 ? 'idle_1' : null;
+    return null;
   }
   /** The frame record for the current state (party). */
   partyFrame() {
@@ -84,25 +148,38 @@ export class Actor {
     if (this.hurtT > 0 && pose !== 'ko') pose = 'hurt';
     if (pose === 'idle' && this.alive && this.hp > 0 && this.hp <= this.maxHp * 0.25) pose = 'kneel';
     if (pose === 'idle' && this.defending) pose = 'defend';
+    const id = this.id, w = this.weapon;
     let name;
     if (pose === 'idle') {
-      const an = a.anims[`${this.id}_${this.weapon}_idle`];
-      name = an ? animFrameAt(an, (this.engine.frame + this.bobPhase) / 60) : `${this.id}_${this.weapon}_idle_0`;
-    } else if (WEAPON_POSES.has(pose)) name = `${this.id}_${this.weapon}_${pose}`;
-    else if (SHARED_POSES.has(pose)) name = `${this.id}_${pose}`;
-    else name = `${this.id}_${this.weapon}_idle_0`;
-    return a.frames[name] || a.frames[`${this.id}_${this.weapon}_idle_0`] || null;
+      // 2-frame breathe: idle_0 / idle_1, a beat every BREATHE frames
+      const an = a.anims[`${id}_${w}_idle`];
+      const beat = Math.floor((this.engine.frame + this.bobPhase) / BREATHE) % 2;
+      name = an && an.frames[beat] ? an.frames[beat] : `${id}_${w}_idle_0`;
+    } else if (WEAPON_POSES.has(pose) || SHARED_POSES.has(pose)) {
+      const fb = POSE_FALLBACK[pose];
+      const tries = [`${id}_${w}_${pose}`, `${id}_${pose}`];
+      if (fb) tries.push(`${id}_${w}_${fb}`, `${id}_${fb}`);
+      name = tries.find((n) => a.frames[n]) || `${id}_${w}_idle_0`;
+    } else name = `${id}_${w}_idle_0`;
+    return a.frames[name] || a.frames[`${id}_${w}_idle_0`] || null;
   }
   enemyFrame() {
     const a = this.atlas;
     if (!a) return null;
+    const state = this.enemyState();
+    if (state) { const n = this.enemyName(ENEMY_STATES[state] || [state], false); if (n) return a.frames[n]; }
     if (this.anim) { const n = animFrameAt(this.anim, (this.engine.frame + this.bobPhase) / 60); return a.frames[n] || null; }
-    return a.frames[this.id] || null;
+    const n = this.enemyName([]);
+    return n ? a.frames[n] : null;
   }
+  /** True when the atlas has a frame for this enemy state (so the code-driven stand-in is off). */
+  hasStateFrame(state) { return !!(this.atlas && this.enemyName(ENEMY_STATES[state] || [state], false)); }
 
   update() {
     this.poseT++;
     if (this.hurtT > 0) { this.hurtT--; if (this.hurtT === 0 && this.pose === 'hurt') this.pose = this.ko ? 'ko' : 'idle'; }
+    if (this.stanceT > 0) this.stanceT--;
+    if (this.pose === 'levelup' && this.poseT >= LEVELUP_FRAMES) this.pose = 'victory';
     if (this.flash && !this.flash.hold) { this.flash.frames--; if (this.flash.frames <= 0) this.flash = null; }
     if (this.move) {
       const m = this.move; m.t++;
@@ -142,8 +219,15 @@ export class Actor {
   breath() {
     if (this.side !== 'enemy' || this.flying || !this.alive || this.move || this.dissolve) return 0;
     if (this.hurtT > 0 || (this.pose !== 'idle' && this.pose !== 'kneel')) return 0;
+    if (this.hasStateFrame('idle_1')) return 0;   // the atlas breathes (idle_1 frame)
     const f = this.engine.frame + this.bobPhase;
-    return (Math.floor(f / 36) % 2) ? 1 : 0;
+    return (Math.floor(f / BREATHE) % 2) ? 1 : 0;
+  }
+  /** Level-up hop height (party): a small jump arc early in LEVELUP_FRAMES, then the landing holds. */
+  hop() {
+    if (this.pose !== 'levelup') return 0;
+    const k = Math.min(1, (this.poseT / LEVELUP_FRAMES) * 1.6);
+    return -Math.round(Math.sin(Math.PI * k) * 6);
   }
 
   draw(r, opts = {}) {
@@ -154,9 +238,10 @@ export class Actor {
     const fr = { ...frame, ox: o.ox, oy: o.oy };
     const bob = (this.pose === 'idle' || this.pose === 'kneel') && !this.move ? this.bob() : 0;
     let dx = 0;
-    if (this.hurtT > HURT_FRAMES - 4) dx = this.side === 'enemy' ? -2 : 2;
+    if (this.hurtT > this.hurtMax - 4) dx = this.side === 'enemy' ? -2 : 2;
     const enterDx = this.enterT > 0 ? Math.round((this.enterT / ENTER_FRAMES) ** 2 * 120) : 0;
-    const x = this.cx + dx + enterDx, y = Math.round(this.y) + bob;
+    const x = this.cx + dx + enterDx, y = Math.round(this.y) + bob + this.hop();
+    const sc = this.scale || 1;
     const flipX = false;
     // Ground shadow (misc atlas) scaled to the sprite's width (about 0.8 of it, so it shows past the feet), centred
     // 2 px below the feet so most of the ellipse shows in front of the sprite. The atlas pixels are 42% ink, so
@@ -182,24 +267,25 @@ export class Actor {
     else if (this.tint) { tint = this.tint; amount = 0.35; }
     else if (this.elite) { tint = '#ffd34d'; amount = 0.14; }
     const sopts = { flipX, alpha: 1, tint, tintAmount: amount };
-    // Enemy hurt squash: the first 4 hurt frames draw the sprite 2 px wider and 2 px shorter, feet planted.
-    if (this.side === 'enemy' && this.hurtT > HURT_FRAMES - 4 && !this.ko) {
+    // Enemy hurt squash (stand-in when the atlas has no hurt frame): the first 4 hurt frames draw the sprite
+    // 2 px wider and 2 px shorter, feet planted.
+    if (this.side === 'enemy' && this.hurtT > this.hurtMax - 4 && !this.ko && !this.hasStateFrame('hurt')) {
       const img = this.atlas.image;
-      const squash = this.hurtT > HURT_FRAMES - 2 ? 2 : 1;
-      r.image(img, x - fr.ox - squash, y - fr.oy + squash, { sx: fr.x, sy: fr.y, sw: fr.w, sh: fr.h, w: fr.w + squash * 2, h: fr.h - squash, ...sopts });
+      const squash = this.hurtT > this.hurtMax - 2 ? 2 : 1;
+      r.image(img, x - Math.round(fr.ox * sc) - squash, y - Math.round(fr.oy * sc) + squash, { sx: fr.x, sy: fr.y, sw: fr.w, sh: fr.h, w: Math.round(fr.w * sc) + squash * 2, h: Math.round(fr.h * sc) - squash, ...sopts });
       return;
     }
     const br = this.breath();
     if (br > 0) {
-      // Breathe: the top part of the sprite settles 1 px; the lower part stays put so the feet never leave the ground.
+      // Breathe stand-in: the top part of the sprite settles 1 px; the lower part stays put so the feet never leave the ground.
       const img = this.atlas.image;
       const split = Math.max(1, Math.round(fr.h * 0.55));
-      const dx0 = x - fr.ox, dy0 = y - fr.oy;
-      r.image(img, dx0, dy0 + split, { sx: fr.x, sy: fr.y + split, sw: fr.w, sh: fr.h - split, ...sopts });
-      r.image(img, dx0, dy0 + br, { sx: fr.x, sy: fr.y, sw: fr.w, sh: split, ...sopts });
+      const dx0 = x - Math.round(fr.ox * sc), dy0 = y - Math.round(fr.oy * sc);
+      r.image(img, dx0, dy0 + Math.round(split * sc), { sx: fr.x, sy: fr.y + split, sw: fr.w, sh: fr.h - split, w: Math.round(fr.w * sc), h: Math.round((fr.h - split) * sc), ...sopts });
+      r.image(img, dx0, dy0 + br, { sx: fr.x, sy: fr.y, sw: fr.w, sh: split, w: Math.round(fr.w * sc), h: Math.round(split * sc), ...sopts });
       return;
     }
-    r.sprite(this.atlas, fr, x, y, sopts);
+    r.sprite(this.atlas, fr, x, y, sc !== 1 ? { ...sopts, scale: sc } : sopts);
   }
 }
 

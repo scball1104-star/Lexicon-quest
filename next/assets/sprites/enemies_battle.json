@@ -42,6 +42,270 @@
    76,
    85,
    86
+  ],
+  "ink_slime_idle_1": [
+   251,
+   498,
+   48,
+   49
+  ],
+  "ink_slime_attack": [
+   64,
+   554,
+   55,
+   42
+  ],
+  "ink_slime_hurt": [
+   173,
+   554,
+   55,
+   41
+  ],
+  "ink_slime_die_0": [
+   301,
+   498,
+   50,
+   49
+  ],
+  "ink_slime_die_1": [
+   121,
+   554,
+   50,
+   42
+  ],
+  "ink_slime_die_2": [
+   46,
+   599,
+   50,
+   32
+  ],
+  "page_wraith_idle_1": [
+   85,
+   354,
+   70,
+   74
+  ],
+  "page_wraith_attack": [
+   229,
+   354,
+   74,
+   73
+  ],
+  "page_wraith_hurt": [
+   305,
+   354,
+   71,
+   72
+  ],
+  "page_wraith_cast": [
+   263,
+   265,
+   67,
+   82
+  ],
+  "page_wraith_die_0": [
+   157,
+   354,
+   70,
+   74
+  ],
+  "page_wraith_die_1": [
+   378,
+   354,
+   70,
+   70
+  ],
+  "page_wraith_die_2": [
+   0,
+   498,
+   66,
+   54
+  ],
+  "briar_wolf_idle_1": [
+   241,
+   433,
+   63,
+   60
+  ],
+  "briar_wolf_attack": [
+   306,
+   433,
+   64,
+   59
+  ],
+  "briar_wolf_hurt": [
+   372,
+   433,
+   67,
+   57
+  ],
+  "briar_wolf_die_0": [
+   0,
+   433,
+   63,
+   63
+  ],
+  "briar_wolf_die_1": [
+   441,
+   433,
+   62,
+   55
+  ],
+  "briar_wolf_die_2": [
+   0,
+   554,
+   62,
+   43
+  ],
+  "moss_scarab_idle_1": [
+   68,
+   498,
+   57,
+   52
+  ],
+  "moss_scarab_attack": [
+   186,
+   498,
+   63,
+   50
+  ],
+  "moss_scarab_hurt": [
+   353,
+   498,
+   59,
+   49
+  ],
+  "moss_scarab_die_0": [
+   127,
+   498,
+   57,
+   52
+  ],
+  "moss_scarab_die_1": [
+   414,
+   498,
+   57,
+   47
+  ],
+  "moss_scarab_die_2": [
+   421,
+   554,
+   57,
+   35
+  ],
+  "bookmite_idle_1": [
+   230,
+   554,
+   44,
+   41
+  ],
+  "bookmite_attack": [
+   276,
+   554,
+   49,
+   39
+  ],
+  "bookmite_hurt": [
+   373,
+   554,
+   46,
+   38
+  ],
+  "bookmite_die_0": [
+   327,
+   554,
+   44,
+   39
+  ],
+  "bookmite_die_1": [
+   0,
+   599,
+   44,
+   35
+  ],
+  "bookmite_die_2": [
+   98,
+   599,
+   44,
+   27
+  ],
+  "tome_golem_idle_1": [
+   193,
+   168,
+   90,
+   91
+  ],
+  "tome_golem_attack": [
+   89,
+   168,
+   102,
+   92
+  ],
+  "tome_golem_hurt": [
+   377,
+   168,
+   93,
+   88
+  ],
+  "tome_golem_die_0": [
+   285,
+   168,
+   90,
+   91
+  ],
+  "tome_golem_die_1": [
+   85,
+   265,
+   90,
+   83
+  ],
+  "tome_golem_die_2": [
+   149,
+   433,
+   90,
+   61
+  ],
+  "ink_wraith_idle_1": [
+   177,
+   265,
+   84,
+   83
+  ],
+  "ink_wraith_attack": [
+   332,
+   265,
+   91,
+   82
+  ],
+  "ink_wraith_hurt": [
+   425,
+   265,
+   84,
+   82
+  ],
+  "ink_wraith_cast": [
+   0,
+   168,
+   87,
+   95
+  ],
+  "ink_wraith_die_0": [
+   0,
+   265,
+   83,
+   87
+  ],
+  "ink_wraith_die_1": [
+   0,
+   354,
+   83,
+   77
+  ],
+  "ink_wraith_die_2": [
+   65,
+   433,
+   82,
+   62
   ]
  },
  "origin": {
@@ -72,7 +336,304 @@
   "ink_wraith": [
    42,
    85
+  ],
+  "ink_slime_idle_1": [
+   24,
+   48
+  ],
+  "ink_slime_attack": [
+   26,
+   41
+  ],
+  "ink_slime_hurt": [
+   28,
+   40
+  ],
+  "ink_slime_die_0": [
+   25,
+   48
+  ],
+  "ink_slime_die_1": [
+   25,
+   41
+  ],
+  "ink_slime_die_2": [
+   25,
+   31
+  ],
+  "page_wraith_idle_1": [
+   35,
+   73
+  ],
+  "page_wraith_attack": [
+   30,
+   72
+  ],
+  "page_wraith_hurt": [
+   40,
+   71
+  ],
+  "page_wraith_cast": [
+   35,
+   81
+  ],
+  "page_wraith_die_0": [
+   35,
+   73
+  ],
+  "page_wraith_die_1": [
+   35,
+   69
+  ],
+  "page_wraith_die_2": [
+   34,
+   53
+  ],
+  "briar_wolf_idle_1": [
+   31,
+   59
+  ],
+  "briar_wolf_attack": [
+   30,
+   58
+  ],
+  "briar_wolf_hurt": [
+   34,
+   56
+  ],
+  "briar_wolf_die_0": [
+   31,
+   62
+  ],
+  "briar_wolf_die_1": [
+   30,
+   54
+  ],
+  "briar_wolf_die_2": [
+   30,
+   42
+  ],
+  "moss_scarab_idle_1": [
+   28,
+   51
+  ],
+  "moss_scarab_attack": [
+   28,
+   49
+  ],
+  "moss_scarab_hurt": [
+   29,
+   48
+  ],
+  "moss_scarab_die_0": [
+   28,
+   51
+  ],
+  "moss_scarab_die_1": [
+   28,
+   46
+  ],
+  "moss_scarab_die_2": [
+   28,
+   34
+  ],
+  "bookmite_idle_1": [
+   22,
+   40
+  ],
+  "bookmite_attack": [
+   22,
+   38
+  ],
+  "bookmite_hurt": [
+   23,
+   37
+  ],
+  "bookmite_die_0": [
+   22,
+   38
+  ],
+  "bookmite_die_1": [
+   22,
+   34
+  ],
+  "bookmite_die_2": [
+   22,
+   26
+  ],
+  "tome_golem_idle_1": [
+   44,
+   90
+  ],
+  "tome_golem_attack": [
+   44,
+   91
+  ],
+  "tome_golem_hurt": [
+   48,
+   87
+  ],
+  "tome_golem_die_0": [
+   44,
+   90
+  ],
+  "tome_golem_die_1": [
+   44,
+   82
+  ],
+  "tome_golem_die_2": [
+   44,
+   60
+  ],
+  "ink_wraith_idle_1": [
+   42,
+   82
+  ],
+  "ink_wraith_attack": [
+   39,
+   81
+  ],
+  "ink_wraith_hurt": [
+   45,
+   81
+  ],
+  "ink_wraith_cast": [
+   43,
+   94
+  ],
+  "ink_wraith_die_0": [
+   41,
+   86
+  ],
+  "ink_wraith_die_1": [
+   41,
+   76
+  ],
+  "ink_wraith_die_2": [
+   41,
+   61
   ]
+ },
+ "anims": {
+  "ink_slime_idle": {
+   "frames": [
+    "ink_slime",
+    "ink_slime_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ink_slime_die": {
+   "frames": [
+    "ink_slime_die_0",
+    "ink_slime_die_1",
+    "ink_slime_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "page_wraith_idle": {
+   "frames": [
+    "page_wraith",
+    "page_wraith_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "page_wraith_die": {
+   "frames": [
+    "page_wraith_die_0",
+    "page_wraith_die_1",
+    "page_wraith_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "briar_wolf_idle": {
+   "frames": [
+    "briar_wolf",
+    "briar_wolf_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "briar_wolf_die": {
+   "frames": [
+    "briar_wolf_die_0",
+    "briar_wolf_die_1",
+    "briar_wolf_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "moss_scarab_idle": {
+   "frames": [
+    "moss_scarab",
+    "moss_scarab_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "moss_scarab_die": {
+   "frames": [
+    "moss_scarab_die_0",
+    "moss_scarab_die_1",
+    "moss_scarab_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "bookmite_idle": {
+   "frames": [
+    "bookmite",
+    "bookmite_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "bookmite_die": {
+   "frames": [
+    "bookmite_die_0",
+    "bookmite_die_1",
+    "bookmite_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "tome_golem_idle": {
+   "frames": [
+    "tome_golem",
+    "tome_golem_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "tome_golem_die": {
+   "frames": [
+    "tome_golem_die_0",
+    "tome_golem_die_1",
+    "tome_golem_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "ink_wraith_idle": {
+   "frames": [
+    "ink_wraith",
+    "ink_wraith_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ink_wraith_die": {
+   "frames": [
+    "ink_wraith_die_0",
+    "ink_wraith_die_1",
+    "ink_wraith_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
  },
  "facing": "right",
  "external": {
@@ -80,5 +641,5 @@
   "archivore": "bosses_battle",
   "lost_page": "bosses_battle"
  },
- "notes": "One frame per enemy, facing RIGHT toward the party. origin = bottom-centre. Idle breathe, hit flash and death dissolve are procedural in code. echo_warden, archivore and lost_page live in bosses_battle.json."
+ "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json."
 }

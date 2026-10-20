@@ -12,6 +12,10 @@
 //              ko, revive, defendPose, swap, slow, banner, elite, knockback, cover, start, victory,
 //              defeat, escape, end
 // `frames` values are for battle speed 1x; the runner divides by the speed setting.
+// W6-anim frame selection (actors.js plays them, with a code fallback when a frame is missing): enemies take
+// pose 'attack' for a melee lunge, 'cast' for spells and telegraphs, 'devour' for the Archivore's devour / feast,
+// 'die' (die_0..2, FRAMES.dieSteps) before the white death flash, and 'stance_<name>' on a stance change; the
+// party takes 'crit' instead of 'windup' when the swing crits and 'combo' while a combo gathers.
 
 export const FRAMES = Object.freeze({
   start: 30, ready: 6, stepIn: 8, windup: 6, strikeHold: 3, hitHold: 14, multiStagger: 5, randomStagger: 9,
@@ -20,7 +24,7 @@ export const FRAMES = Object.freeze({
   enemyLunge: 8, enemyWindup: 6, enemySpell: 20, enemyRelease: 10,
   heal: 16, miss: 14, status: 18, statusQuiet: 8, tick: 16, reveal: 22, delay: 14, reflect: 22,
   breakSlow: 18, breakHold: 30, shieldChip: 8, telegraph: 36, telegraphCancel: 16,
-  dieFlash: 8, dissolve: 30, bossShake: 70, bossDissolve: 90, koKneel: 10, koFall: 16, revive: 26,
+  dieSteps: 12, dieFlash: 8, dissolve: 30, bossShake: 70, bossDissolve: 90, koKneel: 10, koFall: 16, revive: 26,
   summon: 26, split: 22, devour: 46, feast: 34, phase: 72, stance: 54, message: 24, elite: 40, skip: 20,
   fury: 18, escape: 40, escapeFail: 24, combo: 30, victory: 12, defeat: 40, invalid: 8, mpPop: 10,
 });
@@ -86,6 +90,9 @@ export function totalFrames(ops) {
   for (const o of ops) if (o.frames) n += o.frames;
   return n;
 }
+
+/** True when this action's hits include a critical (the party swings with the bigger crit wind-up). */
+const critIn = (rest) => (rest || []).some((e) => e && e.type === 'damage' && e.crit);
 
 class Planner {
   constructor(info) {
@@ -165,7 +172,7 @@ class Planner {
         for (const t of targets) this.push({ op: 'fx', kind: 'item', uid: t, item: a.item || null });
         this.wait(FRAMES.item);
       } else if (kind === 'combo') this.comboOpen(start);
-      else if (isBow) this.bowOpen(actor, start, targets);
+      else if (isBow) this.bowOpen(actor, start, targets, rest);
       else if (hasMove || start.fx === 'weapon') this.meleeOpen(actor, start, rest, weapon);
       else this.castOpen(actor, start, targets);
     } else this.enemyOpen(actor, start, rest, targets);
@@ -196,7 +203,7 @@ class Planner {
       this.wait(10);
     }
     if (target && this.side(target) === 'enemy') { this.push({ op: 'move', uid: actor, to: 'target', target, frames: FRAMES.stepIn }); this.moved.add(actor); }
-    this.pose(actor, 'windup'); this.wait(FRAMES.windup);
+    this.pose(actor, critIn(rest) ? 'crit' : 'windup'); this.wait(FRAMES.windup);
     this.pose(actor, 'strike');
     const arc = start.fx === 'slash_up' ? 'slash_up' : (start.fx === 'slash_wide' || start.fx === 'spin') ? 'slash_wide'
       : start.fx === 'dash_cut' ? 'dash' : start.fx === 'thrust_big' ? 'thrust_big' : fury ? `fury_${w}` : ARC_FX[w] || 'slash';
@@ -206,9 +213,9 @@ class Planner {
     this.wait(FRAMES.strikeHold);
   }
 
-  bowOpen(actor, start, targets) {
+  bowOpen(actor, start, targets, rest = []) {
     this.pose(actor, 'ready'); this.wait(FRAMES.ready);
-    this.pose(actor, 'windup'); this.wait(FRAMES.bowDraw);
+    this.pose(actor, critIn(rest) ? 'crit' : 'windup'); this.wait(FRAMES.bowDraw);
     this.pose(actor, 'strike');
     const fury = start.fx === 'fury_bow';
     if (fury) this.push({ op: 'sfx', id: 'fury_art' });
@@ -242,7 +249,7 @@ class Planner {
     const hint = PARTY_FX[start.fx] || PARTY_FX.combo_cross;
     this.push({ op: 'banner', text: start.action.name, style: 'combo' });
     this.push({ op: 'sfx', id: 'combo_start' });
-    for (const m of members) this.pose(m, 'ready');
+    for (const m of members) this.pose(m, 'combo');
     this.push({ op: 'fx', kind: 'combo_link', uids: members });
     this.wait(FRAMES.combo);
     const targets = start.targets || [];
@@ -266,6 +273,7 @@ class Planner {
   enemyOpen(actor, start, rest, targets) {
     const mv = rest.find((e) => e.type === 'move_to' && e.actor === actor);
     const [fxKind, sfx] = ENEMY_FX[start.fx] || ['claw', 'hit_light'];
+    this.pose(actor, mv ? 'attack' : (start.fx === 'devour' || start.fx === 'feast') ? 'devour' : 'cast');
     this.push({ op: 'flash', uid: actor, color: '#bc94e2', frames: FRAMES.enemyWindup + 2, soft: true });
     if (start.charged) {
       this.push({ op: 'telegraphCancel', actor, fired: true });
@@ -460,6 +468,9 @@ class Planner {
     this.wait(FRAMES.reflect);
   }
   ev_stance(e) {
+    // the Warden settles out of any attack pose and its new stance set flashes in (actors.js STANCE_FLASH)
+    if (this.posed.has(e.actor)) this.pose(e.actor, 'idle');
+    this.push({ op: 'pose', uid: e.actor, pose: `stance_${e.stance}` });
     this.push({ op: 'banner', text: e.name || 'Stance change', style: 'stance' });
     this.push({ op: 'fx', kind: 'stance', uid: e.actor, stance: e.stance });
     this.push({ op: 'sfx', id: 'equip' });
@@ -485,6 +496,7 @@ class Planner {
   }
   ev_split(e) { this.push({ op: 'split', source: e.source, into: e.into || [] }); }
   ev_devour(e) {
+    if (e.actor) this.pose(e.actor, 'devour');
     this.push({ op: 'fx', kind: 'devour', uid: e.target, from: e.actor, success: !!e.success });
     this.push({ op: 'sfx', id: e.success ? 'name_devour' : 'defend' });
     if (e.success) {
@@ -496,6 +508,7 @@ class Planner {
     this.wait(e.success ? FRAMES.devour : FRAMES.status);
   }
   ev_feast(e) {
+    this.pose(e.actor, 'devour');
     this.push({ op: 'fx', kind: 'feast', uid: e.actor, pages: e.pages || [] });
     this.push({ op: 'sfx', id: 'page_flutter' });
     this.help((e.pages && e.pages.length) ? `{c:violet}${this.name(e.actor)} devours its pages!{/c}` : `${this.name(e.actor)} snaps at empty air.`);
@@ -508,6 +521,10 @@ class Planner {
     this.posed.delete(e.target);
     if (side === 'enemy') {
       const boss = this.isBoss(e.target);
+      // die_0..2: the sprite crumbles from the top, then the white flash and the dissolve (pose before 'ko':
+      // the runner ignores poses for KO'd units)
+      this.push({ op: 'pose', uid: e.target, pose: 'die' });
+      this.wait(FRAMES.dieSteps);
       this.push({ op: 'ko', uid: e.target });
       this.push({ op: 'flash', uid: e.target, color: '#ffffff', frames: boss ? FRAMES.bossShake : FRAMES.dieFlash, hold: true });
       this.push({ op: 'sfx', id: boss ? 'boss_die' : 'enemy_die' });
@@ -546,6 +563,7 @@ class Planner {
     this.wait(FRAMES.skip);
   }
   ev_telegraph(e) {
+    this.pose(e.actor, 'cast');
     this.push({ op: 'telegraph', actor: e.actor, skill: e.skill, name: e.name, text: e.text, target: e.target, targets: e.targets || [], nextTurn: e.nextTurn });
     this.push({ op: 'sfx', id: 'telegraph' });
     this.push({ op: 'fx', kind: 'telegraph', uid: e.actor });

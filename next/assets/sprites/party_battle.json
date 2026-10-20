@@ -23,7 +23,7 @@
    "axe"
   ]
  },
- "poses": "per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory}; shared: <char>_{cast,hurt,defend,kneel,ko}",
+ "poses": "per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory,crit,combo,levelup}; shared: <char>_{cast,hurt,defend,kneel,ko,combo,levelup} (combo and levelup alias the primary weapon frame)",
  "frames": {
   "hero_sword_idle_0": [
    0,
@@ -328,6 +328,150 @@
   "bram_ko": [
    64,
    240,
+   32,
+   40
+  ],
+  "hero_sword_crit": [
+   96,
+   240,
+   32,
+   40
+  ],
+  "hero_sword_combo": [
+   128,
+   240,
+   32,
+   40
+  ],
+  "hero_sword_levelup": [
+   160,
+   240,
+   32,
+   40
+  ],
+  "hero_axe_crit": [
+   192,
+   240,
+   32,
+   40
+  ],
+  "hero_axe_combo": [
+   224,
+   240,
+   32,
+   40
+  ],
+  "hero_axe_levelup": [
+   0,
+   280,
+   32,
+   40
+  ],
+  "mira_staff_crit": [
+   32,
+   280,
+   32,
+   40
+  ],
+  "mira_staff_combo": [
+   64,
+   280,
+   32,
+   40
+  ],
+  "mira_staff_levelup": [
+   96,
+   280,
+   32,
+   40
+  ],
+  "mira_bow_crit": [
+   128,
+   280,
+   32,
+   40
+  ],
+  "mira_bow_combo": [
+   160,
+   280,
+   32,
+   40
+  ],
+  "mira_bow_levelup": [
+   192,
+   280,
+   32,
+   40
+  ],
+  "bram_spear_crit": [
+   224,
+   280,
+   32,
+   40
+  ],
+  "bram_spear_combo": [
+   0,
+   320,
+   32,
+   40
+  ],
+  "bram_spear_levelup": [
+   32,
+   320,
+   32,
+   40
+  ],
+  "bram_axe_crit": [
+   64,
+   320,
+   32,
+   40
+  ],
+  "bram_axe_combo": [
+   96,
+   320,
+   32,
+   40
+  ],
+  "bram_axe_levelup": [
+   128,
+   320,
+   32,
+   40
+  ],
+  "hero_combo": [
+   128,
+   240,
+   32,
+   40
+  ],
+  "hero_levelup": [
+   160,
+   240,
+   32,
+   40
+  ],
+  "mira_combo": [
+   64,
+   280,
+   32,
+   40
+  ],
+  "mira_levelup": [
+   96,
+   280,
+   32,
+   40
+  ],
+  "bram_combo": [
+   0,
+   320,
+   32,
+   40
+  ],
+  "bram_levelup": [
+   32,
+   320,
    32,
    40
   ]
