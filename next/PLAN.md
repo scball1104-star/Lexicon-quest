@@ -82,12 +82,12 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] critic-3 on the current build (docs/CRITIQUE_3.md); then publish W6
 
 ## Backlog from W6 review and CRITIQUE_3 (not yet assigned)
-- [ ] Briar Alpha and other borrowed-art enemies scale by 1.3x (non-integer, blurs pixels): give them their own recolored frames at 1x, or 2x for bosses
-- [ ] Whisperwood Hollow battles use the daytime meadow backdrop: compose a root-cave backdrop (or reuse battle_archive with a green tint)
-- [ ] fx.js death dissolve ignores sprite scale
-- [ ] CRITIQUE_3 #3 Archive floors look alike and float in black (art + maps)
-- [ ] CRITIQUE_3 #4 ink pits still read as flat rectangles at a distance (art)
-- [ ] CRITIQUE_3 #8 Bram's gate sprite is not Bram (data: use the party sprite before he joins)
-- [ ] CRITIQUE_3 #10 field Archivore avatar does not match the battle boss (art)
-- [ ] CRITIQUE_3 #12 music reuse: mystery/sorrow cues in story scenes, a distinct F3 or boss-door cue (content + audio)
+- [x] Briar Alpha and other borrowed-art enemies scale by 1.3x (non-integer, blurs pixels): give them their own recolored frames at 1x, or 2x for bosses
+- [x] Whisperwood Hollow battles use the daytime meadow backdrop: compose a root-cave backdrop (or reuse battle_archive with a green tint)
+- [x] fx.js death dissolve ignores sprite scale
+- [x] CRITIQUE_3 #3 Archive floors look alike and float in black (art + maps)
+- [x] CRITIQUE_3 #4 ink pits still read as flat rectangles at a distance (art)
+- [x] CRITIQUE_3 #8 Bram's gate sprite is not Bram (data: use the party sprite before he joins)
+- [x] CRITIQUE_3 #10 field Archivore avatar does not match the battle boss (art)
+- [x] CRITIQUE_3 #12 music reuse: mystery/sorrow cues in story scenes, a distinct F3 or boss-door cue (content + audio)
 - [ ] Next big steps (CRITIQUE_3): party field abilities; Lantern upgrade; Episode 2 vertical slice

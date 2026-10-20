@@ -123,3 +123,12 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   the speaker; every battle command is on screen at once (two columns, with Flee as a button); the empty window in
   battle is now a short battle log; the bestiary shows each monster's picture (a silhouette until you meet it);
   touch screens show A and B button hints instead of keyboard keys.
+
+## 2026-10-20 (Tue) midday: Archive floors with their own look, proper Hollow monsters, story music
+- Each Archive floor is now its own place: the Catalog Halls are warm oak and card drawers around a Great Catalog;
+  the Reading Galleries are cool slate and glass under a rose window; the Rootbound Stacks are dark wood swallowed
+  by roots above the great door. Rooms have real walls instead of floating in black, and ink pits look like pits.
+- The Archivore on the field now looks like the Archivore you fight. The Hollow's monsters have their own art (no
+  more stretched wolves), with a root-cave battle backdrop.
+- The music follows the story: an uneasy theme when names fade and the thirteenth bell rings, the sad theme when
+  Bram loses his father's name and when your own name stays faint, and a triumphant one for the homecoming.
