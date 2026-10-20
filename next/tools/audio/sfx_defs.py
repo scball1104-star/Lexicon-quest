@@ -964,3 +964,158 @@ def drop_legendary(g, v):
     m.add(kit.whoosh(0.9, g, 1500, 7000, q=0.9, peak=0.5), 0.05, 0.2)
     m.add(kit.sparkle(1.25, g, 45, 3000, 9000, (0.03, 0.08), fall=1.3), 0.1, 0.35)
     return verb(m.out, 1.4, 0.28, bright=0.85, predelay=0.015)
+
+
+# ============================================================================ EPISODE 2 (E2-audio)
+# Silverglass: mirrors, beams, glass bridges, the ferry, Lena's clocktower, the Other Selves and Kept.
+
+@sfx("mirror_turn", "field", "A mirror rotates a quarter turn on its stone base: a soft stone grind with a detent click, then a high glassy ring as the pane settles (C7 over E7).", target=-18.0, tail_db=-42)
+def mirror_turn(g, v):
+    m = M()
+    d = 0.26
+    gr = kit.grind(d, g, band=(280, 1300), rough=0.7) * kit.gate(d, 0.04, 0.08)
+    m.add(lp(gr, 2600), 0.0, 0.75)
+    m.add(kit.rumble(d, g, fc=140, rough=0.4, attack=0.03, release=0.1), 0.0, 0.25)
+    m.add(kit.knock([620, 1480, 2900], [9, 10, 11], g, 0.08, 0.012), d - 0.01, 0.45)
+    m.add(kit.glass(hz("C7"), 0.34, g, decay=0.16), d + 0.005, 0.42)
+    m.add(kit.glass(hz("E7"), 0.28, g, decay=0.12), d + 0.03, 0.22)
+    return verb(m.out, 0.6, 0.16, bright=0.85)
+
+
+@sfx("beam_hit", "field", "A light receptor lights for the first time: a bright crystal chime (G6 glass plate plus a B6 bell) with a rising shimmer of glints sweeping up to the top.", target=-17.0, tail_db=-44)
+def beam_hit(g, v):
+    m = M()
+    m.add(kit.glass(hz("G6"), 0.5, g, decay=0.24), 0.0, 0.7)
+    m.add(kit.fm_bell(hz("B6"), 0.45, 3.0, 1.4, decay=0.16, idx_decay=0.05), 0.012, 0.42)
+    m.add(kit.noise_burst(0.012, g, ("high", 5000), 0.002), 0.0, 0.3)
+    d = 0.36
+    n = ns(d)
+    for r, a in ((1.0, 0.3), (1.5, 0.18)):
+        f = dsp.glide(1900 * r, 4600 * r, n, "exp", 0.8)
+        m.add(dsp.sine(f, n, SR) * kit.gate(d, 0.05, 0.3) * (1 + 0.4 * dsp.lfo(17.0, n, SR)), 0.06, a)
+    m.add(kit.sparkle(0.38, g, 30, 3500, 8500, (0.015, 0.04), fall=0.7), 0.06, 0.22)
+    return verb(m.out, 0.55, 0.2, bright=0.9)
+
+
+@sfx("glass_bridge", "field", "Glass bridge cells light up: a sustained glassy swell about 0.6 s long (E6, B6, E7 with a shimmering tremolo and a breath of air), rising in and settling out.", target=-18.0, tail_db=-42)
+def glass_bridge(g, v):
+    m = M()
+    d = 0.5
+    n = ns(d)
+    env = kit.gate(d, 0.2, 0.22)
+    shimmer = 1.0 + 0.25 * dsp.lfo(9.0, n, SR)
+    for nt, a, det in (("E6", 0.5, 1.0), ("B6", 0.36, 1.002), ("E7", 0.2, 0.998), ("G#7", 0.08, 1.0)):
+        f = hz(nt) * det
+        y = dsp.sine(f, n, SR) + 0.3 * dsp.sine(f * 2.32, n, SR) * np.exp(-dsp.tvec(n, SR) / 0.25)
+        m.add(y * env * shimmer, 0.0, a)
+    m.add(kit.whoosh(d, g, 1500, 6000, q=1.2, peak=0.5), 0.0, 0.08)
+    m.add(kit.glass(hz("B6"), 0.2, g, decay=0.09), d - 0.12, 0.18)
+    return verb(m.out, 0.55, 0.22, bright=0.85)
+
+
+@sfx("glass_break", "field", "A pane shatters (Dash through a glass pane; the great mirror cracking): a sharp crack, a dense spray of glass shards and a tinkling tail of falling slivers.", target=-16.0, tail_db=-48)
+def glass_break(g, v):
+    m = M()
+    m.add(kit.noise_burst(0.03, g, ("high", 2500), 0.006, 0.0003), 0.0, 0.9)
+    m.add(kit.thump(260, 120, 0.08, 0.02, 0.0005), 0.0, 0.35)
+    m.add(kit.shatter(0.45, g, count=60, fmin=2400, fmax=8000, spread=0.18), 0.003, 0.85)
+    tail = dsp.Mix(SR, 0.6)
+    for i in range(18):
+        at = 0.1 + (g.random() ** 1.6) * 0.38
+        f = math.exp(g.uniform(math.log(2800), math.log(7500)))
+        tail.add(kit.glass(f, 0.12, g, decay=0.03), at, g.uniform(0.25, 0.7) * (1 - at))
+    m.add(tail.out, 0.0, 0.45)
+    return verb(m.out, 0.45, 0.14, bright=0.9)
+
+
+@sfx("mirror_step", "field", "Stepping through a mirror door: a quick whoosh through a shimmering comb of glassy resonances, a soft swish in and out.", target=-19.0, tail_db=-44)
+def mirror_step(g, v):
+    d = 0.36
+    n = ns(d)
+    w = kit.whoosh(d, g, 500, 3800, q=1.1, peak=0.45, kind="pink")
+    # the shimmering filter: glassy resonances, amplitude-trembling
+    res = dsp.resonator(w * 0.3, [1318.5, 1975.5, 2637.0, 3951.0], [30, 34, 38, 40], [1.0, 0.7, 0.5, 0.3], SR)
+    res = res / (np.max(np.abs(res)) + 1e-12) * (1 + 0.35 * dsp.lfo(14.0, n, SR))
+    y = 0.75 * w + 0.45 * res
+    y = y + 0.12 * kit.sparkle(d, g, 25, 3000, 8000, (0.01, 0.03))[:n]
+    return verb(lp(y, 9000), 0.4, 0.16, bright=0.8)
+
+
+@sfx("ferry_oars", "field", "Tovin's ferry: two slow oar strokes (a wooden oarlock knock, the blade pulling through water with a swirl and small bubbles), the second a little softer.", target=-19.0, tail_db=-44)
+def ferry_oars(g, v):
+    m = M()
+    for k, at in enumerate((0.0, 0.46)):
+        a = 1.0 if k == 0 else 0.82
+        m.add(kit.knock([210, 520, 980], [8, 9, 8], g, 0.1, 0.03), at, 0.35 * a)
+        m.add(kit.creak(0.09, g, 40, 55, modes=(300, 760, 1400), qs=(9, 10, 9)), at + 0.02, 0.12 * a)
+        d = 0.36
+        n = ns(d)
+        sw = dsp.bq_tv(dsp.pink(n, g), "bp", dsp.glide(380, 1100, n, "exp"), 1.4, SR, block=32)
+        sw = sw / (np.max(np.abs(sw)) + 1e-12) * kit.gate(d, 0.12, 0.25) * (1 + 0.3 * dsp.smooth_random(n, g, 18.0, SR))
+        m.add(sw, at + 0.06, 0.55 * a)
+        m.add(kit.bubbles(0.3, g, 9, 350, 1200), at + 0.16, 0.28 * a)
+        m.add(kit.noise_burst(0.15, g, (1500, 5000), 0.04, 0.01), at + 0.34, 0.1 * a)   # drips off the blade
+    return verb(lp(m.out, 7000), 0.35, 0.1, bright=0.6)
+
+
+@sfx("clock_chime", "story", "Lena's clocktower: a small tower chime striking two notes, E5 then C5 (a falling major third), warm and slightly distant.", target=-17.0, tail_db=-40)
+def clock_chime(g, v):
+    m = M()
+    m.add(kit.church_bell(hz("E5"), 0.62, g, decay=0.3, eerie=0.0), 0.0, 0.7)
+    m.add(kit.church_bell(hz("C5"), 0.66, g, decay=0.32, eerie=0.0), 0.34, 0.75)
+    return verb(m.out, 0.6, 0.22, bright=0.55, predelay=0.02)
+
+
+@sfx("reflection_out", "story", "The Other Selves step out of their mirrors: a reversed glass shimmer swelling up into a low thud, with a cold glint on the impact.", target=-16.0, tail_db=-44)
+def reflection_out(g, v):
+    m = M()
+    sh = dsp.Mix(SR, 0.6)
+    for nt, a in (("D6", 0.6), ("A6", 0.45), ("Eb7", 0.3), ("F6", 0.35)):
+        sh.add(kit.glass(hz(nt), 0.55, g, decay=0.2), 0.0, a)
+    sh.add(kit.sparkle(0.5, g, 30, 3000, 8000, (0.02, 0.06)), 0.0, 0.3)
+    rev = verb(sh.out[:, 0] if sh.out.ndim == 2 else sh.out, 0.6, 0.35, bright=0.8)[: ns(0.45)]
+    swell = kit.reverse_swell(rev)
+    m.add(swell / (np.max(np.abs(swell)) + 1e-12), 0.0, 0.7)
+    hit = len(swell) / SR
+    m.add(kit.thump(110, 42, 0.26, 0.08, 0.001), hit - 0.01, 0.9)
+    m.add(kit.noise_burst(0.05, g, ("low", 600), 0.015), hit - 0.01, 0.3)
+    m.add(kit.glass(hz("D7"), 0.25, g, decay=0.07), hit, 0.2)
+    return verb(m.out, 0.4, 0.12, bright=0.6)
+
+
+@sfx("kept", "status", "A party member is Kept (glassed over): a thin frost crackle spreading and thickening, a rising glassy whine, then a crisp seal as the glass closes.", target=-16.5, tail_db=-44)
+def kept(g, v):
+    m = M()
+    d = 0.45
+    n = ns(d)
+    dens = dsp.glide(60, 900, n, "exp", 1.2)
+    cr = np.zeros(n)
+    pos = 0
+    while pos < n:
+        cr[pos] = g.uniform(0.3, 1.0) * (1 if g.random() < 0.5 else -1)
+        pos += max(1, int(SR / dens[min(pos, n - 1)] * g.uniform(0.4, 1.6)))
+    cr = dsp.bq(dsp.bq(cr, "hp", 2500, 0.7, SR), "bp", 5200, 0.8, SR)
+    cr = cr / (np.max(np.abs(cr)) + 1e-12) * kit.gate(d, 0.05, 0.02)
+    m.add(cr, 0.0, 0.5)
+    f = dsp.glide(1200, 2600, n, "exp", 0.9)
+    m.add((dsp.sine(f, n, SR) + 0.3 * dsp.sine(f * 2.32, n, SR)) * kit.gate(d, 0.3, 0.03), 0.0, 0.2)
+    m.add(kit.glass(hz("A6"), 0.26, g, decay=0.08), d, 0.55)
+    m.add(kit.knock([1700, 3300, 5100], [14, 16, 18], g, 0.06, 0.008), d, 0.4)
+    m.add(kit.thump(200, 140, 0.08, 0.025, 0.0005), d, 0.25)
+    return verb(m.out, 0.35, 0.14, bright=0.85)
+
+
+@sfx("kept_break", "status", "Kept ends: the glass bursts in a bright shatter, then a breath of relief (a soft airy exhale) under a small rising two-note chime.", target=-16.0, tail_db=-44)
+def kept_break(g, v):
+    m = M()
+    m.add(kit.noise_burst(0.02, g, ("high", 3000), 0.004, 0.0003), 0.0, 0.7)
+    m.add(kit.shatter(0.4, g, count=44, fmin=3000, fmax=8500, spread=0.14), 0.002, 0.75)
+    d = 0.42
+    n = ns(d)
+    br = dsp.bq_tv(dsp.pink(n, g), "bp", dsp.glide(1400, 700, n, "exp"), 0.9, SR, block=32)
+    br = br / (np.max(np.abs(br)) + 1e-12) * kit.gate(d, 0.12, 0.3)
+    br = dsp.bq(br, "peak", 1100, 1.5, SR, 4.0)
+    m.add(br, 0.16, 0.42)
+    m.add(kit.fm_bell(hz("E6"), 0.4, 3.0, 1.2, decay=0.13, idx_decay=0.04), 0.2, 0.3)
+    m.add(kit.fm_bell(hz("A6"), 0.36, 3.0, 1.2, decay=0.13, idx_decay=0.04), 0.28, 0.3)
+    return verb(m.out, 0.4, 0.15, bright=0.8)

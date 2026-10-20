@@ -52,7 +52,9 @@ AMBIENCE_TARGET = -22.0   # integrated; a bed about 11 dB under the music at def
 MUSIC_TARGET = -16.0      # integrated; manifest volume brings each track here
 
 MUSIC_IDS = ["title", "willowmere", "valley", "archive", "battle", "boss_archivore", "mystery", "sorrow",
-             "triumph", "victory", "gameover"]
+             "triumph", "victory", "gameover",
+             # Episode 2 (composed in tools/music/songs/)
+             "hollow", "hollowmere", "fading_road", "court", "boss_king"]
 LEGACY_MUSIC = {
     "title": "../assets/audio/title.mp3",
     "willowmere": "../assets/audio/town.mp3",
@@ -65,6 +67,8 @@ MUSIC_FALLBACK = {
     "title": None, "willowmere": None, "valley": "willowmere", "archive": None, "battle": None,
     "boss_archivore": "battle", "mystery": None, "sorrow": None, "triumph": "title", "victory": None,
     "gameover": None,
+    "hollow": "willowmere", "hollowmere": "hollow", "fading_road": "valley", "court": "archive",
+    "boss_king": "boss_archivore",
 }
 
 

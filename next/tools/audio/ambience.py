@@ -206,3 +206,92 @@ def wind_valley(n, g):
                  grass=grass / (np.std(grass) + 1e-12) * 0.18, low=low / (np.std(low) + 1e-12) * 0.35)
     STEMS["wind_valley"] = parts
     return sum(parts.values())
+
+
+# ----------------------------------------------------------------------------- Episode 2 (E2-audio)
+def chime_note(f, dur, g):
+    """One wind-chime tube: tubular-bell partials (1, 2.76, 5.40, 8.93) with long, glassy decays."""
+    k = ns(dur)
+    t = np.arange(k) / SR
+    y = np.zeros(k)
+    for r, a, d in ((1.0, 1.0, 1.6), (2.76, 0.45, 0.7), (5.40, 0.18, 0.3), (8.93, 0.06, 0.12)):
+        if f * r < SR * 0.45:
+            y += a * np.sin(2 * np.pi * f * r * t + g.uniform(0, 2 * np.pi)) * np.exp(-t / d)
+    return y * np.clip(t / 0.002, 0, 1) * np.clip((dur - t) / 0.05, 0, 1)
+
+
+@amb("mere_still", "The Hollow by the still mere: slow water lapping at the stones (soft swells with small wet "
+     "slaps and plops), a distant cluster of wind chimes once per loop, a faint high air, and one far-off "
+     "bird. Hushed and a little lonely; nothing moves fast.", 10.0, out_sr=16000)
+def mere_still(n, g):
+    lap = 0.5 + 0.5 * np.sin(2 * np.pi * np.arange(n) * 4 / n + 0.7)            # four slow waves per loop
+    lap = np.clip(lap + 0.25 * periodic_lfo(n, g, 0.8), 0, 1.2)
+    bed = circ_noise(n, g, -4.0, 110, 1300) * (0.35 + 0.65 * lap ** 1.5)
+    hiss = circ_noise(n, g, -1.0, 1500, 5500) * (0.15 + 0.45 * lap ** 3) * 0.3
+    air = circ_noise(n, g, -2.0, 3000, 7500) * 0.03
+    water = np.zeros(n)
+    peaks = [int(n * (k + 0.17) / 4) for k in range(4)]                            # wave crests (sin max)
+    for p0 in peaks:
+        for _ in range(3):                                                         # a slap and two drops
+            k = ns(g.uniform(0.04, 0.09))
+            s = circ_noise(k, g, -2.0, 400, 2200)[:k] * np.exp(-np.arange(k) / (k * 0.25))
+            place(water, s, p0 + int(g.uniform(-0.15, 0.25) * SR), g.uniform(0.15, 0.35))
+        f = math.exp(g.uniform(math.log(450), math.log(1100)))
+        k = ns(0.03)
+        pl = dsp.sine(dsp.glide(f, f * 1.7, k, "exp", 0.7), k, SR) * dsp.env_exp(k, SR, 0.009, 0.002)
+        place(water, pl, p0 + int(g.uniform(0.2, 0.5) * SR), g.uniform(0.2, 0.35))
+    y = bed + hiss + air + water * 1.3
+    chimes = np.zeros(n)
+    notes = [dsp.note_hz(x) for x in ("A5", "C6", "D6", "E6", "G6", "A6")]                  # A minor pentatonic
+    t = 2.6
+    for _ in range(5):                                                              # one soft cluster
+        place(chimes, chime_note(notes[g.integers(0, len(notes))], 2.2, g), ns(t), g.uniform(0.35, 0.8))
+        t += g.uniform(0.12, 0.45)
+    place(chimes, chime_note(notes[2], 2.2, g), ns(7.3), 0.3)                      # and a single stray tube
+    chimes = chimes + 0.6 * circ_reverb(chimes, 1.6, 0.03, 0.55, seed=11)
+    bird = np.zeros(n)
+    place(bird, bird_phrase(g, "whistle"), ns(8.5), 0.5)
+    bird = 0.4 * bird + 0.6 * circ_reverb(bird, 1.4, 0.04, 0.5, seed=12)
+    bed_n = y / (np.std(y) + 1e-12)
+    ev = chimes * 0.9 + bird * 0.45
+    STEMS["mere_still"] = dict(water=bed_n, chimes=chimes * 0.9, bird=bird * 0.45)
+    out = bed_n + ev
+    return out + 0.1 * circ_reverb(out, 0.7, 0.02, 0.45, seed=13)
+
+
+@amb("court_hush", "The Court of Mirrors: a cold, still palace of glass. A faint glass hum (a wet-finger-on-a-rim "
+     "tone around A5 with a slowly beating partner and a fifth), a low room tone, and slow drips falling into "
+     "a very large space, each one a small glassy ping. Beautiful and uneasy, never loud.", 10.0, out_sr=16000)
+def court_hush(n, g):
+    idx = np.arange(n)
+
+    def tone(f, amp):   # an exact whole number of cycles per loop, so the hum loops without a seam
+        return amp * np.sin(2 * np.pi * idx * round(f * n / SR) / n)
+
+    swell = 0.6 + 0.4 * periodic_lfo(n, g, 0.15)
+    hum = (tone(880.0, 0.06) + tone(880.6, 0.05) + tone(1320.0, 0.018) + tone(1761.0, 0.01)) * swell
+    room = circ_noise(n, g, -6.0, 35, 240, 3) * (0.85 + 0.15 * periodic_lfo(n, g, 0.2))
+    air = circ_noise(n, g, -2.0, 2500, 7000) * 0.05
+    bed = room + air
+    bed = bed / (np.std(bed) + 1e-12)
+    drips = np.zeros(n)
+    for at in (0.9, 3.7, 6.2, 8.8):
+        k = ns(0.06)
+        f0 = g.uniform(1300, 1900)
+        d = dsp.sine(dsp.glide(f0, f0 * 1.6, k, "exp", 0.6), k, SR) * dsp.env_exp(k, SR, 0.012, 0.001)
+        place(drips, d, ns(at + g.uniform(-0.1, 0.1)), g.uniform(0.4, 0.6))
+        tk = ns(0.5)
+        tt = np.arange(tk) / SR
+        f1 = g.uniform(2600, 3600)
+        ping = (np.sin(2 * np.pi * f1 * tt) + 0.4 * np.sin(2 * np.pi * f1 * 2.32 * tt)) * np.exp(-tt / 0.12)
+        place(drips, ping, ns(at + 0.01), g.uniform(0.08, 0.14))
+    wet = circ_reverb(drips, 3.2, 0.06, 0.4, seed=21)
+    ev = (drips * 0.25 + wet * 1.3) * 5.0
+    hum_n = hum / (np.std(hum) + 1e-12) * 0.45
+    STEMS["court_hush"] = dict(room=bed, hum=hum_n, drips=ev)
+    y = bed + hum_n + ev
+    # the bed is periodic, so the loop may start anywhere: start where the waveform is flattest so the
+    # wrap-around step is a small one (a steady 880 Hz hum makes every step large at 16 kHz)
+    d = np.abs(np.diff(np.concatenate([y, y[:1]])))
+    smooth = np.convolve(d, np.ones(64) / 64, mode="same")
+    return np.roll(y, -int(np.argmin(smooth[: n // 2])))

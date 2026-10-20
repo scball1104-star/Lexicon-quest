@@ -1,4 +1,4 @@
-// Music asset checks: the four composed tracks exist, are sane MP3s with a gapless LAME tag, sizes are
+// Music asset checks: the composed tracks (Episode 1 and 2) exist, are sane MP3s with a gapless LAME tag, sizes are
 // within bounds, and the <id>.json loop metadata is valid and consistent with the MP3's decoded length.
 // Runs under any runner that imports or executes this file: failures throw (non-zero exit).
 import fs from 'node:fs';
@@ -14,6 +14,12 @@ const TRACKS = {
   mystery: { minSec: 40, maxSec: 55, loops: true },
   sorrow: { minSec: 55, maxSec: 70, loops: true },
   triumph: { minSec: 45, maxSec: 60, loops: false },
+  // Episode 2 (EPISODE2_PLAN.md 8.1)
+  hollow: { minSec: 60, maxSec: 80, loops: true },
+  hollowmere: { minSec: 60, maxSec: 80, loops: true },
+  fading_road: { minSec: 85, maxSec: 95, loops: true },
+  court: { minSec: 85, maxSec: 95, loops: true },
+  boss_king: { minSec: 115, maxSec: 125, loops: true },
 };
 const KBPS = 160;
 const SR = 44100;

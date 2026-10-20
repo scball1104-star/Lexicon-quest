@@ -475,6 +475,9 @@ class Mallet(Instrument):
                       strike=0.18, bright_lp=14000),
         'vibes': dict(ratios=(1.0, 4.0, 9.8), amps=(1.0, 0.18, 0.04), taus=(2.6, 0.5, 0.2),
                       strike=0.06, bright_lp=7000),
+        # glass bell / struck glass plate (Episode 2): free-plate partials, cool and slightly inharmonic
+        'glass': dict(ratios=(1.0, 2.32, 4.25, 6.63), amps=(1.0, 0.42, 0.2, 0.08), taus=(1.4, 0.7, 0.3, 0.14),
+                      strike=0.08, bright_lp=12000),
     }
 
     def __init__(self, preset='celesta', release=1.5):
@@ -640,6 +643,131 @@ class Shaker(Instrument):
         return normalize(v, 0.5 * (0.5 + 0.5 * vel))
 
 
+# --------------------------------------------------------------------------------------
+# Episode 2 additions (E2-audio)
+# --------------------------------------------------------------------------------------
+
+class MutedPiano(Piano):
+    """Felt-muted upright piano (a lullaby accompaniment): the Piano partials through a dark felt
+    lowpass, a softer hammer and a shorter ring."""
+    name = 'piano_muted'
+    release = 1.6
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        v = Piano.render(self, f0, gate_s, vel * 0.8, sr, rng)
+        n = v.shape[0]
+        t = np.arange(n) / sr
+        v = filt(v, 'lp', 1500 + 1300 * vel, sr, 0.6)
+        v = filt(v, 'peak', 280, sr, q=0.9, gain_db=2.0)   # woody body
+        v *= np.exp(-t / 1.4)
+        v = fade_edges(v, sr, 0.3, 30.0)
+        return normalize(v, 0.5 * (0.35 + 0.65 * vel))
+
+
+class GlassPad(Instrument):
+    """Glassy pad: sine partials 1, 2, 3 and an inharmonic 5.07 (struck-glass color), two copies
+    detuned a few cents left/right, slow attack and a gentle tremolo. Stereo."""
+    name = 'glasspad'
+    stereo = True
+    release = 1.4
+
+    def __init__(self, attack=0.9, trem=0.35):
+        self.attack = attack
+        self.trem = trem
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, self.attack, 1.0, 0.85, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        out = np.zeros((n, 2))
+        # unequal sides so a mono fold-down beats gently instead of pumping
+        for side, cents, amp in ((0, -2.5, 1.0), (1, 2.5, 0.72)):
+            f = f0 * 2 ** (cents / 1200.0)
+            v = (np.sin(TWO_PI * f * t + rng.uniform(0, TWO_PI)) + 0.3 * np.sin(TWO_PI * 2 * f * t)
+                 + 0.12 * np.sin(TWO_PI * 3 * f * t) + 0.05 * np.sin(TWO_PI * 5.07 * f * t) * np.exp(-t / 1.5))
+            out[:, side] = v * amp
+            out[:, 1 - side] += 0.25 * v * amp
+        trem = 1.0 + self.trem * 0.15 * np.sin(TWO_PI * (0.6 + rng.uniform(-0.1, 0.1)) * t + rng.uniform(0, TWO_PI))
+        out *= (env * trem)[:, None]
+        out = filt(out, 'lp', 7000, sr, 0.7)
+        return normalize(out, 0.45 * (0.4 + 0.6 * vel))
+
+
+class Harpsichord(Instrument):
+    """Harpsichord: two bright Karplus-Strong strings (8' and a slightly detuned 4' an octave up)
+    plucked near the nut, a quill click, a nasal body peak and fast dampers on key release.
+    Little velocity sensitivity, as on the real instrument."""
+    name = 'harpsichord'
+    release = 0.12
+    max_len = 4.0
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(min(self.max_len, gate_s + 0.35) * sr)
+        v8 = karplus_strong(f0, n, sr, rng, decay_t=2.4, brightness=0.95, vel=0.95, pick_pos=0.11)
+        v4 = karplus_strong(f0 * 2.0 * 1.0009, n, sr, rng, decay_t=1.5, brightness=0.95, vel=0.95, pick_pos=0.09)
+        v = v8 + 0.42 * v4
+        t = np.arange(n) / sr
+        click = filt(noise(n, rng), 'hp', 3000, sr) * np.exp(-t / 0.0025) * 0.22
+        v = v + click
+        v = filt(v, 'peak', 2300, sr, q=1.1, gain_db=3.5)
+        v = filt(v, 'hp', max(60.0, f0 * 0.6), sr, 0.7)
+        n_gate = int(gate_s * sr)
+        if n_gate < n:
+            v[n_gate:] *= np.exp(-np.arange(n - n_gate) / sr / 0.05)
+        v = fade_edges(v, sr, 0.2, 8.0)
+        return normalize(v, 0.5 * (0.75 + 0.25 * vel))
+
+
+class Brass(Instrument):
+    """Brass section for stabs and calls: three detuned saws with a fast lip attack, a bright
+    filter blat that settles, a little saturation for bite."""
+    name = 'brass'
+    release = 0.18
+
+    def __init__(self, attack=0.022, dark=1300.0, bright=5200.0):
+        self.attack = attack
+        self.dark = dark
+        self.bright = bright
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, self.attack, 0.3, 0.8, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        scoop = 2.0 ** (-0.35 * np.exp(-t / 0.025) / 12.0)
+        v = np.zeros(n)
+        for c, ph in ((-6.0, 0.0), (0.0, 0.33), (5.0, 0.71)):
+            f = f0 * scoop * 2 ** (c / 1200.0) * (2.0 ** ((np.sin(TWO_PI * 5.1 * t + ph * 6) * 0.05
+                                                          * np.clip((t - 0.35) / 0.4, 0, 1)) / 12.0))
+            v += osc('saw', f, sr, phase0=ph)
+        v /= 3.0
+        # the blat: bright at the attack, settling darker (more so at low velocity)
+        amt = (0.45 + 0.55 * vel) * (0.55 + 0.45 * np.exp(-t / 0.18))
+        v = morph_lp(v, sr, self.dark + f0, self.bright + 2 * f0, amt, q=0.9)
+        v = np.tanh(1.8 * v) / math.tanh(1.8)
+        v = filt(v, 'peak', 1100, sr, q=1.0, gain_db=2.5)
+        v *= env
+        return normalize(v, 0.5 * (0.45 + 0.55 * vel))
+
+
+class Snare(Instrument):
+    """Field snare for a march: a tuned drum body (two damped modes) plus the snare-wire rattle."""
+    name = 'snare'
+    release = 0.2
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(0.32 * sr)
+        t = np.arange(n) / sr
+        body = (np.sin(TWO_PI * 185 * t) * np.exp(-t / 0.035) + 0.5 * np.sin(TWO_PI * 330 * t) * np.exp(-t / 0.022))
+        wires = filt(noise(n, rng), 'bp', 3800, sr, q=0.6) * np.exp(-t / (0.07 + 0.05 * vel))
+        crack = filt(noise(n, rng), 'hp', 1500, sr) * np.exp(-t / 0.004)
+        v = 0.55 * body + 0.9 * wires + 0.35 * crack
+        v *= (1 - np.exp(-t / 0.0007))
+        v = filt(v, 'lp', 9000, sr, 0.7)
+        return normalize(v, 0.5 * (0.35 + 0.65 * vel))
+
+
 def make(name, **kw):
     """Instrument factory by short name used in song files."""
     table = {
@@ -663,5 +791,12 @@ def make(name, **kw):
         'creak': lambda: Creak(),
         'shaker': lambda: Shaker(),
         'brush': lambda: Shaker(brush=True),
+        # Episode 2
+        'glass': lambda: Mallet('glass', **kw),
+        'glasspad': lambda: GlassPad(**kw),
+        'piano_muted': lambda: MutedPiano(),
+        'harpsichord': lambda: Harpsichord(),
+        'brass': lambda: Brass(**kw),
+        'snare': lambda: Snare(),
     }
     return table[name]()

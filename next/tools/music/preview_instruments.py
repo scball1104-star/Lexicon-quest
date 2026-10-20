@@ -43,6 +43,9 @@ def main():
         ('pizz', 'd3', 0.3, 0.8), ('harp', 'a4', 0.5, 0.8), ('celesta', 'a5', 0.5, 0.8), ('musicbox', 'd6', 0.5, 0.8),
         ('glock', 'd6', 0.5, 0.8), ('piano', 'c4', 1.0, 0.8), ('bell', 'e3', 0.5, 0.9), ('bass', 'd2', 0.8, 0.8),
         ('lowdrum', 'd2', 0.2, 0.9), ('creak', 'd1', 0.2, 0.9), ('shaker', 'c4', 0.1, 0.8), ('brush', 'c4', 0.1, 0.8),
+        # Episode 2
+        ('glass', 'e6', 0.5, 0.8), ('glasspad', 'a4', 2.5, 0.7), ('piano_muted', 'c4', 1.0, 0.7),
+        ('harpsichord', 'c4', 0.4, 0.8), ('brass', 'c4', 0.6, 0.9), ('snare', 'c4', 0.1, 0.8),
     ]
     cols = 4
     rows = math.ceil(len(cases) / cols)

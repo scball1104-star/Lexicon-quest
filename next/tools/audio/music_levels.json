@@ -127,5 +127,35 @@
   "duration": 51.828,
   "sampleRate": 44100,
   "loopKind": "sidecar"
+ },
+ "assets/audio/music/hollow.mp3": {
+  "lufs": -16.44,
+  "duration": 68.731,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/hollowmere.mp3": {
+  "lufs": -16.44,
+  "duration": 68.731,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/fading_road.mp3": {
+  "lufs": -16.46,
+  "duration": 90.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/court.mp3": {
+  "lufs": -16.44,
+  "duration": 88.581,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/boss_king.mp3": {
+  "lufs": -16.5,
+  "duration": 120.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
  }
 }

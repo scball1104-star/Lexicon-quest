@@ -37,7 +37,7 @@ note the id and the one change you want ("cursor: a little lower and softer"). T
 |---|---|---|
 | SFX | WAV 16-bit mono 22050 Hz | per group, max 200 ms K-weighted loudness: UI -19 (cursor -21), text -25, footsteps -27, field -18, story -17, weapons -15, impacts -14, magic -15.5, status -16.5, big moments -14, loot -16 |
 | Jingles | MP3 stereo 32 kHz 160 kbps (WAV masters in `tools/audio/out/jingles_wav/`) | about -17 LUFS integrated, just under the music |
-| Ambience | WAV 16-bit mono, seamless loop (river 22050 Hz; archive and wind 16000 Hz, nothing above 8 kHz) | -22 LUFS integrated (about 11 dB under the music at default sliders); the runtime plays two copies half a loop apart panned left/right for a wide stereo bed |
+| Ambience | WAV 16-bit mono, seamless loop (river 22050 Hz; archive, wind, mere and court 16000 Hz, nothing above 8 kHz) | -22 LUFS integrated (about 11 dB under the music at default sliders); the runtime plays two copies half a loop apart panned left/right for a wide stereo bed |
 | Music | MP3 (Suno or code-composed) | manifest `volume` brings each track to about -16 LUFS |
 
 Every file: true peak <= -1 dBFS, DC removed, 2 ms fade-in / 5 ms fade-out (loops excepted), TPDF dither.
@@ -62,7 +62,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Chest | `chest_open`, then about 0.35 s later `await audio.jingle('item_get')` (story items: `key_item`; battle loot: `drop_common/magic/rare/legendary` by rarity instead) |
 | Doors and stairs | `door_open` when entering, `door_close` after the fade, `stairs` on stair exits, `door_locked` without a key, `door_unlock` with one |
 | Dungeon toolkit | `block_push` per tile, `switch_on` / `switch_off`, `gate_open`, `crystal_hit`, `bridge_appear`, `lantern_reveal`, `brazier_light`, `shelf_move`, `jump` + `land` on ledges, `fall` into pits, `splash`, `pot_break` |
-| Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`) |
+| Silverglass (Episode 2) | `mirror_turn` when a mirror rotates, `beam_hit` when a receptor first lights, `glass_bridge` as bridge cells light, `glass_break` for a Dash through a pane or the great mirror cracking, `mirror_step` through a mirror door, `ferry_oars` on Tovin's ferry, `clock_chime` for Lena's clocktower |
+| Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`, the Nameless King: `pushMusic('boss_king')`) |
 | Attacks | swing (`sword_slash`, `spear_thrust`, `staff_hit`, `axe_chop`, `bow_shot`) at the wind-up, then `hit_light` / `hit_heavy` / `crit` / `miss` on contact; `defend` for guards and blocked hits |
 | Spells and states | `fire`, `ice`, `thunder`, `heal`, `revive`, `item_use`, `buff`, `debuff`, `poison`, `stun`; `break` when shields hit 0; `fury_ready` when the gauge fills, `fury_art` on use; `combo_start`; `telegraph` when a big move is announced |
 | Enemy defeated | `enemy_die` (boss: `boss_die`) |
@@ -70,8 +71,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Defeat | `stopMusic(0.5)`, `await jingle('gameover_sting', { duckMusic: false })`, `music('gameover')` |
 | Inn / save | `await jingle('inn_rest')` across the fade to black (music pauses and resumes); the chapel Bell: `jingle('save')` |
 | Party / quests | `party_join` when Mira or Bram joins, `quest_done` for side quests |
-| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour` |
-| Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors) |
+| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
+| Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors), `mere_still` (the Hollow and its interiors), `court_hush` (every Court floor) |
 """
 
 

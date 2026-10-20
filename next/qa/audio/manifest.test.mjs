@@ -19,9 +19,11 @@ const DESIGN_SFX = `cursor confirm cancel buzzer text_blip door_open door_close 
   drop_common drop_magic drop_rare drop_legendary menu_open menu_close equip buy save_chime
   text_blip_low text_blip_mid text_blip_high`.split(/\s+/).filter(Boolean);
 const STORY_SFX = 'bell_toll bell_peal sign_fade name_restore door_rumble ink_gurgle page_flutter'.split(' ');
+// Episode 2 (EPISODE2_PLAN.md 2.7 / 8.4)
+const EP2_SFX = 'mirror_turn beam_hit glass_bridge glass_break mirror_step ferry_oars clock_chime reflection_out kept kept_break'.split(' ');
 const JINGLES = 'item_get key_item level_up inn_rest save quest_done party_join victory_fanfare gameover_sting'.split(' ');
-const AMBIENCE = 'river_birds archive_hush wind_valley'.split(' ');
-const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover'.split(' ');
+const AMBIENCE = 'river_birds archive_hush wind_valley mere_still court_hush'.split(' ');
+const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover hollow hollowmere fading_road court boss_king'.split(' ');
 
 function parseWav(path) {
   const b = readFileSync(path);
@@ -70,7 +72,7 @@ test('manifest has the four sections and version', () => {
 });
 
 test('every id the design and the story need is present', () => {
-  for (const id of [...DESIGN_SFX, ...STORY_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
+  for (const id of [...DESIGN_SFX, ...STORY_SFX, ...EP2_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
   for (const id of JINGLES) assert.ok(man.jingles[id], `jingle ${id}`);
   for (const id of AMBIENCE) assert.ok(man.ambience[id], `ambience ${id}`);
   for (const id of MUSIC) assert.ok(man.music[id], `music ${id}`);
@@ -162,10 +164,26 @@ test('music: files exist, fallbacks valid, loop points sane, new music files are
 });
 
 test('total synthesized audio stays small', () => {
+  // Episode 1 set ~4.7 MB; Episode 2 adds ~0.36 MB of sfx and two 16 kHz ambience loops (~0.64 MB, runtime-cached,
+  // not precached), so the cap moved from 5.5 to 6.0 MB. The precached share (sfx + jingles) has its own budget in
+  // qa/pwa/precache.test.mjs.
   let total = 0;
   for (const sub of ['sfx', 'jingles', 'ambience']) {
     const d = join(NEXT, 'assets/audio', sub);
     for (const f of readdirSync(d)) total += statSync(join(d, f)).size;
   }
-  assert.ok(total < 5.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  assert.ok(total < 6.0e6, `total ${(total / 1e6).toFixed(2)} MB`);
+});
+
+test('Episode 2 music: the five composed tracks have fallbacks and sidecar loop points', () => {
+  const FALLBACK = { hollow: 'willowmere', hollowmere: 'hollow', fading_road: 'valley', court: 'archive', boss_king: 'boss_archivore' };
+  for (const [id, fb] of Object.entries(FALLBACK)) {
+    const e = man.music[id];
+    assert.ok(e, `music ${id}`);
+    assert.equal(e.src, `assets/audio/music/${id}.mp3`, `${id}: src`);
+    assert.equal(e.fallback, fb, `${id}: fallback`);
+    assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+    assert.ok(e.loopEnd > 60 && e.loopEnd <= e.duration, `${id}: loopEnd`);
+    assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.3, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
+  }
 });

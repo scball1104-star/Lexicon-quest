@@ -1,6 +1,7 @@
-"""Render the composed Episode 1 music tracks.
+"""Render the composed music tracks (Episode 1: archive, mystery, sorrow, triumph; Episode 2: hollow,
+hollowmere, fading_road, court, boss_king).
 
-    python tools/music/render.py                 # all four tracks + review images
+    python tools/music/render.py                 # every track + review images
     python tools/music/render.py archive sorrow  # a subset
     python tools/music/render.py --wav           # also write WAV copies to tools/music/out/ for listening
     python tools/music/render.py --no-review     # skip the images and analysis
@@ -21,7 +22,8 @@ sys.path.insert(0, os.path.join(HERE, 'songs'))
 NEXT = os.path.dirname(os.path.dirname(HERE))
 MUSIC_DIR = os.path.join(NEXT, 'assets', 'audio', 'music')
 OUT_DIR = os.path.join(HERE, 'out')
-ALL = ['archive', 'mystery', 'sorrow', 'triumph']
+ALL = ['archive', 'mystery', 'sorrow', 'triumph',
+       'hollow', 'hollowmere', 'fading_road', 'court', 'boss_king']   # Episode 2: the last five
 
 
 def main(argv):

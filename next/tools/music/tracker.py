@@ -189,7 +189,8 @@ class Song:
     def __init__(self, id, bpm, beats_per_bar=4, bars=16, key='C major', sr=SR, title='',
                  reverb_room=0.82, reverb_damp=0.3, reverb_len=3.5, reverb_level=-6.0,
                  delay_beats=(0.75, 0.5), delay_feedback=0.28, delay_level=-10.0,
-                 target_lufs=-16.0, ends=False, ring_out=4.0, intended_chords=None, master_tilt_db=0.0):
+                 target_lufs=-16.0, ends=False, ring_out=4.0, intended_chords=None, master_tilt_db=0.0,
+                 true_peak_trim=False):
         self.id = id
         self.title = title or id
         self.tempo_map = [(0.0, float(bpm))] if isinstance(bpm, (int, float)) else [(float(b), float(v)) for b, v in bpm]
@@ -212,6 +213,7 @@ class Song:
         self.ring_out = ring_out      # seconds of ring-out kept after the last bar when ends=True
         self.intended_chords = intended_chords or []
         self.master_tilt_db = master_tilt_db
+        self.true_peak_trim = true_peak_trim   # Episode 2 songs: see render()
         self._build_tempo()
 
     # -- tempo -----------------------------------------------------------------------------
@@ -297,6 +299,12 @@ class Song:
         gain = 10.0 ** ((self.target_lufs - lufs) / 20.0)
         mix *= gain
         mix, gr = effects.limiter(mix, sr, ceiling_db=-1.0)
+        # the limiter works on samples; if inter-sample peaks of the delivered pass still poke above -1 dBFS,
+        # trim the whole mix by the excess. Opt-in (the Episode 2 songs set it) so Episode 1 renders keep their bytes.
+        if self.true_peak_trim:
+            tp = effects.true_peak_db(mix[d0:d1], sr)
+            if tp > -1.0:
+                mix *= 10.0 ** ((-1.03 - tp) / 20.0)
         self.stats = {'pre_lufs': lufs, 'gain_db': 20 * math.log10(gain), 'limiter_gr_db': gr, 'track_rms': track_rms}
         if self.ends:
             out = mix[d0:d1].copy()

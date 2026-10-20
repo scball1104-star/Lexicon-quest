@@ -105,6 +105,61 @@
    "loopEnd": null,
    "fallback": null
   },
+  "hollow": {
+   "src": "assets/audio/music/hollow.mp3",
+   "volume": 1.052,
+   "loopStart": 0.06,
+   "loopEnd": 68.631429,
+   "fallback": "willowmere",
+   "bpm": 84.0,
+   "key": "A dorian",
+   "measuredLufs": -16.44,
+   "duration": 68.731
+  },
+  "hollowmere": {
+   "src": "assets/audio/music/hollowmere.mp3",
+   "volume": 1.052,
+   "loopStart": 0.06,
+   "loopEnd": 68.631429,
+   "fallback": "hollow",
+   "bpm": 84.0,
+   "key": "D major",
+   "measuredLufs": -16.44,
+   "duration": 68.731
+  },
+  "fading_road": {
+   "src": "assets/audio/music/fading_road.mp3",
+   "volume": 1.054,
+   "loopStart": 0.06,
+   "loopEnd": 90.06,
+   "fallback": "valley",
+   "bpm": 96.0,
+   "key": "E minor",
+   "measuredLufs": -16.46,
+   "duration": 90.16
+  },
+  "court": {
+   "src": "assets/audio/music/court.mp3",
+   "volume": 1.052,
+   "loopStart": 0.06,
+   "loopEnd": 88.481066,
+   "fallback": "archive",
+   "bpm": 76.0,
+   "key": "D phrygian",
+   "measuredLufs": -16.44,
+   "duration": 88.581
+  },
+  "boss_king": {
+   "src": "assets/audio/music/boss_king.mp3",
+   "volume": 1.059,
+   "loopStart": 0.06,
+   "loopEnd": 120.06,
+   "fallback": "boss_archivore",
+   "bpm": 132.0,
+   "key": "C minor",
+   "measuredLufs": -16.5,
+   "duration": 120.16
+  },
   "_doc": "src null = no file yet; the runtime then plays `fallback` (another music id) or silence when fallback is null. volume brings the track to about -16 LUFS. loopStart/loopEnd in seconds (null = loop the whole file). Files dropped at assets/audio/music/<id>.mp3 (+ <id>.json with loopStart/loopEnd) win over the legacy root tracks after `python tools/audio/build.py --manifest`."
  },
  "sfx": {
@@ -654,6 +709,66 @@
    "duration": 1.709,
    "group": "loot"
   },
+  "mirror_turn": {
+   "src": "assets/audio/sfx/mirror_turn.wav",
+   "volume": 1.0,
+   "duration": 0.609,
+   "group": "field"
+  },
+  "beam_hit": {
+   "src": "assets/audio/sfx/beam_hit.wav",
+   "volume": 1.0,
+   "duration": 0.502,
+   "group": "field"
+  },
+  "glass_bridge": {
+   "src": "assets/audio/sfx/glass_bridge.wav",
+   "volume": 1.0,
+   "duration": 0.6,
+   "group": "field"
+  },
+  "glass_break": {
+   "src": "assets/audio/sfx/glass_break.wav",
+   "volume": 1.0,
+   "duration": 0.591,
+   "group": "field"
+  },
+  "mirror_step": {
+   "src": "assets/audio/sfx/mirror_step.wav",
+   "volume": 1.0,
+   "duration": 0.425,
+   "group": "field"
+  },
+  "ferry_oars": {
+   "src": "assets/audio/sfx/ferry_oars.wav",
+   "volume": 1.0,
+   "duration": 0.968,
+   "group": "field"
+  },
+  "clock_chime": {
+   "src": "assets/audio/sfx/clock_chime.wav",
+   "volume": 1.0,
+   "duration": 1.078,
+   "group": "story"
+  },
+  "reflection_out": {
+   "src": "assets/audio/sfx/reflection_out.wav",
+   "volume": 1.0,
+   "duration": 0.791,
+   "group": "story"
+  },
+  "kept": {
+   "src": "assets/audio/sfx/kept.wav",
+   "volume": 1.0,
+   "duration": 0.704,
+   "group": "status"
+  },
+  "kept_break": {
+   "src": "assets/audio/sfx/kept_break.wav",
+   "volume": 1.0,
+   "duration": 0.639,
+   "group": "status"
+  },
   "text_blip": {
    "alias": "text_blip_mid"
   }
@@ -720,6 +835,18 @@
   },
   "wind_valley": {
    "src": "assets/audio/ambience/wind_valley.wav",
+   "volume": 1.0,
+   "duration": 10.0,
+   "widen": true
+  },
+  "mere_still": {
+   "src": "assets/audio/ambience/mere_still.wav",
+   "volume": 1.0,
+   "duration": 10.0,
+   "widen": true
+  },
+  "court_hush": {
+   "src": "assets/audio/ambience/court_hush.wav",
    "volume": 1.0,
    "duration": 10.0,
    "widen": true

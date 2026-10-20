@@ -15,7 +15,7 @@ note the id and the one change you want ("cursor: a little lower and softer"). T
 |---|---|---|
 | SFX | WAV 16-bit mono 22050 Hz | per group, max 200 ms K-weighted loudness: UI -19 (cursor -21), text -25, footsteps -27, field -18, story -17, weapons -15, impacts -14, magic -15.5, status -16.5, big moments -14, loot -16 |
 | Jingles | MP3 stereo 32 kHz 160 kbps (WAV masters in `tools/audio/out/jingles_wav/`) | about -17 LUFS integrated, just under the music |
-| Ambience | WAV 16-bit mono, seamless loop (river 22050 Hz; archive and wind 16000 Hz, nothing above 8 kHz) | -22 LUFS integrated (about 11 dB under the music at default sliders); the runtime plays two copies half a loop apart panned left/right for a wide stereo bed |
+| Ambience | WAV 16-bit mono, seamless loop (river 22050 Hz; archive, wind, mere and court 16000 Hz, nothing above 8 kHz) | -22 LUFS integrated (about 11 dB under the music at default sliders); the runtime plays two copies half a loop apart panned left/right for a wide stereo bed |
 | Music | MP3 (Suno or code-composed) | manifest `volume` brings each track to about -16 LUFS |
 
 Every file: true peak <= -1 dBFS, DC removed, 2 ms fade-in / 5 ms fade-out (loops excepted), TPDF dither.
@@ -40,7 +40,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Chest | `chest_open`, then about 0.35 s later `await audio.jingle('item_get')` (story items: `key_item`; battle loot: `drop_common/magic/rare/legendary` by rarity instead) |
 | Doors and stairs | `door_open` when entering, `door_close` after the fade, `stairs` on stair exits, `door_locked` without a key, `door_unlock` with one |
 | Dungeon toolkit | `block_push` per tile, `switch_on` / `switch_off`, `gate_open`, `crystal_hit`, `bridge_appear`, `lantern_reveal`, `brazier_light`, `shelf_move`, `jump` + `land` on ledges, `fall` into pits, `splash`, `pot_break` |
-| Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`) |
+| Silverglass (Episode 2) | `mirror_turn` when a mirror rotates, `beam_hit` when a receptor first lights, `glass_bridge` as bridge cells light, `glass_break` for a Dash through a pane or the great mirror cracking, `mirror_step` through a mirror door, `ferry_oars` on Tovin's ferry, `clock_chime` for Lena's clocktower |
+| Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`, the Nameless King: `pushMusic('boss_king')`) |
 | Attacks | swing (`sword_slash`, `spear_thrust`, `staff_hit`, `axe_chop`, `bow_shot`) at the wind-up, then `hit_light` / `hit_heavy` / `crit` / `miss` on contact; `defend` for guards and blocked hits |
 | Spells and states | `fire`, `ice`, `thunder`, `heal`, `revive`, `item_use`, `buff`, `debuff`, `poison`, `stun`; `break` when shields hit 0; `fury_ready` when the gauge fills, `fury_art` on use; `combo_start`; `telegraph` when a big move is announced |
 | Enemy defeated | `enemy_die` (boss: `boss_die`) |
@@ -48,8 +49,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Defeat | `stopMusic(0.5)`, `await jingle('gameover_sting', { duckMusic: false })`, `music('gameover')` |
 | Inn / save | `await jingle('inn_rest')` across the fade to black (music pauses and resumes); the chapel Bell: `jingle('save')` |
 | Party / quests | `party_join` when Mira or Bram joins, `quest_done` for side quests |
-| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour` |
-| Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors) |
+| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
+| Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors), `mere_still` (the Hollow and its interiors), `court_hush` (every Court floor) |
 
 ## Sound effects
 
@@ -109,6 +110,12 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `brazier_light` | 746 ms | 1 | Brazier or torch ignites in a dark room: a 'fwoomp' (rising air plus low thump) settling into a few crackles. |
 | `shelf_move` | 935 ms | 1 | Moving bookshelf slides along the floor: heavy wooden scrape, groaning creaks and a settling knock. |
 | `crystal_hit` | 779 ms | 1 | Crystal switch struck by a tool: a bright glassy ping (inharmonic plate partials) and a rising two-note shimmer. |
+| `mirror_turn` | 609 ms | 1 | A mirror rotates a quarter turn on its stone base: a soft stone grind with a detent click, then a high glassy ring as the pane settles (C7 over E7). |
+| `beam_hit` | 502 ms | 1 | A light receptor lights for the first time: a bright crystal chime (G6 glass plate plus a B6 bell) with a rising shimmer of glints sweeping up to the top. |
+| `glass_bridge` | 600 ms | 1 | Glass bridge cells light up: a sustained glassy swell about 0.6 s long (E6, B6, E7 with a shimmering tremolo and a breath of air), rising in and settling out. |
+| `glass_break` | 591 ms | 1 | A pane shatters (Dash through a glass pane; the great mirror cracking): a sharp crack, a dense spray of glass shards and a tinkling tail of falling slivers. |
+| `mirror_step` | 425 ms | 1 | Stepping through a mirror door: a quick whoosh through a shimmering comb of glassy resonances, a soft swish in and out. |
+| `ferry_oars` | 968 ms | 1 | Tovin's ferry: two slow oar strokes (a wooden oarlock knock, the blade pulling through water with a swirl and small bubbles), the second a little softer. |
 
 ### Story moments
 
@@ -123,6 +130,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `page_flutter` | 574 ms | 1 | A burst of paper pages fluttering (Lost Pages, the Archive): rapid crisp page flaps that thin out over 0.6 s. |
 | `name_devour` | 1.81 s | 1 | The Archivore devours a party member's name (its signature move): a dark rushing inhale, a crunch of tearing paper and a sinking, distorted moan. |
 | `summon` | 1.41 s | 1 | Something is summoned (the Archivore calls Lost Pages): a low swirling portal swell with chorus, rising glitter and a soft 'whoom'. |
+| `clock_chime` | 1.08 s | 1 | Lena's clocktower: a small tower chime striking two notes, E5 then C5 (a falling major third), warm and slightly distant. |
+| `reflection_out` | 791 ms | 1 | The Other Selves step out of their mirrors: a reversed glass shimmer swelling up into a low thud, with a cold glint on the impact. |
 
 ### Battle: weapon swings
 
@@ -166,6 +175,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `debuff` | 700 ms | 1 | Negative status (Blind, Silence, stat down): a descending detuned wobble with deepening vibrato into a dull low note. |
 | `poison` | 600 ms | 1 | Poison: sickly low bubbles and a sinking detuned tritone. |
 | `stun` | 854 ms | 1 | Stun: little stars circling the head, a wobbling three-note high 'tweedle' (fast vibrato sines). |
+| `kept` | 704 ms | 1 | A party member is Kept (glassed over): a thin frost crackle spreading and thickening, a rising glassy whine, then a crisp seal as the glass closes. |
+| `kept_break` | 639 ms | 1 | Kept ends: the glass bursts in a bright shatter, then a breath of relief (a soft airy exhale) under a small rising two-note chime. |
 
 ### Battle: big moments
 
@@ -209,6 +220,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `river_birds` | 10.00 s | Willowmere and the riverside valley: a gentle river (filtered noise with slow surges and a brighter ripple layer), small water plops, and a few songbirds (warbler, whistle, sparrow, a distant dove). Birds are sparse; with the runtime's left/right half-loop offset they answer each other. |
 | `archive_hush` | 10.00 s | The Rootbound Archive: a low, still room tone, faint high air, a few distant drips in a large stone space, an occasional soft paper rustle and one far-off creak of roots settling. Quiet and spacious; it should feel ancient, not scary. |
 | `wind_valley` | 10.00 s | Open valley wind: a broad breathy bed with slow gusts, a faint whistling resonance that rises with each gust, and dry grass rustling on the strongest gusts. No events, so it never sounds repetitive. |
+| `mere_still` | 10.00 s | The Hollow by the still mere: slow water lapping at the stones (soft swells with small wet slaps and plops), a distant cluster of wind chimes once per loop, a faint high air, and one far-off bird. Hushed and a little lonely; nothing moves fast. |
+| `court_hush` | 10.00 s | The Court of Mirrors: a cold, still palace of glass. A faint glass hum (a wet-finger-on-a-rim tone around A5 with a slowly beating partner and a fifth), a low room tone, and slow drips falling into a very large space, each one a small glassy ping. Beautiful and uneasy, never loud. |
 
 ## Music ids
 
@@ -225,6 +238,11 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `triumph` | assets/audio/music/triumph.mp3 | title |
 | `victory` | (none yet) | silence |
 | `gameover` | (none yet) | silence |
+| `hollow` | assets/audio/music/hollow.mp3 | willowmere |
+| `hollowmere` | assets/audio/music/hollowmere.mp3 | hollow |
+| `fading_road` | assets/audio/music/fading_road.mp3 | valley |
+| `court` | assets/audio/music/court.mp3 | archive |
+| `boss_king` | assets/audio/music/boss_king.mp3 | boss_archivore |
 
 ## Regenerate and check
 
