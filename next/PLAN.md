@@ -100,7 +100,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 ## Done: Episode 1 fix pass (W10). Next: Episode 2 build (docs/EPISODE2_PLAN.md, after the weekly usage reset)
 
 ## Episode 2 build (docs/EPISODE2_PLAN.md section 10)
-- [~] Wave 10a: E2-story, E2-battle, E2-tiles (started 2026-10-20 12:50, weekly usage 66%)
-- [ ] Wave 10b
+- [x] Wave 10a: E2-story, E2-battle, E2-tiles
+- [~] Wave 10b: E2-world, E2-maps, E2-sprites running (14:00, weekly 67%); E2-audio next
 - [ ] Wave 10c
 - [ ] Wave 10d
