@@ -87,3 +87,19 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   light; ink pools ripple; the push block looks like a carved stone block; the valley terrain is organic.
 - Phones: battle commands and targets work by tap, with Auto and speed buttons.
 - Published to /next at 03:31 (verified live: no errors on desktop or phone).
+
+## 2026-10-19 (Mon) evening: fixes from your playtest
+- Bridges no longer flash. The map's water/ink animation repainted bare terrain over anything sitting on it in
+  two of its three frames, so bridges and the faint ink traces blinked. Every frame is now painted in full.
+- The leftmost enemy's shield and weakness icons now sit above the command window on phones (the phone command
+  window is taller than the desktop one, and the icons were drawn under it).
+- Weapon swap: it worked for Mira and Bram, but the hero starts with only a sword, so his Swap was greyed out and
+  looked broken. Swap now appears only for someone carrying a second weapon (the hero gets one from Garrick, the
+  smithy, or the valley cliff chest). On phones, the little arrows under a long list are now tappable, so Swap
+  and Flee at the bottom of the command list are reachable without knowing to drag.
+- Your question about seeing equipment boosts: Menu > Status now shows a green "+N" next to every stat for what
+  your gear adds (red if an item lowers it). Menu > Equip still compares items with green/red arrows.
+- Pace change at your request: one agent at a time from here, check-ins every 6 hours, so the scheduled loops and
+  the teams' schedule generators keep their usage. Unfinished work from the four agents the limit cut off is
+  parked on branch `wip/w5b-w6-partial` (a loading screen and installable app, enemy animation frames, a secret
+  Whisperwood dungeon, and the last UI items) and will be finished one piece at a time.
