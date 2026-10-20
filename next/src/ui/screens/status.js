@@ -9,6 +9,8 @@ import { SKILLS, FURY_ARTS } from '../../data/skills.js';
 import { equipKeys, isWeaponKey, equipped, gearName } from '../../game/inventory.js';
 import { cap, fmtGold } from '../text.js';
 import { memberStats } from '../../battle/rules.js';
+import { abilitiesOf, drawAbilityIcon } from '../../world/abilities.js';
+import { FIELD_ABILITIES } from '../../data/text.js';
 
 /** What the worn gear adds to each stat: totals minus the same member with nothing equipped. */
 export function gearBonus(m) {
@@ -72,6 +74,17 @@ export class StatusScreen {
       const name = it ? gearName(it) : '-';
       r.text(name.length > 11 ? name.slice(0, 10) + '.' : name, x + 14, y, { color: it ? (it.rarity || 'common') : 'dim' });
     });
+    // W9: the member's field abilities (pageR uses, pageL switches on the field)
+    const abil = abilitiesOf(this.g, m.id);
+    if (abil.length) {
+      let fx = 10;
+      r.text('Field', fx, 168, { color: 'gold' }); fx += r.measure('Field') + 5;
+      for (const id of abil) {
+        drawAbilityIcon(r, id, fx, 167);
+        r.text(FIELD_ABILITIES[id].name, fx + 14, 168, { color: 'cream' });
+        fx += 14 + r.measure(FIELD_ABILITIES[id].name) + 6;
+      }
+    }
     // Right top: stats.
     drawWindow(r, 168, 4, 212, 64);
     const rows = [['atk', 'ATK', s.atk], ['def', 'DEF', s.def], ['mag', 'MAG', s.mag], ['spr', 'SPR', s.spr], ['spd', 'SPD', s.spd], ['luk', 'LUK', s.luk]];

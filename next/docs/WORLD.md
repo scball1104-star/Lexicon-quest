@@ -56,14 +56,16 @@ by the chapel bell and a Keeper's font when used, and by an `object`/`trigger`/`
 move it. `FieldScene.markSafe()` records the leader's tile and facing.
 
 Input on the field: directions walk, `run` (or `cancel` on a keyboard) runs unless `alwaysRun`, `confirm`
-interacts with the faced tile (across counters), `menu` pushes the menu, `pageR` raises the Lantern of Recall.
-Under a dialog (`updateBelow`) the field animates but reads no input.
+interacts with the faced tile (across counters), `menu` pushes the menu, `pageR` uses a field ability and `pageL`
+switches it (section 1c; near hidden ink `pageR` is always the Lantern of Recall). Under a dialog (`updateBelow`)
+the field animates but reads no input.
 
 **The Lantern prompt (W5, PLAYTEST 2.4).** While the Lantern of Recall is carried, not raised, and any `*_faint`
 tile (ink bridges, wall glyphs, ink switches) lies within `LANTERN_HINT_TILES` (2) of the leader, `lanternHint`
 is on: the lantern icon and the `{i:btn_pageR}` glyph bob over the leader's head (`drawLanternHint`). Touch
-layouts show the icon alone plus a tappable on-canvas `Lantern` button at `LANTERN_BTN` (322, 128, 58 x 18;
-`drawLanternButton`), which calls `useLantern()`. `hiddenInkNear()` is cached per tile and rechecked every
+layouts show the icon alone plus a tappable on-canvas button at `LANTERN_BTN` (322, 128, 58 x 18). W9 made that
+button the field ability button (`abilities.js ABILITY_BTN`, the same rect): a tap there uses what `pageR` would,
+which near hidden ink is the Lantern. `hiddenInkNear()` is cached per tile and rechecked every
 20 frames. `debugState().lanternHint` reports it.
 
 **Receiving things (W5).** `giveItem(id, qty)` puts the item in the bag (`inventory.grant`), shows the toast
@@ -78,6 +80,56 @@ the fade-in and offers each drop in turn.
 first enters `area` (or, with no area, comes within `radius` tiles of a pit tile) one loose page drifts down
 from above and is swallowed by the pit at `at` (default: the nearest pit tile) with `page_flutter`
 (`particles.pageFall`). Once per map load; `debugState().fxDone` lists what has fired. Default off.
+
+## 1c. Field abilities (W9-abilities, `src/world/abilities.js`, art in `src/world/fieldart.js`)
+
+Lufia II gave every hero a field tool that opened the map; here each party member has one.
+
+| Ability | Owner | What it does |
+|---|---|---|
+| Dash Strike | hero (always) | A 3-tile dash (4 frames a tile; running is 8). Plows through pots, breaks thin root walls and cracked rock (`object` + `breakable`), pushes a light block, bonks off walls. A visible enemy it strikes **from behind** (the enemy faces the dash direction) starts the fight `preemptive`: the free first turn. The dash counts as one step for dungeon enemies. |
+| Appraise | Mira | Face a visible enemy up to 5 tiles ahead (or one tile off the line, never through a wall): Mira steps to the front, a lens beam and reticle, then the Appraise window (each kind of foe: head, name, level, shields, weak and resist icons as the battle draws them, its flavor line). The encounter's types go into `game.bestiary` (the rewards.js contract, plus `appraised: true`), so the battle shows them instead of "?" and the Bestiary lists the creature. |
+| Lantern | Mira, once `lantern_of_recall` is carried | `FieldScene.useLantern()`, unchanged. |
+| Shove | Bram | Pushes a heavy block (`block` + `heavy`) one tile (22 frames, dust, a small shake). The hero alone only rocks it. |
+
+**What `pageR` does** (`FieldAbilities.resolve`): (1) an object that needs one ability: a heavy block on the faced
+tile is Shove, a breakable in the dash lane is Dash Strike, whatever is selected; (2) the selected ability when it
+has a target (Dash: an enemy in the lane; Appraise: an enemy in view; Shove: a faced heavy block); (3) the Lantern
+when unrevealed ink is within `LANTERN_REACH` (6, the reveal radius), so every "raise the Lantern with
+{i:btn_pageR}" line stays true whatever is selected; (4) the selected ability on its own (a free dash, the raised
+Lantern, "Nothing here to read."). `pageL` switches the selection (saved as `engine.game.fieldAbility`) and shows the
+**wheel** over the leader for 96 frames: one slot per ability, the selected one framed and lifted, a name tag with
+its owner's head, and the `{i:btn_pageL} switch {i:btn_pageR} use` line above it.
+
+**Prompts.** When an ability has a target, its 12 px icon and the `{i:btn_pageR}` glyph bob over the target (the
+generic check prompt steps aside for breakables). Touch layouts show the on-canvas ability button (`ABILITY_BTN`,
+the old Lantern button) with the ability's icon and name, pulsing when it has a target, and a swap tab (`CYCLE_BTN`,
+302, 128, 18 x 18) left of it; both appear whenever there is a target, hidden ink is near or the wheel is open.
+
+**Tag-in.** Shove and Appraise swap the leader's sprite with the owner's (puffs, a hop): Bram or Mira is in front for
+the action, then everyone is back in place, with the ability's name over (or, acting upward, under) the actor. Dash
+Strike is the hero's own: afterimages every other frame, speed lines, a crescent slash, an eight-ray hit spark and
+debris at the impact; the party does not keep up during the dash and runs the leader's trail afterwards (`catchUp`,
+6 frames a tile). A dash ends on a door, step trigger, exit or open doorway, and the field fires it once the lock
+lifts.
+
+**Hint lines.** One first-time remark per ability (text.js `BARKS`): `first_heavy_block` (Bram, when the hero bumps a
+heavy block), `first_dash_target` (Mira, a breakable within two tiles), `first_appraise_target` (Mira, an
+unappraised foe in view while another ability is selected; it names `{i:btn_pageL}` for the lens). The Status screen
+lists each member's field abilities on its Equipment window ("Field"), and an appraised creature is known in the
+Bestiary (name, weak points, HP) before any fight.
+
+**Breakables and what they hide** (`events.js`): an `object` with `breakable: 'roots' | 'rock'` draws the field art
+(`ab_root_wall` / `ab_cliff_crack`, solid over both of its rows) until Dash Strike breaks it (`breakWall`): then the
+open art (`ab_root_wall_broken` / `ab_cliff_grotto`, walkable), its `opens` wall cells carved to the map's floor
+terrain (`carveOpenings`), saved for good in `engine.game.opened` (`<map>:<id>`). Any event with
+`behind: '<breakable id>'` is concealed (no prop, no prompt, no glint) until then. The map module keeps a tiles.json
+stand-in sprite (`root_drape`, `wall_cracked`) so the map tools validate and draw it.
+
+**Field art** (`fieldart.js`): hand-placed pixel strings in the master palette, rasterized once into the image
+`fieldart` (112 x 32) and added to the live tiles db (`heavy_block` object; `ab_*` tiles) by `installFieldArt`
+before the first map builds. `python qa/world/fieldart_preview.py` renders the sheet and the sprites on their real
+tiles.
 
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 
@@ -112,12 +164,12 @@ Counters block but talking reaches across them.
 | `chest` | `tier item? qty? gold? flag? ilvl?` | one-shot via `engine.game.opened`; `item` gives it (`field.giveItem`: toast, jingle or rarity sound, equip prompt), `gold` adds gold, neither rolls `rollChest(rng, tier, ilvl)`: its gold (coin toast), consumables (`giveItem`) and gear instances (`field.giveGear`, beam at the chest, `first_rare_drop` / `first_legendary_drop` barks). |
 | `sign` | `text tile? fade? dir? lantern?` | `text` is an `ep1.js` lines id. `fade: 'shop'|'inn'|'square'|'gate'` washes the painted sign while `signs_fading` (gate: half after `left_town`), restored after `archivore_defeated`. `lantern: true` reads only once a `*_revealed` id is on or beside the cell. |
 | `book` | `book` | `BOOKS` title then pages. |
-| `object` | `sprite script? text? state? solid? rest?` | inspectable prop; `script` runs a scene, `text` shows lines. `prop_letter` / `prop_ferry_bell` glint. `rest: true` (the Pilgrim's Rest campfire) runs the font's rest flow after the script, without the font bark. |
+| `object` | `sprite script? text? state? solid? rest?` | inspectable prop; `script` runs a scene, `text` shows lines. `prop_letter` / `prop_ferry_bell` glint. `rest: true` (the Pilgrim's Rest campfire) runs the font's rest flow after the script, without the font bark. `breakable: 'roots'` or `'rock'` with `h: 2`, `opens?` (W9): Dash Strike breaks it (section 1c). |
 | `trigger` | `script on:'enter'|'step'|'interact'` | `enter` runs after the fade-in; `step` when the leader arrives (also on the landing tile of a transfer); scenes guard themselves. |
 | `enemy` | `sprite encounter move:'wander'|'patrol'|'chase'|'guard' path? radius?` | dungeons: one step per player step; field: own clock. Contact pushes `battle` with `preemptive` (touched from behind) / `ambush` (caught from behind). Won: gone until re-entry (dungeon) or 60 s (field). Fled: it sits still 2 s and the party backs off a tile. |
 | `switch` | `target state kind:'floor'|'crystal' color? hidden?` | `confirm` while facing toggles it (crystal_hit / switch_on) and fires every target. `hidden` (ink) switches work only after the Lantern reveals them. |
 | `plate` | `target` | down while a block, the party or any actor stands on it. |
-| `block` | | push block: walking into it slides it one tile when the far tile is open floor (block_push). Resets on re-entry. |
+| `block` | `heavy?` | push block: walking into it slides it one tile when the far tile is open floor (block_push). Resets on re-entry. `heavy: true` (W9): it only rocks for the leader; Bram's Shove moves it (`moveBlock`, 22 frames). |
 | `gate` | `sprite:'door_locked'|'door_key'|'door_boss' state to?` or `cells closed open` | opens when every switch/plate/brazier naming it is on (AND); `to` makes the open door a transfer from its doorway cell. |
 | `locked_door` | `key sprite to` | locked (door_locked sfx) until the key is carried; `archive_key` is consumed. Open state persists. |
 | `shelf` | `sprite positions state` | a target: slides between positions (shelf_move), collision follows. |
@@ -127,6 +179,7 @@ Counters block but talking reaches across them.
 | `pot` | `item? qty? gold? sprite?` | breakable (pot_break, shards), solid until broken, respawns on re-entry. |
 | `light` | `r color?` | extra light source (`r` under 16 = tiles; a colour makes it warm with a halo). `pit` | `w h to` | drop area. |
 
+Any event may carry `behind: '<breakable id>'` (W9): hidden until that breakable is broken.
 `object`, `actor` and `trigger` events may carry `safe: true`: after their script or text the party's tile
 becomes the game over return point (a `font` marks it when the party rests). Map-level `ambientFx: [...]` adds
 particle kinds (`motes`, `leaves`, `fireflies`, `birds`, `smoke`, `drips`, `embers`) to what the area and tint
@@ -154,7 +207,9 @@ at `bed` in day light.
 
 `LQ_DEBUG.warp(mapId, x, y, dir)`, `setFlag(flag, v)`, `give(id, qty)`, `party('mira','bram')`,
 `call('scene', id)` (runs a cutscene; `LQ_DEBUG.scene()` itself is the engine's top-scene query), `lantern()`,
-`walk('up,up,left', run)`, `goto(x, y, run)` (pathfinds), `fieldState()`.
+`walk('up,up,left', run)`, `goto(x, y, run)` (pathfinds), `fieldState()`. W9: `ability(id?)` (uses what `pageR`
+would, or forces `id`), `cycleAbility(d)`, `abilityState()` (selection, list, what `pageR` would do, the last hit);
+`fieldState().abilities` carries the same.
 
 - `node qa/run.mjs world`: autotile cases, pathfinding, collision and ledge rules, follower chain, enemy
   step rule, gate AND logic, and the headless walks (`qa/world/walks.py`, every map, zero console errors).
@@ -164,6 +219,10 @@ at `bed` in day light.
 - `python qa/integrate/w5_shots.py` (W5): the equip prompt, legendary / rare toasts, the Lantern prompt and
   touch button, the font rest flow and the pit tell, on both profiles, with state assertions.
 
+- `python qa/world/abilities_lab.py [wheel dash enemy appraise shove roots lantern film] [--device phone]` (W9):
+  one scripted walk per ability on the real maps, with assertions and shots `qa/world/out/ab_*.png`; `film` freezes
+  the game between frames for the dash and shove art. `node qa/run.mjs world` runs it (`abilities_walks.test.mjs`)
+  and the pure rules (`abilities.test.mjs`).
 - `python qa/world/polish_shots.py [--only night_square,dark_lantern,...] [--device phone]`: the polish
   wave's targeted shots (dithered lighting, night town, dusk valley, F3 braziers, ambient life, the
   pilgrim note, game over) in `qa/world/out/p_<name>.png`.
@@ -177,7 +236,10 @@ Performance (headless Chromium, 1920x1080): field update 0.07 ms, draw 0.2 to 0.
 
 - No sleeping pose for the hero (the wake-up scene uses the zzz emote on the standing sprite).
 - Field enemies use simple greedy chasing (no pathfinding) so walls can shelter the party.
-- The `cracked wall` tool interaction is not implemented (Episode 1 has no bomb).
+- Cracked rock and thin roots answer Dash Strike (W9); there is still no bomb. The Archive's decorative
+  `wall_cracked` decals are not breakable: only `object` events with `breakable` are.
+- Field abilities have no poses of their own (the field sheets hold walk frames only): Dash Strike uses the stride
+  frame, lean offsets and effects; Shove and Appraise read through the tag-in swap, the lean and the lens beam.
 - Rain is particles only (no thunder, no puddle reflections).
 - Window detection relies on the kit's warm pane colours; a facade painted with other yellows gets no night
   glow (the chapel, library and every house in town.png match today). The item shop's display window glows

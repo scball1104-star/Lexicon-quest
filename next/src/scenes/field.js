@@ -6,8 +6,9 @@
 // Owns: the TileMap, the party (leader + caterpillar followers), NPCs, visible enemies, events, the
 // cutscene runner, camera, lighting, particles, banner, transitions, autosave on map change.
 // Field HUD: none (DESIGN 5.1). Input: directions walk, run modifier (or cancel on keyboard), confirm
-// interacts, menu opens the menu, pageR raises the Lantern of Recall. Under a dialog (updateBelow) the
-// field keeps animating but reads no input.
+// interacts, menu opens the menu, pageR uses a field ability (W9: Dash Strike, Appraise, the Lantern of Recall,
+// Shove; src/world/abilities.js), pageL switches it. Under a dialog (updateBelow) the field keeps animating but
+// reads no input.
 //
 // LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), call('scene', id), lantern(), state().
 
@@ -31,14 +32,20 @@ import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled } from '../game/story.js';
 import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
+import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
+import { installFieldArt } from '../world/fieldart.js';
 
 const FOLLOW_DEPTH = 2;
 const AUTOSAVE_SLOT = 0;
 const FIELD_RESPAWN_SEC = 60;
 const LANTERN_FRAMES = 120;
 const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
-/** The touch layout's on-canvas "Lantern" button (game px, bottom right, above the dialog area's top edge). */
-export const LANTERN_BTN = { x: 322, y: 128, w: 58, h: 18 };
+/**
+ * The touch layout's on-canvas ability button (game px, bottom right, above the dialog area's top edge). It was the
+ * Lantern button; W9 made it the field ability button (abilities.js ABILITY_BTN), and a tap there while hidden ink
+ * is near still raises the Lantern.
+ */
+export const LANTERN_BTN = ABILITY_BTN;
 const respawnAt = new Map();     // "<map>:<enemyId>" -> engine.time when it comes back (field zones)
 
 export class FieldScene {
@@ -80,6 +87,7 @@ export class FieldScene {
     this.lanternHint = false;          // hidden ink is near and the Lantern is carried: show its prompt
     this.fxTriggers = [];              // one-shot particle tells from the map's ambientFx (the pit page)
     this.fxDone = new Set();
+    this.abilities = new FieldAbilities(this);   // W9: Dash Strike, Appraise, the Lantern, Shove
   }
 
   warnOnce(key, msg) { if (!this.warned.has(key)) { this.warned.add(key); console.warn(`[field] ${msg}`); } }
@@ -130,8 +138,10 @@ export class FieldScene {
     // tear down the old map
     for (const a of this.actors.slice()) this.removeActor(a);
     this.actors = []; this.entities = new Map(); this.byTile = new Map();
+    installFieldArt(e);                // W9: the ability art (heavy block, root wall, cracked rock) joins the tile db
     this.map = new TileMap(e, mod);
     this.mapId = mod.id;
+    this.abilities.reset();
     this.sliding = [];
     this.lantern = 0;
     this.prompt = null;
@@ -658,9 +668,11 @@ export class FieldScene {
         if (this.tryLeaderStep(dir, dur) && !leaderArrived) for (const a of this.actors) if (a.kind === 'party') a.update();
       } else if (input.pressed('confirm')) this.interact();
       else if (input.pressed('menu')) this.openMenu();
-      else if (input.pressed('pageR')) this.useLantern();
-      else if (this.lanternHint && touchUi(e) && input.tapIn(LANTERN_BTN.x, LANTERN_BTN.y, LANTERN_BTN.w, LANTERN_BTN.h)) this.useLantern();
+      else if (input.pressed('pageR')) this.abilities.usePressed();
+      else if (input.pressed('pageL')) this.abilities.cycle(1);
+      else this.abilities.handleTouch(input, true);
     }
+    this.abilities.update(canControl && !L.moving && e.scene === this);
 
     // prompt over the faced interactable
     this.prompt = null;
@@ -887,14 +899,23 @@ export class FieldScene {
       if (!cam.visible(a.px - 8, a.py - 24, 32, 40, 8)) continue;
       items.push({ y: a.sortY, k: a === this.leader ? 2 : 1, a });
     }
+    const ab = this.abilities;
+    for (const g of ab.ghosts) items.push({ y: g.y, k: 0.5, g });          // Dash Strike afterimages
     items.sort((u, v) => (u.y - v.y) || (u.k - v.k));
+    const lean = ab.lean;
     for (const it of items) {
       if (it.p) {
         const p = it.p;
         if (p.tall && !p.draw.anim && p.draw.blend !== 'lighter') this.drawPropShadow(r, p);
         map.drawProp(r, p, t);
+      } else if (it.g) ab.drawGhost(r, it.g);
+      else if (lean && it.a === lean.actor) {
+        it.a.px += lean.dx * 2; it.a.py += lean.dy * 2;
+        it.a.draw(r, t);
+        it.a.px -= lean.dx * 2; it.a.py -= lean.dy * 2;
       } else it.a.draw(r, t);
     }
+    ab.drawFx(r);
     this.particles.draw(r, cam, 'mid');
     map.drawOverhead(r, cam);
     r.popCamera();
@@ -908,8 +929,10 @@ export class FieldScene {
     for (const a of this.actors) if (a.emote) a.drawEmote(r);
     this.drawPrompt(r);
     this.drawLanternHint(r);
+    const idle = !this.inputLocked && !this.pendingWarp && this.engine.scene === this && !L.moving;
+    ab.drawOverlay(r, idle);
     r.popCamera();
-    this.drawLanternButton(r);
+    ab.drawScreen(r, idle);
     if (this.fadeAlpha > 0) r.fade('#000000', this.fadeAlpha);
     this.banner.draw(r);
   }
@@ -931,15 +954,8 @@ export class FieldScene {
     drawIcon(r, 'lantern', x, y);
     if (glyphW) r.text('{i:btn_pageR}', x + 14, y + 1, { shadow: true });
   }
-  /** Touch layouts: a small "Lantern" button (bottom right of the game area) while the prompt applies. */
-  drawLanternButton(r) {
-    if (!this.lanternHint || !touchUi(this.engine)) return;
-    const b = LANTERN_BTN;
-    const pulse = Math.floor(this.frame / 20) % 2 === 0;
-    drawWindow(r, b.x, b.y, b.w, b.h, { kind: 'thin', alpha: 0.94 });
-    drawIcon(r, 'lantern', b.x + 5, b.y + 3);
-    r.text('Lantern', b.x + 20, b.y + 4, { color: pulse ? 'cream' : 'white' });
-  }
+  /** Touch layouts: the ability button (abilities.drawScreen) took over the old Lantern button; kept for callers. */
+  drawLanternButton(r) { this.abilities.drawScreen(r, !this.inputLocked && !this.pendingWarp); }
 
   drawPropShadow(r, p) {
     const d = p.draw;
@@ -966,6 +982,8 @@ export class FieldScene {
   drawPrompt(r) {
     const p = this.prompt;
     if (!p || !this.engine.assets.has('ui')) return;
+    // W9: a breakable shows its ability prompt instead (abilities.drawOverlay); confirm still reads its text
+    if (p.ent && p.ent.ev && p.ent.ev.breakable) return;
     const ui = this.engine.assets.atlas('ui');
     const bob = Math.floor(this.frame / 10) % 2;
     let name, x, y;
@@ -1071,6 +1089,15 @@ export class FieldScene {
     if (!cmds.has('give')) D.register('give', (id, qty = 1) => { stateGive(self.engine.game, id, qty); return self.engine.game.items[id]; });
     D.register('scene', (id) => { const f = self.current(); return f ? f.runScene(id) : false; });
     D.register('lantern', () => { const f = self.current(); if (f) f.useLantern(); return !!f; });
+    // W9 field abilities: ability() uses what pageR would (or `id` forced), cycleAbility() is pageL, abilityState()
+    D.register('ability', (id) => {
+      const f = self.current(); if (!f) return null;
+      if (id) f.game.fieldAbility = id;
+      f.abilities.usePressed();
+      return f.abilities.debugState();
+    });
+    D.register('cycleAbility', (d = 1) => { const f = self.current(); if (f) f.abilities.cycle(d); return f ? f.abilities.selected() : null; });
+    D.register('abilityState', () => { const f = self.current(); return f ? { ...f.abilities.debugState(), resolve: (() => { const c = f.abilities.resolve(); return c ? { id: c.id, kind: c.kind || null, at: c.at || null, target: !!c.target } : null; })() } : null; });
     D.register('fieldState', () => { const f = self.current(); return f ? f.debugState() : null; });
     D.register('party', (...ids) => {
       const f = self.current(); if (!f) return null;
@@ -1115,7 +1142,7 @@ export class FieldScene {
       actors: this.actors.length, props: this.map ? this.map.props.length : 0, lantern: this.lantern,
       entities: [...this.entities.values()].filter((e) => e.present).map((e) => `${e.type}:${e.id}@${e.x},${e.y}${e.state ? ':' + e.state : ''}`),
       prompt: this.prompt ? { x: this.prompt.x, y: this.prompt.y, kind: this.prompt.kind } : null,
-      lanternHint: this.lanternHint, fxDone: [...this.fxDone],
+      lanternHint: this.lanternHint, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
       perf: this.engine.perfStats(),
     };
   }

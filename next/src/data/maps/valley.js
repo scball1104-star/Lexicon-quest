@@ -4,6 +4,10 @@
 // Archive grown into the north cliff. North landing with the empty bell post; Nella's bell in the shallows below
 // it. West: the meadow, the hollow tree cache and a cliff with a ledge shortcut; east: the Whisperwood edge.
 //
+// W9-abilities: the plateau's south face is cracked at (4,14): Dash Strike opens a grotto with an iron chest
+// (`chest_grotto`, hidden until the rock breaks). It sits west of the first-fight cut, so the hero can try the dash
+// before the first battle; the wall_broken overlay under it only tells the map tools the grotto floor is open.
+//
 // Shapes (CRITIQUE_2 item 6): the roads bend and widen, the tall grass and flower drifts are value-noise blobs,
 // the tributary and the ink pool have ragged banks and the cliff-top tree line is broken. Every mark, event and
 // the walk model are unchanged from the straight version (qa/maps asserts them).
@@ -112,6 +116,7 @@ const overlays = [
   ...scatter(ground, ['s'], ['pebbles_0', 'pebbles_1', 'pebbles_2'], 0.3, 33),
   { t: 'hydrangea_blue', x: 38, y: 22 }, { t: 'hydrangea_violet', x: 41, y: 23 },
   { t: 'roots_1', x: 50, y: 28 }, { t: 'roots_0', x: 52, y: 28 },   // roots spill out of the hollow's mouth
+  { t: 'wall_broken', x: 4, y: 14 },                // W9: the grotto behind the cracked face (drawn over by the crack)
 ];
 
 // ---------------------------------------------------------------- decor
@@ -192,6 +197,9 @@ const events = [
   chest('chest_hollow', 16, 25, 'wood', { item: 'echo_herb', qty: 2 }),
   chest('chest_cliff', 4, 8, 'iron', { item: 'hatchet' }),
   chest('chest_whisperwood', 57, 31, 'gold', { item: 'pilgrim_reach' }),
+  // W9-abilities: Dash Strike breaks the cracked face; the grotto's chest appears behind it
+  object('crack_plateau', 4, 14, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2 }),
+  chest('chest_grotto', 4, 15, 'iron', { item: 'phoenix_feather', behind: 'crack_plateau' }),
   // visible enemies: 7 per encounters.js ZONES.valley.plan (the wolf pack at the gate chases, the pack deepest)
   enemy('e_wolves_a', 14, 33, 'briar_wolf', 'valley_wolves', 'chase'),
   enemy('e_wolves_b', 9, 10, 'briar_wolf', 'valley_wolves', 'guard'),

@@ -64,7 +64,7 @@ Every event: `{ id, type, x, y, if?, ifNot? }`. The event exists only while its 
 | `enemy` | `sprite, encounter, move, path?, radius?` | `move` = `wander|patrol|chase|guard`; dungeon enemies step only when the player steps |
 | `switch` | `target, kind: 'floor'|'crystal', color?, state, hidden?` | toggles on interact; every target fires |
 | `plate` | `target` | down while a block or party member stands on it |
-| `block` | | push block, resets on re-entry |
+| `block` | `heavy?` | push block, resets on re-entry; `heavy: true` only moves for Bram's Shove (W9) |
 | `gate` | `sprite, state, to?` | opens when **all** switches/plates targeting it are on; with `to` it is then a door |
 | `locked_door` | `key, sprite, to` | interact with the key; `archive_key` is consumed |
 | `shelf` | `positions, state` | slides between positions when a switch targeting it fires |
@@ -74,6 +74,8 @@ Every event: `{ id, type, x, y, if?, ifNot? }`. The event exists only while its 
 | `ferry` | `text, to, rideIf` | the post is readable always; the ride needs `nella_bell_done` |
 | `light` | `r, color?` | extra light source; `r` under 16 is in tiles (F3 uses 4 to 7), otherwise pixels |
 | `pit` | `w, h, to` | overrides `pitTo` inside an area |
+| `object` + `breakable` | `breakable` (`roots` or `rock`), `text, h: 2, opens?` | W9: Dash Strike breaks it (art from `src/world/fieldart.js`; the module's `sprite` is the tiles.json stand-in the tools draw); `opens` wall cells become floor once broken; saved in `game.opened` |
+| any | `behind: '<id>'` | W9: hidden until the breakable `<id>` is broken (the valley grotto chest) |
 
 `object` / `actor` / `trigger` may add `safe: true` (the F2 Lantern pedestal): using it makes the party's
 tile the game over return point. A map may add `ambientFx: ['motes']` (the library) to its ambient life;
@@ -136,7 +138,9 @@ the north cliff: the great door in the rock face under three willows with root c
 open tiles each side, `root_exit` (39,7) where the boss chamber's passage comes out. North landing: sand, pier,
 the empty bell post (`ferry` event), Nella's bell glinting in the shallows just downstream. West: the meadow,
 a fenced pasture, the hollow willow (wood chest: Echo Herb x2 under the canopy), a cliff plateau with stairs,
-an iron chest (spare Hatchet) and a grassy ledge for a one-way hop down. Secrets: the Whisperwood clearing's
+an iron chest (spare Hatchet) and a grassy ledge for a one-way hop down. W9: the plateau's south face is cracked at (4,14) (`crack_plateau`,
+west of the first-fight cut, so the dash can be tried first); Dash Strike opens a grotto with an iron chest
+(`chest_grotto`, Phoenix Feather, `behind` the crack). Secrets: the Whisperwood clearing's
 ink pool with a hidden ink bridge to a gold chest (Pilgrim's Reach; needs the Lantern, so it is found on the way
 home), and on the pool's north-west edge a ruined root arch (`arch_ruin` (50,27)) whose middle cell is the door
 `hollow_mouth` (51,27) down into Whisperwood Hollow (mark `hollow_mouth` (51,28), where the party comes back up). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
@@ -162,6 +166,9 @@ Wayfarer Mantle); wood chest in the antechamber B. **Shortcuts:** the bell (`arc
 town from F2 and back skips the floor; the F3 shortcut surfaces in B's north face (10,23) once `archive_f2_done`
 is set. The key chest `chest_d` sets `archive_key_found` (the Talk hint turns east). Eight enemies as planned
 (slimes in B and the corridor, mites guarding the pots and the alcove, wraiths and mixed groups in H and I).
+W9: in C, beside the light push block, the heavy block `heavy_c` (6,10) stands in front of a niche in the north
+face (`wall_broken` at (6,8)) with the iron chest `chest_niche` (Silver Circlet). The hero alone only rocks it;
+Bram's Shove moves it one tile either way and clears the niche.
 
 ### archive_f2 (40 x 30): The Reading Galleries
 ![archive_f2](../tools/maps/previews/archive_f2.png)
@@ -189,6 +196,10 @@ the pits; falling drops into the cache below: a gold chest, a brazier, and acros
 Quill; the cache's stairs climb back to the pit room, one way; the module's `ambientFx: [{ fx: 'page_fall', at: [29, 14], area: {...} }]` drops one page into the nearest pit the first time the party steps into the room, the tell before the first fall). Eight enemies with ink wraiths in the stacks and
 the corridors: the unavoidable corridor patrol to the bell hollow (5,20) is the lighter `f3_ink` group and the
 two-wraith `f3_wraiths` guard sits in the letter alcove (3,14), which can be walked around (PLAYTEST_REVIEW_1 3).
+W9: the great door hall's north face has a doorway choked with thin roots at (14,20..21) (`roots_gd`, between two
+bookcases). Dash Strike from the hall breaks it and carves the wall band (14,19): a two-way shortcut up into the
+western stacks (14,18) for the key-room trip, opened only from the hall side (from the stacks it is plain wall until
+then). The stacks' root column moved from (13,18) to (11,18) to clear the landing.
 
 ### archive_boss (24 x 20): Heart of the Archive
 ![archive_boss](../tools/maps/previews/archive_boss.png)

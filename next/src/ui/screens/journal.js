@@ -20,7 +20,8 @@ export function bestiaryEntry(g, id) {
   const raw = g.bestiary ? g.bestiary[id] : null;
   if (!raw) return { seen: 0, killed: 0, weak: [], resist: [] };
   if (Array.isArray(raw)) return { seen: 1, killed: 0, weak: raw.slice(), resist: [] };
-  return { seen: raw.seen || (raw.killed ? 1 : 0) || 0, killed: raw.killed || 0, weak: raw.weak || [], resist: raw.resist || [] };
+  // W9: Mira's Appraise in the field writes `appraised` before any fight: the entry is known (name, weak points, HP)
+  return { seen: raw.seen || (raw.killed ? 1 : 0) || 0, killed: raw.killed || 0, weak: raw.weak || [], resist: raw.resist || [], appraised: !!raw.appraised };
 }
 
 /** Picture box of the bestiary detail panel (screen px). */
@@ -74,7 +75,7 @@ export class JournalScreen {
     const rowH = rowHeightFor(this.engine, 12);
     this.beasts = new List({ x: 24, y: 34, w: 124, rowH, rows: Math.min(11, rowsThatFit(144, rowH)), items: ids.map((id) => {   // x 24: glove inside the screen (D7)
       const e = bestiaryEntry(this.g, id);
-      const known = e.seen > 0 || e.killed > 0;
+      const known = e.seen > 0 || e.killed > 0 || e.appraised;
       return { id, label: known ? BESTIARY[id].name : '???', color: known ? (e.killed ? 'white' : 'gray') : 'dim', known, entry: e };
     }) });
     this.scroll = 0;
@@ -174,7 +175,7 @@ export class JournalScreen {
       for (const t of d.resist) { drawIcon(r, WEAK_ICON[t] || t, rx, ly, { alpha: e.resist.includes(t) ? 1 : 0.35 }); rx += 14; }
       ly += 14;
     }
-    if (d) r.text(`Lv ${d.level}  HP ${e.killed ? d.hp : '???'}  Shields ${d.shields}`, x, Math.min(ly, 100), { color: 'gray' });
+    if (d) r.text(`Lv ${d.level}  HP ${e.killed || e.appraised ? d.hp : '???'}  Shields ${d.shields}`, x, Math.min(ly, 100), { color: 'gray' });
     drawDivider(r, 164, 116, 210);
     // Lore sits in a box from y 121 down to 174 (6 px above the frame); only whole lines are drawn, never a cut
     // one. Left / Right (or a tap on its lower / upper half) scroll an entry that is taller than the box.

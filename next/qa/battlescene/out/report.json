@@ -1,17 +1,6 @@
 [
   {
     "device": "desktop",
-    "scenario": "breathe",
-    "status": "ok",
-    "detail": "",
-    "note": "breathe diff bbox (63, 24, 645, 138)",
-    "files": [
-      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_breathe_a.png",
-      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_breathe_b.png"
-    ]
-  },
-  {
-    "device": "desktop",
     "scenario": "start",
     "status": "ok",
     "detail": "",
@@ -21,6 +10,364 @@
       "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-start-shards18.png",
       "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-start-enter32.png",
       "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-start-start58.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "stage",
+    "status": "ok",
+    "detail": "",
+    "note": "valley:asset@118 archive:asset@118 deep:asset@118 boss:asset@118",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-stage-valley.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_stage_valley_feet.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-stage-archive.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_stage_archive_feet.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-stage-deep.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_stage_deep_feet.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-stage-boss.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_stage_boss_feet.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "strip_intro",
+    "status": "ok",
+    "detail": "",
+    "note": "from _devField",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_intro-slices.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "breathe",
+    "status": "ok",
+    "detail": "",
+    "note": "breathe diff bbox (63, 21, 663, 186)",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_breathe_a.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_breathe_b.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "reduce_motion",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-reduce_motion-intro12.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-reduce_motion-hit.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "strip_impact",
+    "status": "ok",
+    "detail": "",
+    "note": "20 kicked frames, hitstop seen 2",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_impact-slash.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_impact-thrust.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_impact-ember.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_impact-chop.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_impact-arrow.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "command",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-command-root.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_timeline.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-command-sub.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "target_preview",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-target_preview-target.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-target_preview-target2.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "break",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-break-strike.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-break-break.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-break-break2.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "boss",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss-intro.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss-telegraph.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss-target.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "victory",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-victory-poses.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-victory-rewards.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "levelup",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-levelup-drops.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-levelup-rewards.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-levelup-level.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-levelup-level2.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "flee",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-flee-menu.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-flee-dash.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "strip_attack",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_attack-hero_attack.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_attack-mira_ember.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_attack-bram_lunge.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "strip_enemy",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_enemy-enemy_turn.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_enemy-boss_turn.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "strip_death",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_death-kill.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-strip_death-kill.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "boss_phase",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss_phase-pages.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss_phase-phase2_turn.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "party_ko",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-party_ko-boss_hit.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-party_ko-ko.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "combo",
+    "status": "ok",
+    "detail": "",
+    "note": "combo cross_rend",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-combo-cross_rend.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "boss_death",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss_death-death.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-boss_death-after.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "e2e_win",
+    "status": "ok",
+    "detail": "",
+    "note": "auto 2x valley_wolves won in 10.5 s",
+    "files": []
+  },
+  {
+    "device": "desktop",
+    "scenario": "e2e_lose",
+    "status": "ok",
+    "detail": "",
+    "note": "scripted defeat in 1.3 s",
+    "files": []
+  },
+  {
+    "device": "desktop",
+    "scenario": "e2e_all",
+    "status": "ok",
+    "detail": "",
+    "note": "valley_wolves:win valley_slimes:win valley_scarab:win valley_mixed:win valley_pack:win f1_slimes:win f1_mites:win f1_wraith:win f1_mixed:win f2_golem:win f2_wraiths:win f2_mites:win f2_mixed:win echo_warden:win f3_ink:win f3_golem:win f3_wraiths:win f3_mixed:win archivore:win",
+    "files": []
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_enemy",
+    "status": "ok",
+    "detail": "",
+    "note": "lunge + hurt frames: ['ink_slime', 'ink_slime_hurt', 'ink_slime_idle_1']",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_enemy-lunge.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_enemy-hurt.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_cast",
+    "status": "ok",
+    "detail": "",
+    "note": "ink_wraith: ['ink_wraith_cast']",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_cast-cast.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_death",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_death-die.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_devour",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_devour-devour.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_stance",
+    "status": "ok",
+    "detail": "",
+    "note": "mirror ['echo_warden_mirror', 'echo_warden_mirror_cast'] -> ['echo_warden_bulwark', 'echo_warden_bulwark_cast']",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_stance-mirror.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_stance-swap.png"
+    ]
+  },
+  {
+    "device": "desktop",
+    "scenario": "anim_party",
+    "status": "ok",
+    "detail": "",
+    "note": "hero level-up frames: ['hero_sword_levelup']",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_party_crit.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_party_combo.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\desktop-anim_party-levelup.png"
+    ]
+  },
+  {
+    "device": "phone",
+    "scenario": "start",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-start-shards06.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-start-shards18.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-start-enter32.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-start-start58.png"
+    ]
+  },
+  {
+    "device": "phone",
+    "scenario": "command",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-command-root.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\_zoom_timeline.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-command-sub.png"
+    ]
+  },
+  {
+    "device": "phone",
+    "scenario": "target_preview",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-target_preview-target.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-target_preview-target2.png"
+    ]
+  },
+  {
+    "device": "phone",
+    "scenario": "boss",
+    "status": "ok",
+    "detail": "",
+    "note": "",
+    "files": [
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-boss-intro.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-boss-telegraph.png",
+      "D:\\LexiconQuest\\next\\qa\\battlescene\\out\\phone-boss-target.png"
     ]
   }
 ]

@@ -1353,6 +1353,9 @@ export const lines = {
     { lines: 'A great bronze bell among the roots, cracked from lip to crown.' },
   ],
   boss_door_plate: 'A brass plate on the great door: THE HEART OF THE ARCHIVE. KEEPERS ONLY. FEED NOTHING.',
+  // W9-abilities: the field ability targets (inspect text; Dash Strike and Bram's Shove open them)
+  cliff_crack: 'A web of cracks runs through the rock here. Tap it and it answers hollow, like a door.',
+  root_wall_thin: 'Pale roots knit across an old doorway. They are thin and dry, and cold air breathes through the gaps.',
 };
 
 // Credits text lives in data/text.js; re-exported here so the story module is self-contained.

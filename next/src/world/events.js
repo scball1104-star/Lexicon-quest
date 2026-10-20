@@ -10,6 +10,12 @@
 //   fireTarget(field, id, on)              a switch / plate changed: open gates, slide shelves
 //   pushBlock(field, ent, dir)             the leader walked into a push block
 //   revealInk(field, cx, cy, radius)       the Lantern of Recall: *_faint -> *_revealed, persisted
+//   breakWall(field, ent)                  W9: Dash Strike breaks an `object` with `breakable` (persisted)
+//   moveBlock(field, ent, dir, o)          slide a push block one tile (the leader's push, Bram's Shove)
+//
+// W9-abilities fields: `block` + `heavy: true` (only Bram's Shove moves it), `object` + `breakable: 'roots' |
+// 'rock'` (+ `opens: [[x, y], ...]` wall cells carved to floor once it breaks), any event + `behind: '<id>'`
+// (concealed, no prompt, no glint, until that breakable is broken).
 //
 // Persistence: one-shot things (chests, unlocked doors, lit braziers with `flag`, ink reveals) live in
 // engine.game.opened as "<map>:<id>" or "<map>:ink:<x>,<y>"; puzzles reset on re-entry (Lufia II).
@@ -30,6 +36,8 @@ import { TILE } from './tilemap.js';
 const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'] };
 const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor']);
 const MAX_INK_RADIUS = 6;
+/** In-game art for breakables (src/world/fieldart.js), with the tiles.json stand-ins if that art is missing. */
+const BREAK_ART = { roots: ['ab_root_wall', 'ab_root_wall_broken', 'wall_broken'], rock: ['ab_cliff_crack', 'ab_cliff_grotto', 'wall_broken'] };
 
 export function present(field, ev) {
   if (!ev) return false;
@@ -81,8 +89,74 @@ export function refreshEntities(field) {
 }
 
 function setPresent(field, ent, on) {
-  if (on) { if (!ent.present) { ent.present = true; create(field, ent); } }
+  if (on) { if (!ent.present) { ent.present = true; create(field, ent); applyConcealed(field, ent); } }
   else if (ent.present) { destroy(field, ent); ent.present = false; }
+}
+
+/** W9: is the breakable that hides this entity (`behind`) still standing? Broken state is saved per map. */
+function concealedBy(field, ent) {
+  const id = ent.ev.behind;
+  if (!id) return false;
+  return !isOpened(field.game, field.map.id, id);
+}
+function applyConcealed(field, ent) {
+  if (!ent.present || !ent.ev.behind) return;
+  ent.data.concealed = concealedBy(field, ent);
+  if (ent.prop) field.map.setPropVisible(ent.prop, !ent.data.concealed);
+  if (ent.actor) ent.actor.visible = !ent.data.concealed;
+}
+
+/** W9: a breakable `object` (thin root wall, cracked rock): solid art until Dash Strike breaks it, then the open art. */
+function createBreakable(field, ent, broken) {
+  const ev = ent.ev, map = field.map;
+  const [whole, open, fallback] = BREAK_ART[ev.breakable] || [ev.sprite, 'wall_broken', 'wall_broken'];
+  const has = (id) => !!(map.db.tiles && map.db.tiles[id]);
+  ent.state = broken ? 'broken' : 'whole';
+  if (broken) {
+    setTall(map, ent.x, ent.y, has(open) ? open : fallback);
+    carveOpenings(field, ent);
+  } else setTall(map, ent.x, ent.y, has(whole) ? whole : ev.sprite);
+}
+
+/** Put a (16x32) tile on a cell as its only overlay; the tile's code also lands on the cell below it. */
+function setTall(map, x, y, id) {
+  if (!id) return;
+  map.setTile(x, y, id);
+  if (map.inBounds(x, y + 1) && map.recomputeCell) {
+    map.recomputeCell(x, y + 1); map.applyTallTiles(x, y);
+    map.repaint(x, y, x, y + 1);     // setTile repaints one row; a 16x32 tile also covers the row below
+  }
+}
+
+/** Carve `opens` wall cells to the map's floor (the '.' legend terrain) so a broken root wall leads somewhere. */
+function carveOpenings(field, ent) {
+  const map = field.map, mod = map.mod || {};
+  const floor = (mod.legend && mod.legend['.']) || mod.under;
+  for (const [x, y] of ent.ev.opens || []) {
+    if (!map.inBounds(x, y) || !map.walls || !map.db.terrains[floor]) continue;
+    map.walls[y][x] = null;
+    map.tiles[y][x] = null;
+    map.ids[y][x] = floor;
+    map.terrain[y][x] = floor;
+    map.recomputeCell(x, y);
+    map.repaint(x - 1, y - 1, x + 1, y + 1);
+  }
+}
+
+/**
+ * Dash Strike broke a breakable: the open art, the carved passage, saved for good (engine.game.opened), and
+ * whatever hid behind it (`behind`) appears with a sparkle. Returns true when it broke now.
+ */
+export function breakWall(field, ent) {
+  if (!ent || ent.type !== 'object' || !ent.ev.breakable || ent.state === 'broken') return false;
+  markOpened(field.game, field.map.id, ent.id);
+  createBreakable(field, ent, true);
+  for (const e of field.entities.values()) {
+    if (e.ev.behind !== ent.id || !e.present) continue;
+    applyConcealed(field, e);
+    if (field.particles) field.particles.sparkle(e.x * TILE + 8, e.y * TILE + 4, 6, '#ffd34d');
+  }
+  return true;
 }
 
 function addProp(field, ent, t, state, extra = {}) {
@@ -157,7 +231,11 @@ function create(field, ent) {
       break;
     }
     case 'sign': if (ev.sprite) addProp(field, ent, ev.sprite, ev.state || 0); break;
-    case 'object': if (ev.sprite) addProp(field, ent, ev.sprite, ev.state || 0, { solid: ev.solid }); break;
+    case 'object': {
+      if (ev.breakable) { createBreakable(field, ent, opened); break; }
+      if (ev.sprite) addProp(field, ent, ev.sprite, ev.state || 0, { solid: ev.solid });
+      break;
+    }
     case 'switch': {
       ent.state = ev.state === 'on' ? 'on' : 'off';
       if (ev.kind === 'crystal') {
@@ -172,7 +250,12 @@ function create(field, ent) {
       break;
     }
     case 'plate': { ent.state = 'up'; map.setTile(ent.x, ent.y, 'plate_up'); break; }
-    case 'block': addProp(field, ent, ev.sprite || 'push_block', 0, { solid: true }); break;
+    case 'block': {
+      const heavy = !!ev.heavy && !!(map.db.objects && map.db.objects.heavy_block);
+      addProp(field, ent, heavy ? 'heavy_block' : (ev.sprite || 'push_block'), 0, { solid: true });
+      if (ev.heavy && !heavy && ent.prop) ent.prop.tint = { color: '#2e2b4c', amount: 0.45 };   // no art: a darker push block
+      break;
+    }
     case 'gate': {
       ent.state = (ev.flag && g.flags[ev.flag]) || opened ? 'open' : (ev.state === 'open' ? 'open' : 'closed');
       applyGate(field, ent, false);
@@ -255,6 +338,8 @@ export function pitDropAt(field, x, y) {
 /** Does this entity answer to confirm at all (type, state, text) regardless of where it stands? */
 function respondsToConfirm(field, ent) {
   if (!ent.present || !INTERACT_TYPES.has(ent.type)) return false;
+  if (ent.data && ent.data.concealed) return false;
+  if (ent.type === 'object' && ent.ev.breakable && ent.state === 'broken') return false;
   if (ent.type === 'trigger' && ent.ev.on !== 'interact') return false;
   if (ent.type === 'actor' && !ent.ev.text && !ent.ev.script) return false;
   if (ent.type === 'object' && !ent.ev.text && !ent.ev.script) return false;
@@ -483,7 +568,7 @@ function chestScreenPoint(field, ent) {
   return [sx, sy];
 }
 
-async function breakPot(field, ent) {
+export async function breakPot(field, ent) {
   const { engine, map, game: g } = field;
   if (ent.state === 'broken') return;
   ent.state = 'broken';
@@ -576,32 +661,64 @@ export function updatePlate(field, ent) {
   for (const t of targetsOf(ent.ev)) fireTarget(field, t);
 }
 
-/** The leader walked into a push block: slide it one tile if the far tile is free. Returns true when pushed. */
+/**
+ * The leader walked into a push block: slide it one tile if the far tile is free. Returns true when pushed.
+ * A heavy block (W9) does not move for the leader: it shudders, and Bram's Shove (moveBlock) moves it.
+ */
 export function pushBlock(field, ent, dir) {
-  const p = ent.prop;
-  if (!p || ent.data.sliding) return false;
+  if (ent.ev.heavy) { nudgeHeavy(field, ent, dir); return false; }
+  return !!moveBlock(field, ent, dir);
+}
+
+/** May a block slide from its tile one step in `dir`? (open floor, no actor, only plates / triggers / shards there) */
+export function blockCanMove(field, ent, dir) {
+  if (!ent || !ent.prop || ent.data.sliding) return false;
   const [dx, dy] = DIRS[dir];
   const nx = ent.x + dx, ny = ent.y + dy;
-  const code = field.map.codeAt(nx, ny);
-  if (code !== 'none' && code !== 'counter' && !(code === 'solid' && false)) return false;
-  if (code !== 'none') return false;
+  if (field.map.codeAt(nx, ny) !== 'none') return false;
   if (field.actorAt(nx, ny)) return false;
   // a block may slide onto plates, triggers, lights and the shards of a broken pot; nothing else that is there
   const passableEvent = (e) => !e.present || e.type === 'plate' || e.type === 'trigger' || e.type === 'light' || (e.type === 'pot' && e.state === 'broken');
   if (tileHasEvent(field, nx, ny) && !entitiesAt(field, nx, ny).every(passableEvent)) return false;
+  return true;
+}
+
+/** Slide a block one tile (o.frames, default 14; o.sfx, default block_push). Returns the slide promise or false. */
+export function moveBlock(field, ent, dir, o = {}) {
+  if (!blockCanMove(field, ent, dir)) return false;
+  const p = ent.prop;
+  const [dx, dy] = DIRS[dir];
+  const nx = ent.x + dx, ny = ent.y + dy;
   ent.data.sliding = true;
-  field.engine.audio.sfx('block_push');
+  if (o.sfx !== null) field.engine.audio.sfx(o.sfx || 'block_push');
   const ox = ent.x, oy = ent.y;
   ent.x = nx; ent.y = ny;
   ent.cells = [[nx, ny]];
   reindex(field, ent, [[ox, oy]], [[nx, ny]]);
-  field.slideProp(p, nx, ny, 14, null).then(() => {
+  const settle = () => {
     ent.data.sliding = false;
     for (const e of entitiesAt(field, nx, ny)) if (e.type === 'plate') updatePlate(field, e);
     for (const e of entitiesAt(field, ox, oy)) if (e.type === 'plate') updatePlate(field, e);
-    field.bark('first_block_push');
-  });
-  return true;
+    if (!ent.ev.heavy) field.bark('first_block_push');
+    return true;
+  };
+  const slide = field.slideProp(p, nx, ny, o.frames || 14, null);
+  // a promise that resolves once the block has landed (truthy either way, so callers can test the result)
+  return (slide && typeof slide.then === 'function' ? slide.then(settle) : settle()) || true;
+}
+
+/** Walking into a heavy block: it rocks a pixel and settles (once per bump), and Bram has a word the first time. */
+function nudgeHeavy(field, ent, dir) {
+  const p = ent.prop;
+  if (!p || ent.data.sliding) return;
+  if (ent.data.nudgeAt != null && field.frame - ent.data.nudgeAt < 24) return;
+  ent.data.nudgeAt = field.frame;
+  const [dx, dy] = DIRS[dir];
+  field.engine.audio.sfx('hit_light', { volume: 0.6 });
+  p.offX = dx; p.offY = dy;
+  field.engine.after(3, () => { p.offX = 0; p.offY = 0; });
+  if (field.leader && field.leader.showEmote && !field.leader.emote) field.leader.showEmote('sweat', 36);
+  if (field.abilities && field.abilities.has('shove')) field.bark('first_heavy_block');
 }
 
 function reindex(field, ent, oldCells, newCells) {
@@ -662,7 +779,7 @@ export function applySavedReveals(field) {
 export function tickGlints(field) {
   const frame = field.frame;
   if (frame % 24 !== 0 || !field.entities) return;
-  const list = [...field.entities.values()].filter((e) => e.present && e.prop && (
+  const list = [...field.entities.values()].filter((e) => e.present && e.prop && !(e.data && e.data.concealed) && (
     (e.type === 'chest' && e.state !== 'open') || e.ev.glint || /^prop_(letter|ferry_bell)$/.test(e.ev.sprite || '')));
   if (!list.length) return;
   const e = list[(frame / 24 | 0) % list.length];

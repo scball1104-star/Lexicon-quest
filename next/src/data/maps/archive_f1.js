@@ -6,6 +6,8 @@
 // The key: west corridor -> pot storeroom C (break pots to free the push block, push it onto the plate, the
 // barred door opens) -> key alcove D (wood chest with the Archive Key).
 // Optional: moss alcove E (Tess's letter 1) with a broken wall into the hidden cell F (Wayfarer Mantle).
+// W9-abilities: in C, beside the light push block, a heavy block stands in front of a niche in the north face
+// (6,8..9) with an iron chest (Silver Circlet). The hero alone only rocks it; Bram's Shove moves it one tile.
 // Shortcuts: once the bell has tolled (archive_f1_done) a back-stair joins the stairs landing J and the
 // antechamber B both ways, so a town trip from F2 skips the floor. The F3 shortcut surfaces in B on archive_f2_done.
 // Doors set into wall faces are same-map transfers that land on a one-cell notch in the far room's south wall.
@@ -76,6 +78,7 @@ const overlays = [
   { t: 'wall_shelf_l', x: 5, y: 22 }, { t: 'wall_shelf_r', x: 6, y: 22 },
   { t: 'wall_shelf_l', x: 3, y: 8 }, { t: 'wall_shelf_r', x: 4, y: 8 },
   { t: 'wall_broken', x: 9, y: 17 },          // the hole into the hidden cell
+  { t: 'wall_broken', x: 6, y: 8 },           // W9: the niche behind the heavy block in C
   { t: 'wall_cracked', x: 11, y: 8 }, { t: 'wall_cracked', x: 29, y: 2 },
   { t: 'roots_0', x: 3, y: 27 }, { t: 'roots_1', x: 24, y: 27 }, { t: 'roots_2', x: 37, y: 17 }, { t: 'roots_1', x: 25, y: 10 },
   { t: 'roots_0', x: 12, y: 15 }, { t: 'roots_2', x: 6, y: 20 }, { t: 'roots_1', x: 14, y: 27 },
@@ -140,6 +143,8 @@ const events = [
   object('prop_letter', 9, 20, 'prop_letter', { script: 'find_letter_1', ifNot: 'tess_letter_1_found', solid: false }),
   // mechanisms: C (pots hide the push block; plate opens gate_c), H (two blocks, two plates open gate_h)
   block('block_c', 8, 13),
+  { id: 'heavy_c', type: 'block', x: 6, y: 10, sprite: 'push_block', heavy: true },   // W9: Bram's Shove
+  chest('chest_niche', 6, 9, 'iron', { item: 'silver_circlet' }),
   plate('plate_c', 4, 11, 'gate_c'),
   pot('pot_c1', 7, 13), pot('pot_c2', 6, 13), pot('pot_c3', 5, 13, { item: 'potion' }), pot('pot_c4', 9, 13),
   pot('pot_c5', 4, 12), pot('pot_c6', 6, 11, { gold: 20 }), pot('pot_c7', 10, 11), pot('pot_c8', 11, 14, { item: 'antidote' }),

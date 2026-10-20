@@ -6,6 +6,9 @@
 // Branches: WS -> east -> crystal room CR (three crystal switches open the barred door to the key room BK:
 // the Stacks Key); CR -> east -> pit room PR: the pits drop into the cache C below (gold chest; a hidden ink
 // bridge to the First Quill), the cache's stairs lead back up (one way).
+// W9-abilities: the great door hall's north face (14,20..21) is a doorway choked with thin roots. Dash Strike from
+// the hall breaks them and the wall band above (14,19) opens: a shortcut straight back up into the western stacks
+// for the trip to the key room and back. From the stacks side there is only wall until it is open.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, crystal, gate,
   brazier, font, light, pit, steps, enter } from './_kit.js';
 
@@ -79,7 +82,7 @@ const overlays = [
   ...wallShelf(28, 31, 9), ...wallShelf(33, 36, 9),
   // W8-archive: the landmark. Two great roots climb the walls either side of the great door and knot over its arch
   // (the `root_arch` overhead tile); ink weeps from the panelling beside the door's plate.
-  ...wallShelf(13, 15, 20), { t: 'wall_ink_seep', x: 16, y: 20 }, { t: 'root_drape', x: 18, y: 20 },
+  { t: 'wall_shelf_r', x: 13, y: 20 }, { t: 'wall_shelf_l', x: 15, y: 20 }, { t: 'wall_ink_seep', x: 16, y: 20 }, { t: 'root_drape', x: 18, y: 20 },
   { t: 'root_drape', x: 22, y: 20 }, ...wallShelf(23, 23, 20), ...wallShelf(26, 26, 20),
   { t: 'wall_ink_seep', x: 3, y: 20 }, { t: 'root_drape', x: 8, y: 20 }, { t: 'wall_ink_seep', x: 36, y: 21 },
   // root masses swelling out of the wall tops and the dark between the rooms (wall cells only: they are solid)
@@ -103,7 +106,7 @@ const decor = [
   // western stacks: aisles of shelves split by roots
   { t: 'shelf_wide', x: 4, y: 13 }, { t: 'shelf_rooted', x: 9, y: 13 }, { t: 'shelf_b', x: 12, y: 13 },
   { t: 'shelf_wide', x: 7, y: 16 }, { t: 'shelf_rooted', x: 12, y: 16 },
-  { t: 'root_column', x: 4, y: 15 }, { t: 'root_column', x: 13, y: 18 },
+  { t: 'root_column', x: 4, y: 15 }, { t: 'root_column', x: 11, y: 18 },
   { t: 'pillar', x: 2, y: 13 }, { t: 'pillar', x: 14, y: 13 }, { t: 'pillar', x: 10, y: 18 },
   // crystal room
   { t: 'root_column', x: 20, y: 15 },
@@ -148,6 +151,8 @@ const events = [
   sign('boss_door_plate', 18, 21, 'boss_door_plate', { solid: false }),
   sign('hidden_ink_3', 17, 21, 'hidden_ink_3', { solid: false, lantern: true }),
   font('keeper_font', 22, 26),
+  // W9-abilities: thin roots in an old doorway; Dash Strike breaks them and opens (14,19) up into the stacks
+  object('roots_gd', 14, 20, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2, opens: [[14, 19]] }),
   // the thirteenth bell, on the main path
   trigger('bell_trig', 5, 22, 2, 1, 'thirteenth_bell'),
   object('thirteenth_bell_prop', 5, 25, 'prop_thirteenth_bell', { text: 'thirteenth_bell' }),

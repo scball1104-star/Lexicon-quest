@@ -268,6 +268,16 @@ export const HELP = {
     boots: 'Footwear. Speed lives here.',
     mantle: 'A cloak or mantle.',
   },
+  // W9: the field ability wheel ({i:btn_pageL} switches, {i:btn_pageR} uses) and its four abilities
+  field: {
+    wheel: '{i:btn_pageL} switch  {i:btn_pageR} use',
+    dash: 'Dash ahead: breaks cracks, roots, pots.',
+    appraise: 'Read a foe ahead. Fills the Bestiary.',
+    lantern: 'Raise the Lantern: hidden ink shows.',
+    shove: 'Bram shoves a heavy block one tile.',
+    nothing: 'Nothing here to read.',
+    recorded: 'Recorded in the Bestiary.',
+  },
   save: {
     prompt: 'Record your journey here?',
     done: 'Your journey has been recorded.',
@@ -315,6 +325,16 @@ export const BARKS = {
   first_font: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'A Keeper\'s font. Drink. The Keepers left it for exactly this.' }] },
   ],
+  // W9-abilities: the one hint line per field ability, spoken the first time the party meets its target.
+  first_heavy_block: [
+    { if: 'bram_joined', lines: [{ who: 'bram', text: "That one won't budge for you. Stand aside and let me shove it: {i:btn_pageR}." }] },
+  ],
+  first_dash_target: [
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Hear how hollow that sounds? Hit it at a run, {hero}: {i:btn_pageR}.' }] },
+  ],
+  first_appraise_target: [
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Want its weak spots before we fight? {i:btn_pageL} to my lens, then {i:btn_pageR}.' }] },
+  ],
   first_elite: [
     { if: 'bram_joined', lines: [{ who: 'bram', text: 'That one has a gold shine to it. Tougher, but it will drop something good.' }] },
   ],
@@ -358,4 +378,14 @@ export const CREDITS = [
   { heading: 'Thank you for playing', lines: ['The road east is waiting.'] },
 ];
 
-export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS };
+// ------------------------------------------------------------------------------------------------
+// W9: field abilities (the ability wheel, the Status screen row). Help text lives in HELP.field.
+// ------------------------------------------------------------------------------------------------
+export const FIELD_ABILITIES = {
+  dash: { name: 'Dash Strike', owner: 'hero' },
+  appraise: { name: 'Appraise', owner: 'mira' },
+  lantern: { name: 'Lantern', owner: 'mira' },
+  shove: { name: 'Shove', owner: 'bram' },
+};
+
+export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES };
