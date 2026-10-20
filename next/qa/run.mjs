@@ -73,7 +73,14 @@ async function main() {
     }
   };
   const t0 = Date.now();
+  // Browser-heavy suites (headless Chromium walks of every map) flake when they share the CPU with the parallel
+  // batch, so they run alone after it.
+  const SOLO = { test: (f) => f.split(path.sep).join('/').endsWith('qa/world/walks.test.mjs') };
+  const solo = files.filter((f) => SOLO.test(f));
+  files = files.filter((f) => !SOLO.test(f));
   await Promise.all(Array.from({ length: Math.min(jobs, files.length) }, worker));
+  files = solo; next = 0;
+  await worker();
   results.sort((a, b) => a.file.localeCompare(b.file));
 
   const failed = results.filter((r) => r.code !== 0 || r.timedOut);
