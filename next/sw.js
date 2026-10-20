@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'da04f1fc4e6f';
+const SHELL_VERSION = 'a9e03e55a6e7';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -66,6 +66,7 @@ const PRECACHE = [
   'src/data/maps/library.js',
   'src/data/maps/smithy.js',
   'src/data/maps/valley.js',
+  'src/data/maps/whisperwood_hollow.js',
   'src/data/maps/willowmere.js',
   'src/data/npcs.js',
   'src/data/party.js',
