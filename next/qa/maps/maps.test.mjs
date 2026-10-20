@@ -8,18 +8,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { NEXT, MAP_IDS, listMapIds, loadAll, loadDb, validate, walk, parseStagingChecklist, buildGrid } from '../../tools/maps/mapcheck.mjs';
 
+// COMMON.md maps plus the optional side dungeon (W6-content).
+const ALL_IDS = [...MAP_IDS, 'whisperwood_hollow'];
+
 const db = await loadDb();
 const maps = await loadAll();
 const staging = parseStagingChecklist(fs.readFileSync(path.join(NEXT, 'docs', 'story', 'STAGING.md'), 'utf8'));
 const results = Object.fromEntries(Object.entries(maps).map(([id, m]) => [id, validate(m, db, maps, { staging })]));
 
 test('every COMMON.md map id has a module and no module is unexpected', () => {
-  assert.deepEqual(listMapIds().sort(), [...MAP_IDS].sort());
-  for (const id of MAP_IDS) assert.equal(maps[id].id, id, `module ${id} exports id ${maps[id].id}`);
+  assert.deepEqual(listMapIds().sort(), [...ALL_IDS].sort());
+  for (const id of ALL_IDS) assert.equal(maps[id].id, id, `module ${id} exports id ${maps[id].id}`);
 });
 
 test('STAGING.md section 5 parsed into a checklist for every map', () => {
-  for (const id of MAP_IDS) assert.ok(staging[id], `no checklist row for ${id}`);
+  for (const id of ALL_IDS) assert.ok(staging[id], `no checklist row for ${id}`);
   assert.ok(staging.willowmere.marks.includes('gather_oren'));
   assert.ok(staging.willowmere.npcs.includes('loaf'));
   assert.ok(staging.archive_boss.marks.includes('fragment_spot'));
@@ -28,7 +31,7 @@ test('STAGING.md section 5 parsed into a checklist for every map', () => {
   assert.ok(staging.archive_f3.chestFlags.includes('stacks_key_found'));
 });
 
-for (const id of MAP_IDS) {
+for (const id of ALL_IDS) {
   test(`${id}: validates (ids, targets, NPC coverage, enemy plan, STAGING marks)`, () => {
     const r = results[id];
     assert.deepEqual(r.errors, []);
@@ -36,7 +39,7 @@ for (const id of MAP_IDS) {
 }
 
 test('every map has a banner, start and lighting block', () => {
-  for (const id of MAP_IDS) {
+  for (const id of ALL_IDS) {
     const m = maps[id];
     assert.ok(db.BANNERS[id], `banner ${id}`);
     assert.ok(m.start && Number.isInteger(m.start.x) && Number.isInteger(m.start.y), `start ${id}`);
@@ -47,7 +50,7 @@ test('every map has a banner, start and lighting block', () => {
 });
 
 test('event ids are unique per map and npc events match npcsOnMap exactly', () => {
-  for (const id of MAP_IDS) {
+  for (const id of ALL_IDS) {
     const ids = maps[id].events.map((e) => e.id);
     assert.equal(new Set(ids).size, ids.length, `${id} duplicate event ids`);
     const placed = maps[id].events.filter((e) => e.type === 'npc').map((e) => e.id).sort();
@@ -67,7 +70,7 @@ test('visible enemy counts match ZONES plans and the boss actors exist', () => {
     }
   }
   // no enemies outside the zones, and none in town or interiors
-  for (const id of MAP_IDS) if (!db.ZONES[id]) assert.equal(maps[id].events.filter((e) => e.type === 'enemy').length, 0, `${id} has enemies`);
+  for (const id of ALL_IDS) if (!db.ZONES[id]) assert.equal(maps[id].events.filter((e) => e.type === 'enemy').length, 0, `${id} has enemies`);
 });
 
 test('doors and exits round-trip: every interior door returns to the town cell in front of its building', () => {
@@ -136,7 +139,7 @@ for (const [id, ids] of Object.entries(MUST_REACH)) {
 }
 
 test('every chest is reachable (the Whisperwood chest once the Lantern is held)', () => {
-  for (const id of MAP_IDS) {
+  for (const id of ALL_IDS) {
     const r = walk(maps[id], db, { lantern: true });
     for (const e of r.events) if (e.type === 'chest') assert.ok(e.reached, `${id}: chest ${e.id} unreachable even with the Lantern`);
   }
@@ -326,4 +329,80 @@ test('fading signs carry the tile and fade state the renderer needs; the gate si
   const gate = signs.find((s) => s.id === 'town_sign');
   assert.equal(gate.on, 'interact');
   assert.deepEqual([gate.x, gate.y], maps.willowmere.marks.town_sign);
+});
+
+// ------------------------------------------------------------------------------------------------
+// W6-content: Whisperwood Hollow, the optional side dungeon under the valley's Whisperwood pool.
+// ------------------------------------------------------------------------------------------------
+test('whisperwood_hollow: 28 x 20, one dark floor with braziers, doors both ways with the valley pool edge', () => {
+  const m = maps.whisperwood_hollow;
+  assert.equal(m.ground.length, 20); assert.equal(m.ground[0].length, 28);
+  assert.equal(m.area, 'dungeon');
+  assert.equal(m.lighting.dark, 0.5);
+  assert.ok(m.events.filter((e) => e.type === 'brazier').length >= 2, 'braziers to light');
+  const mouth = byId(maps.valley, 'hollow_mouth'), out = byId(m, 'hollow_exit');
+  assert.deepEqual(mouth.to.slice(0, 3), ['whisperwood_hollow', m.start.x, m.start.y], 'the root arch lands on the hollow start');
+  assert.equal(out.to[0], 'valley');
+  assert.ok(Math.abs(out.to[1] - mouth.x) <= 1 && Math.abs(out.to[2] - mouth.y) <= 1, 'the stairs land by the root arch');
+  const vg = maps.valley.ground;
+  let ink = false;
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (vg[mouth.y + dy]?.[mouth.x + dx] === 'i') ink = true;
+  assert.ok(ink, 'the mouth is at the ink pool edge');
+  assert.ok(maps.valley.decor.some((d) => d.t === 'arch_ruin' && Math.abs(d.x - mouth.x) <= 1 && d.y === mouth.y), 'an arch marks the mouth');
+  const chest = byId(maps.valley, 'chest_whisperwood');
+  assert.deepEqual([chest.x, chest.y, chest.tier, chest.item], [57, 31, 'gold', 'pilgrim_reach'], 'the pool secret stays put');
+  for (const k of ['entrance', 'bridge_near', 'bridge_far', 'alpha_spot', 'plaque', 'gold_chest']) assert.ok(m.marks[k], `mark ${k}`);
+});
+
+test('whisperwood_hollow: the Lantern opens it, the plate opens the den, everything is reachable with the Lantern', () => {
+  const m = maps.whisperwood_hollow;
+  const reached = (r, id) => r.events.find((e) => e.id === id).reached;
+  const dark = results.whisperwood_hollow.walk;   // no Lantern: the far shore is out of reach
+  assert.equal(dark.lantern, false);
+  assert.ok(reached(dark, 'hollow_exit') && reached(dark, 'old_piles'));
+  for (const id of ['h_wolves_a', 'h_blot', 'chest_bay', 'block_m', 'gate_b', 'whisperwood_alpha', 'chest_alpha']) assert.equal(reached(dark, id), false, `${id} without the Lantern`);
+  const lit = walk(m, db, { lantern: true });
+  assert.deepEqual(lit.unreached, [], lit.log.join('; '));
+  assert.ok(lit.opened.includes('gate_b'));
+  for (const k of ['bridge_far', 'alpha_spot', 'gold_chest']) assert.ok(lit.marks.find((x) => x.name === k).reached, `mark ${k} with the Lantern`);
+  const noBlock = walk({ ...m, events: m.events.filter((e) => e.type !== 'block') }, db, { lantern: true });
+  for (const id of ['whisperwood_alpha', 'chest_alpha', 'lost_bridge_plaque']) assert.equal(reached(noBlock, id), false, `${id} without the block`);
+  // the lost bridge is exactly the hidden-ink crossing of the pool on row 16
+  const faint = m.overlays.filter((o) => /^ink_bridge_.*_faint$/.test(o.t));
+  assert.ok(faint.length >= 4 && faint.every((o) => o.y === m.marks.bridge_near[1]));
+});
+
+test('whisperwood_hollow: the push-block puzzle has a solution and the straight push is blocked', () => {
+  const m = maps.whisperwood_hollow;
+  const g = buildGrid({ ...m, events: [] }, db);
+  const free = (x, y) => g.code[y][x] === 'none';
+  const b = byId(m, 'block_m'), p = byId(m, 'plate_m');
+  assert.equal(p.target, 'gate_b');
+  assert.ok(p.x > b.x && p.y > b.y);
+  assert.equal(free(b.x + 2, b.y), false, 'the root column stops the straight push east');
+  // push south (the party stands north of it), then east (the party stands west of it)
+  assert.ok(free(b.x, b.y - 1));
+  for (let y = b.y + 1; y <= p.y; y++) assert.ok(free(b.x, y), `column ${b.x} open at ${y}`);
+  assert.ok(free(b.x - 1, p.y));
+  for (let x = b.x + 1; x <= p.x; x++) assert.ok(free(x, p.y), `row ${p.y} open at ${x}`);
+});
+
+test('whisperwood_hollow: three visible enemies, an iron and a gold chest, the Alpha behind its trigger', () => {
+  const m = maps.whisperwood_hollow;
+  const foes = m.events.filter((e) => e.type === 'enemy');
+  assert.deepEqual(foes.map((e) => e.encounter).sort(), ['hollow_blot', 'hollow_wolves', 'hollow_wolves']);
+  assert.deepEqual(foes.map((e) => e.sprite).sort(), ['briar_wolf', 'briar_wolf', 'ink_slime']);
+  assert.ok(db.ENCOUNTERS.hollow_blot.elite, 'the ink slime of the brief is a fixed elite');
+  const chests = m.events.filter((e) => e.type === 'chest');
+  assert.deepEqual(chests.map((c) => c.tier).sort(), ['gold', 'iron']);
+  const gold = chests.find((c) => c.tier === 'gold');
+  const alpha = byId(m, 'whisperwood_alpha');
+  assert.equal(alpha.type, 'actor'); assert.equal(alpha.ifNot, 'briar_alpha_defeated');
+  assert.deepEqual([alpha.x, alpha.y], m.marks.alpha_spot);
+  const t = byId(m, 'alpha_trig'), notch = byId(m, 'notch_b');
+  assert.equal(t.script, 'hollow_alpha');
+  assert.ok(notch.x >= t.x && notch.x < t.x + t.w && notch.y === t.y + 1, 'the first step into the den is on the trigger');
+  assert.ok(gold.y < t.y && alpha.y < t.y, 'the gold chest is behind the Alpha');
+  assert.equal(byId(m, 'hollow_enter').script, 'hollow_entry');
+  assert.equal(byId(m, 'lost_bridge_plaque').lantern, true);
 });

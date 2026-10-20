@@ -4,7 +4,8 @@
 //
 //   node tools/sim/simulate.mjs                 full report (400 battles per encounter and policy)
 //   node tools/sim/simulate.mjs --n 100         fewer battles
-//   node tools/sim/simulate.mjs --zone valley   one zone (valley | archive_f1 | archive_f2 | archive_f3 | archive_boss)
+//   node tools/sim/simulate.mjs --zone valley   one zone (valley | archive_f1 | archive_f2 | archive_f3 | archive_boss
+//                                               | whisperwood_hollow, the optional side dungeon; included by default)
 //   node tools/sim/simulate.mjs --check         exit 1 if a target is missed
 //   node tools/sim/simulate.mjs --json          also write tools/sim/out/sim.json
 //   node tools/sim/simulate.mjs --trace enc seed policy   print one battle's events
@@ -14,7 +15,7 @@
 import { createBattle, makeRng } from '../../src/battle/rules.js';
 import { partyAction } from '../../src/battle/ai.js';
 import { newMember, expForLevel, levelForExp } from '../../src/data/party.js';
-import { ENCOUNTERS, ZONES, ZONE_ORDER, rollEncounter, encounterExp } from '../../src/data/encounters.js';
+import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, rollEncounter, encounterExp } from '../../src/data/encounters.js';
 import { ENEMIES } from '../../src/data/enemies.js';
 
 // ------------------------------------------------------------------ expected party per zone
@@ -54,12 +55,23 @@ LOADOUTS.archive_boss = {
   bram: { ...LOADOUTS.archive_f3.bram, mastery: { spear: 210, axe: 60 } },
   inventory: { potion: 6, hi_potion: 3, ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2 },
 };
+// Whisperwood Hollow (optional, after the Lantern): F2 cleared, the F3 shop gear bought on the way back out,
+// mastery between the F2 and F3 rows. Plain bases (the Pilgrim's Reach at the hollow mouth is not counted).
+LOADOUTS.whisperwood_hollow = {
+  ...LOADOUTS.archive_f3,
+  hero: { ...LOADOUTS.archive_f3.hero, mastery: { sword: 140, axe: 40 } },
+  mira: { ...LOADOUTS.archive_f3.mira, mastery: { staff: 90, bow: 35 } },
+  bram: { ...LOADOUTS.archive_f3.bram, mastery: { spear: 140, axe: 40 } },
+  inventory: { potion: 5, hi_potion: 2, ether: 2, antidote: 2, eye_drops: 1, echo_herb: 2, phoenix_feather: 1 },
+};
 
 // ------------------------------------------------------------------ targets (DESIGN 7 + brief)
 export const TARGETS = {
   ordinary: { roundsMin: 3, roundsMax: 5, winMin: 0.97, hpLossMax: 0.5, naiveWorse: 1.2 },
   echo_warden: { roundsMin: 6, roundsMax: 8, winMin: 0.9 },
   archivore: { roundsMin: 8, roundsMax: 12, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15 },
+  // W6-content: the Briar Alpha (Whisperwood Hollow mini-boss) at Lv 6-7; naive play (attack only) loses often.
+  whisperwood_alpha: { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6 },
   // Party level on entering and leaving each zone if the player fights each zone's plan once
   // (brief: valley Lv 2-3, Archive F1 Lv 4, F2 Lv 5-6, F3 Lv 7, Archivore Lv 8). Also checked at 80%
   // of the plan ("most visible enemies") with a one-level allowance below.
@@ -158,10 +170,10 @@ export function runSuite({ n = 400, zones = ZONE_ORDER, policies = ['competent',
   const out = [];
   for (const z of zones) {
     const zone = ZONES[z];
-    const levels = z === 'archive_f2' ? [5, 6] : z === 'valley' ? [2, 3] : [zone.level[0]];
+    const levels = z === 'archive_f2' ? [5, 6] : z === 'valley' ? [2, 3] : z === 'whisperwood_hollow' ? [6, 7] : [zone.level[0]];
     for (const [enc] of zone.plan) {
       const isBoss = ENCOUNTERS[enc].boss;
-      const lv = enc === 'echo_warden' ? [5, 6] : isBoss ? [8] : levels;
+      const lv = enc === 'echo_warden' ? [5, 6] : enc === 'whisperwood_alpha' ? [6, 7] : isBoss ? [8] : levels;
       const pols = enc === 'archivore' ? [...new Set([...policies, 'reckless'])] : policies;
       for (const level of lv) for (const policy of pols) out.push(runSet({ zone: z, level, encounter: enc, n, policy }));
       if (elites && !isBoss) out.push(runSet({ zone: z, level: lv[lv.length - 1], encounter: enc, n: Math.max(20, Math.floor(n / 4)), policy: 'competent', elite: true }));
@@ -190,7 +202,7 @@ export function progression(share = 1) {
 export function checkTargets(rows, prog = [...progression(1), ...progression(0.8)]) {
   const fails = [];
   const T = TARGETS;
-  const ord = rows.filter((r) => !r.elite && !['echo_warden', 'archivore'].includes(r.encounter));
+  const ord = rows.filter((r) => !r.elite && !ENCOUNTERS[r.encounter].boss);
   const comp = ord.filter((r) => r.policy === 'competent');
   for (const r of comp) {
     if (r.win < T.ordinary.winMin) fails.push(`${r.encounter} Lv${r.level}: competent win ${pct(r.win)} < ${pct(T.ordinary.winMin)}`);
@@ -215,6 +227,14 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
   for (const r of rows.filter((x) => x.encounter === 'echo_warden' && x.policy === 'competent')) {
     if (r.win < T.echo_warden.winMin) fails.push(`echo_warden Lv${r.level}: win ${pct(r.win)} < ${pct(T.echo_warden.winMin)}`);
     if (r.rounds < T.echo_warden.roundsMin - 0.5 || r.rounds > T.echo_warden.roundsMax + 0.5) fails.push(`echo_warden Lv${r.level}: rounds ${r.rounds.toFixed(2)} outside 6-8`);
+  }
+  for (const r of rows.filter((x) => x.encounter === 'whisperwood_alpha')) {
+    const t = T.whisperwood_alpha;
+    if (r.policy === 'competent') {
+      if (r.win < t.winMin) fails.push(`whisperwood_alpha Lv${r.level}: competent win ${pct(r.win)} < ${pct(t.winMin)}`);
+      if (r.rounds < t.roundsMin - 0.5 || r.rounds > t.roundsMax + 0.5) fails.push(`whisperwood_alpha Lv${r.level}: rounds ${r.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
+    }
+    if (r.policy === 'naive' && r.win > t.naiveWinMax) fails.push(`whisperwood_alpha Lv${r.level}: naive wins ${pct(r.win)} > ${pct(t.naiveWinMax)}`);
   }
   const arch = rows.filter((x) => x.encounter === 'archivore');
   const ac = arch.find((r) => r.policy === 'competent');
@@ -271,7 +291,7 @@ if (isMain) {
     const n = Number(get('--n', 400));
     const zone = get('--zone', null);
     const t0 = Date.now();
-    const rows = runSuite({ n, zones: zone ? [zone] : ZONE_ORDER });
+    const rows = runSuite({ n, zones: zone ? [zone] : [...ZONE_ORDER, ...OPTIONAL_ZONES] });
     const prog = [...progression(1), ...progression(0.8)];
     console.log(formatTable(rows));
     console.log('\nProgression (fight each zone plan once, then 80% of it):');

@@ -162,16 +162,17 @@ export const UNIQUES = {
     ilvl: 8, price: 2200, icon: 'staff',
     stats: { atk: 6, mag: 17, spr: 4, mp: 12, mpCostDown: 1 },
     source: 'Archive F3 secret chest (Lantern)', desc: 'A quill-staff that remembers every word it wrote.' },
-  thornwake: { id: 'thornwake', name: 'Thornwake', rarity: 'legendary', slot: 'weapon', type: 'spear',
+  // The Whisperwood pool's secret (renamed from the first Thornwake so the Hollow's axe is the only one).
+  pilgrim_reach: { id: 'pilgrim_reach', name: "Pilgrim's Reach", rarity: 'legendary', slot: 'weapon', type: 'spear',
     ilvl: 6, price: 1800, icon: 'spear',
-    stats: { atk: 17, spd: 1, poisonOnHit: 25 },
-    source: 'Valley secret (Whisperwood edge, needs the Lantern)', desc: 'Briar-wound ash. Its wounds keep stinging.' },
+    stats: { atk: 17, spd: 1, crit: 5 },
+    source: 'Valley secret (Whisperwood pool, needs the Lantern)', desc: "A pilgrim's walking pike. It always finds the gap." },
   // Whisperwood Hollow: the Briar Alpha's drop. Rare-tier numbers (a tier 2 axe and a half) so Lanternheart stays
   // the prize of the episode; its identity is the poison, "bleed" style, on every hit.
-  bramblefang: { id: 'bramblefang', name: 'Bramblefang', rarity: 'legendary', slot: 'weapon', type: 'axe',
+  thornwake: { id: 'thornwake', name: 'Thornwake', rarity: 'legendary', slot: 'weapon', type: 'axe',
     ilvl: 6, price: 1500, icon: 'axe',
     stats: { atk: 18, crit: 4, spd: -1, poisonOnHit: 30 },
-    source: 'Briar Alpha (Whisperwood Hollow, guaranteed)', desc: 'The jaw of the alpha, hafted on briar. It bites back.' },
+    source: 'Briar Alpha (Whisperwood Hollow, guaranteed)', desc: "The alpha's briar, bound to an axe. Its cuts keep bleeding." },
   mirrorguard_mail: { id: 'mirrorguard_mail', name: 'Mirrorguard Mail', rarity: 'legendary', slot: 'body',
     ilvl: 6, price: 1600, icon: 'armor', who: ALL,
     stats: { def: 11, spr: 9, hp: 20, inkRes: 20 },

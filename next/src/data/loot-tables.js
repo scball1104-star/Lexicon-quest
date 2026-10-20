@@ -34,7 +34,7 @@ export const BOSS_LOOT = {
   archivore: { unique: null, rolls: 2, table: 'boss', ilvl: 8,
     consumables: [{ item: 'phoenix_feather', qty: 1 }] },
   // Whisperwood Hollow mini-boss: the axe is its guaranteed drop (the gold chest behind it rolls a rare).
-  briar_alpha: { unique: 'bramblefang', rolls: 1, table: 'boss', ilvl: 6,
+  briar_alpha: { unique: 'thornwake', rolls: 1, table: 'boss', ilvl: 6,
     consumables: [{ item: 'hi_potion', qty: 1 }, { item: 'antidote', qty: 2 }] },
 };
 

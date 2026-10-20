@@ -160,7 +160,7 @@ enemy('archivore', {
 // field sprite ids). The hollow is reached after the Lantern, so its foes are tuned for a Lv 6 to 7 party.
 enemy('thornback_wolf', {
   name: 'Thornback Wolf', family: 'beast', level: 6,
-  hp: 215, atk: 27, def: 10, mag: 6, spr: 8, spd: 16, luk: 7,
+  hp: 250, atk: 27, def: 10, mag: 6, spr: 8, spd: 16, luk: 7,
   shields: 2, weak: ['fire', 'spear'],
   exp: 26, gold: 34, masteryPts: 4,
   moves: [{ skill: 'bite', weight: 50, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 35 },
@@ -180,30 +180,28 @@ enemy('ink_blot', {
   flavor: 'Ink from the black pool, thick as tar and twice as patient.',
 });
 enemy('briar_alpha', {
-  name: 'Briar Alpha', family: 'beast', level: 7, size: 'large', boss: true,
-  hp: 540, atk: 33, def: 11, mag: 10, spr: 10, spd: 15, luk: 8,
+  name: 'Briar Alpha', family: 'beast', level: 7, size: 'large', boss: true, ai: 'phased',
+  hp: 560, atk: 37, def: 11, mag: 10, spr: 10, spd: 15, luk: 8,
   shields: 3, weak: ['fire', 'axe'],
   statusImmune: ['stun', 'silence', 'poison', 'blind'],
   exp: 110, gold: 260, masteryPts: 14,
-  // Howl once it is hurt (allyHurt reads its own HP under 70% when it fights alone): the Haste phase.
-  moves: [{ skill: 'bite', weight: 45, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 35 },
-          { skill: 'howl', weight: 20, once: true, if: 'allyHurt' }],
+  moves: [{ skill: 'bite', weight: 55, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 45 }],
   // Its telegraph reuses the scarab's charge (the only single-target telegraph skill in skills.js): "digs in,
   // eyes fixed on {target}" reads as a pounce. Lunge, Defend or a Break answer it.
   charge: { skill: 'burrow_charge', first: 2, cooldown: 3 },
-  // Phase data for the `briar_alpha` AI script proposed in the W6-content report (calls one Thornback Wolf at
-  // 50%, gains Haste at 25%). The basic script ignores it; the fight is still a real one without it.
+  // Two phase changes (ai.js `phased`): at 50% it calls one Thornback Wolf, at 25% it gains Haste.
   phases: [
-    { id: 'warden', name: 'Warden of the Bridge', at: 1.0, weak: ['fire', 'axe'], resist: [], shields: 3,
+    { id: 'warden', name: 'Warden of the Lost Bridge', at: 1.0, weak: ['fire', 'axe'], resist: [], shields: 3,
       text: 'The Briar Alpha plants itself between you and the plaque.' },
     { id: 'pack_call', name: 'Pack Call', at: 0.5, weak: ['fire', 'axe'], resist: [], shields: 3, summon: 'thornback_wolf',
       text: 'The Alpha throws back its head and calls. Something answers from the pines.' },
     { id: 'thornrage', name: 'Thorn Rage', at: 0.25, weak: ['fire', 'axe'], resist: [], shields: 4, haste: true,
       text: 'Thorns bristle along its spine. It is faster now, and past caring.' },
   ],
-  drops: [], lootZone: 'whisperwood_hollow', uniqueDrop: 'bramblefang',
+  drops: [], lootZone: 'whisperwood_hollow', uniqueDrop: 'thornwake',
+  // No new art: the briar wolf battle frame at 1.3x with the elite gold tint (contract sent to W6-anim).
   sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_wolf', scale: 1.3, tint: '#ffd34d' },
-  flavor: 'The pack\'s first and oldest. It kept the lost bridge for years, and nobody told it to stop.',
+  flavor: "The pack's first and oldest. It kept the lost bridge for years, and nobody told it to stop.",
 });
 
 // Lost Page variants: each summon picks distinct variants so the pages want different answers.

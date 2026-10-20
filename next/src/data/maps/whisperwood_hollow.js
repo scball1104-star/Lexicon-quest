@@ -35,7 +35,7 @@ const overlays = [
   { t: 'ink_bridge_h_faint', x: 5, y: 16 }, { t: 'ink_bridge_h_faint', x: 6, y: 16 }, { t: 'ink_bridge_h_faint', x: 7, y: 16 },
   { t: 'ink_bridge_h_faint', x: 8, y: 16 }, { t: 'ink_bridge_h_faint', x: 9, y: 16 },
   // what is left of the pilgrims' wooden bridge: two rows of rotten piles beside the ink line
-  { t: 'bridge_wood_h_piles_l', x: 6, y: 17 }, { t: 'bridge_wood_h_piles_r', x: 8, y: 17 },
+  { t: 'bridge_wood_h_piles_l', x: 5, y: 17 }, { t: 'bridge_wood_h_piles_m', x: 7, y: 17 }, { t: 'bridge_wood_h_piles_r', x: 9, y: 17 },
   // the plaque with the three names, written in ink that only the Lantern reads (B's north face)
   { t: 'wall_glyph_faint', x: 20, y: 2 },
   // roots everywhere: this hollow is the pines' cellar
@@ -48,11 +48,12 @@ const overlays = [
   ...scatter(ground, ['m'], ['leaves', 'flowers_violet'], 0.2, 62),
 ];
 
-// pines on every cliff top around the rim, clear of the notch and the stairs
+// pines on the cliff tops around the rim, clear of the notch and the stairs (none on the south rim row: a pine
+// there would grow up over the floor)
 const pines = [];
 const pine = (x, y) => pines.push({ t: 'tree_pine', x, y });
-for (const [x, y] of [[1, 1], [4, 0], [7, 1], [10, 0], [13, 1], [26, 1], [26, 5], [0, 7], [2, 9], [5, 8], [8, 9], [11, 7],
-  [14, 9], [16, 10], [24, 9], [26, 9], [0, 12], [27, 12], [27, 16], [0, 16], [1, 19], [6, 19], [11, 19], [17, 19], [22, 19], [26, 19],
+for (const [x, y] of [[1, 1], [4, 0], [7, 1], [10, 0], [13, 1], [26, 1], [27, 5], [0, 7], [2, 9], [5, 8], [8, 9], [11, 7],
+  [14, 9], [27, 9], [0, 12], [27, 12], [27, 16],
   [3, 2], [9, 3], [13, 4], [1, 5], [7, 5], [12, 1], [20, 0]]) pine(x, y);
 
 const decor = [
@@ -88,7 +89,7 @@ const events = [
   chest('chest_bay', 11, 11, 'iron'),
   chest('chest_alpha', 25, 4, 'gold'),
   // inspectables
-  sign('old_piles', 7, 17, 'hollow_piles', { solid: false }),
+  sign('old_piles', 5, 17, 'hollow_piles', { solid: false }),   // read from the near shore, before the Lantern
   // visible enemies: 3 per ZONES.whisperwood_hollow.plan (dungeon rule: they step when the player steps)
   enemy('h_wolves_a', 12, 15, 'briar_wolf', 'hollow_wolves', 'chase'),
   enemy('h_wolves_b', 21, 17, 'briar_wolf', 'hollow_wolves', 'patrol', { path: steps('left', 3, 'right', 3) }),
@@ -97,7 +98,7 @@ const events = [
 
 export default {
   id: 'whisperwood_hollow', name: 'Whisperwood Hollow', area: 'dungeon',
-  music: 'archive', ambience: 'wind_valley', tileset: 'town',
+  music: 'mystery', ambience: 'wind_valley', tileset: 'town',
   lighting: { tint: 'none', dark: 0.5 },
   under: 'dirt',
   pitTo: ['whisperwood_hollow', 3, 16, 'right'],

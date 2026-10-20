@@ -29,8 +29,9 @@ function randomAction(b, rng) {
 }
 
 test('random play never breaks the rules engine', () => {
-  const zoneOf = { valley: 'valley', archive_f1: 'archive_f1', archive_f2: 'archive_f2', archive_f3: 'archive_f3', archive_boss: 'archive_boss' };
-  const levels = { valley: 3, archive_f1: 4, archive_f2: 6, archive_f3: 7, archive_boss: 8 };
+  const zoneOf = { valley: 'valley', archive_f1: 'archive_f1', archive_f2: 'archive_f2', archive_f3: 'archive_f3', archive_boss: 'archive_boss',
+    whisperwood_hollow: 'whisperwood_hollow' };
+  const levels = { valley: 3, archive_f1: 4, archive_f2: 6, archive_f3: 7, archive_boss: 8, whisperwood_hollow: 7 };
   let battles = 0;
   for (const enc of Object.values(ENCOUNTERS)) {
     for (let seed = 1; seed <= 14; seed++) {

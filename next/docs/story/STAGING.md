@@ -74,6 +74,7 @@ therefore be simple and do not need `once`.
 | `archivore_defeated` | Every sign is restored. Hal appears in the bakery. The root passage in `archive_boss` opens. The town is back to normal colors. |
 | `ep1_complete` | Post-game state (NPC lines change). After the credits, load `hero_home` at `bed` in day lighting: Hazel's last line pays off there. |
 | `nella_bell_done` | The valley north landing bell post becomes an exit to the Willowmere ferry landing (ferry shortcut). |
+| `briar_alpha_defeated` | The Briar Alpha map actor in Whisperwood Hollow is gone (its den is open; the stone and the gold chest stay). |
 | `archive_f1_done` | The Keepers' back-stair appears on F1: `stairs_up` objects and doors `shortcut_b` (stairs landing J) and `shortcut_j` (antechamber B), both ways. |
 | `first_fight_done` | The wolf pack `e_wolves_a` at the valley road bend stays a normal `chase` enemy; the scene only despawns it for the current visit. |
 | `starter_quest_started` and not `starter_found` | `starter_dough` sits by the smithy forge. |
@@ -106,12 +107,18 @@ Party chat ("Talk"), journal text and NPC directions name these places. Keep the
 - At the **fork**: the **milestone**, the fork signpost, and the **Pilgrim's Rest** campfire (Quill). Roads go
   north (Archive), west (Willowmere) and east (toward the Hollow lands; blocked in Episode 1 by deep forest or a
   washed-out ford).
-- Placed uniques (battle-rules): `thornwake` in a Whisperwood secret (needs the Lantern, so it is found on the
-  way home); `wayfarer_mantle` in an Archive F1 secret chest; `first_quill` in an F3 Lantern-revealed chest.
+- Placed uniques (battle-rules): `pilgrim_reach` (the Pilgrim's Reach spear) in the Whisperwood pool secret (needs
+  the Lantern, so it is found on the way home), `thornwake` (axe) from the Briar Alpha in Whisperwood Hollow; `wayfarer_mantle` in an Archive F1 secret chest; `first_quill` in an F3 Lantern-revealed chest.
 - North end: the **Rootbound Archive**, a library grown into an enormous willow. Near it, the **north landing**
   with an empty bell post. The **shallows** just downstream (south) of the landing hold Nella's bell.
-- East edge: the **Whisperwood** treeline (secret: `thornwake`, needs the Lantern). West meadow: the **hollow
+- East edge: the **Whisperwood** treeline (secret: `pilgrim_reach`, needs the Lantern). A root arch at the pool's
+  north-west edge (mark `hollow_mouth`) leads down into **Whisperwood Hollow**, the optional dungeon (W6). West meadow: the **hollow
   tree** cache (secret). Visible enemies: briar wolves, moss scarabs, ink slimes.
+
+**Whisperwood Hollow** (optional): a sunken root hollow under the pines. Stairs land on a small shore; a black
+pool cuts it off from the hollow proper, and the pilgrims' lost bridge across it is hidden ink (Lantern). The
+hollow holds wolves, an elite ink blot by an iron chest, a push block and plate for the barred door north, and
+behind it the Briar Alpha's den with the pilgrims' stone (three names) and a gold chest.
 
 **Rootbound Archive**: F1 Catalog Halls (card-catalog walls, keys, push blocks), F2 Reading Galleries (reading
 desks with ghostly ink readers, the Echo Warden, hidden-ink bridges), F3 Rootbound Stacks (roots, moving
@@ -310,6 +317,28 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | `ferry_bell_found` | valley | object `prop_ferry_bell` in the shallows below the north landing | Needs `nella_quest_started`. |
 | `hal_returns` | bakery | talk to Hal | Hal (NPC `hal`, sprite `npc_farmer`) only exists after the Archivore. |
 
+### The Lost Bridge (Whisperwood Hollow, optional; W6-content)
+- **`quill_hint`** (valley, talk to Quill the first time; `ifNot: lost_bridge_started`). Quill introduces himself
+  and tells of the pilgrims' bridge at the black pool east of the fork ("Lost, mind. Not broken."). With the
+  Lantern he points at the root arch. Sets `lost_bridge_started` (the journal side quest "The Lost Bridge").
+- **`hollow_entry`** (`whisperwood_hollow`, `on: 'enter'`; `ifNot: hollow_found`). Camera pans to mark
+  **`bridge_far`** (30 frames) across the black pool. One narration box, then: without the Lantern Bram says the
+  bridge is gone (the scene replays on the next visit); with it Mira says to raise the Lantern (names the button).
+  Sets `lost_bridge_started` if Quill was skipped, and `hollow_found` (Lantern only). Two boxes either way.
+- **`hollow_alpha`** (trigger `alpha_trig` across the boss room's mouth; `ifNot: hollow_cleared`). The W5 boss
+  intro: music to silence, pan 40 frames to the map actor **`whisperwood_alpha`** (field sprite `briar_wolf`,
+  facing down at mark `alpha_spot`, `ifNot: briar_alpha_defeated`), anger emote, six boxes, title card
+  "BRIAR ALPHA / Warden of the Lost Bridge", shake, flash, `music('battle')`, battle `whisperwood_alpha` (boss,
+  no flee). On a win it runs `hollow_after`. If the flag is already set but the stone was never read (a quit
+  mid-scene), the trigger runs `hollow_after` instead.
+- **`hollow_after`** (`if: briar_alpha_defeated`, `ifNot: hollow_cleared`). Silence, the Alpha lies down and
+  despawns, pan 40 to mark **`plaque`** (the pilgrims' stone, hidden ink on the north face), `lantern_reveal`,
+  green flash, the inscription and three names darken (`name_restore`, music `triumph`): SORREL, ANSEL, WREN.
+  Mira: the Archive is not the only place names are kept. Music back to `mystery`. Sets `hollow_cleared`.
+- After the clear: Quill and the Pilgrim's Rest bench (`pilgrim_bench`) have new lines; the stone
+  (`lost_bridge_plaque`) reads the names. The Thornwake axe is the Alpha's guaranteed battle drop
+  (`BOSS_LOOT.briar_alpha`), not a scene give; the gold chest `chest_alpha` behind it (mark `gold_chest`) rolls a rare.
+
 ---
 
 ## 5. Marks checklist
@@ -324,11 +353,12 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | `inn` | NPCs `hob barnaby` |
 | `item_shop` | NPC `pell` |
 | `chapel` | NPC `pip`; save bell object |
-| `valley` | `archive_door`, `door_step` (+ open tiles left and right), `root_exit`, `campfire`; objects `milestone`, `prop_ferry_bell`, `campfire`; NPCs `quill penny` |
+| `valley` | `archive_door`, `door_step` (+ open tiles left and right), `root_exit`, `campfire`, `hollow_mouth`; objects `milestone`, `prop_ferry_bell`, `campfire`; NPCs `quill penny` |
 | `archive_f1` | `catalog_drawer`; object `prop_letter` (letter 1) |
 | `archive_f2` | `font`; actor `echo_warden`; object `lantern_pedestal`; object `prop_letter` (letter 2) |
 | `archive_f3` | `thirteenth_bell`; object `boss_door`; object `prop_letter` (letter 3); chest with flag `stacks_key_found` |
 | `archive_boss` | actor `archivore`, `fragment_spot`, root passage exit |
+| `whisperwood_hollow` | `entrance`, `bridge_near`, `bridge_far`, `alpha_spot`, `plaque`, `gold_chest`; actor `whisperwood_alpha` |
 
 ## 6. Inspect text and books by map
 
@@ -345,6 +375,7 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 | `archive_f1` | `archive_door_carving` (valley side), `catalog_promise`, `catalog_drawers`, `marginalia`, `reading_desk` | `catalog_ledger`, `keeper_journal_1` |
 | `archive_f2` | `reading_desk`, `hidden_ink_1`, `hidden_ink_2`, `keeper_font_galleries` (the font) | `readers_oath`, `keeper_journal_2` |
 | `archive_f3` | `broken_chronicle`, `keeper_font`, `crystal_plaque`, `thirteenth_bell`, `boss_door_plate`, `hidden_ink_3` | `keeper_journal_3` |
+| `whisperwood_hollow` | `hollow_piles`, `lost_bridge_plaque` (Lantern; the names after `hollow_cleared`) | |
 
 `hidden_ink_*` texts only become readable once the Lantern reveals them.
 

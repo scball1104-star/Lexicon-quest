@@ -70,6 +70,12 @@ export const FLAGS = {
   nella_quest_started: 'Nella asked the party to find her call-bell.',
   ferry_bell_found: 'Found Maudie the call-bell in the valley shallows.',
   nella_bell_done: 'Returned the bell. The valley north landing ferry now carries the party to town.',
+
+  // Side quest: The Lost Bridge (Quill; Whisperwood Hollow, optional, W6-content)
+  lost_bridge_started: "Quill told the party about the pilgrims' lost bridge (quill_hint), or they walked into the hollow.",
+  hollow_found: 'Entered Whisperwood Hollow with the Lantern and saw the ink bridge (hollow_entry).',
+  briar_alpha_defeated: 'The Briar Alpha is beaten (encounter flag; hollow_after also sets it). Its map actor is gone.',
+  hollow_cleared: "The pilgrims' stone gave back three names; the lost bridge story is resolved (hollow_after).",
 };
 
 export const FLAG_IDS = Object.keys(FLAGS);
@@ -338,6 +344,39 @@ export const SIDE_QUESTS = [
       },
     ],
   },
+  {
+    // W6-content: the optional Whisperwood Hollow. Quill's hint (or walking in) starts it; the reward is the
+    // Briar Alpha's guaranteed drop, Thornwake (battle loot, not a scene give).
+    id: 'lost_bridge', title: 'The Lost Bridge', giver: 'quill', start: 'lost_bridge_started', done: 'hollow_cleared',
+    reward: 'thornwake',
+    steps: [
+      {
+        id: 'find', done: 'hollow_found',
+        journal: 'Quill says the pilgrims lost a bridge at a black pool past the pines, east of the fork. Lost, not broken.',
+        chat: [
+          { if: 'lantern_get', lines: [{ who: 'mira', text: 'The black pool east of the fork has a root arch beside it. Bring the Lantern. Ink remembers.' }] },
+          { if: 'mira_joined', lines: [{ who: 'mira', text: 'A bridge that is lost, not broken. I would bet on hidden ink. We need a true light.' }] },
+          { lines: [{ who: 'hero', text: '(The pilgrims lost a bridge at a black pool east of the fork.)' }] },
+        ],
+      },
+      {
+        id: 'alpha', done: 'briar_alpha_defeated',
+        journal: 'Under the pines lies a hollow. The lost bridge is hidden ink, and something big keeps the far end.',
+        chat: [
+          { if: 'mira_joined', map: 'whisperwood_hollow', lines: [{ who: 'mira', text: 'The barred door in the north wall wants weight on its plate. That block, maybe.' }] },
+          { if: 'bram_joined', lines: [{ who: 'bram', text: "Something big is guarding the pilgrims' stone. Bring fire. Bring an axe." }] },
+          { lines: [{ who: 'hero', text: '(Something guards the far end of Whisperwood Hollow.)' }] },
+        ],
+      },
+      {
+        id: 'stone', done: 'hollow_cleared',
+        journal: "The Briar Alpha is down. Read the pilgrims' stone by Lantern light.",
+        chat: [
+          { lines: [{ who: 'hero', text: "(The pilgrims' stone stands where the Alpha lay.)" }] },
+        ],
+      },
+    ],
+  },
 ];
 
 // ------------------------------------------------------------------------------------------------
@@ -387,6 +426,15 @@ export const BANTER = {
       { who: 'mira', text: 'Did you know the pilgrim road is older than Willowmere?' },
       { who: 'bram', text: 'I did not.' },
       { who: 'mira', text: "Well, now you do. You're welcome." },
+    ] },
+  ],
+  whisperwood_hollow: [
+    { if: ['hollow_cleared', ...BOTH], lines: [
+      { who: 'bram', text: 'Sorrel, Ansel, Wren. I keep saying them. Somebody should.' },
+    ] },
+    { if: BOTH, lines: [
+      { who: 'mira', text: 'Roots overhead, ink underfoot. Like the Archive, only nobody built it.' },
+      { who: 'bram', text: "Nobody built it, and something still guards it. I don't like that." },
     ] },
   ],
   archive_f1: [

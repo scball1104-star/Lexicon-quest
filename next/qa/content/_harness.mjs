@@ -17,7 +17,8 @@ export const CAMERA_API = new Set(['panTo', 'follow']);
 
 // Canonical ids from COMMON.md / DESIGN.md.
 export const MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
-  'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
+  'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss',
+  'whisperwood_hollow'];   // W6-content: the optional side dungeon
 export const NPC_SPRITES = ['npc_elder', 'npc_tess', 'npc_baker', 'npc_ferry', 'npc_innkeeper', 'npc_shopkeeper',
   'npc_smith', 'npc_child_a', 'npc_child_b', 'npc_guard', 'npc_old_woman', 'npc_farmer', 'npc_scholar', 'npc_parent',
   'npc_bellkeeper', 'animal_cat', 'animal_dog', 'animal_chicken', 'animal_duck'];

@@ -10,7 +10,8 @@ let ENEMIES = null;
 try { ({ ENEMIES } = await import('../../src/data/enemies.js')); } catch { ENEMIES = null; }
 
 const ENEMY_IDS = ['ink_slime', 'page_wraith', 'briar_wolf', 'moss_scarab', 'bookmite', 'tome_golem', 'ink_wraith',
-  'echo_warden', 'lost_page', 'archivore'];
+  'echo_warden', 'lost_page', 'archivore',
+  'thornback_wolf', 'ink_blot', 'briar_alpha'];   // W6-content: Whisperwood Hollow
 
 const boxes = (where, arr) => {
   assert.ok(Array.isArray(arr) && arr.length, `${where}: empty`);

@@ -191,7 +191,7 @@ const events = [
   // chests: the hollow tree cache, the cliff-top chest, the Whisperwood secret (Lantern)
   chest('chest_hollow', 16, 25, 'wood', { item: 'echo_herb', qty: 2 }),
   chest('chest_cliff', 4, 8, 'iron', { item: 'hatchet' }),
-  chest('chest_whisperwood', 57, 31, 'gold', { item: 'thornwake' }),
+  chest('chest_whisperwood', 57, 31, 'gold', { item: 'pilgrim_reach' }),
   // visible enemies: 7 per encounters.js ZONES.valley.plan (the wolf pack at the gate chases, the pack deepest)
   enemy('e_wolves_a', 14, 33, 'briar_wolf', 'valley_wolves', 'chase'),
   enemy('e_wolves_b', 9, 10, 'briar_wolf', 'valley_wolves', 'guard'),

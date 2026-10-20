@@ -215,7 +215,8 @@ Placed uniques (Episode 1 random tables never roll legendaries):
 |---|---|---|---|
 | Lanternheart (sword) | legendary | ATK +24, crit +6, +20% light, sword hits count as light | Archivore (guaranteed drop) |
 | Mirrorguard Mail (body) | legendary | DEF +11, SPR +9, HP +20, ink -20% | Echo Warden (guaranteed drop) |
-| Thornwake (spear) | legendary | ATK +17, SPD +1, 25% poison on hit | Valley secret at the Whisperwood edge, Lantern-revealed (return trip) |
+| Pilgrim's Reach (spear) | legendary | ATK +17, SPD +1, crit +5 | Valley secret at the Whisperwood pool, Lantern-revealed (return trip; was the first "Thornwake") |
+| Thornwake (axe) | legendary | ATK +18, crit +4, SPD -1, 30% poison on hit | Briar Alpha, Whisperwood Hollow (guaranteed drop, `BOSS_LOOT.briar_alpha`) |
 | The First Quill (staff) | legendary | MAG +17, MP +12, spells cost 1 less | Archive F3 secret chest behind hidden ink |
 | Wayfarer Boots (set) | set | SPD +2, DEF +1, HP +10 | Tess's reward for all three letters |
 | Wayfarer Mantle (set) | set | DEF +2, SPR +3, LUK +3 | Archive F1 secret chest |
@@ -243,6 +244,17 @@ player fights each about once:
 | Archive F2 (+ Echo Warden) | 8 + 1 | 5 to 6 | 5 to 6 |
 | Archive F3 | 8 | 6 to 8 | 6 to 7 |
 | Archivore | 1 | fought at 8 | fought at 7 |
+| Whisperwood Hollow (optional, + Briar Alpha) | 3 + 1 | fought at 6 to 7 (not in the EXP curve: `OPTIONAL_ZONES`) | - |
+
+**Whisperwood Hollow** (W6-content, reached after the Lantern): `hollow_wolves` x2 (Thornback Wolf: Lv 6, HP 250,
+weak fire/spear) and `hollow_blot` x1 (two Ink Blots, Lv 6, HP 190, weak fire/axe; the first is a fixed
+Vampiric Stoneskin elite, `elite` on the encounter). The mini-boss `briar_alpha` (Lv 7, HP 560, ATK 37, shields
+3, weak fire/axe, Burrowing Charge telegraph) uses the data-driven `phased` AI in `battle/ai.js`: at 50% Pack
+Call summons one Thornback Wolf, at 25% Thorn Rage grants permanent Haste; HP locks stop a hit skipping a phase.
+Art: no new sprites. `sprite.frame` borrows `briar_wolf` (Alpha at scale 1.3, elite gold tint; Thornback purple
+tint) and `ink_slime` (Blot 1.15, dark ink tint); the battle actor must honor `sprite.frame/scale/tint`.
+Sim at 400 per row: wolves 3.2/3.0 rounds, blot 4.7/4.5, Alpha careful 100% in 7.9/7.4 rounds (Lv 6/7) with 19%
+HP lost, attack-only wins 10%/52%.
 
 Placement notes: make the first valley fight a `valley_wolves` (gentlest at Lv 1), keep scarabs and the
 `valley_pack` deeper in. The hero should own a **Hatchet** by Archive F1 (Garrick's gift). The simulator assumes **Iron

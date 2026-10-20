@@ -533,6 +533,11 @@ export const NPCS = {
     spot: 'The Pilgrim\'s Rest campfire, near the milestone fork', move: 'stand',
     about: 'A traveling scribe who walks the pilgrim road each year to copy the milestone.',
     talk: [
+      { if: 'hollow_cleared', lines: [
+        'You found the pilgrims\' stone? Sorrel, Ansel, Wren. I have written them in my book twice, in case one of us forgets.',
+        'Lost, not broken. I always said so. It only wanted a light, and someone stubborn enough to carry it.',
+      ] },
+      { ifNot: 'lost_bridge_started', scene: 'quill_hint' },
       { if: DONE, lines: [
         'The milestone\'s words are sharp again. I copied them twice anyway. Old habits.',
         'Somewhere, a great many people are remembering things right now, and they will never know who to thank.',
@@ -542,9 +547,8 @@ export const NPCS = {
         'Take it past the pines, east of the fork, to the pool where the pilgrims lost their bridge. Ink remembers, they say.',
       ] },
       { lines: [
-        "I'm Quill, a scribe. I walk the pilgrim road every year to copy the milestone.",
         'This year I copy every name twice. One for me, and one for the village, in case one of us forgets.',
-        'Past the pines east of the fork is a black pool where the pilgrims lost a bridge. Lost, mind. Not broken.',
+        "The pilgrims' bridge, at the black pool past the pines east of the fork. Lost, mind. Not broken.",
       ] },
     ],
   },
@@ -568,7 +572,7 @@ export const NPCS = {
 // Display names for scene speakers that are not NPC records (map-placed actors and party members).
 export const SPEAKER_NAMES = {
   hero: '{hero}', mira: 'Mira', bram: 'Bram',
-  echo_warden: 'Echo Warden', archivore: 'The Archivore',
+  echo_warden: 'Echo Warden', archivore: 'The Archivore', whisperwood_alpha: 'Briar Alpha',
 };
 
 /** Display name for any speaker id used in scenes or talk. */

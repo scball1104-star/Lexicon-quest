@@ -106,7 +106,7 @@ test('helpers: talkTo, isPresent, moveFor, npcsOnMap, speakerName', () => {
   assert.equal(moveFor('wick', has(['wick_tag_done'])).move, 'tag');
   assert.equal(moveFor('wick', has(['wick_tag_done'])).partner, 'lark');
   assert.ok(npcsOnMap('willowmere').some((n) => n.id === 'tess'));
-  for (const m of MAP_IDS.filter((x) => !x.startsWith('archive'))) assert.ok(npcsOnMap(m).length >= 1, `nobody on ${m}`);
+  for (const m of MAP_IDS.filter((x) => !x.startsWith('archive') && x !== 'whisperwood_hollow')) assert.ok(npcsOnMap(m).length >= 1, `nobody on ${m}`);
   assert.equal(speakerName('archivore'), 'The Archivore');
   assert.equal(speakerName('pip'), 'Pip');
   // Every shop/inn NPC hands back its service after the lines.
@@ -133,8 +133,10 @@ test('Tess, Wick and Nella open their quests only once Bram has joined; Oren ope
   assert.ok(!talkTo('wick', has([...town, 'wick_tag_found'])).scene);
   // Oren's starter can open as soon as the hero is up
   assert.deepEqual(talkTo('oren', has(['intro_done'])), { scene: 'oren_starter' });
-  // Quill tells the Whisperwood secret, twice over
-  for (const flags of [[], ['lantern_get']]) {
+  // Quill tells the Whisperwood secret: the first talk is the Lost Bridge hint scene (W6-content), then lines
+  assert.deepEqual(talkTo('quill', has(['bram_joined'])), { scene: 'quill_hint' });
+  assert.match(talkTo('quill', has(['bram_joined', 'lost_bridge_started', 'hollow_cleared'])).lines.map((l) => l.text).join(' '), /Sorrel/);
+  for (const flags of [['lost_bridge_started'], ['lost_bridge_started', 'lantern_get']]) {
     const q = talkTo('quill', has(['bram_joined', ...flags])).lines.map((l) => l.text).join(' ');
     assert.match(q, /pool/);
     assert.match(q, /pines/);

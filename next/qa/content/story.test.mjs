@@ -17,7 +17,7 @@ const encounterExists = (id) => (ENCOUNTERS ? !!ENCOUNTERS[id] : ENCOUNTER_IDS_F
 const MAIN_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered',
   'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open',
   'archivore_defeated', 'ep1_complete'];
-const MAP_ACTORS = ['echo_warden', 'archivore', 'e_wolves_a']; // map actors scenes drive: boss actors, the first-fight wolf pack
+const MAP_ACTORS = ['echo_warden', 'archivore', 'e_wolves_a', 'whisperwood_alpha']; // map actors scenes drive: boss actors, the first-fight wolf pack
 const PARTY = ['hero', 'mira', 'bram'];
 
 // Explore every scene once and keep the runs for the checks below.

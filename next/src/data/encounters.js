@@ -45,7 +45,7 @@ enc('archivore', { zone: 'archive_boss', leader: 'archivore', enemies: ['archivo
 // them), so the "ink slime elite" of the W6-content brief is the same gold-named foe every time.
 enc('hollow_wolves', { zone: 'whisperwood_hollow', leader: 'thornback_wolf', enemies: ['thornback_wolf', 'thornback_wolf'] });
 enc('hollow_blot', { zone: 'whisperwood_hollow', leader: 'ink_blot', enemies: ['ink_blot', 'ink_blot'],
-  elite: { mods: ['splitting', 'vampiric'], index: 0 } });
+  elite: { mods: ['vampiric', 'stoneskin'], index: 0 } });
 enc('whisperwood_alpha', { zone: 'whisperwood_hollow', leader: 'briar_alpha', enemies: ['briar_alpha'], boss: true, noFlee: true,
   music: 'battle', noElite: true, flag: 'briar_alpha_defeated' });
 

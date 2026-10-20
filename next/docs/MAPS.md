@@ -137,8 +137,9 @@ open tiles each side, `root_exit` (39,7) where the boss chamber's passage comes 
 the empty bell post (`ferry` event), Nella's bell glinting in the shallows just downstream. West: the meadow,
 a fenced pasture, the hollow willow (wood chest: Echo Herb x2 under the canopy), a cliff plateau with stairs,
 an iron chest (spare Hatchet) and a grassy ledge for a one-way hop down. Secrets: the Whisperwood clearing's
-ink pool with a hidden ink bridge to a gold chest (Thornwake; needs the Lantern, so it is found on the way
-home). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
+ink pool with a hidden ink bridge to a gold chest (Pilgrim's Reach; needs the Lantern, so it is found on the way
+home), and on the pool's north-west edge a ruined root arch (`arch_ruin` (50,27)) whose middle cell is the door
+`hollow_mouth` (51,27) down into Whisperwood Hollow (mark `hollow_mouth` (51,28), where the party comes back up). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
 step trigger `first_fight_trig` (column 7, rows 6 to 39, a full cut of the map) runs the scripted first fight
 before the pack can be walked past;
 the pack deepest by the Archive. The campfire (39,22) is an `object` with `script: 'campfire_rest'`, `safe` and
@@ -195,6 +196,23 @@ A hollow inside the willow: root columns, ink seeping from the walls, a carpet o
 party enters from the south notch; the Archivore feeds at the north end over the blue carpet (`archivore`
 (12,6), `fragment_spot` (12,9)). After `archivore_defeated` the root passage opens in the north face
 (`root_exit` (16,4)) and leads out to the valley beside the Archive door.
+
+### whisperwood_hollow (28 x 20, dungeon, dark 0.5): Whisperwood Hollow (optional)
+![whisperwood_hollow](../tools/maps/previews/whisperwood_hollow.png)
+A sunken root hollow under the Whisperwood pines (town tileset: cliffs, pines on the rim, dirt and moss floor,
+archive `roots_*` decals, `root_column` pillars, ink). Music `mystery`. The valley's root arch lands on the stairs
+landing (`entrance` (2,13), stairs back up at (2,12)). A black ink pool cuts the landing off from the main
+hollow: the pilgrims' lost bridge is five `ink_bridge_h_faint` cells on row 16 (`bridge_near` (4,16) to
+`bridge_far` (10,16)), so nothing past the pool is reachable before the Lantern; the rotten piles beside it
+(`old_piles`, read from the near shore) and the `hollow_entry` scene tell the story either way. Main hollow:
+two `hollow_wolves` (one chases, one patrols), the elite `hollow_blot` guarding the iron chest `chest_bay` in the
+north notch (11,11), two unlit braziers to light and two already burning. Puzzle: push `block_m` (14,14) onto
+`plate_m` (18,16); the root column at (16,14) blocks the straight push, so it goes down two, then east four. The
+plate opens the barred `gate_b` (20,12) to the notch (20,8) and the den: the `alpha_trig` row 7 fires
+`hollow_alpha` on the first step in, the Briar Alpha (`whisperwood_alpha`, `briar_wolf` field sprite, `ifNot:
+briar_alpha_defeated`) lies before the pilgrims' stone (`lost_bridge_plaque` (20,3), hidden ink, mark `plaque`),
+and the gold chest `chest_alpha` (25,4) sits in the corner behind it. Blocks reset on re-entry. Plan: 2 + 1
+visible enemies + the boss actor (`ZONES.whisperwood_hollow`, optional, not in `ZONE_ORDER`).
 
 ---
 

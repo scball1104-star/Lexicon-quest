@@ -996,6 +996,88 @@ async function hal_returns(s) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Side quest: The Lost Bridge (Whisperwood Hollow, optional; W6-content). Quill's hint starts it, the
+// hollow's entry finds the ink bridge, the Briar Alpha guards the pilgrims' stone, the stone keeps three names.
+// ------------------------------------------------------------------------------------------------
+async function quill_hint(s) {
+  if (await s.hasFlag('lost_bridge_started')) return;
+  await say(s, 'quill', "I'm Quill, a scribe. I walk the pilgrim road every year to copy the milestone.");
+  await say(s, 'quill', 'Past the pines east of the fork is a black pool where the pilgrims lost a bridge. Lost, mind. Not broken.');
+  await say(s, 'quill', 'For a hundred years they crossed it to a stone with their names on it. Then one spring, no bridge.');
+  if (await s.hasFlag('lantern_get')) {
+    await say(s, 'quill', 'And that lantern of yours. Take it to the pool, under the root arch. Ink remembers, they say.');
+  } else {
+    await say(s, 'quill', 'Ink remembers, they say. It only wants a true light to read it by.');
+  }
+  await s.setFlag('lost_bridge_started');
+}
+
+async function hollow_entry(s) {
+  if (await s.hasFlag('hollow_found')) return;
+  if (!(await s.hasFlag('lost_bridge_started'))) await s.setFlag('lost_bridge_started');
+  await s.camera.panTo('bridge_far', 30);
+  await narrate(s, 'Black water fills the hollow. Rotten piles stand in it two by two, leading nowhere.');
+  if (!(await s.hasFlag('lantern_get'))) {
+    await say(s, 'bram', "No bridge. Whatever the pilgrims crossed on, it's long gone.");
+    await s.camera.follow('hero');
+    return;
+  }
+  await say(s, 'mira', 'Lost, not broken. Raise the Lantern with {i:btn_pageR}, {hero}. The bridge is still here.');
+  await s.camera.follow('hero');
+  await s.setFlag('hollow_found');
+}
+
+async function hollow_alpha(s) {
+  if (await s.hasFlag('briar_alpha_defeated')) {
+    if (!(await s.hasFlag('hollow_cleared'))) await hollow_after(s);
+    return;
+  }
+  await s.music(null);
+  await s.camera.panTo('whisperwood_alpha', 40);
+  await s.wait(30);
+  await narrate(s, 'Between the braziers, a stone stands against the wall. Something huge lies curled at its foot.');
+  await s.face('whisperwood_alpha', 'down');
+  await s.emote('whisperwood_alpha', 'anger');
+  await say(s, 'bram', "That's no ordinary wolf. That's the one the others answer to.");
+  await say(s, 'mira', "It isn't hunting. It's guarding. The stone, the bridge, all of it.");
+  await say(s, 'bram', 'Guarding it from who? Nobody has come down here in years.');
+  await say(s, 'mira', 'Then nobody told it to stop. Briar burns, {hero}, and thorns part for an axe.');
+  await narrate(s, 'The Alpha rises. Thorns lift along its spine like hackles.');
+  // Boss intro (W5 style): name card, a jolt, then the battle theme and the swirl.
+  await s.title('BRIAR ALPHA', { sub: 'Warden of the Lost Bridge', frames: 100 });
+  await s.shake(3, 24);
+  await s.flash('#ffffff', 8);
+  await s.music('battle');
+  const result = await s.battle('whisperwood_alpha', { boss: true, canFlee: false });
+  if (result !== 'win') return;
+  await hollow_after(s);
+}
+
+async function hollow_after(s) {
+  await s.setFlag('briar_alpha_defeated');
+  await s.music(null);
+  await s.camera.panTo('whisperwood_alpha', 20);
+  await narrate(s, 'The Alpha sinks down at the foot of the stone, like an old guard lying down after a long watch.');
+  await s.sfx('page_flutter');
+  await s.despawn('whisperwood_alpha');
+  await s.camera.panTo('plaque', 40);
+  await s.sfx('lantern_reveal');
+  await s.flash('#9fe8c8', 16);
+  await narrate(s, 'The Lantern flares. Hidden ink rises on the stone: "HERE THE PILGRIMS CROSSED, AND HERE THEY ARE KEPT."');
+  await narrate(s, 'Below it, three names, pale as breath. As the light touches them, the letters darken one by one.');
+  await s.sfx('name_restore');
+  await s.music('triumph');
+  await say(s, 'mira', 'Sorrel. Ansel. Wren.');
+  await say(s, 'bram', 'The pilgrims. Somebody hid their names in ink, where nothing could eat them.');
+  await say(s, 'mira', 'And a wolf lay on them for years, so nothing could scratch them out either.');
+  await say(s, 'mira', "The Archive isn't the only place names are kept. A stone. A bench. A friend who says them out loud.");
+  await say(s, 'bram', "Then I'll say them. Sorrel, Ansel, Wren. There. Kept.");
+  await s.camera.follow('hero');
+  await s.music('mystery');
+  await s.setFlag('hollow_cleared');
+}
+
+// ------------------------------------------------------------------------------------------------
 // Scene registry. SCENE_CONDITIONS says when each scene is allowed to run ({ if, ifNot } flags); the
 // wrapper checks it, so map triggers can stay simple. Every scene locks input while it runs.
 // ------------------------------------------------------------------------------------------------
@@ -1037,6 +1119,10 @@ export const SCENE_CONDITIONS = {
   nella_bell: { ifNot: 'nella_bell_done' },
   ferry_bell_found: { if: 'nella_quest_started', ifNot: 'ferry_bell_found' },
   hal_returns: { if: 'archivore_defeated', ifNot: 'hal_returned' },
+  quill_hint: { ifNot: 'lost_bridge_started' },
+  hollow_entry: { ifNot: 'hollow_found' },
+  hollow_alpha: { ifNot: 'hollow_cleared' },
+  hollow_after: { if: 'briar_alpha_defeated', ifNot: 'hollow_cleared' },
 };
 
 const RAW = {
@@ -1045,6 +1131,7 @@ const RAW = {
   archive_f2_arrival, find_letter_2, echo_warden, lantern_get, archive_f2_exit, archive_f3_arrival,
   find_letter_3, thirteenth_bell, boss_door, archivore, return_to_willowmere, ending_hook,
   tess_letters, oren_starter, starter_found, wick_tag, duck_nest, nella_bell, ferry_bell_found, hal_returns,
+  quill_hint, hollow_entry, hollow_alpha, hollow_after,
 };
 
 export const scenes = Object.fromEntries(Object.entries(RAW).map(([id, fn]) => [id, cut(fn, SCENE_CONDITIONS[id])]));
@@ -1191,7 +1278,13 @@ export const lines = {
   ],
   hollow_tree: 'A hollow willow, its heart split open by lightning long ago. Pilgrims leave small gifts inside for travelers who come after.',
   pilgrim_rest: 'The Pilgrim\'s Rest: a ring of stones, a kettle, and a dry log bench. A warm fire on a long road.',
-  pilgrim_bench: 'A dry log bench, worn smooth by a century of pilgrims. Someone has carved a small bell into the end of it.',
+  pilgrim_bench: [
+    { if: 'hollow_cleared', lines: [
+      'A dry log bench, worn smooth by a century of pilgrims. Someone has carved a small bell into the end of it.',
+      'Under the bell, freshly cut in a neat scribe\'s hand: SORREL. ANSEL. WREN. And below them: "Crossed at last."',
+    ] },
+    { lines: 'A dry log bench, worn smooth by a century of pilgrims. Someone has carved a small bell into the end of it.' },
+  ],
   bridge_plaque: 'MENDED BY NELLA AND THE RIVER FOLK, SPRING FLOOD YEAR. MAKE ROOM FOR THE RIVER.',
   ferry_post_valley: [
     { if: 'nella_bell_done', lines: 'A bell-post at the north landing. Ring, and Nella\'s ferry will carry you home to Willowmere.' },
@@ -1202,6 +1295,22 @@ export const lines = {
     'A scrap of bark nailed to a post by the benches, lettered in a careful pilgrim\'s hand:',
     '"East of the fork the pines close ranks. Past them, a black pool. The way across is ink, and only a true light reads it."',
     'Beneath it, scratched in a rougher hand: "Worth the thorns."',
+  ],
+
+  // whisperwood_hollow (W6-content)
+  hollow_piles: [
+    'Rotten piles stand in the ink in two rows. Whatever was laid across them is long gone.',
+    'A small bell is carved into the nearest pile, like the one on the bench at the Pilgrim\'s Rest.',
+  ],
+  lost_bridge_plaque: [
+    { if: 'hollow_cleared', lines: [
+      '"HERE THE PILGRIMS CROSSED, AND HERE THEY ARE KEPT."',
+      'SORREL. ANSEL. WREN. The names are dark and sharp, as if written this morning.',
+    ] },
+    { lines: [
+      '"HERE THE PILGRIMS CROSSED, AND HERE THEY ARE KEPT."',
+      'Three names follow, so pale the Lantern can barely hold them.',
+    ] },
   ],
 
   // archive

@@ -86,6 +86,31 @@ export const BESTIARY = {
       'Someone handed it a list.',
     ],
   },
+  // Whisperwood Hollow (optional, W6-content)
+  thornback_wolf: {
+    name: 'Thornback Wolf', where: 'Whisperwood Hollow',
+    lore: [
+      'A briar wolf grown old under the pines. The thorns go all the way through.',
+      'The hollow\'s wolves are bigger than the valley\'s, and they answer to something bigger still.',
+      'Spear and fire both find the gaps in its thorns. Its bite leaves poison, like its smaller cousins.',
+    ],
+  },
+  ink_blot: {
+    name: 'Ink Blot', where: 'Whisperwood Hollow',
+    lore: [
+      'Ink from the black pool, thick as tar and twice as patient.',
+      'It has soaked in the hollow so long that it will not take poison, and the cold barely bothers it.',
+      'Fire and a heavy axe break it apart. The one in the chest bay wears an elite\'s gold.',
+    ],
+  },
+  briar_alpha: {
+    name: 'Briar Alpha', where: 'Whisperwood Hollow',
+    lore: [
+      'The pack\'s first and oldest. It kept the lost bridge for years, and nobody told it to stop.',
+      'Hurt it badly and it calls the pack. Hurt it worse and the thorns along its spine make it fast.',
+      'Fire and axes. It lay across the pilgrims\' stone so long that the names under it were never scratched out.',
+    ],
+  },
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -206,6 +231,7 @@ export const BANNERS = {
   archive_f2: { title: 'Rootbound Archive', sub: 'II. The Reading Galleries' },
   archive_f3: { title: 'Rootbound Archive', sub: 'III. The Rootbound Stacks' },
   archive_boss: { title: 'Heart of the Archive' },
+  whisperwood_hollow: { title: 'Whisperwood Hollow', sub: 'The Lost Bridge' },
 };
 
 // ------------------------------------------------------------------------------------------------

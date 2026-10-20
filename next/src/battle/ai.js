@@ -272,7 +272,39 @@ const archivore = {
   },
 };
 
-const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage };
+// --- Data-driven phases (the Briar Alpha, W6-content) ---------------------------------------------
+// `phases` past the first fire when HP falls to their `at` fraction (damage stops at the threshold, so no
+// phase is skipped). A phase may set weak/resist and shields, `summon` one enemy by id and grant `haste`.
+// Weakness knowledge carries over (same weakKey): only the Archivore makes the player relearn per phase.
+function enterDataPhase(ctx, u, idx) {
+  const p = ENEMIES[u.id].phases[idx];
+  u.ai.phase = idx;
+  ctx.cancelCharge(u, 'phase');
+  ctx.emit({ type: 'phase', actor: u.uid, phase: idx + 1, id: p.id, name: p.name, text: p.text });
+  if (p.weak) ctx.setWeak(u, p.weak, p.resist, u.weakKey);
+  if (idx > 0 && p.shields) ctx.setShields(u, p.shields);
+  if (p.summon) ctx.summon(p.summon, { by: u, summoned: true, firstTurn: 0.5 });
+  if (p.haste) ctx.addStatus(u, 'haste', 99, u);
+}
+const phased = {
+  start(ctx, u) { u.ai.phase = 0; },
+  decide: basic.decide,
+  afterTurn: basic.afterTurn,
+  onChargeFired: basic.onChargeFired,
+  onChargeCancelled: basic.onChargeCancelled,
+  clampDamage(ctx, u, amt) {
+    const nextP = ENEMIES[u.id].phases[(u.ai.phase ?? 0) + 1];
+    if (!nextP) return amt;
+    const floorHp = Math.floor(u.maxHp * nextP.at);
+    return u.hp - amt < floorHp ? Math.max(0, u.hp - floorHp) : amt;
+  },
+  onDamaged(ctx, u) {
+    const nextP = ENEMIES[u.id].phases[(u.ai.phase ?? 0) + 1];
+    if (nextP && u.hp <= Math.floor(u.maxHp * nextP.at)) enterDataPhase(ctx, u, (u.ai.phase ?? 0) + 1);
+  },
+};
+
+const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased };
 function scriptOf(u) {
   const d = ENEMIES[u.id];
   return (d && SCRIPTS[d.ai]) || basic;
