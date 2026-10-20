@@ -143,7 +143,9 @@ west of the first-fight cut, so the dash can be tried first); Dash Strike opens 
 (`chest_grotto`, Phoenix Feather, `behind` the crack). Secrets: the Whisperwood clearing's
 ink pool with a hidden ink bridge to a gold chest (Pilgrim's Reach; needs the Lantern, so it is found on the way
 home), and on the pool's north-west edge a ruined root arch (`arch_ruin` (50,27)) whose middle cell is the door
-`hollow_mouth` (51,27) down into Whisperwood Hollow (mark `hollow_mouth` (51,28), where the party comes back up). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
+`hollow_mouth` (51,27) down into Whisperwood Hollow (mark `hollow_mouth` (51,28), where the party comes back up).
+W10: the step trigger `valley_lantern_hint` across row 17 above the fork (34..46) runs `quill_reminder` once after
+the Lantern (one Mira box pointing at the pool, or at Quill). Seven visible enemies per the plan: the wolf pack `e_wolves_a` chases at the road's bend (14,33) and the
 step trigger `first_fight_trig` (column 7, rows 6 to 39, a full cut of the map) runs the scripted first fight
 before the pack can be walked past;
 the pack deepest by the Archive. The campfire (39,22) is an `object` with `script: 'campfire_rest'`, `safe` and
@@ -180,7 +182,10 @@ Chain Shirt chest, then north through the gallery's wall into the rotunda from t
 over the Lantern pedestal (trigger row 16 across the rotunda). With the Lantern, the ink beside the pedestal
 reveals a bridge straight back into the hub (the shortcut), and the hub's east moat reveals the bridge to the
 stairs room (`archive_f2_exit` trigger in front of the stairs, `hidden_ink_2` on its wall, the Keeper's font
-`keeper_font_f2` at (34,17), 4 x 2, `safe`: the floor's heal and save). Seven ordinary enemies plus the Warden.
+`keeper_font_f2` at (34,17), 4 x 2, `safe`: the floor's heal and save after the Lantern). W10: a second font,
+`keeper_font_f2_hall` at (15,5) in the entry hall's north-west corner beside the stairs up (text `keeper_font_hall`,
+`safe`, mark `font_hall`), is the rest point before the Warden; the west reading desk and its ghost reader moved
+down a row for it (PLAYTEST_REVIEW_2 fix 1). Seven ordinary enemies plus the Warden.
 Faint bridges are pits until revealed (`pitTo` = the hub).
 
 ### archive_f3 (40 x 30): The Rootbound Stacks (dark 0.7)
@@ -189,7 +194,8 @@ Faint bridges are pits until revealed (`pitTo` = the hub).
 split by roots; letter 3 wedged between roots at (3,17)), south through the corridor to the bell hollow (the
 thirteenth bell between two root columns, trigger at the hollow's mouth, braziers), east to the great door hall:
 the boss door with its plate and `hidden_ink_3` beside it, the Keeper's font, the shortcut stairs back to F1's
-antechamber. **Branches:** the crystal room (three crystal switches, all lit opens the barred door to the key
+antechamber, and (W10) Rook the salvager at (25,23) by the font: the Archive's shop (`archive_salvage`, tier 3
+weapons, bronze plate, consumables at a markup), the gold sink before the Archivore. **Branches:** the crystal room (three crystal switches, all lit opens the barred door to the key
 room above: the gold chest with the Stacks Key, the Keeper's third journal, the broken chronicle; the plaque
 `crystal_plaque` beside the barred door reads THREE LIGHTS, ONE DOOR); the pit room (a golem and a patrol among
 the pits; falling drops into the cache below: a gold chest, a brazier, and across a hidden ink bridge the First
@@ -219,8 +225,11 @@ hollow: the pilgrims' lost bridge is five `ink_bridge_h_faint` cells on row 16 (
 two `hollow_wolves` (one chases, one patrols), the elite `hollow_blot` guarding the iron chest `chest_bay` in the
 north notch (11,11), two unlit braziers to light and two already burning. Puzzle: push `block_m` (14,14) onto
 `plate_m` (18,16); the root column at (16,14) blocks the straight push, so it goes down two, then east four. The
-plate opens the barred `gate_b` (20,12) to the notch (20,8) and the den: the `alpha_trig` row 7 fires
-`hollow_alpha` on the first step in, the Briar Alpha (`whisperwood_alpha`, `briar_wolf` field sprite, `ifNot:
+plate opens the barred `gate_b` (20,12) to the notch (20,10) and the shrine vestibule (17..23, 8..9; W10): the
+pilgrims' shrine `hollow_shrine` (`rune_shrine` prop, 3 x 2 at (17,9), a `font` with text `pilgrim_shrine`, `safe`,
+mark `shrine` (20,9)) is the rest point before the Alpha, so a lost fight retries at the den's door with the block
+gate behind the party (PLAYTEST_REVIEW_2 fix 2). The `alpha_trig` row 7 is the vestibule's only way up and fires
+`hollow_alpha`; the Briar Alpha (`whisperwood_alpha`, `briar_alpha` field sprite since W10, `ifNot:
 briar_alpha_defeated`) lies before the pilgrims' stone (`lost_bridge_plaque` (20,3), hidden ink, mark `plaque`),
 and the gold chest `chest_alpha` (25,4) sits in the corner behind it. Blocks reset on re-entry. Plan: 2 + 1
 visible enemies + the boss actor (`ZONES.whisperwood_hollow`, optional, not in `ZONE_ORDER`).

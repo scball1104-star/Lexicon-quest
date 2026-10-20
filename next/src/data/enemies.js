@@ -227,7 +227,15 @@ export const ELITE_MODS = {
   vampiric:  { id: 'vampiric', name: 'Vampiric', lifesteal: 0.35, desc: 'Heals for a third of the damage it deals.' },
   cursed:    { id: 'cursed', name: 'Cursed', curse: 0.3, desc: 'Its hits may inflict Poison, Blind or Chill.' },
   splitting: { id: 'splitting', name: 'Splitting', split: 0.35, desc: 'Splits in two when first defeated.' },
+  // W10: story tiers, never rolled at random (`fixed`). A party that reaches the Briar Alpha late meets an Elder
+  // (encounters.js whisperwood_alpha_t1 / _t2, chosen by ep1.js hollow_alpha from story flags), so the optional
+  // mini-boss stays a fight at Lv 8 and at Lv 9 to 10 instead of a walk. Same bestiary entry (weakKey is the id).
+  elder:     { id: 'elder', name: 'Elder', def: 1.1, fixed: true, desc: 'Grey at the muzzle and grown into its briar.' },
+  elder_ii:  { id: 'elder_ii', name: 'Elder', def: 1.25, spd: 1.2, shields: 1, fixed: true,
+    desc: 'Grey at the muzzle, grown into its briar, and faster than it looks.' },
 };
+/** Modifiers an ordinary encounter may roll (the `fixed` story tiers are excluded). */
+export const RANDOM_ELITE_MODS = Object.keys(ELITE_MODS).filter((k) => !ELITE_MODS[k].fixed);
 export const CURSE_STATUSES = ['poison', 'blind', 'chill'];
 
 export function enemyDef(id) { return ENEMIES[id] || null; }

@@ -169,6 +169,9 @@ const decor = [
 // ---------------------------------------------------------------- events
 const events = [
   trigger('valley_enter', 0, 0, 1, 1, 'valley_arrival', { on: 'enter' }),
+  // W10: once the party holds the Lantern, one short pointer back to Quill's lost bridge, on the way down from the
+  // Archive just above the fork where the pool path turns east (scene guards itself; fires once)
+  trigger('valley_lantern_hint', 34, 17, 13, 1, 'quill_reminder'),
   // the teaching fight: a step trigger down the whole of column 7 (every passable cell at x 7, from the strip
   // above the plateau to the south edge), so the road cannot be skirted through the meadow; the pack waits at
   // the bend (14,33), two tiles outside its chase radius from the trigger

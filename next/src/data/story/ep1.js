@@ -9,6 +9,7 @@
 // Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, {hero} = player name.
 
 import { REWARDS } from '../quests.js';
+import { alphaEncounter } from '../encounters.js';
 import { CREDITS } from '../text.js';
 
 // Speakers with 48x48 portraits (assets/sprites/portraits.json, ids `<id>_48`). Spawned stand-ins for an
@@ -71,7 +72,6 @@ async function wake_up(s) {
   await s.jump('hero');
   await s.walk('hero', ['down']);
   await s.face('hero', 'hazel');
-  await say(s, 'hazel', 'There you are. You sleep like a stone at the bottom of the river.');
   await say(s, 'hazel', 'Did you hear the bells last night? Pip has been at the chapel since dawn, swearing he counted thirteen.');
   const c = await s.choice(['I heard them too.', 'Thirteen?']);
   if (c === 0) {
@@ -79,9 +79,8 @@ async function wake_up(s) {
   } else {
     await say(s, 'hazel', 'Thirteen. The tower holds twelve. Pip is beside himself, and he was never a small man to begin with.');
   }
-  await say(s, 'hazel', "Elder Mael came by asking for you. He wouldn't say why.");
-  await say(s, 'hazel', 'He had his worried face on. The one he thinks nobody notices.');
-  await say(s, 'hazel', "Go and see him. He'll be in Lantern Square, by the well. And take these, in case his errand runs long.");
+  await say(s, 'hazel', 'Elder Mael came by asking for you. He had his worried face on, the one he thinks nobody notices.');
+  await say(s, 'hazel', "He'll be in Lantern Square, by the well. Take these, in case his errand runs long.");
   await s.give('potion', 2);
   await say(s, 'hazel', "Breakfast is on the table. That wasn't a suggestion.");
   await s.setFlag('intro_done');
@@ -112,8 +111,7 @@ async function fading_sign(s) {
   await s.walk('oren_out', ['down']);
   await s.face('oren_out', 'up');
   await s.emote('oren_out', '?');
-  await say(s, 'oren_out', 'Huh.');
-  await say(s, 'oren_out', 'That sign said something this morning. I painted it myself. Twice, because I got the first one crooked.');
+  await say(s, 'oren_out', 'Huh. That sign said something this morning. I painted it myself. Twice. The first one was crooked.');
   await s.camera.follow('hero');
   await s.face('oren_out', 'hero');
   await say(s, 'oren_out', '{hero}! You can read. What did my sign say?');
@@ -123,13 +121,12 @@ async function fading_sign(s) {
     await s.wait(30);
     await s.emote('oren_out', '...');
     await say(s, 'oren_out', "Oren. That's... me. I'm Oren.");
-    await say(s, 'oren_out', 'Long morning. Long, strange morning.');
   } else {
     await say(s, 'oren_out', "Then it's not just me.");
     await s.emote('oren_out', 'sweat');
     await say(s, 'oren_out', "That's worse, isn't it. That's a great deal worse.");
   }
-  await say(s, 'oren_out', "Elder Mael's been pacing the square since dawn, asking after you. Go on. I'll find some paint.");
+  await say(s, 'oren_out', "Long, strange morning. Mael's been pacing the square since dawn, asking after you. I'll find some paint.");
   await s.walk('oren_out', ['up']);
   await s.despawn('oren_out');
   await s.music('willowmere');
@@ -145,26 +142,22 @@ async function mael_intro(s) {
   const c = await s.choice(['I was up early!', '...Maybe.']);
   if (c === 0) await say(s, 'mael', 'Up early, and still late. That is a rare gift. Treasure it.');
   else await say(s, 'mael', 'Honest, at least. Honesty is in short supply this morning.');
-  await say(s, 'mael', "You saw Oren's sign. It is not the only one. The well, the chapel steps, half the shop boards in town.");
-  await say(s, 'mael', 'Names are slipping off Willowmere like rain off a roof.');
+  await say(s, 'mael', "You saw Oren's sign. It is not the only one. Names are slipping off Willowmere like rain off a roof.");
   await s.camera.panTo('bell_tower', 50);
   await say(s, 'mael', 'And last night the tower rang thirteen times. It holds twelve bells. I have counted them every day for sixty years.');
   await s.camera.follow('hero');
   await say(s, 'mael', 'There is an old saying. When a name is taken from the world, a thirteenth bell tolls for it.');
   await s.emote('mael', '...');
   await say(s, 'mael', 'I would very much like that to be only a saying.');
-  await say(s, 'mael', 'North of the valley stands the Rootbound Archive. The Keepers kept the first fragment of the Book of Names there.');
-  await say(s, 'mael', 'If something is eating our names, that is where it will be eating. I need someone to go and look.');
+  await say(s, 'mael', 'If something is eating our names, it eats at the Rootbound Archive, north of the valley. I need someone to go and look.');
   const c2 = await s.choice(['Why me?', "I'll go."]);
   if (c2 === 0) {
     await say(s, 'mael', 'Because you always come back.');
     await s.emote('mael', '...');
-    await say(s, 'mael', 'Humor an old man. Say yes.');
   } else {
     await say(s, 'mael', 'I knew you would. You never could leave a locked door alone.');
   }
-  await say(s, 'mael', 'But not alone. Find Mira at the library, east of the square. She has read every book on the Archive. Twice.');
-  await say(s, 'mael', 'Then take the south gate. If Bram is on watch, tell him I sent you. Tell him twice. He is stubborn.');
+  await say(s, 'mael', 'But not alone. Mira at the library, east of the square, then Bram at the south gate. Tell him twice. He is stubborn.');
   await s.setFlag('met_mael');
   // Mael's hidden fear: the player sees it, the hero only half notices.
   await s.face('mael', 'up');
@@ -187,8 +180,7 @@ async function mira_joins(s) {
   await s.face('mira', 'hero');
   await s.emote('mira', '!');
   await s.camera.follow('hero');
-  await say(s, 'mira', "Oh. You're the Elder's errand. He said someone would come.");
-  await say(s, 'mira', "He didn't say you'd be on time. I had a whole speech about patience ready.");
+  await say(s, 'mira', "Oh. You're the Elder's errand. He didn't say you'd be on time. I had a whole speech about patience ready.");
   await s.walk('mira', 'mira_meet');
   await s.face('mira', 'hero');
   await say(s, 'mira', 'Mira. Archivist apprentice. I reshelve, I copy, and I correct people. Mostly the last one.');
@@ -213,7 +205,6 @@ async function mira_joins(s) {
   await s.despawn('mira');
   await s.addMember('mira');
   await narrate(s, '{c:gold}Mira{/c} joined the party!');
-  await say(s, 'mira', "Right. Lead the way. I'll be the one taking notes.");
   await s.setFlag('mira_joined');
 }
 
@@ -240,8 +231,7 @@ async function bram_joins_body(s) {
   await s.emote('bram', '?');
   await say(s, 'bram', "Mira, you've got a pack on. You get winded climbing the library ladder.");
   await say(s, 'mira', 'Eleven rungs. And I was carrying an atlas. A large one.');
-  await say(s, 'bram', 'So it really is the Archive. Mael told me this morning. He told me twice.');
-  await say(s, 'bram', "Fine. Then I'm coming. Somebody has to stop you two from reading the monsters to death.");
+  await say(s, 'bram', "So it really is the Archive. Then I'm coming. Somebody has to stop you two reading the monsters to death.");
   await say(s, 'holt', 'You are on watch until noon, son.');
   await say(s, 'bram', "Put me down for leave, Sergeant. My father'll understand. He always says...");
   await say(s, 'bram', 'He says a guard who never leaves his gate is just a very tall gate.');
@@ -270,7 +260,6 @@ async function bram_joins_body(s) {
   await s.despawn('bram');
   await s.addMember('bram');
   await narrate(s, '{c:gold}Bram{/c} joined the party!');
-  await say(s, 'bram', "Right. South gate, then the north road up the valley. Let's go before I think about it.");
   await s.setFlag('bram_joined');
 }
 
@@ -311,8 +300,7 @@ async function leave_town(s) {
 // ------------------------------------------------------------------------------------------------
 async function valley_arrival(s) {
   await say(s, 'bram', 'Smell that? Rain on the way. And sheep. Mostly sheep.');
-  await say(s, 'mira', 'Willowmere Valley. Over the bridge, then the pilgrim road north to the Archive. Two hours on foot.');
-  await say(s, 'mira', 'Assuming nothing eats us.');
+  await say(s, 'mira', 'Over the bridge, then the pilgrim road north to the Archive. Two hours on foot, assuming nothing eats us.');
   await say(s, 'bram', "Anything out here tries to eat you, you hit it first. That's the whole secret.");
   await s.setFlag('valley_arrived');
 }
@@ -547,6 +535,21 @@ async function lantern_get(s) {
   await say(s, 'bram', 'A lamp that finds things.');
   await say(s, 'mira', "...Yes. Fine. It's a lamp that finds things.");
   await say(s, 'mira', "If a path ends where it shouldn't, raise the Lantern with {i:btn_pageR}. The Keepers hid their bridges in ink.");
+  // W10: the moment the party holds the Lantern, someone remembers Quill's lost bridge (the Hollow is tuned for now)
+  if ((await s.hasFlag('lost_bridge_started')) && !(await s.hasFlag('hollow_found'))) {
+    await say(s, 'bram', "A lamp that finds things. Quill's lost bridge, then. The black pool, east of the fork.");
+  }
+}
+
+// W10: one short reminder in the valley once the party holds the Lantern (on map entry, once). Points at the pool
+// when Quill has told them about it, at Quill when not.
+async function quill_reminder(s) {
+  if (await s.hasFlag('lost_bridge_started')) {
+    await say(s, 'mira', "Quill's lost bridge is at the black pool, east of the fork. Ink remembers, and now we have a light.");
+  } else {
+    await say(s, 'mira', "That scribe at the Pilgrim's Rest asks every traveler about a lost bridge. With the Lantern, we could look.");
+  }
+  await s.setFlag('quill_reminded');
 }
 
 async function archive_f2_exit(s) {
@@ -728,7 +731,6 @@ async function return_to_willowmere(s) {
   await narrate(s, "Above the gate, the town's name burns bright again: WILLOWMERE.");
   await s.camera.follow('hero');
   await s.sfx('name_restore');
-  await narrate(s, 'One by one, the shop signs light up as you pass. Doors open. People come out to read them aloud.');
   await s.walk('hero', 'return_spot');
   await s.face('hero', 'down');
   await s.walk('holt', 'meet_holt', { speed: 'run' });
@@ -736,33 +738,27 @@ async function return_to_willowmere(s) {
   await say(s, 'holt', "Bram! Garrick! Your father's name is Garrick!");
   await say(s, 'holt', 'Said it every hour, like I promised. Half the town thinks I have gone soft in the head.');
   await say(s, 'bram', 'I know it, Sergeant. I know it on my own.');
-  await say(s, 'holt', 'Good lad. Then go and say it to his face. Here he comes.');
   await s.spawn('garrick_g', { sprite: 'npc_smith', name: 'Garrick', at: 'gather_garrick', dir: 'down' });
   await s.walk('garrick_g', 'meet_garrick');
   await s.face('garrick_g', 'bram');
   await s.face('bram', 'garrick_g');
   await say(s, 'bram', 'Garrick.');
-  await say(s, 'garrick_g', 'Took your time.');
-  await say(s, 'bram', 'I said your name the whole way home.');
-  await say(s, 'garrick_g', 'I know. I heard.');
+  await say(s, 'garrick_g', 'Took your time. I heard you saying it the whole way up the road.');
   await all(s.emote('bram', 'heart'), s.emote('garrick_g', 'heart'));
   await s.spawn('iris_g', { sprite: 'npc_scholar', name: 'Iris', at: 'gather_iris', dir: 'down' });
   await s.walk('iris_g', 'meet_iris');
   await s.face('iris_g', 'mira');
   await say(s, 'iris_g', 'Mira.');
   await s.emote('mira', '!');
-  await say(s, 'mira', 'First try.');
   await say(s, 'iris_g', 'First try. And every try after, for as long as I live.');
   await s.spawn('oren_g', { sprite: 'npc_baker', name: 'Oren', at: 'gather_oren', dir: 'down' });
   await s.walk('oren_g', 'meet_oren', { speed: 'run' });
-  await say(s, 'oren_g', "I can read my sign! OREN'S OVENS! And I have a brother!");
-  await say(s, 'oren_g', 'His name is Hal! He came down from the mill at dawn, shouting it, and he is furious with all of us!');
+  await say(s, 'oren_g', "OREN'S OVENS! And I have a brother! Hal came down from the mill at dawn, furious with all of us!");
   await s.spawn('hazel_g', { sprite: 'npc_parent', name: 'Hazel', at: 'gather_hazel', dir: 'down' });
   await s.walk('hazel_g', 'meet_hazel');
   await s.face('hazel_g', 'hero');
-  await say(s, 'hazel_g', 'Both boots. Ten fingers.');
   await s.emote('hazel_g', 'heart');
-  await say(s, 'hazel_g', 'Good. Now I can breathe again.');
+  await say(s, 'hazel_g', 'Both boots. Ten fingers. Good. Now I can breathe again.');
   await s.walk('mael', 'meet_mael', { speed: 'slow' });
   await s.face('mael', 'hero');
   await say(s, 'mael', 'You did it. Every sign in Willowmere has its name back. Every name in this book.');
@@ -770,19 +766,16 @@ async function return_to_willowmere(s) {
   await s.music('sorrow'); // the town's triumph thins out: every name but one
   await s.emote('mael', '...');
   await say(s, 'mael', 'Every name but one.');
-  await say(s, 'mael', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.');
-  await say(s, 'mael', 'I did not tell you. I was afraid that saying it aloud would make it true.');
+  await say(s, 'mael', '{hero}. Yours began to fade a month ago, before the signs. I did not tell you. I was afraid saying it would make it true.');
   const c = await s.choice(['Why my name?', 'You should have told me.']);
   if (c === 0) {
     await say(s, 'mael', 'I do not know. I have read every page I own, and I do not know.');
   } else {
     await say(s, 'mael', 'Yes. I should have. An old man\'s fear is a poor excuse, and it is the only one I have.');
   }
-  await say(s, 'mira', "Someone put {hero}'s name on a list. We found it in the Archive, with all of yours crossed out.");
-  await say(s, 'mira', 'Below the names, a place was scratched out so hard the pen tore through the paper.');
+  await say(s, 'mira', "{hero}'s name was on a list in the Archive. Below it, someone scratched out a place so hard the pen tore through.");
   await s.emote('mael', '!');
   await say(s, 'mael', 'East of the river there is a town no map remembers. Travelers call it the Nameless Hollow.');
-  await say(s, 'mael', 'They say its people cannot recall what their own home is called.');
   await s.emote('mira', '...');
   await say(s, 'mira', "I came to Willowmere from the east, when I was small. I've never been able to say where from.");
   await say(s, 'bram', "Then that's where we go next. All three of us.");
@@ -1052,13 +1045,17 @@ async function hollow_alpha(s) {
   await say(s, 'mira', "It isn't hunting. It's guarding. The stone, the bridge, all of it.");
   await say(s, 'bram', 'Guarding it from who? Nobody has come down here in years.');
   await say(s, 'mira', 'Then nobody told it to stop. Briar burns, {hero}, and thorns part for an axe.');
+  // W10: a party that comes late meets an Elder (encounters.js ALPHA_TIERS): the same wolf, scaled to the party.
+  const late = { boss_door_open: await s.hasFlag('boss_door_open'), archivore_defeated: await s.hasFlag('archivore_defeated') };
+  const encounter = alphaEncounter((f) => !!late[f]);
+  if (encounter !== 'whisperwood_alpha') await narrate(s, 'Its muzzle is grey, and the briar has grown right into its hide. Down here, alone, it has only grown stronger.');
   await narrate(s, 'The Alpha rises. Thorns lift along its spine like hackles.');
   // Boss intro (W5 style): name card, a jolt, then the battle theme and the swirl.
   await s.title('BRIAR ALPHA', { sub: 'Warden of the Lost Bridge', frames: 100 });
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
   await s.music('battle');
-  const result = await s.battle('whisperwood_alpha', { boss: true, canFlee: false });
+  const result = await s.battle(encounter, { boss: true, canFlee: false });
   if (result !== 'win') return;
   await hollow_after(s);
 }
@@ -1131,6 +1128,7 @@ export const SCENE_CONDITIONS = {
   hal_returns: { if: 'archivore_defeated', ifNot: 'hal_returned' },
   quill_hint: { ifNot: 'lost_bridge_started' },
   hollow_entry: { ifNot: 'hollow_found' },
+  quill_reminder: { if: 'lantern_get', ifNot: ['hollow_found', 'quill_reminded'] },
   hollow_alpha: { ifNot: 'hollow_cleared' },
   hollow_after: { if: 'briar_alpha_defeated', ifNot: 'hollow_cleared' },
 };
@@ -1141,7 +1139,7 @@ const RAW = {
   archive_f2_arrival, find_letter_2, echo_warden, lantern_get, archive_f2_exit, archive_f3_arrival,
   find_letter_3, thirteenth_bell, boss_door, archivore, return_to_willowmere, ending_hook,
   tess_letters, oren_starter, starter_found, wick_tag, duck_nest, nella_bell, ferry_bell_found, hal_returns,
-  quill_hint, hollow_entry, hollow_alpha, hollow_after,
+  quill_hint, quill_reminder, hollow_entry, hollow_alpha, hollow_after,
 };
 
 export const scenes = Object.fromEntries(Object.entries(RAW).map(([id, fn]) => [id, cut(fn, SCENE_CONDITIONS[id])]));
@@ -1312,6 +1310,7 @@ export const lines = {
     'Rotten piles stand in the ink in two rows. Whatever was laid across them is long gone.',
     'A small bell is carved into the nearest pile, like the one on the bench at the Pilgrim\'s Rest.',
   ],
+  pilgrim_shrine: "A pilgrims' shrine, moss on every stone. The rune still glows, and the spring below it runs cold and clean.",
   lost_bridge_plaque: [
     { if: 'hollow_cleared', lines: [
       '"HERE THE PILGRIMS CROSSED, AND HERE THEY ARE KEPT."',
@@ -1340,6 +1339,7 @@ export const lines = {
     '"Perhaps the one holding the list still walks free."',
   ],
   keeper_font: 'A Keeper\'s font. The water is cold, clear, and somehow tastes like the first day of spring.',
+  keeper_font_hall: "A Keeper's font at the foot of the stairs, its basin green with old bronze. The water hums, low and steady, like a held note.",
   keeper_font_galleries: [
     'A Keeper\'s font set into the gallery wall. The water runs clear over a lip of green bronze, and the air above it is cool.',
     'Three words are chipped into the rim: DRINK. REST. REMEMBER.',

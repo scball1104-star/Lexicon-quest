@@ -1,4 +1,4 @@
-// Shops: Willowmere item shop, the smithy, and a valley peddler. Pure data.
+// Shops: Willowmere item shop, the smithy, a valley peddler and Rook's salvage in the Rootbound Stacks. Pure data.
 //
 // stock entries: { item, price?, ifFlag?, ifNotFlag? }  (price defaults to the item's price; flags are
 // story flags from COMMON.md / data/quests.js). Selling pays battle/loot.js itemValue() for gear and
@@ -39,6 +39,23 @@ export const SHOPS = {
       { item: 'traveler_boots', ifFlag: 'archive_f1_done' }, { item: 'scout_mantle', ifFlag: 'archive_f1_done' },
       // Heavy plate after the Echo Warden falls.
       { item: 'bronze_plate', ifFlag: 'echo_warden_defeated' },
+      // W10 (PLAYTEST_REVIEW_2 fix 7): tier 3 once the Galleries are crossed, the same blades Rook sells by the
+      // great door, so gold has a use from the Lantern on (1,377 at the Lantern, 2,906 at the end in the bot run).
+      { item: 'runed_saber', ifFlag: 'archive_f2_done' }, { item: 'bearded_axe', ifFlag: 'archive_f2_done' },
+      { item: 'winged_lance', ifFlag: 'archive_f2_done' }, { item: 'archivist_staff', ifFlag: 'archive_f2_done' },
+      { item: 'yew_longbow', ifFlag: 'archive_f2_done' },
+    ],
+  },
+  // W10: the gold sink inside the Archive. Rook camps by the Keeper's font in the great door hall (F3), so the
+  // first chance to spend comes right where the party has the gold and the reason (the Archivore behind the door).
+  // Tier 3 weapons at list price, the Echo Warden's plate tier, and a dungeon markup on the consumables.
+  archive_salvage: {
+    id: 'archive_salvage', name: "Rook's Salvage", map: 'archive_f3', keeper: 'rook', kind: 'equipment',
+    stock: [
+      { item: 'runed_saber' }, { item: 'bearded_axe' }, { item: 'winged_lance' }, { item: 'archivist_staff' },
+      { item: 'yew_longbow' }, { item: 'bronze_plate' },
+      { item: 'hi_potion', price: 110 }, { item: 'ether', price: 80 }, { item: 'phoenix_feather', price: 180 },
+      { item: 'echo_herb', price: 30 }, { item: 'eye_drops', price: 15 },
     ],
   },
   valley_peddler: {

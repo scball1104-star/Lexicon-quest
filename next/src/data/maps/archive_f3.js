@@ -9,7 +9,7 @@
 // W9-abilities: the great door hall's north face (14,20..21) is a doorway choked with thin roots. Dash Strike from
 // the hall breaks them and the wall band above (14,19) opens: a shortcut straight back up into the western stacks
 // for the trip to the key room and back. From the stacks side there is only wall until it is open.
-import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, crystal, gate,
+import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, crystal, gate, npc,
   brazier, font, light, pit, steps, enter } from './_kit.js';
 
 // W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
@@ -151,6 +151,8 @@ const events = [
   sign('boss_door_plate', 18, 21, 'boss_door_plate', { solid: false }),
   sign('hidden_ink_3', 17, 21, 'hidden_ink_3', { solid: false, lantern: true }),
   font('keeper_font', 22, 26),
+  // W10: Rook's salvage (shops.js archive_salvage): the gold sink, beside the font and the shortcut stairs
+  npc('rook', 25, 23, 'down'),
   // W9-abilities: thin roots in an old doorway; Dash Strike breaks them and opens (14,19) up into the stacks
   object('roots_gd', 14, 20, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2, opens: [[14, 19]] }),
   // the thirteenth bell, on the main path

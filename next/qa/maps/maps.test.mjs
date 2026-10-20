@@ -264,7 +264,7 @@ test('archive_f1: the back-stair joins the stairs landing and the antechamber bo
 
 test('archive_f2: one Keeper\'s font in the stairs room, safe, with its own two-box text; nothing else was added', () => {
   const f2 = maps.archive_f2;
-  const fonts = f2.events.filter((e) => e.type === 'font' || e.type === 'save');
+  const fonts = f2.events.filter((e) => (e.type === 'font' || e.type === 'save') && e.id !== 'keeper_font_f2_hall');
   assert.equal(fonts.length, 1);
   const f = fonts[0];
   assert.deepEqual([f.id, f.type, f.text, f.safe, f.w, f.h], ['keeper_font_f2', 'font', 'keeper_font_galleries', true, 4, 2]);
@@ -279,6 +279,24 @@ test('archive_f2: one Keeper\'s font in the stairs room, safe, with its own two-
     const n = maps[id].events.filter((e) => e.type === 'font' || e.type === 'save').length;
     assert.equal(n, id === 'archive_f3' ? 1 : 0, `${id} fonts`);
   }
+});
+
+test('archive_f2: the entry hall font is the rest point before the Warden (W10, PLAYTEST_REVIEW_2 fix 1)', () => {
+  const f2 = maps.archive_f2;
+  const hall = byId(f2, 'keeper_font_f2_hall');
+  assert.deepEqual([hall.type, hall.text, hall.safe, hall.w, hall.h], ['font', 'keeper_font_hall', true, 4, 2]);
+  assert.ok(typeof db.lines.keeper_font_hall === 'string' && db.lines.keeper_font_hall.length > 0);
+  assert.ok(hall.x >= 15 && hall.x + hall.w - 1 <= 25 && hall.y - hall.h + 1 >= 4 && hall.y <= 8, 'inside the entry hall (15..25, 4..8)');
+  // without the Lantern (no pedestal): the hall font and the Warden are reachable, the stairs-room font is not
+  const dark = walk({ ...f2, events: f2.events.filter((e) => e.script !== 'lantern_get') }, db);
+  const reached = (id) => dark.events.find((e) => e.id === id).reached;
+  assert.equal(dark.lantern, false);
+  assert.ok(reached('keeper_font_f2_hall'), 'hall font before the Lantern');
+  assert.ok(reached('warden_trig') && reached('echo_warden'), 'the Warden before the Lantern');
+  assert.equal(reached('keeper_font_f2'), false, 'the stairs-room font stays behind the hidden-ink bridge');
+  // the walk from the stairs up to the hub stays open (carpet column 20) and the font does not touch the stairs
+  const g = buildGrid(f2, db);
+  for (let y = 4; y <= 11; y++) assert.equal(g.code[y][20], 'none', `entry column open at y ${y}`);
 });
 
 test('archive_f3: the corridor patrol is the lighter ink group, the two-wraith guard sits in the alcove; the plaque is by the crystals', () => {
@@ -372,6 +390,36 @@ test('whisperwood_hollow: the Lantern opens it, the plate opens the den, everyth
   assert.ok(faint.length >= 4 && faint.every((o) => o.y === m.marks.bridge_near[1]));
 });
 
+test('whisperwood_hollow: the pilgrims\' shrine is a rest point past the block gate, before the Alpha (W10)', () => {
+  const m = maps.whisperwood_hollow;
+  const s = byId(m, 'hollow_shrine');
+  assert.deepEqual([s.type, s.sprite, s.text, s.safe], ['font', 'rune_shrine', 'pilgrim_shrine', true]);
+  assert.ok(typeof db.lines.pilgrim_shrine === 'string');
+  const t = byId(m, 'alpha_trig');
+  assert.ok(s.y > t.y, 'the shrine sits below the trigger row (reached before the fight)');
+  const lit = walk(m, db, { lantern: true });
+  assert.ok(lit.events.find((e) => e.id === 'hollow_shrine').reached);
+  // reachable from the notch without stepping on the trigger: flood from the notch over non-trigger floor
+  const g = buildGrid(m, db);
+  const notch = byId(m, 'notch_b');
+  const onTrig = (x, y) => y === t.y && x >= t.x && x < t.x + t.w;
+  const seen = new Set([`${notch.x},${notch.y}`]);
+  const q = [[notch.x, notch.y]];
+  let touches = false;
+  while (q.length) {
+    const [x, y] = q.shift();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= s.x && nx < s.x + s.w && ny <= s.y && ny > s.y - s.h) touches = true;
+      if (seen.has(`${nx},${ny}`) || onTrig(nx, ny) || !g.code[ny] || g.code[ny][nx] !== 'none' || ny < t.y) continue;
+      seen.add(`${nx},${ny}`); q.push([nx, ny]);
+    }
+  }
+  assert.ok(touches, 'the shrine can be used from the vestibule without crossing the trigger');
+  assert.deepEqual(m.marks.shrine.length, 2);
+  assert.equal(byId(m, 'whisperwood_alpha').sprite, 'briar_alpha', 'the boss-intro actor is the Alpha, not a plain wolf');
+});
+
 test('whisperwood_hollow: the push-block puzzle has a solution and the straight push is blocked', () => {
   const m = maps.whisperwood_hollow;
   const g = buildGrid({ ...m, events: [] }, db);
@@ -401,7 +449,14 @@ test('whisperwood_hollow: three visible enemies, an iron and a gold chest, the A
   assert.deepEqual([alpha.x, alpha.y], m.marks.alpha_spot);
   const t = byId(m, 'alpha_trig'), notch = byId(m, 'notch_b');
   assert.equal(t.script, 'hollow_alpha');
-  assert.ok(notch.x >= t.x && notch.x < t.x + t.w && notch.y === t.y + 1, 'the first step into the den is on the trigger');
+  // W10: the notch opens into the shrine vestibule below the den; the trigger row is the vestibule's only way up
+  assert.equal(byId(m, 'gate_b').to[2], notch.y, 'the barred door lands on the notch');
+  assert.ok(notch.x >= t.x && notch.x < t.x + t.w && notch.y > t.y + 1, 'the notch is below the trigger, past the vestibule');
+  const g = buildGrid(m, db);
+  for (let x = 0; x < m.ground[0].length; x++) {
+    if (g.code[t.y + 1][x] !== 'none' || g.code[t.y][x] !== 'none') continue;
+    assert.ok(x >= t.x && x < t.x + t.w, `vestibule column ${x} leads up past the trigger`);
+  }
   assert.ok(gold.y < t.y && alpha.y < t.y, 'the gold chest is behind the Alpha');
   assert.equal(byId(m, 'hollow_enter').script, 'hollow_entry');
   assert.equal(byId(m, 'lost_bridge_plaque').lantern, true);

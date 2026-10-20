@@ -6,7 +6,7 @@
 // how many of each group the zone should hold: the EXP curve in party.js assumes the player fights
 // roughly that many (most visible enemies once). Keep the counts if you move enemies around.
 
-import { ENEMIES, ELITE_RATE, ELITE_MODS } from './enemies.js';
+import { ENEMIES, ELITE_RATE, RANDOM_ELITE_MODS } from './enemies.js';
 
 export const ENCOUNTERS = {};
 function enc(id, o) { ENCOUNTERS[id] = { id, boss: false, noFlee: false, music: 'battle', ...o }; }
@@ -48,6 +48,23 @@ enc('hollow_blot', { zone: 'whisperwood_hollow', leader: 'ink_blot', enemies: ['
   elite: { mods: ['vampiric', 'stoneskin'], index: 0 } });
 enc('whisperwood_alpha', { zone: 'whisperwood_hollow', leader: 'briar_alpha', enemies: ['briar_alpha'], boss: true, noFlee: true,
   music: 'battle', noElite: true, flag: 'briar_alpha_defeated' });
+// W10: the same Alpha for a party that comes late (PLAYTEST_REVIEW_2 3). ep1.js hollow_alpha picks the tier from story
+// flags (alphaEncounter below): F3 cleared (Lv 8) -> t1, the Archivore beaten (Lv 9 to 10) -> t2. Fixed `elder` mods
+// keep the bestiary entry and the Thornwake drop; the simulator holds each tier to the Alpha's 6 to 9 round target.
+enc('whisperwood_alpha_t1', { zone: 'whisperwood_hollow', leader: 'briar_alpha', enemies: ['briar_alpha'], boss: true, noFlee: true,
+  music: 'battle', noElite: true, flag: 'briar_alpha_defeated', elite: { mods: ['elder'], index: 0 }, tierOf: 'whisperwood_alpha' });
+enc('whisperwood_alpha_t2', { zone: 'whisperwood_hollow', leader: 'briar_alpha', enemies: ['briar_alpha'], boss: true, noFlee: true,
+  music: 'battle', noElite: true, flag: 'briar_alpha_defeated', elite: { mods: ['elder_ii'], index: 0 }, tierOf: 'whisperwood_alpha' });
+
+/** The Briar Alpha encounter for the party's progress: flags -> encounter id (see the tiers above). */
+export const ALPHA_TIERS = [
+  { flag: 'archivore_defeated', encounter: 'whisperwood_alpha_t2', level: [9, 10] },
+  { flag: 'boss_door_open', encounter: 'whisperwood_alpha_t1', level: [8, 8] },
+];
+export function alphaEncounter(hasFlag) {
+  for (const t of ALPHA_TIERS) if (hasFlag(t.flag)) return t.encounter;
+  return 'whisperwood_alpha';
+}
 
 // ---------------------------------------------------------------- Zones
 // level: the party level the zone is tuned for. plan: [encounterId, count] visible enemies to place.
@@ -95,7 +112,7 @@ export function rollEncounter(id, rng, opts = {}) {
     let mods;
     if (Array.isArray(opts.forceElite)) mods = opts.forceElite.slice();
     else {
-      const ids = Object.keys(ELITE_MODS);
+      const ids = RANDOM_ELITE_MODS;
       const first = ids[Math.floor(rand(rng) * ids.length)];
       mods = [first];
       if (rand(rng) < 0.3) {

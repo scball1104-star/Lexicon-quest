@@ -74,6 +74,7 @@ export const FLAGS = {
   // Side quest: The Lost Bridge (Quill; Whisperwood Hollow, optional, W6-content)
   lost_bridge_started: "Quill told the party about the pilgrims' lost bridge (quill_hint), or they walked into the hollow.",
   hollow_found: 'Entered Whisperwood Hollow with the Lantern and saw the ink bridge (hollow_entry).',
+  quill_reminded: 'Mira pointed back at the lost bridge in the valley after the Lantern (quill_reminder, once).',
   briar_alpha_defeated: 'The Briar Alpha is beaten (encounter flag; hollow_after also sets it). Its map actor is gone.',
   hollow_cleared: "The pilgrims' stone gave back three names; the lost bridge story is resolved (hollow_after).",
 };
@@ -120,7 +121,7 @@ export const MAIN_QUEST = {
       journal: 'Mael wants you to go to the Rootbound Archive. First, find Mira at the library, east of the square.',
       chat: [
         { map: 'library', lines: [{ who: 'hero', text: '(Mira should be here somewhere, probably behind a stack of books.)' }] },
-        { lines: [{ who: 'hero', text: '(Mira, at the library. That is the east side of Lantern Square.)' }] },
+        { lines: [{ who: 'hero', text: '(Mira at the library, east of the square. Then the Archive, where the Keepers kept a piece of the Book of Names.)' }] },
       ],
     },
     {
@@ -129,6 +130,7 @@ export const MAIN_QUEST = {
       chat: [
         { lines: [
           { who: 'mira', text: 'Mael said the south gate. Straight down the main road from the square.' },
+          { who: 'mira', text: 'The Keepers kept the first fragment of the Book of Names in the Archive. If the names are going anywhere, they go there.' },
           { who: 'mira', text: 'If Bram is on watch, let me do the talking. He likes me. Mostly.' },
         ] },
       ],
@@ -354,7 +356,7 @@ export const SIDE_QUESTS = [
         id: 'find', done: 'hollow_found',
         journal: 'Quill says the pilgrims lost a bridge at a black pool past the pines, east of the fork. Lost, not broken.',
         chat: [
-          { if: 'lantern_get', lines: [{ who: 'mira', text: 'The black pool east of the fork has a root arch beside it. Bring the Lantern. Ink remembers.' }] },
+          { if: 'lantern_get', nudge: true, lines: [{ who: 'bram', text: "Quill's pool, east of the fork. A root arch beside black water. We have a lamp that finds things now." }] },
           { if: 'mira_joined', lines: [{ who: 'mira', text: 'A bridge that is lost, not broken. I would bet on hidden ink. We need a true light.' }] },
           { lines: [{ who: 'hero', text: '(The pilgrims lost a bridge at a black pool east of the fork.)' }] },
         ],
@@ -512,10 +514,16 @@ export function partyChat(hasFlag, mapId, { maxSide = 1 } = {}) {
   const step = currentStep(hasFlag);
   const main = pickChat(step.chat, hasFlag, mapId);
   const side = [];
+  // A side entry marked `nudge` (fresh news, e.g. the Lantern for the lost bridge) goes before older reminders.
+  const picks = [];
   for (const { step: st } of activeSideQuests(hasFlag)) {
-    if (side.length >= maxSide) break;
     const e = pickChat(st.chat, hasFlag, mapId);
-    if (e) side.push(...e.lines);
+    if (e) picks.push(e);
+  }
+  picks.sort((a, b) => (b.nudge ? 1 : 0) - (a.nudge ? 1 : 0));
+  for (const e of picks) {
+    if (side.length >= maxSide) break;
+    side.push(...e.lines);
   }
   const b = mapId != null ? pickChat(BANTER[mapId], hasFlag, mapId) : null;
   return { step, lines: main ? main.lines : [], side, banter: b ? b.lines : [] };

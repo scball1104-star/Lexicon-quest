@@ -18,6 +18,8 @@ with no DOM, canvas, audio or timers; every random roll goes through an injected
 | `src/data/encounters.js` | 18 encounter groups, zone plans (how many visible enemies to place), `rollEncounter` |
 | `src/data/loot-tables.js`, `src/data/shops.js` | drop tables, chest tiers, boss loot; three shops with flag-gated stock |
 | `tools/sim/simulate.mjs` | the balance simulator; `tools/sim/tables.mjs` prints the tables below from the data |
+| `tools/sim/route.mjs` | W10: the whole main route as one run (HP/MP carried, elites, field care, rest points) |
+| `tools/sim/loadouts.mjs` | W10: the expected party per zone (`LOADOUTS`, `knownBestiary`), shared by both |
 | `qa/battle/*.test.mjs` | 55 node tests in 9 files (about 6 s), including a fuzz pass of 252 random battles |
 
 ---
@@ -408,5 +410,39 @@ Tuning notes (what moved and why):
 - Unique items have fixed stats (no rolled ranges) to keep their identity and the balance predictable.
 - The valley peddler has no COMMON.md sprite id; `keeperSprite: 'npc_farmer'` is only a hint.
 - The battle rules do not model field "preemptive/ambush" detection: the field scene passes `start`.
-- Multi-fight attrition (MP/HP carried across a floor) is not simulated; single fights start full, with the
-  policy rationing MP instead.
+- Multi-fight attrition is simulated since W10 by `tools/sim/route.mjs` (section 8b). It still assumes the bot or a
+  careful player; it does not model backtracking to a font mid-floor.
+
+## 8b. The route, the Auto MP fix, the Alpha tiers and the gold sink (W10, PLAYTEST_REVIEW_2)
+
+**Why live fights ran long.** The bot's 35 live fights averaged 5.5 rounds (valley 5.2, F1 4.8, F2 7.4, F3 5.1)
+while every simulated fight was 3 to 5. `simulate.mjs` starts each fight at full HP and MP; the field has no MP
+regeneration. `route.mjs` plays the route as one run (each zone's plan shuffled, HP/MP/EXP carried, elites at
+`ELITE_RATE`, rests only at rest points) and, with the bot's habits (`--bot`: potions only, chest gear, no field
+heals; `--rests old`: no font before the Echo Warden) reproduced the live numbers: valley 5.0, F1 4.7, F2 6.7,
+F3 6.2, overall 5.6. Split by MP at the start of a fight, F2 fights took 4.7 rounds above half MP and 6.8 below,
+and 94% of them started below (average 14%). Elites add about 2 rounds but are 1 in 8 (about 0.25 per zone).
+Cause: MP attrition (no rest from the valley campfire through F1 and F2 to the Warden) plus an Auto brain that
+never valued Mira's Channel (a free staff strike that returns 5 MP) and so walked into every next fight dry.
+
+**Fixes.** (1) The F2 entry hall font (maps). (2) Auto values the MP an action returns at the same weight it
+charges for MP spent, outside boss fights (`ai.js damageOptions`, `mpGainOf`). Bot route after both: valley 4.3,
+F1 4.0, F2 4.9, F3 5.3, overall 4.65, losses per run 0.93 to 0.06; careful route 4.17 overall, every zone
+3.9 to 4.3. Boss tuning is unchanged (boss fights ignore the MP gain). `simulate.mjs --check` and
+`qa/battle/sim.test.mjs` now gate the route (`ROUTE_TARGETS`: careful zones 3 to 5, overall 4.6 or less; bot
+overall 5 or less, zones 5.75 or less: the bot fights F3 with valley weapons).
+
+**The Briar Alpha for a late party.** Encounters `whisperwood_alpha_t1` / `_t2` are the same Alpha with a fixed
+story elite (`ELITE_MODS.elder`: DEF x1.1; `elder_ii`: DEF x1.25, SPD x1.2, +1 shield; both `fixed`, never rolled,
+`RANDOM_ELITE_MODS` excludes them) on top of the elite base (HP x1.45, ATK/MAG x1.12, double rewards). The name
+reads "Elder Briar Alpha"; the bestiary key stays `briar_alpha` and Thornwake still drops. `alphaEncounter()` picks
+by flags: `boss_door_open` -> t1 (party about Lv 8), `archivore_defeated` -> t2 (Lv 9 to 10). Results (careful /
+attack-only): base Lv 6 7.9 rounds / 10% win, Lv 7 7.4 / 52%; t1 Lv 8 8.5 / 5%; t2 Lv 9 8.1 / 17%, Lv 10 7.6 / 56%.
+Without tiers a Lv 9 to 10 party won attack-only 99 to 100%.
+
+**Gold.** Rook's salvage in the great door hall (`shops.js archive_salvage`): the five tier 3 weapons (900 to 950),
+bronze plate, Hi-Potion 110, Ether 80, Phoenix Feather 180. The smithy gets the same weapons on `archive_f2_done`.
+`economy()` / `checkEconomy()`: battle gold on the route 2,516; a player who skips the optional F3 town trip
+reaches Rook with about 1,490 (one tier 3 weapon); the salvage stock (5,210) can absorb the whole route's gold.
+With tier 3 weapons bought (hero and Bram, or all three) the Archivore takes 9.1 / 8.7 rounds (careful, 98 to
+100%) and reckless play still loses 10 to 14% of the time; F3 mixed groups drop from 5.2 to 4.2 to 4.4 rounds.

@@ -7,7 +7,7 @@ import { SKILLS, STATUSES, DAMAGE_TYPES, WEAPON_TYPES, ENEMY_TYPES, FURY_ARTS, W
 import { PARTY, PARTY_IDS, statsAt, STAT_KEYS, expForLevel, levelForExp, MASTERY_XP, newMember, knownSkills,
   grantExp, grantMastery } from '../../src/data/party.js';
 import { ITEMS, EQUIPMENT, UNIQUES, SETS, AFFIXES, CONSUMABLES, KEY_ITEMS, RARITIES, canEquip } from '../../src/data/items.js';
-import { ENEMIES, ELITE_MODS, LOST_PAGE_VARIANTS, ELITE_BASE } from '../../src/data/enemies.js';
+import { ENEMIES, ELITE_MODS, LOST_PAGE_VARIANTS, ELITE_BASE, RANDOM_ELITE_MODS } from '../../src/data/enemies.js';
 import { ENCOUNTERS, ZONES, ZONE_ORDER, rollEncounter } from '../../src/data/encounters.js';
 import { SHOPS } from '../../src/data/shops.js';
 import { BOSS_LOOT, RARITY_TABLES, ZONE_LOOT } from '../../src/data/loot-tables.js';
@@ -73,7 +73,9 @@ test('enemies: stats, skills, weaknesses and loot zones are valid', () => {
   }
   for (const v of LOST_PAGE_VARIANTS) for (const t of v.weak) assert.ok(DAMAGE_TYPES.includes(t));
   assert.equal(new Set(LOST_PAGE_VARIANTS.map((v) => v.weak.join())).size, LOST_PAGE_VARIANTS.length, 'each page reads differently');
-  assert.deepEqual(Object.keys(ELITE_MODS).sort(), ['cursed', 'splitting', 'stoneskin', 'swift', 'vampiric']);
+  // W10: two fixed story tiers (the Elder Briar Alpha) sit beside the five random modifiers and never roll
+  assert.deepEqual(Object.keys(ELITE_MODS).sort(), ['cursed', 'elder', 'elder_ii', 'splitting', 'stoneskin', 'swift', 'vampiric']);
+  assert.deepEqual([...RANDOM_ELITE_MODS].sort(), ['cursed', 'splitting', 'stoneskin', 'swift', 'vampiric']);
   assert.ok(ENEMIES.archivore.phases.length === 3);
 });
 

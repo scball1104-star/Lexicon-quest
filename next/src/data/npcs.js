@@ -553,6 +553,25 @@ export const NPCS = {
     ],
   },
 
+  // ----------------------------------------------------------------------------------------------
+  // archive_f3 (W10: the Archive's gold sink, by the Keeper's font in the great door hall)
+  // ----------------------------------------------------------------------------------------------
+  rook: {
+    name: 'Rook', sprite: 'npc_farmer', map: 'archive_f3',
+    spot: 'Great door hall, by the Keeper\'s font and the shortcut stairs', move: 'turn',
+    service: { type: 'shop', id: 'archive_salvage' },
+    about: 'A salvager who works the old Keeper ruins. Came down the shortcut stairs. Polite, unbothered, expensive.',
+    talk: [
+      { if: DONE, lines: [
+        'Quiet down here now. Good for business, bad for prices. Mine stay where they are.',
+      ] },
+      { lines: [
+        "Don't mind me. Salvage. The Keepers left good steel on the deep shelves, and nobody to sell it.",
+        "Cleaned and edged. Not cheap. Neither is whatever's chewing behind that big door.",
+      ] },
+    ],
+  },
+
   penny: {
     name: 'Penny', sprite: 'npc_shopkeeper', map: 'valley',
     spot: 'Peddler\'s cart at the valley end of the bridge', move: 'stand', service: { type: 'shop', id: 'valley_peddler' },

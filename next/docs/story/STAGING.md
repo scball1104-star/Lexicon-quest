@@ -336,15 +336,25 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 - **`quill_hint`** (valley, talk to Quill the first time; `ifNot: lost_bridge_started`). Quill introduces himself
   and tells of the pilgrims' bridge at the black pool east of the fork ("Lost, mind. Not broken."). With the
   Lantern he points at the root arch. Sets `lost_bridge_started` (the journal side quest "The Lost Bridge").
+- **`quill_reminder`** (valley, step trigger `valley_lantern_hint` across row 17 above the fork; `if: lantern_get`,
+  `ifNot: [hollow_found, quill_reminded]`; W10). One Mira box on the first valley entry after the Lantern: with
+  `lost_bridge_started` it names the black pool east of the fork, without it it names the scribe at the Pilgrim's
+  Rest. Sets `quill_reminded`. `lantern_get` adds one Bram box ("A lamp that finds things. Quill's lost bridge,
+  then.") when `lost_bridge_started` is set and the hollow is not found yet, and the Talk side reminder for the
+  lost bridge carries `nudge: true` so it wins the side slot (quests.js partyChat).
 - **`hollow_entry`** (`whisperwood_hollow`, `on: 'enter'`; `ifNot: hollow_found`). Camera pans to mark
   **`bridge_far`** (30 frames) across the black pool. One narration box, then: without the Lantern Bram says the
   bridge is gone (the scene replays on the next visit); with it Mira says to raise the Lantern (names the button).
   Sets `lost_bridge_started` if Quill was skipped, and `hollow_found` (Lantern only). Two boxes either way.
 - **`hollow_alpha`** (trigger `alpha_trig` across the boss room's mouth; `ifNot: hollow_cleared`). The W5 boss
-  intro: music to silence, pan 40 frames to the map actor **`whisperwood_alpha`** (field sprite `briar_wolf`,
-  facing down at mark `alpha_spot`, `ifNot: briar_alpha_defeated`), anger emote, six boxes, title card
-  "BRIAR ALPHA / Warden of the Lost Bridge", shake, flash, `music('battle')`, battle `whisperwood_alpha` (boss,
-  no flee). On a win it runs `hollow_after`. If the flag is already set but the stone was never read (a quit
+  intro: music to silence, pan 40 frames to the map actor **`whisperwood_alpha`** (field sprite `briar_alpha`
+  since W10, facing down at mark `alpha_spot`, `ifNot: briar_alpha_defeated`), anger emote, six boxes, title card
+  "BRIAR ALPHA / Warden of the Lost Bridge", shake, flash, `music('battle')`, battle (boss, no flee). W10: the
+  encounter comes from `alphaEncounter()` (encounters.js `ALPHA_TIERS`): `whisperwood_alpha` on the intended
+  route, `whisperwood_alpha_t1` once `boss_door_open`, `whisperwood_alpha_t2` once `archivore_defeated` (the
+  "Elder" tiers, one extra narration box: grey muzzle, briar grown into its hide). The trigger sits above the
+  shrine vestibule (`hollow_shrine`, a rest point; mark `shrine`), so a lost fight retries from the shrine when
+  the party rested there. On a win it runs `hollow_after`. If the flag is already set but the stone was never read (a quit
   mid-scene), the trigger runs `hollow_after` instead.
 - **`hollow_after`** (`if: briar_alpha_defeated`, `ifNot: hollow_cleared`). Silence, the Alpha lies down and
   despawns, pan 40 to mark **`plaque`** (the pilgrims' stone, hidden ink on the north face), `lantern_reveal`,

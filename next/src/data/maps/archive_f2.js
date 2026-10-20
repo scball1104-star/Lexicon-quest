@@ -6,8 +6,9 @@
 // open"). West wing: long gallery, then north into the rotunda from the south: the Warden faces down over the
 // lantern pedestal. East wing: the reading rooms (letter 2, Iron Pike). With the Lantern, hidden ink bridges
 // appear: one beside the pedestal straight back into the hub (the shortcut), one from the hub to the stairs.
-// The stairs room holds the floor's Keeper's font (heal, save, `safe` landmark): the breather before the Warden
-// for anyone who crosses the hub first, and the last one before F3's.
+// The stairs room holds the floor's Keeper's font (heal, save, `safe` landmark): the last one before F3's. It sits
+// past the east hidden-ink bridge, so it only opens with the Lantern. W10 (PLAYTEST_REVIEW_2 fix 1): a second font
+// stands in the entry hall beside the stairs up, the rest point before the Warden after the long F1 stretch.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, actor,
   floorSwitch, shelf, font, light, steps, enter } from './_kit.js';
 
@@ -84,8 +85,9 @@ const decor = [
   // W8-archive: lecterns in the hub and the reading rooms
   { t: 'lectern', x: 12, y: 13 }, { t: 'lectern', x: 27, y: 13 }, { t: 'lectern', x: 33, y: 27 },
   // entry hall: desks where the ink readers sit
-  { t: 'reading_table', x: 16, y: 6 }, { t: 'reading_table', x: 23, y: 6 },
-  { t: 'candelabra', x: 15, y: 4 }, { t: 'candelabra', x: 25, y: 4 },
+  // (W10: the west desk moved down a row and the west candelabra gave way to the hall's Keeper's font)
+  { t: 'reading_table', x: 16, y: 7 }, { t: 'reading_table', x: 23, y: 6 },
+  { t: 'candelabra', x: 25, y: 4 },
   { t: 'stairs_up', x: 20, y: 3 },
   // hub: desks, columns, braziers at the moats
   { t: 'reading_table_long', x: 13, y: 14 }, { t: 'reading_table_long', x: 24, y: 14 },
@@ -110,7 +112,7 @@ const decor = [
 const events = [
   enter('f2_enter', 'archive_f2_arrival'),
   // W8-archive: the hanging glass lamps (overhead tiles below) cast a little light of their own
-  light('lamp_e1', 16, 5, 3, '#9fe8d8'), light('lamp_e2', 24, 5, 3, '#9fe8d8'),
+  light('lamp_e1', 17, 7, 3, '#9fe8d8'), light('lamp_e2', 24, 5, 3, '#9fe8d8'),
   light('lamp_h1', 14, 13, 3, '#9fe8d8'), light('lamp_h2', 25, 13, 3, '#9fe8d8'), light('lamp_w', 4, 25, 3, '#9fe8d8'),
   door('stairs_f1', 20, 3, ['archive_f1', 31, 3, 'down'], { kind: 'stairs' }),
   door('stairs_f3', 35, 11, ['archive_f3', 5, 3, 'down'], { kind: 'stairs' }),
@@ -127,19 +129,20 @@ const events = [
   sign('hidden_ink_1', 6, 11, 'hidden_ink_1', { solid: false, lantern: true }),
   sign('hidden_ink_2', 34, 11, 'hidden_ink_2', { solid: false, lantern: true }),
   trigger('f2_exit_trig', 33, 13, 3, 3, 'archive_f2_exit'),
-  // the Keeper's font of the Galleries: the only heal and save between the F1 bell and F3's font
+  // the Keeper's fonts of the Galleries: the entry hall's (before the Warden) and the stairs room's (after the Lantern)
+  { ...font('keeper_font_f2_hall', 15, 5, 'keeper_font_hall'), safe: true },
   { ...font('keeper_font_f2', 34, 17, 'keeper_font_galleries'), safe: true },
   // Tess's second letter, in the south-east reading room
   object('prop_letter', 37, 23, 'prop_letter', { script: 'find_letter_2', ifNot: 'tess_letter_2_found', solid: false }),
   // faint ink readers (ink-tinted, translucent, non-solid: see docs/MAPS.md)
-  actor('reader_1', 16, 7, 'npc_scholar', 'up', { ghost: true, solid: false }),
+  actor('reader_1', 16, 8, 'npc_scholar', 'up', { ghost: true, solid: false }),
   actor('reader_2', 23, 7, 'npc_scholar', 'up', { ghost: true, solid: false }),
   actor('reader_3', 25, 15, 'npc_scholar', 'up', { ghost: true, solid: false }),
   // chests: the simulator assumes Iron Pike and Chain Shirt come from F2
   chest('chest_eg', 33, 23, 'iron', { item: 'iron_pike' }),
   chest('chest_wg', 11, 23, 'iron', { item: 'chain_shirt' }),
   // signs and books
-  sign('reading_desk', 16, 6, 'reading_desk', { solid: false }),
+  sign('reading_desk', 16, 7, 'reading_desk', { solid: false }),
   book('readers_oath', 23, 6, 'readers_oath', { solid: false }),
   book('keeper_journal_2', 4, 26, 'keeper_journal_2', { solid: false }),
   // visible enemies: 7 ordinary per ZONES.archive_f2.plan plus the Warden
@@ -165,11 +168,11 @@ export default {
   decor,
   // hanging glass lamps over the readers' desks (drawn above actors; the light events above match them)
   overhead: [
-    { t: 'hanging_lamp', x: 16, y: 4 }, { t: 'hanging_lamp', x: 24, y: 4 },
+    { t: 'hanging_lamp', x: 17, y: 6 }, { t: 'hanging_lamp', x: 24, y: 4 },
     { t: 'hanging_lamp', x: 14, y: 12 }, { t: 'hanging_lamp', x: 25, y: 12 }, { t: 'hanging_lamp', x: 4, y: 24 },
   ],
   events,
   exits: [],
-  marks: { lantern_pedestal: [4, 13], warden_spot: [4, 14], stairs_down: [35, 12], entrance: [20, 4], font: [35, 15] },
+  marks: { lantern_pedestal: [4, 13], warden_spot: [4, 14], stairs_down: [35, 12], entrance: [20, 4], font: [35, 15], font_hall: [17, 6] },
   start: { x: 20, y: 4, dir: 'down' },
 };

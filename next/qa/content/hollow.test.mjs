@@ -171,3 +171,47 @@ test('simulator: the whisperwood zone row meets its targets at Lv 6 and 7', () =
     assert.ok(n.win <= 0.6 && n.win < c.win, `Lv ${lv}: naive wins ${n.win}`);
   }
 });
+
+// ------------------------------------------------------------------------------------------------ W10
+test('W10: after the Lantern, the pool is pointed at once in lantern_get, once in the valley, and in Talk', async () => {
+  const { partyChat } = await import('../../src/data/quests.js');
+  const say = (log) => ops(log, 'say').map((e) => `${e.args[0]}: ${e.args[1]}`).join(' | ');
+  // lantern_get: Bram names the pool only when Quill has told them about it
+  const told = await runOnce(scenes.lantern_get, { flags: [...PARTY, 'echo_warden_defeated', 'lost_bridge_started'] });
+  assert.match(say(told.log), /bram: A lamp that finds things\. Quill's lost bridge/);
+  const untold = await runOnce(scenes.lantern_get, { flags: [...PARTY, 'echo_warden_defeated'] });
+  assert.doesNotMatch(say(untold.log), /Quill/);
+  // the valley reminder: one box, once, and never before the Lantern or after the hollow is found
+  const r1 = await runOnce(scenes.quill_reminder, { flags: [...PARTY, 'lantern_get', 'lost_bridge_started'] });
+  assert.equal(ops(r1.log, 'say').length, 1);
+  assert.match(say(r1.log), /black pool, east of the fork/);
+  const r2 = await runOnce(scenes.quill_reminder, { flags: [...PARTY, 'lantern_get'] });
+  assert.match(say(r2.log), /scribe at the Pilgrim's Rest/);
+  for (const flags of [[...PARTY], [...PARTY, 'lantern_get', 'hollow_found'], [...PARTY, 'lantern_get', 'quill_reminded']]) {
+    const r = await runOnce(scenes.quill_reminder, { flags });
+    assert.equal(ops(r.log, 'say').length, 0, `quiet with ${flags.join(',')}`);
+  }
+  assert.ok(FLAGS.quill_reminded);
+  // Talk: the lost bridge nudge wins the one side slot over Tess's letters
+  const flags = [...PARTY, 'met_mael', 'left_town', 'archive_entered', 'archive_f1_done', 'echo_warden_defeated', 'lantern_get',
+    'lost_bridge_started', 'tess_quest_started'];
+  const chat = partyChat(has(flags), 'archive_f2');
+  assert.equal(chat.side.length, 1);
+  assert.equal(chat.side[0].who, 'bram');
+  assert.match(chat.side[0].text, /Quill's pool, east of the fork/);
+});
+
+test('W10: hollow_alpha picks the Alpha tier from story progress and stages the briar_alpha sprite', async () => {
+  const base = [...PARTY, 'lantern_get', 'lost_bridge_started', 'hollow_found'];
+  const pick = async (extra) => ops((await runOnce(scenes.hollow_alpha, { flags: [...base, ...extra] })).log, 'battle')[0].args[0];
+  assert.equal(await pick([]), 'whisperwood_alpha');
+  assert.equal(await pick(['boss_door_open']), 'whisperwood_alpha_t1');
+  assert.equal(await pick(['boss_door_open', 'archivore_defeated']), 'whisperwood_alpha_t2');
+  for (const id of ['whisperwood_alpha_t1', 'whisperwood_alpha_t2']) {
+    const e = ENCOUNTERS[id];
+    assert.deepEqual([e.flag, e.boss, e.noFlee, e.enemies.join(), e.zone], ['briar_alpha_defeated', true, true, 'briar_alpha', 'whisperwood_hollow']);
+    assert.ok(e.elite && e.elite.mods.every((m) => m.startsWith('elder')), `${id} is an Elder`);
+  }
+  const elder = await runOnce(scenes.hollow_alpha, { flags: [...base, 'archivore_defeated'] });
+  assert.ok(ops(elder.log, 'say').some((e) => /muzzle is grey/.test(e.args[1])), 'the late Alpha is described as older');
+});

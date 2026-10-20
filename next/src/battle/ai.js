@@ -634,12 +634,16 @@ function damageOptions(b, me, cmds, canSkill) {
     if (cost && overBudget) continue;
     // Mira keeps MP for healing; everyone saves a little in long fights
     const mpWeight = me.id === 'mira' ? (mpFrac < 0.35 ? 6 : 2.2) : (mpFrac < 0.25 ? 3 : 1.2);
+    // W10: MP the action gives back (Mira's Channel) is worth what the same MP costs. The field has no MP
+    // regeneration, so an Auto party that never Channels walks into the next fight dry (PLAYTEST_REVIEW_2 3, the
+    // route simulator tools/sim/route.mjs). Boss fights spend everything anyway (and keep their tuning).
+    const gain = !boss && me.maxMp ? Math.min(mpGainOf(sk), me.maxMp - me.mp) * mpWeight : 0;
     if (sk.target === 'enemy') {
       for (const f of foes) {
         if (reflectsAgainst(f, sk.formula)) continue;
         const est = b.estimate(me, { ...a, target: f.uid })[0];
         if (!est) continue;
-        out.push({ action: { ...a, target: f.uid }, score: scoreHit(b, me, f, est, sk) / rank - cost * mpWeight });
+        out.push({ action: { ...a, target: f.uid }, score: scoreHit(b, me, f, est, sk) / rank - cost * mpWeight + gain });
       }
     } else {
       const ests = b.estimate(me, a);
@@ -653,6 +657,13 @@ function damageOptions(b, me, cmds, canSkill) {
     }
   }
   return out;
+}
+
+/** MP a skill returns to its user (Channel). */
+function mpGainOf(sk) {
+  let n = 0;
+  for (const e of sk.effects || []) if (e.mpGain) n += e.mpGain;
+  return n;
 }
 
 /** Value of a hit: damage that matters + shields + breaking a dangerous foe. */

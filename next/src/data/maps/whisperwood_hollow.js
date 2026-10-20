@@ -11,14 +11,19 @@
 //
 // Flow: stairs (2,13) -> landing -> hidden bridge row 16 -> M (10,16) -> fights, braziers, chest bay -> block
 // (14,14) onto plate (18,16): the root column blocks the straight push, so it goes down two then right four ->
-// gate_b (20,12) -> notch (20,8) -> B -> alpha_trig (row 7) -> the Alpha -> plaque (20,4) -> gold chest (25,4).
+// gate_b (20,12) -> notch (20,10) -> the shrine vestibule V (rows 8-9) -> alpha_trig (row 7) -> the Alpha ->
+// plaque (20,4) -> gold chest (25,4).
+// W10 (PLAYTEST_REVIEW_2 fix 2): V holds the pilgrims' shrine, a rest point (font flow: full heal, save, game over
+// return point) past the block gate and before the Alpha's trigger, so a lost Alpha fight retries at the den's door
+// with the gate puzzle behind the party instead of at the stairs with three foes and a reset block in the way.
 import { grid, box, put, rows, room, scatter, door, sign, trigger, enemy, chest, actor, block, plate, gate,
   brazier, light, steps, enter } from './_kit.js';
 
 const W = 28, H = 20;
 const g = grid(W, H, '^');
 room(g, 16, 4, 25, 7, '.', '|');           // B boss room (faces rows 2-3)
-put(g, 20, 8, '.');                        // notch below B (the barred door's far side)
+box(g, 17, 8, 23, 9, '.');                 // V: the shrine vestibule below B (the trigger row 7 is its only way up)
+put(g, 20, 10, '.');                       // notch below V (the barred door's far side)
 room(g, 1, 13, 25, 18, '.', '|');          // the hollow band: landing L | pool P | main hollow M (faces rows 11-12)
 room(g, 10, 11, 12, 12, '.', '|');         // the chest bay, a 3 x 2 notch in M's north wall (faces rows 9-10)
 // the pool: ragged ink between the landing (x 1..4) and the hollow (x 10..25)
@@ -27,6 +32,7 @@ put(g, 5, 13, '.'); put(g, 5, 18, '.'); put(g, 9, 18, '.'); put(g, 9, 13, '.');
 put(g, 4, 17, 'i'); put(g, 10, 14, 'i');
 // moss where the roots drip and under the plaque
 box(g, 11, 17, 13, 18, 'm'); box(g, 23, 13, 25, 14, 'm'); box(g, 19, 4, 21, 4, 'm'); put(g, 24, 7, 'm');
+box(g, 17, 9, 19, 9, 'm'); put(g, 23, 9, 'm');   // moss where the shrine's spring seeps
 put(g, 1, 13, 'm'); put(g, 2, 18, 'm'); put(g, 3, 18, 'm');
 const ground = rows(g);
 
@@ -75,14 +81,17 @@ const events = [
   // the push-block puzzle: block (14,14) onto the plate (18,16) opens the barred door into the boss room
   block('block_m', 14, 14),
   plate('plate_m', 18, 16, 'gate_b'),
-  gate('gate_b', 20, 12, 'door_locked', { to: ['whisperwood_hollow', 20, 8, 'up'] }),
-  door('notch_b', 20, 8, ['whisperwood_hollow', 20, 13, 'down']),
+  gate('gate_b', 20, 12, 'door_locked', { to: ['whisperwood_hollow', 20, 10, 'up'] }),
+  door('notch_b', 20, 10, ['whisperwood_hollow', 20, 13, 'down']),
+  // the pilgrims' shrine in V: the Keeper's font flow (Rest, then Save) with the rune shrine prop
+  { id: 'hollow_shrine', type: 'font', x: 17, y: 9, w: 3, h: 2, text: 'pilgrim_shrine', sprite: 'rune_shrine', safe: true },
+  light('light_shrine', 18, 8, 3, '#9fe8d8'),
   // dark hollow: two braziers the party lights, and the light of the ones already burning
   brazier('brazier_m1', 13, 18), brazier('brazier_m2', 22, 13),
   light('light_stairs', 2, 13, 4), light('light_m1', 10, 18, 5, '#ffb070'), light('light_m2', 25, 15, 5, '#ffb070'),
   light('light_b1', 18, 4, 5, '#ffb070'), light('light_b2', 22, 4, 5, '#ffb070'),
   // the Briar Alpha, in front of the plaque; the trigger across the room's mouth runs the boss intro
-  actor('whisperwood_alpha', 20, 5, 'briar_wolf', 'down', { ifNot: 'briar_alpha_defeated' }),
+  actor('whisperwood_alpha', 20, 5, 'briar_alpha', 'down', { ifNot: 'briar_alpha_defeated' }),
   trigger('alpha_trig', 17, 7, 7, 1, 'hollow_alpha'),
   sign('lost_bridge_plaque', 20, 3, 'lost_bridge_plaque', { solid: false, lantern: true }),
   // chests: the iron one in the bay behind the Blot, the gold one in the corner behind the Alpha
@@ -109,6 +118,7 @@ export default {
   overhead: [],
   events,
   exits: [],
-  marks: { entrance: [2, 13], bridge_near: [4, 16], bridge_far: [10, 16], alpha_spot: [20, 5], plaque: [20, 4], gold_chest: [25, 5] },
+  marks: { entrance: [2, 13], bridge_near: [4, 16], bridge_far: [10, 16], alpha_spot: [20, 5], plaque: [20, 4], gold_chest: [25, 5],
+    shrine: [20, 9] },
   start: { x: 2, y: 13, dir: 'down' },
 };

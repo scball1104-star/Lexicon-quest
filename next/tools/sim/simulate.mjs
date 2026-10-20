@@ -6,7 +6,7 @@
 //   node tools/sim/simulate.mjs --n 100         fewer battles
 //   node tools/sim/simulate.mjs --zone valley   one zone (valley | archive_f1 | archive_f2 | archive_f3 | archive_boss
 //                                               | whisperwood_hollow, the optional side dungeon; included by default)
-//   node tools/sim/simulate.mjs --check         exit 1 if a target is missed
+//   node tools/sim/simulate.mjs --check         exit 1 if a target is missed (also runs the route and economy checks)
 //   node tools/sim/simulate.mjs --json          also write tools/sim/out/sim.json
 //   node tools/sim/simulate.mjs --trace enc seed policy   print one battle's events
 //
@@ -17,53 +17,11 @@ import { partyAction } from '../../src/battle/ai.js';
 import { newMember, expForLevel, levelForExp } from '../../src/data/party.js';
 import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, rollEncounter, encounterExp } from '../../src/data/encounters.js';
 import { ENEMIES } from '../../src/data/enemies.js';
+import { ITEMS } from '../../src/data/items.js';
+import { SHOPS } from '../../src/data/shops.js';
 
-// ------------------------------------------------------------------ expected party per zone
-// Gear the player can reasonably own on arrival (start kit, valley chest hatchet, a couple of smithy
-// buys, the Echo Warden's Mirrorguard Mail). Plain bases only so results do not hinge on lucky rolls.
-// mastery: points in each weapon type (25 = M2, 70 = M3, 140 = M4, 240 = M5).
-export const LOADOUTS = {
-  valley: {
-    hero: { weapon: 'sword', equip: { sword: 'short_sword', body: 'cloth_tunic' }, mastery: { sword: 12 } },
-    mira: { weapon: 'staff', equip: { staff: 'oak_staff', bow: 'short_bow', body: 'cloth_tunic' }, mastery: { staff: 8, bow: 2 } },
-    bram: { weapon: 'spear', equip: { spear: 'ash_spear', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { spear: 12, axe: 2 } },
-    inventory: { potion: 4, antidote: 1, eye_drops: 1 },
-  },
-  archive_f1: {
-    hero: { weapon: 'sword', equip: { sword: 'short_sword', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { sword: 45, axe: 6 } },
-    mira: { weapon: 'staff', equip: { staff: 'oak_staff', bow: 'short_bow', body: 'cloth_tunic', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 25, bow: 10 } },
-    bram: { weapon: 'spear', equip: { spear: 'ash_spear', axe: 'hatchet', body: 'leather_vest', head: 'cloth_cap' }, mastery: { spear: 45, axe: 10 } },
-    inventory: { potion: 5, ether: 1, antidote: 1, eye_drops: 1, echo_herb: 1 },
-  },
-  archive_f2: {
-    hero: { weapon: 'sword', equip: { sword: 'longsword', axe: 'hatchet', body: 'leather_vest', head: 'leather_hood' }, mastery: { sword: 100, axe: 25 } },
-    mira: { weapon: 'staff', equip: { staff: 'oak_staff', bow: 'short_bow', body: 'leather_vest', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 60, bow: 25 } },
-    bram: { weapon: 'spear', equip: { spear: 'ash_spear', axe: 'hatchet', body: 'leather_vest', head: 'leather_hood', boots: 'leather_boots' }, mastery: { spear: 100, axe: 25 } },
-    inventory: { potion: 5, hi_potion: 1, ether: 2, antidote: 1, eye_drops: 1, echo_herb: 2, phoenix_feather: 1 },
-  },
-  archive_f3: {
-    hero: { weapon: 'sword', equip: { sword: 'longsword', axe: 'hatchet', body: 'chain_shirt', head: 'leather_hood', boots: 'leather_boots' }, mastery: { sword: 170, axe: 50 } },
-    mira: { weapon: 'staff', equip: { staff: 'crystal_rod', bow: 'short_bow', body: 'mirrorguard_mail', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 110, bow: 40 } },
-    bram: { weapon: 'spear', equip: { spear: 'iron_pike', axe: 'hatchet', body: 'chain_shirt', head: 'iron_helm', boots: 'leather_boots' }, mastery: { spear: 170, axe: 50 } },
-    inventory: { potion: 5, hi_potion: 2, ether: 2, antidote: 1, eye_drops: 2, echo_herb: 2, phoenix_feather: 1 },
-  },
-};
-LOADOUTS.archive_boss = {
-  ...LOADOUTS.archive_f3,
-  hero: { ...LOADOUTS.archive_f3.hero, mastery: { sword: 210, axe: 60 } },
-  mira: { ...LOADOUTS.archive_f3.mira, mastery: { staff: 140, bow: 45 } },
-  bram: { ...LOADOUTS.archive_f3.bram, mastery: { spear: 210, axe: 60 } },
-  inventory: { potion: 6, hi_potion: 3, ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2 },
-};
-// Whisperwood Hollow (optional, after the Lantern): F2 cleared, the F3 shop gear bought on the way back out,
-// mastery between the F2 and F3 rows. Plain bases (the Pilgrim's Reach at the hollow mouth is not counted).
-LOADOUTS.whisperwood_hollow = {
-  ...LOADOUTS.archive_f3,
-  hero: { ...LOADOUTS.archive_f3.hero, mastery: { sword: 140, axe: 40 } },
-  mira: { ...LOADOUTS.archive_f3.mira, mastery: { staff: 90, bow: 35 } },
-  bram: { ...LOADOUTS.archive_f3.bram, mastery: { spear: 140, axe: 40 } },
-  inventory: { potion: 5, hi_potion: 2, ether: 2, antidote: 2, eye_drops: 1, echo_herb: 2, phoenix_feather: 1 },
-};
+import { LOADOUTS, ALPHA_TIER_RUNS, knownBestiary } from './loadouts.mjs';
+export { LOADOUTS, ALPHA_TIER_RUNS, knownBestiary };
 
 // ------------------------------------------------------------------ targets (DESIGN 7 + brief)
 export const TARGETS = {
@@ -101,24 +59,15 @@ const quantile = (arr, q) => {
   return s[Math.min(s.length - 1, Math.floor(q * s.length))];
 };
 
-/**
- * Bestiary the player has by the time they fight in a zone: every ordinary enemy's weaknesses are
- * known (they meet each type several times and the battle UI remembers hits). Bosses start unknown.
- */
-export function knownBestiary() {
-  const out = {};
-  for (const e of Object.values(ENEMIES)) if (!e.boss && e.id !== 'lost_page') out[e.id] = [...e.weak, ...e.resist, ...e.immune, ...e.absorb];
-  return out;
-}
 
 /** One battle. Returns metrics. */
-export function runBattle({ zone, level, encounter, seed, policy = 'competent', elite = false, trace = false, bestiary = true }) {
+export function runBattle({ zone, level, encounter, seed, policy = 'competent', elite = false, trace = false, bestiary = true, loadout = zone }) {
   const rng = makeRng(seed * 7919 + 17);
-  const party = makeParty(zone, level);
+  const party = makeParty(loadout, level);
   const spec = rollEncounter(encounter, rng, { eliteRate: elite ? 1 : 0, noElite: !elite });
   const e = ENCOUNTERS[encounter];
   const b = createBattle({ party, enemies: spec.enemies, rng,
-    options: { inventory: { ...LOADOUTS[zone].inventory }, boss: e.boss, canFlee: !e.noFlee, zone: e.zone, encounter,
+    options: { inventory: { ...LOADOUTS[loadout].inventory }, boss: e.boss, canFlee: !e.noFlee, zone: e.zone, encounter,
       bestiary: bestiary ? knownBestiary() : {} } });
   const log = trace ? [...b.startEvents] : null;
   let steps = 0;
@@ -150,9 +99,9 @@ export function runBattle({ zone, level, encounter, seed, policy = 'competent', 
 }
 
 /** Run N battles for an encounter + policy. */
-export function runSet({ zone, level, encounter, n, policy, elite = false, seed0 = 1 }) {
+export function runSet({ zone, level, encounter, n, policy, elite = false, seed0 = 1, loadout = zone }) {
   const rows = [];
-  for (let i = 0; i < n; i++) rows.push(runBattle({ zone, level, encounter, seed: seed0 + i, policy, elite }));
+  for (let i = 0; i < n; i++) rows.push(runBattle({ zone, level, encounter, seed: seed0 + i, policy, elite, loadout }));
   const wins = rows.filter((r) => r.win);
   return {
     zone, level, encounter, policy, elite, n,
@@ -177,6 +126,11 @@ export function runSuite({ n = 400, zones = ZONE_ORDER, policies = ['competent',
       const pols = enc === 'archivore' ? [...new Set([...policies, 'reckless'])] : policies;
       for (const level of lv) for (const policy of pols) out.push(runSet({ zone: z, level, encounter: enc, n, policy }));
       if (elites && !isBoss) out.push(runSet({ zone: z, level: lv[lv.length - 1], encounter: enc, n: Math.max(20, Math.floor(n / 4)), policy: 'competent', elite: true }));
+    }
+    if (z === 'whisperwood_hollow') {
+      for (const t of ALPHA_TIER_RUNS) for (const level of t.levels) for (const policy of policies) {
+        out.push(runSet({ zone: z, level, encounter: t.encounter, n, policy, loadout: t.loadout }));
+      }
     }
   }
   return out;
@@ -228,13 +182,14 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
     if (r.win < T.echo_warden.winMin) fails.push(`echo_warden Lv${r.level}: win ${pct(r.win)} < ${pct(T.echo_warden.winMin)}`);
     if (r.rounds < T.echo_warden.roundsMin - 0.5 || r.rounds > T.echo_warden.roundsMax + 0.5) fails.push(`echo_warden Lv${r.level}: rounds ${r.rounds.toFixed(2)} outside 6-8`);
   }
-  for (const r of rows.filter((x) => x.encounter === 'whisperwood_alpha')) {
+  // the Alpha and its Elder tiers (W10) share one target: 6 to 9 rounds, careful play wins, attack-only does not walk it
+  for (const r of rows.filter((x) => x.encounter === 'whisperwood_alpha' || ENCOUNTERS[x.encounter].tierOf === 'whisperwood_alpha')) {
     const t = T.whisperwood_alpha;
     if (r.policy === 'competent') {
-      if (r.win < t.winMin) fails.push(`whisperwood_alpha Lv${r.level}: competent win ${pct(r.win)} < ${pct(t.winMin)}`);
-      if (r.rounds < t.roundsMin - 0.5 || r.rounds > t.roundsMax + 0.5) fails.push(`whisperwood_alpha Lv${r.level}: rounds ${r.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
+      if (r.win < t.winMin) fails.push(`${r.encounter} Lv${r.level}: competent win ${pct(r.win)} < ${pct(t.winMin)}`);
+      if (r.rounds < t.roundsMin - 0.5 || r.rounds > t.roundsMax + 0.5) fails.push(`${r.encounter} Lv${r.level}: rounds ${r.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
     }
-    if (r.policy === 'naive' && r.win > t.naiveWinMax) fails.push(`whisperwood_alpha Lv${r.level}: naive wins ${pct(r.win)} > ${pct(t.naiveWinMax)}`);
+    if (r.policy === 'naive' && r.win > t.naiveWinMax) fails.push(`${r.encounter} Lv${r.level}: naive wins ${pct(r.win)} > ${pct(t.naiveWinMax)}`);
   }
   const arch = rows.filter((x) => x.encounter === 'archivore');
   const ac = arch.find((r) => r.policy === 'competent');
@@ -257,6 +212,44 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
 
 const avg = (a) => a.reduce((s, v) => s + v, 0) / Math.max(1, a.length);
 const pct = (v) => `${Math.round(v * 100)}%`;
+
+// ------------------------------------------------------------------ economy (W10, PLAYTEST_REVIEW_2 fix 7)
+/**
+ * Battle gold along the main route (each zone plan once, no elites, no chests or sales: a floor, not a forecast)
+ * against what the shops sell. Rows: gold on arriving in each zone and the gear the zone's LOADOUT adds.
+ */
+export function economy({ startGold = 80 } = {}) {
+  let gold = startGold;
+  const owned = new Set(['short_sword', 'cloth_tunic', 'oak_staff', 'short_bow', 'ash_spear', 'hatchet', 'leather_vest',
+    'cloth_cap', 'mirrorguard_mail', 'iron_pike', 'chain_shirt']);   // start kit, gifts, the F2 chests, the Warden's mail
+  const rows = [];
+  let earned = 0;
+  for (const z of ZONE_ORDER) {
+    const need = new Set();
+    for (const id of ['hero', 'mira', 'bram']) for (const it of Object.values(LOADOUTS[z][id].equip)) if (it && !owned.has(it)) need.add(it);
+    let buy = 0;
+    for (const it of need) { buy += ITEMS[it].price; owned.add(it); }
+    rows.push({ zone: z, arrive: gold, buys: [...need], cost: buy });
+    gold -= buy;
+    let g = 0;
+    for (const [enc, n] of ZONES[z].plan) g += ENCOUNTERS[enc].enemies.reduce((s, e) => s + ENEMIES[e].gold, 0) * n;
+    gold += g; earned += g;
+  }
+  const salvage = SHOPS.archive_salvage.stock.filter((s) => ITEMS[s.item].slot);
+  const t3 = salvage.map((s) => s.price ?? ITEMS[s.item].price);
+  const boss = rows.find((r) => r.zone === 'archive_boss');
+  const f3 = rows.find((r) => r.zone === 'archive_f3');
+  return { rows, earned, end: gold, sinkTotal: t3.reduce((a, b) => a + b, 0), cheapestT3: Math.min(...t3),
+    // a player who skips the optional F3 town trip (crystal rod, iron helm) reaches Rook with that gold unspent
+    atRook: boss.arrive + f3.cost };
+}
+
+export function checkEconomy(e = economy()) {
+  const fails = [];
+  if (e.atRook < e.cheapestT3) fails.push(`economy: ${e.atRook} gold at Rook's salvage, the cheapest tier-3 piece costs ${e.cheapestT3}`);
+  if (e.sinkTotal < e.earned) fails.push(`economy: the Archive salvage sells ${e.sinkTotal} gold of gear, the route pays ${e.earned}: gold piles up again`);
+  return fails;
+}
 
 export function formatTable(rows) {
   const head = ['zone', 'encounter', 'Lv', 'policy', 'win', 'rounds', 'p10-p90', 'hp lost', 'KOs', 'items'];
@@ -297,6 +290,19 @@ if (isMain) {
     console.log('\nProgression (fight each zone plan once, then 80% of it):');
     for (const p of prog) console.log(`  ${pct(p.share).padStart(4)} ${p.zone.padEnd(13)} ${String(p.fights).padStart(4)} fights  Lv ${p.startLevel} -> ${p.endLevel}  (total EXP ${p.exp})`);
     const fails = checkTargets(rows, zone ? prog.filter((p) => p.zone === zone) : prog);
+    if (!zone) {
+      // W10: the route (HP and MP carried between fights, elites at the live rate) and the gold flow
+      const { routeSummary, checkRoute, REST_PLANS } = await import('./route.mjs');
+      const careful = routeSummary({ n: 100, rests: REST_PLANS.current });
+      const bot = routeSummary({ n: 100, rests: REST_PLANS.current, bot: true });
+      console.log(`\nRoute (100 runs, HP/MP carried): careful ${careful.overall.toFixed(2)} rounds per ordinary fight `
+        + `(${Object.entries(careful.zones).map(([z, v]) => `${z} ${v.rounds.toFixed(2)}`).join(', ')}); autoplay-like ${bot.overall.toFixed(2)} `
+        + `(${Object.entries(bot.zones).map(([z, v]) => `${z} ${v.rounds.toFixed(2)}`).join(', ')})`);
+      fails.push(...checkRoute(careful, 'careful'), ...checkRoute(bot, 'bot'));
+      const eco = economy();
+      console.log(`Economy: ${eco.earned} battle gold on the route, ${eco.atRook} at Rook's salvage, tier-3 stock ${eco.sinkTotal}`);
+      fails.push(...checkEconomy(eco));
+    }
     console.log(`\n${fails.length ? 'TARGETS MISSED:\n  ' + fails.join('\n  ') : 'All targets met.'}`);
     console.log(`(${rows.reduce((s, r) => s + r.n, 0)} battles in ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
     if (args.includes('--json')) {

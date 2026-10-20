@@ -8,7 +8,9 @@ import { runOnce } from './_harness.mjs';
 const STATE = {
   wake_up: [], fading_sign: ['intro_done'], mael_intro: ['intro_done'], mira_joins: ['intro_done', 'met_mael'],
   south_gate: ['intro_done', 'met_mael', 'mira_joined'], archive_door: ['bram_joined', 'mira_joined'],
-  lantern_get: ['echo_warden_defeated', 'archive_f1_done', 'mira_joined', 'bram_joined'],
+  lantern_get: ['echo_warden_defeated', 'archive_f1_done', 'mira_joined', 'bram_joined', 'lost_bridge_started'],
+  quill_reminder: ['lantern_get', 'lost_bridge_started', 'mira_joined', 'bram_joined'],
+  hollow_alpha: ['lantern_get', 'lost_bridge_started', 'hollow_found', 'boss_door_open', 'archivore_defeated', 'mira_joined', 'bram_joined'],
   thirteenth_bell: ['archive_f2_done', 'mira_joined', 'bram_joined'],
   archivore: ['boss_door_open', 'mira_joined', 'bram_joined'],
   echo_warden: ['archive_f1_done', 'mira_joined', 'bram_joined'],
