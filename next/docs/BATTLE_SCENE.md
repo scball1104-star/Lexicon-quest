@@ -101,7 +101,7 @@ combo, enemy lunge or enemy cast), then plays the hits in order, then returns ev
 | buff wind-up / item / defend / swap | 18 / 24 / 14 / 16 | enemy wind-up / lunge / spell / release | 6 / 8 / 20 / 10 |
 | heal / miss / status / status tick | 16 / 14 / 18 / 16 | reveal / knockback / reflect | 22 / 14 / 22 |
 | BREAK: slow-motion (x0.5) / hold | 18 / 30 | shield chip | 8 |
-| telegraph / cancel | 36 / 16 | enemy death flash / dissolve | 8 / 30 |
+| telegraph / cancel | 36 / 16 | enemy die steps / death flash / dissolve | 12 / 8 / 30 |
 | boss death shake / dissolve | 70 / 90 | party KO kneel / fall | 10 / 16 |
 | revive / summon / split | 26 / 26 / 22 | devour / feast | 46 / 34 |
 | phase banner / stance banner | 72 / 54 | combo banner | 30 |
@@ -187,8 +187,11 @@ face crop and a smooth 12x12 thumbnail of the enemy sprite.
 
 ## 8. Known gaps
 
-- Enemies have one frame each (DESIGN 6.3): attacks are a lunge plus procedural fx, hurt is a 2 px recoil plus
-  the squash, idle is the 1 px breathe.
+- Enemy animation is derived from one painted frame per enemy (section 11), so poses are small part moves
+  (lean, a turned head or limb, a wing flare), not redrawn key poses. The code bob / squash / breathe remain as
+  the fallback for any enemy without the frames.
+- dissolveSprite (fx.js) draws at scale 1, so a borrowed-art enemy drawn at `sprite.scale` != 1 shrinks back to
+  its atlas size for the 30-frame dissolve.
 - No touch "tap to confirm" hint glyph in the help window (the AUTO / x2 buttons and the row model cover touch).
 - No name on hover over a timeline slot (CRITIQUE C4 suggested one); the heads carry identity on their own.
 - The help window is one line; long telegraph sentences are cut with an ellipsis (the marker, timeline '!' and
@@ -220,3 +223,52 @@ healer not ready (Mira dead, silenced, out of MP or more than three slots away) 
 a teammate in that spot instead. `node tools/sim/simulate.mjs --check` meets every target with this policy (the
 55% rule is gated to Archive groups because an early Mend in valley_pack pushed it to 5.5 rounds, past the 3 to 5
 target).
+
+## 11. Animation frames (W6-anim)
+
+Generator: `tools/art/sprites/anim_frames.py` (enemies, Archivore, Echo Warden, Lost Page) and `anim_party.py`
+(party extras), packed by `anim_atlas.py` from `build_enemies.build_battle`, `build_bosses.build` and
+`build_party_battle.build`. Every pre-W6 frame keeps its name, rect and origin (`qa/battlescene/actors.test.mjs`
+checks it); derived frames are packed below the base frames, each with its own entry in the atlas `origin`
+table, and the sheets are saved as lossless indexed PNGs. Parts (heads, horns, arms, wings, blades, shields) move
+as rigid parts with RotSprite-style sampling (8x Scale2x, transform, sample back), so turned lines stay clean.
+
+| Frame | Enemies (`<id>_...`) | Bosses |
+|---|---|---|
+| `idle_1` | breathe: body above the legs up 1 px (slime swells, wraith rags sway) | Archivore wings lift 2.5 deg |
+| `attack` | lunge: lean 2-3 px forward, head or horns down, front limb reaching | Archivore wings flare 9 deg, eye wide, slit pupil |
+| `hurt` | recoil 2 px back, 2 px squash, eyes shut, outline one ramp brighter | Archivore lid closes |
+| `cast` | page_wraith, ink_wraith: arms raised, magic-ramp glow, sparkles | Archivore ink inhale: wings fold, body contracts, eye burns gold |
+| `devour` | - | Archivore: eye 1.55x with a dilated pupil, tendrils reach, lunge |
+| `die_0..2` | a ragged wavefront eats the sprite from the top (violet burning edge, ash) | same, plus `lost_page_die_*` |
+| stances | - | `echo_warden_mirror` (shield tilted up, ice-blue mirror face, sheen), `echo_warden_bulwark` (shield planted low and forward, steel face, knight crouched, blade drawn to guard), each with `_idle_1`, `_attack`, `_hurt`, `_cast` |
+
+Party (`party_battle`, 32x40 cells appended after the original 51): `<id>_<weapon>_crit` (deeper crouch, lean
+back, weapon cocked fully behind, glint), `<id>_<weapon>_combo` (low wide stance, weapon raised, sparkles),
+`<id>_<weapon>_levelup` (victory pose lifted 3 px, legs in a stride), and shared `<id>_combo` / `<id>_levelup`
+aliasing the primary weapon. The existing `idle_0` / `idle_1` are the party breathe.
+
+Scene (`actors.js`, frame selection only in `animator.js`):
+
+- Idle: a 2-frame breathe, a beat every `BREATHE` = 36 frames, both sides (base / `idle_1`; party `idle_0` /
+  `idle_1`). Flyers still bob 2 px.
+- Enemy pose `attack` is set before the lunge `move` (melee); `cast` for spells and `telegraph` events (falls back
+  to `attack`); `devour` for the Archivore's devour / feast (falls back to `cast`); `hurt` holds 16 frames when
+  the frame exists (past the 6-frame white hit flash), with the 2 px shove on its first 4 frames.
+- Enemy death: `ev_ko` plans `pose die` + `wait FRAMES.dieSteps` (12) BEFORE the `ko` op; the actor steps
+  `die_0..2` every `DIE_STEP` = 4 frames, holds `die_2` through the white flash and the dissolve eats `die_2`.
+- `stance` events plan `pose stance_<name>` (and settle an attack pose to idle): the actor swaps to the
+  `<stem>_<stance>` set, flashes `_cast` for `STANCE_FLASH` = 20 frames, and drops back to the neutral set while
+  broken.
+- Party: `crit` replaces `windup` when any hit of the swing (melee or bow) crits; combo members gather in `combo`;
+  the rewards' level-up page re-sends `victory`, which the actor turns into `levelup` with a 6 px hop over
+  `LEVELUP_FRAMES` = 26 frames, then back to `victory`.
+- Elites keep their tint on every frame. Borrowed art (`ENEMIES[id].sprite = { frame, scale, tint }`): the frame
+  stem is `sprite.frame` when the atlas has no `<id>` frame, the sprite (and its shadow and hit box) is drawn at
+  `scale`, and `tint` applies at 0.35 when the unit has none, so the Hollow enemies inherit every derived frame.
+- Missing frames fall back to the old code: the 1 px split breathe, the hurt squash, the plain base frame.
+
+Verify: `python next/tools/art/sprites/anim_preview.py --atlas` (origin-aligned 4x sheets of every shipped frame,
+`out/anim_atlas_<stem>_4x.png`); `python next/qa/battlescene/autobattle.py --only anim_enemy,anim_cast,anim_death,
+anim_devour,anim_stance,anim_party` (zoomed strips that print the frame each actor drew under every tile and fail
+when a generator frame never reaches the screen); `node next/qa/run.mjs battlescene`.
