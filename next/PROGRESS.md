@@ -132,3 +132,14 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   more stretched wolves), with a root-cave battle backdrop.
 - The music follows the story: an uneasy theme when names fade and the thirteenth bell rings, the sad theme when
   Bram loses his father's name and when your own name stays faint, and a triumphant one for the homecoming.
+
+## 2026-10-20 (Tue) late morning: field abilities, and Episode 2 is designed
+- Each party member has a field ability (switch with the left page button, use with the right; on phones the
+  ability button sits where the Lantern button was): the hero's Dash Strike breaks cracked rock and root walls
+  and gets a free first turn when it hits an enemy from behind; Mira's Appraise reads a visible enemy's weaknesses
+  from a distance and records them; Bram's Shove moves heavy blocks. Each opens one optional secret (a valley grotto,
+  an Archive storeroom niche, a root shortcut on floor three).
+- Episode 2 is designed and ready to build: "The Town Without a Name". The road east from the valley leads through
+  a misty pass to a town where no one has a reflection, and across the lake to the Court of Mirrors (light-and-mirror
+  puzzles, your party's own reflections as a mini-boss, the three-phase Nameless King). Plan:
+  `next/docs/EPISODE2_PLAN.md`. I will start building it after the weekly usage reset so your loops keep room.
