@@ -391,7 +391,7 @@ test('whisperwood_hollow: three visible enemies, an iron and a gold chest, the A
   const m = maps.whisperwood_hollow;
   const foes = m.events.filter((e) => e.type === 'enemy');
   assert.deepEqual(foes.map((e) => e.encounter).sort(), ['hollow_blot', 'hollow_wolves', 'hollow_wolves']);
-  assert.deepEqual(foes.map((e) => e.sprite).sort(), ['briar_wolf', 'briar_wolf', 'ink_slime']);
+  assert.deepEqual(foes.map((e) => e.sprite).sort(), ['ink_blot', 'thornback_wolf', 'thornback_wolf']);
   assert.ok(db.ENCOUNTERS.hollow_blot.elite, 'the ink slime of the brief is a fixed elite');
   const chests = m.events.filter((e) => e.type === 'chest');
   assert.deepEqual(chests.map((c) => c.tier).sort(), ['gold', 'iron']);
