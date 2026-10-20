@@ -8,7 +8,7 @@ change the generator and rebuild. Everything is 16 px tiles, top-left light, col
 | `terrain.png` | ground autotiles (A2), animated water + ink (A1), fill variants, decal overlays |
 | `cliffs.png` | cliff wall system (grass top + rock face), stairs cut into cliffs, one-way ledges |
 | `town.png` | 11 prefab buildings (top) + modular kit: roofs, walls, doors, windows, awnings, fences, bridges, well, stalls, signs, banners, stairs |
-| `archive.png` | Rootbound Archive: wall systems `archive` (stone cap around a flat `#14101e` void, two-tone face) and `archive_roots` (same cap and face over the old root-choked earth fill), archive floor, pillar, shelves (incl. moving shelf), tables, candelabra, braziers, roots, plates, switches, crystal switch, push block, doors (key, locked, boss), cracked wall, stairs, hidden-ink pieces, lantern pedestal |
+| `archive.png` | Rootbound Archive: per-floor kits for F1 / F2 / F3 (see *Per-floor Archive kits* below); wall systems `archive` (stone cap around a flat `#14101e` void, two-tone face) and `archive_roots` (same cap and face over the old root-choked earth fill), archive floor, pillar, shelves (incl. moving shelf), tables, candelabra, braziers, roots, plates, switches, crystal switch, push block, doors (key, locked, boss), cracked wall, stairs, hidden-ink pieces, lantern pedestal |
 | `interior.png` | 3 interior wall systems, wall windows, counter, beds, tables, chairs, hearth, goods shelves, barrels/pots/crates/sacks, rug, stairs |
 | `tiles.json` | every id below with its rect, collision and autotile/anim data |
 
@@ -63,12 +63,11 @@ transparent outside the boundary. To draw cell (x, y) whose terrain is T:
 3. each higher one L is drawn as an A2 cell where neighbour n is connected iff order(n) >= order(L).
 
 Holes (`water`, `shallow`, `ink`, `pit`) are highest, so they draw their own banks and lips; grass draws its
-tufted edge over dirt and sand; the plaza draws a dressed curb over grass. A `pit` has a rim: a lit 1 px edge on
-its top and left (the far wall is a cut stone face fading to ink), a darker right edge and a 2 px dark lip along
-the bottom, so it reads as a hole. `ink` (W5-art, CRITIQUE_2 item 5) is a dark violet-indigo liquid, not flat navy:
+tufted edge over dirt and sand; the plaza draws a dressed curb over grass. A `pit` has a light rim all round, an irregular
+outline and its far wall as a cut stone face fading to ink, so it reads as a hole (W8, see *Per-floor Archive kits*). `ink` (W5-art, CRITIQUE_2 item 5) is a dark violet-indigo liquid, not flat navy:
 an ink:2 body with soft ink:1 depth bands, slow highlight ripples (thin ink:3 arcs that drift and breathe over the
-3 A1 frames) with ink:4 glints, a lighter meniscus ring (ink:3, shimmering to ink:4) inside the shore, a dark lip
-on the near and side banks and a cut stone face under the far bank. Preview: `python compose.py ink_test`
+3 A1 frames) with ink:4 glints, a lighter meniscus ring (ink:3, shimmering to ink:4) inside the shore, a light stone
+rim all round (W8) and a cut stone face under the far bank. Preview: `python compose.py ink_test`
 (`out/preview_ink_test.png`; set the scene's `frame` to 1 or 2 for the other frames). `plaza` keeps its mortar in the mid step and dresses only every third stone,
 so actors out-contrast the floor (6 fill variants). `carpet_red` / `carpet_blue` read as cloth: a dark hem with
 a fringe stitch on the N and S ends, a gold line, a knot stripe and a soft woven field. Pre-render each map layer once
@@ -128,6 +127,45 @@ shelf_bread rack_weapons rug_round stairs_in_up stairs_in_down hearth`.
 
 Door objects (`door_*`, `stairs_*`) are set into a 2-row wall face: anchor = bottom-left doorway cell.
 Closed doors list the doorway as footprint; open ones list it as `doorAt`.
+
+## Per-floor Archive kits (W8-archive, CRITIQUE_3 items 3 and 4)
+
+Each Archive floor has its own floor terrain, wall band, inner face, the deep beyond its walls, an outer face,
+props and one landmark. Generators: `archive_floors.py` (terrains and wall systems) and `archive_props_w8.py`
+(props), both appended to `archive.png` by `archive.py`. The old `archive` / `archive_roots` systems and
+`archive_floor` are unchanged (the test maps still use them).
+
+| Floor | Floor terrain | Walls (`<sys>` and `<sys>_out`) | Props | Landmark |
+|---|---|---|---|---|
+| F1 Catalog Halls | `catalog_wood` warm oak parquet, basket weave, dropped index cards | `catalog`: walnut cap, brass front lip, oak panels over card drawers; `catalog_out`: shelf and drawer silhouettes in the dark, oak siding falling away | `card_cabinet` (32x32 object), `pillar_oak`, `book_stack` (1-tile object), `index_cards` (decal), `wall_drawers_<l\|m\|r>` (16x32 face overlays) | `great_catalog_dial` (32x32 face overlay: the brass index wheel in the drawer wall) |
+| F2 Reading Galleries | `gallery_stone` cold slate harlequin, glass inlays | `gallery`: slate cap, verdigris lip, slate ashlar under a verdigris frieze; `gallery_out`: dark leaded lancets in the dark | `lectern` (object), `gallery_window` (16x32 face overlay), `hanging_lamp` (16x32 tile for the map `overhead` list; pair it with a `light` event) | `gallery_rose` (48x32 face overlay: the rose window) |
+| F3 Rootbound Stacks | `stacks_wood` dark long floorboards, roots, ink in the seams | `stacks`: root-choked cap with ragged edges, dark panelling with roots and ink; `stacks_out`: root fragments in the black, a curtain of roots falling away | `shelf_rooted` (32x48 object), `root_mass_a` (32x16) / `root_mass_b` (16x32) braids for wall tops, `root_drape` and `wall_ink_seep` (16x32 face overlays) | `root_arch` (80x32 tile for the map `overhead` list, at (door x - 1, door top row): roots knotted over the great door) |
+
+Footstep surfaces follow the ids (`*_wood` = wood, `gallery_stone` = stone).
+
+**Wall depth.** The maps keep carving rooms out of `#`, then classify the wall cells (`depth()` in each
+`src/data/maps/archive_*.js`): a wall cell touching a room (8-neighbourhood) stays the band `#` = `<sys>_top`, a full
+tile of wall top, so walls have thickness; a wall cell under the band's south side becomes the outer face `o` =
+`<sys>_out_face` (one or two rows); every other wall cell is the deep `v` = `<sys>_out_top`. All of them are `solid`.
+The band's A2 edges are directional (bright front lip on S, dark back edge on N, lit W, shaded E) whatever the
+neighbour is, so the same piece serves a north wall (face below), a south wall (outer face below) and a side wall.
+`<sys>_out_top` has no edges at all (every quarter is the fill), so the deep is seamless; both tops carry
+`topVariants`. Face blocks are cut per quarter, so `FaceStyle` rows 0..7 only see `top` and rows 8..15 only see
+`bottom`: the per-floor faces are written as a head (8 rows), a 16-periodic body and a foot (8 rows)
+(`archive_floors.SplitFace`).
+
+Overlays on wall cells must be solid (an overlay's collision replaces the cell's); the root masses are placed through
+`rootMasses()` in the maps, which drops any placement that would touch a floor or face cell. `hanging_lamp` and
+`root_arch` are collision `none` and belong in `overhead` only, never in `overlays`.
+
+**Ink and pits (CRITIQUE_3 #4).** `ink` and `pit` have an irregular outline (a bigger wobble plus a few bites), a
+light rim all round (stone_cool 5 on the far lip, 4 on the west, 3 on the near and east lips), the far bank as a cut
+face going down in courses, and a darker band on the ink under the far bank. `ink_bridge_<h|v>_revealed` carries a
+faint, dithered pale cyan glow on the ink either side of the deck (the Lantern's light caught under the planks). The
+maps also break the pool and pit outlines into ragged cell shapes where no prop or crossing depends on them.
+
+Previews: `python w8_swatch.py <terrain or wall top ids>` (out/w8/swatch.png, 3x) and `python w8_props_sheet.py`
+(out/w8/props.png); whole floors with `python ../../maps/preview.py archive_f1 --crop=0,0,40,30 --scale=2`.
 
 ## Tile ids (16 px unless the entry says otherwise)
 

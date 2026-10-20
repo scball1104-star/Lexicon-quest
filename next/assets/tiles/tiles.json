@@ -14,6 +14,9 @@
  },
  "terrainOrder": [
   "archive_floor",
+  "catalog_wood",
+  "gallery_stone",
+  "stacks_wood",
   "stone_floor",
   "wood_floor",
   "dirt",
@@ -39,7 +42,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 5,
+   "order": 8,
    "variants": [
     [
      0,
@@ -84,7 +87,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 7,
+   "order": 10,
    "variants": [
     [
      96,
@@ -109,7 +112,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 3,
+   "order": 6,
    "variants": [
     [
      128,
@@ -144,7 +147,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 8,
+   "order": 11,
    "variants": [
     [
      0,
@@ -189,7 +192,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 4,
+   "order": 7,
    "variants": [
     [
      96,
@@ -224,7 +227,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 12,
+   "order": 15,
    "variants": [
     [
      160,
@@ -249,7 +252,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 1,
+   "order": 4,
    "variants": [
     [
      0,
@@ -289,7 +292,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 2,
+   "order": 5,
    "variants": [
     [
      80,
@@ -324,7 +327,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 9,
+   "order": 12,
    "variants": []
   },
   "carpet_blue": {
@@ -336,7 +339,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 10,
+   "order": 13,
    "variants": []
   },
   "pit": {
@@ -348,7 +351,7 @@
    "autotile": "A2",
    "kind": "hole",
    "collision": "pit",
-   "order": 14,
+   "order": 17,
    "variants": []
   },
   "moss": {
@@ -360,7 +363,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 6,
+   "order": 9,
    "variants": [
     [
      144,
@@ -385,7 +388,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 11,
+   "order": 14,
    "anim": {
     "frames": [
      0,
@@ -407,7 +410,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 13,
+   "order": 16,
    "anim": {
     "frames": [
      0,
@@ -474,6 +477,156 @@
     1
    ],
    "sheet": "archive.png"
+  },
+  "catalog_wood": {
+   "x": 0,
+   "y": 256,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     256
+    ],
+    [
+     48,
+     256
+    ],
+    [
+     64,
+     256
+    ],
+    [
+     80,
+     256
+    ],
+    [
+     96,
+     256
+    ],
+    [
+     112,
+     256
+    ],
+    [
+     128,
+     256
+    ]
+   ],
+   "variantWeights": [
+    24,
+    3,
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   "sheet": "archive.png",
+   "order": 1
+  },
+  "gallery_stone": {
+   "x": 144,
+   "y": 256,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     176,
+     256
+    ],
+    [
+     192,
+     256
+    ],
+    [
+     208,
+     256
+    ],
+    [
+     224,
+     256
+    ],
+    [
+     240,
+     256
+    ],
+    [
+     256,
+     256
+    ]
+   ],
+   "variantWeights": [
+    20,
+    3,
+    2,
+    2,
+    1,
+    1
+   ],
+   "sheet": "archive.png",
+   "order": 2
+  },
+  "stacks_wood": {
+   "x": 272,
+   "y": 256,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     304,
+     256
+    ],
+    [
+     320,
+     256
+    ],
+    [
+     336,
+     256
+    ],
+    [
+     352,
+     256
+    ],
+    [
+     368,
+     256
+    ],
+    [
+     384,
+     256
+    ],
+    [
+     400,
+     256
+    ],
+    [
+     416,
+     256
+    ]
+   ],
+   "variantWeights": [
+    14,
+    2,
+    2,
+    2,
+    2,
+    1,
+    1,
+    2
+   ],
+   "sheet": "archive.png",
+   "order": 3
   }
  },
  "walls": {
@@ -548,6 +701,258 @@
    ],
    "collision": "solid",
    "note": "legend ids archive_roots_top / archive_roots_face; the old root-choked earth fill under the same cap and face as archive",
+   "sheet": "archive.png"
+  },
+  "catalog": {
+   "top": [
+    0,
+    304
+   ],
+   "face": [
+    32,
+    304
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     304
+    ],
+    [
+     144,
+     304
+    ],
+    [
+     160,
+     304
+    ],
+    [
+     176,
+     304
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "W8-archive per-floor wall band (catalog_top) and inner face (catalog_face)",
+   "sheet": "archive.png"
+  },
+  "catalog_out": {
+   "top": [
+    64,
+    304
+   ],
+   "face": [
+    96,
+    304
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     304
+    ],
+    [
+     208,
+     304
+    ],
+    [
+     224,
+     304
+    ],
+    [
+     240,
+     304
+    ],
+    [
+     256,
+     304
+    ],
+    [
+     272,
+     304
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    3,
+    3,
+    2,
+    3,
+    1
+   ],
+   "note": "the deep beyond the walls (catalog_out_top, no edges) and the outer face under a band's south lip (catalog_out_face)",
+   "sheet": "archive.png"
+  },
+  "gallery": {
+   "top": [
+    0,
+    352
+   ],
+   "face": [
+    32,
+    352
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     352
+    ],
+    [
+     144,
+     352
+    ],
+    [
+     160,
+     352
+    ],
+    [
+     176,
+     352
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "W8-archive per-floor wall band (gallery_top) and inner face (gallery_face)",
+   "sheet": "archive.png"
+  },
+  "gallery_out": {
+   "top": [
+    64,
+    352
+   ],
+   "face": [
+    96,
+    352
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     352
+    ],
+    [
+     208,
+     352
+    ],
+    [
+     224,
+     352
+    ],
+    [
+     240,
+     352
+    ],
+    [
+     256,
+     352
+    ],
+    [
+     272,
+     352
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    3,
+    3,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (gallery_out_top, no edges) and the outer face under a band's south lip (gallery_out_face)",
+   "sheet": "archive.png"
+  },
+  "stacks": {
+   "top": [
+    0,
+    400
+   ],
+   "face": [
+    32,
+    400
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     400
+    ],
+    [
+     144,
+     400
+    ],
+    [
+     160,
+     400
+    ],
+    [
+     176,
+     400
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "W8-archive per-floor wall band (stacks_top) and inner face (stacks_face)",
+   "sheet": "archive.png"
+  },
+  "stacks_out": {
+   "top": [
+    64,
+    400
+   ],
+   "face": [
+    96,
+    400
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     400
+    ],
+    [
+     208,
+     400
+    ],
+    [
+     224,
+     400
+    ],
+    [
+     240,
+     400
+    ],
+    [
+     256,
+     400
+    ],
+    [
+     272,
+     400
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (stacks_out_top, no edges) and the outer face under a band's south lip (stacks_out_face)",
    "sheet": "archive.png"
   },
   "interior": {
@@ -1968,6 +2373,114 @@
    "w": 16,
    "h": 16,
    "collision": "none",
+   "sheet": "archive.png"
+  },
+  "index_cards": {
+   "x": 112,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "archive.png"
+  },
+  "wall_drawers_l": {
+   "x": 0,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "wall_drawers_m": {
+   "x": 16,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "wall_drawers_r": {
+   "x": 32,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "great_catalog_dial": {
+   "x": 48,
+   "y": 512,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "gallery_window": {
+   "x": 80,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "gallery_rose": {
+   "x": 96,
+   "y": 512,
+   "w": 48,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "root_drape": {
+   "x": 144,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "wall_ink_seep": {
+   "x": 160,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "archive.png"
+  },
+  "hanging_lamp": {
+   "x": 176,
+   "y": 512,
+   "w": 16,
+   "h": 32,
+   "collision": "none",
+   "note": "overhead tile: list it in the map `overhead`",
+   "sheet": "archive.png"
+  },
+  "root_mass_a": {
+   "x": 0,
+   "y": 544,
+   "w": 32,
+   "h": 16,
+   "collision": "solid",
+   "note": "wall cells only (band / deep): it is solid",
+   "sheet": "archive.png"
+  },
+  "root_mass_b": {
+   "x": 32,
+   "y": 544,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "wall cells only (band / deep): it is solid",
+   "sheet": "archive.png"
+  },
+  "root_arch": {
+   "x": 48,
+   "y": 544,
+   "w": 80,
+   "h": 32,
+   "collision": "none",
+   "note": "overhead tile, x = boss door x - 1, y = door top row: roots knotted over the great door",
    "sheet": "archive.png"
   },
   "window_in": {
@@ -4642,6 +5155,134 @@
    ],
    "collision": "solid",
    "kind": "door",
+   "sheet": "archive.png"
+  },
+  "card_cabinet": {
+   "rect": [
+    0,
+    464,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "F1 freestanding card catalogue; top row overhead",
+   "sheet": "archive.png"
+  },
+  "pillar_oak": {
+   "rect": [
+    32,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "F1 column; capital row overhead",
+   "sheet": "archive.png"
+  },
+  "book_stack": {
+   "rect": [
+    48,
+    464,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a pile of books on the floor",
+   "sheet": "archive.png"
+  },
+  "lectern": {
+   "rect": [
+    64,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "F2 lectern with an open book",
+   "sheet": "archive.png"
+  },
+  "shelf_rooted": {
+   "rect": [
+    80,
+    464,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "F3 bookshelf swallowed by roots",
    "sheet": "archive.png"
   },
   "bed_single": {

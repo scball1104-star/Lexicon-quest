@@ -9,7 +9,29 @@
 // The stairs room holds the floor's Keeper's font (heal, save, `safe` landmark): the breather before the Warden
 // for anyone who crosses the hub first, and the last one before F3's.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, actor,
-  floorSwitch, shelf, font, steps, enter } from './_kit.js';
+  floorSwitch, shelf, font, light, steps, enter } from './_kit.js';
+
+// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
+// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
+// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
+// three are wall.
+function depth(g) {
+  const H = g.length, W = g[0].length;
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
+  const band = (x, y) => {
+    if (at(x, y) !== '#') return false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(x + dx, y + dy) !== '#') return true;
+    return false;
+  };
+  const out = g.map((r) => r.split(''));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (g[y][x] !== '#' || band(x, y)) continue;
+    if (band(x, y - 1)) out[y][x] = 'o';
+    else if (y >= 2 && out[y - 1][x] === 'o' && band(x, y - 2)) out[y][x] = 'o';
+    else out[y][x] = 'v';
+  }
+  return out.map((r) => r.join(''));
+}
 
 const W = 40, H = 30;
 const g = grid(W, H, '#');
@@ -17,6 +39,10 @@ room(g, 15, 4, 25, 8, '.', '|');           // N entry hall
 room(g, 2, 12, 38, 17, '.', '|');          // the gallery band: rotunda | ink | hub | ink | stairs room
 box(g, 8, 12, 9, 17, 'i');                 // west moat
 box(g, 30, 12, 32, 17, 'i');               // east moat
+// W8-archive (CRITIQUE_3 #4): ragged moat outlines, so the ink reads as pools cut into the floor and never as
+// rectangles; the hidden-bridge rows and every prop cell stay as they were
+put(g, 10, 15, 'i'); put(g, 7, 16, 'i');   // west moat bulges
+put(g, 32, 12, '.'); put(g, 29, 15, 'i'); put(g, 33, 16, 'i');   // east moat
 box(g, 19, 9, 21, 11, '.');                // entry hall down into the hub
 room(g, 2, 22, 13, 27, '.', '|');          // WG west gallery
 room(g, 27, 22, 38, 27, '.', '|');         // EG east reading rooms
@@ -29,7 +55,7 @@ box(g, 19, 12, 21, 17, 'c');
 box(g, 19, 4, 21, 8, 'c');
 box(g, 3, 13, 6, 16, 'b');
 put(g, 33, 17, 'm'); put(g, 34, 17, 'm'); put(g, 2, 27, 'm'); put(g, 3, 27, 'm'); put(g, 38, 27, 'm');
-const ground = rows(g);
+const ground = rows(depth(g));
 
 const overlays = [
   // hidden ink: the shortcut bridge beside the pedestal and the exit bridge to the stairs room
@@ -37,17 +63,26 @@ const overlays = [
   { t: 'ink_bridge_h_faint', x: 30, y: 14 }, { t: 'ink_bridge_h_faint', x: 31, y: 14 }, { t: 'ink_bridge_h_faint', x: 32, y: 14 },
   { t: 'wall_glyph_faint', x: 6, y: 10 },     // hidden_ink_1, beside the pedestal
   { t: 'wall_glyph_faint', x: 34, y: 10 },    // hidden_ink_2, by the stairs
-  ...wallShelf(10, 18, 10), ...wallShelf(22, 29, 10),
-  ...wallShelf(15, 18, 2), ...wallShelf(22, 25, 2),
-  ...wallShelf(30, 33, 20), ...wallShelf(35, 37, 20),
-  ...wallShelf(7, 11, 20),
+  // W8-archive: the Reading Galleries are glass. The landmark is the rose window over the Lantern's pedestal in
+  // the Warden's rotunda; tall lancets of blue-green glass stand between the shelves of the hub, the entry hall and
+  // the reading rooms.
+  { t: 'gallery_rose', x: 3, y: 10 },
+  ...wallShelf(10, 12, 10), { t: 'gallery_window', x: 13, y: 10 }, ...wallShelf(14, 15, 10),
+  { t: 'gallery_window', x: 16, y: 10 }, ...wallShelf(17, 18, 10),
+  ...wallShelf(22, 23, 10), { t: 'gallery_window', x: 24, y: 10 }, ...wallShelf(25, 26, 10),
+  { t: 'gallery_window', x: 27, y: 10 }, ...wallShelf(28, 29, 10),
+  { t: 'gallery_window', x: 15, y: 2 }, ...wallShelf(16, 18, 2), ...wallShelf(22, 24, 2), { t: 'gallery_window', x: 25, y: 2 },
+  ...wallShelf(30, 33, 20), { t: 'gallery_window', x: 34, y: 20 }, ...wallShelf(35, 37, 20),
+  { t: 'gallery_window', x: 6, y: 20 }, ...wallShelf(7, 11, 20),
   { t: 'wall_cracked', x: 36, y: 10 }, { t: 'wall_cracked', x: 2, y: 20 },
-  { t: 'roots_0', x: 2, y: 12 }, { t: 'roots_1', x: 38, y: 12 }, { t: 'roots_2', x: 14, y: 17 }, { t: 'roots_1', x: 26, y: 27 },
+  { t: 'roots_0', x: 2, y: 12 }, { t: 'roots_1', x: 38, y: 12 }, { t: 'roots_2', x: 14, y: 17 }, { t: 'roots_1', x: 27, y: 27 },
   { t: 'roots_0', x: 13, y: 27 }, { t: 'roots_2', x: 2, y: 26 }, { t: 'roots_1', x: 15, y: 8 }, { t: 'roots_0', x: 25, y: 8 },
   { t: 'ink_puddle_0', x: 11, y: 16 }, { t: 'ink_puddle_1', x: 28, y: 13 }, { t: 'ink_puddle_0', x: 35, y: 26 }, { t: 'ink_puddle_1', x: 6, y: 25 },
 ];
 
 const decor = [
+  // W8-archive: lecterns in the hub and the reading rooms
+  { t: 'lectern', x: 12, y: 13 }, { t: 'lectern', x: 27, y: 13 }, { t: 'lectern', x: 33, y: 27 },
   // entry hall: desks where the ink readers sit
   { t: 'reading_table', x: 16, y: 6 }, { t: 'reading_table', x: 23, y: 6 },
   { t: 'candelabra', x: 15, y: 4 }, { t: 'candelabra', x: 25, y: 4 },
@@ -74,6 +109,9 @@ const decor = [
 
 const events = [
   enter('f2_enter', 'archive_f2_arrival'),
+  // W8-archive: the hanging glass lamps (overhead tiles below) cast a little light of their own
+  light('lamp_e1', 16, 5, 3, '#9fe8d8'), light('lamp_e2', 24, 5, 3, '#9fe8d8'),
+  light('lamp_h1', 14, 13, 3, '#9fe8d8'), light('lamp_h2', 25, 13, 3, '#9fe8d8'), light('lamp_w', 4, 25, 3, '#9fe8d8'),
   door('stairs_f1', 20, 3, ['archive_f1', 31, 3, 'down'], { kind: 'stairs' }),
   door('stairs_f3', 35, 11, ['archive_f3', 5, 3, 'down'], { kind: 'stairs' }),
   // the rotating galleries: one switch, two shelves on rails along the hub's south wall
@@ -118,13 +156,18 @@ export default {
   id: 'archive_f2', name: 'The Reading Galleries', area: 'dungeon',
   music: 'archive', ambience: 'archive_hush', tileset: 'archive',
   lighting: { tint: 'none', dark: 0.2 },
-  under: 'archive_floor',
+  under: 'gallery_stone',
   pitTo: ['archive_f2', 20, 16, 'down'],
-  legend: { '#': 'archive_top', '|': 'archive_face', '.': 'archive_floor', 'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss', 'i': 'ink' },
+  legend: { '#': 'gallery_top', '|': 'gallery_face', 'v': 'gallery_out_top', 'o': 'gallery_out_face', '.': 'gallery_stone',
+    'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss', 'i': 'ink' },
   ground,
   overlays,
   decor,
-  overhead: [],
+  // hanging glass lamps over the readers' desks (drawn above actors; the light events above match them)
+  overhead: [
+    { t: 'hanging_lamp', x: 16, y: 4 }, { t: 'hanging_lamp', x: 24, y: 4 },
+    { t: 'hanging_lamp', x: 14, y: 12 }, { t: 'hanging_lamp', x: 25, y: 12 }, { t: 'hanging_lamp', x: 4, y: 24 },
+  ],
   events,
   exits: [],
   marks: { lantern_pedestal: [4, 13], warden_spot: [4, 14], stairs_down: [35, 12], entrance: [20, 4], font: [35, 15] },

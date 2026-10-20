@@ -9,6 +9,36 @@
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, crystal, gate,
   brazier, font, light, pit, steps, enter } from './_kit.js';
 
+// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
+// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
+// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
+// three are wall.
+function depth(g) {
+  const H = g.length, W = g[0].length;
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
+  const band = (x, y) => {
+    if (at(x, y) !== '#') return false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(x + dx, y + dy) !== '#') return true;
+    return false;
+  };
+  const out = g.map((r) => r.split(''));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (g[y][x] !== '#' || band(x, y)) continue;
+    if (band(x, y - 1)) out[y][x] = 'o';
+    else if (y >= 2 && out[y - 1][x] === 'o' && band(x, y - 2)) out[y][x] = 'o';
+    else out[y][x] = 'v';
+  }
+  return out.map((r) => r.join(''));
+}
+
+// Root masses lie on wall tops only (they are solid): any placement that would touch a floor or face cell is dropped.
+// a = a braid along a north/south wall (2 x 1 cells), b = a braid down a side wall (1 x 2 cells).
+function rootMasses(ground, list) {
+  const wall = (x, y) => 'v#o'.includes((ground[y] || '')[x] || '.');
+  return list.filter(([k, x, y]) => (k === 'a' ? [[0, 0], [1, 0]] : [[0, 0], [0, 1]]).every(([dx, dy]) => wall(x + dx, y + dy)))
+    .map(([k, x, y]) => ({ t: `root_mass_${k}`, x, y }));
+}
+
 const W = 40, H = 30;
 const g = grid(W, H, '#');
 room(g, 2, 4, 9, 7, '.', '|');             // E entry
@@ -28,13 +58,15 @@ put(g, 20, 8, '.');                        // BK notch
 put(g, 5, 3, '.'); put(g, 24, 21, '.'); put(g, 33, 22, '.');   // stairs doorAt cells (objects draw them)
 // pits in the pit room
 box(g, 29, 13, 31, 14, 'p'); box(g, 33, 15, 35, 16, 'p'); put(g, 32, 12, 'p'); put(g, 36, 13, 'p');
+// W8-archive (CRITIQUE_3 #4): ragged pit outlines (no rectangles); the doorway, the braziers and the landing stay clear
+put(g, 30, 12, 'p'); put(g, 31, 12, 'p'); put(g, 30, 15, 'p'); put(g, 34, 17, 'p'); put(g, 35, 17, 'p'); put(g, 36, 16, 'p');
 // ink in the cache with the First Quill beyond it
 box(g, 34, 24, 35, 27, 'i');
 // floor dressing
 box(g, 19, 22, 21, 27, 'c'); box(g, 20, 4, 21, 7, 'b');
 put(g, 2, 18, 'm'); put(g, 3, 18, 'm'); put(g, 2, 17, 'm'); put(g, 14, 11, 'm'); put(g, 9, 27, 'm'); put(g, 8, 27, 'm');
 put(g, 37, 18, 'm'); put(g, 36, 18, 'm'); put(g, 29, 27, 'm');
-const ground = rows(g);
+const ground = rows(depth(g));
 
 const overlays = [
   { t: 'ink_bridge_h_faint', x: 34, y: 25 }, { t: 'ink_bridge_h_faint', x: 35, y: 25 },
@@ -45,7 +77,16 @@ const overlays = [
   ...wallShelf(2, 4, 2), ...wallShelf(7, 9, 2),
   ...wallShelf(18, 23, 2),
   ...wallShelf(28, 31, 9), ...wallShelf(33, 36, 9),
-  ...wallShelf(13, 16, 20), ...wallShelf(22, 23, 20), ...wallShelf(26, 26, 20),
+  // W8-archive: the landmark. Two great roots climb the walls either side of the great door and knot over its arch
+  // (the `root_arch` overhead tile); ink weeps from the panelling beside the door's plate.
+  ...wallShelf(13, 15, 20), { t: 'wall_ink_seep', x: 16, y: 20 }, { t: 'root_drape', x: 18, y: 20 },
+  { t: 'root_drape', x: 22, y: 20 }, ...wallShelf(23, 23, 20), ...wallShelf(26, 26, 20),
+  { t: 'wall_ink_seep', x: 3, y: 20 }, { t: 'root_drape', x: 8, y: 20 }, { t: 'wall_ink_seep', x: 36, y: 21 },
+  // root masses swelling out of the wall tops and the dark between the rooms (wall cells only: they are solid)
+  ...rootMasses(ground, [['a', 8, 8], ['a', 12, 8], ['a', 23, 8], ['a', 30, 8], ['a', 35, 8], ['a', 2, 19],
+    ['a', 8, 19], ['a', 27, 19], ['a', 33, 19], ['a', 3, 28], ['a', 14, 28], ['a', 23, 28], ['a', 31, 28],
+    ['a', 3, 1], ['a', 20, 1], ['b', 15, 11], ['b', 26, 16], ['b', 10, 21], ['b', 38, 13], ['b', 1, 14],
+    ['b', 27, 24], ['b', 16, 4]]),
   { t: 'wall_cracked', x: 17, y: 9 }, { t: 'wall_cracked', x: 30, y: 21 },
   // roots everywhere: this floor is inside the willow
   { t: 'roots_0', x: 2, y: 11 }, { t: 'roots_1', x: 3, y: 16 }, { t: 'roots_2', x: 2, y: 16 }, { t: 'roots_0', x: 4, y: 17 },
@@ -60,14 +101,14 @@ const decor = [
   // entry
   { t: 'stairs_up', x: 5, y: 3 }, { t: 'brazier_lit', x: 2, y: 4 }, { t: 'brazier_lit', x: 9, y: 4 },
   // western stacks: aisles of shelves split by roots
-  { t: 'shelf_wide', x: 4, y: 13 }, { t: 'shelf_a', x: 9, y: 13 }, { t: 'shelf_b', x: 12, y: 13 },
-  { t: 'shelf_wide', x: 7, y: 16 }, { t: 'shelf_a', x: 12, y: 16 },
+  { t: 'shelf_wide', x: 4, y: 13 }, { t: 'shelf_rooted', x: 9, y: 13 }, { t: 'shelf_b', x: 12, y: 13 },
+  { t: 'shelf_wide', x: 7, y: 16 }, { t: 'shelf_rooted', x: 12, y: 16 },
   { t: 'root_column', x: 4, y: 15 }, { t: 'root_column', x: 13, y: 18 },
   { t: 'pillar', x: 2, y: 13 }, { t: 'pillar', x: 14, y: 13 }, { t: 'pillar', x: 10, y: 18 },
   // crystal room
   { t: 'root_column', x: 20, y: 15 },
   // pit room
-  { t: 'root_column', x: 27, y: 13 }, { t: 'shelf_b', x: 35, y: 12 },
+  { t: 'root_column', x: 27, y: 13 }, { t: 'shelf_rooted', x: 35, y: 12 },
   // key room
   { t: 'candelabra', x: 17, y: 4 }, { t: 'candelabra', x: 24, y: 4 }, { t: 'reading_table', x: 22, y: 6 },
   // bell hollow
@@ -133,19 +174,21 @@ const events = [
 
 export default {
   id: 'archive_f3', name: 'The Rootbound Stacks', area: 'dungeon',
-  music: 'archive', ambience: 'archive_hush', tileset: 'archive',
+  // CRITIQUE_3 #12: the deepest floor and the boss approach (the great door hall) get their own track
+  music: 'mystery', ambience: 'archive_hush', tileset: 'archive',
   lighting: { tint: 'none', dark: 0.7 },
   // the pit tell (PLAYTEST_REVIEW_1 fix 6): the first time the leader steps into the pit room a single page
   // drifts down into the pit nearest its doorway (W5-systems ambientFx contract; once per map load)
   ambientFx: [{ fx: 'page_fall', at: [29, 14], area: { x: 27, y: 11, w: 11, h: 8 } }],
-  under: 'archive_floor',
+  under: 'stacks_wood',
   pitTo: ['archive_f3', 31, 24, 'down'],
-  legend: { '#': 'archive_top', '|': 'archive_face', '.': 'archive_floor', 'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss',
+  legend: { '#': 'stacks_top', '|': 'stacks_face', 'v': 'stacks_out_top', 'o': 'stacks_out_face', '.': 'stacks_wood',
+    'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss',
     'i': 'ink', 'p': 'pit' },
   ground,
   overlays,
   decor,
-  overhead: [],
+  overhead: [{ t: 'root_arch', x: 18, y: 19 }],   // W8-archive: roots knotted over the great door (above actors)
   events,
   exits: [],
   marks: { thirteenth_bell: [6, 25], boss_door: [20, 21], entrance: [5, 4], font: [23, 26] },

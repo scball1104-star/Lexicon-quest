@@ -762,9 +762,9 @@ class Carpet(Terrain):
 
 # =====================================================================================  PIT / VOID
 class Pit(Terrain):
-    """Hole in the floor. Rim (brief W4 'pit rim'): a 1 px lighter edge on the top and left (lit lip), a
-    darker edge on the right, and a 2 px dark lip along the bottom so the hole reads as a hole; the far
-    (north) wall is a cut stone face fading into ink."""
+    """Hole in the floor (W8-archive, CRITIQUE_3 #4: reads as a pit from any distance). An irregular outline (wobbly
+    profile with a few bites), a LIGHT rim all round (a lit stone lip on the near and west sides, a lit lip over a
+    cut face on the far side), the far wall falling away in courses into the dark, and a faint ink glow far below."""
     id = 'pit'
     kind = 'hole'
     collision = 'pit'
@@ -772,10 +772,10 @@ class Pit(Terrain):
 
     def __init__(self):
         super().__init__()
-        prof = {s: profile1d(600 + i, amp=0.5, spikes=0) for i, s in enumerate('NSWE')}
+        prof = {s: profile1d(610 + i, amp=1.9, spikes=3, spike_amp=1.2) for i, s in enumerate('NSWE')}
         self.specs = {
-            'ground': EdgeSpec({'N': 1.0, 'S': 1.0, 'W': 1.0, 'E': 1.0}, r=2.0, rr=1.0, prof=prof),
-            'void': EdgeSpec({'N': 10.0, 'S': 3.0, 'W': 2.5, 'E': 2.5}, r=2.5, rr=1.5, prof=prof),
+            'ground': EdgeSpec({'N': 1.5, 'S': 1.5, 'W': 1.5, 'E': 1.5}, r=3.0, rr=2.0, prof=prof),
+            'void': EdgeSpec({'N': 8.0, 'S': 3.5, 'W': 3.5, 'E': 3.5}, r=3.5, rr=2.5, prof=prof),
         }
 
     def make_texture(self, frame, variant):
@@ -784,44 +784,43 @@ class Pit(Terrain):
     def pixel(self, c, x, y):
         if not c.i('ground', x, y):
             return None
+        g = c.f('ground', x, y)
         if c.i('void', x, y):
-            # depth fade just under the far wall
             k = 0
-            while k < 4 and c.i('void', x, y - k - 1):
+            while k < 5 and c.i('void', x, y - k - 1):
                 k += 1
-            if k == 0 and c.side('void', x, y) == 'N':
+            s = c.side('void', x, y)
+            if k == 0 and s == 'N':
                 return C('ink', 1)
-            if k == 1 and c.side('void', x, y) == 'N' and (x + y) % 2 == 0:
+            if k == 1 and s == 'N' and (x + y) % 2 == 0:
+                return C('ink', 1)
+            # a faint ink glow far below, deep inside the hole
+            if c.f('void', x, y) > 4.0 and (x * 3 + y * 5) % 7 == 0:
                 return C('ink', 1)
             return DARK
         s = c.side('void', x, y)
-        g = c.f('ground', x, y)
+        if g < 1:
+            # the rim: lit on the far (N) and west lips, a softer light on the near (S) and east lips
+            return {'N': K(5), 'W': K(4), 'S': K(3), 'E': K(3)}.get(s, K(4))
         if s == 'N':
-            # cut face of the floor going down into the dark: lit lip, then stone courses fading to ink
+            # cut face of the floor going down into the dark: courses fading to ink
             k = 0
             while k < 12 and c.i('ground', x, y - k - 1) and not c.i('void', x, y - k - 1):
                 k += 1
-            if k == 0 or g < 1:
-                return K(5)
-            if k == 1:
-                return K(3)
-            course = (k - 2) % 4
-            joint = course == 3 or ((x + (k // 4) * 5) % 8 == 0)
-            if k < 6:
-                return K(1) if joint else K(2)
-            if k < 9:
-                return C('ink', 1) if joint else (K(1) if (x + k) % 2 else C('ink', 1))
-            return C('ink', 1)
+            if k <= 1:
+                return K(4)
+            course = (k - 2) % 3
+            joint = course == 2 or ((x + (k // 3) * 5) % 6 == 0)
+            if k < 5:
+                return K(1) if joint else (K(3) if course == 0 else K(2))
+            if k < 7:
+                return C('ink', 1) if joint else K(1)
+            return C('ink', 1) if (x + k) % 2 else DARK
         if s == 'S':
-            # near edge: a 2 px dark lip (no lit line here, so the floor falls away instead of ending in a slab)
-            if g < 1:
-                return K(0)
-            return DARK
-        if g < 1:
-            return K(4) if s == 'W' else K(1)
+            return K(0) if g < 2 else DARK
         if s == 'W':
-            return K(2) if g < 2 else K(1)
-        return K(0) if g < 2 else DARK
+            return K(2) if g < 2 else K(0)
+        return K(1) if g < 2 else DARK
 
 
 # =====================================================================================  MOSS (on stone)
@@ -960,10 +959,12 @@ class Ink(Terrain):
 
     def __init__(self):
         super().__init__()
-        prof = {s: profile1d(900 + i, amp=1.1, spikes=1, spike_amp=0.8) for i, s in enumerate('NSWE')}
+        # W8-archive (CRITIQUE_3 #4): an irregular outline (bigger wobble, a few bites) so pools and moats never
+        # read as rectangles, and a deeper far bank so the ink sits well below the floor
+        prof = {s: profile1d(920 + i, amp=2.0, spikes=3, spike_amp=1.2) for i, s in enumerate('NSWE')}
         self.specs = {
-            'ground': EdgeSpec({'N': 1.2, 'S': 1.2, 'W': 1.2, 'E': 1.2}, r=3.0, rr=2.0, prof=prof),
-            'surf': EdgeSpec({'N': 4.0, 'S': 2.2, 'W': 2.4, 'E': 2.4}, r=3.5, rr=2.5, prof=prof),
+            'ground': EdgeSpec({'N': 1.2, 'S': 1.2, 'W': 1.2, 'E': 1.2}, r=3.5, rr=2.5, prof=prof),
+            'surf': EdgeSpec({'N': 5.5, 'S': 2.6, 'W': 2.9, 'E': 2.9}, r=4.0, rr=3.0, prof=prof),
         }
 
     # W5-art: a dark violet-indigo liquid, not flat navy. The body is ink:2 with soft ink:1 depth pools,
@@ -972,13 +973,10 @@ class Ink(Terrain):
     def make_texture(self, frame, variant):
         I = lambda i: C('ink', i)
         t = blank(I(2))
-        # depth: two broad, soft dark bands that never move (the pool is deep, not a sheet); their
-        # ends taper so they read as shadowed swells, not spots
         for i, (x, y) in enumerate(scatter(157, 2, 9)):
             for dy, (lo, hi) in enumerate(((-2, 4), (-4, 6), (-1, 5))):
                 for dx in range(lo, hi + 1):
                     t[(y + dy - 1) % 16][(x + dx + dy + i) % 16] = I(1)
-        # highlight ripples: a long flattened arc that drifts 1 px per frame; its crest brightens on frame 1
         arcs = [['...hhhhh...', '..h.....h..'], ['..hhhhhh...', '.h......h..'], ['...hhhhhh..', '..h......h.']]
         for i, (x, y) in enumerate(scatter(151, 2, 9)):
             shp = arcs[(frame + i) % 3]
@@ -988,7 +986,6 @@ class Ink(Terrain):
                         t[(y + j) % 16][(x + k + frame) % 16] = I(3)
             if (frame + i) % 3 == 1:
                 t[y % 16][(x + 5 + frame) % 16] = I(4)
-        # glints that blink in turn
         for i, (x, y) in enumerate(scatter(153, 3, 6)):
             if (frame + i) % 3 == 0:
                 t[y][x] = I(4)
@@ -1005,30 +1002,43 @@ class Ink(Terrain):
             d = c.f('surf', x, y)
             s = c.side('surf', x, y)
             if s == 'N':
-                # under the far bank: the bank's shadow on the liquid, then the meniscus
-                if d < 1:
-                    return I(0)
+                # under the far bank: the bank's shadow on the liquid (2 px), then the meniscus
                 if d < 2:
+                    return I(0) if d < 1 or (x + y) % 2 else I(1)
+                if d < 3:
                     return I(3) if (x + c.frame) % 3 else I(2)
+                if d < 4 and (x + c.frame) % 2 == 0:
+                    return I(1)
                 return self.tex(c, x, y)
             if d < 1:
-                # meniscus: a lighter rim that shimmers
                 return I(4) if (h32(x, y, c.frame, 161) % 5 == 0) else I(3)
             if d < 2 and (x + y + c.frame) % 4 == 0:
                 return I(3)
             return self.tex(c, x, y)
         s = c.side('surf', x, y)
-        if s == 'N':
-            k = 0
-            while k < 6 and c.i('ground', x, y - k - 1) and not c.i('surf', x, y - k - 1):
-                k += 1
-            if k == 0 or g < 1:
-                return K(3)
-            return I(2) if (x + k) % 3 == 0 else K(1)
-        # near and side banks: a dark lip (the floor's edge stained by the ink)
         if g < 1:
-            return K(1) if s == 'S' else (K(2) if s == 'W' else K(0))
-        return K(0)
+            # the light rim: the floor's lit lip all round the pool (CRITIQUE_3 #4), brightest on the far side
+            return {'N': K(5), 'W': K(4), 'S': K(3), 'E': K(3)}.get(s, K(4))
+        if s == 'N':
+            # the far bank: a cut face going down to the ink, stained darker toward the waterline
+            k = 0
+            while k < 8 and c.i('ground', x, y - k - 1) and not c.i('surf', x, y - k - 1):
+                k += 1
+            if k <= 1:
+                return K(4)
+            if k == 2:
+                return K(3) if (x % 5) else K(2)
+            if k == 3:
+                return K(2) if (x % 4) else K(1)
+            if k == 4:
+                return K(1) if (x % 3) else I(2)
+            return I(1) if (x + k) % 3 else K(0)
+        if s == 'S':
+            # the near bank: the floor's edge seen from above, a dark lip where it drops into the ink
+            return K(0) if g < 2 else I(0)
+        if s == 'W':
+            return K(2) if g < 2 else K(0)
+        return K(1) if g < 2 else I(0)
 
 
 # =====================================================================================  overlays
@@ -1129,7 +1139,7 @@ TERRAINS_A2 = [Grass(), TallGrass(), Dirt(), Plaza(), Sand(), Shallow(), StoneFl
 TERRAINS_A1 = [Water(), Ink()]
 
 # draw order, low -> high. Fill terrains sit on lower ones; holes (water, ink, pit) are highest.
-TERRAIN_ORDER = ['archive_floor', 'stone_floor', 'wood_floor', 'dirt', 'sand', 'grass', 'moss', 'tallgrass', 'plaza',
+TERRAIN_ORDER = ['archive_floor', 'catalog_wood', 'gallery_stone', 'stacks_wood', 'stone_floor', 'wood_floor', 'dirt', 'sand', 'grass', 'moss', 'tallgrass', 'plaza',
                  'carpet_red', 'carpet_blue', 'water', 'shallow', 'ink', 'pit']
 
 SHEET_W = 256

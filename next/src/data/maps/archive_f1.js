@@ -12,6 +12,28 @@
 import { grid, box, put, rows, room, wallShelf, npc, door, sign, book, object, trigger, enemy, chest, pot,
   block, plate, gate, lockedDoor, steps, enter } from './_kit.js';
 
+// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
+// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
+// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
+// three are wall.
+function depth(g) {
+  const H = g.length, W = g[0].length;
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
+  const band = (x, y) => {
+    if (at(x, y) !== '#') return false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(x + dx, y + dy) !== '#') return true;
+    return false;
+  };
+  const out = g.map((r) => r.split(''));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (g[y][x] !== '#' || band(x, y)) continue;
+    if (band(x, y - 1)) out[y][x] = 'o';
+    else if (y >= 2 && out[y - 1][x] === 'o' && band(x, y - 2)) out[y][x] = 'o';
+    else out[y][x] = 'v';
+  }
+  return out.map((r) => r.join(''));
+}
+
 const W = 40, H = 30;
 const g = grid(W, H, '#');
 // rooms (floor rect + two face rows above)
@@ -37,10 +59,17 @@ box(g, 19, 22, 20, 27, 'c');
 box(g, 30, 4, 33, 6, 'b');
 put(g, 35, 15, 'm'); put(g, 36, 15, 'm'); put(g, 36, 16, 'm'); put(g, 26, 17, 'm');
 
-const ground = rows(g);
+const ground = rows(depth(g));
 
 const overlays = [
-  ...wallShelf(15, 23, 20),                   // the catalog drawer wall over the hall's north face
+  // W8-archive: the Great Catalog, the floor's landmark. Floor-to-ceiling card drawers across the hall's north face
+  // and the brass index wheel in the middle of it, over the carpet (catalog_drawers is read at (19,21)).
+  { t: 'wall_drawers_l', x: 15, y: 20 }, { t: 'wall_drawers_m', x: 16, y: 20 }, { t: 'wall_drawers_m', x: 17, y: 20 },
+  { t: 'wall_drawers_m', x: 18, y: 20 }, { t: 'great_catalog_dial', x: 19, y: 20 },
+  { t: 'wall_drawers_m', x: 21, y: 20 }, { t: 'wall_drawers_m', x: 22, y: 20 }, { t: 'wall_drawers_r', x: 23, y: 20 },
+  // index cards spilled across the floors (decals)
+  { t: 'index_cards', x: 17, y: 23 }, { t: 'index_cards', x: 23, y: 25 }, { t: 'index_cards', x: 9, y: 25 },
+  { t: 'index_cards', x: 32, y: 14 }, { t: 'index_cards', x: 10, y: 5 }, { t: 'index_cards', x: 4, y: 22 },
   { t: 'wall_glyph_revealed', x: 14, y: 20 }, // the Catalog Promise plaque
   { t: 'wall_shelf_l', x: 26, y: 8 }, { t: 'wall_shelf_m', x: 27, y: 8 }, { t: 'wall_shelf_r', x: 28, y: 8 },
   { t: 'wall_shelf_l', x: 34, y: 8 }, { t: 'wall_shelf_m', x: 35, y: 8 }, { t: 'wall_shelf_r', x: 36, y: 8 },
@@ -58,7 +87,9 @@ const decor = [
   // hall: pillars frame the carpet under the catalog wall and hold the side walls (CRITIQUE_1 C6)
   { t: 'reading_table_long', x: 16, y: 25 }, { t: 'reading_table', x: 22, y: 26 },
   { t: 'candelabra', x: 15, y: 22 }, { t: 'candelabra', x: 23, y: 22 },
-  { t: 'pillar', x: 18, y: 22 }, { t: 'pillar', x: 21, y: 22 }, { t: 'pillar', x: 14, y: 24 }, { t: 'pillar', x: 24, y: 23 },
+  { t: 'pillar_oak', x: 18, y: 22 }, { t: 'pillar_oak', x: 21, y: 22 }, { t: 'pillar_oak', x: 14, y: 24 }, { t: 'pillar_oak', x: 24, y: 23 },
+  // W8-archive: card catalogues and book piles (the Catalog Halls' furniture)
+  { t: 'book_stack', x: 24, y: 27 }, { t: 'book_stack', x: 14, y: 27 },
   { t: 'brazier_lit', x: 18, y: 28 }, { t: 'brazier_lit', x: 22, y: 28 },
   // B
   { t: 'reading_table', x: 8, y: 26 }, { t: 'shelf_a', x: 11, y: 24 },
@@ -76,7 +107,11 @@ const decor = [
   // J
   { t: 'stairs_down', x: 31, y: 3 }, { t: 'candelabra', x: 29, y: 4 }, { t: 'candelabra', x: 34, y: 4 },
   // D
-  { t: 'candelabra', x: 11, y: 4 },
+  { t: 'candelabra', x: 11, y: 4 }, { t: 'card_cabinet', x: 6, y: 4 }, { t: 'book_stack', x: 10, y: 6 },
+  // I and B: card catalogues against the walls
+  { t: 'card_cabinet', x: 26, y: 11 }, { t: 'card_cabinet', x: 11, y: 27 },
+  // J: the landing's book piles
+  { t: 'book_stack', x: 29, y: 6 },
 ];
 
 const events = [
@@ -138,8 +173,9 @@ export default {
   id: 'archive_f1', name: 'The Catalog Halls', area: 'dungeon',
   music: 'archive', ambience: 'archive_hush', tileset: 'archive',
   lighting: { tint: 'none', dark: 0.15 },
-  under: 'archive_floor',
-  legend: { '#': 'archive_top', '|': 'archive_face', '.': 'archive_floor', 'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss' },
+  under: 'catalog_wood',
+  legend: { '#': 'catalog_top', '|': 'catalog_face', 'v': 'catalog_out_top', 'o': 'catalog_out_face', '.': 'catalog_wood',
+    'c': 'carpet_red', 'b': 'carpet_blue', 'm': 'moss' },
   ground,
   overlays,
   decor,

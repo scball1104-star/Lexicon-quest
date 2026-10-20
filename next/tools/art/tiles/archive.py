@@ -916,6 +916,16 @@ def ink_bridge(orient, state):
     P(5, 4, VI(3)); P(13, 5, VI(3))
     for i in range(1, 16):
         P(i, 13, SH(80))
+    # W8-archive (CRITIQUE_3 #4): a faint glow on the ink under a revealed bridge, the Lantern's light caught
+    # beneath the planks: pale cyan, dithered, strongest against the deck and fading out to the tile edge
+    g = CY(3)
+    for i in range(16):
+        for j, a in ((2, 70), (1, 44), (0, 22), (14, 54), (15, 30)):
+            if a < 50 and (i + j) % 2:
+                continue
+            P(i, j, (g[0], g[1], g[2], a))
+        if i % 2 == 0:
+            P(i, 13, (g[0], g[1], g[2], 40))
     return cv
 
 
@@ -1096,5 +1106,10 @@ def build():
     for k in range(2):
         sh.tile('ink_puddle_%d' % k, ink_puddle(k), collision='none')
     sh.newline()
+    # W8-archive: the per-floor kits (catalog / gallery / stacks floors, wall bands, the deep, outer faces, props)
+    import archive_floors
+    import archive_props_w8
+    archive_floors.build_into(sh)
+    archive_props_w8.build_into(sh)
     H = sh.y
     return sh.cv.crop(0, 0, 512, H), sh.meta
