@@ -287,6 +287,8 @@ Every one is a string, a list of boxes, or a conditional list whose last entry i
   `courier_satchel`, `elian_reply`, `black_feather`, `kept_promise`, `merewarden_mantle`, `courier_knot`,
   `hi_ether`; `paper_crown` comes from a chest. Bestiary names and first lore lines were sent to E2-battle; text.test
   checks they match `enemies.js`.
+- **E2-scene-ui.** The fountain's +25 Fury (`fountain_done`) only applies when the battle scene passes the save's
+  `flags` to `createEncounterBattle` (E2-battle's encounter option `startFury`).
 - **E2-sprites.** Spawned sprites: `npc_elian`, `npc_aurel`, `npc_anwen`, `npc_vex`, `refl_hero`, `refl_mira`,
   `refl_bram` (field), plus the 13 NPC sprites. Portraits used: `elian`, `anwen`, `tovin`, `lena`, `aurel`,
   `nameless_king`, and `silver_rogue` for Vex.
