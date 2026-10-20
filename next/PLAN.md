@@ -98,3 +98,9 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] ep2-designer: docs/story/EPISODE2.md + docs/EPISODE2_PLAN.md (build briefs for the second realm)
 
 ## Done: Episode 1 fix pass (W10). Next: Episode 2 build (docs/EPISODE2_PLAN.md, after the weekly usage reset)
+
+## Episode 2 build (docs/EPISODE2_PLAN.md section 10)
+- [~] Wave 10a: E2-story, E2-battle, E2-tiles (started 2026-10-20 12:50, weekly usage 66%)
+- [ ] Wave 10b
+- [ ] Wave 10c
+- [ ] Wave 10d
