@@ -91,9 +91,9 @@ const events = [
   // inspectables
   sign('old_piles', 5, 17, 'hollow_piles', { solid: false }),   // read from the near shore, before the Lantern
   // visible enemies: 3 per ZONES.whisperwood_hollow.plan (dungeon rule: they step when the player steps)
-  enemy('h_wolves_a', 12, 15, 'briar_wolf', 'hollow_wolves', 'chase'),
-  enemy('h_wolves_b', 21, 17, 'briar_wolf', 'hollow_wolves', 'patrol', { path: steps('left', 3, 'right', 3) }),
-  enemy('h_blot', 11, 12, 'ink_slime', 'hollow_blot', 'guard'),
+  enemy('h_wolves_a', 12, 15, 'thornback_wolf', 'hollow_wolves', 'chase'),
+  enemy('h_wolves_b', 21, 17, 'thornback_wolf', 'hollow_wolves', 'patrol', { path: steps('left', 3, 'right', 3) }),
+  enemy('h_blot', 11, 12, 'ink_blot', 'hollow_blot', 'guard'),
 ];
 
 export default {

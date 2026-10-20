@@ -76,9 +76,13 @@ ENEMY_CROPS = {
     'tome_golem':  dict(at=(7, 3)),
     'echo_warden': dict(at=(7, 0)),
     'archivore':   dict(at=(11, 8)),
+    'thornback_wolf': dict(at=(0, 4)),
+    'ink_blot':    dict(at=(1, 6)),
+    'briar_alpha': dict(at=(0, 4)),
 }
 ORDER = ['hero', 'mira', 'bram', 'ink_slime', 'page_wraith', 'briar_wolf', 'moss_scarab', 'bookmite',
-         'tome_golem', 'ink_wraith', 'echo_warden', 'lost_page', 'archivore']
+         'tome_golem', 'ink_wraith', 'echo_warden', 'lost_page', 'archivore',
+         'thornback_wolf', 'ink_blot', 'briar_alpha']
 
 
 def rgb(h):
