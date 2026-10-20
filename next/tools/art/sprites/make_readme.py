@@ -87,8 +87,17 @@ def write(extras):
     A('additive glow disc. `prop_letter` frames [plain, glint]. `pot` breaks to `pot_broken`.')
     A('')
     A('## enemies_battle.png / .json, bosses_battle.png / .json  (face RIGHT, origin = bottom-centre)')
-    A('enemies_battle: ' + ', '.join('`%s`' % k for k in eb['frames']) + '.')
-    A('bosses_battle: ' + ', '.join('`%s`' % k for k in bb['frames']) + ' (anim `lost_page_flutter`).')
+    import anim_frames as AF
+    def bases(fr):
+        return [k for k in fr if not any(k.endswith('_' + sfx) for sfx in AF.ORDER)]
+    A('enemies_battle: ' + ', '.join('`%s`' % k for k in bases(eb['frames'])) + '.')
+    A('bosses_battle: ' + ', '.join('`%s`' % k for k in bases(bb['frames'])) + ' (anim `lost_page_flutter`).')
+    A('Derived frames (W6-anim, `anim_frames.py`): `<id>_idle_1`, `_attack`, `_hurt`, `_cast` (casters), `_devour`')
+    A('(Archivore), `_die_0..2`, Echo Warden stance sets; anims `<id>_idle` and `<id>_die`. Every frame has its own origin.')
+    A('Whisperwood Hollow (W8-art, `hollow_enemies.py`): `thornback_wolf` (old silver-violet fur, black-green bramble, bone')
+    A('thorns), `ink_blot` (tar-black ink, cyan eyes, puddle and drips, rim-lit) and `briar_alpha` (a clean 1x larger wolf')
+    A('from the painting: warm brown fur, briar mane, gold-tipped thorns, rose hips) have their own base and derived frames,')
+    A('packed in a block under the older frames (no older rect moved). Draw them at 1x with no tint.')
     A('`enemies_battle.json.external` maps the boss-sheet ids so battle code can look up any enemy id.')
     A('Cleanup pass (CRITIQUE_1 C8, `cleanup.py`): colours within 0.04 OKLab of a master colour snap to it, near-duplicate')
     A('colours merge, isolated pixels take their majority neighbour (bright saturated accents are protected), and the 1 px')
@@ -104,6 +113,10 @@ def write(extras):
     A('## enemies_field.png / .json  (visible map enemies, face LEFT)')
     A('`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: ' +
       ', '.join('`%s`' % k for k in ef['sprites']) + '.')
+    A('`archivore_avatar` (W8-art, CRITIQUE_3 #10, `chars/archivore_avatar.py`): the boss on the field, the battle')
+    A('Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52, frontal, hovering')
+    A('`sprites.archivore_avatar.hover` (5) px above its feet so the shadow shows; frames `_0` wings up, `_1` wings down,')
+    A('`_2` level; anim `archivore_avatar_idle` plays 0, 2, 1, 2 (the field code alternates `_0` / `_1`).')
     A('')
     A('## portraits.png / .json')
     A('`portraits.<id>` -> `{"48": frame, "32": frame}`; both sizes include a 1 px bevel frame and a dark backdrop.')

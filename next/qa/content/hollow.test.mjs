@@ -109,14 +109,14 @@ test('post-clear lines: Quill, the Pilgrim\'s Rest bench and the stone remember 
   assert.doesNotMatch(join(resolve(lines.lost_bridge_plaque, has([]))), /SORREL/);
 });
 
-test('Briar Alpha: a large elite-tinted briar wolf, two phase changes, weak to fire and axe, shields 3', () => {
+test('Briar Alpha: a large briar wolf with its own frame, two phase changes, weak to fire and axe, shields 3', () => {
   const a = ENEMIES.briar_alpha;
   assert.equal(a.name, 'Briar Alpha');
   assert.ok(a.boss && a.size === 'large');
   assert.equal(a.ai, 'phased');
   assert.equal(a.shields, 3);
   assert.deepEqual([...a.weak].sort(), ['axe', 'fire']);
-  assert.deepEqual([a.sprite.frame, a.sprite.scale], ['briar_wolf', 1.3], 'the briar wolf frame at 1.3x (no new art)');
+  assert.deepEqual([a.sprite.frame, a.sprite.scale || 1, a.sprite.tint || null], ['briar_alpha', 1, null], 'its own 1x frame, no scale or tint (W8-art)');
   const [p0, p1, p2] = a.phases;
   assert.equal(p0.at, 1);
   assert.equal(p1.at, 0.5); assert.ok(ENEMIES[p1.summon], 'calls one wolf at 50%');

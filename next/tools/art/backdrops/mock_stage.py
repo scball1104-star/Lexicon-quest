@@ -32,6 +32,8 @@ SETUPS = {
     'archive_f2': ('battle_archive', ['page_wraith', 'tome_golem', 'bookmite'], 0.0),
     'archive_deep': ('battle_archive', ['ink_wraith', 'tome_golem', 'page_wraith'], 0.22),
     'boss': ('battle_boss', ['archivore', 'lost_page_1'], 0.0),
+    'hollow': ('battle_hollow', ['thornback_wolf', 'ink_blot', 'thornback_wolf'], 0.0),
+    'hollow_alpha': ('battle_hollow', ['briar_alpha', 'thornback_wolf'], 0.0),
 }
 
 
@@ -79,6 +81,9 @@ def render(setup, spr, tag=''):
     if setup == 'boss':
         units.append(('archivore', 98, FEET))
         units.append(('lost_page_1', 200, 70))
+    elif setup == 'hollow_alpha':
+        units.append(('briar_alpha', 98, FEET))          # BOSS_SLOT
+        units.append(('thornback_wolf', 200, FEET))      # its Pack Call summon, grounded at the summon slot x
     else:
         for name, x in zip(foes, ENEMY_X[len(foes)]):
             units.append((name, x, FEET))

@@ -120,6 +120,60 @@
    25,
    32,
    32
+  ],
+  "archivore_avatar_0": [
+   0,
+   58,
+   55,
+   52
+  ],
+  "archivore_avatar_1": [
+   56,
+   58,
+   55,
+   52
+  ],
+  "archivore_avatar_2": [
+   112,
+   58,
+   55,
+   52
+  ],
+  "thornback_wolf_0": [
+   168,
+   58,
+   24,
+   24
+  ],
+  "thornback_wolf_1": [
+   193,
+   58,
+   24,
+   24
+  ],
+  "ink_blot_0": [
+   218,
+   58,
+   16,
+   16
+  ],
+  "ink_blot_1": [
+   235,
+   58,
+   16,
+   16
+  ],
+  "briar_alpha_0": [
+   0,
+   111,
+   24,
+   24
+  ],
+  "briar_alpha_1": [
+   25,
+   111,
+   24,
+   24
   ]
  },
  "anims": {
@@ -201,6 +255,40 @@
     "archivore_1"
    ],
    "fps": 3,
+   "loop": true
+  },
+  "archivore_avatar_idle": {
+   "frames": [
+    "archivore_avatar_0",
+    "archivore_avatar_2",
+    "archivore_avatar_1",
+    "archivore_avatar_2"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  "thornback_wolf_idle": {
+   "frames": [
+    "thornback_wolf_0",
+    "thornback_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ink_blot_idle": {
+   "frames": [
+    "ink_blot_0",
+    "ink_blot_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "briar_alpha_idle": {
+   "frames": [
+    "briar_alpha_0",
+    "briar_alpha_1"
+   ],
+   "fps": 4,
    "loop": true
   }
  },
@@ -304,8 +392,49 @@
     16,
     31
    ]
+  },
+  "archivore_avatar": {
+   "size": [
+    55,
+    52
+   ],
+   "origin": [
+    27,
+    51
+   ],
+   "hover": 5
+  },
+  "thornback_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "ink_blot": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "briar_alpha": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
   }
  },
  "facing": "left",
- "notes": "Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom)."
+ "notes": "Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2."
 }

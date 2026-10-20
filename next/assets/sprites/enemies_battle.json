@@ -306,6 +306,132 @@
    433,
    82,
    62
+  ],
+  "thornback_wolf": [
+   151,
+   721,
+   63,
+   63
+  ],
+  "thornback_wolf_idle_1": [
+   86,
+   721,
+   63,
+   64
+  ],
+  "thornback_wolf_attack": [
+   216,
+   721,
+   64,
+   63
+  ],
+  "thornback_wolf_hurt": [
+   347,
+   721,
+   67,
+   61
+  ],
+  "thornback_wolf_die_0": [
+   282,
+   721,
+   63,
+   62
+  ],
+  "thornback_wolf_die_1": [
+   0,
+   800,
+   63,
+   59
+  ],
+  "thornback_wolf_die_2": [
+   283,
+   800,
+   62,
+   45
+  ],
+  "ink_blot": [
+   173,
+   800,
+   53,
+   50
+  ],
+  "ink_blot_idle_1": [
+   65,
+   800,
+   51,
+   52
+  ],
+  "ink_blot_attack": [
+   347,
+   800,
+   59,
+   45
+  ],
+  "ink_blot_hurt": [
+   408,
+   800,
+   58,
+   44
+  ],
+  "ink_blot_die_0": [
+   118,
+   800,
+   53,
+   51
+  ],
+  "ink_blot_die_1": [
+   228,
+   800,
+   53,
+   46
+  ],
+  "ink_blot_die_2": [
+   0,
+   861,
+   53,
+   35
+  ],
+  "briar_alpha": [
+   172,
+   636,
+   84,
+   81
+  ],
+  "briar_alpha_idle_1": [
+   86,
+   636,
+   84,
+   82
+  ],
+  "briar_alpha_attack": [
+   258,
+   636,
+   84,
+   81
+  ],
+  "briar_alpha_hurt": [
+   344,
+   636,
+   90,
+   78
+  ],
+  "briar_alpha_die_0": [
+   0,
+   636,
+   84,
+   83
+  ],
+  "briar_alpha_die_1": [
+   0,
+   721,
+   84,
+   77
+  ],
+  "briar_alpha_die_2": [
+   416,
+   721,
+   83,
+   61
   ]
  },
  "origin": {
@@ -512,6 +638,90 @@
   "ink_wraith_die_2": [
    41,
    61
+  ],
+  "thornback_wolf": [
+   31,
+   62
+  ],
+  "thornback_wolf_idle_1": [
+   31,
+   63
+  ],
+  "thornback_wolf_attack": [
+   30,
+   62
+  ],
+  "thornback_wolf_hurt": [
+   34,
+   60
+  ],
+  "thornback_wolf_die_0": [
+   31,
+   61
+  ],
+  "thornback_wolf_die_1": [
+   31,
+   58
+  ],
+  "thornback_wolf_die_2": [
+   30,
+   44
+  ],
+  "ink_blot": [
+   26,
+   49
+  ],
+  "ink_blot_idle_1": [
+   25,
+   51
+  ],
+  "ink_blot_attack": [
+   27,
+   44
+  ],
+  "ink_blot_hurt": [
+   29,
+   43
+  ],
+  "ink_blot_die_0": [
+   26,
+   50
+  ],
+  "ink_blot_die_1": [
+   26,
+   45
+  ],
+  "ink_blot_die_2": [
+   26,
+   34
+  ],
+  "briar_alpha": [
+   41,
+   80
+  ],
+  "briar_alpha_idle_1": [
+   41,
+   81
+  ],
+  "briar_alpha_attack": [
+   39,
+   80
+  ],
+  "briar_alpha_hurt": [
+   46,
+   77
+  ],
+  "briar_alpha_die_0": [
+   41,
+   82
+  ],
+  "briar_alpha_die_1": [
+   41,
+   76
+  ],
+  "briar_alpha_die_2": [
+   40,
+   60
   ]
  },
  "anims": {
@@ -633,6 +843,57 @@
    ],
    "fps": 15,
    "loop": false
+  },
+  "thornback_wolf_idle": {
+   "frames": [
+    "thornback_wolf",
+    "thornback_wolf_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "thornback_wolf_die": {
+   "frames": [
+    "thornback_wolf_die_0",
+    "thornback_wolf_die_1",
+    "thornback_wolf_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "ink_blot_idle": {
+   "frames": [
+    "ink_blot",
+    "ink_blot_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ink_blot_die": {
+   "frames": [
+    "ink_blot_die_0",
+    "ink_blot_die_1",
+    "ink_blot_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "briar_alpha_idle": {
+   "frames": [
+    "briar_alpha",
+    "briar_alpha_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "briar_alpha_die": {
+   "frames": [
+    "briar_alpha_die_0",
+    "briar_alpha_die_1",
+    "briar_alpha_die_2"
+   ],
+   "fps": 15,
+   "loop": false
   }
  },
  "facing": "right",
@@ -641,5 +902,5 @@
   "archivore": "bosses_battle",
   "lost_page": "bosses_battle"
  },
- "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json."
+ "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted."
 }

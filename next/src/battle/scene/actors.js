@@ -13,7 +13,7 @@
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
 import { ENEMIES } from '../../data/enemies.js';
-import { partySlots, enemySlots, summonSlot, BOSS_SLOT, shadowFor } from './layout.js';
+import { partySlots, enemySlots, summonSlot, BOSS_SLOT, BASELINE, shadowFor } from './layout.js';
 
 const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory', 'crit', 'combo', 'levelup']);
 const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko', 'combo', 'levelup']);
@@ -209,6 +209,12 @@ export class Actor {
   startMove(toX, toY, frames) { this.move = { fromX: this.x, fromY: this.y, toX, toY, t: 0, frames: Math.max(1, frames) }; }
   startDissolve(frames) { this.dissolve = { t: 0, frames: Math.max(1, frames) }; this.flash = null; this.ko = true; }
 
+  /** The resting tint (no flash): a variant or borrowed-art tint at 0.35, else the elite gold at 0.14, else none. */
+  baseTint() {
+    if (this.tint) return { tint: this.tint, amount: 0.35 };
+    if (this.elite) return { tint: '#ffd34d', amount: 0.14 };
+    return { tint: null, amount: 0 };
+  }
   /** Hover offset for flying units (whole sprite). Grounded enemies breathe instead (see breath()). */
   bob() {
     const f = this.engine.frame + this.bobPhase;
@@ -258,14 +264,16 @@ export class Actor {
       if (!this.flying) r.sprite(misc, sf, sx, sy, { alpha: k });
     }
     if (this.dissolve) {
+      // W8-art: the dissolve draws at the unit's own scale with its resting tint (variant / borrowed-art tint or
+      // the elite gold), the same as the frame before it, so nothing jumps when the dissolve starts.
       const k = this.dissolve.t / this.dissolve.frames;
-      dissolveSprite(r, this.atlas, fr, x, y, k, { flipX, tint: this.tint, tintAmount: this.tint ? 0.35 : 0, drop: Math.round(k * 8), rows: true });
+      const bt = this.baseTint();
+      dissolveSprite(r, this.atlas, fr, x, y, k, { flipX, scale: sc, tint: bt.tint, tintAmount: bt.amount, drop: Math.round(k * 8 * sc), rows: true });
       return;
     }
     let tint = null, amount = 0;
     if (this.flash) { tint = this.flash.color; amount = this.flash.hold ? 1 : Math.min(1, 0.4 + 0.6 * (this.flash.frames / Math.max(1, this.flash.total))) * (this.flash.soft ? 0.55 : 1); }
-    else if (this.tint) { tint = this.tint; amount = 0.35; }
-    else if (this.elite) { tint = '#ffd34d'; amount = 0.14; }
+    else ({ tint, amount } = this.baseTint());
     const sopts = { flipX, alpha: 1, tint, tintAmount: amount };
     // Enemy hurt squash (stand-in when the atlas has no hurt frame): the first 4 hurt frames draw the sprite
     // 2 px wider and 2 px shorter, feet planted.
@@ -310,6 +318,9 @@ export function createActors(engine, units) {
 /** Add a summoned unit (Lost Page, split child) at the next free summon slot. */
 export function addSummon(engine, actors, unit, index) {
   const a = new Actor(engine, unit, summonSlot(index));
+  // The summon slots are hover lines for flying adds (Lost Pages). A grounded summon (the Briar Alpha's
+  // Thornback Wolf) stands on the enemy baseline at the slot's x instead of floating in the air.
+  if (!a.flying) { a.y = a.homeY = BASELINE.enemy; }
   a.enterT = 0;
   actors.set(unit.uid, a);
   return a;

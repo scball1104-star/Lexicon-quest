@@ -54,7 +54,10 @@ function ditherPattern(ctx, level, color) {
 let scratch = null;
 /**
  * Draw a sprite frame with k (0..1) of its pixels removed in a Bayer dither (SNES death dissolve).
- * opts: { flipX, tint, tintAmount, drop: px the remaining pixels sink, rows: dissolve bottom-up }.
+ * opts: { flipX, tint, tintAmount, scale, drop: px the remaining pixels sink, rows: dissolve bottom-up }.
+ * W8-art: `scale` and `tint` match Renderer.sprite (feet anchored at (x, y), destination rounded to whole pixels,
+ * tint = a tintAmount blend toward the colour), so a scaled or tinted unit does not pop as it starts to dissolve.
+ * The dither runs on the frame's own pixels (one Bayer cell per source pixel), so it scales with the sprite.
  */
 export function dissolveSprite(r, atlas, frame, x, y, k, opts = {}) {
   const f = typeof frame === 'object' ? frame : atlas.frames[frame];
@@ -79,12 +82,15 @@ export function dissolveSprite(r, atlas, frame, x, y, k, opts = {}) {
     if (opts.rows) { const cut = Math.round(f.h * Math.max(0, k * 1.3 - 0.3)); if (cut > 0) g.clearRect(0, 0, f.w, cut); }
   }
   g.restore();
+  const sc = opts.scale > 0 ? opts.scale : 1;
+  const w = Math.round(f.w * sc), h = Math.round(f.h * sc);
   const ox = opts.flipX ? f.w - 1 - f.ox : f.ox;
-  const dx = Math.round(x - ox), dy = Math.round(y - f.oy + (opts.drop || 0));
+  const dx = Math.round(x - ox * sc), dy = Math.round(y - f.oy * sc + (opts.drop || 0));
   const ctx = r.ctx;
   ctx.save();
-  if (opts.flipX) { ctx.translate(dx + f.w, dy); ctx.scale(-1, 1); ctx.drawImage(scratch, 0, 0, f.w, f.h, 0, 0, f.w, f.h); }
-  else ctx.drawImage(scratch, 0, 0, f.w, f.h, dx, dy, f.w, f.h);
+  ctx.imageSmoothingEnabled = false;
+  if (opts.flipX) { ctx.translate(dx + w, dy); ctx.scale(-1, 1); ctx.drawImage(scratch, 0, 0, f.w, f.h, 0, 0, w, h); }
+  else ctx.drawImage(scratch, 0, 0, f.w, f.h, dx, dy, w, h);
   ctx.restore();
 }
 

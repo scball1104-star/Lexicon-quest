@@ -59,8 +59,12 @@ const BACKDROPS = {
   archive: { asset: 'battle_archive', cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
   archive_deep: { asset: 'battle_archive', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)', darken: 0.22 },
   boss: { asset: 'battle_boss', cell: 7, bright: 0.72, tint: 'rgba(110,60,160,0.32)' },
+  // W8-art: Whisperwood Hollow's own stage (root cave, ink pool, pale light shafts; tools/art/backdrops/compose_hollow.py)
+  hollow: { asset: 'battle_hollow', cell: 0, bright: 0.6, tint: 'rgba(30,50,40,0.35)' },
 };
-const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss'];
+const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow'];
+/** Zone -> stage key overrides (W8-art): the hollow's zone data still names 'valley', its stage is 'hollow'. */
+const ZONE_BACKDROP = { whisperwood_hollow: 'hollow' };
 const artLoads = new Map();      // asset id -> 'loading' | 'ok' | 'missing'
 
 function loadImageUrl(href) {
@@ -114,7 +118,9 @@ function backdropAssetReady(engine, key) {
 }
 export function backdropKey(zoneId, isBoss) {
   const zone = ZONES[zoneId];
-  return isBoss && zoneId === 'archive_boss' ? 'boss' : zone && zone.backdrop ? zone.backdrop : zoneId === 'valley' ? 'valley' : 'archive';
+  if (isBoss && zoneId === 'archive_boss') return 'boss';
+  if (ZONE_BACKDROP[zoneId]) return ZONE_BACKDROP[zoneId];
+  return zone && zone.backdrop ? zone.backdrop : zoneId === 'valley' ? 'valley' : 'archive';
 }
 
 /**

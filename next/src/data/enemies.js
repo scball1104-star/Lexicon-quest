@@ -155,9 +155,10 @@ enemy('archivore', {
 });
 
 // ---------------------------------------------------------------- Whisperwood Hollow (optional, Lv 6-7)
-// No new art (W6-content brief): each entry names the base frame it borrows through `sprite.frame`, with a
-// `scale` and `tint` the battle scene may apply (contract requested from W6-anim; the field uses the base
-// field sprite ids). The hollow is reached after the Lantern, so its foes are tuned for a Lv 6 to 7 party.
+// W8-art: each foe has its own frames at 1x in enemies_battle (`<id>`, `<id>_idle_1|attack|hurt|die_0..2`; built by
+// tools/art/sprites/hollow_enemies.py), so there is no scale or tint any more. The field still uses the base
+// field sprite ids (briar_wolf, ink_slime). The hollow is reached after the Lantern, so its foes are tuned for a
+// Lv 6 to 7 party.
 enemy('thornback_wolf', {
   name: 'Thornback Wolf', family: 'beast', level: 6,
   hp: 250, atk: 27, def: 10, mag: 6, spr: 8, spd: 16, luk: 7,
@@ -166,7 +167,7 @@ enemy('thornback_wolf', {
   moves: [{ skill: 'bite', weight: 50, target: 'lowestHpPct' }, { skill: 'thorn_bite', weight: 35 },
           { skill: 'howl', weight: 15, once: true, if: 'notHasted' }],
   drops: [{ item: 'potion', chance: 0.12 }, { item: 'antidote', chance: 0.15 }], lootZone: 'whisperwood_hollow',
-  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_wolf', scale: 1.0, tint: '#7a4a8a' },
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'thornback_wolf' },
   flavor: 'A briar wolf grown old under the pines. The thorns go all the way through.',
 });
 enemy('ink_blot', {
@@ -176,7 +177,7 @@ enemy('ink_blot', {
   exp: 22, gold: 40, masteryPts: 4,
   moves: [{ skill: 'slime_tackle', weight: 50 }, { skill: 'ink_spit', weight: 50 }],
   drops: [{ item: 'ether', chance: 0.12 }, { item: 'eye_drops', chance: 0.15 }], lootZone: 'whisperwood_hollow',
-  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'ink_slime', scale: 1.15, tint: '#3a2a6a' },
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'ink_blot' },
   flavor: 'Ink from the black pool, thick as tar and twice as patient.',
 });
 enemy('briar_alpha', {
@@ -199,8 +200,8 @@ enemy('briar_alpha', {
       text: 'Thorns bristle along its spine. It is faster now, and past caring.' },
   ],
   drops: [], lootZone: 'whisperwood_hollow', uniqueDrop: 'thornwake',
-  // No new art: the briar wolf battle frame at 1.3x with the elite gold tint (contract sent to W6-anim).
-  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_wolf', scale: 1.3, tint: '#ffd34d' },
+  // W8-art: its own 1x frame, drawn larger from the painting (no 1.3x upscale, no tint).
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'briar_alpha' },
   flavor: "The pack's first and oldest. It kept the lost bridge for years, and nobody told it to stop.",
 });
 

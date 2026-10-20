@@ -512,3 +512,18 @@ FIELD = {
 ................................
 """]},
 }
+
+# W8-art: field palettes for the Whisperwood Hollow foes, so the hollow map can show them as their own creatures
+# (the same grids as their kin, recoloured to match their battle frames). Built after archivore_avatar, so no
+# older rect moves. id: (grid to reuse, palette)
+VARIANTS = {
+    'thornback_wolf': ('briar_wolf', {
+        '0': 'shadow:0', 'r': 'shadow:1', 'R': 'stone_cool:2', 'x': 'stone_cool:3', 'X': 'stone_cool:4',
+        'g': 'foliage_dark:1', 'G': 'roof_green:2', 'H': 'stone_warm:5', 'Y': 'gold:4', 'w': 'stone_warm:5', 'n': 'ink:1'}),
+    'ink_blot': ('ink_slime', {
+        '0': 'ink:0', 'a': 'ink:1', 'b': 'ink:2', 'c': 'ink:3', 'd': 'magic_violet:1',
+        'W': 'magic_violet:3', 'Y': 'magic_cyan:3', 'y': 'magic_cyan:2'}),
+    'briar_alpha': ('briar_wolf', {
+        '0': 'earth:0', 'r': 'wood:1', 'R': 'wood:2', 'x': 'wood:3', 'X': 'wood:4', 'g': 'foliage_dark:1',
+        'G': 'grass:1', 'H': 'gold:4', 'Y': 'gold:5', 'w': 'stone_warm:5', 'n': 'ink:1'}),
+}

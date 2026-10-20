@@ -49,6 +49,10 @@ RECIPES = {
                           note='valley battle stage: daytime meadow composed from the palette, tiles and props'),
     'battle_valley_dusk': dict(compose='dusk', extras=0, max_pair=0.17, stage=(118, 0.46),
                                note='valley battle stage at dusk (optional id for late-day fights)'),
+    # W8-art: Whisperwood Hollow (optional dungeon) gets its own stage: a root cave under the pines with an ink
+    # pool and pale shafts of light, composed by compose_hollow.py from the palette (no painting exists).
+    'battle_hollow': dict(compose='hollow', extras=2, max_pair=0.15, stage=(118, 0.40),
+                          note='Whisperwood Hollow battle stage: root cave, ink pool, pale light shafts (composed)'),
     'battle_archive': dict(cell=7, zoom=1.0, frameY=0.0, bright=0.82, contrast=0.88, sat=0.9, extras=4,
                            tint=('#3c3278', 0.22), stage=(118, 0.44), note='archive battle stage (cell 7 as src/scenes/battle.js)'),
     'battle_boss': dict(cell=7, zoom=1.0, frameY=0.0, bright=0.72, contrast=0.9, sat=0.95, extras=4,
@@ -279,7 +283,10 @@ def old_runtime(cell, bright=1.0, tint=None, band=True):
 
 # ----------------------------------------------------------------------------- build
 def build_one(bid, rec, pal):
-    if rec.get('compose'):
+    if rec.get('compose') == 'hollow':
+        import compose_hollow
+        a = compose_hollow.compose(rec['compose'])
+    elif rec.get('compose'):
         import compose_valley
         a = compose_valley.compose(rec['compose'])
     else:
@@ -296,7 +303,7 @@ def build_one(bid, rec, pal):
     meta = {'image': bid + '.png', 'w': W, 'h': H, 'cell': rec.get('cell'), 'note': rec.get('note', ''),
             'extraColors': extras, 'colors': int(len(np.unique(idx)))}
     if rec.get('compose'):
-        meta['composed'] = 'tools/art/backdrops/compose_valley.py (%s)' % rec['compose']
+        meta['composed'] = 'tools/art/backdrops/%s.py (%s)' % ('compose_hollow' if rec['compose'] == 'hollow' else 'compose_valley', rec['compose'])
     if rec.get('stage'):
         meta['bandY'] = int(rec['stage'][0])
         meta['bandAlpha'] = float(rec['stage'][1])

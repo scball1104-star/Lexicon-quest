@@ -118,15 +118,21 @@ def build_battle():
     sheet, rects, origin = AA.append(sheet, rects, origin, derived)
     for eid in ENEMIES:
         anims.update(AA.enemy_anims(eid, rects))
+    # W8-art: the Whisperwood Hollow foes get their own frames (base + the same derived set), packed in a
+    # third block under everything above, so no existing rect moves (hollow_enemies.py)
+    import hollow_enemies as HE
+    sheet, rects, origin = AA.append(sheet, rects, origin, HE.atlas_frames())
+    for eid in HE.IDS:
+        anims.update(AA.enemy_anims(eid, rects))
     AA.save_indexed(sheet, os.path.join(DST, 'enemies_battle.png'))
     meta = {'image': 'enemies_battle.png', 'frames': rects,
             'origin': origin,
             'anims': anims,
             'facing': 'right',
             'external': {'echo_warden': 'bosses_battle', 'archivore': 'bosses_battle', 'lost_page': 'bosses_battle'},
-            'notes': 'Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json.'}
+            'notes': 'Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted.'}
     write_json(os.path.join(DST, 'enemies_battle.json'), meta)
-    contact(list(e.items()), os.path.join(OUT, 'enemies_battle_4x.png'), scale=4, cols=4, title='enemies_battle at 4x (facing right)')
+    contact(list(e.items()) + list(HE.base().items()), os.path.join(OUT, 'enemies_battle_4x.png'), scale=4, cols=5, title='enemies_battle at 4x (facing right)')
     return meta
 
 
@@ -150,10 +156,35 @@ def build_field():
             names.append(n)
         anims[f'{eid}_idle'] = {'frames': names, 'fps': 3 if eid in ('page_wraith', 'ink_wraith', 'archivore', 'lost_page') else 4, 'loop': True}
         sizes[eid] = {'size': [w, h], 'origin': [w // 2, h - 1]}
+    # W8-art (CRITIQUE_3 #10): the Archivore's field avatar, the battle boss at map scale (a hovering winged eye,
+    # chars/archivore_avatar.py). Appended after every grid sprite, so no existing rect moves.
+    import archivore_avatar as AV
+    names = []
+    for i, im in enumerate(AV.frames()):
+        n = f'archivore_avatar_{i}'
+        sh.add(n, im)
+        items.append((n, im))
+        names.append(n)
+    anims['archivore_avatar_idle'] = {'frames': [names[0], names[2], names[1], names[2]], 'fps': 5, 'loop': True}
+    sizes['archivore_avatar'] = {'size': [AV.W, AV.H], 'origin': [AV.W // 2, AV.H - 1], 'hover': AV.HOVER}
+    # W8-art: field sprites for the Whisperwood Hollow foes (their kin's grids in their own palettes)
+    for vid, (src_id, pal) in EF.VARIANTS.items():
+        d = EF.FIELD[src_id]
+        leg = P.resolve(pal, 'field_' + vid)
+        w, h = d['size']
+        names = []
+        for i, gtxt in enumerate(d['frames']):
+            im = parse_grid(grid_from_text(gtxt), leg, w=w, h=h)
+            n = f'{vid}_{i}'
+            sh.add(n, im)
+            items.append((n, im))
+            names.append(n)
+        anims[f'{vid}_idle'] = {'frames': names, 'fps': 4, 'loop': True}
+        sizes[vid] = {'size': [w, h], 'origin': [w // 2, h - 1]}
     sheet, rects = sh.render()
     save_png(sheet, os.path.join(DST, 'enemies_field.png'))
     meta = {'image': 'enemies_field.png', 'frames': rects, 'anims': anims, 'sprites': sizes, 'facing': 'left',
-            'notes': 'Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom).'}
+            'notes': 'Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2.'}
     write_json(os.path.join(DST, 'enemies_field.json'), meta)
     contact(items, os.path.join(OUT, 'enemies_field_6x.png'), scale=6, cols=6, title='enemies_field at 6x (facing left)')
     return meta
