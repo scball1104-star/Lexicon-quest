@@ -43,6 +43,17 @@ const LOG_SHOW = 3;
 
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
+// In-battle boss name card (the W5 cutscene title style, laid on the battlefield): name + subtitle, keyed by the
+// encounter's leader id. The field cutscene still shows its own full-screen `s.title` card before the swirl; this
+// is the name settling onto the stage as the party enters (FF6 boss reveal), and the card the battle harness sees.
+const BOSS_CARD = {
+  refl_hero: { name: 'THE OTHER SELVES', sub: 'Hall of Reflections' },
+  nameless_king: { name: 'THE NAMELESS KING', sub: 'Keeper of the Court' },
+  archivore: { name: 'THE ARCHIVORE', sub: 'Eater of Names' },
+  echo_warden: { name: 'ECHO WARDEN', sub: 'Knight of the Last Order' },
+  briar_alpha: { name: 'BRIAR ALPHA', sub: 'Warden of the Lost Bridge' },
+};
+const BOSS_CARD_FRAMES = 120;
 const VICTORY_WAIT = 54;
 const DEFEAT_WAIT = 100;
 const FLEE_WAIT = 44;
@@ -61,8 +72,15 @@ const BACKDROPS = {
   boss: { asset: 'battle_boss', cell: 7, bright: 0.72, tint: 'rgba(110,60,160,0.32)' },
   // W8-art: Whisperwood Hollow's own stage (root cave, ink pool, pale light shafts; tools/art/backdrops/compose_hollow.py)
   hollow: { asset: 'battle_hollow', cell: 0, bright: 0.6, tint: 'rgba(30,50,40,0.35)' },
+  // Episode 2 (E2-tiles backdrops; the grade is baked into the PNG, so no extra bright/tint here). The zone's
+  // `backdrop` field (data/encounters.js) selects these keys: east_road, court (F1/F2), court_deep (F3), throne.
+  east_road: { asset: 'battle_east_road', cell: 1, bright: 1.0, tint: null },
+  court: { asset: 'battle_court', cell: 1, bright: 1.0, tint: null },
+  court_deep: { asset: 'battle_court_deep', cell: 1, bright: 1.0, tint: null },
+  throne: { asset: 'battle_throne', cell: 1, bright: 1.0, tint: null },
 };
-const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow'];
+const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
+  'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne'];
 /** Zone -> stage key overrides (W8-art): the hollow's zone data still names 'valley', its stage is 'hollow'. */
 const ZONE_BACKDROP = { whisperwood_hollow: 'hollow' };
 const artLoads = new Map();      // asset id -> 'loading' | 'ok' | 'missing'
@@ -260,6 +278,15 @@ export class BattleScene {
     this.kick = { x: 0, y: 0, frames: 0 };
     this.phase = 'intro';
     this.startOps = planEvents(startEvents, { units: this.info });
+    // Boss name card (shown as the party enters) and the Other Selves' mirror entrance.
+    this.bossIntro = null; this.reflectionEntrance = false; this.stageRevealed = false;
+    if (encounter.boss) {
+      const leaderId = (encounter.enemies && encounter.enemies[0] && encounter.enemies[0].id) || null;
+      const card = (leaderId && BOSS_CARD[leaderId]) || null;
+      const fallbackName = this.units.find((u) => u.side === 'enemy' && u.boss);
+      this.bossIntro = { name: card ? card.name : (fallbackName ? String(fallbackName.name).toUpperCase() : 'BOSS'), sub: card ? card.sub : '', t: 0, frames: BOSS_CARD_FRAMES };
+      this.reflectionEntrance = leaderId === 'refl_hero' || encounter.id === 'other_selves';
+    }
     this.timeline = battle.timeline(8);
     this.help = { text: '', color: null, chars: 0 };
     this.log = [];
@@ -298,6 +325,16 @@ export class BattleScene {
     this.fx.spawn(kind, { ...o, ...extra });
   }
 
+  /** The stage has been revealed (shards cleared): the Other Selves step out of the great mirror. */
+  onStageRevealed() {
+    if (this.stageRevealed) return;
+    this.stageRevealed = true;
+    if (this.reflectionEntrance && !this.fast) {
+      this.engine.audio.sfx('reflection_out');
+      for (const a of this.livingEnemies()) this.fxAt('reflection_out', a.uid);
+    }
+  }
+
   // ---------------------------------------------------------------------------------------------- update
   update(dt, below) {
     const e = this.engine;
@@ -305,6 +342,7 @@ export class BattleScene {
     this.frame++;
     if (e.game && typeof e.game.playtime === 'number') e.game.playtime += dt;   // the field is paused under us: keep the clock honest
     if (this.banner) { this.banner.t++; if (this.banner.t >= this.banner.frames) this.banner = null; }
+    if (this.bossIntro && this.phase !== 'intro' && this.bossIntro.t < this.bossIntro.frames) this.bossIntro.t = this.fast ? this.bossIntro.frames : this.bossIntro.t + 1;
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
     if (this.kick.frames > 0 && --this.kick.frames <= 0) { this.kick.x = 0; this.kick.y = 0; }
     if (this.backdropLayer && !this.backdropLayer.usedAsset && backdropAssetReady(e, this.backdropLayer.key)) {
@@ -320,7 +358,7 @@ export class BattleScene {
     switch (this.phase) {
       case 'intro': {
         this.shard.update();
-        if (this.shard.done) { this.phase = 'enter'; this.timer = ENTER_FRAMES; }
+        if (this.shard.done) { this.phase = 'enter'; this.timer = ENTER_FRAMES; this.onStageRevealed(); }
         break;
       }
       case 'enter': {
@@ -494,6 +532,7 @@ export class BattleScene {
       case 'defendPose': if (a) { a.defending = !!op.on; if (!op.on && a.pose === 'defend') a.setPose('idle'); } return false;
       case 'cover': { const g = this.actor(op.actor); if (g) g.covering = op.on ? op.target : null; return false; }
       case 'swap': if (a) { a.weapon = op.weapon; a.resolveArt(); } return false;
+      case 'swapSprite': if (a) a.swapSprite(op.sprite); return false;
       case 'slow': if (!this.fast && !e.settings.reduceMotion) this.slow = { factor: op.factor, frames: op.frames }; return false;
       case 'banner': if (!this.fast) this.banner = { text: op.text, style: op.style, t: 0, frames: this.scaled(op.style === 'combo' ? 48 : 70) }; return false;
       case 'elite': this.eliteTag = { uid: op.uid, t: this.scaled(90) }; return false;
@@ -506,7 +545,7 @@ export class BattleScene {
       }
       case 'timeline': this.timeline = op.order || []; return false;
       case 'telegraph': {
-        this.telegraphs.set(op.actor, { skill: op.skill, name: op.name, text: op.text, target: op.target, targets: op.targets, nextTurn: op.nextTurn });
+        this.telegraphs.set(op.actor, { skill: op.skill, name: op.name, text: op.text, target: op.target, targets: op.targets, nextTurn: op.nextTurn, partner: op.partner || null, mirrorCombo: !!op.mirrorCombo });
         return false;
       }
       case 'telegraphCancel': this.telegraphs.delete(op.actor); return false;
@@ -696,6 +735,8 @@ export class BattleScene {
     if (this.phase === 'intro') { if (kicked) r.popCamera(); this.shard.draw(r); return; }
     for (const d of this.drops) this.drawDrop(r, d);
     this.fx.drawOver(r);
+    // Kept members are sealed in a mirror shard on the stage (drawn in stage space so it tracks the sprite).
+    for (const a of this.party()) if (a.statuses && a.statuses.kept && !a.dead && !a.ko) HUD.drawKeptShard(r, a, this.frame);
     if (kicked) r.popCamera();
     // Markers.
     const frame = this.frame;
@@ -723,11 +764,14 @@ export class BattleScene {
       this.drawHelpWindow(r);
       const preview = this.menu.state === 'target' && this.menu.preview ? { landing: this.menu.preview.landing, uid: this.currentUid } : null;
       HUD.drawTimeline(r, this.timeline, this.actors, preview, frame);
+      // Mirrored Combo telegraph (the Other Selves): a silver bracket links the two reflections' timeline slots.
+      for (const [actorUid, tele] of this.telegraphs) if (tele.mirrorCombo && tele.partner) HUD.drawMirrorBracket(r, this.timeline, actorUid, tele.partner, frame);
     }
     HUD.drawPartyStatus(r, this.party(), this.menu.state !== 'closed' ? this.currentUid : null, frame);
     if (this.menu.state !== 'closed') this.menu.draw(r, frame);
     else this.drawLog(r);
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
+    if (this.bossIntro && this.bossIntro.t < this.bossIntro.frames && this.phase !== 'rewards') HUD.drawBossCard(r, this.bossIntro);
     if (this.phase === 'rewards') this.drawRewards(r);
     void e;
   }

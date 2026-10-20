@@ -396,6 +396,18 @@ class Planner {
     this.wait(FRAMES.miss);
   }
   ev_status_add(e) {
+    // Kept (the Nameless King): the member is sealed in a mirror shard on the stage. The shard seals over it, a
+    // glassy freeze plays, and the party-status window shows the icon_kept badge (hud PARTY_STATUS_ORDER).
+    if (e.status === 'kept') {
+      this.push({ op: 'status', uid: e.target, status: 'kept', on: true, turns: e.turns });
+      this.push({ op: 'pose', uid: e.target, pose: 'hurt' });
+      this.push({ op: 'fx', kind: 'kept_seal', uid: e.target });
+      this.push({ op: 'sfx', id: 'kept' });
+      this.push({ op: 'screenFlash', color: '#cfefff', frames: 8, alpha: 0.3 });
+      this.help(`{c:violet}${this.name(e.target)} is kept in the mirror!{/c}`);
+      this.wait(FRAMES.status);
+      return;
+    }
     const good = GOOD.has(e.status);
     this.push({ op: 'status', uid: e.target, status: e.status, on: true, turns: e.turns });
     this.push({ op: 'fx', kind: good ? 'status_good' : 'status_bad', uid: e.target, status: e.status });
@@ -406,6 +418,15 @@ class Planner {
   }
   ev_status_remove(e) {
     this.push({ op: 'status', uid: e.target, status: e.status, on: false });
+    // Freed from Kept (Recall, Silver Salve, or the King Broken): the shard shatters and the member stands again.
+    if (e.status === 'kept' && e.reason === 'freed') {
+      this.push({ op: 'fx', kind: 'kept_shatter', uid: e.target });
+      this.push({ op: 'sfx', id: 'kept_break' });
+      this.push({ op: 'pose', uid: e.target, pose: 'idle' });
+      this.help(`{c:cyan}${this.name(e.target)} breaks free of the mirror!{/c}`);
+      this.wait(FRAMES.status);
+      return;
+    }
     if (e.reason === 'cured' || e.reason === 'countered') {
       this.push({ op: 'fx', kind: 'cleanse', uid: e.target, small: true });
       this.help(`${this.name(e.target)}: ${STATUS_GONE[e.status] || 'recovers'}.`);
@@ -480,9 +501,19 @@ class Planner {
   }
   ev_phase(e) {
     this.push({ op: 'banner', text: e.name || `Phase ${e.phase}`, style: 'phase' });
-    this.push({ op: 'fx', kind: 'phase', uid: e.actor, phase: e.phase });
-    this.push({ op: 'sfx', id: e.phase >= 3 ? 'door_rumble' : 'summon' });
-    this.push({ op: 'shake', mag: 3, frames: 24 });
+    // A phase that carries a new sprite (the Nameless King's veil shattering to `nameless_king_unmasked`): the
+    // glass breaks, then the frames swap mid-flash (the swap op also white-flashes the actor).
+    if (e.sprite) {
+      this.push({ op: 'fx', kind: 'shatter', uid: e.actor, big: true });
+      this.push({ op: 'sfx', id: 'glass_break' });
+      this.push({ op: 'screenFlash', color: '#ffffff', frames: 10, alpha: 0.7 });
+      this.push({ op: 'shake', mag: 4, frames: 20 });
+      this.push({ op: 'swapSprite', uid: e.actor, sprite: e.sprite });
+    } else {
+      this.push({ op: 'fx', kind: 'phase', uid: e.actor, phase: e.phase });
+      this.push({ op: 'sfx', id: e.phase >= 3 ? 'door_rumble' : 'summon' });
+      this.push({ op: 'shake', mag: 3, frames: 24 });
+    }
     this.push({ op: 'reveal', uid: e.actor, reset: true });
     this.help(e.text || `${this.name(e.actor)} changes.`, 'orange');
     this.wait(FRAMES.phase);
@@ -559,12 +590,16 @@ class Planner {
       this.push({ op: 'fx', kind: 'status_bad', uid: e.actor, status: 'stun' });
       this.push({ op: 'sfx', id: 'stun', volume: 0.5 });
       this.help(`${nm} is stunned and cannot move!`, 'violet');
+    } else if (e.reason === 'kept') {
+      this.help(`${nm} is kept in the mirror.`, 'violet');
     } else this.help(`${nm} is broken and loses the turn!`, 'gold');
-    this.wait(FRAMES.skip);
+    this.wait(e.reason === 'kept' ? FRAMES.statusQuiet : FRAMES.skip);
   }
   ev_telegraph(e) {
     this.pose(e.actor, 'cast');
-    this.push({ op: 'telegraph', actor: e.actor, skill: e.skill, name: e.name, text: e.text, target: e.target, targets: e.targets || [], nextTurn: e.nextTurn });
+    // `partner` + `mirrorCombo` (the Other Selves' Mirrored Combo): the scene draws a silver bracket between the
+    // two reflections' timeline slots (hud.drawMirrorBracket).
+    this.push({ op: 'telegraph', actor: e.actor, skill: e.skill, name: e.name, text: e.text, target: e.target, targets: e.targets || [], nextTurn: e.nextTurn, partner: e.partner || null, mirrorCombo: !!e.mirrorCombo });
     this.push({ op: 'sfx', id: 'telegraph' });
     this.push({ op: 'fx', kind: 'telegraph', uid: e.actor });
     this.help(`{c:orange}${e.text}{/c}`);
@@ -584,7 +619,19 @@ class Planner {
       this.wait(FRAMES.elite);
       return;
     }
-    this.help(e.text, e.kind === 'taunt' ? 'green' : e.kind === 'interrupt' ? 'cyan' : null);
+    // "The mirror cracks!" (the King is Broken and frees every Kept member): a glass crack and a bright beat;
+    // the per-member shatter follows on each status_remove 'freed'.
+    if (e.kind === 'kept_break') {
+      this.push({ op: 'sfx', id: 'glass_break' });
+      this.push({ op: 'screenFlash', color: '#ffffff', frames: 8, alpha: 0.5 });
+      this.push({ op: 'shake', mag: 3, frames: 12 });
+      this.help(`{c:cyan}${e.text}{/c}`);
+      this.wait(FRAMES.message);
+      return;
+    }
+    const col = e.kind === 'taunt' ? 'green' : e.kind === 'interrupt' ? 'cyan'
+      : e.kind === 'ward' || e.kind === 'ward_break' ? 'orange' : e.kind === 'kept' || e.kind === 'kept_hold' ? 'violet' : null;
+    this.help(e.text, col);
     this.wait(FRAMES.message);
   }
   ev_escape(e) {

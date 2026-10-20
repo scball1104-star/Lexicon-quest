@@ -853,6 +853,60 @@ export class BattleFx {
     this.particles(cx, cy, 30, { colors: [C.paper, C.violet, C.purple, C.white], speed: 2.2, life: 30, radius: 30, radiusY: 30, blink: true });
     if (o.phase >= 3) this.particles(cx, cy, 24, { colors: FIRE, dir: -Math.PI / 2, spread: 1.2, speed: 1.6, life: 30, radius: 40, radiusY: 30, delay: 10 });
   }
+  // --- Episode 2: glass (the Court of Mirrors, the Kept status, the King's veil) ----------------------------
+  /** A mirror shard seals over a Kept member: angular facets snap in with a freezing shimmer. */
+  fx_kept_seal(o) {
+    const { cx, cy } = this.center(o);
+    const h = o.h || 40, hw = Math.max(12, Math.round((o.w || 28) / 2) + 3);
+    const top = cy - h / 2 - 2, bot = (o.y || cy) + 1;
+    this.add(16, (r, t) => {
+      const grow = Math.min(1, t / 6);
+      const fade = t < 12 ? 1 : (16 - t) / 4;
+      const w = Math.round(hw * grow);
+      const pts = [[cx, top], [cx + w, cy - 4], [cx + w - 2, bot], [cx - w + 2, bot], [cx - w, cy - 4]];
+      r.withAlpha(0.55 * fade, () => {
+        for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; r.line(a[0], a[1], b[0], b[1], C.cyan); }
+        r.line(cx - w + 3, top + 6, cx + w - 5, bot - 5, C.white);
+        r.line(cx + w - 3, top + 7, cx - w + 5, bot - 6, C.ice);
+      });
+    }, 'top');
+    this.sparkles(cx, cy, 7, [C.cyan, C.white, C.ice], 18, hw);
+  }
+  /** The Kept shard breaks: fracture rays and glass motes fly out. */
+  fx_kept_shatter(o) {
+    const { cx, cy } = this.center(o);
+    this.add(10, (r, t) => {
+      const k = t / 10;
+      for (let i = 0; i < 5; i++) { const a = i * TAU / 5 + 0.3; const r0 = 2 + k * 6, r1 = 6 + k * 24; r.withAlpha(1 - k, () => r.line(cx + cos(a) * r0, cy + sin(a) * r0, cx + cos(a) * r1, cy + sin(a) * r1, i % 2 ? C.white : C.cyan)); }
+    }, 'top');
+    this.particles(cx, cy, 14, { colors: [C.white, C.cyan, C.ice], speed: 2.6, life: 16, gravity: 0.12, size: 2, shrink: true });
+  }
+  /** A pane of glass shatters over a unit (the King's veil; o.big by default). */
+  fx_shatter(o) {
+    const { cx, cy } = this.center(o);
+    const big = o.big !== false;
+    this.add(14, (r, t) => {
+      const k = t / 14;
+      for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + 0.2; const r1 = (big ? 46 : 28) * Math.min(1, k * 1.4); r.withAlpha(1 - k, () => r.line(cx, cy, cx + cos(a) * r1, cy + sin(a) * r1 * 0.9, i % 2 ? C.white : C.cyan)); }
+    }, 'top');
+    this.particles(cx, cy, big ? 22 : 12, { colors: [C.white, C.cyan, C.ice, C.violet], speed: big ? 3 : 2, life: 20, gravity: 0.14, size: 2, shrink: true });
+    this.fx_ring(o, { color: C.white, r0: 2, r1: big ? 40 : 24, frames: 10 });
+  }
+  /** A reflection steps out of the great mirror: a reversed shimmer that settles into the figure, with a low gleam. */
+  fx_reflection_out(o) {
+    const { cx, cy } = this.center(o);
+    const h = o.h || 40, hw = Math.max(14, Math.round((o.w || 28) / 2) + 2);
+    this.add(22, (r, t) => {
+      const k = t / 22;
+      r.withAlpha(0.6 * (1 - k), () => {
+        for (let y = Math.round(cy - h / 2); y < (o.y || cy); y += 2) {
+          const off = Math.round(sin((y + t * 3) * 0.3) * 5 * (1 - k));
+          r.rect(cx - hw + off, y, hw * 2, 1, (t + y) % 4 < 2 ? C.cyan : C.white);
+        }
+      });
+    }, 'top');
+    this.sparkles(cx, cy, 8, [C.cyan, C.white, C.violet], 22, hw);
+  }
 }
 
 // ------------------------------------------------------------------------------------------- intro slices

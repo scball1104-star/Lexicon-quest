@@ -82,9 +82,12 @@ export class Actor {
     const ext = (en && en.meta && en.meta.external) || {};
     // The frame stem: the enemy's own frame, else the frame it borrows (ENEMIES[id].sprite.frame).
     const spr = (this.def && this.def.sprite) || null;
-    const stems = [this.id];
-    if (spr && spr.frame && spr.frame !== this.id) stems.push(spr.frame);
-    let atlasId = 'enemies_battle', stem = this.id;
+    // artId lets a boss swap its battle frames mid-fight (the Nameless King's veil shatters to
+    // `nameless_king_unmasked`); the unit's logical id and uid are unchanged, so only the drawn frames differ.
+    const baseId = this.artId || this.id;
+    const stems = [baseId];
+    if (spr && spr.frame && spr.frame !== baseId) stems.push(spr.frame);
+    let atlasId = 'enemies_battle', stem = baseId;
     for (const c of stems) {
       if (en && en.frames[c]) { atlasId = 'enemies_battle'; stem = c; break; }
       if (ext[c] && assets.has(ext[c])) { atlasId = ext[c]; stem = c; break; }
@@ -97,6 +100,9 @@ export class Actor {
     const f = this.atlas && (this.atlas.frames[stem] || (this.anim && this.atlas.frames[this.anim.frames[0]]));
     this.w = f ? Math.round(f.w * this.scale) : 48; this.h = f ? Math.round(f.h * this.scale) : 48;
   }
+
+  /** Swap the drawn battle frames (and a white flash) without touching the logical id: the King's unmask. */
+  swapSprite(id) { if (!id || id === this.artId) return; this.artId = id; this.resolveArt(); this.flash = { color: '#ffffff', frames: 8, total: 10, hold: false, soft: true }; }
 
   get alive() { return !this.dead && !this.ko; }
   get cx() { return Math.round(this.x); }

@@ -4,10 +4,10 @@
 
 import { drawWindow, drawSelBar, drawGauge, drawLabel, drawIcon, uiAtlas } from '../../ui/window.js';
 import { animFrameAt } from '../../core/assets.js';
-import { HELP_WIN, STATUS_WIN, TL, timelineSlotX, statusRow, enemyRowAnchor, PORTRAIT_FACE, enemyFaceRect, BANNER_Y, W } from './layout.js';
+import { HELP_WIN, STATUS_WIN, TL, timelineSlotX, statusRow, enemyRowAnchor, PORTRAIT_FACE, enemyFaceRect, BANNER_Y, W, H } from './layout.js';
 import { frameOrigin } from './actors.js';
 
-const PARTY_STATUS_ORDER = ['poison', 'burn', 'chill', 'stun', 'silence', 'blind', 'nameless', 'regen', 'protect', 'haste', 'focus', 'taunt'];
+const PARTY_STATUS_ORDER = ['kept', 'poison', 'burn', 'chill', 'stun', 'silence', 'blind', 'nameless', 'regen', 'protect', 'haste', 'focus', 'taunt'];
 const WEAK_TYPES = ['sword', 'spear', 'staff', 'axe', 'bow', 'fire', 'ice', 'thunder', 'light'];
 
 export function drawHelp(r, text, color, opts = {}) {
@@ -120,8 +120,10 @@ export function drawTimeline(r, order, actors, preview, frame) {
     drawHead(r, a, sx + 3, sy + 3, row.skip ? 0.45 : 1);
     if (i === 0 && pulse) r.strokeRect(sx - 1, sy - 1, 20, 20, '#f9d77a');
     if (row.skip) {
-      const m = ui.frames[row.skip === 'stun' ? 'st8_stun' : 'shield_broken'];
-      if (m) r.sprite(ui, m, sx + 9, sy + 9, { topLeft: true });
+      // Kept turns (the Nameless King) grey the head and carry the icon_kept shard marker; stun / break keep theirs.
+      const mk = row.skip === 'kept' ? (ui.frames.icon_kept || ui.frames.st8_silence || ui.frames.shield_broken)
+        : row.skip === 'stun' ? ui.frames.st8_stun : ui.frames.shield_broken;
+      if (mk) r.sprite(ui, mk, sx + 18 - Math.min(10, mk.w), sy + 18 - Math.min(10, mk.h), { topLeft: true });
     } else if (row.charging) {
       r.rect(sx + 11, sy + 1, 6, 8, '#14101e');
       r.text('!', sx + 12, sy - 1, { color: 'orange', shadow: false });
@@ -155,7 +157,8 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     if (active) drawSelBar(r, L.bar[0], L.bar[1], L.bar[2], { alpha: 0.6 });
     const pct = a.maxHp ? a.hp / a.maxHp : 0;
     const ko = a.ko || a.hp <= 0;
-    const nameCol = ko ? 'dim' : pct <= 0.25 ? 'red' : 'white';
+    const kept = !!a.statuses.kept;
+    const nameCol = ko ? 'dim' : kept ? 'cyan' : pct <= 0.25 ? 'red' : 'white';
     r.text(a.name, L.name[0], L.name[1], { color: nameCol });
     const hpText = String(Math.max(0, Math.round(a.shownHp)));
     r.text(hpText, L.hp[0], L.hp[1], { align: 'right', color: nameCol });
@@ -173,7 +176,9 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     let ix = L.status[0];
     const ids = PARTY_STATUS_ORDER.filter((s) => a.statuses[s]);
     for (const s of ids.slice(0, 5)) {
-      if (ui && ui.frames[`st8_${s}`]) r.sprite(ui, ui.frames[`st8_${s}`], ix, L.status[1], { topLeft: true });
+      // Kept has no 8 px timeline badge; use the icon_kept shard (or st8_silence as a stand-in) so the row still marks it.
+      const bf = ui && (ui.frames[`st8_${s}`] || (s === 'kept' ? (ui.frames.icon_kept || ui.frames.st8_silence) : null));
+      if (bf) r.sprite(ui, bf, ix, L.status[1], { topLeft: true });
       ix += 9;
     }
     if (a.defending && ui && ui.frames.icon_shield) r.sprite(ui, ui.frames.icon_shield, L.status[0] + 46, L.status[1] - 2, { topLeft: true, alpha: 0.9 });
@@ -198,6 +203,16 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false) {
     }
   }
   let ex = x + 15;
+  // Reflect marker (Episode 2): while a foe rebounds attacks (the Glassback under Protect), a mirror badge leads the
+  // row so the player sees not to throw a spell at it. know.reflect is 'magic' | 'phys' | null (rules.knowledge).
+  if (know && know.reflect) {
+    const fr = ui.frames.weak_frame;
+    if (fr) r.sprite(ui, fr, ex, y - 1, { topLeft: true });
+    const ic = ui.frames.icon_reflect || ui.frames.st8_protect || ui.frames.icon_shield;
+    if (ic) r.sprite(ui, ic, ex + 1, y, { topLeft: true });
+    else { r.strokeRect(ex + 1, y, 12, 12, '#8af0e8'); r.line(ex + 2, y + 11, ex + 12, y + 1, '#f6f4ee'); }
+    ex += 15;
+  }
   const weak = (know && know.weak) || [];
   const resist = (know && know.resist) || [];
   const unknown = know ? know.unknown : 0;
@@ -293,6 +308,71 @@ export function drawBigBanner(r, text, style, k) {
     r.rect(x, y, w, 1, color === 'gold' ? '#f9d77a' : color === 'orange' ? '#eba14d' : '#8af0e8');
     r.rect(x, y + 23, w, 1, color === 'gold' ? '#f9d77a' : color === 'orange' ? '#eba14d' : '#8af0e8');
     r.text(text, W / 2, y + 4, { font: 'large', align: 'center', color });
+  });
+}
+
+/**
+ * A Kept member sealed in a mirror shard on the stage (the Nameless King). Drawn over the sprite: a faceted glass
+ * prism (cyan outline + white gleam + travelling shimmer) that reads as "held behind glass" without hiding the unit.
+ */
+export function drawKeptShard(r, actor, frame) {
+  const cx = actor.cx;
+  const h = actor.h || 40, w = Math.max(18, actor.w || 28);
+  const top = Math.round(actor.y - h - 3), bot = Math.round(actor.y + 1);
+  const mid = top + Math.round((bot - top) * 0.4);
+  const hw = Math.round(w / 2 + 4);
+  const pts = [[cx, top], [cx + hw, mid], [cx + hw - 2, bot], [cx - hw + 2, bot], [cx - hw, mid]];
+  // A faint glassy wash inside the prism (dithered so it does not flatten the sprite).
+  r.withAlpha(0.14, () => r.ditherEllipse(cx, Math.round((top + bot) / 2), hw - 1, Math.round((bot - top) / 2), '#8af0e8', 0.6));
+  // Facet outline and inner creases.
+  r.withAlpha(0.8, () => { for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; r.line(a[0], a[1], b[0], b[1], '#cfefff'); } });
+  r.withAlpha(0.45, () => { r.line(cx, top, cx - hw + 2, bot, '#8af0e8'); r.line(cx, top, cx + hw - 2, bot, '#8af0e8'); });
+  // A gleam travelling down the glass.
+  const span = Math.max(1, bot - top);
+  const gy = top + ((frame * 2) % span);
+  r.withAlpha(0.7, () => r.line(cx - hw + 3, gy, cx + hw - 3, gy - 2, '#ffffff'));
+}
+
+/**
+ * The Other Selves' Mirrored Combo telegraph: a silver bracket under the two reflections' timeline slots, so the
+ * player sees the pair that is about to act as one (and can break the link). aUid / bUid are the two actors.
+ */
+export function drawMirrorBracket(r, order, aUid, bUid, frame) {
+  if (!aUid || !bUid) return;
+  const ia = order.findIndex((o) => o.uid === aUid);
+  const ib = order.findIndex((o) => o.uid === bUid);
+  if (ia < 0 || ib < 0) return;
+  const lo = Math.min(ia, ib), hi = Math.max(ia, ib);
+  if (hi >= TL.slots) return;
+  const x0 = timelineSlotX(lo) + 9, x1 = timelineSlotX(hi) + 9;
+  const y = TL.y + 19;
+  const pulse = Math.floor(frame / 8) % 2 === 0;
+  const col = pulse ? '#e8ecff' : '#9aa6d8';
+  r.line(x0 + 1, y, x1 - 1, y, col);
+  r.line(x0, y, x0, y - 4, col);
+  r.line(x1, y, x1, y - 4, col);
+  const mx = Math.round((x0 + x1) / 2);
+  r.rect(mx - 1, y - 1, 3, 3, pulse ? '#ffffff' : '#cfefff');
+}
+
+/**
+ * In-battle boss name card (the W5 cutscene title card, laid on the battlefield as the party enters): the boss
+ * name in the large font over a darkened gold-ruled band, with its subtitle. card = { name, sub, t, frames }.
+ */
+export function drawBossCard(r, card) {
+  if (!card) return;
+  const { name, sub, t, frames } = card;
+  const inK = Math.min(1, t / 14), outK = t > frames - 16 ? Math.max(0, (frames - t) / 16) : 1;
+  const a = Math.max(0, Math.min(inK, outK));
+  if (a <= 0) return;
+  const cy = Math.round(H * 0.4);
+  const bh = sub ? 40 : 28;
+  r.withAlpha(a * 0.72, () => r.rect(0, cy - 2, W, bh, '#14101e'));
+  r.withAlpha(a, () => {
+    r.rect(0, cy - 2, W, 1, '#f9d77a');
+    r.rect(0, cy + bh - 3, W, 1, '#f9d77a');
+    r.text(name, W / 2, cy + 3, { font: 'large', align: 'center', color: 'cream' });
+    if (sub) r.text(sub, W / 2, cy + 23, { align: 'center', color: 'gray' });
   });
 }
 

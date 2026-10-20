@@ -291,6 +291,17 @@ def case_f1(lab):
     lab.wait_idle(15000)
     lab.frames(10)
     lab.shot('e2_f1_teach_after')
+    # D1's cracked glass pane: Dash Strike south breaks it and opens the alcove with the Merewarden Helm
+    lab.warp('court_f1', 33, 13, 'down')
+    setup_party(lab)
+    lab.frames(10)
+    check(lab.run(field_js('const e = f.entities.get("chest_helm"); return !!(e && e.data.concealed);')), 'the helm chest hides behind the pane')
+    lab.run(field_js('f.leader.face("down"); return true;'))
+    lab.call('ability', 'dash')
+    lab.page.wait_for_function(f'(() => {{ const f = {FIELD}; const e = f.entities.get("pane_d"); return e && e.state === "broken"; }})()', timeout=15000, polling=50)
+    lab.wait_idle(15000)
+    check(lab.run(field_js('return f.map.codeAt(33, 16) === "none" && !f.entities.get("chest_helm").data.concealed;')), 'Dash Strike breaks the pane: the alcove opens')
+    lab.shot('e2_f1_pane_broken')
 
 
 CASES = {'beam': case_beam, 'bridge': case_bridge, 'shove': case_shove, 'dark': case_dark, 'mere': case_mere,

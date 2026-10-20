@@ -33,6 +33,8 @@ import { drawWindow, drawIcon } from '../ui/window.js';
 import { touchUi } from '../ui/list.js';
 
 export const ORDER = ['dash', 'appraise', 'lantern', 'shove'];
+/** Breakable kinds Dash Strike answers: thin roots, cracked rock, and (E2) a cracked silverglass pane. */
+export const BREAK_KINDS = new Set(['roots', 'rock', 'glass']);
 export const DASH_TILES = 3;
 export const DASH_FRAMES = 4;            // frames per tile while dashing (running is 8)
 export const APPRAISE_RANGE = 5;
@@ -250,7 +252,7 @@ export class FieldAbilities {
     // the Lantern prompt is showing (ink within two tiles): pageR is the Lantern, as the scripted lines promise
     const lanternUp = list.includes('lantern') && f.lantern <= 0;
     if (lanternUp && f.hiddenInkNear && f.hiddenInkNear()) return { id: 'lantern', kind: 'ink', target: true };
-    if (hit && (hit.kind === 'roots' || hit.kind === 'rock') && list.includes('dash')) return { id: 'dash', kind: hit.kind, target: hit.ent, at: hit.at, lane };
+    if (hit && BREAK_KINDS.has(hit.kind) && list.includes('dash')) return { id: 'dash', kind: hit.kind, target: hit.ent, at: hit.at, lane };
     // 2. the selected ability, when it has a target
     if (sel === 'dash' && hit && hit.kind === 'enemy') return { id: 'dash', kind: 'enemy', target: hit.actor, at: hit.at, lane };
     if (sel === 'appraise') {
@@ -293,7 +295,7 @@ export class FieldAbilities {
       if (c && c.target && c.at) {
         const L = this.f.leader;
         const d = Math.abs(c.at[0] - L.tx) + Math.abs(c.at[1] - L.ty);
-        if ((c.kind === 'roots' || c.kind === 'rock') && d <= 2 && !this.game.counters['bark:first_dash_target']) this.f.bark('first_dash_target');
+        if (BREAK_KINDS.has(c.kind) && d <= 2 && !this.game.counters['bark:first_dash_target']) this.f.bark('first_dash_target');
       }
       if (!this.game.counters['bark:first_appraise_target'] && this.has('appraise') && this.selected() !== 'appraise' && this.f.map.mod.area !== 'town') {
         const L = this.f.leader;
@@ -407,16 +409,17 @@ export class FieldAbilities {
     for (const a of f.actors) if (a.kind === 'enemy' && a.brain) a.brain.onPlayerStep();
     if (!hit) { await catching; await this.recover(); this.afterDash(); return; }
     const [hx, hy] = hit.at;
-    if (hit.kind === 'roots' || hit.kind === 'rock') {
+    if (BREAK_KINDS.has(hit.kind)) {
       const ent = hit.ent;
       const ix = hx * TILE + 8 - dx * 4, iy = hy * TILE + 8 - dy * 4;    // where the blade meets it
       this.addFx('slash', hx, hy, dir, 14);
       this.fx.push({ kind: 'spark', x: ix, y: iy, t: 0, life: 10 });
       e.audio.sfx('sword_slash');
       await this.hitStop(4, 2);
-      e.audio.sfx(hit.kind === 'roots' ? 'axe_chop' : 'hit_heavy');
+      e.audio.sfx(hit.kind === 'roots' ? 'axe_chop' : hit.kind === 'glass' ? 'glass_break' : 'hit_heavy');
       const cx = ent.x * TILE + 8, cy = ent.y * TILE + 14;
-      const [lite, dark] = hit.kind === 'roots' ? ['#e4cb96', '#896042'] : ['#ebdfc8', '#7e6d6e'];
+      // E2: a cracked silverglass pane (Court F1) breaks into cold glass shards
+      const [lite, dark] = hit.kind === 'roots' ? ['#e4cb96', '#896042'] : hit.kind === 'glass' ? ['#e8fffb', '#8af0e8'] : ['#ebdfc8', '#7e6d6e'];
       f.particles.burst('shard', cx, cy, 12, lite);
       f.particles.burst('shard', cx, cy + 8, 8, dark);
       f.particles.puff(cx, cy + 16); f.particles.puff(cx - 5, cy + 14); f.particles.puff(cx + 5, cy + 14);
@@ -691,7 +694,7 @@ export class FieldAbilities {
       let topY = ty * TILE - 4;
       if (c.kind === 'enemy' && c.target.spr) topY = c.target.feetY - c.target.spr.h - 2;
       if (c.kind === 'heavy') topY = c.target.y * TILE - 12;
-      if (c.kind === 'roots' || c.kind === 'rock') topY = c.target.y * TILE;
+      if (BREAK_KINDS.has(c.kind)) topY = c.target.y * TILE;
       const glyphW = touch ? 0 : r.measure('{i:btn_pageR}');
       const w = 12 + (glyphW ? glyphW + 2 : 0);
       const x = tx * TILE + 8 - Math.round(w / 2), y = topY - 12 - bob;

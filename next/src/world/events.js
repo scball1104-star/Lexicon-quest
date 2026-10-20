@@ -14,7 +14,7 @@
 //   moveBlock(field, ent, dir, o)          slide a push block one tile (the leader's push, Bram's Shove)
 //
 // W9-abilities fields: `block` + `heavy: true` (only Bram's Shove moves it), `object` + `breakable: 'roots' |
-// 'rock'` (+ `opens: [[x, y], ...]` wall cells carved to floor once it breaks), any event + `behind: '<id>'`
+// 'rock' | 'glass' (E2)` (+ `opens: [[x, y], ...]` wall cells carved to floor once it breaks), any event + `behind: '<id>'`
 // (concealed, no prompt, no glint, until that breakable is broken).
 //
 // Persistence: one-shot things (chests, unlocked doors, lit braziers with `flag`, ink reveals) live in
@@ -48,7 +48,9 @@ const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switc
 const BEAM_RELEVANT = new Set(['beam', 'mirror', 'receptor', 'gate', 'locked_door', 'block', 'pot', 'chest', 'shelf', 'object']);
 const MAX_INK_RADIUS = 6;
 /** In-game art for breakables (src/world/fieldart.js), with the tiles.json stand-ins if that art is missing. */
-const BREAK_ART = { roots: ['ab_root_wall', 'ab_root_wall_broken', 'wall_broken'], rock: ['ab_cliff_crack', 'ab_cliff_grotto', 'wall_broken'] };
+const BREAK_ART = { roots: ['ab_root_wall', 'ab_root_wall_broken', 'wall_broken'], rock: ['ab_cliff_crack', 'ab_cliff_grotto', 'wall_broken'],
+  // E2: a cracked silverglass pane in a Court wall band (court.png pieces)
+  glass: ['glass_pane_cracked_top', 'glass_pane_broken_top', 'wall_broken'] };
 
 export function present(field, ev) {
   if (!ev) return false;
@@ -597,13 +599,17 @@ async function openChest(field, ent) {
   field.particles.sparkle(ent.x * TILE + 8, ent.y * TILE + 4, 6, '#ffd34d');
   await engine.waitFrames(18);
   const ev = ent.ev;
-  if (ev.item) {
-    await field.giveItem(ev.item, ev.qty || 1);
-    if (ev.item === 'archive_key') await field.bark('first_archive_key');
-  } else if (ev.gold) {
-    g.gold += ev.gold;
-    engine.audio.sfx('coin');
-    if (engine.toasts) await engine.toasts.gold(ev.gold);
+  if (ev.item || ev.gold) {
+    // a placed chest pays its item and its gold (E2: the Remembrance Cache holds both)
+    if (ev.item) {
+      await field.giveItem(ev.item, ev.qty || 1);
+      if (ev.item === 'archive_key') await field.bark('first_archive_key');
+    }
+    if (ev.gold) {
+      g.gold += ev.gold;
+      engine.audio.sfx('coin');
+      if (engine.toasts) await engine.toasts.gold(ev.gold);
+    }
   } else {
     // a random chest: rollChest -> { gold, items: [instances], consumables: [{ item, qty }] } (loot-tables CHEST_TIERS)
     const zone = ZONES[map.id];
@@ -765,6 +771,8 @@ export function blockCanMove(field, ent, dir) {
   const nx = ent.x + dx, ny = ent.y + dy;
   if (field.map.codeAt(nx, ny) !== 'none') return false;
   if (field.glass && field.glass.isBridge(nx, ny)) return false;
+  // never onto a door cell, present or not (notches, mirror doors, door pairs): a parked block would seal it
+  if (entitiesAt(field, nx, ny).some((e) => e.type === 'door')) return false;
   if (field.actorAt(nx, ny)) return false;
   // a block may slide onto plates, triggers, lights and the shards of a broken pot; nothing else that is there
   const passableEvent = (e) => !e.present || e.type === 'plate' || e.type === 'trigger' || e.type === 'light' || (e.type === 'pot' && e.state === 'broken');
