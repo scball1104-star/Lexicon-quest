@@ -1,6 +1,9 @@
 // Dump the dialogue boxes of chosen scenes (first path through each, plus a realistic flag state) as
 // JSON for qa/content/preview_dialogue.py. Usage: node qa/content/_boxes.mjs scene1 scene2 ...
-import { scenes } from '../../src/data/story/ep1.js';
+import { scenes as EP1 } from '../../src/data/story/ep1.js';
+import { scenes as EP2 } from '../../src/data/story/ep2.js';
+
+const scenes = { ...EP1, ...EP2 };
 import { speakerName, NPCS } from '../../src/data/npcs.js';
 import { runOnce } from './_harness.mjs';
 
@@ -18,6 +21,15 @@ const STATE = {
   campfire_rest: ['left_town', 'mira_joined', 'bram_joined'],
   return_to_willowmere: ['archivore_defeated', 'mira_joined', 'bram_joined'],
   tess_letters: ['intro_done', 'tess_quest_started', 'tess_letter_3_found', 'mira_joined', 'bram_joined'],
+  // Episode 2 (E2-story): a finished Episode 1 plus the beats each scene needs.
+  ...Object.fromEntries(Object.entries({
+    ep2_morning: [], ep2_mael: [], garrick_crossing: ['ep2_started'], east_first_fight: ['crossing_done'],
+    waystation_rest: ['crossing_done'], mere_view: ['crossing_done'], nh_arrival: ['crossing_done'],
+    fountain_faces: ['nh_arrived'], elian_hall: ['met_elian'], anwen_register: ['heard_crisis'], tovin_ferry: ['met_anwen'],
+    court_crossing: ['court_ferry_open'], mira_memory_1: ['court_f1_arrived'], vex_mirror: ['court_f2_arrived'],
+    other_selves: ['court_f1_done', 'court_f2_arrived'], vow_courage: ['court_f2_done'], vow_door: ['vow_belonging', 'vow_mercy', 'vow_courage'],
+    nameless_king: ['vow_door_open'], hollowmere_restored: ['aurel_named'], tess_last_route: [],
+  }).map(([k, v]) => [k, ['intro_done', 'mira_joined', 'bram_joined', 'archivore_defeated', 'ep1_complete', ...v]])),
 };
 const PORTRAITS = {};
 const out = [];

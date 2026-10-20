@@ -47,6 +47,29 @@ export const DIRS = ['up', 'down', 'left', 'right'];
 export const TINTS = ['none', 'dawn', 'day', 'dusk', 'night', 'ink'];
 export const ENCOUNTER_IDS_FALLBACK = ['echo_warden', 'archivore'];
 
+// ------------------------------------------------------------------------------------------------
+// Episode 2 ids (docs/EPISODE2_PLAN.md sections 2 and 9). Built by other wave-10 agents; the content tests accept
+// them by these planned ids and use the real data files whenever those already define them.
+// ------------------------------------------------------------------------------------------------
+export const EP2_MAP_IDS = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chapel', 'nh_inn', 'nh_shop', 'nh_smithy',
+  'court_f1', 'court_f2', 'court_f3', 'court_throne'];
+export const EP2_NPC_SPRITES = ['npc_elian', 'npc_anwen', 'npc_tovin', 'npc_lena', 'npc_vessa', 'npc_nico', 'npc_sava',
+  'npc_corin', 'npc_orla', 'npc_wren', 'npc_fitch', 'npc_vex', 'npc_aurel'];
+export const EP2_FIELD_SPRITES = ['refl_hero', 'refl_mira', 'refl_bram', 'nameless_king_avatar']; // enemies_field
+export const EP2_PORTRAITS = ['elian', 'anwen', 'tovin', 'lena', 'aurel', 'nameless_king', 'silver_rogue'];
+export const EP2_MUSIC = ['hollow', 'hollowmere', 'fading_road', 'court', 'boss_king'];
+export const EP2_SFX = ['mirror_turn', 'beam_hit', 'glass_bridge', 'glass_break', 'mirror_step', 'ferry_oars', 'clock_chime',
+  'reflection_out', 'kept', 'kept_break'];
+export const EP2_ENEMY_IDS = ['mist_wolf', 'glassback', 'quicksilver', 'quicksilver_bead', 'glint_wisp', 'glass_sentinel',
+  'borrowed_shadow', 'faceless_knight', 'shard_swarm', 'refl_hero', 'refl_mira', 'refl_bram', 'nameless_king',
+  'false_sorrow', 'false_pride'];
+export const EP2_ENCOUNTERS = ['road_mixed', 'other_selves', 'nameless_king'];
+// Items and shops E2-battle owns (plan 2.3 and 7); accepted by id until items.js / shops.js define them.
+export const EP2_ITEMS = ['mael_letter', 'glass_key', 'name_fragment_2', 'mirror_sigil', 'courier_satchel', 'elian_reply',
+  'black_feather', 'hi_ether', 'silver_salve', 'kept_promise', 'merewarden_mantle', 'courier_knot', 'paper_crown',
+  'twinfold_charm', 'hollowcrown', 'merewarden_helm'];
+export const EP2_SHOPS = ['east_peddler', 'hollow_items', 'hollow_smithy'];
+
 /** Walk a directory tree and return file paths matching a predicate. */
 export function listFiles(dir, pred = () => true) {
   const out = [];

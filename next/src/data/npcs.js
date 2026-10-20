@@ -1,4 +1,4 @@
-// Episode 1 NPCs. Pure data + tiny pure helpers.
+// NPCs for Episode 1 and Episode 2 (Episode 2 records are at the end of NPCS). Pure data + tiny pure helpers.
 //
 // Record shape:
 //   id: {
@@ -14,7 +14,7 @@
 // shows the zzz emote now and then). `move` may also be a conditional list
 // [{ if, ifNot, move, radius?, partner?, path? }, ..., { move }]: first match wins (see moveFor).
 // Talk: first entry whose conditions match wins (see story/dialogue.js). A `scene` entry runs a scene
-// from story/ep1.js instead of plain lines. Plain strings are said by the NPC; { who, text } lines are
+// from story/ep1.js or story/ep2.js instead of plain lines. Plain strings are said by the NPC; { who, text } lines are
 // party interjections (who: 'mira' | 'bram' | 'hero') or narration (who: null).
 
 import { pick, matches, resolve } from './story/dialogue.js';
@@ -23,6 +23,10 @@ const M = 'mira_joined';
 const B = 'bram_joined';
 const DONE = 'archivore_defeated';
 const END = 'ep1_complete';
+// Episode 2 stages: arrival (nh_arrived), the Court (court_entered), the restoration (nh_restored), the end.
+const E2 = 'ep2_started';
+const NHR = 'nh_restored';
+const E2END = 'ep2_complete';
 
 export const NPCS = {
   // ----------------------------------------------------------------------------------------------
@@ -33,6 +37,21 @@ export const NPCS = {
     spot: 'Lantern Square, beside the well, facing south', move: 'turn',
     about: 'Town elder and keeper of the Town Register. Gentle, wry, hiding a fear about the hero\'s name.',
     talk: [
+      // Episode 2
+      { if: 'letter_answer_done', lines: [
+        'HOLLOWMERE, in my best hand. I keep turning back to that page. Two towns remember it now.',
+        'Yours is still faint, {hero}. But I have learned that faint is not the same as gone.',
+      ] },
+      { if: 'letter_answer_started', scene: 'letter_answer' },
+      { if: E2END, lines: [
+        'Hollowmere. So that is the name my books kept forgetting. Say it again for me. Slowly.',
+        'Your name, written twice. I do not know what that means, {hero}. I intend to find out.',
+      ] },
+      { if: E2, lines: [
+        'The fork, then the east branch to the ford. Garrick will have it planked by now, or be furious.',
+        'Go gently, {hero}. And keep the letter dry. It is the only one I could write.',
+      ] },
+      { if: END, ifNot: E2, scene: 'ep2_mael' },
       { if: END, lines: [
         'Every name is back in the Register but one. I check it every morning now, before my tea.',
         'I will find out why, {hero}. You have my word, and an old man\'s word is all he has left to spend.',
@@ -59,6 +78,24 @@ export const NPCS = {
     spot: 'South square, by the notice board near the gate', move: 'wander', radius: 2,
     about: 'Willowmere\'s courier, quick and proud of her job. Her father, the old courier, vanished north years ago.',
     talk: [
+      // Episode 2: The Last Route (start, and the satchel delivery)
+      { if: 'satchel_found', ifNot: 'last_route_done', scene: 'tess_last_route' },
+      { if: END, ifNot: 'last_route_started', scene: 'tess_last_route' },
+      // The letters quest opens once the party is whole (bram_joined). Before that Tess only hints.
+      { if: B, ifNot: 'tess_quest_started', scene: 'tess_letters' },
+      { if: 'tess_letter_1_found', ifNot: 'tess_letter_1_delivered', scene: 'tess_letters' },
+      { if: 'tess_letter_2_found', ifNot: 'tess_letter_2_delivered', scene: 'tess_letters' },
+      { if: 'tess_letter_3_found', ifNot: 'tess_letter_3_delivered', scene: 'tess_letters' },
+      // Episode 2 lines sit below the letter scenes, so a letter still in the bag can always be delivered.
+      { if: 'last_route_done', lines: [
+        'North, by the White Road. When the snow is off it, I am going. Do not tell Mael. No. Tell Mael.',
+      ] },
+      { if: E2END, lines: [
+        'Hollowmere. My father slept there once, on his way north. I can say where now. That is a place to start.',
+      ] },
+      { if: 'last_route_started', lines: [
+        "A satchel with red post marks. If the Hollow has a lost-property shelf, it's on it. I'd bet my boots.",
+      ] },
       { if: ['tess_quest_done', DONE], lines: [
         "I still can't remember my father's name. Whatever took it, it wasn't your Archivore. That was older.",
         'But I have his letter, and his crossed sevens. That is a thread. Couriers follow threads.',
@@ -67,11 +104,6 @@ export const NPCS = {
         'Three letters home. My satchel feels lighter and heavier at the same time.',
         'Mind the boots. They know the roads better than you do. Let them lead.',
       ] },
-      // The letters quest opens once the party is whole (bram_joined). Before that Tess only hints.
-      { if: B, ifNot: 'tess_quest_started', scene: 'tess_letters' },
-      { if: 'tess_letter_1_found', ifNot: 'tess_letter_1_delivered', scene: 'tess_letters' },
-      { if: 'tess_letter_2_found', ifNot: 'tess_letter_2_delivered', scene: 'tess_letters' },
-      { if: 'tess_letter_3_found', ifNot: 'tess_letter_3_delivered', scene: 'tess_letters' },
       { if: DONE, lines: [
         "You came back! Did you see my letters down there? They'll be in the quiet places. Letters like quiet.",
       ] },
@@ -94,6 +126,12 @@ export const NPCS = {
       // The ferry bell quest opens once the party is whole (bram_joined). Before that Nella only hints.
       { if: 'ferry_bell_found', ifNot: 'nella_bell_done', scene: 'nella_bell' },
       { if: B, ifNot: 'nella_quest_started', scene: 'nella_bell' },
+      { if: E2END, lines: [
+        'A ferryman on a lake with no current at all? Tell this Tovin that is cheating. Tell him I am jealous.',
+      ] },
+      { if: E2, lines: [
+        'East, past the ford? The tributary runs out of a still lake, they say. Still water. Imagine.',
+      ] },
       { if: [DONE, 'tess_letter_2_delivered'], lines: [
         'Mother and I mended the little skiff this morning. She talks to the boards. I talk to the rope. We get on.',
         'Lark has a grandmother now. She keeps saying it, like a new word she is trying out.',
@@ -123,6 +161,12 @@ export const NPCS = {
     spot: 'The twelve flowerbeds along the river road, near the thirteenth bed', move: 'wander', radius: 2,
     about: 'Old gardener who keeps a flowerbed for every founding family. Nella\'s mother; the fading has taken that from both.',
     talk: [
+      { if: E2END, lines: [
+        'Hollowmere. A town with a lake. My Nella would like a lake. Nothing in it tries to sink her.',
+      ] },
+      { if: E2, lines: [
+        'Going east, dear? Bring me back a flower from the far side. Any flower. I keep a bed for strangers.',
+      ] },
       { if: DONE, lines: [
         'My Nella. My daughter. I said it to the lantern blossoms all morning so they would know too.',
         'My mother told me the thirteenth bed was for a bell that went away. I always kept it, in case it came back.',
@@ -147,6 +191,12 @@ export const NPCS = {
     spot: 'South gate, right-hand post (Bram stands at the left post until he joins)', move: 'stand',
     about: 'The old gate sergeant. Steady, kind, keeps his promises. Holds Garrick\'s name for Bram.',
     talk: [
+      { if: E2END, lines: [
+        'Hollowmere, is it? I walked the east road once, years back. Never could say where it went. Now I can.',
+      ] },
+      { if: E2, lines: [
+        "East, is it? Mind the mist past the ford. My old sergeant called it the road that doesn't want you.",
+      ] },
       { if: DONE, lines: [
         "Garrick, Garrick, Garrick. Said it every hour. My wife thinks I've taken up a hobby.",
         'Good to have you home, all three of you. Names and all.',
@@ -287,6 +337,14 @@ export const NPCS = {
     spot: 'By the hearth (mark hazel_start), two or more open tiles from the bed', move: 'turn',
     about: 'The hero\'s guardian. Brisk, loving, teasing; hides worry inside chores. Took the hero in as a baby.',
     talk: [
+      { if: E2END, lines: [
+        "Hollowmere. Mira's from Hollowmere. I said it to the kettle until it boiled.",
+        "Your name. Is it any brighter? No, don't answer. Eat first. Then answer.",
+      ] },
+      { if: E2, lines: [
+        'Still here? The ford will not cross itself. Well. Garrick might make it.',
+        'Write, {hero}. Letters. Tess will carry them, and I will read every one twice.',
+      ] },
       { if: END, lines: [
         'When you came to me, your name was already stitched on your blanket. Someone loved you enough to choose it.',
         'Remember that, whatever happens to the ink. Now eat.',
@@ -320,6 +378,12 @@ export const NPCS = {
     talk: [
       { if: 'starter_found', ifNot: 'starter_done', scene: 'oren_starter' },
       { if: 'intro_done', ifNot: 'starter_quest_started', scene: 'oren_starter' },
+      { if: E2END, lines: [
+        'Hollowmere! Hal says they have no baker there. No baker! I am sending them a starter. A cousin of the old one.',
+      ] },
+      { if: E2, lines: [
+        'Hal went to the ford with Garrick at dawn. I sent rolls. Two for Hal, two for whoever is with him.',
+      ] },
       { if: 'hal_returned', lines: [
         'Hal says my rolls are too sweet. Hal has been saying that for forty years. I missed it terribly.',
         'Habit is a stubborn kind of love. Write that down somewhere. Somewhere it will stay.',
@@ -342,11 +406,17 @@ export const NPCS = {
   },
 
   hal: {
-    name: 'Hal', sprite: 'npc_farmer', map: 'bakery', show: { if: DONE },
+    name: 'Hal', sprite: 'npc_farmer', map: 'bakery', show: { if: DONE, ifNot: 'garrick_at_ford' },
     spot: 'Bakery, beside the flour bin', move: 'turn',
     about: 'Oren\'s brother, the miller. Lived at the mill for a month, forgotten by everyone, including himself.',
     talk: [
       { ifNot: 'hal_returned', scene: 'hal_returns' },
+      { if: E2END, lines: [
+        "Garrick's Crossing. I carried the light end, and I am telling everyone it was the heavy end.",
+      ] },
+      { if: 'crossing_done', lines: [
+        'My back has opinions about that bridge. Did you eat the rolls? Oren will ask. Oren always asks.',
+      ] },
       { lines: [
         "I lived up at the mill for a month, setting out flour for a brother I couldn't name.",
         'Oren set out rolls for me. I set out flour for him. Neither of us knew why. We know now.',
@@ -358,10 +428,19 @@ export const NPCS = {
   // smithy
   // ----------------------------------------------------------------------------------------------
   garrick: {
-    name: 'Garrick', sprite: 'npc_smith', portrait: 'garrick', map: 'smithy',
+    name: 'Garrick', sprite: 'npc_smith', portrait: 'garrick', map: 'smithy', show: { ifNot: 'garrick_at_ford' },
     spot: 'At the anvil, beside the forge', move: 'turn', service: { type: 'shop', id: 'willowmere_smithy' },
     about: 'Bram\'s father, the smith. Few words, all of them load-bearing. "Do not rush a forge."',
     talk: [
+      { if: E2END, lines: [
+        'They say the Hollow has a glass smith. Glass. Hm.',
+        '...Ask her how she tempers it. For no reason.',
+      ] },
+      { if: 'crossing_done', lines: [
+        'Back already? Toll still applies. One word.',
+        { who: 'bram', text: 'Garrick.' },
+        'Paid.',
+      ] },
       { if: B, ifNot: ['garrick_farewell_done', DONE], scene: 'garrick_farewell' },
       { if: 'starter_quest_started', ifNot: 'starter_found', lines: [
         "Something's living by my forge. It's warm, and it's rising. I've decided not to ask.",
@@ -384,6 +463,8 @@ export const NPCS = {
     name: 'Anvil', sprite: 'animal_dog', map: 'smithy', spot: 'Smithy, lying by the door', move: 'wander', radius: 1,
     about: 'Garrick\'s old dog. Loves everyone, every time.',
     talk: [
+      { if: 'garrick_at_ford', lines: [{ who: null, text: 'Anvil lies across the smithy doorway, nose on his paws, facing the road.' }] },
+      { if: E2END, lines: [{ who: null, text: 'Anvil sniffs your boots for a long time. They smell of a lake he has never met.' }] },
       { if: DONE, lines: [{ who: null, text: 'Anvil has a new collar. It says ANVIL in very large letters. Garrick is taking no chances.' }] },
       { if: B, lines: [
         { who: null, text: 'Anvil thumps his tail at Bram so hard his whole back end wags.' },
@@ -408,6 +489,15 @@ export const NPCS = {
     spot: 'Head librarian\'s desk, facing the door', move: 'turn',
     about: 'Head of the Willowmere library and Mira\'s teacher. Dry, dignified, and frightened of forgetting.',
     talk: [
+      { if: E2END, lines: [
+        'Hollowmere. I have added it to the list, right under "Mira. Come home." She did.',
+        { who: 'mira', text: 'I did.' },
+      ] },
+      { if: END, ifNot: 'iris_farewell_done', scene: 'iris_farewell' },
+      { if: 'iris_farewell_done', lines: [
+        'Go on, before I start a second list. It would be all you.',
+        { who: 'mira', text: 'It would be alphabetical, at least.' },
+      ] },
       { if: DONE, lines: [
         'Mira. Mira. Mira. I say it every time I pass her desk. She pretends it annoys her.',
         'I crossed every line off my list of things not to forget. Then I wrote them all down again. Habit.',
@@ -444,6 +534,13 @@ export const NPCS = {
     spot: 'Under the bell ropes at the foot of the tower stair', move: 'turn',
     about: 'The bellkeeper. Counts everything. Deaf in one ear from fifty years of bells. Right about the thirteenth.',
     talk: [
+      { if: E2END, lines: [
+        'Your Sister Anwen says the same words my grandmother did? Then our grandmothers knew each other.',
+        'Or the bells did. Bells talk. I have always said so. Nobody listens. Except bells.',
+      ] },
+      { if: E2, lines: [
+        'Thirteen, the other night. Again! Nobody laughs anymore. They just bring me tea. I miss the laughing.',
+      ] },
       { if: END, lines: [
         'Twelve bells, and then thirteen. I counted. I ALWAYS count.',
         'Nobody laughed at me this time. I think I would have preferred the laughing.',
@@ -586,12 +683,288 @@ export const NPCS = {
       ] },
     ],
   },
+
+  // ==============================================================================================
+  // Episode 2. Every Hollow NPC has noReflection until nh_restored (plan 5.2): the world agent reads the
+  // `noReflection` field below. Stages: arrival (nh_arrived), the Court (court_entered), restored (nh_restored /
+  // ep2_complete, set together by the restoration chain).
+  // ==============================================================================================
+
+  // The Fading Road
+  penny_e: {
+    name: 'Penny', sprite: 'npc_shopkeeper', map: 'east_road', spot: 'The Waystation, beside her cart (mark penny_cart)',
+    move: 'stand', service: { type: 'shop', id: 'east_peddler' },
+    about: 'Penny the valley peddler, on the road now. Same person as `penny` (valley); a second record for the east road.',
+    talk: [
+      { if: E2END, lines: [
+        'Hollowmere! I have sold to that town for years and never once known where I was. Now I can send a bill.',
+      ] },
+      { if: 'nh_arrived', lines: [
+        'Back from the town with no name? Stock up. The road forgets. I do not. I keep a list.',
+      ] },
+      { lines: [
+        'Supplies for the road! Potions, ethers, and a very good tent. The directions are still free.',
+        'My brother Pell worries. I sell. And I go where the roads still go.',
+      ] },
+    ],
+  },
+
+  // The Nameless Hollow (outdoors)
+  corin: {
+    name: 'Corin', sprite: 'npc_corin', map: 'nameless_hollow', spot: 'West gate, at the post (mark gate_in side)',
+    move: 'stand', noReflection: true,
+    about: 'The gate watch. Greets everyone with "Welcome home" because the town has no other greeting. First to shout Hollowmere.',
+    talk: [
+      { if: E2END, lines: [
+        'Welcome to Hollowmere! I say it to everyone now. Twice to the ducks.',
+        'A year I can name. This one. I am going to stand this watch until it is a very old year.',
+      ] },
+      { if: 'court_entered', lines: [
+        'I have stood this watch for a year I cannot name. Today I watched a boat go to the Court. First time.',
+      ] },
+      { if: 'met_elian', lines: [
+        'Welcome home. Still the only greeting we have. It is a good one, I think. I am keeping it either way.',
+      ] },
+      { if: 'nh_arrived', lines: [
+        'The mayor is at the fountain most evenings. It is always evening here. So: the fountain.',
+      ] },
+      { lines: ['Welcome... home. Welcome home.'] },
+    ],
+  },
+
+  nico: {
+    name: 'Nico', sprite: 'npc_nico', map: 'nameless_hollow', spot: 'Inside the west gate, by the gate sign (mark nico_spot)',
+    move: 'wander', radius: 3, noReflection: true,
+    about: 'Errand boy, eight or so, chalk on his hands. Draws a crown on every blank sign. Nico\'s Crowns.',
+    talk: [
+      { if: 'paper_crown_found', ifNot: 'nico_crowns_done', scene: 'nico_crowns' },
+      { if: 'court_entered', ifNot: 'nico_crowns_started', scene: 'nico_crowns' },
+      { if: E2END, lines: [
+        'My crowns are on real signs now! HOLLOWMERE, with a crown on the O. That one is mine.',
+        'Ma says festival day comes back this year. I am making two hundred crowns. I have made four.',
+      ] },
+      { if: 'nico_crowns_done', lines: [
+        'I am drawing a better crown than the king\'s. Mine has eleven points. His only had five.',
+      ] },
+      { if: 'nico_crowns_started', lines: [
+        'A paper crown. Gold paint. If you see one, it is the most important thing in the world. Probably.',
+      ] },
+      { lines: [
+        'I drew a crown on every blank sign. The grownups hated it.',
+        'Then they stopped hating it. Now they just sigh. Sighing is better.',
+      ] },
+    ],
+  },
+
+  sava: {
+    name: 'Sava', sprite: 'npc_sava', map: 'nameless_hollow', spot: 'Loom bench on the porch of the Signless Inn',
+    move: 'turn', noReflection: true,
+    about: 'The weaver. Embroiders coats with an empty space where the name should go. First to see the party\'s faces.',
+    talk: [
+      { if: E2END, lines: [
+        'I am stitching names into every coat in town. Fifteen years of empty name-spaces. My fingers are sore and happy.',
+      ] },
+      { if: 'court_entered', lines: [
+        'You went to the Court and came back with your faces. I keep checking the fountain to make sure.',
+      ] },
+      { if: 'met_elian', lines: [
+        'Your faces in the water! I had forgotten what a nose looks like upside down.',
+        'We leave the name-space empty in every embroidered coat. It feels rude to guess.',
+      ] },
+      { lines: ['We leave the name-space empty in every embroidered coat. It feels rude to guess.'] },
+    ],
+  },
+
+  lena: {
+    name: 'Lena', sprite: 'npc_lena', portrait: 'lena', map: 'nameless_hollow',
+    spot: 'At the clocktower door, north-east of the square (mark clocktower)', move: 'turn', noReflection: true,
+    about: 'The watchmaker. Spectacles, an apron of tiny tools. Precise and wry. Fountain witness.',
+    talk: [
+      { if: 'fountain_started', ifNot: 'testimony_lena', scene: 'lena_testimony' },
+      { if: E2END, lines: [
+        'The tower runs four minutes fast. I have decided to leave it. We are owed some time.',
+        'Ten past four, it said, the moment the hands came back. I wrote it down. I am framing it.',
+      ] },
+      { if: 'court_entered', lines: [
+        'Every clock in my shop struck midnight when your boat reached the Court. At teatime. I took it as a good sign.',
+      ] },
+      { if: 'nh_arrived', lines: [
+        'Our clocks strike at midnight, but the tower has no hands. Fifteen years of midnights. You get used to it.',
+        'No. You do not. I lied. Mind the step.',
+      ] },
+      { lines: ['Our clocks strike at midnight, but the tower has no hands.'] },
+    ],
+  },
+
+  tovin: {
+    name: 'Tovin', sprite: 'npc_tovin', portrait: 'tovin', map: 'nameless_hollow',
+    spot: 'Mending a net on his pier, north shore (mark tovin_spot)', move: 'stand', noReflection: true,
+    about: 'The ferryman, the only boat on the mere. Gruff, softer than he sounds. Rowed child Mira to the Court. Fountain witness.',
+    talk: [
+      { if: 'met_anwen', ifNot: 'court_ferry_open', scene: 'tovin_ferry' },
+      { if: E2END, lines: [
+        'I row people to the Court now. For visits. Visits. Fifteen years I would not go near it.',
+        'Elian asks me to tell the day I pulled him out of the mere. I tell it shorter every time. He tells it longer.',
+      ] },
+      { if: 'court_ferry_open', lines: [
+        'Boat is ready. Ring the post at the end of the pier, and I am at the oars.',
+        'The Court keeps what it takes. So you go and take it back. That is the plan? Good plan.',
+      ] },
+      { if: 'heard_crisis', lines: ['No. Not to the Court. I do not care who sent you.'] },
+      { lines: [
+        'Nobody rows to the Court. The Court keeps what it takes.',
+        'Mending a net. Nets I can fix. Go on.',
+      ] },
+    ],
+  },
+
+  orla: {
+    name: 'Orla', sprite: 'npc_orla', map: 'nameless_hollow', spot: 'At the rune shrine beside the pier',
+    move: 'stand', noReflection: true,
+    about: 'Old, Keeper-born, tends the shrine at the ferry landing. Starts the Fountain quest; hints at the portraits.',
+    talk: [
+      { if: 'court_ferry_open', ifNot: 'fountain_started', scene: 'orla_fountain' },
+      { if: E2END, lines: [
+        'The Keepers built that Court to keep faces, not people. Somebody forgot the difference. Now we remember it.',
+      ] },
+      { if: 'court_entered', lines: [
+        'There are three portraits in the Court, but the middle frame is empty. Look at all three. They like to be looked at.',
+        'And the fountain listens when all three witnesses have spoken. Old Orla says so. Old Orla is usually right.',
+      ] },
+      { if: 'fountain_started', lines: [
+        'The fountain listens when all three witnesses have spoken. The Watchmaker. The Ferryman. The Sister.',
+      ] },
+      { lines: [
+        'Keeper-born, me. My grandmother tended this shrine, and hers before her. None of us could ever say for whom.',
+      ] },
+    ],
+  },
+
+  aurel: {
+    name: 'Aurel', sprite: 'npc_aurel', portrait: 'aurel', map: 'nameless_hollow', show: { if: NHR },
+    spot: 'Beside the Fountain of Faces, on a bench (mark restored_aurel)', move: 'turn',
+    about: 'The Nameless King, unmasked: a tired, grey-bearded man who looks like Elian grown old. Has a reflection.',
+    talk: [
+      { if: 'letter_answer_done', lines: [
+        'Mael wrote HOLLOWMERE in his Register? Then it is in two books. Three, with the page you carry.',
+        'There was a list, {hero}. Someone in the First Library writes them. When you go looking, go carefully.',
+      ] },
+      { lines: [
+        'Aurel. Elian says it to me every morning, the way you would wind a clock. I let him. I like the sound.',
+        'There was a list, {hero}. Someone in the First Library writes them. When you go looking, go carefully.',
+      ] },
+    ],
+  },
+
+  // The Nameless Hollow (interiors)
+  elian: {
+    name: 'Elian', sprite: 'npc_elian', portrait: 'elian', map: 'nh_hall', show: { if: 'met_elian' },
+    spot: "Behind the mayor's desk with the ledger (mark elian_desk)", move: 'turn', noReflection: true,
+    about: 'Mayor, about twenty, coat far too big, ledger under his arm. Raised by Anwen. Hidden: Aurel\'s son, the boy Mira promised to come back for.',
+    talk: [
+      { if: NHR, ifNot: 'letter_answer_started', scene: 'elian_letter' },
+      { if: E2END, lines: [
+        'Father sits in the hall every morning and lets me read him the ledger. He says he likes the names.',
+        'I think he likes being in it. I wrote him in first. Aurel, at the top, in my best hand.',
+      ] },
+      { if: 'court_entered', lines: [
+        'Tovin rowed you over. Tovin. He has not taken that boat to the Court in fifteen years.',
+        'Whatever is over there, be careful. And come back. People here are very good at waiting.',
+      ] },
+      { if: 'heard_crisis', lines: [
+        'Sister Anwen is at the chapel, south-east of the square. Tell her the mayor sent you. She will pretend to be impressed.',
+      ] },
+      { lines: ['Visitors. Sit, please. I will be with you once I have written down that you are here.'] },
+    ],
+  },
+
+  anwen: {
+    name: 'Sister Anwen', sprite: 'npc_anwen', portrait: 'anwen', map: 'nh_chapel',
+    spot: 'At the register lectern among the candles (mark anwen_spot)', move: 'turn', noReflection: true,
+    about: 'Keeper of the chapel register and forty-one candles. Raised the town\'s foundlings, Elian among them. Fountain witness.',
+    talk: [
+      { if: 'fountain_started', ifNot: 'testimony_anwen', scene: 'anwen_testimony' },
+      { if: E2END, lines: [
+        'AUREL. I read it every morning now, before the candles. Forty-one candles, and one name.',
+        'Elian brings his father to evensong. Aurel sings badly and with great conviction. I adore him for it.',
+      ] },
+      { if: 'court_entered', lines: [
+        'You crossed the mere. I lit a candle for each of you. That makes forty-four. Mira will want to count them.',
+      ] },
+      { if: 'met_anwen', lines: [
+        'A name is a promise, not a title. Whoever was written on that white line, someone promised them.',
+        'Tovin is at the pier. He will say no. Ask again.',
+      ] },
+      { lines: ['Welcome, travelers. The mayor will want to see you before I do. He likes to be first. It is the coat.'] },
+    ],
+  },
+
+  wren: {
+    name: 'Wren', sprite: 'npc_wren', map: 'nh_inn', spot: 'Behind the inn counter', move: 'stand',
+    service: { type: 'inn', price: 40 }, noReflection: true,
+    about: 'Innkeeper of the Signless Inn. Cheerful. Keeps the lost-property shelf (The Last Route).',
+    talk: [
+      { if: E2END, lines: [
+        'Signless Inn. I am keeping the name. It has grown on me, and the sign painter is booked for a year.',
+      ] },
+      { if: 'court_entered', lines: [
+        'Back from the Court in one piece? Three pieces. Your pieces. You know what I mean. Bed?',
+      ] },
+      { lines: [
+        'Welcome! We have no sign, so I call it the Signless Inn. Forty gold a night. Beds that remember you.',
+        'Lost something? Everyone has. The shelf in the corner is full of it.',
+      ] },
+    ],
+  },
+
+  fitch: {
+    name: 'Fitch', sprite: 'npc_fitch', map: 'nh_shop', spot: 'Behind the counter of the Hollow Provisioner',
+    move: 'turn', service: { type: 'shop', id: 'hollow_items' }, noReflection: true,
+    about: 'Runs the Hollow Provisioner. Talks to his stock so it remembers what it is. Pell\'s eastern cousin in spirit.',
+    talk: [
+      { if: E2END, lines: [
+        'I still talk to my stock. Habit. But now it answers to its names. You are salve. Yes you are.',
+      ] },
+      { if: 'court_entered', lines: [
+        'You are salve. You are rope. You are... Silver Salve, new in. For glass, they say. Cures being kept.',
+      ] },
+      { lines: [
+        'You are salve. You are rope. You are a lamp. Sorry. I talk to the stock so it remembers what it is.',
+        'Buying? Please buy. Then I only have to remember the rest.',
+      ] },
+    ],
+  },
+
+  vessa: {
+    name: 'Vessa', sprite: 'npc_vessa', map: 'nh_smithy', spot: 'At the glass furnace', move: 'turn',
+    service: { type: 'shop', id: 'hollow_smithy' }, noReflection: true,
+    about: 'Glassblower and smith of the Silverglass Smithy. Blunt, burn scars, goggles up. Seeds Emberpeak.',
+    talk: [
+      { if: E2END, lines: [
+        'Emberpeak sand made the best silverglass. Made. Nobody has had a cart down from the mountain since summer.',
+        'Mind how you go up there. Glass remembers heat. So do mountains.',
+      ] },
+      { if: 'court_f2_done', lines: [
+        'Glass that remembers. Finally I can work it again. Look at this edge. It holds like a grudge.',
+      ] },
+      { if: 'court_entered', lines: [
+        'Sometimes the glass reflects a place before I enter it. Today it showed me the Court. So. You went.',
+      ] },
+      { lines: [
+        'Sometimes the glass reflects a place before I enter it. Glass and steel here. Mostly steel. The glass sulks.',
+        'Buying or staring? Both are fine. Staring is free.',
+      ] },
+    ],
+  },
 };
 
 // Display names for scene speakers that are not NPC records (map-placed actors and party members).
 export const SPEAKER_NAMES = {
   hero: '{hero}', mira: 'Mira', bram: 'Bram',
   echo_warden: 'Echo Warden', archivore: 'The Archivore', whisperwood_alpha: 'Briar Alpha',
+  // Episode 2: map actors and the vow-mirror memory voices (speakers with no actor)
+  nameless_king: 'The Nameless King', tovin_c: 'Tovin', elian_t: 'Elian', aurel_t: 'Aurel',
+  king_memory: 'The King', boy_memory: 'Small Boy', tovin_memory: 'Tovin',
 };
 
 /** Display name for any speaker id used in scenes or talk. */

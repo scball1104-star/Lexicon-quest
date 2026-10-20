@@ -603,3 +603,28 @@ Chapter II lines; the Signless Inn, the Hollow Provisioner and the Silverglass S
 `hollow_found` and `hollow_cleared` and the encounter ids `hollow_*`. Episode 2 never uses a bare `hollow_` prefix
 for new ids or flags: the town is `nameless_hollow` (`nh_*`), the dungeon `court_*`. Player-facing text says
 "the Nameless Hollow" or "the Hollow" in Episode 2 context and "Whisperwood Hollow" in full for the old dungeon.
+
+---
+
+## 9. Build notes (E2-story, wave 10a)
+
+The script is built: `src/data/story/ep2.js` (48 scenes, 60 inspect lines), Episode 2 NPCs and Willowmere lines in
+`npcs.js`, flags, the main quest, five side quests and banter in `quests.js`, bestiary, banners, books, barks and
+`CREDITS_EP2` in `text.js`, staging in `STAGING_EP2.md`, tests in `qa/content/ep2.test.mjs`. Where the build
+differs from the beat sheet above, and why:
+
+- **Act I morning.** Mira and Bram are party followers after Episode 1, so they are in Hazel's house, not at the
+  well: Hazel says Mira has been "at my table", and both get a line. Hazel's count and the choice are as written.
+- **Nico's Crowns.** Nico is eight, so he cannot remember a festival fifteen years old: he knows it from his
+  mother's stories, and asks the hero to keep the King's crown because "he should know somebody kept it safe".
+- **Aurel's name on screen.** In `king_after` the unmasked King speaks as "The King" until Elian says "Aurel";
+  under the name flash the actor is swapped so the speaker tag reads Aurel from then on.
+- **Small added scenes.** `court_f1_stairs` and `court_f2_stairs` (the stairs triggers that set the floor flags),
+  `orla_fountain`, `lena_testimony`, `anwen_testimony` (the Fountain quest's start and witnesses), `elian_letter`
+  (Elian writes the reply), and the portraits as one scene each. Elian's hall trigger waits for `met_elian`; until
+  then his desk holds a note: "At the fountain. Back soon. E."
+- **Added flags.** `garrick_at_ford` (hides Garrick and Hal between Mael's errand and the crossing; the smithy door
+  carries the GONE TO THE FORD note as its own sign), `iris_farewell_done`, `saw_old_milestone`, the receptor
+  scenes' `silverglass_lock_seen` and `vow_*_seen`, and `portraits_started`.
+- **The Three Portraits** is a journal side quest (giver Orla) that completes when the cache appears.
+- **Not yet paid:** the Fountain's canon 90 gold (the cutscene API has no gold give; proposal in STAGING_EP2.md 6).

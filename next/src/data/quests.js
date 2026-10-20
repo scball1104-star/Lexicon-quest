@@ -1,4 +1,4 @@
-// Episode 1 quests: every story flag, the main quest with journal text, Chrono Trigger style party chat
+// Episode 1 and Episode 2 quests: every story flag, the main quest with journal text, Chrono Trigger style party chat
 // ("Talk" in the field menu: a companion says, in character, what to do next), side quests and rewards.
 // Pure data + pure helpers. No DOM, no engine.
 //
@@ -78,6 +78,88 @@ export const FLAGS = {
   briar_alpha_defeated: 'The Briar Alpha is beaten (encounter flag; hollow_after also sets it). Its map actor is gone.',
   hollow_cleared: "The pilgrims' stone gave back three names; the lost bridge story is resolved (hollow_after).",
 };
+
+// ------------------------------------------------------------------------------------------------
+// Episode 2 flags (EPISODE2_PLAN 2.2, plus the scene-local ones the script needs). Merged into FLAGS below.
+// Prefixes: town nh_, dungeon court_, never a bare hollow_ (Whisperwood Hollow owns those).
+// ------------------------------------------------------------------------------------------------
+export const EP2_FLAGS = {
+  // Main story
+  ep2_started: 'Mael gave the letter for the Hollow; Episode 2 is underway (ep2_mael).',
+  crossing_done: "Garrick's Crossing played at the ford; the east road is open (garrick_crossing).",
+  east_road_arrived: 'First arrival on the Fading Road (east_road_arrival).',
+  east_first_fight_done: 'The Mist Wolf and Glassback teaching fight was won (east_first_fight).',
+  nh_arrived: 'First arrival in the Nameless Hollow (nh_arrival).',
+  met_elian: 'Met Mayor Elian at the Fountain of Faces (fountain_faces). Elian appears in his hall.',
+  heard_crisis: "Elian told the Hollow's story and took Mael's letter (elian_hall).",
+  met_anwen: 'Sister Anwen showed the white line in the register (anwen_register).',
+  court_ferry_open: 'Tovin agreed to row to the Court (tovin_ferry). The ferry_court event is rideable.',
+  court_entered: 'First arrival at the Court of Mirrors by ferry (court_crossing).',
+  court_f1_done: 'Took the stairs down from the Silverglass Antechamber (court_f1_stairs).',
+  vex_met: 'Vex Quill appeared in the great mirror on F2 (vex_mirror).',
+  other_selves_defeated: 'The Other Selves are beaten (encounter flag; other_selves also sets it). The great mirror is a stair.',
+  court_f2_done: 'Took the mirror stair down from the Hall of Other Selves (court_f2_stairs).',
+  vow_door_open: 'All three vows lit; the vow door opened; Mira remembered (vow_door).',
+  nameless_king_defeated: 'The Nameless King is beaten (encounter flag; king_after also sets it).',
+  aurel_named: "Elian said his father's name; Aurel is himself again (king_after). The throne mirror leads home.",
+  nh_restored: 'The town is Hollowmere again: signs lettered, faces in the water, dusk lifted (hollowmere_restored).',
+  ep2_complete: 'The Episode 2 ending played (ep2_ending). Roll CREDITS_EP2, then wake at nh_inn inn_bed.',
+
+  // Story beats and world state
+  ep2_morning_done: "Hazel's Episode 2 morning scene played (ep2_morning).",
+  garrick_at_ford: 'Garrick (and Hal) are at the ford: set by ep2_mael, cleared by garrick_crossing. Hides them in town.',
+  iris_farewell_done: 'Iris showed Mira her list (iris_farewell).',
+  saw_old_milestone: 'Mira raised the Lantern at the old milestone (old_milestone).',
+  saw_cairns: 'The mist and the cairns were introduced (fading_stretch).',
+  fog_looped: 'The party wandered off the cairns once and came back round (fog_loop).',
+  waystation_rested: 'The party sat at the Waystation fire once (waystation_rest).',
+  saw_court: 'Saw the mere and the Court from the rise (mere_view).',
+  court_f1_arrived: 'Court F1 antechamber scene played (court_f1_arrival).',
+  court_f2_arrived: 'Court F2 arrival scene played (court_f2_arrival).',
+  court_f3_arrived: 'Court F3 arrival scene played (court_f3_arrival). Opens the F3 mirror shortcut.',
+  silverglass_lock_lit: 'Latch flag of receptor rec_lock (map); silverglass_lock also sets it. Opens gate_lock.',
+  silverglass_lock_seen: 'The beam pan for the Silverglass Lock played once (silverglass_lock).',
+  mira_memory_1: "Mira's first memory, the child in the window (mira_memory_1).",
+  mira_memory_2: "Mira's second memory, the forgotten promise (mira_memory_2).",
+  mira_memory_3: "Mira's third memory, what she finally remembers (vow_door).",
+  vow_belonging: 'Latch flag of receptor rec_belonging (map); vow_belonging also sets it.',
+  vow_mercy: 'Latch flag of receptor rec_mercy (map); vow_mercy also sets it.',
+  vow_courage: 'Latch flag of receptor rec_courage (map); vow_courage also sets it.',
+  vow_belonging_seen: 'The Belonging vow memory played (vow_belonging).',
+  vow_mercy_seen: 'The Mercy vow memory played (vow_mercy).',
+  vow_courage_seen: 'The Courage vow memory played (vow_courage).',
+  portraits_started: 'Looked at a first Court portrait; The Three Portraits enters the journal.',
+  portrait_child_seen: 'Looked at A Child at the River (portrait_child).',
+  portrait_keeper_seen: 'Looked at A Keeper in the Court (portrait_keeper).',
+  portrait_king_seen: 'Looked at A King Without a Crown (portrait_king).',
+  remembrance_open: 'All three portraits seen; the Remembrance Cache chest appears on F2.',
+  mirror_sigil_get: 'Aurel gave the Mirror Sigil (king_after). Keeper mirror doors open.',
+  black_feather_found: 'Picked up the black feather in the throne antechamber (black_feather).',
+  glass_key_f1: 'Set by the F1 chest that holds a glass_key (map chest flag). Talk points at the glass door.',
+  glass_key_f2: 'Set by the F2 chest that holds a glass_key (map chest flag). Talk points at the glass door.',
+
+  // Side quest: The Fountain of Faces (Orla)
+  fountain_started: 'Orla told the party about the three witnesses (orla_fountain).',
+  testimony_lena: "Heard Lena's testimony (lena_testimony).",
+  testimony_tovin: "Heard Tovin's testimony (set by tovin_ferry).",
+  testimony_anwen: "Heard Anwen's testimony (anwen_testimony).",
+  fountain_done: 'The fountain listened and gave its offerings (fountain_check). +25 Fury when the King fight starts.',
+
+  // Side quest: The Last Route (Tess)
+  last_route_started: "Tess asked after her father's satchel (tess_last_route), or the party found it first.",
+  satchel_found: "Took the courier's satchel from the Signless Inn's lost-property shelf (satchel_found).",
+  last_route_done: "Gave Tess the satchel; she gave the Courier's Knot (tess_last_route).",
+
+  // Side quest: A Letter Answered (Elian, Mael)
+  letter_answer_started: 'Elian wrote his reply to Mael (elian_letter).',
+  letter_answer_done: 'Mael wrote HOLLOWMERE in the Willowmere Register (letter_answer).',
+
+  // Side quest: Nico's Crowns
+  nico_crowns_started: 'Nico told the party about his dream of a paper crown (nico_crowns).',
+  paper_crown_found: 'Set by the F3 Belonging chest that holds the Paper Crown (map chest flag).',
+  nico_crowns_done: 'Showed Nico the crown; he insisted the hero keep it (nico_crowns).',
+};
+Object.assign(FLAGS, EP2_FLAGS);
 
 export const FLAG_IDS = Object.keys(FLAGS);
 
@@ -471,11 +553,347 @@ export const BANTER = {
   ],
 };
 
+
+// ================================================================================================
+// Episode 2: rewards, the main quest, side quests and banter. The Episode 2 quest takes over the journal and
+// Talk once ep1_complete is set (mainQuestFor). Talk always names the next step, in Mira's or Bram's voice.
+// ================================================================================================
+export const REWARDS_EP2 = {
+  hazel: { item: 'hi_potion', qty: 2, why: "Hazel's two Hi-Potions (ep2_morning)" },
+  fountain: { item: 'merewarden_mantle', qty: 1, gold: 90,
+    why: 'The Fountain of Faces (set piece). The canon 90 gold needs a gold give in the cutscene API (not there yet).' },
+  fountain_extra: { item: 'hi_ether', qty: 2, why: 'The Fountain of Faces' },
+  last_route: { item: 'courier_knot', qty: 1, why: 'The Last Route (Tess)' },
+  letter: { item: 'phoenix_feather', qty: 2, why: 'A Letter Answered (Mael)' },
+  nico: { item: 'paper_crown', qty: 1, why: "Nico's Crowns (found in the F3 Belonging chest; Nico says keep it)" },
+  portraits: { item: 'ether', qty: 2, why: 'The Three Portraits (the Remembrance Cache chest: 140 gold, 2 Ethers, book court_ledger)' },
+  kept_promise: { item: 'kept_promise', qty: 1, why: 'Elian gives Mira his bow (king_after)' },
+};
+
+const NH_MAPS = ['nameless_hollow', 'nh_hall', 'nh_chapel', 'nh_inn', 'nh_shop', 'nh_smithy'];
+const COURT_MAPS = ['court_f1', 'court_f2', 'court_f3', 'court_throne'];
+const VOWS = ['vow_belonging', 'vow_mercy', 'vow_courage'];
+const m = (text) => ({ who: 'mira', text });
+const b = (text) => ({ who: 'bram', text });
+
+export const MAIN_QUEST_EP2 = {
+  id: 'main_ep2',
+  title: 'The Town Without a Name',
+  steps: [
+    {
+      id: 'road_east', title: 'The Road East', done: 'crossing_done',
+      journal: 'Mael has written a letter to the town east of the river. Take it across the valley, by the east branch.',
+      chat: [
+        { map: 'hero_home', ifNot: 'ep2_started', lines: [
+          m('Mael is at the well in Lantern Square. Out the door and down the lane.'),
+          b("I'll carry your pack. I packed it, so I know what's in it."),
+        ] },
+        { map: TOWN_MAPS, ifNot: 'ep2_started', lines: [m('Mael wants us at the well in Lantern Square first. He has something for us.')] },
+        { ifNot: 'ep2_started', lines: [m('Mael wanted us at the well in Willowmere before we go anywhere.')] },
+        { map: TOWN_MAPS, lines: [
+          b('South gate, then the valley. At the fork, the east branch, down to the ford. My father is there.'),
+          m('Say goodbye to anyone you would miss. Iris made me a list.'),
+        ] },
+        { map: 'valley', lines: [
+          b('The east branch at the fork, along the tributary. The ford is where the road washed out.'),
+          m('Listen for hammering. Garrick does not do anything quietly.'),
+        ] },
+        { lines: [b('The ford on the tributary, east of the valley fork. My father went ahead.')] },
+      ],
+    },
+    {
+      id: 'fading_road', title: 'The Fading Road', done: 'nh_arrived',
+      journal: 'Follow the Fading Road upstream along the river. Where the mist hides the road, keep to the cairns.',
+      chat: [
+        { map: 'valley', lines: [
+          b("Over Garrick's Crossing, then east along the bank. Say his name when you cross."),
+          m('It is a rule now. It is carved into a rail.'),
+        ] },
+        { map: 'east_road', ifNot: 'saw_cairns', lines: [m('Upstream, east. The road thins out, but the river does not. Follow the water.')] },
+        { map: 'east_road', ifNot: 'saw_court', lines: [
+          m('Keep to the cairns. Each stack is in sight of the last one. Lose them and the mist walks us back.'),
+          b('And past the mist, somebody keeps a fire. I can smell the kettle.'),
+        ] },
+        { map: 'east_road', lines: [m('The town by the mere. East, along the shore. The road ends at its gate.')] },
+        { lines: [m('East, along the river, to wherever this road still remembers.')] },
+      ],
+    },
+    {
+      id: 'nameless_hollow', title: 'The Nameless Hollow', done: 'court_ferry_open',
+      journal: 'A town with no name and no reflections. Hear Mayor Elian, then Sister Anwen, then find a boat.',
+      chat: [
+        { ifNot: 'met_elian', map: NH_MAPS, lines: [m('Corin said the mayor would be at the fountain, in the middle of the square.')] },
+        { ifNot: 'met_elian', lines: [m('The town by the mere. Its mayor is the one to find.')] },
+        { ifNot: 'heard_crisis', map: 'nameless_hollow', lines: [
+          m('Elian said the hall. The big blank door on the north side of the square.'),
+          b("He said sitting down. I'm in favor of sitting down."),
+        ] },
+        { ifNot: 'heard_crisis', lines: [m('Elian is waiting at his hall, on the north side of the square.')] },
+        { ifNot: 'met_anwen', lines: [
+          m('Sister Anwen, at the chapel. South-east corner of the square, under the empty bell frame.'),
+          b("She heard the bell. She'll want to talk about the bell."),
+        ] },
+        { lines: [
+          m('Tovin, at the pier on the north shore. He rows the only boat on the mere.'),
+          b("Anwen said he'd say no. So we ask twice."),
+        ] },
+      ],
+    },
+    {
+      id: 'court_f1', title: 'The Silverglass Antechamber', done: 'court_f1_done',
+      journal: 'Across the mere stands the Court of Mirrors. Follow the moonlight through the antechamber and find the way down.',
+      chat: [
+        { map: NH_MAPS, lines: [b("Tovin's boat is at the pier. Ring the post at the end, and he rows us across.")] },
+        { map: 'court_f1', if: 'silverglass_lock_lit', lines: [m('The crystal by the stairs is lit and the gate is open. Down we go.')] },
+        { map: 'court_f1', if: 'glass_key_f1', lines: [
+          m('We have the glass key. The locked door is off the west side of the antechamber, where the light first pointed.'),
+          m('Behind it is a moon window. Carry its light with the lenses, all the way to the crystal by the stairs.'),
+        ] },
+        { map: 'court_f1', lines: [
+          m('That mirror in the antechamber turns. Turn it until the light finds the crystal in the east wall.'),
+          b("The glass door in the west wing is locked. Keys are never next to their locks. I'd look east."),
+        ] },
+        { lines: [m('The Court of Mirrors, across the mere. Tovin will row us whenever we ask.')] },
+      ],
+    },
+    {
+      id: 'court_f2', title: 'The Hall of Other Selves', done: 'court_f2_done',
+      journal: 'On the second floor, light makes bridges. Cross the Well of Reflections and find what waits in the west wing.',
+      chat: [
+        { map: 'court_f1', lines: [b('We found the stairs already. North end of the stairs hall, then down.')] },
+        { map: 'court_f2', if: 'other_selves_defeated', lines: [b('The great mirror in the arena is a stair now. Down.')] },
+        { map: 'court_f2', if: 'glass_key_f2', lines: [
+          m('We have the key. The locked glass door is at the west end of the south gallery.'),
+          b('And past it, a font. Then whatever is making that big mirror hum.'),
+        ] },
+        { map: 'court_f2', lines: [
+          m('Turn the mirror in the north gallery. A lit glass rail holds our weight.'),
+          m('One beam, two bridges. The island sits in the middle of the Well. The way on is south from there.'),
+        ] },
+        { lines: [m('The Hall of Other Selves, on the second floor of the Court. The bridges there are made of light.')] },
+      ],
+    },
+    {
+      id: 'court_f3', title: 'The Unnamed Throne', done: 'vow_door_open',
+      journal: 'Three wings, three vows, one door. Light the vow mirror in each wing of the Unnamed Throne.',
+      chat: [
+        { map: 'court_f2', lines: [b('The mirror stair in the arena goes down to the third floor.')] },
+        { map: 'court_f3', if: VOWS, lines: [m('All three vows are lit. The vow door is open, north of the hall.')] },
+        { map: 'court_f3', if: ['vow_belonging', 'vow_mercy'], lines: [
+          b("Two lit. The south wing is left. That heavy mirror sits off the line. I'll shove it onto its socket."),
+        ] },
+        { map: 'court_f3', if: ['vow_belonging', 'vow_courage'], lines: [
+          m('Two lit. The east wing is left: light bridges over the drop. If we fall, the ledge climbs back.'),
+        ] },
+        { map: 'court_f3', if: ['vow_mercy', 'vow_courage'], lines: [
+          m('Two lit. The west wing is left, the dark one. The beam is the only light there. Follow it.'),
+        ] },
+        { map: 'court_f3', lines: [
+          m('Three wings: west, east and south. Each has a vow mirror. Light all three and the door opens.'),
+          b("The south one has a mirror too heavy to turn where it stands. That one's mine to shove."),
+        ] },
+        { lines: [m('The Unnamed Throne, the Court\'s third floor. Three vows, three wings, one door.')] },
+      ],
+    },
+    {
+      id: 'king', title: "The King's Mirror", done: 'nameless_king_defeated',
+      journal: 'Behind the vow door lies the throne room. Someone there is keeping the whole town in a mirror.',
+      chat: [
+        { map: ['court_f3', 'court_throne'], lines: [
+          m('When his mirror turns to one of us, that one defends, or Bram guards them. Break him and the glass cracks.'),
+          b('And if he seals one of us in glass: Recall, or a Silver Salve. Fitch sells them.'),
+        ] },
+        { lines: [m('The throne room, behind the vow door on the third floor. Drink at the font before we knock.')] },
+      ],
+    },
+    {
+      id: 'hollowmere', title: 'Hollowmere', done: 'nh_restored',
+      journal: 'The King has his name back. Go through the great mirror. The town should see you come home.',
+      chat: [
+        { map: 'court_throne', lines: [m('Through the great mirror. Aurel said the town should see us come home.')] },
+        { lines: [b('Back to the town. The great mirror in the throne room goes straight to the square.')] },
+      ],
+    },
+    {
+      id: 'epilogue2', title: 'Toward Emberpeak', done: null,
+      journal: 'Hollowmere has its name. Yours is in the Book twice. Far to the north-east, Emberpeak is burning.',
+      chat: [
+        { map: NH_MAPS, lines: [
+          b("Emberpeak is north-east, past the mountains. When you're ready, {hero}. Not before."),
+          m('The mirror in the chapel opens onto Willowmere now. Mael will want to hear all of it.'),
+        ] },
+        { lines: [
+          m('Hollowmere has its name. Yours is in the Book twice. I want to know why.'),
+          b("And Emberpeak is burning. That's my mountain. When we're ready, we go."),
+        ] },
+      ],
+    },
+  ],
+};
+
+export const SIDE_QUESTS_EP2 = [
+  {
+    id: 'fountain', title: 'The Fountain of Faces', giver: 'orla', start: 'fountain_started', done: 'fountain_done',
+    reward: REWARDS_EP2.fountain.item,
+    counter: { label: 'Witnesses heard', flags: ['testimony_lena', 'testimony_tovin', 'testimony_anwen'] },
+    steps: [
+      {
+        id: 'witnesses', done: ['testimony_lena', 'testimony_tovin', 'testimony_anwen'],
+        journal: 'The fountain listens when three witnesses have spoken: Lena the watchmaker, Tovin, and Sister Anwen.',
+        chat: [
+          { ifNot: 'testimony_lena', lines: [m('Lena is a witness. Her door is under the clocktower, north-east of the square.')] },
+          { lines: [m('Sister Anwen is the last witness. The chapel, south-east of the square.')] },
+        ],
+      },
+      {
+        id: 'fountain', done: 'fountain_done',
+        journal: 'All three witnesses have spoken. Look into the Fountain of Faces.',
+        chat: [{ lines: [m('All three witnesses have spoken. The fountain should listen to us now.')] }],
+      },
+    ],
+  },
+  {
+    id: 'last_route', title: 'The Last Route', giver: 'tess', start: 'last_route_started', done: 'last_route_done',
+    reward: REWARDS_EP2.last_route.item,
+    steps: [
+      {
+        id: 'find', done: 'satchel_found',
+        journal: "Tess's father carried the east post, and his route book never came home. Look for a lost-property shelf.",
+        chat: [
+          { map: NH_MAPS, lines: [b('An inn always has a lost-property shelf. The Signless Inn, west side of the square.')] },
+          { lines: [m("Tess's father's satchel. If the Hollow has a lost-property shelf, it is there.")] },
+        ],
+      },
+      {
+        id: 'deliver', done: 'last_route_done',
+        journal: "You found the courier's satchel. Take it home to Tess, at the south square in Willowmere.",
+        chat: [
+          { if: 'mirror_sigil_get', lines: [m('The chapel mirror goes straight to Willowmere now. Tess is at the south square.')] },
+          { lines: [b("Tess's satchel. She is at the south square in Willowmere. A long walk. Worth it.")] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'letter_answer', title: 'A Letter Answered', giver: 'elian', start: 'letter_answer_started', done: 'letter_answer_done',
+    reward: REWARDS_EP2.letter.item,
+    steps: [
+      {
+        id: 'deliver', done: 'letter_answer_done',
+        journal: "Elian has answered Mael's letter, signed with a town's name at last. Carry it to Mael in Willowmere.",
+        chat: [
+          { if: 'mirror_sigil_get', lines: [m("The mirror in Hollowmere's chapel opens onto Willowmere's. Mael is at the well.")] },
+          { lines: [m("Elian's reply, for Mael. He will be at the well in Lantern Square.")] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'nico_crowns', title: "Nico's Crowns", giver: 'nico', start: 'nico_crowns_started', done: 'nico_crowns_done',
+    reward: REWARDS_EP2.nico.item,
+    steps: [
+      {
+        id: 'find', done: 'paper_crown_found',
+        journal: 'Nico dreams of a paper crown that somebody gave somebody. If one still exists, the Court is keeping it.',
+        chat: [
+          { map: 'court_f3', lines: [m('If a crown is hidden anywhere, it is in the dark wing, where only the beam can see.')] },
+          { lines: [m("Nico's paper crown. If it exists, the Court is keeping it.")] },
+        ],
+      },
+      {
+        id: 'show', done: 'nico_crowns_done',
+        journal: 'You found a paper crown in the Court. Show it to Nico, by the town gate.',
+        chat: [{ lines: [b('Nico is by the gate, chalking. Show him the crown.')] }],
+      },
+    ],
+  },
+  {
+    id: 'three_portraits', title: 'The Three Portraits', giver: 'orla', start: 'portraits_started', done: 'remembrance_open',
+    reward: REWARDS_EP2.portraits.item,
+    counter: { label: 'Portraits seen', flags: ['portrait_child_seen', 'portrait_keeper_seen', 'portrait_king_seen'] },
+    steps: [
+      {
+        id: 'look', done: 'remembrance_open',
+        journal: 'Orla says there are three portraits in the Court, and the middle frame is empty. Find all three.',
+        chat: [
+          { map: 'court_f2', lines: [m('A child, a keeper, a king. One hangs by the stairs we came down. The others are off the galleries.')] },
+          { lines: [m("The three portraits are on the Court's second floor.")] },
+        ],
+      },
+    ],
+  },
+];
+
+const EP2_BANTER = {
+  east_road: [
+    { if: [...BOTH, 'nh_restored'], lines: [
+      m('The road remembers now. The ruts run all the way to the gate.'),
+      b('We walked it enough times. It had no choice.'),
+    ] },
+    { if: BOTH, lines: [
+      b('Is it me, or is the grass getting quieter?'),
+      m("It's not you. It's the road."),
+    ] },
+  ],
+  nameless_hollow: [
+    { if: [...BOTH, 'nh_restored'], lines: [
+      m('Hollowmere. I keep saying it under my breath. Bram, stop smiling.'),
+      b("I'm not smiling. This is my face."),
+    ] },
+    { if: BOTH, lines: [
+      b("Everyone here is so friendly. It's unsettling."),
+      m('They have nothing else to hold on to. So they hold on to each other.'),
+    ] },
+  ],
+  nh_hall: [{ if: BOTH, lines: [
+    m("Elian's ledger has every name in town in it. Every day. In the same order."),
+    b("He'd get on with Holt."),
+  ] }],
+  nh_chapel: [{ if: BOTH, lines: [m('Forty-one. I keep counting them. I keep getting forty-one.')] }],
+  nh_inn: [{ if: BOTH, lines: [b('Beds that remember you. Wren says that as if it were a good thing.')] }],
+  nh_shop: [{ if: BOTH, lines: [b('Fitch just told a rope it was a rope. The rope seemed to appreciate it.')] }],
+  nh_smithy: [{ if: BOTH, lines: [b("Glass that holds an edge. My father would hate it. Then he'd ask how.")] }],
+  court_f1: [{ if: BOTH, lines: [
+    b('I keep seeing myself out of the corner of my eye. I look worried.'),
+    m('You look like you always look.'),
+    b('Exactly.'),
+  ] }],
+  court_f2: [
+    { if: [...BOTH, 'other_selves_defeated'], lines: [
+      m('My reflection said I would run. I keep thinking about how sure it sounded.'),
+      b('Mine said I stand still. I move plenty. I am moving right now.'),
+    ] },
+    { if: BOTH, lines: [
+      m('Those portraits. I know some of those ears.'),
+      b("Holt's. I'm telling you."),
+    ] },
+  ],
+  court_f3: [{ if: BOTH, lines: [
+    b("Every step down here, something steps up to meet it. I don't like it."),
+    m('It is only the floor, Bram.'),
+    b("That's what I don't like."),
+  ] }],
+  court_throne: [{ if: [...BOTH, 'aurel_named'], lines: [b('A guard at a post nobody came to relieve. Well. We came.')] }],
+};
+Object.assign(BANTER, EP2_BANTER);
+BANTER.willowmere.unshift({ if: [...BOTH, 'ep2_complete'], lines: [
+  m('Willowmere looks smaller. No. It looks the same. I look bigger.'),
+  b('You look the same, Mira.'),
+] });
+
 // ------------------------------------------------------------------------------------------------
 // Helpers
 // ------------------------------------------------------------------------------------------------
 const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const allSet = (flags, hasFlag) => toList(flags).every((f) => hasFlag(f));
+
+/** Every side quest of both episodes, in journal order. */
+export const ALL_SIDE_QUESTS = [...SIDE_QUESTS, ...SIDE_QUESTS_EP2];
+
+/** The main quest the journal and Talk follow: Episode 2's once Episode 1 is complete. */
+export function mainQuestFor(hasFlag) {
+  return hasFlag('ep1_complete') ? MAIN_QUEST_EP2 : MAIN_QUEST;
+}
 
 /** First entry whose conditions and map filter match. */
 export function pickChat(entries, hasFlag, mapId) {
@@ -496,7 +914,7 @@ export function currentStep(hasFlag, quest = MAIN_QUEST) {
 /** Active side quests with their current step: [{ quest, step }]. */
 export function activeSideQuests(hasFlag) {
   const out = [];
-  for (const q of SIDE_QUESTS) {
+  for (const q of ALL_SIDE_QUESTS) {
     if (!hasFlag(q.start) || hasFlag(q.done)) continue;
     const step = q.steps.find((st) => !allSet(st.done, hasFlag)) || q.steps[q.steps.length - 1];
     out.push({ quest: q, step });
@@ -511,7 +929,7 @@ export function activeSideQuests(hasFlag) {
  * Speakers are 'hero' (thoughts), 'mira' or 'bram'.
  */
 export function partyChat(hasFlag, mapId, { maxSide = 1 } = {}) {
-  const step = currentStep(hasFlag);
+  const step = currentStep(hasFlag, mainQuestFor(hasFlag));
   const main = pickChat(step.chat, hasFlag, mapId);
   const side = [];
   // A side entry marked `nudge` (fresh news, e.g. the Lantern for the lost bridge) goes before older reminders.
@@ -531,15 +949,17 @@ export function partyChat(hasFlag, mapId, { maxSide = 1 } = {}) {
 
 /** Journal entries for the menu: main step plus each started side quest (done ones marked). */
 export function journal(hasFlag) {
-  const step = currentStep(hasFlag);
-  const side = SIDE_QUESTS.filter((q) => hasFlag(q.start)).map((q) => {
+  const quest = mainQuestFor(hasFlag);
+  const step = currentStep(hasFlag, quest);
+  const side = ALL_SIDE_QUESTS.filter((q) => hasFlag(q.start)).map((q) => {
     const done = hasFlag(q.done);
     const st = done ? null : (q.steps.find((x) => !allSet(x.done, hasFlag)) || q.steps[q.steps.length - 1]);
     const count = q.counter ? q.counter.flags.filter((f) => hasFlag(f)).length : null;
     return { id: q.id, title: q.title, done, text: done ? 'Complete.' : st.journal,
       counter: q.counter ? { label: q.counter.label, value: count, max: q.counter.flags.length } : null };
   });
-  return { main: { title: MAIN_QUEST.title, step: step.title, text: step.journal }, side };
+  return { main: { title: quest.title, step: step.title, text: step.journal }, side };
 }
 
-export default { FLAGS, FLAG_IDS, REWARDS, MAIN_QUEST, SIDE_QUESTS, BANTER, partyChat, currentStep, journal };
+export default { FLAGS, FLAG_IDS, REWARDS, MAIN_QUEST, SIDE_QUESTS, BANTER, partyChat, currentStep, journal,
+  EP2_FLAGS, REWARDS_EP2, MAIN_QUEST_EP2, SIDE_QUESTS_EP2, ALL_SIDE_QUESTS, mainQuestFor };

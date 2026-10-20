@@ -1,4 +1,4 @@
-// Episode 1 text: bestiary lore, books (library and Archive), location banners, menu help lines,
+// Episode 1 and Episode 2 text (Episode 2 at the end): bestiary lore, books (library and Archive), location banners, menu help lines,
 // field remarks (party "barks"), game over lines and the credits. Pure data.
 //
 // Box rules (checked by qa/content): at most 3 lines of 42 characters per box, no em dashes.
@@ -388,4 +388,218 @@ export const FIELD_ABILITIES = {
   shove: { name: 'Shove', owner: 'bram' },
 };
 
-export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES };
+// ================================================================================================
+// Episode 2 (E2-story). Merged into the Episode 1 tables above, so every existing reader sees them.
+// ================================================================================================
+
+// Bestiary for the 15 new foes. lore[0] is the enemies.js `flavor` (agreed with E2-battle).
+Object.assign(BESTIARY, {
+  mist_wolf: {
+    name: 'Mist Wolf', where: 'The Fading Road',
+    lore: [
+      'A wolf made mostly of morning fog. The bite is real.',
+      'Mist wolves hunt where the road thins. Travelers who lose the cairns tend to meet them twice.',
+      'Fire burns the mist off them, and a spear finds what is left. Their bite can blur your sight.',
+    ],
+  },
+  glassback: {
+    name: 'Glassback Beetle', where: 'The Fading Road',
+    lore: [
+      'Its shell is old silverglass. While it glitters, spells bounce.',
+      'It opens every fight by hardening its shell. Anything cast at it then comes straight back.',
+      'An axe cracks the glass, and so does thunder. Once the shine is gone, magic lands as it should.',
+    ],
+  },
+  quicksilver: {
+    name: 'Quicksilver', where: 'The Fading Road',
+    lore: [
+      'A bead of mercury that rolled off a mirror and kept rolling.',
+      'Hit it hard enough and it splits in two, and both halves are still annoyed.',
+      'Thunder and ice set it solid. Fire only makes it run.',
+    ],
+  },
+  quicksilver_bead: {
+    name: 'Quicksilver Bead', where: 'The Fading Road',
+    lore: [
+      'A drop of Quicksilver that broke away. It wants to roll back.',
+      'Small, quick, and very nearly harmless. Very nearly.',
+    ],
+  },
+  glint_wisp: {
+    name: 'Glint Wisp', where: 'The Silverglass Antechamber',
+    lore: [
+      'A glint of light that came loose from the glass and lost its way.',
+      'It throws dazzling dust. When it gathers itself into a prism, everyone should brace.',
+      'Arrows and thunder bring it down. Fire and light only feed it.',
+    ],
+  },
+  glass_sentinel: {
+    name: 'Glass Sentinel', where: 'The Silverglass Antechamber',
+    lore: [
+      'A sentry of the Court, built of silverglass and very old orders.',
+      'It raises a glass guard and waits. When it stamps, the floor shakes and shards fly at everyone.',
+      'Thunder and an axe. Swords and spears skid off its sides.',
+    ],
+  },
+  borrowed_shadow: {
+    name: 'Borrowed Shadow', where: 'The Hall of Other Selves',
+    lore: [
+      'A shadow with nobody to belong to. It borrows whatever hits it.',
+      'Strike it with one thing and it learns that thing, and gives it back. Change what you strike with.',
+      'Light and arrows find it before it has learned to hide from them.',
+    ],
+  },
+  faceless_knight: {
+    name: 'Faceless Knight', where: 'The Hall of Other Selves',
+    lore: [
+      'A knight of the Court with a blank visor. It guards the weakest.',
+      'It steps in front of whichever ally is closest to falling. Hit them all at once, or hit the knight.',
+      'Axes, thunder and light. When it raises its blade for judgement, defend.',
+    ],
+  },
+  shard_swarm: {
+    name: 'Shard Swarm', where: 'The Unnamed Throne',
+    lore: [
+      'Pieces of a broken mirror that still fly in formation.',
+      'Hard to hit with a blade. A storm of them can cut the whole party at once.',
+      'Thunder, axes and light scatter them. Spears and arrows mostly pass between.',
+    ],
+  },
+  refl_hero: {
+    name: 'Nameless Reflection', where: 'The Hall of Other Selves',
+    lore: [
+      'Your reflection, stepped out of the glass. It has no face.',
+      'It fights the way you fight, backwards: strong where you are, open to everything you do not carry.',
+      'Spear, staff and bow. It shrugs off swords and axes.',
+    ],
+  },
+  refl_mira: {
+    name: "Mira's Reflection", where: 'The Hall of Other Selves',
+    lore: [
+      'Mira, backwards. It says what she is afraid of.',
+      'It casts fire and frost, and mends the other reflections.',
+      'Sword, axe and spear. Staves and bows are her own, and it knows them.',
+    ],
+  },
+  refl_bram: {
+    name: "Bram's Reflection", where: 'The Hall of Other Selves',
+    lore: [
+      'Bram, backwards. It stands still, the way guards are taught.',
+      'It guards the others and dares you to hit it. It is very good at being hit.',
+      'Sword, staff and bow. Spears and axes are his own, and it knows them.',
+    ],
+  },
+  nameless_king: {
+    name: 'The Nameless King', where: "The King's Mirror",
+    lore: [
+      'The lord of the Court of Mirrors. He keeps everything.',
+      'When his mirror turns toward someone, he means to keep them. Defend, or they are sealed in glass.',
+      "His name was Aurel. He gave it to the glass so it would take his name and not his son's.",
+    ],
+  },
+  false_sorrow: {
+    name: 'Sorrow', where: "The King's Mirror",
+    lore: [
+      'A reflection of grief. While it weeps, the King mends.',
+      'Its lament heals the King and washes him clean. Fire and arrows end it.',
+    ],
+  },
+  false_pride: {
+    name: 'Pride', where: "The King's Mirror",
+    lore: [
+      'A reflection of pride. It stands in front of what it guards.',
+      'While it stands proud, nothing gets past it to Sorrow. Strike them all at once, or strike Pride first.',
+      'Spears and thunder. Fire and swords only flatter it.',
+    ],
+  },
+});
+
+// Books. Map events: { type: 'book', book: '<id>' }.
+Object.assign(BOOKS, {
+  nh_ledger: {
+    title: "Elian's Ledger", where: 'nh_hall',
+    pages: [
+      'Every name in town, written fresh each morning in the same young hand. Every page, the same list.',
+      'Some mornings a name is written, crossed out, and written again, harder.',
+      'Near the back, smaller: "Today I felt I was waiting for someone. I wrote my own name twice, to be safe."',
+    ],
+  },
+  court_ledger: {
+    title: 'The Ledger of the Court', where: 'court_f2',
+    pages: [
+      "The Keepers kept names in the Book and faces in the glass. A reflection is a name's shadow.",
+      'While someone keeps your reflection, your name has somewhere to rest. That is what this Court is for.',
+      'In a later hand: "The list came today. A child\'s name at the top. I have offered the glass a trade."',
+      'The last line, pressed hard into the page: "Keep them. Keep them all. Do not let it read them."',
+    ],
+  },
+  nh_register_page: {
+    title: 'A Page of the Register', where: 'nh_chapel',
+    pages: [
+      "Births, marriages and namings, in Sister Anwen's round hand. Every line full.",
+      '"Found on the chapel step, about four years old, wrapped in a man\'s coat. He knew his own name: Elian."',
+      'Halfway down the page, one line is white. Not erased. White, as if nothing had ever been written there.',
+    ],
+  },
+});
+
+// Banners for the 11 new maps. `states` (Episode 2 shape): a first-match conditional list of { if, ifNot, title,
+// sub } that bannerFor checks before the base title. Readers that only know `title` still get the base banner.
+Object.assign(BANNERS, {
+  east_road: { title: 'The Fading Road', sub: 'East of the Fork' },
+  nameless_hollow: { title: 'Nameless Hollow', sub: 'The Unwritten Square',
+    states: [{ if: 'nh_restored', title: 'Hollowmere', sub: 'The Remembered Square' }] },
+  nh_hall: { title: "Mayor's Hall" },
+  nh_chapel: { title: 'Chapel of the Candles' },
+  nh_inn: { title: 'The Signless Inn' },
+  nh_shop: { title: 'Hollow Provisioner' },
+  nh_smithy: { title: 'Silverglass Smithy' },
+  court_f1: { title: 'Court of Mirrors', sub: 'I. The Silverglass Antechamber' },
+  court_f2: { title: 'Court of Mirrors', sub: 'II. The Hall of Other Selves' },
+  court_f3: { title: 'Court of Mirrors', sub: 'III. The Unnamed Throne' },
+  court_throne: { title: "The King's Mirror" },
+});
+
+// Field remarks for the Episode 2 field mechanics (one each per save). fog_loop is also a scene (the step
+// trigger at fog_return runs scene fog_loop); the bark is the same exchange for a world system that prefers it.
+Object.assign(BARKS, {
+  first_mirror: [
+    { if: ['court_entered', 'bram_joined'], lines: [{ who: 'mira', text: 'It turns on its stand. Wherever the light lands, that is where it wants to go.' }] },
+  ],
+  first_glass_bridge: [
+    { if: ['court_entered', 'bram_joined'], lines: [{ who: 'bram', text: 'The light is holding the glass up. Or the glass is holding the light. Either way, it holds me.' }] },
+  ],
+  first_receptor: [
+    { if: ['court_entered', 'bram_joined'], lines: [{ who: 'mira', text: 'A crystal that keeps the light. Something, somewhere, just unlocked.' }] },
+  ],
+  fog_loop: [
+    { if: ['saw_cairns', 'bram_joined'], lines: [
+      { who: 'mira', text: "We've passed this one. Eleven pebbles. I counted." },
+      { who: 'bram', text: 'Stay on the stones.' },
+    ] },
+  ],
+});
+
+// Help lines for the Hollow's save bell and inn (one line each, max 40 characters).
+Object.assign(HELP.save, { bell_hollow: 'The silver bell rings. Someone listens.' });
+Object.assign(HELP.inn, { poor_wren: 'Not enough gold. Wren looks sorry.' });
+
+// Credits for Episode 2. Played after ep2_complete over the "hollowmere" theme (same card shape as CREDITS).
+export const CREDITS_EP2 = [
+  { heading: 'LEXICON QUEST', lines: ['Episode 2: The Town Without a Name'] },
+  { heading: 'Created by', lines: ['Scott Ball'] },
+  { heading: 'Story, World and Direction', lines: ['Scott Ball'] },
+  { heading: 'Music', lines: ['Composed for Lexicon Quest with Suno'] },
+  { heading: 'The Party', lines: ['{hero}', 'Mira of Hollowmere', 'Bram, son of Garrick'] },
+  { heading: 'Hollowmere', lines: ['Mayor Elian', 'Sister Anwen', 'Tovin the ferryman', 'Lena the watchmaker'] },
+  { heading: 'Hollowmere', lines: ['Vessa of the Silverglass Smithy', 'Nico and his crowns', 'Sava the weaver', 'Corin of the watch'] },
+  { heading: 'Hollowmere', lines: ['Orla of the shrine', 'Wren of the Signless Inn', 'Fitch, and his stock'] },
+  { heading: 'The Road East', lines: ["Garrick and Hal, of Garrick's Crossing", 'Penny, who goes where roads go'] },
+  { heading: 'The Court of Mirrors', lines: ['The Other Selves', 'Sorrow and Pride', 'Aurel, the Nameless King'] },
+  { heading: 'And', lines: ['Vex Quill, who was never in the room'] },
+  { heading: 'Willowmere', lines: ['Hazel, who waited up', 'Elder Mael and his Register', 'Iris and her list', 'Tess, and the White Road'] },
+  { heading: '', lines: ['A name is a promise, not a title.', 'Thank you for keeping ours.'] },
+  { heading: 'Thank you for playing', lines: ['Far away, the mountains begin to smolder.'] },
+];
+
+export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES, CREDITS_EP2 };

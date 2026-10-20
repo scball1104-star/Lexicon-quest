@@ -2,16 +2,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NPCS, talkTo, isPresent, moveFor, npcsOnMap, speakerName } from '../../src/data/npcs.js';
-import { scenes } from '../../src/data/story/ep1.js';
-import { FLAGS } from '../../src/data/quests.js';
+import { scenes as EP1_SCENES } from '../../src/data/story/ep1.js';
+import { scenes as EP2_SCENES } from '../../src/data/story/ep2.js';
+import { FLAGS, EP2_FLAGS } from '../../src/data/quests.js';
 import { fits, boxLines, resolve } from '../../src/data/story/dialogue.js';
-import { MAP_IDS, NPC_SPRITES, EXTRA_SPRITES } from './_harness.mjs';
+import { MAP_IDS, NPC_SPRITES, EXTRA_SPRITES, EP2_MAP_IDS, EP2_NPC_SPRITES, EP2_SHOPS } from './_harness.mjs';
+
+const scenes = { ...EP1_SCENES, ...EP2_SCENES };
+const ALL_MAPS = [...MAP_IDS, ...EP2_MAP_IDS];
 
 let SHOPS = null;
 try { ({ SHOPS } = await import('../../src/data/shops.js')); } catch { SHOPS = null; }
 
 const MOVES = ['stand', 'turn', 'wander', 'patrol', 'tag', 'sleep'];
-const SPRITES = new Set([...NPC_SPRITES, ...EXTRA_SPRITES]);
+const SPRITES = new Set([...NPC_SPRITES, ...EXTRA_SPRITES, ...EP2_NPC_SPRITES]);
 const flagsOf = (e) => [e?.if, e?.ifNot].flat().filter(Boolean);
 
 // Flags that can only be set once Mira (or Bram) is in the party. Used to check interjections.
@@ -19,14 +23,15 @@ const AFTER_MIRA = ['mira_joined', 'bram_joined', 'left_town', 'valley_arrived',
   'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open',
   'archivore_defeated', 'ep1_complete', 'returned_home', 'found_thirteenth_bell', 'garrick_farewell_done',
   'tess_letter_1_found', 'tess_letter_2_found', 'tess_letter_3_found',
-  'tess_letter_1_delivered', 'tess_letter_2_delivered', 'tess_letter_3_delivered', 'tess_quest_done', 'hal_returned'];
+  'tess_letter_1_delivered', 'tess_letter_2_delivered', 'tess_letter_3_delivered', 'tess_quest_done', 'hal_returned',
+  ...Object.keys(EP2_FLAGS)]; // every Episode 2 flag comes after ep1_complete, with the whole party
 const AFTER_BRAM = AFTER_MIRA.filter((f) => f !== 'mira_joined');
 
 test('every NPC has a name, a valid sprite, a map, a movement style and dialogue', () => {
   for (const [id, n] of Object.entries(NPCS)) {
     assert.ok(n.name && typeof n.name === 'string', `${id}: name`);
     assert.ok(SPRITES.has(n.sprite), `${id}: sprite ${n.sprite}`);
-    assert.ok(MAP_IDS.includes(n.map), `${id}: map ${n.map}`);
+    assert.ok(ALL_MAPS.includes(n.map), `${id}: map ${n.map}`);
     assert.ok(n.spot && n.about, `${id}: spot and about`);
     const moves = Array.isArray(n.move) ? n.move : [{ move: n.move }];
     for (const m of moves) assert.ok(MOVES.includes(m.move), `${id}: move ${m.move}`);
@@ -76,7 +81,7 @@ test('shops and inns hook to real shop ids', () => {
   for (const [id, n] of Object.entries(NPCS)) {
     if (!n.service) continue;
     assert.ok(['shop', 'inn'].includes(n.service.type), `${id}: service type`);
-    if (n.service.type === 'shop' && SHOPS) assert.ok(SHOPS[n.service.id], `${id}: unknown shop ${n.service.id}`);
+    if (n.service.type === 'shop' && SHOPS) assert.ok(SHOPS[n.service.id] || EP2_SHOPS.includes(n.service.id), `${id}: unknown shop ${n.service.id}`);
     if (n.service.type === 'inn') assert.ok(Number.isInteger(n.service.price), `${id}: inn price`);
   }
 });
@@ -85,6 +90,7 @@ test('every townsperson says something new once the names come back', () => {
   const POST = ['archivore_defeated', 'ep1_complete'];
   for (const [id, n] of Object.entries(NPCS)) {
     if (n.talk.length === 1 && n.talk[0].scene) continue; // party members before joining, the dough
+    if (EP2_MAP_IDS.includes(n.map)) continue; // Episode 2 people: checked in ep2.test.mjs (they change at nh_restored)
     if (flagsOf(n.show).includes('archivore_defeated')) continue; // Hal only exists afterwards
     if ([n.show?.ifNot].flat().some((f) => f === 'mira_joined' || f === 'bram_joined')) continue; // joins the party
     assert.ok(n.talk.some((e) => [e.if].flat().some((f) => POST.includes(f))), `${id}: no post-Archivore lines`);
@@ -147,13 +153,14 @@ test('Tess, Wick and Nella open their quests only once Bram has joined; Oren ope
 test('NPC portraits exist in the W1-sprites portrait atlas', async () => {
   const { existsSync, readFileSync } = await import('node:fs');
   const { join } = await import('node:path');
-  const { NEXT, PORTRAITS } = await import('./_harness.mjs');
+  const { NEXT, PORTRAITS, EP2_PORTRAITS } = await import('./_harness.mjs');
   const atlasPath = join(NEXT, 'assets', 'sprites', 'portraits.json');
   const frames = existsSync(atlasPath) ? JSON.parse(readFileSync(atlasPath, 'utf8')).frames : null;
   for (const [id, n] of Object.entries(NPCS)) {
     if (!n.portrait) continue;
-    assert.ok(PORTRAITS.includes(n.portrait), `${id}: portrait ${n.portrait} is not a known portrait id`);
-    if (frames) assert.ok(frames[`${n.portrait}_48`], `${id}: ${n.portrait}_48 missing from portraits.json`);
+    assert.ok(PORTRAITS.includes(n.portrait) || EP2_PORTRAITS.includes(n.portrait), `${id}: portrait ${n.portrait} is not a known portrait id`);
+    // Episode 2 portraits are E2-sprites' (wave 10b); until then the dialogue draws no portrait (ui/window.js).
+    if (frames && !EP2_PORTRAITS.includes(n.portrait)) assert.ok(frames[`${n.portrait}_48`], `${id}: ${n.portrait}_48 missing from portraits.json`);
   }
 });
 
