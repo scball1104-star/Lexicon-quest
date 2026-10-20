@@ -128,7 +128,21 @@ shelves, dark rooms with braziers, the thirteenth bell, the great door), then th
 
 ## 4. Scene by scene
 
-Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless the scene says otherwise.
+Music: each map plays its own track (`willowmere`, `valley`, `archive` on F1 and F2, `mystery` on F3) unless the
+scene says otherwise. `music()` does not restore the map track by itself: a scene that leaves the map's track
+must put it back before it ends (checked by the "music cues" test in `qa/content/story.test.mjs`).
+
+Cue sheet (W8, CRITIQUE_3 #12), in story order:
+
+| Scene | Cue |
+|---|---|
+| `fading_sign` | `mystery` as the painted name goes, back to `willowmere` when Oren walks off |
+| `south_gate` (Bram joins) | `sorrow` enters in the silence after "tell him... tell...", holds through Holt's promise, `willowmere` before Bram joins |
+| `campfire_rest` (Emberpeak answer) | `sorrow` from "The fire took the lower town", back to `valley` |
+| `thirteenth_bell` | the F3 track drops to silence for the toll, then `mystery` (F3's own track) comes back in |
+| `archivore` after the win | `triumph` at the fragment, `sorrow` when the hero's name stays faint; it carries out the root passage |
+| `return_to_willowmere` | `triumph` at the gate, `sorrow` when Mael opens the Register ("Every name but one"), silence, then the bells |
+| `ending_hook` | silence, `bell_peal`, `bell_toll`, `mystery` on "Thirteen." |
 
 ### prologue
 - Where: before `hero_home`, over the title key art (`scenes/prologue.js` may also read `PROLOGUE` directly).
@@ -172,7 +186,8 @@ Music: each map plays its own track (`willowmere`, `valley`, `archive`) unless t
 - Map: `willowmere`. Step trigger across the road two tiles north of the gate (mark **`gate_inner`**). Talking
   to Bram also runs it. Before Mira joins it is a short "nobody leaves alone" stop and pushes the hero one
   tile back north (that tile must be open). With Mira, it is the full scene.
-- Bram (NPC `bram`, party sprite) at the left gate post; Sergeant Holt (NPC `holt`) at the right post.
+- Bram (NPC `bram`: the party field sprite and the `bram` portrait, so he is the same man in town, in the party and in
+  the dungeon; `npcs.test.mjs` locks this) at the left gate post; Sergeant Holt (NPC `holt`) at the right post.
 - Bram walks to the hero, despawns, joins. Sets `bram_joined`.
 
 ### garrick_farewell (optional)

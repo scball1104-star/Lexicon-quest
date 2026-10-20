@@ -156,3 +156,13 @@ test('NPC portraits exist in the W1-sprites portrait atlas', async () => {
     if (frames) assert.ok(frames[`${n.portrait}_48`], `${id}: ${n.portrait}_48 missing from portraits.json`);
   }
 });
+
+test('Bram is one person: the gate NPC wears the party sprite and portrait (CRITIQUE_3 #8)', () => {
+  assert.equal(NPCS.bram.sprite, 'bram', 'the gate sprite is the party field sprite');
+  assert.equal(NPCS.bram.portrait, 'bram', 'the gate portrait is the party portrait');
+  // Nobody else may borrow his name or his sprite, and no other NPC speaks with his portrait.
+  for (const [id, n] of Object.entries(NPCS)) {
+    if (id !== 'bram') assert.ok(n.sprite !== 'bram' && n.portrait !== 'bram', `${id} borrows Bram's look`);
+  }
+  assert.equal(speakerName('bram'), 'Bram');
+});

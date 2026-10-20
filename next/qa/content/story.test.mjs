@@ -1,11 +1,17 @@
 // Episode 1 story script: every scene, every branch. Uses only the cutscene API, every referenced id
 // exists, every flag is declared, every box fits, and a full playthrough sets every main story flag.
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { scenes, lines, SCENE_CONDITIONS, PROLOGUE } from '../../src/data/story/ep1.js';
 import { NPCS } from '../../src/data/npcs.js';
 import { FLAGS } from '../../src/data/quests.js';
 import { ITEMS } from '../../src/data/items.js';
+import WILLOWMERE from '../../src/data/maps/willowmere.js';
+import VALLEY from '../../src/data/maps/valley.js';
+import ARCHIVE_F3 from '../../src/data/maps/archive_f3.js';
 import { fits, boxLines, CHOICE_COLS } from '../../src/data/story/dialogue.js';
 import { explore, playthrough, runOnce, MUSIC, SFX, EMOTES, DIRS, TINTS, PORTRAITS, NPC_SPRITES, EXTRA_SPRITES,
   ENCOUNTER_IDS_FALLBACK } from './_harness.mjs';
@@ -326,4 +332,43 @@ test('side quests run start to finish and pay out once', async () => {
   const gives = Object.values(logs).flat(2).filter((e) => e.op === 'give').map((e) => e.args[0]);
   assert.equal(gives.filter((g) => g === 'wayfarer_boots').length, 1, 'boots exactly once');
   assert.equal(logs.hal_returns[1].filter((e) => e.op === 'say').length, 0, 'Hal reunion plays once');
+});
+
+test('music cues: mystery for the signs and the bell, sorrow for lost names, triumph for the homecoming (CRITIQUE_3 #12)', async () => {
+  const musics = (log) => log.filter((e) => e.op === 'music').map((e) => e.args[0]);
+  const idx = (log, pred) => log.findIndex(pred);
+  const both = ['mira_joined', 'bram_joined'];
+  // The fading sign: the town track gives way to mystery before the name goes, and returns when Oren leaves.
+  const sign = await runOnce(scenes.fading_sign, { flags: ['intro_done'], branchFlags: false });
+  assert.deepEqual(musics(sign.log), ['mystery', WILLOWMERE.music]);
+  assert.ok(idx(sign.log, (e) => e.op === 'music') < idx(sign.log, (e) => e.op === 'sfx' && e.args[0] === 'sign_fade'), 'mystery starts before the sign fades');
+  // Bram loses his father's name: sorrow enters at the silence, holds through Holt, town track back before he joins.
+  const gate = await runOnce(scenes.south_gate, { flags: ['met_mael', 'mira_joined'], branchFlags: false });
+  assert.deepEqual(musics(gate.log), ['sorrow', WILLOWMERE.music]);
+  const at = (re) => idx(gate.log, (e) => e.op === 'say' && re.test(e.args[1]));
+  const sor = idx(gate.log, (e) => e.op === 'music' && e.args[0] === 'sorrow');
+  assert.ok(at(/tell him\.\.\. tell/) < sor && sor < at(/His name\. My father/), 'sorrow lands in the silence after "tell..."');
+  assert.ok(at(/I will say his name every hour/) > sor, 'sorrow holds through the Sergeant promise');
+  assert.ok(idx(gate.log, (e) => e.op === 'music' && e.args[0] === WILLOWMERE.music) < idx(gate.log, (e) => e.op === 'addMember'), 'town track returns before he joins');
+  // The Emberpeak story at the campfire is the other lost name.
+  const camp = await runOnce(scenes.campfire_rest, { flags: both, decisions: [0], branchFlags: false });
+  assert.deepEqual(musics(camp.log), ['sorrow', VALLEY.music]);
+  // The thirteenth bell: silence for the toll, then F3's own track (mystery) comes back in and the scene ends on it.
+  const bell = await runOnce(scenes.thirteenth_bell, { flags: [...both, 'archive_f2_done'], branchFlags: false });
+  assert.deepEqual(musics(bell.log), [null, 'mystery']);
+  assert.equal(musics(bell.log).at(-1), ARCHIVE_F3.music, 'the scene ends on the F3 map track');
+  assert.ok(idx(bell.log, (e) => e.op === 'music') < idx(bell.log, (e) => e.op === 'sfx' && e.args[0] === 'bell_toll'), 'silence falls before the toll');
+  // The faint name after the Archivore, and the Register at home: triumph gives way to sorrow, never the reverse.
+  const after = await runOnce(scenes.archivore, { flags: [...both, 'boss_door_open'], branchFlags: false });
+  assert.deepEqual(musics(after.log), [null, 'boss_archivore', 'triumph', 'sorrow']);
+  const home = await runOnce(scenes.return_to_willowmere, { flags: [...both, 'archivore_defeated'], branchFlags: false });
+  assert.deepEqual(musics(home.log), ['triumph', 'sorrow', null, 'mystery']);
+  const homeSay = (re) => idx(home.log, (e) => e.op === 'say' && re.test(e.args[1]));
+  const ms = idx(home.log, (e) => e.op === 'music' && e.args[0] === 'sorrow');
+  assert.ok(homeSay(/Every name but one/) > ms - 4 && homeSay(/You did it\. Every sign/) < ms, 'sorrow starts as Mael opens the Register');
+  // Every track named exists in the audio manifest.
+  const manifest = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'audio', 'manifest.json'), 'utf8'));
+  for (const [id, runs] of Object.entries(RUNS)) {
+    for (const r of runs) for (const m of musics(r.log)) assert.ok(m === null || m in manifest.music, `${id}: music ${m} is not in the manifest`);
+  }
 });

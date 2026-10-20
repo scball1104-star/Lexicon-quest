@@ -104,6 +104,7 @@ async function hazel_farewell(s) {
 async function fading_sign(s) {
   await s.camera.panTo('bakery_sign', 40);
   await s.wait(30);
+  await s.music('mystery'); // the town track slips away as the name does; it comes back when Oren walks off
   await s.sfx('sign_fade');
   await s.setFlag('signs_fading');
   await narrate(s, "The bakery's lantern-sign flickers. Its painted name goes pale, then thin, then nothing at all.");
@@ -131,6 +132,7 @@ async function fading_sign(s) {
   await say(s, 'oren_out', "Elder Mael's been pacing the square since dawn, asking after you. Go on. I'll find some paint.");
   await s.walk('oren_out', ['up']);
   await s.despawn('oren_out');
+  await s.music('willowmere');
   await s.setFlag('saw_fading_sign');
 }
 
@@ -244,6 +246,7 @@ async function bram_joins_body(s) {
   await say(s, 'bram', "Put me down for leave, Sergeant. My father'll understand. He always says...");
   await say(s, 'bram', 'He says a guard who never leaves his gate is just a very tall gate.');
   await say(s, 'bram', 'If you see my father at the forge, tell him... tell...');
+  await s.music('sorrow'); // enters under the silence, holds through Holt's promise
   await s.wait(40);
   await s.emote('bram', '...');
   await s.wait(40);
@@ -262,6 +265,7 @@ async function bram_joins_body(s) {
   await say(s, 'bram', "I'm coming with you. That wasn't a question.");
   await say(s, 'holt', 'I will tell Garrick. I will tell him twice. And I will say his name every hour until you are back.');
   await say(s, 'bram', '...Thank you, Sergeant.');
+  await s.music('willowmere');
   await s.walk('bram', 'hero');
   await s.despawn('bram');
   await s.addMember('bram');
@@ -362,8 +366,10 @@ async function campfire_rest(s) {
   const c = await s.choice(['Ask Bram about Emberpeak', 'Ask Mira about the Archive', 'Just rest']);
   if (c === 0) {
     await say(s, 'bram', 'Emberpeak. A forge town, high up where the snow starts. Every roof was copper. You could see it shine from two valleys off.');
+    await s.music('sorrow');
     await say(s, 'bram', 'The fire took the lower town in one night. I was nine. My father carried me out. My mother went back in for the neighbors.');
     await say(s, 'bram', "They got out. She didn't. I kept her face. Her name went with the smoke. That's all I'm saying tonight. Pass the kettle.");
+    await s.music('valley');
   } else if (c === 1) {
     await say(s, 'mira', 'Sealed a hundred years ago by the Keepers themselves. Nobody knows why. The page that would tell us went blank.');
     await say(s, 'mira', 'Three floors, the books agree on that much: the Catalog Halls, the Reading Galleries, and the Rootbound Stacks.');
@@ -589,9 +595,11 @@ async function thirteenth_bell(s) {
   await say(s, 'mira', "It isn't a curse. It's an alarm. The Keepers made it to ring whenever a name is taken.");
   await say(s, 'mira', "Its voice runs down the roots, under the whole valley. Under our tower. That's what the town heard.");
   await say(s, 'bram', 'So every time it rings...');
+  await s.music(null); // the Stacks go quiet for the toll, then the track comes back in under the question
   await s.sfx('bell_toll');
   await s.shake(2, 50);
   await s.wait(60);
+  await s.music('mystery'); // F3's own track (archive_f3.music; story.test.mjs checks they match)
   await say(s, 'bram', 'Who was that? Who did we just lose?');
   await say(s, 'mira', "We'll never know. That's what it means to forget someone.");
   await s.emote('bram', 'anger');
@@ -690,6 +698,7 @@ async function archivore_after(s) {
   await say(s, 'mira', "It's {hero}.");
   await say(s, 'bram', "Why would anyone want {hero}'s name?");
   await say(s, 'mira', "I don't know. But someone wrote it on purpose, in ink that doesn't fade.");
+  await s.music('sorrow'); // the victory theme gives way to the one name that stays faint
   await narrate(s, 'On the golden page, the names brighten one by one. All but one.');
   await narrate(s, 'Near the bottom, your own name stays faint, like writing seen through water.');
   await say(s, 'mira', 'Yours is still faint.');
@@ -758,6 +767,7 @@ async function return_to_willowmere(s) {
   await s.face('mael', 'hero');
   await say(s, 'mael', 'You did it. Every sign in Willowmere has its name back. Every name in this book.');
   await narrate(s, 'Mael opens the Town Register. His finger stops near the bottom of the page.');
+  await s.music('sorrow'); // the town's triumph thins out: every name but one
   await s.emote('mael', '...');
   await say(s, 'mael', 'Every name but one.');
   await say(s, 'mael', '{hero}. Yours began to fade a month ago. Before the signs. Before the bell.');
