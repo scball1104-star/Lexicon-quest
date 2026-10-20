@@ -3,7 +3,9 @@
   "images": {
     "archive": "assets/tiles/archive.png",
     "cliffs": "assets/tiles/cliffs.png",
+    "court": "assets/tiles/court.png",
     "environments": "../assets/art/environments.webp",
+    "hollow": "assets/tiles/hollow.png",
     "interior": "assets/tiles/interior.png",
     "terrain": "assets/tiles/terrain.png",
     "town": "assets/tiles/town.png"
@@ -11,11 +13,16 @@
   "atlases": {
     "battle_archive": "assets/backdrops/battle_archive.json",
     "battle_boss": "assets/backdrops/battle_boss.json",
+    "battle_court": "assets/backdrops/battle_court.json",
+    "battle_court_deep": "assets/backdrops/battle_court_deep.json",
+    "battle_east_road": "assets/backdrops/battle_east_road.json",
     "battle_hollow": "assets/backdrops/battle_hollow.json",
+    "battle_throne": "assets/backdrops/battle_throne.json",
     "battle_valley": "assets/backdrops/battle_valley.json",
     "battle_valley_dusk": "assets/backdrops/battle_valley_dusk.json",
     "bosses_battle": "assets/sprites/bosses_battle.json",
     "dialog_keyart": "assets/backdrops/dialog_keyart.json",
+    "dialog_keyart_ep2": "assets/backdrops/dialog_keyart_ep2.json",
     "enemies_battle": "assets/sprites/enemies_battle.json",
     "enemies_field": "assets/sprites/enemies_field.json",
     "heads": "assets/ui/heads.json",

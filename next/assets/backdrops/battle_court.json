@@ -1,0 +1,17 @@
+{
+ "image": "battle_court.png",
+ "w": 384,
+ "h": 216,
+ "cell": 1,
+ "note": "Court of Mirrors F1/F2 battle stage: cell 1, cool grade",
+ "extraColors": [
+  "#5d559c",
+  "#7a70ac",
+  "#4f4f84",
+  "#3b3b62"
+ ],
+ "colors": 48,
+ "bandY": 118,
+ "bandAlpha": 0.42,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

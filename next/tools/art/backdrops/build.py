@@ -59,6 +59,22 @@ RECIPES = {
                         tint=('#6e3ca0', 0.32), stage=(118, 0.46), note='boss stage: archive with the violet tint'),
     'dialog_keyart': dict(cell=0, zoom=1.0, frameY=0.0, bright=0.62, contrast=0.9, sat=0.85, extras=4,
                           vignette=0.55, note='prologue / dialog cards: darkened so text reads over it'),
+    # E2-tiles (EPISODE2_PLAN 9.3): Episode 2. Cell 1 is the Nameless Hollow mirror palace (glass towers over a
+    # still mere). The Fading Road has no painting, so it is composed (compose_east_road.py) like the valley.
+    'battle_east_road': dict(compose='east_road', extras=0, max_pair=0.16, stage=(118, 0.44),
+                             note='Fading Road battle stage: misty lowland at dusk, silver birches, the mere and a far '
+                                  'glint of the Court (composed)'),
+    'battle_court': dict(cell=1, zoom=1.0, frameY=0.0, bright=0.85, contrast=0.92, sat=0.9, extras=4,
+                         tint=('#5a7ad2', 0.18), stage=(118, 0.42),
+                         note='Court of Mirrors F1/F2 battle stage: cell 1, cool grade'),
+    'battle_court_deep': dict(cell=1, zoom=1.0, frameY=0.0, bright=0.6, contrast=0.95, sat=0.95, extras=4,
+                              tint=('#6e3ca0', 0.30), stage=(118, 0.46),
+                              note='Court of Mirrors F3 battle stage: cell 1 darker, violet grade'),
+    'battle_throne': dict(cell=1, zoom=1.55, frameX=0.08, frameY=-0.55, bright=0.68, contrast=1.0, sat=1.0, extras=4,
+                          tint=('#6e3ca0', 0.34), vignette=0.35, stage=(118, 0.48),
+                          note='the Nameless King: a tight crop on the glass towers, violet grade'),
+    'dialog_keyart_ep2': dict(cell=1, zoom=1.0, frameY=0.0, bright=0.62, contrast=0.9, sat=0.85, extras=4,
+                              vignette=0.55, note='Episode 2 title cards and CREDITS_EP2: cell 1 darkened, vignette'),
 }
 
 
@@ -108,7 +124,7 @@ def load_palette():
 
 
 # ----------------------------------------------------------------------------- source and grading
-def cell_window(cell, zoom=1.0, frameY=0.0):
+def cell_window(cell, zoom=1.0, frameY=0.0, frameX=0.0):
     im = Image.open(SRC).convert('RGB')
     cw, ch = im.width // COLS, im.height // ROWS
     cx, cy = (cell % COLS) * cw, (cell // COLS) * ch
@@ -117,7 +133,8 @@ def cell_window(cell, zoom=1.0, frameY=0.0):
         sh = ch
         sw = int(round(ch * W / H))
     sw, sh = int(round(sw / zoom)), int(round(sh / zoom))
-    ox = cx + (cw - sw) // 2
+    xslack = (cw - sw) / 2.0
+    ox = cx + int(round(xslack + frameX * xslack))      # frameX in -1..1 slides the window left / right (E2)
     slack = (ch - sh) / 2.0
     oy = cy + int(round(slack + frameY * slack))
     return im.crop((ox, oy, ox + sw, oy + sh))
@@ -286,11 +303,14 @@ def build_one(bid, rec, pal):
     if rec.get('compose') == 'hollow':
         import compose_hollow
         a = compose_hollow.compose(rec['compose'])
+    elif rec.get('compose') == 'east_road':
+        import compose_east_road
+        a = compose_east_road.compose(rec['compose'])
     elif rec.get('compose'):
         import compose_valley
         a = compose_valley.compose(rec['compose'])
     else:
-        im = cell_window(rec['cell'], rec.get('zoom', 1.0), rec.get('frameY', 0.0))
+        im = cell_window(rec['cell'], rec.get('zoom', 1.0), rec.get('frameY', 0.0), rec.get('frameX', 0.0))
         a = downscale(im)
         a = unsharp(a, 0.55, 1.0)
         a = grade(a, rec)
@@ -303,7 +323,9 @@ def build_one(bid, rec, pal):
     meta = {'image': bid + '.png', 'w': W, 'h': H, 'cell': rec.get('cell'), 'note': rec.get('note', ''),
             'extraColors': extras, 'colors': int(len(np.unique(idx)))}
     if rec.get('compose'):
-        meta['composed'] = 'tools/art/backdrops/%s.py (%s)' % ('compose_hollow' if rec['compose'] == 'hollow' else 'compose_valley', rec['compose'])
+        meta['composed'] = 'tools/art/backdrops/%s.py (%s)' % (
+            {'hollow': 'compose_hollow', 'east_road': 'compose_east_road'}.get(rec['compose'], 'compose_valley'),
+            rec['compose'])
     if rec.get('stage'):
         meta['bandY'] = int(rec['stage'][0])
         meta['bandAlpha'] = float(rec['stage'][1])

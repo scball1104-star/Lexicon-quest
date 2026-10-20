@@ -1,0 +1,17 @@
+{
+ "image": "battle_court_deep.png",
+ "w": 384,
+ "h": 216,
+ "cell": 1,
+ "note": "Court of Mirrors F3 battle stage: cell 1 darker, violet grade",
+ "extraColors": [
+  "#3d2870",
+  "#1c1951",
+  "#66376e",
+  "#644b78"
+ ],
+ "colors": 33,
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

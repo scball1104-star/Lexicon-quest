@@ -17,6 +17,9 @@
   "catalog_wood",
   "gallery_stone",
   "stacks_wood",
+  "glass_floor",
+  "gallery_floor",
+  "throne_floor",
   "stone_floor",
   "wood_floor",
   "dirt",
@@ -28,6 +31,7 @@
   "carpet_red",
   "carpet_blue",
   "water",
+  "mere_water",
   "shallow",
   "ink",
   "pit"
@@ -42,7 +46,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 8,
+   "order": 11,
    "variants": [
     [
      0,
@@ -87,7 +91,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 10,
+   "order": 13,
    "variants": [
     [
      96,
@@ -112,7 +116,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 6,
+   "order": 9,
    "variants": [
     [
      128,
@@ -147,7 +151,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 11,
+   "order": 14,
    "variants": [
     [
      0,
@@ -192,7 +196,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 7,
+   "order": 10,
    "variants": [
     [
      96,
@@ -227,7 +231,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 15,
+   "order": 19,
    "variants": [
     [
      160,
@@ -252,7 +256,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 4,
+   "order": 7,
    "variants": [
     [
      0,
@@ -292,7 +296,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 5,
+   "order": 8,
    "variants": [
     [
      80,
@@ -327,7 +331,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 12,
+   "order": 15,
    "variants": []
   },
   "carpet_blue": {
@@ -339,7 +343,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 13,
+   "order": 16,
    "variants": []
   },
   "pit": {
@@ -351,7 +355,7 @@
    "autotile": "A2",
    "kind": "hole",
    "collision": "pit",
-   "order": 17,
+   "order": 21,
    "variants": []
   },
   "moss": {
@@ -363,7 +367,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 9,
+   "order": 12,
    "variants": [
     [
      144,
@@ -388,7 +392,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 14,
+   "order": 17,
    "anim": {
     "frames": [
      0,
@@ -410,7 +414,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 16,
+   "order": 20,
    "anim": {
     "frames": [
      0,
@@ -627,6 +631,177 @@
    ],
    "sheet": "archive.png",
    "order": 3
+  },
+  "glass_floor": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "reflect": true,
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ],
+    [
+     128,
+     0
+    ]
+   ],
+   "variantWeights": [
+    30,
+    3,
+    1,
+    2,
+    1,
+    2,
+    2
+   ],
+   "sheet": "court.png",
+   "order": 4
+  },
+  "gallery_floor": {
+   "x": 144,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "reflect": true,
+   "variants": [
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ],
+    [
+     224,
+     0
+    ],
+    [
+     240,
+     0
+    ],
+    [
+     256,
+     0
+    ]
+   ],
+   "variantWeights": [
+    22,
+    3,
+    2,
+    2,
+    2,
+    1
+   ],
+   "sheet": "court.png",
+   "order": 5
+  },
+  "throne_floor": {
+   "x": 272,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "reflect": true,
+   "variants": [
+    [
+     304,
+     0
+    ],
+    [
+     320,
+     0
+    ],
+    [
+     336,
+     0
+    ],
+    [
+     352,
+     0
+    ],
+    [
+     368,
+     0
+    ],
+    [
+     384,
+     0
+    ],
+    [
+     400,
+     0
+    ]
+   ],
+   "variantWeights": [
+    18,
+    4,
+    3,
+    3,
+    2,
+    1,
+    1
+   ],
+   "sheet": "court.png",
+   "order": 6
+  },
+  "mere_water": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "reflect": true,
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 420
+   },
+   "variants": [],
+   "sheet": "hollow.png",
+   "order": 18
   }
  },
  "walls": {
@@ -993,6 +1168,258 @@
    "collision": "solid",
    "note": "legend ids interior_stone_top / interior_stone_face; faces are normally 2 rows tall",
    "sheet": "interior.png"
+  },
+  "court": {
+   "top": [
+    0,
+    48
+   ],
+   "face": [
+    32,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "E2 Court wall band (court_top) and inner face (court_face)",
+   "sheet": "court.png"
+  },
+  "court_out": {
+   "top": [
+    64,
+    48
+   ],
+   "face": [
+    96,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ],
+    [
+     224,
+     48
+    ],
+    [
+     240,
+     48
+    ],
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (court_out_top, no edges) and the outer face under a band's south lip (court_out_face)",
+   "sheet": "court.png"
+  },
+  "court_gallery": {
+   "top": [
+    0,
+    96
+   ],
+   "face": [
+    32,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     96
+    ],
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "E2 Court wall band (court_gallery_top) and inner face (court_gallery_face)",
+   "sheet": "court.png"
+  },
+  "court_gallery_out": {
+   "top": [
+    64,
+    96
+   ],
+   "face": [
+    96,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ],
+    [
+     240,
+     96
+    ],
+    [
+     256,
+     96
+    ],
+    [
+     272,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    3,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (court_gallery_out_top, no edges) and the outer face under a band's south lip (court_gallery_out_face)",
+   "sheet": "court.png"
+  },
+  "court_throne": {
+   "top": [
+    0,
+    144
+   ],
+   "face": [
+    32,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     144
+    ],
+    [
+     144,
+     144
+    ],
+    [
+     160,
+     144
+    ],
+    [
+     176,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    9,
+    2,
+    2,
+    2
+   ],
+   "note": "E2 Court wall band (court_throne_top) and inner face (court_throne_face)",
+   "sheet": "court.png"
+  },
+  "court_throne_out": {
+   "top": [
+    64,
+    144
+   ],
+   "face": [
+    96,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     144
+    ],
+    [
+     208,
+     144
+    ],
+    [
+     224,
+     144
+    ],
+    [
+     240,
+     144
+    ],
+    [
+     256,
+     144
+    ],
+    [
+     272,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    9,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (court_throne_out_top, no edges) and the outer face under a band's south lip (court_throne_out_face)",
+   "sheet": "court.png"
   }
  },
  "tiles": {
@@ -2596,6 +3023,508 @@
    "autotile": "line16",
    "sheet": "interior.png"
   },
+  "mirror_wall": {
+   "x": 0,
+   "y": 416,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "sheet": "court.png"
+  },
+  "glass_pane_cracked": {
+   "x": 16,
+   "y": 416,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "Dash Strike breakable (face)",
+   "sheet": "court.png"
+  },
+  "glass_pane_broken": {
+   "x": 32,
+   "y": 416,
+   "w": 16,
+   "h": 32,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "portrait_blank": {
+   "x": 48,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "portrait_blank_2": {
+   "x": 80,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "portrait_blank_3": {
+   "x": 112,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "portrait_child": {
+   "x": 144,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "portrait_keeper_empty": {
+   "x": 176,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "portrait_king": {
+   "x": 208,
+   "y": 416,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32 face overlay (2-row face)",
+   "sheet": "court.png"
+  },
+  "crowned_reflection": {
+   "x": 240,
+   "y": 416,
+   "w": 32,
+   "h": 48,
+   "collision": "none",
+   "note": "reflection-only decal for the throne_floor under the empty throne (translucent)",
+   "sheet": "court.png"
+  },
+  "glass_bridge_h_dim": {
+   "x": 0,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "pit",
+   "sheet": "court.png"
+  },
+  "glass_bridge_h_lit": {
+   "x": 16,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "glass_bridge_v_dim": {
+   "x": 32,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "pit",
+   "sheet": "court.png"
+  },
+  "glass_bridge_v_lit": {
+   "x": 48,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "glass_slot": {
+   "x": 64,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "beam": "pass",
+   "note": "wall-top cell the beam passes",
+   "sheet": "court.png"
+  },
+  "glass_slot_face": {
+   "x": 80,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "beam": "pass",
+   "note": "face cell the beam passes",
+   "sheet": "court.png"
+  },
+  "glass_pane_cracked_top": {
+   "x": 96,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "Dash Strike breakable (band)",
+   "sheet": "court.png"
+  },
+  "glass_pane_broken_top": {
+   "x": 112,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_h": {
+   "x": 0,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_v": {
+   "x": 16,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_ne": {
+   "x": 32,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_nw": {
+   "x": 48,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_se": {
+   "x": 64,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_sw": {
+   "x": 80,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_socket": {
+   "x": 96,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_h_lit": {
+   "x": 112,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_v_lit": {
+   "x": 128,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_ne_lit": {
+   "x": 144,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_nw_lit": {
+   "x": 160,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_se_lit": {
+   "x": 176,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_corner_sw_lit": {
+   "x": 192,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "inlay_socket_lit": {
+   "x": 208,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "court.png"
+  },
+  "roof_slate_ridge_l": {
+   "x": 96,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_ridge_m": {
+   "x": 112,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_ridge_r": {
+   "x": 128,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_field_l": {
+   "x": 144,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_field_m": {
+   "x": 160,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_field_r": {
+   "x": 176,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_eave_l": {
+   "x": 192,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_eave_m": {
+   "x": 208,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_slate_eave_r": {
+   "x": 224,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_ridge_l": {
+   "x": 240,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_ridge_m": {
+   "x": 256,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_ridge_r": {
+   "x": 272,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_field_l": {
+   "x": 288,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_field_m": {
+   "x": 304,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_field_r": {
+   "x": 320,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_eave_l": {
+   "x": 336,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_eave_m": {
+   "x": 352,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "roof_silver_eave_r": {
+   "x": 368,
+   "y": 0,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "sign_blank": {
+   "x": 0,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "blank hanging board (the Hollow)",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_inn": {
+   "x": 16,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "lettered Hollowmere sign; covers sign_blank exactly on the prefab's signAt cell",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_shop": {
+   "x": 32,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "lettered Hollowmere sign; covers sign_blank exactly on the prefab's signAt cell",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_smithy": {
+   "x": 48,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "lettered Hollowmere sign; covers sign_blank exactly on the prefab's signAt cell",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_chapel": {
+   "x": 64,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "lettered Hollowmere sign; covers sign_blank exactly on the prefab's signAt cell",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_hall": {
+   "x": 80,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "note": "lettered Hollowmere sign; covers sign_blank exactly on the prefab's signAt cell",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_gate_blank": {
+   "x": 96,
+   "y": 400,
+   "w": 32,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "sign_hollow_gate": {
+   "x": 128,
+   "y": 400,
+   "w": 32,
+   "h": 16,
+   "collision": "solid",
+   "note": "32 x 16; covers gate_hollow's blank board at its signAt cell",
+   "sheet": "hollow.png"
+  },
+  "clock_hands": {
+   "x": 160,
+   "y": 400,
+   "w": 32,
+   "h": 32,
+   "collision": "solid",
+   "note": "32 x 32; at the clocktower's handsAt cell",
+   "sheet": "hollow.png"
+  },
+  "court_far": {
+   "x": 144,
+   "y": 432,
+   "w": 128,
+   "h": 96,
+   "collision": "none",
+   "note": "128 x 96 distant Court silhouette; draw in the overhead layer over the mere",
+   "sheet": "hollow.png"
+  },
   "flowers_white": {
    "sheet": "terrain.png",
    "x": 0,
@@ -2707,6 +3636,39 @@
    "w": 16,
    "h": 16,
    "collision": "none"
+  },
+  "chalk_crown": {
+   "x": 192,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "Nico's chalk crown decal (translucent)",
+   "sheet": "hollow.png"
+  },
+  "reeds_0": {
+   "x": 208,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
+  },
+  "reeds_1": {
+   "x": 224,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
+  },
+  "reeds_2": {
+   "x": 240,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
   }
  },
  "objects": {
@@ -5614,6 +6576,2322 @@
    },
    "note": "top 2 rows overlap a 2-row wall face; bottom row is the hearthstone",
    "sheet": "interior.png"
+  },
+  "mirror_stand": {
+   "rect": [
+    0,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     208,
+     16,
+     32
+    ],
+    [
+     16,
+     208,
+     16,
+     32
+    ]
+   ],
+   "note": "turnable mirror; frames by state: 0 = '/', 1 = '\\\\'",
+   "sheet": "court.png"
+  },
+  "mirror_heavy": {
+   "rect": [
+    32,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     32,
+     208,
+     16,
+     32
+    ],
+    [
+     48,
+     208,
+     16,
+     32
+    ]
+   ],
+   "note": "heavy mirror (Shove moves it one tile); frames by state: 0 = '/', 1 = '\\\\'",
+   "sheet": "court.png"
+  },
+  "receptor": {
+   "rect": [
+    64,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     208,
+     16,
+     32
+    ],
+    [
+     80,
+     208,
+     16,
+     32
+    ]
+   ],
+   "note": "crystal receptor on a pedestal; frames by state: 0 = dark, 1 = lit",
+   "sheet": "court.png"
+  },
+  "receptor_wall": {
+   "rect": [
+    96,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     96,
+     208,
+     16,
+     32
+    ],
+    [
+     112,
+     208,
+     16,
+     32
+    ]
+   ],
+   "note": "crystal receptor set in a 2-row wall face; frames by state: 0 = dark, 1 = lit",
+   "sheet": "court.png"
+  },
+  "beam_window": {
+   "rect": [
+    128,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "note": "beam source window in a north face (the beam leaves its sill southward)",
+   "sheet": "court.png"
+  },
+  "beam_lens": {
+   "rect": [
+    176,
+    208,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 180
+   },
+   "note": "beam source on a pedestal (the lens sits on the anchor tile row above)",
+   "sheet": "court.png"
+  },
+  "font_silver": {
+   "rect": [
+    224,
+    208,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "the silver font (rest and save)",
+   "sheet": "court.png"
+  },
+  "door_glass_key_closed": {
+   "rect": [
+    0,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "set into a 2-tile wall face; cells (0,0) and (1,0) are the doorway",
+   "sheet": "court.png"
+  },
+  "door_glass_key_open": {
+   "rect": [
+    32,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "set into a 2-tile wall face; cells (0,0) and (1,0) are the doorway",
+   "sheet": "court.png"
+  },
+  "door_glass_closed": {
+   "rect": [
+    64,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "set into a 2-tile wall face; cells (0,0) and (1,0) are the doorway",
+   "sheet": "court.png"
+  },
+  "door_glass_open": {
+   "rect": [
+    96,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "set into a 2-tile wall face; cells (0,0) and (1,0) are the doorway",
+   "sheet": "court.png"
+  },
+  "stairs_glass_up": {
+   "rect": [
+    128,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "court.png"
+  },
+  "stairs_glass_down": {
+   "rect": [
+    160,
+    240,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "court.png"
+  },
+  "door_vow": {
+   "rect": [
+    192,
+    240,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     192,
+     240,
+     32,
+     48
+    ],
+    [
+     224,
+     240,
+     32,
+     48
+    ],
+    [
+     256,
+     240,
+     32,
+     48
+    ],
+    [
+     288,
+     240,
+     32,
+     48
+    ],
+    [
+     320,
+     240,
+     32,
+     48
+    ]
+   ],
+   "note": "the Vow Door; frames by state: 0..3 = crystals lit, 4 = open (art only: use door_vow_open for the walkable doorway)",
+   "sheet": "court.png"
+  },
+  "door_vow_closed": {
+   "rect": [
+    352,
+    240,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     352,
+     240,
+     32,
+     48
+    ],
+    [
+     384,
+     240,
+     32,
+     48
+    ],
+    [
+     416,
+     240,
+     32,
+     48
+    ],
+    [
+     448,
+     240,
+     32,
+     48
+    ]
+   ],
+   "note": "frames by state: 0..3 = crystals lit",
+   "sheet": "court.png"
+  },
+  "door_vow_open": {
+   "rect": [
+    480,
+    240,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "court.png"
+  },
+  "door_throne": {
+   "rect": [
+    0,
+    288,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     288,
+     48,
+     48
+    ],
+    [
+     48,
+     288,
+     48,
+     48
+    ]
+   ],
+   "note": "glass boss door; frames by state: 0 = closed, 1 = open (art only: use door_throne_open for the walkable doorway)",
+   "sheet": "court.png"
+  },
+  "door_throne_closed": {
+   "rect": [
+    96,
+    288,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "court.png"
+  },
+  "door_throne_open": {
+   "rect": [
+    144,
+    288,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "court.png"
+  },
+  "throne_glass": {
+   "rect": [
+    192,
+    288,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "court.png"
+  },
+  "mirror_tall": {
+   "rect": [
+    224,
+    288,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 2,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     224,
+     288,
+     16,
+     48
+    ],
+    [
+     240,
+     288,
+     16,
+     48
+    ]
+   ],
+   "note": "full-length mirror (door kind mirror); frames by state: 0 = dull, 1 = active; the anchor cell is the walk-in cell",
+   "sheet": "court.png"
+  },
+  "glass_bench": {
+   "rect": [
+    256,
+    288,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "court.png"
+  },
+  "mirror_great": {
+   "rect": [
+    0,
+    336,
+    96,
+    80
+   ],
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     336,
+     96,
+     80
+    ],
+    [
+     96,
+     336,
+     96,
+     80
+    ],
+    [
+     192,
+     336,
+     96,
+     80
+    ]
+   ],
+   "note": "the King's great mirror, 6 x 5 tiles, in the north face; frames by state: 0 = whole (the town), 1 = shattered, 2 = empty frame",
+   "sheet": "court.png"
+  },
+  "chapel_hollow": {
+   "rect": [
+    0,
+    48,
+    144,
+    160
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    9
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     -6
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     -6
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     -6
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "signAt": [
+    5,
+    -1
+   ],
+   "sheet": "hollow.png"
+  },
+  "clocktower": {
+   "rect": [
+    144,
+    48,
+    80,
+    144
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    8
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 5,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "handsAt": [
+    1,
+    -4
+   ],
+   "sheet": "hollow.png"
+  },
+  "hall_hollow": {
+   "rect": [
+    224,
+    48,
+    176,
+    144
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    8
+   ],
+   "footprint": [
+    [
+     0,
+     -6
+    ],
+    [
+     0,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     -6
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     -6
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     -6
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     -6
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     -6
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -6
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     -6
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     8,
+     -6
+    ],
+    [
+     8,
+     -5
+    ],
+    [
+     8,
+     -4
+    ],
+    [
+     8,
+     -3
+    ],
+    [
+     8,
+     -2
+    ],
+    [
+     8,
+     -1
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     9,
+     -6
+    ],
+    [
+     9,
+     -5
+    ],
+    [
+     9,
+     -4
+    ],
+    [
+     9,
+     -3
+    ],
+    [
+     9,
+     -2
+    ],
+    [
+     9,
+     -1
+    ],
+    [
+     9,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    5,
+    0
+   ],
+   "collision": "solid",
+   "signAt": [
+    7,
+    -1
+   ],
+   "sheet": "hollow.png"
+  },
+  "inn_hollow": {
+   "rect": [
+    0,
+    208,
+    144,
+    112
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "signAt": [
+    2,
+    -1
+   ],
+   "sheet": "hollow.png"
+  },
+  "house_hollow_m": {
+   "rect": [
+    144,
+    208,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "shop_hollow": {
+   "rect": [
+    240,
+    208,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "signAt": [
+    2,
+    -1
+   ],
+   "sheet": "hollow.png"
+  },
+  "smithy_hollow": {
+   "rect": [
+    336,
+    208,
+    112,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "signAt": [
+    3,
+    -1
+   ],
+   "sheet": "hollow.png"
+  },
+  "house_hollow_s": {
+   "rect": [
+    0,
+    320,
+    80,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "hollow.png"
+  },
+  "gate_hollow": {
+   "rect": [
+    80,
+    320,
+    112,
+    64
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "signAt": [
+    2,
+    -2
+   ],
+   "note": "sign_hollow_gate (32 x 16) covers the blank board when drawn at signAt (its top-left cell)",
+   "sheet": "hollow.png"
+  },
+  "toll_ruin": {
+   "rect": [
+    192,
+    320,
+    112,
+    64
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "note": "roofless; interior cells (1..4, -1) and the gap (3, 0) are walkable",
+   "sheet": "hollow.png"
+  },
+  "cairn": {
+   "rect": [
+    0,
+    432,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "hollow.png"
+  },
+  "signpost_blank": {
+   "rect": [
+    16,
+    432,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "hollow.png"
+  },
+  "floodwrack": {
+   "rect": [
+    32,
+    432,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "hollow.png"
+  },
+  "tree_birch_silver": {
+   "rect": [
+    64,
+    432,
+    80,
+    96
+   ],
+   "anchor": [
+    2,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 5,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "recoloured from props.json tree_willow",
+   "sheet": "hollow.png"
   }
  },
  "overlays": {
@@ -5728,6 +9006,39 @@
    "w": 16,
    "h": 16,
    "collision": "none"
+  },
+  "chalk_crown": {
+   "x": 192,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "Nico's chalk crown decal (translucent)",
+   "sheet": "hollow.png"
+  },
+  "reeds_0": {
+   "x": 208,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
+  },
+  "reeds_1": {
+   "x": 224,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
+  },
+  "reeds_2": {
+   "x": 240,
+   "y": 400,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "hollow.png"
   }
  }
 }

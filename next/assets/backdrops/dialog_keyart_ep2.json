@@ -1,0 +1,13 @@
+{
+ "image": "dialog_keyart_ep2.png",
+ "w": 384,
+ "h": 216,
+ "cell": 1,
+ "note": "Episode 2 title cards and CREDITS_EP2: cell 1 darkened, vignette",
+ "extraColors": [
+  "#453665",
+  "#5b4b76",
+  "#794e6d"
+ ],
+ "colors": 38
+}

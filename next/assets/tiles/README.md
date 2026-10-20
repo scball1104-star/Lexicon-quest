@@ -10,6 +10,8 @@ change the generator and rebuild. Everything is 16 px tiles, top-left light, col
 | `town.png` | 11 prefab buildings (top) + modular kit: roofs, walls, doors, windows, awnings, fences, bridges, well, stalls, signs, banners, stairs |
 | `archive.png` | Rootbound Archive: per-floor kits for F1 / F2 / F3 (see *Per-floor Archive kits* below); wall systems `archive` (stone cap around a flat `#14101e` void, two-tone face) and `archive_roots` (same cap and face over the old root-choked earth fill), archive floor, pillar, shelves (incl. moving shelf), tables, candelabra, braziers, roots, plates, switches, crystal switch, push block, doors (key, locked, boss), cracked wall, stairs, hidden-ink pieces, lantern pedestal |
 | `interior.png` | 3 interior wall systems, wall windows, counter, beds, tables, chairs, hearth, goods shelves, barrels/pots/crates/sacks, rug, stairs |
+| `court.png` | Episode 2, the Court of Mirrors (`court.py` = `court_kit.py` + `court_props.py`): 3 floors, 3 wall systems (+ `_out`), the beam mechanism, glass doors, fonts, throne, mirrors, portraits (see *Episode 2* below) |
+| `hollow.png` | Episode 2, the Nameless Hollow and the Fading Road (`hollow.py`): `mere_water`, 10 prefabs, slate and silver roof chunks, blank and lettered signs, clock hands, road and shore props, `court_far` |
 | `tiles.json` | every id below with its rect, collision and autotile/anim data |
 
 ## tiles.json
@@ -166,6 +168,50 @@ maps also break the pool and pit outlines into ragged cell shapes where no prop 
 
 Previews: `python w8_swatch.py <terrain or wall top ids>` (out/w8/swatch.png, 3x) and `python w8_props_sheet.py`
 (out/w8/props.png); whole floors with `python ../../maps/preview.py archive_f1 --crop=0,0,40,30 --scale=2`.
+
+## Episode 2 (E2-tiles, EPISODE2_PLAN 5.1 and 9.1)
+
+New sheets only; no existing rect moved (`python e2_idcheck.py` compares against a snapshot). New keys:
+`reflect: true` on `glass_floor`, `gallery_floor`, `throne_floor`, `mere_water` (the field draws actors flipped
+over them); `beam: 'pass'` on `glass_slot` / `glass_slot_face` (solid to walkers, beams pass).
+
+**State frames.** An object with several looks carries `frames: [[x, y, w, h], ...]` indexed by the event's state
+(the props.json convention); `rect` is `frames[0]`. `resolveProp` should read `m.frames[p.state]` like it does for
+props. `mirror_stand`, `mirror_heavy`: 0 = '/', 1 = '\' (backslash). `receptor`, `receptor_wall`: 0 dark, 1 lit.
+`door_vow`: 0..3 crystals lit, 4 open (art); `door_vow_closed` has frames 0..3; `door_vow_open` is the walkable
+doorway (`doorAt [0,0]`). `door_throne`: 0 closed, 1 open (art); `door_throne_closed` / `_open` follow the
+`GATE_SPRITES` pair convention, as do `door_glass_key_*` (glass key) and `door_glass_*` (receptor gate).
+`mirror_tall`: 0 dull, 1 active (16 x 48, footprint none, `doorAt [0,0]`: the anchor cell is the walk-in cell).
+`mirror_great`: 0 whole (the town), 1 shattered, 2 empty frame (96 x 80, set in a north face, bottom row solid).
+Animated (`anim`): `beam_window`, `beam_lens`, `font_silver`.
+
+| Court group | ids |
+|---|---|
+| Floors (A2, fill) | `glass_floor` (F1 silver octagon slabs, blue glass corners), `gallery_floor` (F2 violet marquetry), `throne_floor` (F3 black mirror) |
+| Walls (`<sys>_top/_face`, `<sys>_out_top/_out_face`, W8 depth scheme) | `court` (silver-white cap, arched mirror panels), `court_gallery` (violet cap, damask over wainscot), `court_throne` (cracked slate cap, crown frieze, ashlar) |
+| Beam pieces | `mirror_stand`, `mirror_heavy`, `beam_window` (face piece), `beam_lens`, `receptor`, `receptor_wall` (face piece) |
+| Tiles | `glass_bridge_<h\|v>_<dim\|lit>` (dim = `pit`, lit = `none`), `glass_slot`, `glass_slot_face`, `inlay_<h\|v\|corner_ne\|corner_nw\|corner_se\|corner_sw\|socket>` and the same with `_lit` (corner_<a><b> joins sides a and b) |
+| Breakables | `glass_pane_cracked` / `glass_pane_broken` (16 x 32 face), `glass_pane_cracked_top` / `_broken_top` (band cell) |
+| Doors, stairs | `door_glass_key_<closed\|open>`, `door_glass_<closed\|open>` (32 x 32), `door_vow*` (32 x 48), `door_throne*` (48 x 48), `stairs_glass_up`, `stairs_glass_down` |
+| Furniture, decor | `font_silver` (32 x 32), `throne_glass` (32 x 48), `glass_bench`, `mirror_tall`, `mirror_great`, `mirror_wall` (16 x 32 face), `portrait_<blank\|blank_2\|blank_3\|child\|keeper_empty\|king>` (32 x 32 face overlays; keeper_empty shows the wall through), `crowned_reflection` (32 x 48 translucent floor decal, upside down, under the empty throne) |
+
+| Hollow group | ids |
+|---|---|
+| Terrain | `mere_water` (A1, 3 frames at 420 ms, still water, calm waterline, `reflect`) |
+| Prefabs (`kind: building`) | `hall_hollow`, `inn_hollow`, `shop_hollow`, `smithy_hollow`, `chapel_hollow` (empty bell frame), `clocktower` (handless face), `house_hollow_s`, `house_hollow_m`, `gate_hollow`, `toll_ruin` (roofless: interior cells (1..4,-1) and the gap (3,0) walkable) |
+| Roof chunks | `roof_<slate\|silver>_<ridge\|field\|eave>_<l\|m\|r>` (blue slate = the existing `roof_blue_*`) |
+| Signs | `sign_blank`, `sign_hollow_<inn\|shop\|smithy\|chapel\|hall>` (16 x 16), `sign_hollow_gate_blank`, `sign_hollow_gate` (32 x 16), `clock_hands` (32 x 32), overlay `chalk_crown` |
+| Road and shore | objects `cairn`, `signpost_blank`, `floodwrack` (2 x 1), `tree_birch_silver` (5 x 6, the props willow recoloured); overlays `reeds_0..2`; tile `court_far` (128 x 96, overhead) |
+
+**signAt / handsAt.** Each Hollow shop prefab hangs a blank board at a tile-aligned cell, recorded as `signAt`
+(relative to the anchor, like `doorAt`); `sign_hollow_<kind>` covers that board exactly on the same cell
+(`gate_hollow`: `sign_hollow_gate` with its top-left at `signAt`). `clocktower.handsAt` is the top-left cell of
+`clock_hands`. Buildings paint after ground overlays, so put the restored signs and the hands in the map's
+`overhead` list (flag-gated, `if: 'nh_restored'`), not in `overlays`.
+
+Previews: `python e2_scenes.py` (out/e2/: `court_f1_room` is the beam teaching room with a mock beam,
+`court_f2_well`, `court_f3_hub`, `court_throne`, `hollow_square`, `court_f<1..3>_plain`), `python e2_contact.py
+court hollow` (out/e2/contact_<sheet>.png, every object with all frames), `python e2_bits.py <ids>`.
 
 ## Tile ids (16 px unless the entry says otherwise)
 

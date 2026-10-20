@@ -1,0 +1,17 @@
+{
+ "image": "battle_throne.png",
+ "w": 384,
+ "h": 216,
+ "cell": 1,
+ "note": "the Nameless King: a tight crop on the glass towers, violet grade",
+ "extraColors": [
+  "#703d7a",
+  "#422e6c",
+  "#181951",
+  "#5a5192"
+ ],
+ "colors": 37,
+ "bandY": 118,
+ "bandAlpha": 0.48,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

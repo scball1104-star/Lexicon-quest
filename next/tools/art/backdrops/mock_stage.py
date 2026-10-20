@@ -34,6 +34,11 @@ SETUPS = {
     'boss': ('battle_boss', ['archivore', 'lost_page_1'], 0.0),
     'hollow': ('battle_hollow', ['thornback_wolf', 'ink_blot', 'thornback_wolf'], 0.0),
     'hollow_alpha': ('battle_hollow', ['briar_alpha', 'thornback_wolf'], 0.0),
+    # E2-tiles: Episode 2 stages with Episode 1 stand-in enemies (the E2 sprites land in wave 10b)
+    'east_road': ('battle_east_road', ['briar_wolf', 'moss_scarab', 'briar_wolf'], 0.0),
+    'court': ('battle_court', ['page_wraith', 'tome_golem', 'ink_slime'], 0.0),
+    'court_deep': ('battle_court_deep', ['ink_wraith', 'tome_golem', 'page_wraith'], 0.0),
+    'throne': ('battle_throne', ['archivore'], 0.0),
 }
 
 

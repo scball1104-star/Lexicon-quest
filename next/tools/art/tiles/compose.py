@@ -244,6 +244,9 @@ def draw_tile(db, cv, tid, x, y, frame=0):
 def draw_object(db, cv, o, frame, part='base'):
     m = db.objects[o['t']]
     rx, ry, rw, rh = m['rect']
+    if o.get('state') is not None and m.get('frames'):
+        # E2-tiles: state frames (mirrors '/' '\', receptors dark/lit, doors by crystals lit), like props.json
+        rx, ry, rw, rh = m['frames'][o['state']]
     if m.get('anim'):
         seq = m['anim']['frames']
         rx += seq[frame % len(seq)] * m['anim']['frameDx']

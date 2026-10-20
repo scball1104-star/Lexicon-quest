@@ -1,0 +1,13 @@
+{
+ "image": "battle_east_road.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "Fading Road battle stage: misty lowland at dusk, silver birches, the mere and a far glint of the Court (composed)",
+ "extraColors": [],
+ "colors": 45,
+ "composed": "tools/art/backdrops/compose_east_road.py (east_road)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}
