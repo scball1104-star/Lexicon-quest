@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'a9e03e55a6e7';
+const SHELL_VERSION = '4f324fdd37ee';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -197,6 +197,8 @@ const PRECACHE = [
   'assets/backdrops/battle_archive.png',
   'assets/backdrops/battle_boss.json',
   'assets/backdrops/battle_boss.png',
+  'assets/backdrops/battle_hollow.json',
+  'assets/backdrops/battle_hollow.png',
   'assets/backdrops/battle_valley.json',
   'assets/backdrops/battle_valley.png',
   'assets/backdrops/battle_valley_dusk.json',
