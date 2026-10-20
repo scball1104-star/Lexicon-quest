@@ -124,15 +124,24 @@ def build_battle():
     sheet, rects, origin = AA.append(sheet, rects, origin, HE.atlas_frames())
     for eid in HE.IDS:
         anims.update(AA.enemy_anims(eid, rects))
+    # E2-sprites: the Episode 2 foes (ep2_enemies.py) and the Other Selves (ep2_reflections.py), base and derived
+    # frames in a fourth block under everything above, so no existing rect moves
+    import ep2_enemies as E2, ep2_reflections as RF
+    sheet, rects, origin = AA.append(sheet, rects, origin, E2.atlas_frames() + RF.battle_frames())
+    for eid in list(E2.IDS) + list(RF.IDS):
+        anims.update(AA.enemy_anims(eid, rects))
     AA.save_indexed(sheet, os.path.join(DST, 'enemies_battle.png'))
     meta = {'image': 'enemies_battle.png', 'frames': rects,
             'origin': origin,
             'anims': anims,
             'facing': 'right',
-            'external': {'echo_warden': 'bosses_battle', 'archivore': 'bosses_battle', 'lost_page': 'bosses_battle'},
-            'notes': 'Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted.'}
+            'external': {'echo_warden': 'bosses_battle', 'archivore': 'bosses_battle', 'lost_page': 'bosses_battle',
+                         'nameless_king': 'bosses_battle', 'nameless_king_unmasked': 'bosses_battle'},
+            'notes': 'Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted. E2-sprites: the Episode 2 foes (mist_wolf, glassback, quicksilver, quicksilver_bead, glint_wisp, glass_sentinel, borrowed_shadow, faceless_knight, false_sorrow, false_pride, shard_swarm; ep2_enemies.py) and the Other Selves (refl_hero, refl_mira, refl_bram; ep2_reflections.py) have base + idle_1, attack, hurt, die_0..2, and cast for glint_wisp, borrowed_shadow, false_sorrow and the reflections; 1x, untinted. nameless_king and nameless_king_unmasked live in bosses_battle.json.'}
     write_json(os.path.join(DST, 'enemies_battle.json'), meta)
     contact(list(e.items()) + list(HE.base().items()), os.path.join(OUT, 'enemies_battle_4x.png'), scale=4, cols=5, title='enemies_battle at 4x (facing right)')
+    contact([(n, f) for n, f in E2.base().items()] + [(n, f) for n, f, _, _ in RF.battle_frames() if n in RF.IDS],
+            os.path.join(OUT, 'enemies_battle_ep2_4x.png'), scale=4, cols=5, title='enemies_battle Episode 2 at 4x (facing right)')
     return meta
 
 
@@ -181,12 +190,41 @@ def build_field():
             names.append(n)
         anims[f'{vid}_idle'] = {'frames': names, 'fps': 4, 'loop': True}
         sizes[vid] = {'size': [w, h], 'origin': [w // 2, h - 1]}
+    # E2-sprites: the Episode 2 foes (their kin's grids in their own palettes, the shard swarm's own grid), the Other
+    # Selves (party_field frames in glass, left stand and step) and the Nameless King's avatar (front and back).
+    # Appended after every earlier frame on the same shelf, so no existing rect moves.
+    import enemy_field_ep2 as F2, ep2_reflections as RF, king_avatar as KA
+    ep2 = []
+    for vid, (src_id, pal) in F2.VARIANTS_EP2.items():
+        d = EF.FIELD[src_id]
+        leg = P.resolve(pal, 'field_' + vid)
+        ep2.append((vid, [parse_grid(grid_from_text(g), leg, w=d['size'][0], h=d['size'][1]) for g in d['frames']], 4))
+    leg = P.resolve(F2.SWARM['pal'], 'field_shard_swarm')
+    ep2.append(('shard_swarm', [parse_grid(grid_from_text(g), leg, w=16, h=16) for g in F2.SWARM['frames']], 5))
+    for rid, blk in RF.field_blocks().items():
+        ep2.append((rid, [blk['left'][0], blk['left'][1]], 4))
+    kf = KA.frames()
+    ep2.append(('nameless_king_avatar', kf[0:2], 2))
+    ep2.append(('nameless_king_avatar_back', kf[2:4], 2))
+    for vid, imgs, fps in ep2:
+        names = []
+        for i, im in enumerate(imgs):
+            n = f'{vid}_{i}'
+            sh.add(n, im)
+            items.append((n, im))
+            names.append(n)
+        anims[f'{vid}_idle'] = {'frames': names, 'fps': fps, 'loop': True}
+        h, w = imgs[0].shape[:2]
+        sizes[vid] = {'size': [w, h], 'origin': [w // 2, h - 1]}
     sheet, rects = sh.render()
     save_png(sheet, os.path.join(DST, 'enemies_field.png'))
     meta = {'image': 'enemies_field.png', 'frames': rects, 'anims': anims, 'sprites': sizes, 'facing': 'left',
-            'notes': 'Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2.'}
+            'notes': 'Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2. E2-sprites: Episode 2 foes as the grids of their Episode 1 kin in their own palettes, shard_swarm (16x16), refl_hero/refl_mira/refl_bram (24x32, left stand and step; the 4-direction walking versions are in npcs.json and win the sprite lookup), nameless_king_avatar (40x50, frontal) and nameless_king_avatar_back (the same seen from behind; a separate sprite id).'}
     write_json(os.path.join(DST, 'enemies_field.json'), meta)
     contact(items, os.path.join(OUT, 'enemies_field_6x.png'), scale=6, cols=6, title='enemies_field at 6x (facing left)')
+    e2n = {f'{v}_{i}' for v, imgs, _ in ep2 for i in range(len(imgs))}
+    contact([(n, im) for n, im in items if n in e2n], os.path.join(OUT, 'enemies_field_ep2_6x.png'), scale=6, cols=8,
+            title='enemies_field Episode 2 at 6x (facing left)')
     return meta
 
 

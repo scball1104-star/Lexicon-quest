@@ -204,6 +204,102 @@
    887,
    22,
    19
+  ],
+  "nameless_king": [
+   0,
+   1279,
+   142,
+   138
+  ],
+  "nameless_king_idle_1": [
+   0,
+   1138,
+   142,
+   139
+  ],
+  "nameless_king_attack": [
+   144,
+   1279,
+   144,
+   138
+  ],
+  "nameless_king_hurt": [
+   146,
+   1419,
+   146,
+   136
+  ],
+  "nameless_king_cast": [
+   0,
+   984,
+   154,
+   152
+  ],
+  "nameless_king_die_0": [
+   144,
+   1138,
+   142,
+   139
+  ],
+  "nameless_king_die_1": [
+   0,
+   1559,
+   142,
+   132
+  ],
+  "nameless_king_die_2": [
+   288,
+   1559,
+   142,
+   99
+  ],
+  "nameless_king_unmasked": [
+   290,
+   1279,
+   142,
+   138
+  ],
+  "nameless_king_unmasked_idle_1": [
+   288,
+   1138,
+   142,
+   139
+  ],
+  "nameless_king_unmasked_attack": [
+   0,
+   1419,
+   144,
+   138
+  ],
+  "nameless_king_unmasked_hurt": [
+   294,
+   1419,
+   146,
+   136
+  ],
+  "nameless_king_unmasked_cast": [
+   156,
+   984,
+   154,
+   152
+  ],
+  "nameless_king_unmasked_die_0": [
+   312,
+   984,
+   142,
+   142
+  ],
+  "nameless_king_unmasked_die_1": [
+   144,
+   1559,
+   142,
+   132
+  ],
+  "nameless_king_unmasked_die_2": [
+   0,
+   1693,
+   142,
+   96
   ]
  },
  "origin": {
@@ -342,6 +438,70 @@
   "lost_page_die_2": [
    11,
    18
+  ],
+  "nameless_king": [
+   72,
+   137
+  ],
+  "nameless_king_idle_1": [
+   72,
+   138
+  ],
+  "nameless_king_attack": [
+   71,
+   137
+  ],
+  "nameless_king_hurt": [
+   75,
+   135
+  ],
+  "nameless_king_cast": [
+   72,
+   151
+  ],
+  "nameless_king_die_0": [
+   72,
+   138
+  ],
+  "nameless_king_die_1": [
+   72,
+   131
+  ],
+  "nameless_king_die_2": [
+   72,
+   98
+  ],
+  "nameless_king_unmasked": [
+   72,
+   137
+  ],
+  "nameless_king_unmasked_idle_1": [
+   72,
+   138
+  ],
+  "nameless_king_unmasked_attack": [
+   71,
+   137
+  ],
+  "nameless_king_unmasked_hurt": [
+   75,
+   135
+  ],
+  "nameless_king_unmasked_cast": [
+   72,
+   151
+  ],
+  "nameless_king_unmasked_die_0": [
+   72,
+   141
+  ],
+  "nameless_king_unmasked_die_1": [
+   72,
+   131
+  ],
+  "nameless_king_unmasked_die_2": [
+   72,
+   95
   ]
  },
  "aliases": {
@@ -416,7 +576,41 @@
    ],
    "fps": 1.6667,
    "loop": true
+  },
+  "nameless_king_idle": {
+   "frames": [
+    "nameless_king",
+    "nameless_king_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "nameless_king_die": {
+   "frames": [
+    "nameless_king_die_0",
+    "nameless_king_die_1",
+    "nameless_king_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "nameless_king_unmasked_idle": {
+   "frames": [
+    "nameless_king_unmasked",
+    "nameless_king_unmasked_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "nameless_king_unmasked_die": {
+   "frames": [
+    "nameless_king_unmasked_die_0",
+    "nameless_king_unmasked_die_1",
+    "nameless_king_unmasked_die_2"
+   ],
+   "fps": 15,
+   "loop": false
   }
  },
- "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin."
+ "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin. E2-sprites: nameless_king (veiled: a glass veil in the hood) and nameless_king_unmasked (phase 3: the tired grey-bearded face), each with _idle_1, _attack (the glass sword raised), _hurt, _cast (crown and shards glow: Keeping, Mirror Rain, Cold Mirror), _die_0..2; 1x inside the 160x144 boss cell."
 }

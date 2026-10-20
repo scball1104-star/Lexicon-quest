@@ -233,8 +233,34 @@ def build():
     small.append(('npc_dough_0', parse_grid(grid_from_text(SP.DOUGH_0), leg, w=16, h=16)))
     small.append(('npc_dough_1', parse_grid(grid_from_text(SP.DOUGH_1), leg, w=16, h=16)))
     small_rows = (len(small) + (W // 16) - 1) // (W // 16)
-    sheet = blank(W, Hh + small_rows * 16)
+    # E2-sprites: the Episode 2 townsfolk (npc_specs.NPCS_EP2) and the Other Selves (party_field frames in glass,
+    # ep2_reflections.py) as blocks in their own bands UNDER the animals band, so no Episode 1 rect moves
+    import ep2_reflections as RF
+    e2_blocks = []
+    for nid, spec in S.NPCS_EP2.items():
+        fr = npc_frames(nid, spec)
+        e2_blocks.append((nid, fr))
+    for rid, blk in RF.field_blocks().items():
+        e2_blocks.append((rid, blk))
+    e2_list = []
+    for nid, fr in e2_blocks:
+        blk = []
+        for d in DIRS:
+            for i, f in enumerate(fr[d]):
+                blk.append((f'{nid}_{d}_{i}' if i < 3 else f'{nid}_{d}_blink', f))
+            anims[f'{nid}_walk_{d}'] = {'frames': [f'{nid}_{d}_1', f'{nid}_{d}_0', f'{nid}_{d}_2', f'{nid}_{d}_0'], 'fps': 6, 'loop': True}
+            anims[f'{nid}_idle_{d}'] = {'frames': [f'{nid}_{d}_0'] * 26 + [f'{nid}_{d}_blink'] + [f'{nid}_{d}_0'], 'fps': 8, 'loop': True}
+        e2_list.append((nid, blk))
+    e2_top = Hh + small_rows * 16
+    e2_rows = (len(e2_list) + per - 1) // per
+    sheet = blank(W, e2_top + e2_rows * 128)
     rects = {}
+    for bi, (nid, blk) in enumerate(e2_list):
+        bx, by = (bi % per) * 96, e2_top + (bi // per) * 128
+        for i, (n, f) in enumerate(blk):
+            x, y = bx + (i % 4) * 24, by + (i // 4) * 32
+            sheet[y:y + 32, x:x + 24] = f
+            rects[n] = [x, y, 24, 32]
     for bi, (nid, blk) in enumerate(blocks):
         bx, by = (bi % per) * 96, (bi // per) * 128
         for i, (n, f) in enumerate(blk):
@@ -255,11 +281,16 @@ def build():
     anims['npc_dough_wobble'] = {'frames': ['npc_dough_0', 'npc_dough_1'], 'fps': 4, 'loop': True}
     save_png(sheet, os.path.join(DST, 'npcs.png'))
     sprites = {nid: {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid, sp in S.NPCS.items()}
+    for nid, sp in S.NPCS_EP2.items():
+        sprites[nid] = {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS}
+    for rid in RF.IDS:
+        sprites[rid] = {'name': {'refl_hero': 'Nameless Reflection', 'refl_mira': "Mira's Reflection",
+                                 'refl_bram': "Bram's Reflection"}[rid], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS}
     for a in ('cat', 'dog', 'chicken', 'duck'):
         sprites[f'animal_{a}'] = {'cell': [16, 16], 'origin': [8, 15], 'faces': 'left', 'flipForRight': True}
     sprites['npc_dough'] = {'name': "Oren's runaway starter", 'cell': [16, 16], 'origin': [8, 15], 'faces': 'front'}
     meta = {'image': 'npcs.png', 'cell': [24, 32], 'origin': [12, 31],
-            'layout': 'humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the bottom band.',
+            'layout': 'humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the band under the Episode 1 blocks; the Episode 2 townsfolk and the Other Selves (refl_hero, refl_mira, refl_bram) in their own bands under the animals (E2-sprites).',
             'sprites': sprites, 'frames': rects, 'anims': anims}
     write_json(os.path.join(DST, 'npcs.json'), meta)
     # previews
@@ -269,6 +300,18 @@ def build():
         for dd in DIRS:
             items.append((f'{nid[4:]} {dd}', d[f'{nid}_{dd}_0']))
     contact(items, os.path.join(OUT, 'npcs_stand_4x.png'), scale=4, cols=8, title='NPCs: down, left, right, up (stand) at 4x')
+    e2i = []
+    for nid, blk in e2_list:
+        d = dict(blk)
+        for dd in DIRS:
+            e2i.append((f'{nid[4:] if nid.startswith("npc_") else nid} {dd}', d[f'{nid}_{dd}_0']))
+    contact(e2i, os.path.join(OUT, 'npcs_ep2_stand_4x.png'), scale=4, cols=8, title='Episode 2 NPCs and the Other Selves: down, left, right, up (stand) at 4x')
+    e2w = []
+    for nid, blk in e2_list:
+        d = dict(blk)
+        e2w += [(nid[4:] if nid.startswith('npc_') else nid, d[f'{nid}_down_1']), ('', d[f'{nid}_down_0']), ('', d[f'{nid}_down_2']),
+                ('', d[f'{nid}_left_1']), ('', d[f'{nid}_left_0']), ('', d[f'{nid}_left_2'])]
+    contact(e2w, os.path.join(OUT, 'npcs_ep2_walk_4x.png'), scale=4, cols=12, title='Episode 2 walk frames (down A/stand/B, left A/stand/B)')
     contact(small, os.path.join(OUT, 'animals_dough_6x.png'), scale=6, cols=7, title='animals + npc_dough at 6x')
     walk = []
     for nid, blk in blocks:

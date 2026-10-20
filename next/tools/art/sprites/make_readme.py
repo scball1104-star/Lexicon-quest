@@ -67,6 +67,20 @@ def write(extras):
         'npc_scholar': 'navy bun, glasses, blue robe, book',
         'npc_parent': 'auburn hair, green dress, cream apron',
         'npc_bellkeeper': 'balding, grey beard, chapel-purple robe, lantern',
+        # Episode 2 (E2-sprites, npc_specs.NPCS_EP2)
+        'npc_elian': 'about twenty, sandy hair, wine-red mayor coat far too big (long), gold trim, ledger',
+        'npc_anwen': 'grey habit and hood with silver thread, grey bun, the chapel register',
+        'npc_tovin': 'old ferryman, grey hair and stubble, ochre oilskin, oar',
+        'npc_lena': 'greying bun, spectacles, plum dress, leather tool apron',
+        'npc_vessa': 'ginger ponytail, brass goggles pushed up, leather apron, glowing glass in hand',
+        'npc_nico': 'errand boy (child body), dark hair, ochre tunic',
+        'npc_sava': 'black hair, green dress, gold-patterned shawl',
+        'npc_corin': 'the Hollow watch: helmet, slate-grey tunic, spear',
+        'npc_orla': 'white bun, deep blue dress, teal shawl',
+        'npc_wren': 'auburn ponytail, mustard dress, cream apron, mug',
+        'npc_fitch': 'stout, mustache, plum shirt, leather apron',
+        'npc_vex': 'silver hair, long dark leather coat, crimson scarf',
+        'npc_aurel': 'balding, long grey beard, silver robe, no crown',
     }
     for k in npc_ids:
         A('| `%s` | %s | %s |' % (k, npcs['sprites'][k].get('name', ''), looks.get(k, '')))
@@ -75,6 +89,9 @@ def write(extras):
       ' with frames `<id>_{sit_0,sit_1,walk_0}` (cat, dog) or `<id>_{stand_0,peck_0|stand_1,walk_0}`')
     A('(chicken, duck); anims `<id>_idle`, `<id>_walk`. `npc_dough` (Oren\'s runaway starter): `npc_dough_0/1`,')
     A('anim `npc_dough_wobble`.')
+    A('Episode 2 (E2-sprites): the 13 townsfolk above from `npc_elian` on, and the Other Selves `refl_hero`, `refl_mira`,')
+    A('`refl_bram` (the party_field frames in a silver-violet glass ramp, white eyes, the hero with a blank face; the cutscenes')
+    A('spawn them as walking actors), sit in their own bands UNDER the animals band, so no Episode 1 rect moved.')
     A('')
     A('## props.png / .json')
     A('`objects.<id>`: `frame [x,y,w,h]`, `anchor [px,py]` (bottom-centre of the footprint inside the frame),')
@@ -110,6 +127,20 @@ def write(extras):
     A('Recolours: page_wraith and bookmite are parchment/ink gradient maps, briar_wolf brown fur + green briar,')
     A('ink_wraith ink-violet. Idle motion, hit flash and death dissolve are procedural (DESIGN 6.3).')
     A('')
+    A('Episode 2 (E2-sprites), a fourth block under everything above (no older rect moved), 1x, untinted:')
+    A('`mist_wolf` (cell 2 in its own silver-grey, pale blue mane), `glassback` (cell 3, silverglass shell, steel legs),')
+    A('`quicksilver` and `quicksilver_bead` (cell 0 in liquid mercury at 48 and 26 px), `glint_wisp` (cell 1, pale silver-lilac),')
+    A('`glass_sentinel` (cell 4, slate with glass ribbons and a cyan core), `borrowed_shadow` (cell 1, violet-black, silver')
+    A('eyes, rim-lit), `faceless_knight` (cell 5, slate and black, a pale blank faceplate), `false_sorrow` (cell 7 in its')
+    A('own icy white-blue), `false_pride` (cell 5, gold and white, crowned), `shard_swarm` (six hand-built glass shards) and')
+    A('the Other Selves `refl_hero`, `refl_mira`, `refl_bram` (party_battle frames flipped to face right, glass ramp, white')
+    A('eyes, the hero blank: base = idle_0, idle_1, attack = strike, hurt, cast). Every one has `_idle_1`, `_attack`, `_hurt`,')
+    A('`_die_0..2`; `_cast` for glint_wisp, borrowed_shadow, false_sorrow and the reflections (others fall back to attack).')
+    A('Generators: `ep2_enemies.py`, `ep2_reflections.py`. The Nameless King (`ep2_king.py`, bosses.png cell 1 at 1x, 144x142')
+    A('inside the 160x144 boss cell, flipped so the glass sword is on the party side) is in bosses_battle: `nameless_king`')
+    A('(a glass veil in the hood) and `nameless_king_unmasked` (phase 3: a tired grey-bearded face), each with `_idle_1`,')
+    A('`_attack` (the sword raised), `_hurt`, `_cast` (crown and shards glow), `_die_0..2`; `external` maps both.')
+    A('')
     A('## enemies_field.png / .json  (visible map enemies, face LEFT)')
     A('`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: ' +
       ', '.join('`%s`' % k for k in ef['sprites']) + '.')
@@ -117,6 +148,11 @@ def write(extras):
     A('Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52, frontal, hovering')
     A('`sprites.archivore_avatar.hover` (5) px above its feet so the shadow shows; frames `_0` wings up, `_1` wings down,')
     A('`_2` level; anim `archivore_avatar_idle` plays 0, 2, 1, 2 (the field code alternates `_0` / `_1`).')
+    A('Episode 2 (E2-sprites, `chars/enemy_field_ep2.py`): each new foe on the grid of its Episode 1 kin in its own palette')
+    A('(`shard_swarm` has its own 16x16 grid); `refl_*_0/1` are the glass party_field left stand and step (the 4-direction')
+    A('versions in npcs.json win the actor lookup); `nameless_king_avatar` (`chars/king_avatar.py`, 40x50, frontal: crown')
+    A('of glass tines, the veil, blue cape, glass sword, four floating shards; `_0`/`_1` bob) and `nameless_king_avatar_back`')
+    A('(the same from behind, its own sprite id).')
     A('')
     A('## portraits.png / .json')
     A('`portraits.<id>` -> `{"48": frame, "32": frame}`; both sizes include a 1 px bevel frame and a dark backdrop.')
@@ -129,12 +165,16 @@ def write(extras):
     A('')
     A('Garrick and Pip are recoloured from the NPC paintings (iron-grey hair, chapel purple). No sources exist yet for')
     A('Oren, Edda, Holt, Cobb, Quill, Penny: the UI should fall back to no portrait for them.')
+    A('Episode 2: `elian`, `anwen`, `tovin`, `lena`, `aurel` are drawn from shapes in `chars/portraits_ep2.py` (no painted')
+    A('source exists) and finished like the NPC-painting portraits; `nameless_king` is a crop of bosses.png cell 1 with the')
+    A('glass veil sheen; `vex` is an alias of `silver_rogue` (`aliases`). No portraits for the other Hollow townsfolk.')
     A('')
     A('## ../ui/heads.png / .json  (timeline head icons, 12x12)')
     A('`head_<id>` for hero, mira, bram and every enemy and boss id: a 10x10 head on `#251d34` inside a 1 px `#14101e` frame.')
     A('Party heads are hand-pixeled and face front; enemy heads are crops of the field sprites, facing right. `origin` is')
     A('[0, 0] (draw top-left at the slot). The frame is neutral so the HUD can over-draw a side-coloured ring.')
-    A('Generated by `build_heads.py`.')
+    A('Generated by `build_heads.py`. Episode 2: every new foe; `head_refl_*` are the party heads in glass;')
+    A('`head_nameless_king` is the veil and crown of the avatar.')
     A('')
     A('## misc.png / .json')
     A('`shadow_small|medium|large|huge` (palette shadow_overlay at its alpha), `sparkle_0..2`, `dust_0..2`')

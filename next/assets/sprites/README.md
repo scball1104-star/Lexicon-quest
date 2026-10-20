@@ -41,11 +41,27 @@ Townsfolk ids (cast names from W1-content):
 | `npc_scholar` | Iris | navy bun, glasses, blue robe, book |
 | `npc_parent` | Hazel | auburn hair, green dress, cream apron |
 | `npc_bellkeeper` | Pip | balding, grey beard, chapel-purple robe, lantern |
+| `npc_elian` | Elian | about twenty, sandy hair, wine-red mayor coat far too big (long), gold trim, ledger |
+| `npc_anwen` | Sister Anwen | grey habit and hood with silver thread, grey bun, the chapel register |
+| `npc_tovin` | Tovin | old ferryman, grey hair and stubble, ochre oilskin, oar |
+| `npc_lena` | Lena | greying bun, spectacles, plum dress, leather tool apron |
+| `npc_vessa` | Vessa | ginger ponytail, brass goggles pushed up, leather apron, glowing glass in hand |
+| `npc_nico` | Nico | errand boy (child body), dark hair, ochre tunic |
+| `npc_sava` | Sava | black hair, green dress, gold-patterned shawl |
+| `npc_corin` | Corin | the Hollow watch: helmet, slate-grey tunic, spear |
+| `npc_orla` | Orla | white bun, deep blue dress, teal shawl |
+| `npc_wren` | Wren | auburn ponytail, mustard dress, cream apron, mug |
+| `npc_fitch` | Fitch | stout, mustache, plum shirt, leather apron |
+| `npc_vex` | Vex Quill | silver hair, long dark leather coat, crimson scarf |
+| `npc_aurel` | Aurel | balding, long grey beard, silver robe, no crown |
 | `npc_dough` | Oren's runaway starter |  |
 
 Animals (16x16, face LEFT, flip for right): `animal_cat`, `animal_dog`, `animal_chicken`, `animal_duck` with frames `<id>_{sit_0,sit_1,walk_0}` (cat, dog) or `<id>_{stand_0,peck_0|stand_1,walk_0}`
 (chicken, duck); anims `<id>_idle`, `<id>_walk`. `npc_dough` (Oren's runaway starter): `npc_dough_0/1`,
 anim `npc_dough_wobble`.
+Episode 2 (E2-sprites): the 13 townsfolk above from `npc_elian` on, and the Other Selves `refl_hero`, `refl_mira`,
+`refl_bram` (the party_field frames in a silver-violet glass ramp, white eyes, the hero with a blank face; the cutscenes
+spawn them as walking actors), sit in their own bands UNDER the animals band, so no Episode 1 rect moved.
 
 ## props.png / .json
 `objects.<id>`: `frame [x,y,w,h]`, `anchor [px,py]` (bottom-centre of the footprint inside the frame),
@@ -63,8 +79,8 @@ Chests: `chest_wood|iron|gold` with frames [closed, open]. `lamp_post` frames [u
 additive glow disc. `prop_letter` frames [plain, glint]. `pot` breaks to `pot_broken`.
 
 ## enemies_battle.png / .json, bosses_battle.png / .json  (face RIGHT, origin = bottom-centre)
-enemies_battle: `ink_slime`, `page_wraith`, `briar_wolf`, `moss_scarab`, `bookmite`, `tome_golem`, `ink_wraith`, `thornback_wolf`, `ink_blot`, `briar_alpha`.
-bosses_battle: `archivore`, `echo_warden`, `lost_page_0`, `lost_page_1`, `lost_page_2`, `lost_page` (anim `lost_page_flutter`).
+enemies_battle: `ink_slime`, `page_wraith`, `briar_wolf`, `moss_scarab`, `bookmite`, `tome_golem`, `ink_wraith`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `glass_sentinel`, `borrowed_shadow`, `faceless_knight`, `false_sorrow`, `false_pride`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`.
+bosses_battle: `archivore`, `echo_warden`, `lost_page_0`, `lost_page_1`, `lost_page_2`, `lost_page`, `nameless_king`, `nameless_king_unmasked` (anim `lost_page_flutter`).
 Derived frames (W6-anim, `anim_frames.py`): `<id>_idle_1`, `_attack`, `_hurt`, `_cast` (casters), `_devour`
 (Archivore), `_die_0..2`, Echo Warden stance sets; anims `<id>_idle` and `<id>_die`. Every frame has its own origin.
 Whisperwood Hollow (W8-art, `hollow_enemies.py`): `thornback_wolf` (old silver-violet fur, black-green bramble, bone
@@ -83,12 +99,31 @@ Judge them on the stages with `tools/art/backdrops/mock_stage.py` (out/mock_stag
 Recolours: page_wraith and bookmite are parchment/ink gradient maps, briar_wolf brown fur + green briar,
 ink_wraith ink-violet. Idle motion, hit flash and death dissolve are procedural (DESIGN 6.3).
 
+Episode 2 (E2-sprites), a fourth block under everything above (no older rect moved), 1x, untinted:
+`mist_wolf` (cell 2 in its own silver-grey, pale blue mane), `glassback` (cell 3, silverglass shell, steel legs),
+`quicksilver` and `quicksilver_bead` (cell 0 in liquid mercury at 48 and 26 px), `glint_wisp` (cell 1, pale silver-lilac),
+`glass_sentinel` (cell 4, slate with glass ribbons and a cyan core), `borrowed_shadow` (cell 1, violet-black, silver
+eyes, rim-lit), `faceless_knight` (cell 5, slate and black, a pale blank faceplate), `false_sorrow` (cell 7 in its
+own icy white-blue), `false_pride` (cell 5, gold and white, crowned), `shard_swarm` (six hand-built glass shards) and
+the Other Selves `refl_hero`, `refl_mira`, `refl_bram` (party_battle frames flipped to face right, glass ramp, white
+eyes, the hero blank: base = idle_0, idle_1, attack = strike, hurt, cast). Every one has `_idle_1`, `_attack`, `_hurt`,
+`_die_0..2`; `_cast` for glint_wisp, borrowed_shadow, false_sorrow and the reflections (others fall back to attack).
+Generators: `ep2_enemies.py`, `ep2_reflections.py`. The Nameless King (`ep2_king.py`, bosses.png cell 1 at 1x, 144x142
+inside the 160x144 boss cell, flipped so the glass sword is on the party side) is in bosses_battle: `nameless_king`
+(a glass veil in the hood) and `nameless_king_unmasked` (phase 3: a tired grey-bearded face), each with `_idle_1`,
+`_attack` (the sword raised), `_hurt`, `_cast` (crown and shards glow), `_die_0..2`; `external` maps both.
+
 ## enemies_field.png / .json  (visible map enemies, face LEFT)
-`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: `ink_slime`, `bookmite`, `moss_scarab`, `lost_page`, `page_wraith`, `ink_wraith`, `briar_wolf`, `tome_golem`, `echo_warden`, `archivore`, `archivore_avatar`, `thornback_wolf`, `ink_blot`, `briar_alpha`.
+`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: `ink_slime`, `bookmite`, `moss_scarab`, `lost_page`, `page_wraith`, `ink_wraith`, `briar_wolf`, `tome_golem`, `echo_warden`, `archivore`, `archivore_avatar`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `borrowed_shadow`, `glass_sentinel`, `faceless_knight`, `false_pride`, `false_sorrow`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`, `nameless_king_avatar`, `nameless_king_avatar_back`.
 `archivore_avatar` (W8-art, CRITIQUE_3 #10, `chars/archivore_avatar.py`): the boss on the field, the battle
 Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52, frontal, hovering
 `sprites.archivore_avatar.hover` (5) px above its feet so the shadow shows; frames `_0` wings up, `_1` wings down,
 `_2` level; anim `archivore_avatar_idle` plays 0, 2, 1, 2 (the field code alternates `_0` / `_1`).
+Episode 2 (E2-sprites, `chars/enemy_field_ep2.py`): each new foe on the grid of its Episode 1 kin in its own palette
+(`shard_swarm` has its own 16x16 grid); `refl_*_0/1` are the glass party_field left stand and step (the 4-direction
+versions in npcs.json win the actor lookup); `nameless_king_avatar` (`chars/king_avatar.py`, 40x50, frontal: crown
+of glass tines, the veil, blue cape, glass sword, four floating shards; `_0`/`_1` bob) and `nameless_king_avatar_back`
+(the same from behind, its own sprite id).
 
 ## portraits.png / .json
 `portraits.<id>` -> `{"48": frame, "32": frame}`; both sizes include a 1 px bevel frame and a dark backdrop.
@@ -100,7 +135,7 @@ Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52,
 | `bram` | portraits.webp cell 2 |
 | `mael` | portraits.webp cell 3 |
 | `noble_lady` | portraits.webp cell 4 (unassigned, for later episodes) |
-| `silver_rogue` | portraits.webp cell 5 (unassigned, for later episodes) |
+| `silver_rogue` | portraits.webp cell 5 |
 | `goggles_smith` | portraits.webp cell 6 (unassigned, for later episodes) |
 | `hooded_sage` | portraits.webp cell 7 (unassigned, for later episodes) |
 | `tess` | interior-sprites.png cell 4 |
@@ -111,15 +146,26 @@ Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52,
 | `hob` | interior-sprites.png cell 7 |
 | `garrick` | interior-sprites.png cell 2 |
 | `pip` | interior-sprites.png cell 0 |
+| `elian` | hand-drawn (chars/portraits_ep2.py) |
+| `anwen` | hand-drawn (chars/portraits_ep2.py) |
+| `tovin` | hand-drawn (chars/portraits_ep2.py) |
+| `lena` | hand-drawn (chars/portraits_ep2.py) |
+| `aurel` | hand-drawn (chars/portraits_ep2.py) |
+| `nameless_king` | bosses.webp cell 1 (crop) |
+| `vex` | alias of silver_rogue |
 
 Garrick and Pip are recoloured from the NPC paintings (iron-grey hair, chapel purple). No sources exist yet for
 Oren, Edda, Holt, Cobb, Quill, Penny: the UI should fall back to no portrait for them.
+Episode 2: `elian`, `anwen`, `tovin`, `lena`, `aurel` are drawn from shapes in `chars/portraits_ep2.py` (no painted
+source exists) and finished like the NPC-painting portraits; `nameless_king` is a crop of bosses.png cell 1 with the
+glass veil sheen; `vex` is an alias of `silver_rogue` (`aliases`). No portraits for the other Hollow townsfolk.
 
 ## ../ui/heads.png / .json  (timeline head icons, 12x12)
 `head_<id>` for hero, mira, bram and every enemy and boss id: a 10x10 head on `#251d34` inside a 1 px `#14101e` frame.
 Party heads are hand-pixeled and face front; enemy heads are crops of the field sprites, facing right. `origin` is
 [0, 0] (draw top-left at the slot). The frame is neutral so the HUD can over-draw a side-coloured ring.
-Generated by `build_heads.py`.
+Generated by `build_heads.py`. Episode 2: every new foe; `head_refl_*` are the party heads in glass;
+`head_nameless_king` is the veil and crown of the avatar.
 
 ## misc.png / .json
 `shadow_small|medium|large|huge` (palette shadow_overlay at its alpha), `sparkle_0..2`, `dust_0..2`

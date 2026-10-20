@@ -745,6 +745,12 @@
    12,
    12
   ],
+  "icon_feather": [
+   1,
+   241,
+   12,
+   12
+  ],
   "icon_fire": [
    378,
    190,
@@ -796,6 +802,12 @@
   "icon_ice": [
    482,
    190,
+   12,
+   12
+  ],
+  "icon_kept": [
+   14,
+   241,
    12,
    12
   ],
@@ -877,6 +889,12 @@
    12,
    12
   ],
+  "icon_reflect": [
+   27,
+   241,
+   12,
+   12
+  ],
   "icon_regen": [
    157,
    205,
@@ -892,6 +910,12 @@
   "icon_shield": [
    183,
    205,
+   12,
+   12
+  ],
+  "icon_sigil": [
+   40,
+   241,
    12,
    12
   ],
@@ -1312,6 +1336,12 @@
   "st8_haste": [
    245,
    218,
+   8,
+   8
+  ],
+  "st8_kept": [
+   53,
+   241,
    8,
    8
   ],
@@ -2348,6 +2378,10 @@
    "icon_fury",
    "icon_taunt",
    "icon_nameless",
+   "icon_kept",
+   "icon_reflect",
+   "icon_sigil",
+   "icon_feather",
    "st8_poison",
    "st8_burn",
    "st8_chill",
@@ -2360,7 +2394,8 @@
    "st8_focus",
    "st8_fury",
    "st8_taunt",
-   "st8_nameless"
+   "st8_nameless",
+   "st8_kept"
   ],
   "icons16": [
    "icon16_sword",
@@ -2643,7 +2678,8 @@
    "focus": "icon_focus",
    "fury": "icon_fury",
    "taunt": "icon_taunt",
-   "nameless": "icon_nameless"
+   "nameless": "icon_nameless",
+   "kept": "icon_kept"
   },
   "statusMini": {
    "poison": "st8_poison",
@@ -2658,7 +2694,11 @@
    "focus": "st8_focus",
    "fury": "st8_fury",
    "taunt": "st8_taunt",
-   "nameless": "st8_nameless"
+   "nameless": "st8_nameless",
+   "kept": "st8_kept"
+  },
+  "markers": {
+   "reflect": "icon_reflect"
   }
  },
  "buttonGlyphs": {

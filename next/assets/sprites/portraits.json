@@ -192,6 +192,78 @@
    224,
    32,
    32
+  ],
+  "elian_48": [
+   64,
+   224,
+   48,
+   48
+  ],
+  "anwen_48": [
+   112,
+   224,
+   48,
+   48
+  ],
+  "tovin_48": [
+   160,
+   224,
+   48,
+   48
+  ],
+  "lena_48": [
+   208,
+   224,
+   48,
+   48
+  ],
+  "aurel_48": [
+   0,
+   272,
+   48,
+   48
+  ],
+  "nameless_king_48": [
+   48,
+   272,
+   48,
+   48
+  ],
+  "elian_32": [
+   96,
+   272,
+   32,
+   32
+  ],
+  "anwen_32": [
+   128,
+   272,
+   32,
+   32
+  ],
+  "tovin_32": [
+   160,
+   272,
+   32,
+   32
+  ],
+  "lena_32": [
+   192,
+   272,
+   32,
+   32
+  ],
+  "aurel_32": [
+   224,
+   272,
+   32,
+   32
+  ],
+  "nameless_king_32": [
+   0,
+   320,
+   32,
+   32
   ]
  },
  "portraits": {
@@ -258,6 +330,34 @@
   "pip": {
    "48": "pip_48",
    "32": "pip_32"
+  },
+  "elian": {
+   "48": "elian_48",
+   "32": "elian_32"
+  },
+  "anwen": {
+   "48": "anwen_48",
+   "32": "anwen_32"
+  },
+  "tovin": {
+   "48": "tovin_48",
+   "32": "tovin_32"
+  },
+  "lena": {
+   "48": "lena_48",
+   "32": "lena_32"
+  },
+  "aurel": {
+   "48": "aurel_48",
+   "32": "aurel_32"
+  },
+  "nameless_king": {
+   "48": "nameless_king_48",
+   "32": "nameless_king_32"
+  },
+  "vex": {
+   "48": "silver_rogue_48",
+   "32": "silver_rogue_32"
   }
  },
  "sources": {
@@ -276,13 +376,22 @@
   "hazel": "interior-sprites.png cell 1",
   "hob": "interior-sprites.png cell 7",
   "garrick": "interior-sprites.png cell 2",
-  "pip": "interior-sprites.png cell 0"
+  "pip": "interior-sprites.png cell 0",
+  "elian": "hand-drawn (chars/portraits_ep2.py)",
+  "anwen": "hand-drawn (chars/portraits_ep2.py)",
+  "tovin": "hand-drawn (chars/portraits_ep2.py)",
+  "lena": "hand-drawn (chars/portraits_ep2.py)",
+  "aurel": "hand-drawn (chars/portraits_ep2.py)",
+  "nameless_king": "bosses.webp cell 1 (crop)",
+  "vex": "alias of silver_rogue"
+ },
+ "aliases": {
+  "vex": "silver_rogue"
  },
  "unassigned": [
   "noble_lady",
-  "silver_rogue",
   "goggles_smith",
   "hooded_sage"
  ],
- "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop."
+ "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex (Vex Quill: the silver_rogue frames)."
 }

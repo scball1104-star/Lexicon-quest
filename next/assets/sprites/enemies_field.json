@@ -174,6 +174,198 @@
    111,
    24,
    24
+  ],
+  "mist_wolf_0": [
+   50,
+   111,
+   24,
+   24
+  ],
+  "mist_wolf_1": [
+   75,
+   111,
+   24,
+   24
+  ],
+  "glassback_0": [
+   100,
+   111,
+   16,
+   16
+  ],
+  "glassback_1": [
+   117,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_0": [
+   134,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_1": [
+   151,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_bead_0": [
+   168,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_bead_1": [
+   185,
+   111,
+   16,
+   16
+  ],
+  "glint_wisp_0": [
+   202,
+   111,
+   24,
+   24
+  ],
+  "glint_wisp_1": [
+   227,
+   111,
+   24,
+   24
+  ],
+  "borrowed_shadow_0": [
+   0,
+   136,
+   24,
+   24
+  ],
+  "borrowed_shadow_1": [
+   25,
+   136,
+   24,
+   24
+  ],
+  "glass_sentinel_0": [
+   50,
+   136,
+   24,
+   24
+  ],
+  "glass_sentinel_1": [
+   75,
+   136,
+   24,
+   24
+  ],
+  "faceless_knight_0": [
+   100,
+   136,
+   24,
+   32
+  ],
+  "faceless_knight_1": [
+   125,
+   136,
+   24,
+   32
+  ],
+  "false_pride_0": [
+   150,
+   136,
+   24,
+   32
+  ],
+  "false_pride_1": [
+   175,
+   136,
+   24,
+   32
+  ],
+  "false_sorrow_0": [
+   200,
+   136,
+   24,
+   24
+  ],
+  "false_sorrow_1": [
+   225,
+   136,
+   24,
+   24
+  ],
+  "shard_swarm_0": [
+   0,
+   169,
+   16,
+   16
+  ],
+  "shard_swarm_1": [
+   17,
+   169,
+   16,
+   16
+  ],
+  "refl_hero_0": [
+   34,
+   169,
+   24,
+   32
+  ],
+  "refl_hero_1": [
+   59,
+   169,
+   24,
+   32
+  ],
+  "refl_mira_0": [
+   84,
+   169,
+   24,
+   32
+  ],
+  "refl_mira_1": [
+   109,
+   169,
+   24,
+   32
+  ],
+  "refl_bram_0": [
+   134,
+   169,
+   24,
+   32
+  ],
+  "refl_bram_1": [
+   159,
+   169,
+   24,
+   32
+  ],
+  "nameless_king_avatar_0": [
+   184,
+   169,
+   40,
+   50
+  ],
+  "nameless_king_avatar_1": [
+   0,
+   220,
+   40,
+   50
+  ],
+  "nameless_king_avatar_back_0": [
+   41,
+   220,
+   40,
+   50
+  ],
+  "nameless_king_avatar_back_1": [
+   82,
+   220,
+   40,
+   50
   ]
  },
  "anims": {
@@ -289,6 +481,134 @@
     "briar_alpha_1"
    ],
    "fps": 4,
+   "loop": true
+  },
+  "mist_wolf_idle": {
+   "frames": [
+    "mist_wolf_0",
+    "mist_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glassback_idle": {
+   "frames": [
+    "glassback_0",
+    "glassback_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "quicksilver_idle": {
+   "frames": [
+    "quicksilver_0",
+    "quicksilver_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "quicksilver_bead_idle": {
+   "frames": [
+    "quicksilver_bead_0",
+    "quicksilver_bead_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glint_wisp_idle": {
+   "frames": [
+    "glint_wisp_0",
+    "glint_wisp_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "borrowed_shadow_idle": {
+   "frames": [
+    "borrowed_shadow_0",
+    "borrowed_shadow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glass_sentinel_idle": {
+   "frames": [
+    "glass_sentinel_0",
+    "glass_sentinel_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "faceless_knight_idle": {
+   "frames": [
+    "faceless_knight_0",
+    "faceless_knight_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "false_pride_idle": {
+   "frames": [
+    "false_pride_0",
+    "false_pride_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "false_sorrow_idle": {
+   "frames": [
+    "false_sorrow_0",
+    "false_sorrow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "shard_swarm_idle": {
+   "frames": [
+    "shard_swarm_0",
+    "shard_swarm_1"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  "refl_hero_idle": {
+   "frames": [
+    "refl_hero_0",
+    "refl_hero_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "refl_mira_idle": {
+   "frames": [
+    "refl_mira_0",
+    "refl_mira_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "refl_bram_idle": {
+   "frames": [
+    "refl_bram_0",
+    "refl_bram_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "nameless_king_avatar_idle": {
+   "frames": [
+    "nameless_king_avatar_0",
+    "nameless_king_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "nameless_king_avatar_back_idle": {
+   "frames": [
+    "nameless_king_avatar_back_0",
+    "nameless_king_avatar_back_1"
+   ],
+   "fps": 2,
    "loop": true
   }
  },
@@ -433,8 +753,168 @@
     12,
     23
    ]
+  },
+  "mist_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "glassback": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "quicksilver": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "quicksilver_bead": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "glint_wisp": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "borrowed_shadow": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "glass_sentinel": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "faceless_knight": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "false_pride": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "false_sorrow": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "shard_swarm": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "refl_hero": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "refl_mira": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "refl_bram": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "nameless_king_avatar": {
+   "size": [
+    40,
+    50
+   ],
+   "origin": [
+    20,
+    49
+   ]
+  },
+  "nameless_king_avatar_back": {
+   "size": [
+    40,
+    50
+   ],
+   "origin": [
+    20,
+    49
+   ]
   }
  },
  "facing": "left",
- "notes": "Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2."
+ "notes": "Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2. E2-sprites: Episode 2 foes as the grids of their Episode 1 kin in their own palettes, shard_swarm (16x16), refl_hero/refl_mira/refl_bram (24x32, left stand and step; the 4-direction walking versions are in npcs.json and win the sprite lookup), nameless_king_avatar (40x50, frontal) and nameless_king_avatar_back (the same seen from behind; a separate sprite id)."
 }

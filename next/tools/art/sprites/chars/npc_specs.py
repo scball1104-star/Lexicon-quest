@@ -69,3 +69,69 @@ NPCS = {
                            pal={'hair': HAIR['gray'], 'top': R('cloth_purple', 1, 2, 3, 4), 'sec': R('gold', 1, 2, 3, 4),
                                 'glow': ['fire:4', 'fire:5']}),
 }
+
+# ------------------------------------------------------------------ Episode 2 (E2-sprites): the Nameless Hollow,
+# the Court and the rival. Packed in their own band under the Episode 1 blocks and the animals (build_npcs.py),
+# so no Episode 1 rect moves. Looks from docs/story/EPISODE2.md (cast) and EPISODE2_PLAN.md 9.2.
+HAIR.update({
+    'sandy': ['path:1', 'path:2', 'path:3', 'sand:2'],
+    'greying': ['stone_warm:1', 'stone_warm:2', 'stone_warm:3', 'stone_warm:4'],
+    'silver': ['stone_cool:3', 'stone_cool:5', 'metal:3', 'metal:4'],
+})
+LEATHER = R('wood', 1, 2, 3, 4)
+SILVER = ['stone_cool:3', 'stone_cool:4', 'stone_cool:5', 'metal:3']
+
+NPCS_EP2 = {
+    # Mayor Elian: about twenty, slight, sandy hair, a wine-red mayor's coat several sizes too big (the long robe
+    # body, hem on his shoes), gold trim, the ledger always under his arm
+    'npc_elian': dict(name='Elian', body='robe', head='short', over=['book'],
+                      pal={'hair': HAIR['sandy'], 'top': R('roof_red', 1, 2, 3, 4), 'sec': R('gold', 1, 2, 3, 4),
+                           'accent': R('gold', 2, 3, 4), 'wood': R('earth', 1, 2, 3)}),
+    # Sister Anwen: sixties, a grey habit and hood stitched with silver thread, the chapel register
+    'npc_anwen': dict(name='Sister Anwen', body='robe', head='bun', hat='hood', over=['book'],
+                      pal={'hair': HAIR['gray'], 'top': R('stone_cool', 1, 2, 3, 4), 'hat': R('stone_cool', 1, 2, 3, 4),
+                           'sec': ['metal:1', 'stone_cool:5', 'metal:3', 'metal:4'], 'accent': ['stone_cool:4', 'metal:3', 'metal:4'],
+                           'wood': R('cloth_purple', 1, 2, 3)}),
+    # Tovin the ferryman: old, weathered, an ochre oilskin, grey stubble, his oar
+    'npc_tovin': dict(name='Tovin', body='tunic', head='short', beard='short', over=['oar'], no_arms=True,
+                      pal={'hair': HAIR['gray'], 'top': ['earth:2', 'earth:3', 'path:2', 'path:3'], 'bottom': R('shadow', 1, 2, 3),
+                           'skin': ['skin_light:0', 'skin_light:1', 'skin_light:1', 'skin_light:2'], 'wood': R('wood', 2, 3, 4)}),
+    # Lena the watchmaker: fifties, greying bun, spectacles, a plum dress and an apron of tiny tools
+    'npc_lena': dict(name='Lena', body='dress', head='bun', over=['glasses', 'apron'],
+                     pal={'hair': HAIR['greying'], 'top': R('roof_purple', 1, 2, 3, 4), 'sec': LEATHER,
+                          'bottom': R('roof_purple', 1, 2, 3)}),
+    # Vessa the glassblower: goggles up, a leather apron, a glowing glass piece in hand
+    'npc_vessa': dict(name='Vessa', body='tunic', head='pony', hat='goggles', over=['apron_wide', 'mug'], no_arms=True,
+                      pal={'hair': HAIR['ginger'], 'top': CREAM, 'sec': LEATHER, 'bottom': R('earth', 1, 2, 3),
+                           'hat': R('wood', 1, 2, 3, 4), 'metal': R('gold', 1, 2, 3, 4), 'glow': ['magic_cyan:3', 'magic_cyan:4']}),
+    # Nico: errand boy, eight or so, an ochre tunic
+    'npc_nico': dict(name='Nico', body='child', head='short', head_dy=5,
+                     pal={'hair': HAIR['dark'], 'top': R('gold', 1, 2, 3, 4), 'bottom': R('earth', 1, 2, 3)}),
+    # Sava the weaver: gentle, black hair, a green dress and a gold-patterned shawl of her own weaving
+    'npc_sava': dict(name='Sava', body='dress', head='long', over=['shawl'],
+                     pal={'hair': HAIR['black'], 'top': R('roof_green', 1, 2, 3, 4), 'sec': R('gold', 1, 2, 3, 4),
+                          'bottom': R('roof_green', 1, 2, 3), 'skin': R('skin_med', 0, 1, 2, 3)}),
+    # Corin the watchman: the Hollow's gate watch in slate grey (Holt, Willowmere's guard, wears blue)
+    'npc_corin': dict(name='Corin', body='tunic', head='short', hat='helmet', over=['spear'], no_arms=True,
+                      pal={'hair': HAIR['dark'], 'top': R('stone_cool', 1, 2, 3, 4), 'bottom': R('shadow', 1, 2, 3),
+                           'accent': ['stone_cool:4', 'metal:3', 'metal:4']}),
+    # Orla: old, Keeper-born, white bun, a deep blue dress and a teal shawl
+    'npc_orla': dict(name='Orla', body='dress', head='bun', over=['shawl'],
+                     pal={'hair': HAIR['white'], 'top': R('cloth_blue', 1, 2, 3, 4), 'sec': R('magic_cyan', 0, 1, 2, 3),
+                          'bottom': R('cloth_blue', 1, 2, 3)}),
+    # Wren: the Signless Inn's cheerful innkeeper, ginger ponytail, mustard dress, cream apron, a mug
+    'npc_wren': dict(name='Wren', body='dress', head='pony', over=['apron', 'mug'], no_arms=True,
+                     pal={'hair': HAIR['auburn'], 'top': R('gold', 1, 2, 3, 4), 'sec': CREAM, 'bottom': R('earth', 1, 2, 3),
+                          'glow': ['gold:3', 'gold:4']}),
+    # Fitch: the Hollow Provisioner, stout, mustache, a plum shirt and a leather apron
+    'npc_fitch': dict(name='Fitch', body='stout', head='short', beard='mustache', over=['apron_wide'],
+                      pal={'hair': HAIR['dark'], 'top': R('cloth_purple', 1, 2, 3, 4), 'sec': LEATHER,
+                           'bottom': R('shadow', 1, 2, 3), 'skin': R('skin_med', 0, 1, 2, 3)}),
+    # Vex Quill: silver hair, a crimson scarf, a long dark leather coat
+    'npc_vex': dict(name='Vex Quill', body='robe', head='long', over=['scarf'],
+                    pal={'hair': HAIR['silver'], 'top': ['ink:0', 'ink:1', 'shadow:2', 'stone_cool:2'],
+                         'sec': R('roof_red', 1, 2, 3, 4), 'bottom': R('ink', 0, 1, 2), 'accent': R('gold', 2, 3, 4)}),
+    # Aurel (after aurel_named): a silver robe, a long grey beard, no crown
+    'npc_aurel': dict(name='Aurel', body='robe', head='elder', beard='long',
+                      pal={'hair': HAIR['gray'], 'top': SILVER, 'sec': R('water', 2, 3, 4, 5), 'accent': R('water', 3, 4, 5)}),
+}

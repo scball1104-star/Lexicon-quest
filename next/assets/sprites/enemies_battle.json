@@ -432,6 +432,630 @@
    721,
    83,
    61
+  ],
+  "mist_wolf": [
+   122,
+   1520,
+   63,
+   59
+  ],
+  "mist_wolf_idle_1": [
+   0,
+   1520,
+   63,
+   60
+  ],
+  "mist_wolf_attack": [
+   187,
+   1520,
+   64,
+   59
+  ],
+  "mist_wolf_hurt": [
+   318,
+   1520,
+   67,
+   57
+  ],
+  "mist_wolf_die_0": [
+   341,
+   1450,
+   63,
+   62
+  ],
+  "mist_wolf_die_1": [
+   253,
+   1520,
+   63,
+   58
+  ],
+  "mist_wolf_die_2": [
+   326,
+   1640,
+   63,
+   43
+  ],
+  "glassback": [
+   293,
+   1582,
+   57,
+   51
+  ],
+  "glassback_idle_1": [
+   234,
+   1582,
+   57,
+   52
+  ],
+  "glassback_attack": [
+   424,
+   1582,
+   63,
+   50
+  ],
+  "glassback_hurt": [
+   0,
+   1640,
+   59,
+   49
+  ],
+  "glassback_die_0": [
+   60,
+   1582,
+   57,
+   55
+  ],
+  "glassback_die_1": [
+   61,
+   1640,
+   57,
+   49
+  ],
+  "glassback_die_2": [
+   55,
+   1691,
+   57,
+   37
+  ],
+  "quicksilver": [
+   222,
+   1640,
+   50,
+   47
+  ],
+  "quicksilver_idle_1": [
+   120,
+   1640,
+   48,
+   49
+  ],
+  "quicksilver_attack": [
+   391,
+   1640,
+   55,
+   42
+  ],
+  "quicksilver_hurt": [
+   448,
+   1640,
+   55,
+   41
+  ],
+  "quicksilver_die_0": [
+   170,
+   1640,
+   50,
+   49
+  ],
+  "quicksilver_die_1": [
+   274,
+   1640,
+   50,
+   44
+  ],
+  "quicksilver_die_2": [
+   114,
+   1691,
+   50,
+   36
+  ],
+  "quicksilver_bead": [
+   450,
+   1733,
+   27,
+   25
+  ],
+  "quicksilver_bead_idle_1": [
+   423,
+   1733,
+   25,
+   26
+  ],
+  "quicksilver_bead_attack": [
+   30,
+   1766,
+   29,
+   23
+  ],
+  "quicksilver_bead_hurt": [
+   139,
+   1766,
+   30,
+   22
+  ],
+  "quicksilver_bead_die_0": [
+   479,
+   1733,
+   27,
+   25
+  ],
+  "quicksilver_bead_die_1": [
+   61,
+   1766,
+   27,
+   23
+  ],
+  "quicksilver_bead_die_2": [
+   195,
+   1766,
+   27,
+   19
+  ],
+  "glint_wisp": [
+   387,
+   1520,
+   55,
+   57
+  ],
+  "glint_wisp_idle_1": [
+   444,
+   1520,
+   55,
+   57
+  ],
+  "glint_wisp_attack": [
+   0,
+   1582,
+   58,
+   56
+  ],
+  "glint_wisp_hurt": [
+   119,
+   1582,
+   56,
+   55
+  ],
+  "glint_wisp_cast": [
+   194,
+   1450,
+   53,
+   64
+  ],
+  "glint_wisp_die_0": [
+   65,
+   1520,
+   55,
+   60
+  ],
+  "glint_wisp_die_1": [
+   177,
+   1582,
+   55,
+   53
+  ],
+  "glint_wisp_die_2": [
+   0,
+   1691,
+   53,
+   40
+  ],
+  "glass_sentinel": [
+   0,
+   1195,
+   90,
+   90
+  ],
+  "glass_sentinel_idle_1": [
+   295,
+   1099,
+   90,
+   91
+  ],
+  "glass_sentinel_attack": [
+   99,
+   1099,
+   102,
+   92
+  ],
+  "glass_sentinel_hurt": [
+   92,
+   1195,
+   93,
+   88
+  ],
+  "glass_sentinel_die_0": [
+   203,
+   1099,
+   90,
+   92
+  ],
+  "glass_sentinel_die_1": [
+   284,
+   1195,
+   90,
+   87
+  ],
+  "glass_sentinel_die_2": [
+   249,
+   1450,
+   90,
+   64
+  ],
+  "borrowed_shadow": [
+   72,
+   1372,
+   70,
+   74
+  ],
+  "borrowed_shadow_idle_1": [
+   144,
+   1372,
+   70,
+   74
+  ],
+  "borrowed_shadow_attack": [
+   216,
+   1372,
+   74,
+   73
+  ],
+  "borrowed_shadow_hurt": [
+   292,
+   1372,
+   71,
+   72
+  ],
+  "borrowed_shadow_cast": [
+   171,
+   1287,
+   67,
+   82
+  ],
+  "borrowed_shadow_die_0": [
+   0,
+   1372,
+   70,
+   76
+  ],
+  "borrowed_shadow_die_1": [
+   365,
+   1372,
+   70,
+   70
+  ],
+  "borrowed_shadow_die_2": [
+   352,
+   1582,
+   70,
+   51
+  ],
+  "faceless_knight": [
+   194,
+   898,
+   95,
+   98
+  ],
+  "faceless_knight_idle_1": [
+   97,
+   898,
+   95,
+   99
+  ],
+  "faceless_knight_attack": [
+   291,
+   898,
+   112,
+   98
+  ],
+  "faceless_knight_hurt": [
+   97,
+   1000,
+   97,
+   96
+  ],
+  "faceless_knight_die_0": [
+   405,
+   898,
+   95,
+   97
+  ],
+  "faceless_knight_die_1": [
+   187,
+   1195,
+   95,
+   88
+  ],
+  "faceless_knight_die_2": [
+   0,
+   1450,
+   95,
+   68
+  ],
+  "false_sorrow": [
+   0,
+   1287,
+   83,
+   83
+  ],
+  "false_sorrow_idle_1": [
+   85,
+   1287,
+   84,
+   83
+  ],
+  "false_sorrow_attack": [
+   240,
+   1287,
+   91,
+   82
+  ],
+  "false_sorrow_hurt": [
+   333,
+   1287,
+   84,
+   82
+  ],
+  "false_sorrow_cast": [
+   407,
+   1000,
+   87,
+   95
+  ],
+  "false_sorrow_die_0": [
+   376,
+   1195,
+   83,
+   87
+  ],
+  "false_sorrow_die_1": [
+   419,
+   1287,
+   83,
+   78
+  ],
+  "false_sorrow_die_2": [
+   406,
+   1450,
+   82,
+   61
+  ],
+  "false_pride": [
+   196,
+   1000,
+   95,
+   96
+  ],
+  "false_pride_idle_1": [
+   0,
+   1000,
+   95,
+   97
+  ],
+  "false_pride_attack": [
+   293,
+   1000,
+   112,
+   96
+  ],
+  "false_pride_hurt": [
+   0,
+   1099,
+   97,
+   94
+  ],
+  "false_pride_die_0": [
+   0,
+   898,
+   95,
+   100
+  ],
+  "false_pride_die_1": [
+   387,
+   1099,
+   95,
+   91
+  ],
+  "false_pride_die_2": [
+   97,
+   1450,
+   95,
+   67
+  ],
+  "shard_swarm": [
+   308,
+   1691,
+   34,
+   31
+  ],
+  "shard_swarm_idle_1": [
+   243,
+   1691,
+   33,
+   32
+  ],
+  "shard_swarm_attack": [
+   366,
+   1733,
+   29,
+   28
+  ],
+  "shard_swarm_hurt": [
+   202,
+   1691,
+   39,
+   33
+  ],
+  "shard_swarm_die_0": [
+   166,
+   1691,
+   34,
+   36
+  ],
+  "shard_swarm_die_1": [
+   278,
+   1691,
+   28,
+   32
+  ],
+  "shard_swarm_die_2": [
+   0,
+   1766,
+   28,
+   24
+  ],
+  "refl_hero": [
+   344,
+   1691,
+   24,
+   31
+  ],
+  "refl_hero_idle_1": [
+   97,
+   1733,
+   24,
+   30
+  ],
+  "refl_hero_attack": [
+   123,
+   1733,
+   28,
+   30
+  ],
+  "refl_hero_hurt": [
+   370,
+   1691,
+   23,
+   31
+  ],
+  "refl_hero_cast": [
+   395,
+   1691,
+   21,
+   31
+  ],
+  "refl_hero_die_0": [
+   418,
+   1691,
+   24,
+   31
+  ],
+  "refl_hero_die_1": [
+   258,
+   1733,
+   24,
+   29
+  ],
+  "refl_hero_die_2": [
+   90,
+   1766,
+   24,
+   23
+  ],
+  "refl_mira": [
+   153,
+   1733,
+   24,
+   30
+  ],
+  "refl_mira_idle_1": [
+   284,
+   1733,
+   24,
+   29
+  ],
+  "refl_mira_attack": [
+   310,
+   1733,
+   29,
+   29
+  ],
+  "refl_mira_hurt": [
+   179,
+   1733,
+   21,
+   30
+  ],
+  "refl_mira_cast": [
+   444,
+   1691,
+   23,
+   31
+  ],
+  "refl_mira_die_0": [
+   469,
+   1691,
+   24,
+   31
+  ],
+  "refl_mira_die_1": [
+   397,
+   1733,
+   24,
+   28
+  ],
+  "refl_mira_die_2": [
+   116,
+   1766,
+   21,
+   23
+  ],
+  "refl_bram": [
+   0,
+   1733,
+   23,
+   31
+  ],
+  "refl_bram_idle_1": [
+   202,
+   1733,
+   23,
+   30
+  ],
+  "refl_bram_attack": [
+   227,
+   1733,
+   29,
+   30
+  ],
+  "refl_bram_hurt": [
+   25,
+   1733,
+   20,
+   31
+  ],
+  "refl_bram_cast": [
+   47,
+   1733,
+   23,
+   31
+  ],
+  "refl_bram_die_0": [
+   72,
+   1733,
+   23,
+   31
+  ],
+  "refl_bram_die_1": [
+   341,
+   1733,
+   23,
+   29
+  ],
+  "refl_bram_die_2": [
+   171,
+   1766,
+   22,
+   20
   ]
  },
  "origin": {
@@ -722,6 +1346,422 @@
   "briar_alpha_die_2": [
    40,
    60
+  ],
+  "mist_wolf": [
+   31,
+   58
+  ],
+  "mist_wolf_idle_1": [
+   31,
+   59
+  ],
+  "mist_wolf_attack": [
+   30,
+   58
+  ],
+  "mist_wolf_hurt": [
+   34,
+   56
+  ],
+  "mist_wolf_die_0": [
+   31,
+   61
+  ],
+  "mist_wolf_die_1": [
+   31,
+   57
+  ],
+  "mist_wolf_die_2": [
+   31,
+   42
+  ],
+  "glassback": [
+   28,
+   50
+  ],
+  "glassback_idle_1": [
+   28,
+   51
+  ],
+  "glassback_attack": [
+   28,
+   49
+  ],
+  "glassback_hurt": [
+   29,
+   48
+  ],
+  "glassback_die_0": [
+   28,
+   54
+  ],
+  "glassback_die_1": [
+   28,
+   48
+  ],
+  "glassback_die_2": [
+   28,
+   36
+  ],
+  "quicksilver": [
+   25,
+   46
+  ],
+  "quicksilver_idle_1": [
+   24,
+   48
+  ],
+  "quicksilver_attack": [
+   26,
+   41
+  ],
+  "quicksilver_hurt": [
+   28,
+   40
+  ],
+  "quicksilver_die_0": [
+   25,
+   48
+  ],
+  "quicksilver_die_1": [
+   25,
+   43
+  ],
+  "quicksilver_die_2": [
+   25,
+   35
+  ],
+  "quicksilver_bead": [
+   13,
+   24
+  ],
+  "quicksilver_bead_idle_1": [
+   12,
+   25
+  ],
+  "quicksilver_bead_attack": [
+   13,
+   22
+  ],
+  "quicksilver_bead_hurt": [
+   15,
+   21
+  ],
+  "quicksilver_bead_die_0": [
+   13,
+   24
+  ],
+  "quicksilver_bead_die_1": [
+   13,
+   22
+  ],
+  "quicksilver_bead_die_2": [
+   13,
+   18
+  ],
+  "glint_wisp": [
+   27,
+   56
+  ],
+  "glint_wisp_idle_1": [
+   27,
+   56
+  ],
+  "glint_wisp_attack": [
+   23,
+   55
+  ],
+  "glint_wisp_hurt": [
+   31,
+   54
+  ],
+  "glint_wisp_cast": [
+   27,
+   63
+  ],
+  "glint_wisp_die_0": [
+   27,
+   59
+  ],
+  "glint_wisp_die_1": [
+   27,
+   52
+  ],
+  "glint_wisp_die_2": [
+   27,
+   39
+  ],
+  "glass_sentinel": [
+   44,
+   89
+  ],
+  "glass_sentinel_idle_1": [
+   44,
+   90
+  ],
+  "glass_sentinel_attack": [
+   44,
+   91
+  ],
+  "glass_sentinel_hurt": [
+   48,
+   87
+  ],
+  "glass_sentinel_die_0": [
+   44,
+   91
+  ],
+  "glass_sentinel_die_1": [
+   44,
+   86
+  ],
+  "glass_sentinel_die_2": [
+   44,
+   63
+  ],
+  "borrowed_shadow": [
+   35,
+   73
+  ],
+  "borrowed_shadow_idle_1": [
+   35,
+   73
+  ],
+  "borrowed_shadow_attack": [
+   30,
+   72
+  ],
+  "borrowed_shadow_hurt": [
+   40,
+   71
+  ],
+  "borrowed_shadow_cast": [
+   35,
+   81
+  ],
+  "borrowed_shadow_die_0": [
+   35,
+   75
+  ],
+  "borrowed_shadow_die_1": [
+   35,
+   69
+  ],
+  "borrowed_shadow_die_2": [
+   35,
+   50
+  ],
+  "faceless_knight": [
+   48,
+   97
+  ],
+  "faceless_knight_idle_1": [
+   48,
+   98
+  ],
+  "faceless_knight_attack": [
+   48,
+   97
+  ],
+  "faceless_knight_hurt": [
+   49,
+   95
+  ],
+  "faceless_knight_die_0": [
+   48,
+   96
+  ],
+  "faceless_knight_die_1": [
+   48,
+   87
+  ],
+  "faceless_knight_die_2": [
+   48,
+   67
+  ],
+  "false_sorrow": [
+   41,
+   82
+  ],
+  "false_sorrow_idle_1": [
+   42,
+   82
+  ],
+  "false_sorrow_attack": [
+   39,
+   81
+  ],
+  "false_sorrow_hurt": [
+   45,
+   81
+  ],
+  "false_sorrow_cast": [
+   43,
+   94
+  ],
+  "false_sorrow_die_0": [
+   41,
+   86
+  ],
+  "false_sorrow_die_1": [
+   41,
+   77
+  ],
+  "false_sorrow_die_2": [
+   41,
+   60
+  ],
+  "false_pride": [
+   48,
+   95
+  ],
+  "false_pride_idle_1": [
+   48,
+   96
+  ],
+  "false_pride_attack": [
+   48,
+   95
+  ],
+  "false_pride_hurt": [
+   49,
+   93
+  ],
+  "false_pride_die_0": [
+   48,
+   99
+  ],
+  "false_pride_die_1": [
+   48,
+   90
+  ],
+  "false_pride_die_2": [
+   48,
+   66
+  ],
+  "shard_swarm": [
+   17,
+   30
+  ],
+  "shard_swarm_idle_1": [
+   16,
+   31
+  ],
+  "shard_swarm_attack": [
+   11,
+   27
+  ],
+  "shard_swarm_hurt": [
+   21,
+   32
+  ],
+  "shard_swarm_die_0": [
+   17,
+   35
+  ],
+  "shard_swarm_die_1": [
+   17,
+   31
+  ],
+  "shard_swarm_die_2": [
+   17,
+   23
+  ],
+  "refl_hero": [
+   10,
+   30
+  ],
+  "refl_hero_idle_1": [
+   10,
+   29
+  ],
+  "refl_hero_attack": [
+   9,
+   29
+  ],
+  "refl_hero_hurt": [
+   11,
+   30
+  ],
+  "refl_hero_cast": [
+   10,
+   30
+  ],
+  "refl_hero_die_0": [
+   10,
+   30
+  ],
+  "refl_hero_die_1": [
+   10,
+   28
+  ],
+  "refl_hero_die_2": [
+   10,
+   22
+  ],
+  "refl_mira": [
+   10,
+   29
+  ],
+  "refl_mira_idle_1": [
+   10,
+   28
+  ],
+  "refl_mira_attack": [
+   9,
+   28
+  ],
+  "refl_mira_hurt": [
+   11,
+   29
+  ],
+  "refl_mira_cast": [
+   10,
+   30
+  ],
+  "refl_mira_die_0": [
+   10,
+   30
+  ],
+  "refl_mira_die_1": [
+   10,
+   27
+  ],
+  "refl_mira_die_2": [
+   9,
+   22
+  ],
+  "refl_bram": [
+   11,
+   30
+  ],
+  "refl_bram_idle_1": [
+   11,
+   29
+  ],
+  "refl_bram_attack": [
+   11,
+   29
+  ],
+  "refl_bram_hurt": [
+   12,
+   30
+  ],
+  "refl_bram_cast": [
+   11,
+   30
+  ],
+  "refl_bram_die_0": [
+   11,
+   30
+  ],
+  "refl_bram_die_1": [
+   11,
+   28
+  ],
+  "refl_bram_die_2": [
+   11,
+   19
   ]
  },
  "anims": {
@@ -894,13 +1934,253 @@
    ],
    "fps": 15,
    "loop": false
+  },
+  "mist_wolf_idle": {
+   "frames": [
+    "mist_wolf",
+    "mist_wolf_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "mist_wolf_die": {
+   "frames": [
+    "mist_wolf_die_0",
+    "mist_wolf_die_1",
+    "mist_wolf_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "glassback_idle": {
+   "frames": [
+    "glassback",
+    "glassback_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "glassback_die": {
+   "frames": [
+    "glassback_die_0",
+    "glassback_die_1",
+    "glassback_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "quicksilver_idle": {
+   "frames": [
+    "quicksilver",
+    "quicksilver_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "quicksilver_die": {
+   "frames": [
+    "quicksilver_die_0",
+    "quicksilver_die_1",
+    "quicksilver_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "quicksilver_bead_idle": {
+   "frames": [
+    "quicksilver_bead",
+    "quicksilver_bead_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "quicksilver_bead_die": {
+   "frames": [
+    "quicksilver_bead_die_0",
+    "quicksilver_bead_die_1",
+    "quicksilver_bead_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "glint_wisp_idle": {
+   "frames": [
+    "glint_wisp",
+    "glint_wisp_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "glint_wisp_die": {
+   "frames": [
+    "glint_wisp_die_0",
+    "glint_wisp_die_1",
+    "glint_wisp_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "glass_sentinel_idle": {
+   "frames": [
+    "glass_sentinel",
+    "glass_sentinel_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "glass_sentinel_die": {
+   "frames": [
+    "glass_sentinel_die_0",
+    "glass_sentinel_die_1",
+    "glass_sentinel_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "borrowed_shadow_idle": {
+   "frames": [
+    "borrowed_shadow",
+    "borrowed_shadow_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "borrowed_shadow_die": {
+   "frames": [
+    "borrowed_shadow_die_0",
+    "borrowed_shadow_die_1",
+    "borrowed_shadow_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "faceless_knight_idle": {
+   "frames": [
+    "faceless_knight",
+    "faceless_knight_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "faceless_knight_die": {
+   "frames": [
+    "faceless_knight_die_0",
+    "faceless_knight_die_1",
+    "faceless_knight_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "false_sorrow_idle": {
+   "frames": [
+    "false_sorrow",
+    "false_sorrow_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "false_sorrow_die": {
+   "frames": [
+    "false_sorrow_die_0",
+    "false_sorrow_die_1",
+    "false_sorrow_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "false_pride_idle": {
+   "frames": [
+    "false_pride",
+    "false_pride_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "false_pride_die": {
+   "frames": [
+    "false_pride_die_0",
+    "false_pride_die_1",
+    "false_pride_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "shard_swarm_idle": {
+   "frames": [
+    "shard_swarm",
+    "shard_swarm_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "shard_swarm_die": {
+   "frames": [
+    "shard_swarm_die_0",
+    "shard_swarm_die_1",
+    "shard_swarm_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "refl_hero_idle": {
+   "frames": [
+    "refl_hero",
+    "refl_hero_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "refl_hero_die": {
+   "frames": [
+    "refl_hero_die_0",
+    "refl_hero_die_1",
+    "refl_hero_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "refl_mira_idle": {
+   "frames": [
+    "refl_mira",
+    "refl_mira_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "refl_mira_die": {
+   "frames": [
+    "refl_mira_die_0",
+    "refl_mira_die_1",
+    "refl_mira_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "refl_bram_idle": {
+   "frames": [
+    "refl_bram",
+    "refl_bram_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "refl_bram_die": {
+   "frames": [
+    "refl_bram_die_0",
+    "refl_bram_die_1",
+    "refl_bram_die_2"
+   ],
+   "fps": 15,
+   "loop": false
   }
  },
  "facing": "right",
  "external": {
   "echo_warden": "bosses_battle",
   "archivore": "bosses_battle",
-  "lost_page": "bosses_battle"
+  "lost_page": "bosses_battle",
+  "nameless_king": "bosses_battle",
+  "nameless_king_unmasked": "bosses_battle"
  },
- "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted."
+ "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted. E2-sprites: the Episode 2 foes (mist_wolf, glassback, quicksilver, quicksilver_bead, glint_wisp, glass_sentinel, borrowed_shadow, faceless_knight, false_sorrow, false_pride, shard_swarm; ep2_enemies.py) and the Other Selves (refl_hero, refl_mira, refl_bram; ep2_reflections.py) have base + idle_1, attack, hurt, die_0..2, and cast for glint_wisp, borrowed_shadow, false_sorrow and the reflections; 1x, untinted. nameless_king and nameless_king_unmasked live in bosses_battle.json."
 }

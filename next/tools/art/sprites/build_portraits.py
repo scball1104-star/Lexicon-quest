@@ -206,6 +206,51 @@ def build():
     return big, small
 
 
+# E2-sprites: the Nameless King's portrait, a crop of bosses.png cell 1 (the veiled head and the fractured crown):
+# (cell, crop centre x, y, crop size) for 48 and 32, in cell pixels
+KING_CROP = {48: (1, 224, 84, 124), 32: (1, 224, 82, 112)}
+
+
+def make_boss(src, ci, cx, cy, s, n, k):
+    """a portrait from the transparent boss sheet: the crop composited on the portrait backdrop, then as make_extra"""
+    from srcutil import grid_cell
+    cell = grid_cell(src, 4, 2, ci)
+    crop = square(cell, cx, cy, s).copy()
+    comp = paste(backdrop(*crop.shape[:2]), crop, 0, 0)
+    from scipy.ndimage import median_filter
+    for ch in range(3):
+        comp[..., ch] = median_filter(comp[..., ch], size=3)
+    d = box_resize(comp, n - 2, n - 2)
+    d[..., 3] = 1
+    pal = palette_from(d, k, seed=5)
+    pal = harmonize(pal, 0.035)
+    q = quantize(d, pal)
+    q = remove_orphans(q, passes=1, max_de=0.05, min_opaque_nb=8)
+    # the glass veil: the dark void of the hood gets the battle sprite's cold diagonal sheen
+    H, W = q.shape[:2]
+    L = to_oklab(q[..., :3].reshape(-1, 3)).reshape(H, W, 3)[..., 0]
+    yy, xx = np.mgrid[0:H, 0:W]
+    void = (L < 0.24) & (xx > W * 0.3) & (xx < W * 0.7) & (yy > H * 0.3) & (yy < H * 0.85)
+    if void.sum() > 8:
+        k = xx + yy
+        c = int(np.median(k[void]))
+        for off, ref in ((-2, 'water:3'), (-1, 'ice:2'), (2, 'water:2')):
+            m = void & (k == c + off)
+            q[m, :3] = np.array(hex2rgb(P.color(ref)), np.float32) / 255
+    return frame(q)
+
+
+def build_ep2():
+    """[(pid, img48, img32)]: the hand-drawn Episode 2 cast (chars/portraits_ep2.py) and the King's crop"""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chars'))
+    import portraits_ep2 as PE
+    out = [(pid, PE.portrait(pid, 48), PE.portrait(pid, 32)) for pid in PE.IDS]
+    bsrc = load_src('bosses.png')
+    out.append(('nameless_king', make_boss(bsrc, *KING_CROP[48], 48, 22), make_boss(bsrc, *KING_CROP[32], 32, 18)))
+    return out
+
+
 def build_atlas():
     big, small = build()
     sh = Shelf(256, pad=0)
@@ -213,17 +258,38 @@ def build_atlas():
         sh.add(pid + '_48', im)
     for pid, im in small:
         sh.add(pid + '_32', im)
+    # E2-sprites: Episode 2 portraits after every Episode 1 frame on the same shelf, so no existing rect moves
+    ep2 = build_ep2()
+    for pid, b48, s32 in ep2:
+        sh.add(pid + '_48', b48)
+    for pid, b48, s32 in ep2:
+        sh.add(pid + '_32', s32)
     sheet, rects = sh.render()
     save_png(sheet, os.path.join(DST, 'portraits.png'))
     ids = [p for p, _ in big]
+    e2ids = [p for p, _, _ in ep2]
+    portraits = {p: {'48': p + '_48', '32': p + '_32'} for p in ids + e2ids}
+    portraits['vex'] = dict(portraits['silver_rogue'])          # Vex Quill (an alias: the same frames)
+    sources = {p: ('portraits.webp cell %d' % CROPS[p][0]) if p in CROPS else ('interior-sprites.png cell %d' % EXTRA[p][0]) for p in ids}
+    for p in e2ids:
+        sources[p] = 'bosses.webp cell 1 (crop)' if p == 'nameless_king' else 'hand-drawn (chars/portraits_ep2.py)'
+    sources['vex'] = 'alias of silver_rogue'
     meta = {'image': 'portraits.png', 'frames': rects,
-            'portraits': {p: {'48': p + '_48', '32': p + '_32'} for p in ids},
-            'sources': {p: ('portraits.webp cell %d' % CROPS[p][0]) if p in CROPS else ('interior-sprites.png cell %d' % EXTRA[p][0]) for p in ids},
-            'unassigned': ['noble_lady', 'silver_rogue', 'goggles_smith', 'hooded_sage'],
-            'notes': '48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop.'}
+            'portraits': portraits,
+            'sources': sources,
+            'aliases': {'vex': 'silver_rogue'},
+            'unassigned': ['noble_lady', 'goggles_smith', 'hooded_sage'],
+            'notes': '48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. '
+                     'E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex '
+                     '(Vex Quill: the silver_rogue frames).'}
     write_json(os.path.join(DST, 'portraits.json'), meta)
     contact(big, os.path.join(OUT, 'portraits_48_4x.png'), scale=4, cols=4, title='portraits 48x48 at 4x')
     contact(small, os.path.join(OUT, 'portraits_32_4x.png'), scale=4, cols=8, title='portraits 32x32 at 4x')
+    contact([(p, b) for p, b, _ in ep2] + [('silver_rogue (vex)', dict(big)['silver_rogue']), ('mael', dict(big)['mael']),
+             ('hob', dict(big)['hob'])], os.path.join(OUT, 'portraits_ep2_48_4x.png'), scale=4, cols=5,
+            title='Episode 2 portraits 48x48 at 4x (with Episode 1 references)')
+    contact([(p, s) for p, _, s in ep2], os.path.join(OUT, 'portraits_ep2_32_4x.png'), scale=4, cols=6,
+            title='Episode 2 portraits 32x32 at 4x')
     return meta
 
 

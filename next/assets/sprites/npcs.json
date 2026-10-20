@@ -8,7 +8,7 @@
   12,
   31
  ],
- "layout": "humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the bottom band.",
+ "layout": "humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the band under the Episode 1 blocks; the Episode 2 townsfolk and the Other Selves (refl_hero, refl_mira, refl_bram) in their own bands under the animals (E2-sprites).",
  "sprites": {
   "npc_elder": {
    "name": "Elder Mael",
@@ -265,6 +265,278 @@
     "up"
    ]
   },
+  "npc_elian": {
+   "name": "Elian",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_anwen": {
+   "name": "Sister Anwen",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_tovin": {
+   "name": "Tovin",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_lena": {
+   "name": "Lena",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_vessa": {
+   "name": "Vessa",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_nico": {
+   "name": "Nico",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_sava": {
+   "name": "Sava",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_corin": {
+   "name": "Corin",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_orla": {
+   "name": "Orla",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_wren": {
+   "name": "Wren",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_fitch": {
+   "name": "Fitch",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_vex": {
+   "name": "Vex Quill",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_aurel": {
+   "name": "Aurel",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "refl_hero": {
+   "name": "Nameless Reflection",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "refl_mira": {
+   "name": "Mira's Reflection",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "refl_bram": {
+   "name": "Bram's Reflection",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
   "animal_cat": {
    "cell": [
     16,
@@ -327,6 +599,1542 @@
   }
  },
  "frames": {
+  "npc_elian_down_0": [
+   0,
+   656,
+   24,
+   32
+  ],
+  "npc_elian_down_1": [
+   24,
+   656,
+   24,
+   32
+  ],
+  "npc_elian_down_2": [
+   48,
+   656,
+   24,
+   32
+  ],
+  "npc_elian_down_blink": [
+   72,
+   656,
+   24,
+   32
+  ],
+  "npc_elian_left_0": [
+   0,
+   688,
+   24,
+   32
+  ],
+  "npc_elian_left_1": [
+   24,
+   688,
+   24,
+   32
+  ],
+  "npc_elian_left_2": [
+   48,
+   688,
+   24,
+   32
+  ],
+  "npc_elian_left_blink": [
+   72,
+   688,
+   24,
+   32
+  ],
+  "npc_elian_right_0": [
+   0,
+   720,
+   24,
+   32
+  ],
+  "npc_elian_right_1": [
+   24,
+   720,
+   24,
+   32
+  ],
+  "npc_elian_right_2": [
+   48,
+   720,
+   24,
+   32
+  ],
+  "npc_elian_right_blink": [
+   72,
+   720,
+   24,
+   32
+  ],
+  "npc_elian_up_0": [
+   0,
+   752,
+   24,
+   32
+  ],
+  "npc_elian_up_1": [
+   24,
+   752,
+   24,
+   32
+  ],
+  "npc_elian_up_2": [
+   48,
+   752,
+   24,
+   32
+  ],
+  "npc_elian_up_blink": [
+   72,
+   752,
+   24,
+   32
+  ],
+  "npc_anwen_down_0": [
+   96,
+   656,
+   24,
+   32
+  ],
+  "npc_anwen_down_1": [
+   120,
+   656,
+   24,
+   32
+  ],
+  "npc_anwen_down_2": [
+   144,
+   656,
+   24,
+   32
+  ],
+  "npc_anwen_down_blink": [
+   168,
+   656,
+   24,
+   32
+  ],
+  "npc_anwen_left_0": [
+   96,
+   688,
+   24,
+   32
+  ],
+  "npc_anwen_left_1": [
+   120,
+   688,
+   24,
+   32
+  ],
+  "npc_anwen_left_2": [
+   144,
+   688,
+   24,
+   32
+  ],
+  "npc_anwen_left_blink": [
+   168,
+   688,
+   24,
+   32
+  ],
+  "npc_anwen_right_0": [
+   96,
+   720,
+   24,
+   32
+  ],
+  "npc_anwen_right_1": [
+   120,
+   720,
+   24,
+   32
+  ],
+  "npc_anwen_right_2": [
+   144,
+   720,
+   24,
+   32
+  ],
+  "npc_anwen_right_blink": [
+   168,
+   720,
+   24,
+   32
+  ],
+  "npc_anwen_up_0": [
+   96,
+   752,
+   24,
+   32
+  ],
+  "npc_anwen_up_1": [
+   120,
+   752,
+   24,
+   32
+  ],
+  "npc_anwen_up_2": [
+   144,
+   752,
+   24,
+   32
+  ],
+  "npc_anwen_up_blink": [
+   168,
+   752,
+   24,
+   32
+  ],
+  "npc_tovin_down_0": [
+   192,
+   656,
+   24,
+   32
+  ],
+  "npc_tovin_down_1": [
+   216,
+   656,
+   24,
+   32
+  ],
+  "npc_tovin_down_2": [
+   240,
+   656,
+   24,
+   32
+  ],
+  "npc_tovin_down_blink": [
+   264,
+   656,
+   24,
+   32
+  ],
+  "npc_tovin_left_0": [
+   192,
+   688,
+   24,
+   32
+  ],
+  "npc_tovin_left_1": [
+   216,
+   688,
+   24,
+   32
+  ],
+  "npc_tovin_left_2": [
+   240,
+   688,
+   24,
+   32
+  ],
+  "npc_tovin_left_blink": [
+   264,
+   688,
+   24,
+   32
+  ],
+  "npc_tovin_right_0": [
+   192,
+   720,
+   24,
+   32
+  ],
+  "npc_tovin_right_1": [
+   216,
+   720,
+   24,
+   32
+  ],
+  "npc_tovin_right_2": [
+   240,
+   720,
+   24,
+   32
+  ],
+  "npc_tovin_right_blink": [
+   264,
+   720,
+   24,
+   32
+  ],
+  "npc_tovin_up_0": [
+   192,
+   752,
+   24,
+   32
+  ],
+  "npc_tovin_up_1": [
+   216,
+   752,
+   24,
+   32
+  ],
+  "npc_tovin_up_2": [
+   240,
+   752,
+   24,
+   32
+  ],
+  "npc_tovin_up_blink": [
+   264,
+   752,
+   24,
+   32
+  ],
+  "npc_lena_down_0": [
+   0,
+   784,
+   24,
+   32
+  ],
+  "npc_lena_down_1": [
+   24,
+   784,
+   24,
+   32
+  ],
+  "npc_lena_down_2": [
+   48,
+   784,
+   24,
+   32
+  ],
+  "npc_lena_down_blink": [
+   72,
+   784,
+   24,
+   32
+  ],
+  "npc_lena_left_0": [
+   0,
+   816,
+   24,
+   32
+  ],
+  "npc_lena_left_1": [
+   24,
+   816,
+   24,
+   32
+  ],
+  "npc_lena_left_2": [
+   48,
+   816,
+   24,
+   32
+  ],
+  "npc_lena_left_blink": [
+   72,
+   816,
+   24,
+   32
+  ],
+  "npc_lena_right_0": [
+   0,
+   848,
+   24,
+   32
+  ],
+  "npc_lena_right_1": [
+   24,
+   848,
+   24,
+   32
+  ],
+  "npc_lena_right_2": [
+   48,
+   848,
+   24,
+   32
+  ],
+  "npc_lena_right_blink": [
+   72,
+   848,
+   24,
+   32
+  ],
+  "npc_lena_up_0": [
+   0,
+   880,
+   24,
+   32
+  ],
+  "npc_lena_up_1": [
+   24,
+   880,
+   24,
+   32
+  ],
+  "npc_lena_up_2": [
+   48,
+   880,
+   24,
+   32
+  ],
+  "npc_lena_up_blink": [
+   72,
+   880,
+   24,
+   32
+  ],
+  "npc_vessa_down_0": [
+   96,
+   784,
+   24,
+   32
+  ],
+  "npc_vessa_down_1": [
+   120,
+   784,
+   24,
+   32
+  ],
+  "npc_vessa_down_2": [
+   144,
+   784,
+   24,
+   32
+  ],
+  "npc_vessa_down_blink": [
+   168,
+   784,
+   24,
+   32
+  ],
+  "npc_vessa_left_0": [
+   96,
+   816,
+   24,
+   32
+  ],
+  "npc_vessa_left_1": [
+   120,
+   816,
+   24,
+   32
+  ],
+  "npc_vessa_left_2": [
+   144,
+   816,
+   24,
+   32
+  ],
+  "npc_vessa_left_blink": [
+   168,
+   816,
+   24,
+   32
+  ],
+  "npc_vessa_right_0": [
+   96,
+   848,
+   24,
+   32
+  ],
+  "npc_vessa_right_1": [
+   120,
+   848,
+   24,
+   32
+  ],
+  "npc_vessa_right_2": [
+   144,
+   848,
+   24,
+   32
+  ],
+  "npc_vessa_right_blink": [
+   168,
+   848,
+   24,
+   32
+  ],
+  "npc_vessa_up_0": [
+   96,
+   880,
+   24,
+   32
+  ],
+  "npc_vessa_up_1": [
+   120,
+   880,
+   24,
+   32
+  ],
+  "npc_vessa_up_2": [
+   144,
+   880,
+   24,
+   32
+  ],
+  "npc_vessa_up_blink": [
+   168,
+   880,
+   24,
+   32
+  ],
+  "npc_nico_down_0": [
+   192,
+   784,
+   24,
+   32
+  ],
+  "npc_nico_down_1": [
+   216,
+   784,
+   24,
+   32
+  ],
+  "npc_nico_down_2": [
+   240,
+   784,
+   24,
+   32
+  ],
+  "npc_nico_down_blink": [
+   264,
+   784,
+   24,
+   32
+  ],
+  "npc_nico_left_0": [
+   192,
+   816,
+   24,
+   32
+  ],
+  "npc_nico_left_1": [
+   216,
+   816,
+   24,
+   32
+  ],
+  "npc_nico_left_2": [
+   240,
+   816,
+   24,
+   32
+  ],
+  "npc_nico_left_blink": [
+   264,
+   816,
+   24,
+   32
+  ],
+  "npc_nico_right_0": [
+   192,
+   848,
+   24,
+   32
+  ],
+  "npc_nico_right_1": [
+   216,
+   848,
+   24,
+   32
+  ],
+  "npc_nico_right_2": [
+   240,
+   848,
+   24,
+   32
+  ],
+  "npc_nico_right_blink": [
+   264,
+   848,
+   24,
+   32
+  ],
+  "npc_nico_up_0": [
+   192,
+   880,
+   24,
+   32
+  ],
+  "npc_nico_up_1": [
+   216,
+   880,
+   24,
+   32
+  ],
+  "npc_nico_up_2": [
+   240,
+   880,
+   24,
+   32
+  ],
+  "npc_nico_up_blink": [
+   264,
+   880,
+   24,
+   32
+  ],
+  "npc_sava_down_0": [
+   0,
+   912,
+   24,
+   32
+  ],
+  "npc_sava_down_1": [
+   24,
+   912,
+   24,
+   32
+  ],
+  "npc_sava_down_2": [
+   48,
+   912,
+   24,
+   32
+  ],
+  "npc_sava_down_blink": [
+   72,
+   912,
+   24,
+   32
+  ],
+  "npc_sava_left_0": [
+   0,
+   944,
+   24,
+   32
+  ],
+  "npc_sava_left_1": [
+   24,
+   944,
+   24,
+   32
+  ],
+  "npc_sava_left_2": [
+   48,
+   944,
+   24,
+   32
+  ],
+  "npc_sava_left_blink": [
+   72,
+   944,
+   24,
+   32
+  ],
+  "npc_sava_right_0": [
+   0,
+   976,
+   24,
+   32
+  ],
+  "npc_sava_right_1": [
+   24,
+   976,
+   24,
+   32
+  ],
+  "npc_sava_right_2": [
+   48,
+   976,
+   24,
+   32
+  ],
+  "npc_sava_right_blink": [
+   72,
+   976,
+   24,
+   32
+  ],
+  "npc_sava_up_0": [
+   0,
+   1008,
+   24,
+   32
+  ],
+  "npc_sava_up_1": [
+   24,
+   1008,
+   24,
+   32
+  ],
+  "npc_sava_up_2": [
+   48,
+   1008,
+   24,
+   32
+  ],
+  "npc_sava_up_blink": [
+   72,
+   1008,
+   24,
+   32
+  ],
+  "npc_corin_down_0": [
+   96,
+   912,
+   24,
+   32
+  ],
+  "npc_corin_down_1": [
+   120,
+   912,
+   24,
+   32
+  ],
+  "npc_corin_down_2": [
+   144,
+   912,
+   24,
+   32
+  ],
+  "npc_corin_down_blink": [
+   168,
+   912,
+   24,
+   32
+  ],
+  "npc_corin_left_0": [
+   96,
+   944,
+   24,
+   32
+  ],
+  "npc_corin_left_1": [
+   120,
+   944,
+   24,
+   32
+  ],
+  "npc_corin_left_2": [
+   144,
+   944,
+   24,
+   32
+  ],
+  "npc_corin_left_blink": [
+   168,
+   944,
+   24,
+   32
+  ],
+  "npc_corin_right_0": [
+   96,
+   976,
+   24,
+   32
+  ],
+  "npc_corin_right_1": [
+   120,
+   976,
+   24,
+   32
+  ],
+  "npc_corin_right_2": [
+   144,
+   976,
+   24,
+   32
+  ],
+  "npc_corin_right_blink": [
+   168,
+   976,
+   24,
+   32
+  ],
+  "npc_corin_up_0": [
+   96,
+   1008,
+   24,
+   32
+  ],
+  "npc_corin_up_1": [
+   120,
+   1008,
+   24,
+   32
+  ],
+  "npc_corin_up_2": [
+   144,
+   1008,
+   24,
+   32
+  ],
+  "npc_corin_up_blink": [
+   168,
+   1008,
+   24,
+   32
+  ],
+  "npc_orla_down_0": [
+   192,
+   912,
+   24,
+   32
+  ],
+  "npc_orla_down_1": [
+   216,
+   912,
+   24,
+   32
+  ],
+  "npc_orla_down_2": [
+   240,
+   912,
+   24,
+   32
+  ],
+  "npc_orla_down_blink": [
+   264,
+   912,
+   24,
+   32
+  ],
+  "npc_orla_left_0": [
+   192,
+   944,
+   24,
+   32
+  ],
+  "npc_orla_left_1": [
+   216,
+   944,
+   24,
+   32
+  ],
+  "npc_orla_left_2": [
+   240,
+   944,
+   24,
+   32
+  ],
+  "npc_orla_left_blink": [
+   264,
+   944,
+   24,
+   32
+  ],
+  "npc_orla_right_0": [
+   192,
+   976,
+   24,
+   32
+  ],
+  "npc_orla_right_1": [
+   216,
+   976,
+   24,
+   32
+  ],
+  "npc_orla_right_2": [
+   240,
+   976,
+   24,
+   32
+  ],
+  "npc_orla_right_blink": [
+   264,
+   976,
+   24,
+   32
+  ],
+  "npc_orla_up_0": [
+   192,
+   1008,
+   24,
+   32
+  ],
+  "npc_orla_up_1": [
+   216,
+   1008,
+   24,
+   32
+  ],
+  "npc_orla_up_2": [
+   240,
+   1008,
+   24,
+   32
+  ],
+  "npc_orla_up_blink": [
+   264,
+   1008,
+   24,
+   32
+  ],
+  "npc_wren_down_0": [
+   0,
+   1040,
+   24,
+   32
+  ],
+  "npc_wren_down_1": [
+   24,
+   1040,
+   24,
+   32
+  ],
+  "npc_wren_down_2": [
+   48,
+   1040,
+   24,
+   32
+  ],
+  "npc_wren_down_blink": [
+   72,
+   1040,
+   24,
+   32
+  ],
+  "npc_wren_left_0": [
+   0,
+   1072,
+   24,
+   32
+  ],
+  "npc_wren_left_1": [
+   24,
+   1072,
+   24,
+   32
+  ],
+  "npc_wren_left_2": [
+   48,
+   1072,
+   24,
+   32
+  ],
+  "npc_wren_left_blink": [
+   72,
+   1072,
+   24,
+   32
+  ],
+  "npc_wren_right_0": [
+   0,
+   1104,
+   24,
+   32
+  ],
+  "npc_wren_right_1": [
+   24,
+   1104,
+   24,
+   32
+  ],
+  "npc_wren_right_2": [
+   48,
+   1104,
+   24,
+   32
+  ],
+  "npc_wren_right_blink": [
+   72,
+   1104,
+   24,
+   32
+  ],
+  "npc_wren_up_0": [
+   0,
+   1136,
+   24,
+   32
+  ],
+  "npc_wren_up_1": [
+   24,
+   1136,
+   24,
+   32
+  ],
+  "npc_wren_up_2": [
+   48,
+   1136,
+   24,
+   32
+  ],
+  "npc_wren_up_blink": [
+   72,
+   1136,
+   24,
+   32
+  ],
+  "npc_fitch_down_0": [
+   96,
+   1040,
+   24,
+   32
+  ],
+  "npc_fitch_down_1": [
+   120,
+   1040,
+   24,
+   32
+  ],
+  "npc_fitch_down_2": [
+   144,
+   1040,
+   24,
+   32
+  ],
+  "npc_fitch_down_blink": [
+   168,
+   1040,
+   24,
+   32
+  ],
+  "npc_fitch_left_0": [
+   96,
+   1072,
+   24,
+   32
+  ],
+  "npc_fitch_left_1": [
+   120,
+   1072,
+   24,
+   32
+  ],
+  "npc_fitch_left_2": [
+   144,
+   1072,
+   24,
+   32
+  ],
+  "npc_fitch_left_blink": [
+   168,
+   1072,
+   24,
+   32
+  ],
+  "npc_fitch_right_0": [
+   96,
+   1104,
+   24,
+   32
+  ],
+  "npc_fitch_right_1": [
+   120,
+   1104,
+   24,
+   32
+  ],
+  "npc_fitch_right_2": [
+   144,
+   1104,
+   24,
+   32
+  ],
+  "npc_fitch_right_blink": [
+   168,
+   1104,
+   24,
+   32
+  ],
+  "npc_fitch_up_0": [
+   96,
+   1136,
+   24,
+   32
+  ],
+  "npc_fitch_up_1": [
+   120,
+   1136,
+   24,
+   32
+  ],
+  "npc_fitch_up_2": [
+   144,
+   1136,
+   24,
+   32
+  ],
+  "npc_fitch_up_blink": [
+   168,
+   1136,
+   24,
+   32
+  ],
+  "npc_vex_down_0": [
+   192,
+   1040,
+   24,
+   32
+  ],
+  "npc_vex_down_1": [
+   216,
+   1040,
+   24,
+   32
+  ],
+  "npc_vex_down_2": [
+   240,
+   1040,
+   24,
+   32
+  ],
+  "npc_vex_down_blink": [
+   264,
+   1040,
+   24,
+   32
+  ],
+  "npc_vex_left_0": [
+   192,
+   1072,
+   24,
+   32
+  ],
+  "npc_vex_left_1": [
+   216,
+   1072,
+   24,
+   32
+  ],
+  "npc_vex_left_2": [
+   240,
+   1072,
+   24,
+   32
+  ],
+  "npc_vex_left_blink": [
+   264,
+   1072,
+   24,
+   32
+  ],
+  "npc_vex_right_0": [
+   192,
+   1104,
+   24,
+   32
+  ],
+  "npc_vex_right_1": [
+   216,
+   1104,
+   24,
+   32
+  ],
+  "npc_vex_right_2": [
+   240,
+   1104,
+   24,
+   32
+  ],
+  "npc_vex_right_blink": [
+   264,
+   1104,
+   24,
+   32
+  ],
+  "npc_vex_up_0": [
+   192,
+   1136,
+   24,
+   32
+  ],
+  "npc_vex_up_1": [
+   216,
+   1136,
+   24,
+   32
+  ],
+  "npc_vex_up_2": [
+   240,
+   1136,
+   24,
+   32
+  ],
+  "npc_vex_up_blink": [
+   264,
+   1136,
+   24,
+   32
+  ],
+  "npc_aurel_down_0": [
+   0,
+   1168,
+   24,
+   32
+  ],
+  "npc_aurel_down_1": [
+   24,
+   1168,
+   24,
+   32
+  ],
+  "npc_aurel_down_2": [
+   48,
+   1168,
+   24,
+   32
+  ],
+  "npc_aurel_down_blink": [
+   72,
+   1168,
+   24,
+   32
+  ],
+  "npc_aurel_left_0": [
+   0,
+   1200,
+   24,
+   32
+  ],
+  "npc_aurel_left_1": [
+   24,
+   1200,
+   24,
+   32
+  ],
+  "npc_aurel_left_2": [
+   48,
+   1200,
+   24,
+   32
+  ],
+  "npc_aurel_left_blink": [
+   72,
+   1200,
+   24,
+   32
+  ],
+  "npc_aurel_right_0": [
+   0,
+   1232,
+   24,
+   32
+  ],
+  "npc_aurel_right_1": [
+   24,
+   1232,
+   24,
+   32
+  ],
+  "npc_aurel_right_2": [
+   48,
+   1232,
+   24,
+   32
+  ],
+  "npc_aurel_right_blink": [
+   72,
+   1232,
+   24,
+   32
+  ],
+  "npc_aurel_up_0": [
+   0,
+   1264,
+   24,
+   32
+  ],
+  "npc_aurel_up_1": [
+   24,
+   1264,
+   24,
+   32
+  ],
+  "npc_aurel_up_2": [
+   48,
+   1264,
+   24,
+   32
+  ],
+  "npc_aurel_up_blink": [
+   72,
+   1264,
+   24,
+   32
+  ],
+  "refl_hero_down_0": [
+   96,
+   1168,
+   24,
+   32
+  ],
+  "refl_hero_down_1": [
+   120,
+   1168,
+   24,
+   32
+  ],
+  "refl_hero_down_2": [
+   144,
+   1168,
+   24,
+   32
+  ],
+  "refl_hero_down_blink": [
+   168,
+   1168,
+   24,
+   32
+  ],
+  "refl_hero_left_0": [
+   96,
+   1200,
+   24,
+   32
+  ],
+  "refl_hero_left_1": [
+   120,
+   1200,
+   24,
+   32
+  ],
+  "refl_hero_left_2": [
+   144,
+   1200,
+   24,
+   32
+  ],
+  "refl_hero_left_blink": [
+   168,
+   1200,
+   24,
+   32
+  ],
+  "refl_hero_right_0": [
+   96,
+   1232,
+   24,
+   32
+  ],
+  "refl_hero_right_1": [
+   120,
+   1232,
+   24,
+   32
+  ],
+  "refl_hero_right_2": [
+   144,
+   1232,
+   24,
+   32
+  ],
+  "refl_hero_right_blink": [
+   168,
+   1232,
+   24,
+   32
+  ],
+  "refl_hero_up_0": [
+   96,
+   1264,
+   24,
+   32
+  ],
+  "refl_hero_up_1": [
+   120,
+   1264,
+   24,
+   32
+  ],
+  "refl_hero_up_2": [
+   144,
+   1264,
+   24,
+   32
+  ],
+  "refl_hero_up_blink": [
+   168,
+   1264,
+   24,
+   32
+  ],
+  "refl_mira_down_0": [
+   192,
+   1168,
+   24,
+   32
+  ],
+  "refl_mira_down_1": [
+   216,
+   1168,
+   24,
+   32
+  ],
+  "refl_mira_down_2": [
+   240,
+   1168,
+   24,
+   32
+  ],
+  "refl_mira_down_blink": [
+   264,
+   1168,
+   24,
+   32
+  ],
+  "refl_mira_left_0": [
+   192,
+   1200,
+   24,
+   32
+  ],
+  "refl_mira_left_1": [
+   216,
+   1200,
+   24,
+   32
+  ],
+  "refl_mira_left_2": [
+   240,
+   1200,
+   24,
+   32
+  ],
+  "refl_mira_left_blink": [
+   264,
+   1200,
+   24,
+   32
+  ],
+  "refl_mira_right_0": [
+   192,
+   1232,
+   24,
+   32
+  ],
+  "refl_mira_right_1": [
+   216,
+   1232,
+   24,
+   32
+  ],
+  "refl_mira_right_2": [
+   240,
+   1232,
+   24,
+   32
+  ],
+  "refl_mira_right_blink": [
+   264,
+   1232,
+   24,
+   32
+  ],
+  "refl_mira_up_0": [
+   192,
+   1264,
+   24,
+   32
+  ],
+  "refl_mira_up_1": [
+   216,
+   1264,
+   24,
+   32
+  ],
+  "refl_mira_up_2": [
+   240,
+   1264,
+   24,
+   32
+  ],
+  "refl_mira_up_blink": [
+   264,
+   1264,
+   24,
+   32
+  ],
+  "refl_bram_down_0": [
+   0,
+   1296,
+   24,
+   32
+  ],
+  "refl_bram_down_1": [
+   24,
+   1296,
+   24,
+   32
+  ],
+  "refl_bram_down_2": [
+   48,
+   1296,
+   24,
+   32
+  ],
+  "refl_bram_down_blink": [
+   72,
+   1296,
+   24,
+   32
+  ],
+  "refl_bram_left_0": [
+   0,
+   1328,
+   24,
+   32
+  ],
+  "refl_bram_left_1": [
+   24,
+   1328,
+   24,
+   32
+  ],
+  "refl_bram_left_2": [
+   48,
+   1328,
+   24,
+   32
+  ],
+  "refl_bram_left_blink": [
+   72,
+   1328,
+   24,
+   32
+  ],
+  "refl_bram_right_0": [
+   0,
+   1360,
+   24,
+   32
+  ],
+  "refl_bram_right_1": [
+   24,
+   1360,
+   24,
+   32
+  ],
+  "refl_bram_right_2": [
+   48,
+   1360,
+   24,
+   32
+  ],
+  "refl_bram_right_blink": [
+   72,
+   1360,
+   24,
+   32
+  ],
+  "refl_bram_up_0": [
+   0,
+   1392,
+   24,
+   32
+  ],
+  "refl_bram_up_1": [
+   24,
+   1392,
+   24,
+   32
+  ],
+  "refl_bram_up_2": [
+   48,
+   1392,
+   24,
+   32
+  ],
+  "refl_bram_up_blink": [
+   72,
+   1392,
+   24,
+   32
+  ],
   "npc_elder_down_0": [
    0,
    0,
@@ -4489,6 +6297,2822 @@
     "npc_bellkeeper_up_0",
     "npc_bellkeeper_up_blink",
     "npc_bellkeeper_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_elian_walk_down": {
+   "frames": [
+    "npc_elian_down_1",
+    "npc_elian_down_0",
+    "npc_elian_down_2",
+    "npc_elian_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_elian_idle_down": {
+   "frames": [
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_0",
+    "npc_elian_down_blink",
+    "npc_elian_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_elian_walk_left": {
+   "frames": [
+    "npc_elian_left_1",
+    "npc_elian_left_0",
+    "npc_elian_left_2",
+    "npc_elian_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_elian_idle_left": {
+   "frames": [
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_0",
+    "npc_elian_left_blink",
+    "npc_elian_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_elian_walk_right": {
+   "frames": [
+    "npc_elian_right_1",
+    "npc_elian_right_0",
+    "npc_elian_right_2",
+    "npc_elian_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_elian_idle_right": {
+   "frames": [
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_0",
+    "npc_elian_right_blink",
+    "npc_elian_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_elian_walk_up": {
+   "frames": [
+    "npc_elian_up_1",
+    "npc_elian_up_0",
+    "npc_elian_up_2",
+    "npc_elian_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_elian_idle_up": {
+   "frames": [
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_0",
+    "npc_elian_up_blink",
+    "npc_elian_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_anwen_walk_down": {
+   "frames": [
+    "npc_anwen_down_1",
+    "npc_anwen_down_0",
+    "npc_anwen_down_2",
+    "npc_anwen_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_anwen_idle_down": {
+   "frames": [
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_0",
+    "npc_anwen_down_blink",
+    "npc_anwen_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_anwen_walk_left": {
+   "frames": [
+    "npc_anwen_left_1",
+    "npc_anwen_left_0",
+    "npc_anwen_left_2",
+    "npc_anwen_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_anwen_idle_left": {
+   "frames": [
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_0",
+    "npc_anwen_left_blink",
+    "npc_anwen_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_anwen_walk_right": {
+   "frames": [
+    "npc_anwen_right_1",
+    "npc_anwen_right_0",
+    "npc_anwen_right_2",
+    "npc_anwen_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_anwen_idle_right": {
+   "frames": [
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_0",
+    "npc_anwen_right_blink",
+    "npc_anwen_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_anwen_walk_up": {
+   "frames": [
+    "npc_anwen_up_1",
+    "npc_anwen_up_0",
+    "npc_anwen_up_2",
+    "npc_anwen_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_anwen_idle_up": {
+   "frames": [
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_0",
+    "npc_anwen_up_blink",
+    "npc_anwen_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_tovin_walk_down": {
+   "frames": [
+    "npc_tovin_down_1",
+    "npc_tovin_down_0",
+    "npc_tovin_down_2",
+    "npc_tovin_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_tovin_idle_down": {
+   "frames": [
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_0",
+    "npc_tovin_down_blink",
+    "npc_tovin_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_tovin_walk_left": {
+   "frames": [
+    "npc_tovin_left_1",
+    "npc_tovin_left_0",
+    "npc_tovin_left_2",
+    "npc_tovin_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_tovin_idle_left": {
+   "frames": [
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_0",
+    "npc_tovin_left_blink",
+    "npc_tovin_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_tovin_walk_right": {
+   "frames": [
+    "npc_tovin_right_1",
+    "npc_tovin_right_0",
+    "npc_tovin_right_2",
+    "npc_tovin_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_tovin_idle_right": {
+   "frames": [
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_0",
+    "npc_tovin_right_blink",
+    "npc_tovin_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_tovin_walk_up": {
+   "frames": [
+    "npc_tovin_up_1",
+    "npc_tovin_up_0",
+    "npc_tovin_up_2",
+    "npc_tovin_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_tovin_idle_up": {
+   "frames": [
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_0",
+    "npc_tovin_up_blink",
+    "npc_tovin_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_lena_walk_down": {
+   "frames": [
+    "npc_lena_down_1",
+    "npc_lena_down_0",
+    "npc_lena_down_2",
+    "npc_lena_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_lena_idle_down": {
+   "frames": [
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_0",
+    "npc_lena_down_blink",
+    "npc_lena_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_lena_walk_left": {
+   "frames": [
+    "npc_lena_left_1",
+    "npc_lena_left_0",
+    "npc_lena_left_2",
+    "npc_lena_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_lena_idle_left": {
+   "frames": [
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_0",
+    "npc_lena_left_blink",
+    "npc_lena_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_lena_walk_right": {
+   "frames": [
+    "npc_lena_right_1",
+    "npc_lena_right_0",
+    "npc_lena_right_2",
+    "npc_lena_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_lena_idle_right": {
+   "frames": [
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_0",
+    "npc_lena_right_blink",
+    "npc_lena_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_lena_walk_up": {
+   "frames": [
+    "npc_lena_up_1",
+    "npc_lena_up_0",
+    "npc_lena_up_2",
+    "npc_lena_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_lena_idle_up": {
+   "frames": [
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_0",
+    "npc_lena_up_blink",
+    "npc_lena_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vessa_walk_down": {
+   "frames": [
+    "npc_vessa_down_1",
+    "npc_vessa_down_0",
+    "npc_vessa_down_2",
+    "npc_vessa_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vessa_idle_down": {
+   "frames": [
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_0",
+    "npc_vessa_down_blink",
+    "npc_vessa_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vessa_walk_left": {
+   "frames": [
+    "npc_vessa_left_1",
+    "npc_vessa_left_0",
+    "npc_vessa_left_2",
+    "npc_vessa_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vessa_idle_left": {
+   "frames": [
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_0",
+    "npc_vessa_left_blink",
+    "npc_vessa_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vessa_walk_right": {
+   "frames": [
+    "npc_vessa_right_1",
+    "npc_vessa_right_0",
+    "npc_vessa_right_2",
+    "npc_vessa_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vessa_idle_right": {
+   "frames": [
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_0",
+    "npc_vessa_right_blink",
+    "npc_vessa_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vessa_walk_up": {
+   "frames": [
+    "npc_vessa_up_1",
+    "npc_vessa_up_0",
+    "npc_vessa_up_2",
+    "npc_vessa_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vessa_idle_up": {
+   "frames": [
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_0",
+    "npc_vessa_up_blink",
+    "npc_vessa_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_nico_walk_down": {
+   "frames": [
+    "npc_nico_down_1",
+    "npc_nico_down_0",
+    "npc_nico_down_2",
+    "npc_nico_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_nico_idle_down": {
+   "frames": [
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_0",
+    "npc_nico_down_blink",
+    "npc_nico_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_nico_walk_left": {
+   "frames": [
+    "npc_nico_left_1",
+    "npc_nico_left_0",
+    "npc_nico_left_2",
+    "npc_nico_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_nico_idle_left": {
+   "frames": [
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_0",
+    "npc_nico_left_blink",
+    "npc_nico_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_nico_walk_right": {
+   "frames": [
+    "npc_nico_right_1",
+    "npc_nico_right_0",
+    "npc_nico_right_2",
+    "npc_nico_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_nico_idle_right": {
+   "frames": [
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_0",
+    "npc_nico_right_blink",
+    "npc_nico_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_nico_walk_up": {
+   "frames": [
+    "npc_nico_up_1",
+    "npc_nico_up_0",
+    "npc_nico_up_2",
+    "npc_nico_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_nico_idle_up": {
+   "frames": [
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_0",
+    "npc_nico_up_blink",
+    "npc_nico_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_sava_walk_down": {
+   "frames": [
+    "npc_sava_down_1",
+    "npc_sava_down_0",
+    "npc_sava_down_2",
+    "npc_sava_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_sava_idle_down": {
+   "frames": [
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_0",
+    "npc_sava_down_blink",
+    "npc_sava_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_sava_walk_left": {
+   "frames": [
+    "npc_sava_left_1",
+    "npc_sava_left_0",
+    "npc_sava_left_2",
+    "npc_sava_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_sava_idle_left": {
+   "frames": [
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_0",
+    "npc_sava_left_blink",
+    "npc_sava_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_sava_walk_right": {
+   "frames": [
+    "npc_sava_right_1",
+    "npc_sava_right_0",
+    "npc_sava_right_2",
+    "npc_sava_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_sava_idle_right": {
+   "frames": [
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_0",
+    "npc_sava_right_blink",
+    "npc_sava_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_sava_walk_up": {
+   "frames": [
+    "npc_sava_up_1",
+    "npc_sava_up_0",
+    "npc_sava_up_2",
+    "npc_sava_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_sava_idle_up": {
+   "frames": [
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_0",
+    "npc_sava_up_blink",
+    "npc_sava_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_corin_walk_down": {
+   "frames": [
+    "npc_corin_down_1",
+    "npc_corin_down_0",
+    "npc_corin_down_2",
+    "npc_corin_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_corin_idle_down": {
+   "frames": [
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_0",
+    "npc_corin_down_blink",
+    "npc_corin_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_corin_walk_left": {
+   "frames": [
+    "npc_corin_left_1",
+    "npc_corin_left_0",
+    "npc_corin_left_2",
+    "npc_corin_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_corin_idle_left": {
+   "frames": [
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_0",
+    "npc_corin_left_blink",
+    "npc_corin_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_corin_walk_right": {
+   "frames": [
+    "npc_corin_right_1",
+    "npc_corin_right_0",
+    "npc_corin_right_2",
+    "npc_corin_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_corin_idle_right": {
+   "frames": [
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_0",
+    "npc_corin_right_blink",
+    "npc_corin_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_corin_walk_up": {
+   "frames": [
+    "npc_corin_up_1",
+    "npc_corin_up_0",
+    "npc_corin_up_2",
+    "npc_corin_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_corin_idle_up": {
+   "frames": [
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_0",
+    "npc_corin_up_blink",
+    "npc_corin_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_orla_walk_down": {
+   "frames": [
+    "npc_orla_down_1",
+    "npc_orla_down_0",
+    "npc_orla_down_2",
+    "npc_orla_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_orla_idle_down": {
+   "frames": [
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_0",
+    "npc_orla_down_blink",
+    "npc_orla_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_orla_walk_left": {
+   "frames": [
+    "npc_orla_left_1",
+    "npc_orla_left_0",
+    "npc_orla_left_2",
+    "npc_orla_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_orla_idle_left": {
+   "frames": [
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_0",
+    "npc_orla_left_blink",
+    "npc_orla_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_orla_walk_right": {
+   "frames": [
+    "npc_orla_right_1",
+    "npc_orla_right_0",
+    "npc_orla_right_2",
+    "npc_orla_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_orla_idle_right": {
+   "frames": [
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_0",
+    "npc_orla_right_blink",
+    "npc_orla_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_orla_walk_up": {
+   "frames": [
+    "npc_orla_up_1",
+    "npc_orla_up_0",
+    "npc_orla_up_2",
+    "npc_orla_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_orla_idle_up": {
+   "frames": [
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_0",
+    "npc_orla_up_blink",
+    "npc_orla_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_wren_walk_down": {
+   "frames": [
+    "npc_wren_down_1",
+    "npc_wren_down_0",
+    "npc_wren_down_2",
+    "npc_wren_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_wren_idle_down": {
+   "frames": [
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_0",
+    "npc_wren_down_blink",
+    "npc_wren_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_wren_walk_left": {
+   "frames": [
+    "npc_wren_left_1",
+    "npc_wren_left_0",
+    "npc_wren_left_2",
+    "npc_wren_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_wren_idle_left": {
+   "frames": [
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_0",
+    "npc_wren_left_blink",
+    "npc_wren_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_wren_walk_right": {
+   "frames": [
+    "npc_wren_right_1",
+    "npc_wren_right_0",
+    "npc_wren_right_2",
+    "npc_wren_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_wren_idle_right": {
+   "frames": [
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_0",
+    "npc_wren_right_blink",
+    "npc_wren_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_wren_walk_up": {
+   "frames": [
+    "npc_wren_up_1",
+    "npc_wren_up_0",
+    "npc_wren_up_2",
+    "npc_wren_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_wren_idle_up": {
+   "frames": [
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_0",
+    "npc_wren_up_blink",
+    "npc_wren_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_fitch_walk_down": {
+   "frames": [
+    "npc_fitch_down_1",
+    "npc_fitch_down_0",
+    "npc_fitch_down_2",
+    "npc_fitch_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_fitch_idle_down": {
+   "frames": [
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_0",
+    "npc_fitch_down_blink",
+    "npc_fitch_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_fitch_walk_left": {
+   "frames": [
+    "npc_fitch_left_1",
+    "npc_fitch_left_0",
+    "npc_fitch_left_2",
+    "npc_fitch_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_fitch_idle_left": {
+   "frames": [
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_0",
+    "npc_fitch_left_blink",
+    "npc_fitch_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_fitch_walk_right": {
+   "frames": [
+    "npc_fitch_right_1",
+    "npc_fitch_right_0",
+    "npc_fitch_right_2",
+    "npc_fitch_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_fitch_idle_right": {
+   "frames": [
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_0",
+    "npc_fitch_right_blink",
+    "npc_fitch_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_fitch_walk_up": {
+   "frames": [
+    "npc_fitch_up_1",
+    "npc_fitch_up_0",
+    "npc_fitch_up_2",
+    "npc_fitch_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_fitch_idle_up": {
+   "frames": [
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_0",
+    "npc_fitch_up_blink",
+    "npc_fitch_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_walk_down": {
+   "frames": [
+    "npc_vex_down_1",
+    "npc_vex_down_0",
+    "npc_vex_down_2",
+    "npc_vex_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_idle_down": {
+   "frames": [
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_0",
+    "npc_vex_down_blink",
+    "npc_vex_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_walk_left": {
+   "frames": [
+    "npc_vex_left_1",
+    "npc_vex_left_0",
+    "npc_vex_left_2",
+    "npc_vex_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_idle_left": {
+   "frames": [
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_0",
+    "npc_vex_left_blink",
+    "npc_vex_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_walk_right": {
+   "frames": [
+    "npc_vex_right_1",
+    "npc_vex_right_0",
+    "npc_vex_right_2",
+    "npc_vex_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_idle_right": {
+   "frames": [
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_0",
+    "npc_vex_right_blink",
+    "npc_vex_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_walk_up": {
+   "frames": [
+    "npc_vex_up_1",
+    "npc_vex_up_0",
+    "npc_vex_up_2",
+    "npc_vex_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_idle_up": {
+   "frames": [
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_0",
+    "npc_vex_up_blink",
+    "npc_vex_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_aurel_walk_down": {
+   "frames": [
+    "npc_aurel_down_1",
+    "npc_aurel_down_0",
+    "npc_aurel_down_2",
+    "npc_aurel_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_aurel_idle_down": {
+   "frames": [
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_0",
+    "npc_aurel_down_blink",
+    "npc_aurel_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_aurel_walk_left": {
+   "frames": [
+    "npc_aurel_left_1",
+    "npc_aurel_left_0",
+    "npc_aurel_left_2",
+    "npc_aurel_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_aurel_idle_left": {
+   "frames": [
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_0",
+    "npc_aurel_left_blink",
+    "npc_aurel_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_aurel_walk_right": {
+   "frames": [
+    "npc_aurel_right_1",
+    "npc_aurel_right_0",
+    "npc_aurel_right_2",
+    "npc_aurel_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_aurel_idle_right": {
+   "frames": [
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_0",
+    "npc_aurel_right_blink",
+    "npc_aurel_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_aurel_walk_up": {
+   "frames": [
+    "npc_aurel_up_1",
+    "npc_aurel_up_0",
+    "npc_aurel_up_2",
+    "npc_aurel_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_aurel_idle_up": {
+   "frames": [
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_0",
+    "npc_aurel_up_blink",
+    "npc_aurel_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_hero_walk_down": {
+   "frames": [
+    "refl_hero_down_1",
+    "refl_hero_down_0",
+    "refl_hero_down_2",
+    "refl_hero_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_hero_idle_down": {
+   "frames": [
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_0",
+    "refl_hero_down_blink",
+    "refl_hero_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_hero_walk_left": {
+   "frames": [
+    "refl_hero_left_1",
+    "refl_hero_left_0",
+    "refl_hero_left_2",
+    "refl_hero_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_hero_idle_left": {
+   "frames": [
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_0",
+    "refl_hero_left_blink",
+    "refl_hero_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_hero_walk_right": {
+   "frames": [
+    "refl_hero_right_1",
+    "refl_hero_right_0",
+    "refl_hero_right_2",
+    "refl_hero_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_hero_idle_right": {
+   "frames": [
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_0",
+    "refl_hero_right_blink",
+    "refl_hero_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_hero_walk_up": {
+   "frames": [
+    "refl_hero_up_1",
+    "refl_hero_up_0",
+    "refl_hero_up_2",
+    "refl_hero_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_hero_idle_up": {
+   "frames": [
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_0",
+    "refl_hero_up_blink",
+    "refl_hero_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_mira_walk_down": {
+   "frames": [
+    "refl_mira_down_1",
+    "refl_mira_down_0",
+    "refl_mira_down_2",
+    "refl_mira_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_mira_idle_down": {
+   "frames": [
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_0",
+    "refl_mira_down_blink",
+    "refl_mira_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_mira_walk_left": {
+   "frames": [
+    "refl_mira_left_1",
+    "refl_mira_left_0",
+    "refl_mira_left_2",
+    "refl_mira_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_mira_idle_left": {
+   "frames": [
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_0",
+    "refl_mira_left_blink",
+    "refl_mira_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_mira_walk_right": {
+   "frames": [
+    "refl_mira_right_1",
+    "refl_mira_right_0",
+    "refl_mira_right_2",
+    "refl_mira_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_mira_idle_right": {
+   "frames": [
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_0",
+    "refl_mira_right_blink",
+    "refl_mira_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_mira_walk_up": {
+   "frames": [
+    "refl_mira_up_1",
+    "refl_mira_up_0",
+    "refl_mira_up_2",
+    "refl_mira_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_mira_idle_up": {
+   "frames": [
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_0",
+    "refl_mira_up_blink",
+    "refl_mira_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_bram_walk_down": {
+   "frames": [
+    "refl_bram_down_1",
+    "refl_bram_down_0",
+    "refl_bram_down_2",
+    "refl_bram_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_bram_idle_down": {
+   "frames": [
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_0",
+    "refl_bram_down_blink",
+    "refl_bram_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_bram_walk_left": {
+   "frames": [
+    "refl_bram_left_1",
+    "refl_bram_left_0",
+    "refl_bram_left_2",
+    "refl_bram_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_bram_idle_left": {
+   "frames": [
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_0",
+    "refl_bram_left_blink",
+    "refl_bram_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_bram_walk_right": {
+   "frames": [
+    "refl_bram_right_1",
+    "refl_bram_right_0",
+    "refl_bram_right_2",
+    "refl_bram_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_bram_idle_right": {
+   "frames": [
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_0",
+    "refl_bram_right_blink",
+    "refl_bram_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "refl_bram_walk_up": {
+   "frames": [
+    "refl_bram_up_1",
+    "refl_bram_up_0",
+    "refl_bram_up_2",
+    "refl_bram_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "refl_bram_idle_up": {
+   "frames": [
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_0",
+    "refl_bram_up_blink",
+    "refl_bram_up_0"
    ],
    "fps": 8,
    "loop": true
