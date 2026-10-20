@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'd45f8019607a';
+const SHELL_VERSION = '3033b0ace61b';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -75,6 +75,7 @@ const PRECACHE = [
   'src/data/skills.js',
   'src/data/story/dialogue.js',
   'src/data/story/ep1.js',
+  'src/data/story/ep2.js',
   'src/data/text.js',
   'src/game/inventory.js',
   'src/game/state.js',
@@ -173,6 +174,8 @@ const PRECACHE = [
   'assets/ui/touch/run_pressed.png',
   'assets/tiles/archive.png',
   'assets/tiles/cliffs.png',
+  'assets/tiles/court.png',
+  'assets/tiles/hollow.png',
   'assets/tiles/interior.png',
   'assets/tiles/terrain.png',
   'assets/tiles/tiles.json',
@@ -199,14 +202,24 @@ const PRECACHE = [
   'assets/backdrops/battle_archive.png',
   'assets/backdrops/battle_boss.json',
   'assets/backdrops/battle_boss.png',
+  'assets/backdrops/battle_court.json',
+  'assets/backdrops/battle_court.png',
+  'assets/backdrops/battle_court_deep.json',
+  'assets/backdrops/battle_court_deep.png',
+  'assets/backdrops/battle_east_road.json',
+  'assets/backdrops/battle_east_road.png',
   'assets/backdrops/battle_hollow.json',
   'assets/backdrops/battle_hollow.png',
+  'assets/backdrops/battle_throne.json',
+  'assets/backdrops/battle_throne.png',
   'assets/backdrops/battle_valley.json',
   'assets/backdrops/battle_valley.png',
   'assets/backdrops/battle_valley_dusk.json',
   'assets/backdrops/battle_valley_dusk.png',
   'assets/backdrops/dialog_keyart.json',
   'assets/backdrops/dialog_keyart.png',
+  'assets/backdrops/dialog_keyart_ep2.json',
+  'assets/backdrops/dialog_keyart_ep2.png',
   'assets/backdrops/title.json',
   'assets/backdrops/title.png',
   'assets/audio/sfx/axe_chop_1.wav',
