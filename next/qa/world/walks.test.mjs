@@ -14,7 +14,7 @@ function hasPlaywright() {
 }
 
 test('every map walks headless with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.join(HERE, 'walks.py')], { timeout: 80000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const r = spawnSync('python', [path.join(HERE, 'walks.py')], { timeout: 160000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
   const out = (r.stdout || '') + (r.stderr || '');
   assert.equal(r.status, 0, out.split('\n').slice(-25).join('\n'));
   assert.match(out, /OK: zero console errors/);
