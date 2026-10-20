@@ -103,3 +103,11 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   the teams' schedule generators keep their usage. Unfinished work from the four agents the limit cut off is
   parked on branch `wip/w5b-w6-partial` (a loading screen and installable app, enemy animation frames, a secret
   Whisperwood dungeon, and the last UI items) and will be finished one piece at a time.
+
+## 2026-10-20 (Tue) overnight: the parked menu fixes are finished and live
+- Title, prologue, name entry and credits now sit at the same pixel density as the rest of the game.
+- Text never crowds a window edge; the journal and bestiary scroll instead of overflowing; the pointing glove is
+  no longer clipped in the shop and journal; the RUN and MENU buttons are bigger on phones; button hints use the
+  same glyphs everywhere; the Victory window fits its contents; Fury READY sits beside its gauge.
+- Still parked (one at a time, as usage allows): loading screen and installable app, enemy animation frames, the
+  Whisperwood Hollow secret dungeon.

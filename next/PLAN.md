@@ -59,18 +59,18 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] fix passes from both reviews (W5 story/maps, W5 systems, W5 art); W5b-ui in progress
 
 ## Wave 5 visual backlog from docs/CRITIQUE_2.md (ranked; Bram item was stale, asset is correct)
-- [~] D1 Key-art screens (title, prologue, name entry, credits) still show 10k+ colors: dither the vignette/overlays instead of alpha-blending, draw the quantized atlas 1:1 (ui, W5b)
+- [x] D1 Key-art screens (title, prologue, name entry, credits) still show 10k+ colors: dither the vignette/overlays instead of alpha-blending, draw the quantized atlas 1:1 (ui, W5b)
 - [x] D2 Valley battles use the dusk town painting: build a daytime valley backdrop from the tiles/map vista (W5-art)
 - [x] D3 Bookmites and the Archivore base go near-black on the dark Archive stage: rim light on dark sprites or a lighter stage band (W5-art + battle)
 - [x] D4 Hidden-ink pits and bridges are flat navy rectangles: real ink art with edges, ripples, and revealed-bridge planks (W5-art)
 - [x] D5 Valley terrain is blocky (rectangular tall grass, straight road): shape patches and curve the road (W5-story-maps)
-- [~] D6 Text runs to the window edge in places: enforce 8 px padding in dialog/menus (W5b)
-- [~] D7 Cursor glove clipped at x=0 in Shop and Journal (W5b)
-- [~] D8 Touch chrome RUN/MENU pills about 14 css px: enlarge (W5b, core/touch)
+- [x] D6 Text runs to the window edge in places: enforce 8 px padding in dialog/menus (W5b)
+- [x] D7 Cursor glove clipped at x=0 in Shop and Journal (W5b)
+- [x] D8 Touch chrome RUN/MENU pills about 14 css px: enlarge (W5b, core/touch)
 - [x] D9 Push block reads as a cabinet: redraw as a carved stone block with a handle groove (W5-art)
-- [~] D10 Inconsistent confirm glyphs between screens (W5b)
-- [~] D11 Empty Victory window on no-drop fights; Fury READY label overlaps the gauge (W5b)
-- [~] D12 qa/shots.py: wait for typewriter completion before capturing story shots; re-render stale map previews (W5b)
+- [x] D10 Inconsistent confirm glyphs between screens (W5b)
+- [x] D11 Empty Victory window on no-drop fights; Fury READY label overlaps the gauge (W5b)
+- [x] D12 qa/shots.py: wait for typewriter completion before capturing story shots; re-render stale map previews (W5b)
 
 ## Budget mode (Scott 2026-10-19): one agent at a time; parked work on wip/w5b-w6-partial
 - [x] Scott playtest: bridges blinking, weakness row under command window on phone, hero Swap greyed, gear bonuses on Status
