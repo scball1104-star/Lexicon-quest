@@ -89,7 +89,8 @@ export function scanLane(q, x, y, dir, max = DASH_TILES) {
     const ents = q.ents(nx, ny);
     const brk = ents.find((e) => e.type === 'object' && e.ev.breakable && e.state !== 'broken' && !(e.data && e.data.concealed));
     if (brk) return { path, pots, hit: { kind: brk.ev.breakable, ent: brk, at } };
-    const blk = ents.find((e) => e.type === 'block');
+    // blocks, and E2's sliding mirrors (heavy: Bram's Shove; push: a light push)
+    const blk = ents.find((e) => e.type === 'block' || (e.type === 'mirror' && (e.ev.heavy || e.ev.push)));
     if (blk) return { path, pots, hit: { kind: blk.ev.heavy ? 'heavy' : 'block', ent: blk, at } };
     const a = q.actor(nx, ny);
     if (a) return { path, pots, hit: { kind: a.kind === 'enemy' ? 'enemy' : 'actor', actor: a, at } };

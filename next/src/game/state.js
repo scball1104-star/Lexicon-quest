@@ -40,6 +40,57 @@ export function createGame(heroName = 'Hero', opts = {}) {
   return g;
 }
 
+// ---- Episode 2 quick start (E2-world, EPISODE2_PLAN 5.6) ------------------------------------------
+/** Episode 1 flags a save that saw the Episode 1 credits has: the main line plus the beats on the critical path. */
+export const EP1_DONE_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered',
+  'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open', 'archivore_defeated',
+  'ep1_complete', 'signs_fading', 'saw_fading_sign', 'hazel_farewell_done', 'garrick_farewell_done', 'valley_arrived',
+  'saw_milestone', 'f1_arrived', 'f2_arrived', 'f3_arrived', 'found_thirteenth_bell', 'first_fight_done',
+  'campfire_rested', 'archive_key_found', 'stacks_key_found', 'returned_home', 'hal_returned'];
+/**
+ * The party Episode 2 expects at Lv 9: the simulator's `east_road` loadout (tools/sim/loadouts.mjs; the test in
+ * qa/world/ep2_plumbing.test.mjs keeps the two in step).
+ */
+export const EP2_START = {
+  level: 9, gold: 900, map: 'hero_home', mark: 'bed',
+  items: { potion: 6, hi_potion: 3, ether: 4, phoenix_feather: 1, name_fragment_1: 1, lantern_of_recall: 1 },
+  members: {
+    hero: { weapon: 'sword', equip: { sword: 'lanternheart', axe: 'hatchet', body: 'chain_shirt', head: 'leather_hood', boots: 'leather_boots' }, mastery: { sword: 245, axe: 70 } },
+    mira: { weapon: 'staff', equip: { staff: 'crystal_rod', bow: 'short_bow', body: 'mirrorguard_mail', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 160, bow: 50 } },
+    bram: { weapon: 'spear', equip: { spear: 'iron_pike', axe: 'hatchet', body: 'chain_shirt', head: 'iron_helm', boots: 'leather_boots' }, mastery: { spear: 245, axe: 70 } },
+  },
+};
+
+/**
+ * A fresh game standing where Episode 2 begins: a Lv 9 party in the east_road loadout, every Episode 1 main flag
+ * plus ep1_complete and the credits_rolled counter, the Lantern and the first name fragment, 900 gold and a stocked
+ * bag, in bed at home (so `ep2_morning` runs). `pos` is the bed mark of hero_home when the caller passes it
+ * (o.pos), else START_POS (hero_home keeps `bed` there). Pure.
+ */
+export function newGameEp2(heroName = 'Hero', o = {}) {
+  const S = EP2_START;
+  const g = createGame(heroName, { map: S.map, pos: o.pos, seed: o.seed });
+  for (const id of ['mira', 'bram']) addMember(g, id);
+  for (const m of g.party) {
+    const spec = S.members[m.id];
+    m.level = S.level;
+    const fresh = newMember(m.id, { level: S.level, name: m.name });
+    m.exp = fresh.exp;
+    if (spec) { m.weapon = spec.weapon; m.equip = { ...m.equip, ...spec.equip }; m.mastery = { ...m.mastery, ...spec.mastery }; }
+    m.hp = fresh.hp; m.mp = fresh.mp;
+    const s = memberMax(m);
+    m.hp = s.hp; m.mp = s.mp; m.fury = 0;
+  }
+  g.items = {};
+  for (const [id, q] of Object.entries(S.items)) give(g, id, q);
+  g.gold = S.gold;
+  for (const f of EP1_DONE_FLAGS) g.flags[f] = true;
+  g.counters.credits_rolled = 1;
+  g.chapter = 2;
+  g.lastSafe = { map: g.map, pos: { ...g.pos } };
+  return g;
+}
+
 export function cleanName(s) {
   const t = String(s || '').replace(/[^A-Za-z0-9 '\-]/g, '').trim().slice(0, 8);
   return t || 'Hero';

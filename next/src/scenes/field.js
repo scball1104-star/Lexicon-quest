@@ -11,8 +11,11 @@
 // reads no input.
 //
 // LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), call('scene', id), lantern(), state().
+// E2-world: silverglass beams (field.glass, world/silverglass.js), reflections (field.reflections), mirror and fog
+// doors, flag-gated overlays, conditional music / tint / banners, mist, the Episode 2 credits handoff, and
+// LQ_DEBUG.newGameEp2(name), beams(), turnMirror(id), reflections().
 
-import { createGame, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
+import { createGame, newGameEp2, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
 import { grant, equipOffers, equipGear, deltaLine, gearName, isWeaponKey, baseOf } from '../game/inventory.js';
 import { memberName } from '../ui/party.js';
 import { touchUi } from '../ui/list.js';
@@ -29,7 +32,9 @@ import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
-import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled } from '../game/story.js';
+import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF } from '../game/story.js';
+import { Silverglass } from '../world/silverglass.js';
+import { Reflections, inGlass } from '../world/reflections.js';
 import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
 import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
@@ -88,6 +93,8 @@ export class FieldScene {
     this.fxTriggers = [];              // one-shot particle tells from the map's ambientFx (the pit page)
     this.fxDone = new Set();
     this.abilities = new FieldAbilities(this);   // W9: Dash Strike, Appraise, the Lantern, Shove
+    this.glass = new Silverglass(this);          // E2: silverglass beams, receptors, glass bridges
+    this.reflections = new Reflections(this);    // E2: who has a face in the water
   }
 
   warnOnce(key, msg) { if (!this.warned.has(key)) { this.warned.add(key); console.warn(`[field] ${msg}`); } }
@@ -139,7 +146,7 @@ export class FieldScene {
     for (const a of this.actors.slice()) this.removeActor(a);
     this.actors = []; this.entities = new Map(); this.byTile = new Map();
     installFieldArt(e);                // W9: the ability art (heavy block, root wall, cracked rock) joins the tile db
-    this.map = new TileMap(e, mod);
+    this.map = new TileMap(e, mod, { hasFlag: this.hasFlag });
     this.mapId = mod.id;
     this.abilities.reset();
     this.sliding = [];
@@ -162,6 +169,8 @@ export class FieldScene {
     // events, reveals
     EV.buildEntities(this);
     EV.applySavedReveals(this);
+    this.glass.reset();
+    this.reflections.reset();
     this.gateCheck();
     // camera, lighting, particles, music
     this.camera.snapTo(this.leader);
@@ -174,12 +183,14 @@ export class FieldScene {
     this.particles.list = [];
     this.particles.setChimneys(chimneyTops(this.features));
     this.particles.setRain(mod.weather === 'rain' && !mod.weatherZone);
+    this.particles.setMist(mistAreasOf(mod));
     this.weatherZone = mod.weather === 'rain' ? mod.weatherZone || null : null;
     this.lastTint = null;
     this.syncTimeOfDay();
+    if (this.particles.prewarmMist) this.particles.prewarmMist(this.camera);
     this.applyMusic(mod);
     e.audio.ambience(mod.ambience || null, { fade: 1.2 });
-    const b = bannerFor(mod.id, mod);
+    const b = bannerFor(mod.id, mod, this.hasFlag);
     if (b && !o.quiet) this.banner.show(b.title, b.sub);
     if (!o.first) this.autosave();
     this.loading = false;
@@ -200,14 +211,16 @@ export class FieldScene {
   ambientFor(mod, tint) {
     const out = [];
     const night = tint === 'dusk' || tint === 'night';
+    const still = tint === 'hollow_dusk';            // E2: the Nameless Hollow's evening has no life in the air
     if (mod.area === 'field') out.push('leaves');
     if ((mod.area === 'town' || mod.area === 'field') && night) out.push('fireflies');
-    if ((mod.area === 'town' || mod.area === 'field') && !night) out.push('birds');
+    if ((mod.area === 'town' || mod.area === 'field') && !night && !still) out.push('birds');
     if (mod.area === 'town') out.push('smoke');
     if (mod.area === 'dungeon') out.push('motes', 'drips');
     if (mod.lighting && mod.lighting.dark > 0.3) out.push('embers');
     // ambientFx strings are particle kinds; objects ({ fx, at, area }) are one-shot tells handled by fxTriggers
     if (mod.ambientFx) out.push(...mod.ambientFx.filter((k) => typeof k === 'string' && k !== 'page_fall'));
+    if (mistAreasOf(mod) !== undefined) out.push('mist');
     return out;
   }
 
@@ -221,7 +234,7 @@ export class FieldScene {
     this.lastTint = tint;
     const mod = this.map.mod;
     this.particles.setAmbient(this.ambientFor(mod, tint));
-    const lit = this.lighting.isNight || tint === 'dawn' || (mod.lighting && mod.lighting.dark > 0.3) ? 1 : 0;
+    const lit = this.lighting.isNight || this.lighting.lampsLit || tint === 'dawn' || (mod.lighting && mod.lighting.dark > 0.3) ? 1 : 0;
     for (const p of this.map.props) if (p.t === 'lamp_post' && p.state !== lit) this.map.setPropState(p, lit);
   }
 
@@ -235,14 +248,16 @@ export class FieldScene {
   applyMusic(mod) {
     const e = this.engine;
     const interior = mod.area === 'interior';
+    // E2: `music` may be a first-match list ([{ if: 'nh_restored', id: 'hollowmere' }, { id: 'hollow' }])
+    const music = pickConditional(mod.music, this.hasFlag) || null;
     if (this.musicPushed && !interior) { e.audio.popMusic(0.8); this.musicPushed = false; this.currentMusic = this.musicBelow || null; }
     if (interior) {
-      if (mod.music && mod.music !== this.currentMusic) {
-        if (this.musicPushed) e.audio.music(mod.music);
-        else { this.musicBelow = this.currentMusic; e.audio.pushMusic(mod.music); this.musicPushed = true; }
-        this.currentMusic = mod.music;
+      if (music && music !== this.currentMusic) {
+        if (this.musicPushed) e.audio.music(music);
+        else { this.musicBelow = this.currentMusic; e.audio.pushMusic(music); this.musicPushed = true; }
+        this.currentMusic = music;
       }
-    } else if (mod.music) { if (mod.music !== this.currentMusic) e.audio.music(mod.music); this.currentMusic = mod.music; }
+    } else if (music) { if (music !== this.currentMusic) e.audio.music(music); this.currentMusic = music; }
     else { e.audio.stopMusic(1.0); this.currentMusic = null; }
     this.sceneMusic = null;
   }
@@ -260,7 +275,11 @@ export class FieldScene {
     }
   }
 
-  /** Transition to another map (or another spot on this one). kind: door | stairs | edge | pit | same | ferry | warp. */
+  /**
+   * Transition to another map (or another spot on this one). kind: door | stairs | edge | pit | same | ferry | warp,
+   * and E2: mirror (a Keeper mirror: white dither, mirror_step, a landmark like any map-to-map door) | fog (the Fading
+   * Stretch's loop doors: a soft white dither, no door sounds, same map).
+   */
   warpTo(mapId, x, y, dir, kind = 'door') {
     if (this.pendingWarp) return this.pendingWarp;
     const e = this.engine;
@@ -272,16 +291,26 @@ export class FieldScene {
     if (k === 'door' || k === 'same') e.audio.sfx('door_open');
     else if (k === 'stairs') e.audio.sfx('stairs');
     else if (k === 'pit' || k === 'fall') e.audio.sfx('fall');
+    else if (k === 'mirror') e.audio.sfx('mirror_step');
     this.inputLocked++;
-    const landmark = !same || kind === 'stairs';
+    const landmark = !same || kind === 'stairs' || kind === 'mirror';
     this.pendingWarp = e.fadeTo(async () => {
       await this.loadMap(mapId, x, y, dir, { quiet: same, landmark });
     }, opts).then(() => {
       this.inputLocked = Math.max(0, this.inputLocked - 1);
       this.pendingWarp = null;
       if (k === 'door' && !same) e.audio.sfx('door_close');
+      if (k === 'fog' && !this.dead) this.afterFog();
     });
     return this.pendingWarp;
+  }
+
+  /** The fog loop landed the party: a step trigger there (fog_loop) speaks; without one, the fog_loop bark does. */
+  afterFog() {
+    const L = this.leader;
+    const trig = EV.entitiesAt(this, L.tx, L.ty).some((e) => e.present && e.type === 'trigger' && e.ev.script);
+    this.setFlag('fog_looped');
+    if (!trig) this.bark('fog_loop');
   }
 
   // ---------------------------------------------------------------- party
@@ -421,10 +450,18 @@ export class FieldScene {
     EV.refreshEntities(this);
     for (const a of this.actors) if (a.kind === 'npc') refreshNpcBehaviour(this, a);
     this.gateCheck();
+    // E2: flag-gated overlays and overhead tiles (the ford bridge, the Hollow's lettered signs, the clock hands)
+    if (this.map && this.map.gated && (this.map.gated.length || this.map.gatedOverhead.length)) this.map.refreshGated(this.hasFlag);
+    if (this.glass) this.glass.markDirty();
     const mod = this.map && this.map.mod;
     if (mod && !this.inputLocked) {
       const tintName = tintFor(mod.id, (mod.lighting || {}).tint, this.hasFlag);
       this.lighting.setTint(tintName === 'ink_light' ? '#b8b0d0' : tintName, 30);
+    }
+    // E2: a conditional map track follows its flags outside scenes (scenes set the music themselves)
+    if (mod && Array.isArray(mod.music) && !(this.cutscene && this.cutscene.running) && !this.musicPushed) {
+      const m = pickConditional(mod.music, this.hasFlag);
+      if (m && m !== this.currentMusic) { this.engine.audio.music(m); this.currentMusic = m; }
     }
   }
   gateCheck() { /* gates with flags are re-evaluated by refreshEntities (present + state) */ }
@@ -485,6 +522,16 @@ export class FieldScene {
       await jingle;
     }
     if (inst) await this.maybeEquipPrompt(got.uid);
+  }
+  /** E2 (the cutscene's give('gold', n)): add gold with the coin sound and the "Received n gold." toast. */
+  async giveGold(n) {
+    const e = this.engine;
+    const amount = Math.max(0, Math.round(Number(n) || 0));
+    if (!amount) return;
+    this.game.gold += amount;
+    e.audio.sfx('coin');
+    if (e.toasts && e.toasts.gold) await e.toasts.gold(amount);
+    else await this.dialog({ who: null, text: `Received {c:gold}${amount} gold{/c}.` });
   }
   /** A rolled gear instance (random chests): into the bag, the toast (beam at `o.at`), then the equip prompt. */
   async giveGear(inst, o = {}) {
@@ -554,7 +601,8 @@ export class FieldScene {
     try {
       if (e.hasScene('battle')) {
         if (this.map.mod.area !== 'interior') e.audio.sfx('encounter');
-        result = await e.pushAwait('battle', { encounterId, start: o.start || 'normal', boss: !!o.boss, canFlee: o.canFlee !== false });
+        // the save's story flags go along: an encounter may read one (the Nameless King's +25 Fury on fountain_done)
+        result = await e.pushAwait('battle', { encounterId, start: o.start || 'normal', boss: !!o.boss, canFlee: o.canFlee !== false, flags: this.game.flags });
       } else {
         this.warnOnce('nobattle', 'battle scene missing; encounters auto-win');
         e.renderer.flash('#ffffff', 10, 0.7);
@@ -656,6 +704,9 @@ export class FieldScene {
       }
     }
 
+    // E2: silverglass (a dirty trace, the bridge grace rule) and a receptor's first-light scene once the field is quiet
+    this.glass.update();
+    if (canControl && !L.moving && e.scene === this && !this.cutscene.running && this.glass.queue.length) this.runScene(this.glass.takeScript());
     // a companion remark that had to wait (a scene, a battle, a chest) speaks now that the field is quiet
     if (canControl && !L.moving && this.pendingBarks.length && e.scene === this && !this.banner.active) this.bark(this.pendingBarks.shift());
 
@@ -680,6 +731,8 @@ export class FieldScene {
       const [fx, fy] = L.facingTile();
       const list = EV.interactables(this, fx, fy);
       if (list.length) this.prompt = { x: fx, y: fy, kind: EV.promptKind(list[0]), ent: list[0] };
+      // E2: the first turnable mirror the party faces earns Mira's remark
+      if (this.prompt && this.prompt.ent.type === 'mirror' && !this.prompt.ent.ev.fixed && !this.game.counters['bark:first_mirror']) this.bark('first_mirror');
     }
     // the Lantern prompt: carried, not raised, and unrevealed ink within reach
     this.lanternHint = canControl && !L.moving && this.lantern <= 0 && this.hiddenInkNear();
@@ -708,7 +761,7 @@ export class FieldScene {
     this.particles.update(this.camera);
     EV.tickGlints(this);
     this.banner.update();
-    if (!this.inputLocked && !this.pendingWarp && creditsPending(this.game, this.hasFlag)) this.rollCredits();
+    if (!this.inputLocked && !this.pendingWarp) { const ep = creditsPending(this.game, this.hasFlag); if (ep) this.rollCredits(ep); }
   }
 
   tryLeaderStep(dir, dur) {
@@ -719,8 +772,8 @@ export class FieldScene {
     // enemies: walking into one starts its battle
     const enemy = this.actorAt(nx, ny, L);
     if (enemy && enemy.kind === 'enemy') { this.touchEnemy(enemy, 'player'); return false; }
-    // push blocks
-    for (const ent of EV.entitiesAt(this, nx, ny)) if (ent.present && ent.type === 'block') { EV.pushBlock(this, ent, dir); return false; }
+    // push blocks (and E2's sliding mirrors)
+    for (const ent of EV.entitiesAt(this, nx, ny)) if (ent.present && EV.isPushable(ent)) { EV.pushBlock(this, ent, dir); return false; }
     const v = this.canStep(L, L.tx, L.ty, nx, ny, dir);
     if (v === false) return false;
     if (v === 'hop') { L.hop(dir); this.partyFollow(14); return true; }
@@ -761,7 +814,8 @@ export class FieldScene {
 
   useDoor(ent) {
     const to = ent.ev.to;
-    const kind = ent.ev.kind === 'stairs' ? 'stairs' : 'door';
+    const k = ent.ev.kind;
+    const kind = k === 'stairs' || k === 'mirror' || k === 'fog' ? k : 'door';
     this.warpTo(to[0], to[1], to[2], to[3] || this.leader.dir, kind);
   }
 
@@ -863,15 +917,21 @@ export class FieldScene {
     return best;
   }
 
-  async rollCredits() {
+  /**
+   * An episode's ending handoff (story.js CREDITS_HANDOFF): Episode 1 rolls CREDITS and wakes the party at home in
+   * bed; Episode 2 rolls CREDITS_EP2 over `hollowmere`, sets the counter credits2_rolled and wakes them in
+   * Hollowmere's inn (nh_inn, inn_bed). Both in day light.
+   */
+  async rollCredits(episode = 1) {
     const e = this.engine;
-    markCreditsRolled(this.game);
+    const h = CREDITS_HANDOFF[episode] || CREDITS_HANDOFF[1];
+    markCreditsRolled(this.game, episode);
     this.lockInput();
     try {
-      if (e.hasScene('credits')) await e.pushAwait('credits');
+      if (e.hasScene('credits')) await e.pushAwait('credits', episode === 2 ? { cards: h.cards, music: h.music } : undefined);
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);
-      await e.fadeTo(() => this.loadMap('hero_home', null, null, 'down', { mark: 'bed', landmark: true }), { duration: 1.0, hold: 0.2 });
+      await e.fadeTo(() => this.loadMap(h.map, null, null, 'down', { mark: h.mark, landmark: true }), { duration: 1.0, hold: 0.2 });
       this.fadeAlpha = 0; this.fadeTween = null;
       this.lighting.setTint('day', 0);
     } finally { this.unlockInput(); }
@@ -885,6 +945,8 @@ export class FieldScene {
     r.pushCamera(cam.x, cam.y);
     map.drawGround(r, cam, t);
     this.drawSignFades(r);
+    this.reflections.draw(r, t);       // E2: under everything that stands on the floor
+    this.glass.drawBeams(r, t);        // E2: the light runs under the actors and props that stand in it
     this.particles.draw(r, cam, 'below');
     // y-sorted props and actors
     const items = [];
@@ -909,6 +971,7 @@ export class FieldScene {
         if (p.tall && !p.draw.anim && p.draw.blend !== 'lighter') this.drawPropShadow(r, p);
         map.drawProp(r, p, t);
       } else if (it.g) ab.drawGhost(r, it.g);
+      else if (inGlass(it.a)) this.reflections.drawInGlass(r, t, it.a);
       else if (lean && it.a === lean.actor) {
         it.a.px += lean.dx * 2; it.a.py += lean.dy * 2;
         it.a.draw(r, t);
@@ -916,6 +979,8 @@ export class FieldScene {
       } else it.a.draw(r, t);
     }
     ab.drawFx(r);
+    this.reflections.drawOver(r);      // E2: faces in the fountain go over the fountain's art
+    this.glass.drawFlares(r, t);       // E2: bounce flares, splashes, lit receptors
     this.particles.draw(r, cam, 'mid');
     map.drawOverhead(r, cam);
     r.popCamera();
@@ -976,6 +1041,7 @@ export class FieldScene {
     }
     for (const l of map.lights) out.push({ ...l, kind: l.color ? 'warm' : 'neutral', flicker: !!l.color });
     for (const p of map.props) if (p.light && p.visible) out.push({ ...p.light, kind: 'warm', flicker: true });
+    if (dark && this.glass.active) out.push(...this.glass.lights());   // E2: the beam is a light in dark rooms
     return out;
   }
 
@@ -1099,6 +1165,16 @@ export class FieldScene {
     D.register('cycleAbility', (d = 1) => { const f = self.current(); if (f) f.abilities.cycle(d); return f ? f.abilities.selected() : null; });
     D.register('abilityState', () => { const f = self.current(); return f ? { ...f.abilities.debugState(), resolve: (() => { const c = f.abilities.resolve(); return c ? { id: c.id, kind: c.kind || null, at: c.at || null, target: !!c.target } : null; })() } : null; });
     D.register('fieldState', () => { const f = self.current(); return f ? f.debugState() : null; });
+    // E2-world: the silverglass state, turning a mirror by id (as confirm would), the reflections drawn last frame
+    D.register('beams', () => { const f = self.current(); return f ? f.glass.debugState() : null; });
+    D.register('turnMirror', async (id) => {
+      const f = self.current(); if (!f) return null;
+      const ent = f.entities.get(id);
+      if (!ent || ent.type !== 'mirror') return null;
+      await EV.turnMirror(f, ent);
+      return f.glass.debugState();
+    });
+    D.register('reflections', () => { const f = self.current(); return f ? { active: f.reflections.active, drawn: f.reflections.drawn } : null; });
     D.register('party', (...ids) => {
       const f = self.current(); if (!f) return null;
       for (const id of ids.flat()) { try { stateAddMemberDebug(f.game, id); } catch (e) { console.warn(e.message); } }
@@ -1143,6 +1219,7 @@ export class FieldScene {
       entities: [...this.entities.values()].filter((e) => e.present).map((e) => `${e.type}:${e.id}@${e.x},${e.y}${e.state ? ':' + e.state : ''}`),
       prompt: this.prompt ? { x: this.prompt.x, y: this.prompt.y, kind: this.prompt.kind } : null,
       lanternHint: this.lanternHint, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
+      glass: this.glass.debugState(), reflections: this.reflections.drawn,
       perf: this.engine.perfStats(),
     };
   }
@@ -1163,6 +1240,21 @@ export function fxTriggersOf(mod) {
   return out;
 }
 
+/**
+ * E2: where the `mist` particles may drift. `ambientFx` holds 'mist' (anywhere: returns null) or
+ * { fx: 'mist', area: { x, y, w, h } } entries (tile rects). undefined when the map has no mist.
+ */
+export function mistAreasOf(mod) {
+  let any = false;
+  const areas = [];
+  for (const k of (mod && mod.ambientFx) || []) {
+    if (k === 'mist') { any = true; continue; }
+    if (k && typeof k === 'object' && k.fx === 'mist') { any = true; if (k.area) areas.push(k.area); }
+  }
+  if (!any) return undefined;
+  return areas.length ? areas : null;
+}
+
 export default FieldScene;
 
 /** Registered by the scene registry: debug commands that work before the field is on screen. */
@@ -1177,4 +1269,15 @@ export async function install(engine) {
     });
   }
   if (!D.commands().includes('setFlag')) D.register('setFlag', (flag, value = true) => { if (!engine.game) engine.game = createGame('Arden'); stateSetFlag(engine.game, flag, value); return !!value; });
+  /**
+   * LQ_DEBUG.newGameEp2(name, { scene: 'field' | 'none' }): the Episode 2 quick start (state.js newGameEp2): a Lv 9
+   * party at home in bed with every Episode 1 main flag, so ep2_morning runs. The title's Episode 2 entry calls it.
+   */
+  D.register('newGameEp2', (name = 'Hero', o = {}) => {
+    const g = newGameEp2(name, o);
+    engine.game = g;
+    if (o.scene === 'none' || !engine.hasScene('field')) return g.map;
+    engine.reset('field', { map: g.map, mark: 'bed', dir: 'down' });
+    return g.map;
+  });
 }

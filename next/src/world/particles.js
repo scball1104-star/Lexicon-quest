@@ -7,6 +7,7 @@
 //   fx.setChimneys([{ x, y }])              world px of chimney tops (smoke rises from a visible one)
 //   fx.spawn('puff', x, y) / fx.sparkle(x, y, n) / fx.burst('shard', x, y, n) / fx.sway(tx, ty)
 //   fx.update(cam) ; fx.draw(r, cam, 'below' | 'mid' | 'above')
+//   fx.setMist([{ x, y, w, h }] | null)     E2: slow dithered fog blobs ('mist' ambient), limited to tile areas
 //
 // Passes: 'below' sits under props and actors (puffs, shards, drips, resting birds); 'mid' is drawn right
 // after the actors and before the overhead layer and the lighting, so it is tinted and darkened with the
@@ -14,9 +15,11 @@
 // rooms (fireflies, motes, sparkles, rain). Leaves, smoke and flying birds are 'above' too but take the day
 // tint through `shade` so they do not glow at night.
 
-const CAPS = { leaves: 14, fireflies: 16, motes: 26, drips: 5, rain: 70, embers: 10, smoke: 14, birds: 3 };
+const CAPS = { leaves: 14, fireflies: 16, motes: 26, drips: 5, rain: 70, embers: 10, smoke: 14, birds: 3, mist: 14 };
 const ABOVE = new Set(['leaf', 'firefly', 'mote', 'rain', 'sparkle', 'glint', 'ember', 'smoke', 'page']);
-const MID = new Set(['sway', 'splash']);
+const MID = new Set(['sway', 'splash', 'mist']);
+const MIST_SIZES = [[44, 12], [32, 10], [56, 14]];
+const MIST_LIFE = 520;
 const GRASS = new Set(['grass', 'tallgrass']);
 const BIRD_FLEE_PX = 44;
 
@@ -37,6 +40,41 @@ export class Particles {
   }
 
   setAmbient(kinds) { this.ambient = new Set(kinds || []); }
+  /** E2 (EPISODE2_PLAN 5.5): where the mist may spawn, as tile rects; null = anywhere in view. */
+  setMist(areas) { this.mistAreas = areas && areas.length ? areas : null; }
+  /** Fill the view with mist at once on a map load (so the Fading Stretch is not clear for the first seconds). */
+  prewarmMist(cam) {
+    if (!this.ambient.has('mist') || !cam) return;
+    const rng = this.field.rng, W = cam.W || 384, H = cam.H || 216;
+    for (let i = 0; i < 40 && this.count('mist') < CAPS.mist; i++) {
+      const tx = cam.x + rng.int(-24, W), ty = cam.y + rng.int(0, H);
+      if (this.mistAreas && !this.mistAreas.some((a) => tx >= a.x * 16 && ty >= a.y * 16 && tx < (a.x + a.w) * 16 && ty < (a.y + a.h) * 16)) continue;
+      const life = MIST_LIFE + rng.int(0, 200);
+      const p = this.spawn('mist', tx, ty, { vx: rng.range(0.06, 0.16), vy: rng.range(-0.015, 0.015), life, phase: rng.range(0, 6.28), state: rng.int(0, MIST_SIZES.length - 1) });
+      p.t = rng.int(Math.round(life * 0.2), Math.round(life * 0.7));
+    }
+  }
+  /** Soft fog blob sprites: three nested Bayer-dithered ellipses, cached once per size. */
+  mistSprite(i) {
+    this._mist = this._mist || [];
+    if (this._mist[i] !== undefined) return this._mist[i];
+    let c = null;
+    if (typeof document !== 'undefined') {
+      const [w, h] = MIST_SIZES[i];
+      c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d');
+      const B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+      g.fillStyle = '#eef2f8';
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const dx = (x + 0.5 - w / 2) / (w / 2), dy = (y + 0.5 - h / 2) / (h / 2);
+        const d = Math.sqrt(dx * dx + dy * dy);
+        const density = d < 0.45 ? 0.62 : d < 0.75 ? 0.4 : d < 1 ? 0.18 : 0;
+        if (B[(y % 4) * 4 + (x % 4)] < density * 16) g.fillRect(x, y, 1, 1);
+      }
+    }
+    this._mist[i] = c;
+    return c;
+  }
   setRain(on) { this.rainTarget = on ? 1 : 0; }
   setChimneys(list) { this.chimneys = list || []; }
   setShade(rgb) {
@@ -145,6 +183,12 @@ export class Particles {
       const spot = this.grassSpot(cam, 5);
       if (spot) this.spawn('bird', spot[0] * 16 + rng.int(3, 12), spot[1] * 16 + 14, { life: 900 + rng.int(0, 600), phase: rng.int(0, 40), state: 0, data: { dir: rng.range(0, 1) < 0.5 ? -1 : 1 } });
     }
+    const mistN = this.ambient.has('mist') ? this.count('mist') : CAPS.mist;
+    if (mistN < CAPS.mist && this.frame % (mistN < 8 ? 6 : 23) === 0) {
+      const tx = cam.x + rng.int(-24, W), ty = cam.y + rng.int(0, H);
+      const inArea = !this.mistAreas || this.mistAreas.some((a) => tx >= a.x * 16 && ty >= a.y * 16 && tx < (a.x + a.w) * 16 && ty < (a.y + a.h) * 16);
+      if (inArea) this.spawn('mist', tx, ty, { vx: rng.range(0.06, 0.16) * (this.windX >= 0 ? 1 : -1), vy: rng.range(-0.015, 0.015), life: MIST_LIFE + rng.int(0, 200), phase: rng.range(0, 6.28), state: rng.int(0, MIST_SIZES.length - 1) });
+    }
     if (this.rainIntensity > 0.02 && this.count('rain') < CAPS.rain * this.rainIntensity) {
       for (let i = 0; i < 3; i++) this.spawn('rain', cam.x + rng.int(-10, W + 10), cam.y - rng.int(0, H), { vx: -0.6, vy: 4.2, life: 90 });
     }
@@ -172,10 +216,11 @@ export class Particles {
           break;
         }
         case 'sway': break;
+        case 'mist': p.x += p.vx + Math.sin(p.phase + p.t * 0.01) * 0.04; p.y += p.vy; break;
         case 'page': p.x += Math.sin(p.phase + p.t * 0.09) * 0.55; p.y += p.vy; if (p.data && p.y > p.data.rim + 10) p.t = Math.max(p.t, p.life - 1); break;
         default: p.vy += p.g; p.x += p.vx; p.y += p.vy;
       }
-      if (p.t < p.life && (p.kind === 'rain' || cam.visible(p.x, p.y, 2, 2, 48))) keep.push(p);
+      if (p.t < p.life && (p.kind === 'rain' || cam.visible(p.x, p.y, p.kind === 'mist' ? 56 : 2, 2, 48))) keep.push(p);
     }
     this.list = keep;
   }
@@ -193,7 +238,7 @@ export class Particles {
     for (const p of this.list) {
       if (this.passOf(p) !== pass) continue;
       const x = Math.round(p.x), y = Math.round(p.y);
-      if (x < x0 || y < y0 || x > x1 || y > y1) continue;
+      if ((x < x0 || y < y0 || x > x1 || y > y1) && p.kind !== 'mist') continue;
       const k = p.t / p.life;
       switch (p.kind) {
         case 'leaf': {
@@ -273,6 +318,14 @@ export class Particles {
         case 'rain': {
           g.globalAlpha = 0.55 * this.rainIntensity; g.fillStyle = '#cfe0ff';
           g.fillRect(x, y, 1, 4); g.fillRect(x + 1, y - 2, 1, 2);
+          g.globalAlpha = 1;
+          break;
+        }
+        case 'mist': {
+          const img = this.mistSprite(p.state || 0);
+          if (!img || x + img.width < x0 || x > x1 || y + img.height < y0 || y > y1) break;
+          g.globalAlpha = 0.55 * (k < 0.15 ? k / 0.15 : k > 0.8 ? (1 - k) / 0.2 : 1);
+          g.drawImage(img, x, y);
           g.globalAlpha = 1;
           break;
         }

@@ -1,6 +1,6 @@
 // Map transitions and the location banner (W2-world).
 //
-//   transitionOpts('door' | 'stairs' | 'edge' | 'pit' | 'same' | 'ferry' | 'fall', { dir, x, y })
+//   transitionOpts('door' | 'stairs' | 'edge' | 'pit' | 'same' | 'ferry' | 'fall' | 'mirror' | 'fog', { dir, x, y })
 //       -> options for engine.fadeTo (style, duration, hold, iris centre, wipe direction)
 //   const banner = new Banner(engine); banner.show('Willowmere', 'Lantern Square'); banner.update(); banner.draw(r)
 //
@@ -18,6 +18,9 @@ const KINDS = {
   fall: { style: 'fade', duration: 0.6, hold: 0.25 },
   ferry: { style: 'fade', duration: 1.0, hold: 0.35 },
   warp: { style: 'dither', duration: 0.4 },
+  // E2: a Keeper mirror dissolves to white; the Fading Stretch's fog folds back on itself in a soft grey-white
+  mirror: { style: 'dither', duration: 0.8, hold: 0.12, color: '#f2f6ff' },
+  fog: { style: 'dither', duration: 0.7, hold: 0.1, color: '#d8dde6' },
 };
 
 /** Vertical wipe (the engine's wipe is horizontal only). */
@@ -30,7 +33,7 @@ function wipeV(dir) {
 }
 
 export function transitionOpts(kind, o = {}) {
-  const base = { ...(KINDS[kind] || KINDS.door), color: '#06050c' };
+  const base = { color: '#06050c', ...(KINDS[kind] || KINDS.door) };
   if (kind === 'stairs' && o.x != null) { base.x = o.x; base.y = o.y; }
   if (kind === 'edge') {
     if (o.dir === 'up' || o.dir === 'down') base.style = wipeV(o.dir);

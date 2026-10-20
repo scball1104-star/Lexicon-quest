@@ -1,6 +1,7 @@
 # World: the field scene, maps on screen, events, cutscenes
 
-Owner: W2-world. Code: `src/world/*`, `src/scenes/field.js`, `src/game/story.js`. Tests: `qa/world/`.
+Owner: W2-world; Episode 2 systems E2-world (section 1d). Code: `src/world/*`, `src/scenes/field.js`, `src/game/*`.
+Tests: `qa/world/`.
 Benchmarks: Chrono Trigger (snappy grid walk, party caterpillar, no HUD), Lufia II (visible enemies that
 step when you step, blocks, plates, switches, keys, dark rooms), Secret of Mana (lush, alive).
 
@@ -130,6 +131,87 @@ stand-in sprite (`root_drape`, `wall_cracked`) so the map tools validate and dra
 `fieldart` (112 x 32) and added to the live tiles db (`heavy_block` object; `ab_*` tiles) by `installFieldArt`
 before the first map builds. `python qa/world/fieldart_preview.py` renders the sheet and the sprites on their real
 tiles.
+
+## 1d. Episode 2 field systems (E2-world, EPISODE2_PLAN 5)
+
+**Silverglass beams** (`world/beam.js` pure tracing, `world/silverglass.js` on the field as `field.glass`).
+Event types `beam` (`dir`, `sprite: beam_window | beam_lens`), `mirror` (`state` 0 = '/', 1 = backslash; `fixed`,
+`heavy`, `push`, `sprite: mirror_stand | mirror_heavy`, `text`), `receptor` (`target` id or list, `latch`, `flag`,
+`script`, `face`, `sprite: receptor | receptor_wall`). Tracing: a source emits from its own cell; the beam passes every
+cell whose code is not `solid`/`void` (props, gates, blocks, pots and chests count as solid; actors never block) and
+`beam: 'pass'` tiles (`glass_slot`, `glass_slot_face`); mirrors and receptors are checked before the cell code; a
+receptor lights only through its `face` (the side the crystal looks toward; none = any side) and stops the beam; its
+back stops it as a wall would. 256 cells max, loop guard on (cell, direction). Several sources union.
+- **Confirm** on a turnable mirror turns it (`mirror_turn`, a 1 px lift, an immediate re-trace). Its `text` (the
+  `court_lens` line) is read only the first time that line is met in the save, before the turn. Fixed mirrors read
+  their text. `push: true` mirrors slide when walked into; `heavy: true` ones move only by Bram's Shove (W9, through
+  `EV.isPushable` / `scanLane`); both keep their state; neither ever enters a glass bridge cell (`blockCanMove`).
+- **Receptors** are gate sources (`sourceCount` / AND with switches, plates, braziers): lit while a beam arrives;
+  `latch` keeps them lit; `flag` is set on light and, when already set at load, starts the receptor lit and opens its
+  gate quietly; `script` is queued the first time it lights (never on a quiet load, never twice) and runs as soon as
+  the field is idle. `beam_hit` and a sparkle on lighting. A gate with `sprite: 'door_vow'` shows its lit crystals
+  (`door_vow_closed` frame = sources on, 0..3) and swaps to `door_vow_open`. Gate sprites: `door_glass`,
+  `door_glass_key` (locked_door, key `glass_key`, consumed), `door_vow`, `door_throne`.
+- **Bridges**: any cell holding `glass_bridge_[hv]_dim` (collision pit) swaps to `_lit` (collision none) while a beam
+  crosses it, whichever way; `glass_bridge` sfx and the `first_glass_bridge` bark. Grace: a lit cell with any actor on
+  it (leader, followers, NPCs) stays lit until vacated (`glass.update`).
+- **Inlays**: a map overlay `{ t: 'inlay_*', inlay: '<receptorId>' }` shows its `_lit` tile while that receptor is lit.
+- **Re-trace** on load (quiet), mirror turn (at once), block or mirror move (start and landing), any entity shown or
+  hidden, any flag change, gates. Mirrors and blocks reset on re-entry; latched receptors persist through their flag.
+- **Drawing**: after the ground layer and the reflections (actors and props stand in front of the light): a 2 px
+  `#eef6ff` core with a 1 px dithered `magic_cyan` halo each side, BEAM_LIFT (6 px) above the tile centres (the height
+  of a mirror's glass and a receptor's crystal), the halo alternating every 4 frames. After the props: four-point
+  flares where it bends, a splash where it meets a wall, a dithered glow on lit receptors, bright pixels running along
+  it (`reduceMotion` turns the moving parts off), the odd sparkle at bounces. In dark maps it is a light: a neutral
+  radius-18 light every 32 px (at most 24) and one on each lit receptor (`glass.lights()`). Dark room with the beam
+  lit: field draw 0.43 ms headless.
+- **Barks** (text.js BARKS, once per save): `first_mirror` when the party first faces a turnable mirror,
+  `first_glass_bridge` when a bridge first lights, `first_receptor` when a receptor is first on screen.
+
+**Reflections** (`world/reflections.js`, `field.reflections`, drawn right after the ground). Cells are reflective when
+their terrain or a tile on them says `reflect: true` (glass_floor, gallery_floor, throne_floor, mere_water); a solid
+tile, or planks over water (`bridge|pier|dock|stairs` ids), hide the surface (`TileMap.reflectAt`). An actor's current
+frame is drawn flipped under its feet, clipped to the reflective cells of the two rows below, alpha 0.35 tinted toward
+the surface; in water it ripples a pixel band by band (off under `reduceMotion`). At most 8 a frame, nearest the leader
+first. **The fountain** (`fountain` prop, on maps with reflective cells or `fountainFaces: true`): everyone standing on the row just south of its basin stills a dark oval of
+water in the nearest open stretch (found from the art's water pixels); those with a reflection have their face in it,
+upright, chin on the near waterline (leaning over a basin you meet your own face). No two patches overlap.
+**Who has none**: an NPC whose `npcs.js` record has `noReflection` (until `nh_restored`), Hollow scene spawns (ids
+`nh_*`, or `<npc>_<letter>` spawns of such an NPC, or its sprite), and `nameless_king` / `aurel_k` always. **The hero**:
+a faceless pale smudge (alpha 0.12) until `nh_restored`, then a faint greyed whole reflection (alpha 0.2).
+**In the glass**: the scene actor `vex` is drawn as an image in the mirror (silvered, translucent, no shadow).
+
+**Doors.** `door` + `kind: 'mirror'` (sprite `mirror_tall`, drawn in its active frame; the event cell is the walk-in
+cell): a white dither dissolve, `mirror_step`, and it sets the game over return point like any map-to-map door.
+`door` + `kind: 'fog'` (no sprite): a soft grey dither, no door sounds, same map; on landing it sets `fog_looped` and,
+when no step trigger stands on the landing tile, plays the `fog_loop` bark.
+
+**Flag-gated map fields.** `overlays[]` and `overhead[]` entries accept `if` / `ifNot`; a flag change adds or removes
+them, recomputes their cells' collision (an overlay's code applies only while present) and repaints
+(`TileMap.refreshGated`). `music` and `lighting.tint` may be first-match lists (`[{ if: 'nh_restored', id: 'hollowmere' },
+{ id: 'hollow' }]`, `story.pickConditional`); outside a scene the map track follows its flags. `BANNERS[id].states` (first
+match of `{ if, ifNot, title, sub }`) is read by `bannerFor(mapId, mod, hasFlag)`.
+New tint `hollow_dusk` (silver-violet, lighter and greyer than dusk): lamps lit and windows glowing (`LAMP_TINTS`), no
+fireflies, no birds. New particle kind `mist`: ambientFx `'mist'` (anywhere) or `{ fx: 'mist', area: { x, y, w, h } }`
+(tiles); up to 14 soft Bayer-dithered blobs drifting with the wind in the `mid` pass, prewarmed on load.
+
+**Story plumbing.** `story.js` merges `ep1.js` and `ep2.js` scenes and lines (`storyCollisions()` must stay empty).
+The cutscene API's `give('gold', n)` adds gold with the coin sound and the gold toast (`field.giveGold`). The battle
+gets the save's flags (`startBattle` passes `flags`; `scenes/battle.js` forwards them to `createEncounterBattle`: the
+Nameless King's +25 Fury on `fountain_done`). Credits: `creditsPending` returns 1 or 2; Episode 2 pushes `credits` with
+`{ cards: CREDITS_EP2, music: 'hollowmere' }`, counts `credits2_rolled` and wakes the party at `nh_inn` `inn_bed` in day
+light (`CREDITS_HANDOFF`). **Quick start**: `state.newGameEp2(name)` (Lv 9, the simulator's `east_road` loadout, every
+Episode 1 critical-path flag plus `ep1_complete` and `credits_rolled`, the Lantern and the first fragment, 900 gold,
+potions 6, hi-potions 3, ethers 4, a phoenix feather, in bed at home so `ep2_morning` runs); `LQ_DEBUG.newGameEp2(name)`
+starts it on the field.
+
+**Debug.** `LQ_DEBUG.beams()` (traced beams, receptors, mirrors, bridges, grace, queue), `turnMirror(id)`,
+`reflections()`, `newGameEp2(name)`; `fieldState().glass`. Fixtures: `_testcourt`, `_testcourt_dark`, `_testmere` in
+`world/_testmap.js`. Tests: `qa/world/beam.test.mjs` (tracing), `e2_field.test.mjs` (receptors, gates, latch, scripts,
+bridges, grace, inlays, sliding mirrors, the vow door, gated overlays, reflection budget on a headless field),
+`e2_plumbing.test.mjs`, and `walks.test.mjs` (solo slot) which also runs `python qa/world/e2_lab.py [beam bridge shove dark mere doors
+plumbing] [--device phone]` (asserted walks; shots `qa/world/out/e2_*.png`). `walks.py` walks Episode 2 maps with the
+Episode 2 story flags set (no scene fires mid-walk).
 
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 

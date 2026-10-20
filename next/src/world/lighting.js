@@ -27,10 +27,14 @@ export const TINTS = {
   dusk: { color: '#c48ab8', alpha: 0.46, desat: 0.14 },
   night: { color: '#262a66', alpha: 0.84, desat: 0.42 },
   ink: { color: '#a498c4', alpha: 0.42 },
+  // E2: the Nameless Hollow's evening. Silver-violet, lighter and greyer than dusk; lamps lit, no fireflies.
+  hollow_dusk: { color: '#b6b0d4', alpha: 0.36, desat: 0.26 },
 };
 
 /** Tints under which lamps are lit, windows glow and fireflies come out. */
 export const NIGHT_TINTS = new Set(['dusk', 'night']);
+/** Tints under which lamps are lit and windows glow but nothing lives in the air (E2: hollow_dusk). */
+export const LAMP_TINTS = new Set(['dusk', 'night', 'hollow_dusk']);
 
 // Light colours at full brightness (centre band), per kind.
 export const LIGHT_TINTS = {
@@ -138,10 +142,13 @@ export class Lighting {
   raiseLantern(frames = 120) { this.lantern = frames; this.lanternTotal = frames; }
   /** True while the scene reads as evening or night (lamps lit, windows glowing, fireflies out). */
   get isNight() { return NIGHT_TINTS.has(this.tintName); }
+  /** True while lamps should be lit (night, dusk, and the Hollow's still evening). */
+  get lampsLit() { return LAMP_TINTS.has(this.tintName); }
   /** How strongly lamps and windows glow for the current tint: 0 by day, up to 1 at night. */
   get glowStrength() {
     if (this.tintName === 'night') return 1;
     if (this.tintName === 'dusk') return 0.6;
+    if (this.tintName === 'hollow_dusk') return 0.45;
     if (this.tintName === 'dawn') return 0.25;
     return 0;
   }

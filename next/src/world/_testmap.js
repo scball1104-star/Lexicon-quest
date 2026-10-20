@@ -218,5 +218,92 @@ export const TEST_DUNGEON = {
   marks: { catalog_drawer: [3, 4], lantern_pedestal: [26, 8], echo_warden: [24, 6] },
 };
 
-export const TEST_MAPS = { _testtown: TEST_TOWN, _testhome: TEST_HOME, _testdungeon: TEST_DUNGEON };
+// ------------------------------------------------------------------------------------------------ Episode 2
+// E2-world fixtures for the silverglass beams, bridges, receptors, sliding mirrors, mirror and fog doors,
+// reflections, mist, flag-gated overlays and conditional music / tint (qa/world/e2_*.test.mjs, fieldlab shots).
+// `_testcourt`: room A (x 1-13) holds the moon window `src_a` shining south onto mirror `m1`; turned to '\' the
+// beam crosses the glass slot at (14,8), lights the bridge over the chasm (x 16-19, row 8) and the receptor `r1`,
+// which opens the glass gate `g1` in room B's north face. `mh` (heavy) and `mp` (push) test sliding mirrors.
+const courtRows = () => {
+  const out = [];
+  out.push('#'.repeat(30), '#'.repeat(30), '#' + '|'.repeat(28) + '#', '#' + '|'.repeat(28) + '#');
+  for (let y = 4; y <= 13; y++) {
+    const mid = y === 8 ? 'S' : y === 11 ? '.' : '#';
+    out.push('#' + '.'.repeat(13) + mid + '.' + 'pppp' + '.'.repeat(9) + '#');
+  }
+  out.push('#'.repeat(30), '#'.repeat(30));
+  return out;
+};
+export const TEST_COURT = {
+  id: '_testcourt', name: 'Test Court', area: 'dungeon', music: 'archive', ambience: null, tileset: 'court',
+  lighting: { tint: 'none', dark: 0 },
+  under: 'glass_floor',
+  start: { x: 6, y: 11, dir: 'up' },
+  legend: { '#': 'court_top', '|': 'court_face', '.': 'glass_floor', 'p': 'pit', 'S': 'glass_slot' },
+  ground: courtRows(),
+  overlays: [
+    { t: 'glass_bridge_h_dim', x: 16, y: 8 }, { t: 'glass_bridge_h_dim', x: 17, y: 8 },
+    { t: 'glass_bridge_h_dim', x: 18, y: 8 }, { t: 'glass_bridge_h_dim', x: 19, y: 8 },
+    { t: 'inlay_v', x: 24, y: 7, inlay: 'r1' }, { t: 'inlay_v', x: 24, y: 6, inlay: 'r1' }, { t: 'inlay_v', x: 24, y: 5, inlay: 'r1' },
+    { t: 'inlay_corner_se', x: 24, y: 4, inlay: 'r1' },
+    { t: 'chalk_crown', x: 6, y: 13, if: '_test_gated' },
+  ],
+  decor: [],
+  pitTo: ['_testcourt', 15, 9, 'down'],
+  events: [
+    { id: 'src_a', type: 'beam', x: 4, y: 3, dir: 'down', sprite: 'beam_window' },
+    { id: 'm1', type: 'mirror', x: 4, y: 8, state: 0, text: 'court_lens' },
+    { id: 'r1', type: 'receptor', x: 24, y: 8, face: 'left', target: 'g1', latch: true, flag: '_test_r1_lit' },
+    { id: 'g1', type: 'gate', x: 22, y: 3, w: 2, sprite: 'door_glass', state: 'closed' },
+    { id: 'mh', type: 'mirror', x: 8, y: 10, state: 0, heavy: true },
+    { id: 'mp', type: 'mirror', x: 11, y: 12, state: 1, push: true },
+    { id: 'mirror_d', type: 'door', kind: 'mirror', sprite: 'mirror_tall', x: 26, y: 12, to: ['_testmere', 20, 7, 'down'], if: 'mirror_sigil_get' },
+  ],
+  exits: [],
+  marks: { window: [4, 4], bridge: [17, 8], receptor: [24, 8], gate: [22, 4] },
+};
+/** The same room in the dark (F3's west wing): the beam is the light. */
+export const TEST_COURT_DARK = { ...TEST_COURT, id: '_testcourt_dark', lighting: { tint: 'none', dark: 0.6 }, pitTo: ['_testcourt_dark', 15, 9, 'down'],
+  events: TEST_COURT.events.map((e) => (e.id === 'mirror_d' ? { ...e, to: ['_testmere', 20, 7, 'down'] } : e)) };
+
+// `_testmere`: a shore on the mere (reflective water), the fountain with its crowd (Hollow faces show none until
+// nh_restored), mist over the east half, a fog loop door, the Keeper mirror back to the court, a gated sign.
+const mereRows = () => {
+  const out = [];
+  for (let y = 0; y < 18; y++) {
+    if (y < 4) out.push('~'.repeat(30));
+    else if (y === 4) out.push('ssssssssssssssssssssssssssssss');
+    else if (y < 13) out.push('..' + 'oooooooooooooooooooo' + '........');
+    else if (y === 13) out.push('ssssssssss' + 'oooooooooooo' + '........');
+    else out.push('~~~~~~~~~s' + '.'.repeat(20));
+  }
+  return out;
+};
+export const TEST_MERE = {
+  id: '_testmere', name: 'Test Mere', area: 'town', ambience: null, tileset: 'town',
+  music: [{ if: 'nh_restored', id: 'triumph' }, { id: 'mystery' }],
+  lighting: { tint: [{ if: 'nh_restored', id: 'none' }, { id: 'hollow_dusk' }], dark: 0 },
+  under: 'grass',
+  start: { x: 10, y: 6, dir: 'up' },
+  legend: { '.': 'grass', 'o': 'plaza', 's': 'sand', '~': 'mere_water' },
+  ground: mereRows(),
+  overlays: [
+    { t: 'sign_blank', x: 3, y: 9, ifNot: 'nh_restored' }, { t: 'sign_hollow_inn', x: 3, y: 9, if: 'nh_restored' },
+    { t: 'bridge_wood_v_m_w', x: 12, y: 3, if: '_test_bridge' }, { t: 'bridge_wood_v_m_e', x: 13, y: 3, if: '_test_bridge' },
+  ],
+  decor: [{ t: 'fountain', x: 12, y: 11 }, { t: 'lamp_post', x: 9, y: 9 }, { t: 'lamp_post', x: 18, y: 9 }],
+  ambientFx: [{ fx: 'mist', area: { x: 20, y: 0, w: 10, h: 18 } }],
+  events: [
+    { id: 'nh_crowd_a', type: 'actor', x: 12, y: 12, sprite: 'npc_old_woman', dir: 'up' },
+    { id: 'nh_crowd_b', type: 'actor', x: 15, y: 12, sprite: 'npc_farmer', dir: 'up' },
+    { id: 'stranger', type: 'actor', x: 7, y: 6, sprite: 'npc_shopkeeper', dir: 'down' },
+    { id: 'fog_a', type: 'door', kind: 'fog', x: 26, y: 14, to: ['_testmere', 22, 16, 'up'] },
+    { id: 'mirror_back', type: 'door', kind: 'mirror', sprite: 'mirror_tall', x: 20, y: 6, to: ['_testcourt', 25, 12, 'down'], if: 'mirror_sigil_get' },
+  ],
+  exits: [],
+  marks: { fountain_view: [13, 12], pond: [5, 13], mirror_in: [20, 7] },
+};
+
+export const TEST_MAPS = { _testtown: TEST_TOWN, _testhome: TEST_HOME, _testdungeon: TEST_DUNGEON,
+  _testcourt: TEST_COURT, _testcourt_dark: TEST_COURT_DARK, _testmere: TEST_MERE };
 export default TEST_MAPS;

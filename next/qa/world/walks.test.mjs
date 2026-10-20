@@ -19,3 +19,15 @@ test('every map walks headless with zero console errors', { skip: !hasPlaywright
   assert.equal(r.status, 0, out.split('\n').slice(-25).join('\n'));
   assert.match(out, /OK: zero console errors/);
 });
+
+// E2-world: the Episode 2 field systems in the real game (qa/world/e2_lab.py): the silverglass teaching room before
+// and after the turn, the lit bridge and its grace rule, Bram's Shove on a heavy mirror and a push mirror, the beam
+// as a light in the dark (draw time), reflections in water and the fountain's faces, mist, conditional tint and
+// music, gated overlays, fog and Keeper mirror doors, newGameEp2, gold from a scene, flags into the battle, the
+// Episode 2 credits handoff. Here (not in its own file) so it runs in the solo slot after the parallel batch.
+test('the Episode 2 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
+  const r = spawnSync('python', [path.join(HERE, 'e2_lab.py')], { timeout: 110000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const out = (r.stdout || '') + (r.stderr || '');
+  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
+  assert.match(out, /E2_LAB: PASS/);
+});

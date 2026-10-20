@@ -188,7 +188,12 @@ export class Cutscene {
       },
       async setFlag(flag, value = true) { F.setFlag(flag, value); },
       async hasFlag(flag) { return stateHasFlag(F.game, flag); },
-      async give(itemId, qty = 1) { if (!self.dead) await F.giveItem(itemId, qty); },
+      /** give(itemId, qty); give('gold', n) adds n gold with the coin sound and the "Received n gold." toast. */
+      async give(itemId, qty = 1) {
+        if (self.dead) return;
+        if (itemId === 'gold') { await F.giveGold(qty); return; }
+        await F.giveItem(itemId, qty);
+      },
       async take(itemId, qty = 1) { if (!self.dead) await F.takeItem(itemId, qty); },
       async battle(encounterId, o = {}) {
         if (self.dead) return 'lose';

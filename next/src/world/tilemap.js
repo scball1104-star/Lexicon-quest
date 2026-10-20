@@ -8,6 +8,9 @@
 //   map.drawOverhead(r, cam)         canopies, roof ridges, arches: above actors
 //   map.props                        y-sorted drawables: { sortY, draw(r, t), cells, solid, ... }
 //   map.addProp(spec) / removeProp(p) / setPropSprite(p, id) / moveProp(p, x, y)
+//   new TileMap(engine, mod, { hasFlag })   E2: `overlays` and `overhead` entries may carry if / ifNot
+//   map.refreshGated(hasFlag)        a flag changed: add or remove gated overlays / overhead tiles and repaint
+//   map.reflectAt(x, y)              E2: a reflective cell (terrain or tile with `reflect: true`)
 //
 // Layers: terrain (A2 autotiles layered by terrainOrder, A1 water/ink animated), wall tops and faces,
 // legend tiles, decor tiles, overlays, then the base rows of buildings go into `ground`; the top rows of
@@ -15,16 +18,26 @@
 // props.json object, mechanism events) are drawn by the field, sorted with the actors by their feet row.
 
 import { a2Quarters, faceQuarters, line16Index, pickVariant, terrainLayers, neighbours, allConnected, QUARTERS, QUARTER_OFFSET } from './autotile.js';
+import { matches } from '../data/story/dialogue.js';
 
 export const TILE = 16;
 const WALKABLE = new Set(['none', 'ledge_s', 'ledge_e', 'ledge_w', 'pit', 'counter']);
 
 export function isBlocking(code) { return code === 'solid' || code === 'water' || code === 'counter' || code === 'void'; }
 
+/** Is a flag-gated map entry (`if` / `ifNot`) present for these flags? No condition: always. */
+export function gatedPresent(entry, hasFlag) {
+  if (!entry || (entry.if == null && entry.ifNot == null)) return true;
+  return !!hasFlag && matches(entry, hasFlag);
+}
+
 export class TileMap {
-  constructor(engine, mod) {
+  constructor(engine, mod, opts = {}) {
     this.engine = engine;
     this.mod = mod;
+    this.hasFlag = opts.hasFlag || null;
+    this.gated = [];       // E2: flag-gated overlays [{ o, on }] (re-evaluated by refreshGated)
+    this.gatedOverhead = [];
     this.id = mod.id;
     this.db = engine.assets.json('tiles') || { terrains: {}, walls: {}, tiles: {}, objects: {}, terrainOrder: [] };
     const propsAtlas = engine.assets.has('props') ? engine.assets.atlas('props') : null;
@@ -107,25 +120,111 @@ export class TileMap {
       this.animMs = first.ms || 220;
       this.animSeq = first.frames;
     }
-    for (const o of mod.overlays || []) this.pushOverlay(o);
+    for (const o of mod.overlays || []) {
+      if (!o) continue;
+      if (o.if != null || o.ifNot != null) {
+        const g = { o, on: gatedPresent(o, this.hasFlag), base: null };
+        this.gated.push(g);
+        if (g.on) g.base = this.pushOverlay(o);
+        continue;
+      }
+      this.pushOverlay(o);
+    }
     for (const d of mod.decor || []) this.placeDecor(d);
     for (const d of this.decorObjects) this.placeDecor(d);
-    this.overheadTiles = (mod.overhead || []).filter((o) => TILES[o.t] || this.warn('overhead:' + o.t, `unknown overhead tile "${o.t}"`));
+    this.overheadTiles = (mod.overhead || []).filter((o) => o && (TILES[o.t] || this.warn('overhead:' + o.t, `unknown overhead tile "${o.t}"`)));
+    for (const o of this.overheadTiles) if (o.if != null || o.ifNot != null) this.gatedOverhead.push(o);
     for (const l of (mod.lighting && mod.lighting.lights) || []) this.lights.push({ x: l.x, y: l.y, r: l.r || 48, color: l.color || null });
   }
 
   inBounds(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
 
+  /** Add one overlay entry; returns the terrain it replaced when it is a terrain patch (for gated removal). */
   pushOverlay(o) {
-    if (!this.inBounds(o.x, o.y)) return;
+    if (!this.inBounds(o.x, o.y)) return null;
     if (this.db.terrains[o.t]) {
       // a terrain used as an overlay is a patch of that terrain (carpets, moss): it autotiles with its neighbours
+      const was = this.terrain[o.y][o.x];
       this.terrain[o.y][o.x] = o.t;
       if (this.db.terrains[o.t].anim && !this.animated.some(([x, y]) => x === o.x && y === o.y)) this.animated.push([o.x, o.y]);
-      return;
+      return { terrain: was };
     }
-    if (!this.db.tiles[o.t]) { this.warn('ov:' + o.t, `unknown overlay "${o.t}"`); return; }
+    if (!this.db.tiles[o.t]) { this.warn('ov:' + o.t, `unknown overlay "${o.t}"`); return null; }
     (this.overlays[o.y][o.x] || (this.overlays[o.y][o.x] = [])).push(o.t);
+    return null;
+  }
+
+  /**
+   * E2 (EPISODE2_PLAN 5.5): flag-gated overlays and overhead tiles. After a flag changes, add the entries whose
+   * condition now holds and remove the ones whose condition no longer does, recompute their cells' collision
+   * (an overlay's code applies only while it is present) and repaint. Returns the number of entries changed.
+   */
+  refreshGated(hasFlag) {
+    if (hasFlag) this.hasFlag = hasFlag;
+    let n = 0;
+    let box = null;
+    const grow = (x0, y0, x1, y1) => { box = box ? [Math.min(box[0], x0), Math.min(box[1], y0), Math.max(box[2], x1), Math.max(box[3], y1)] : [x0, y0, x1, y1]; };
+    for (const g of this.gated) {
+      const want = gatedPresent(g.o, this.hasFlag);
+      if (want === g.on) continue;
+      const o = g.o;
+      n++;
+      g.on = want;
+      if (!this.inBounds(o.x, o.y)) continue;
+      if (this.db.terrains[o.t]) {
+        if (want) g.base = this.pushOverlay(o);
+        else if (g.base) this.terrain[o.y][o.x] = g.base.terrain;
+      } else if (want) this.pushOverlay(o);
+      else {
+        const list = this.overlays[o.y][o.x];
+        const i = list ? list.indexOf(o.t) : -1;
+        if (i >= 0) list.splice(i, 1);
+      }
+      const m = this.db.tiles[o.t];
+      const cw = m ? Math.ceil((m.w || 16) / TILE) : 1, ch = m ? Math.ceil((m.h || 16) / TILE) : 1;
+      for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) if (this.inBounds(o.x + i, o.y + j)) this.recomputeCell(o.x + i, o.y + j);
+      grow(o.x - 1, o.y - 1, o.x + cw, o.y + ch);
+    }
+    if (box) {
+      this.repaint(Math.max(0, box[0]), Math.max(0, box[1]), Math.min(this.w - 1, box[2]), Math.min(this.h - 1, box[3]));
+      if (this.reflectGrid) this.buildReflectGrid();     // planks over the water hide its surface
+    }
+    let over = 0;
+    for (const o of this.gatedOverhead) { const want = gatedPresent(o, this.hasFlag); if (want !== (o._on !== false)) over++; }
+    if (over) {
+      const g = this.overhead.ctx;
+      g.clearRect(0, 0, this.overhead.w, this.overhead.h);
+      this.paintOverhead(g);
+      n += over;
+    }
+    return n;
+  }
+
+  /** E2 (EPISODE2_PLAN 5.2): reflective cells (glass floors, the mere, any tile with `reflect: true`). */
+  reflectAt(x, y) {
+    if (!this.inBounds(x, y)) return false;
+    if (!this.reflectGrid) this.buildReflectGrid();
+    return this.reflectGrid[y * this.w + x] === 1;
+  }
+  buildReflectGrid() {
+    const T = this.db.terrains, TILES = this.db.tiles || {};
+    const g = new Uint8Array(this.w * this.h);
+    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+      if (this.walls[y][x]) continue;
+      const terr = this.terrain[y][x];
+      let on = !!(terr && T[terr] && T[terr].reflect);
+      const wet = !!(terr && T[terr] && T[terr].collision === 'water');
+      for (const id of this.idsAt(x, y)) {
+        const m = TILES[id];
+        if (!m) continue;
+        if (m.reflect) on = true;
+        // a wall piece, or planks laid over the water (a pier, a bridge), hides the surface
+        else if (m.collision === 'solid' || (wet && m.collision === 'none' && /bridge|pier|dock|stairs/.test(id))) on = false;
+      }
+      if (on) g[y * this.w + x] = 1;
+    }
+    this.reflectGrid = g;
+    this.hasReflect = g.some((v) => v === 1);
   }
 
   placeDecor(d) {
@@ -194,7 +293,8 @@ export class TileMap {
     p.light = null;
     if (m) {
       const [ax, ay] = m.anchor;
-      const [rx, ry, rw, rh] = m.rect;
+      // E2: tiles.json objects may list `frames` by state (mirrors, receptors, the vow door, the great mirror)
+      const [rx, ry, rw, rh] = (m.frames && m.frames[p.state]) || m.rect;
       p.draw = { img: this.sheet(m.sheet), sx: rx, sy: ry, w: rw, h: rh, dx: (p.x - ax) * TILE, dy: (p.y - ay) * TILE, anim: m.anim || null, blend: null };
       p.sortY = (p.y + 1) * TILE - 1;
       p.footH = 1;
@@ -515,7 +615,10 @@ export class TileMap {
 
   paintOverhead(g) {
     for (const s of this.statics) this.paintStatic(g, s, 'overhead');
-    for (const o of this.overheadTiles) this.paintTile(g, o.t, o.x, o.y, 0);
+    for (const o of this.overheadTiles) {
+      if (o.if != null || o.ifNot != null) { o._on = gatedPresent(o, this.hasFlag); if (!o._on) continue; }
+      this.paintTile(g, o.t, o.x, o.y, 0);
+    }
   }
 
   /** Which ground layer shows at time t (seconds). */

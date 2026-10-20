@@ -19,6 +19,10 @@
 //
 // Persistence: one-shot things (chests, unlocked doors, lit braziers with `flag`, ink reveals) live in
 // engine.game.opened as "<map>:<id>" or "<map>:ink:<x>,<y>"; puzzles reset on re-entry (Lufia II).
+//
+// E2-world (EPISODE2_PLAN 5.1): silverglass `beam` sources, `mirror`s (confirm turns them; `push` / `heavy` ones
+// slide like blocks) and crystal `receptor`s (gate sources while lit; `latch`, `flag`, `script`). The tracing and
+// the bridges live in world/silverglass.js (field.glass); this file owns their props, confirm and pushing.
 
 import { matches } from '../data/story/dialogue.js';
 import { talkTo, NPCS } from '../data/npcs.js';
@@ -33,8 +37,15 @@ import { makeNpcActor } from './npc.js';
 import { DIRS, OPPOSITE } from './pathfind.js';
 import { TILE } from './tilemap.js';
 
-const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'] };
-const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor']);
+const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'],
+  // Episode 2 (the Court of Mirrors): receptor gates, glass-key doors, the three-crystal vow door, the throne door
+  door_glass: ['door_glass_closed', 'door_glass_open'], door_glass_key: ['door_glass_key_closed', 'door_glass_key_open'],
+  door_vow: ['door_vow_closed', 'door_vow_open'], door_throne: ['door_throne_closed', 'door_throne_open'] };
+/** Gates whose closed frame shows how many of their sources are on (the vow door's three crystals). */
+const COUNTING_GATES = new Set(['door_vow']);
+const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor', 'mirror', 'receptor', 'beam']);
+/** Things a beam reads (a change to any of them asks the silverglass system to trace again). */
+const BEAM_RELEVANT = new Set(['beam', 'mirror', 'receptor', 'gate', 'locked_door', 'block', 'pot', 'chest', 'shelf', 'object']);
 const MAX_INK_RADIUS = 6;
 /** In-game art for breakables (src/world/fieldart.js), with the tiles.json stand-ins if that art is missing. */
 const BREAK_ART = { roots: ['ab_root_wall', 'ab_root_wall_broken', 'wall_broken'], rock: ['ab_cliff_crack', 'ab_cliff_grotto', 'wall_broken'] };
@@ -91,6 +102,7 @@ export function refreshEntities(field) {
 function setPresent(field, ent, on) {
   if (on) { if (!ent.present) { ent.present = true; create(field, ent); applyConcealed(field, ent); } }
   else if (ent.present) { destroy(field, ent); ent.present = false; }
+  if (field.glass && BEAM_RELEVANT.has(ent.type)) field.glass.markDirty();
 }
 
 /** W9: is the breakable that hides this entity (`behind`) still standing? Broken state is saved per map. */
@@ -213,7 +225,8 @@ function create(field, ent) {
       break;
     }
     case 'door': {
-      if (ev.sprite) addProp(field, ent, ev.sprite, 0);
+      // a mirror door (kind 'mirror', sprite mirror_tall) shows its active frame while it exists
+      if (ev.sprite) addProp(field, ent, ev.sprite, ev.kind === 'mirror' ? 1 : 0);
       // a flag-gated door that just appeared opens its painted doors (door_double_closed -> door_double_open)
       if (ev.if != null) {
         for (const [cx, cy] of [...ent.cells, ...ent.cells.map(([x, y]) => [x, y - 1])]) {
@@ -287,6 +300,24 @@ function create(field, ent) {
       else { ent.state = 'whole'; addProp(field, ent, ev.sprite || 'pot', 0, { solid: true }); }
       break;
     }
+    case 'beam': {
+      // a silverglass source: a moon window in a north face (beam_window) or a lens on a pedestal (beam_lens)
+      addProp(field, ent, ev.sprite || 'beam_window', 0);
+      break;
+    }
+    case 'mirror': {
+      ent.state = ev.state ? 1 : 0;
+      addProp(field, ent, ev.sprite || (ev.heavy ? 'mirror_heavy' : 'mirror_stand'), ent.state, { solid: true });
+      break;
+    }
+    case 'receptor': {
+      // a latched receptor whose flag is set starts lit (its gate opens on load: silverglass.reset)
+      const latched = !!(ev.flag && g.flags[ev.flag]);
+      ent.state = latched ? 'lit' : 'dark';
+      ent.data.latched = latched; ent.data.everLit = latched;
+      addProp(field, ent, ev.sprite || 'receptor', latched ? 1 : 0, { solid: true });
+      break;
+    }
     case 'light': {
       // `r` under 16 is in tiles (the F3 room lights say 4 to 7), otherwise world pixels
       const r = ev.r == null ? 48 : ev.r < 16 ? ev.r * TILE : ev.r;
@@ -313,8 +344,9 @@ function applyGate(field, ent, animate) {
     for (const [x, y] of ev.cells) map.setTile(x, y, open ? ev.open : ev.closed);
   } else {
     const pair = GATE_SPRITES[ev.sprite || 'door_locked'] || GATE_SPRITES.door_locked;
-    if (ent.prop) map.setPropSprite(ent.prop, open ? pair[1] : pair[0], 0);
-    else addProp(field, ent, open ? pair[1] : pair[0], 0);
+    const frame = !open && COUNTING_GATES.has(ev.sprite) ? Math.min(3, sourceCount(field, ent.id).on) : 0;
+    if (ent.prop) map.setPropSprite(ent.prop, open ? pair[1] : pair[0], frame);
+    else addProp(field, ent, open ? pair[1] : pair[0], frame);
   }
   if (animate) {
     field.engine.audio.sfx(open ? 'gate_open' : 'door_close');
@@ -343,6 +375,8 @@ function respondsToConfirm(field, ent) {
   if (ent.type === 'trigger' && ent.ev.on !== 'interact') return false;
   if (ent.type === 'actor' && !ent.ev.text && !ent.ev.script) return false;
   if (ent.type === 'object' && !ent.ev.text && !ent.ev.script) return false;
+  if ((ent.type === 'receptor' || ent.type === 'beam') && !ent.ev.text && !ent.ev.script) return false;
+  if (ent.type === 'mirror' && ent.ev.fixed && !ent.ev.text) return false;
   if (ent.type === 'chest' && ent.state === 'open') return false;
   if (ent.type === 'pot' && ent.state === 'broken') return false;
   if (ent.type === 'sign' && ent.ev.dir && field.leader && ent.ev.dir !== field.leader.dir) return false;
@@ -454,6 +488,11 @@ export async function interact(field, ent) {
       return;
     }
     case 'locked_door': return unlockDoor(field, ent);
+    case 'mirror': return turnMirror(field, ent);
+    case 'receptor': case 'beam': {
+      if (ev.text) await field.showBoxes(inspectBoxes(ev.text, field.hasFlag));
+      return;
+    }
     case 'brazier': {
       if (ent.state === 'lit') return;
       ent.state = 'lit';
@@ -490,6 +529,33 @@ export async function restFlow(field, o = {}) {
   if (field.dead) return true;
   const s = await field.dialog({ who: null, text: HELP.save.prompt, choices: ['Save', 'Not now'], cancel: 1 });
   if (s === 0 && engine.hasScene('menu') && !field.dead) await engine.pushAwait('menu', { page: 'save' });
+  return true;
+}
+
+/**
+ * Confirm on a mirror: a fixed one only reads its text; a turnable one flips between '/' and the backslash
+ * (mirror_turn) with a small lift, and the beams are traced again at once. Its `text` (the court_lens line) is read
+ * the first time that line is met in this save, before the turn, so every later confirm is just a turn.
+ */
+export async function turnMirror(field, ent) {
+  const ev = ent.ev, engine = field.engine, map = field.map, g = field.game;
+  if (ev.fixed) { if (ev.text) await field.showBoxes(inspectBoxes(ev.text, field.hasFlag)); return false; }
+  if (ev.text && g.counters && !g.counters[`read:${ev.text}`]) {
+    g.counters[`read:${ev.text}`] = 1;
+    await field.showBoxes(inspectBoxes(ev.text, field.hasFlag));
+    if (field.dead) return false;
+  }
+  if (ent.data.sliding) return false;
+  ent.state = ent.state ? 0 : 1;
+  engine.audio.sfx('mirror_turn');
+  if (ent.prop) {
+    map.setPropState(ent.prop, ent.state);
+    ent.prop.offY = -1;
+    engine.after(4, () => { if (ent.prop) ent.prop.offY = 0; });
+  }
+  if (field.particles) field.particles.sparkle(ent.x * TILE + 8, ent.y * TILE - 4, 3, '#e8fffb');
+  if (field.glass) field.glass.recompute();
+  await engine.waitFrames(8);
   return true;
 }
 
@@ -602,16 +668,21 @@ async function unlockDoor(field, ent) {
   await engine.waitFrames(20);
 }
 
-// ---------------------------------------------------------------- targets (switches and plates)
-export function fireTarget(field, id) {
+// ---------------------------------------------------------------- targets (switches, plates, receptors)
+/** A source of `id` changed: open or close a gate, slide a shelf. o.quiet: no sound or shake (map load). */
+export function fireTarget(field, id, o = {}) {
   const ent = field.entities.get(id);
   if (!ent || !ent.present) return;
   const on = sourcesOn(field, id);
   if (ent.type === 'gate') {
     const want = on ? 'open' : 'closed';
-    if (ent.state === want) return;
+    if (ent.state === want) {
+      // the vow door shows each lit crystal while it stays shut
+      if (want === 'closed' && COUNTING_GATES.has(ent.ev.sprite)) applyGate(field, ent, false);
+      return;
+    }
     ent.state = want;
-    applyGate(field, ent, true);
+    applyGate(field, ent, !o.quiet);
     if (ent.ev.flag && on) field.setFlag(ent.ev.flag);
   } else if (ent.type === 'shelf') {
     const want = on ? 1 : 0;
@@ -626,18 +697,27 @@ export function fireTarget(field, id) {
   }
 }
 
-/** AND of every switch/plate/brazier whose target list names `id`. */
-function sourcesOn(field, id) {
-  let any = false, all = true;
+const SOURCE_TYPES = new Set(['switch', 'plate', 'brazier', 'receptor']);
+function sourceIsOn(ent) {
+  if (ent.type === 'plate') return ent.state === 'down';
+  if (ent.type === 'brazier' || ent.type === 'receptor') return ent.state === 'lit';
+  return ent.state === 'on';
+}
+/** How many switches / plates / braziers / receptors name `id`, and how many of them are on. */
+export function sourceCount(field, id) {
+  let n = 0, on = 0;
+  if (!field.entities) return { n, on };
   for (const ent of field.entities.values()) {
-    if (!ent.present) continue;
-    if (!(ent.type === 'switch' || ent.type === 'plate' || ent.type === 'brazier')) continue;
-    if (!targetsOf(ent.ev).includes(id)) continue;
-    any = true;
-    const on = ent.type === 'plate' ? ent.state === 'down' : ent.type === 'brazier' ? ent.state === 'lit' : ent.state === 'on';
-    if (!on) all = false;
+    if (!ent.present || !SOURCE_TYPES.has(ent.type) || !targetsOf(ent.ev).includes(id)) continue;
+    n++;
+    if (sourceIsOn(ent)) on++;
   }
-  return any && all;
+  return { n, on };
+}
+/** AND of every switch/plate/brazier/receptor whose target list names `id`. */
+function sourcesOn(field, id) {
+  const c = sourceCount(field, id);
+  return c.n > 0 && c.on === c.n;
 }
 
 // ---------------------------------------------------------------- stepping
@@ -670,12 +750,21 @@ export function pushBlock(field, ent, dir) {
   return !!moveBlock(field, ent, dir);
 }
 
-/** May a block slide from its tile one step in `dir`? (open floor, no actor, only plates / triggers / shards there) */
+/** Blocks and the mirrors that slide (`push: true`, or `heavy: true` for Bram's Shove). */
+export function isPushable(ent) {
+  return !!ent && (ent.type === 'block' || (ent.type === 'mirror' && !!(ent.ev.push || ent.ev.heavy)));
+}
+
+/**
+ * May a block (or a sliding mirror) move from its tile one step in `dir`? Open floor, no actor, only plates /
+ * triggers / shards there, and never onto a glass bridge cell (lit or dim: EPISODE2_PLAN 5.1).
+ */
 export function blockCanMove(field, ent, dir) {
   if (!ent || !ent.prop || ent.data.sliding) return false;
   const [dx, dy] = DIRS[dir];
   const nx = ent.x + dx, ny = ent.y + dy;
   if (field.map.codeAt(nx, ny) !== 'none') return false;
+  if (field.glass && field.glass.isBridge(nx, ny)) return false;
   if (field.actorAt(nx, ny)) return false;
   // a block may slide onto plates, triggers, lights and the shards of a broken pot; nothing else that is there
   const passableEvent = (e) => !e.present || e.type === 'plate' || e.type === 'trigger' || e.type === 'light' || (e.type === 'pot' && e.state === 'broken');
@@ -695,11 +784,13 @@ export function moveBlock(field, ent, dir, o = {}) {
   ent.x = nx; ent.y = ny;
   ent.cells = [[nx, ny]];
   reindex(field, ent, [[ox, oy]], [[nx, ny]]);
+  if (field.glass) field.glass.markDirty();       // the block left the beam line (or entered it) now
   const settle = () => {
     ent.data.sliding = false;
     for (const e of entitiesAt(field, nx, ny)) if (e.type === 'plate') updatePlate(field, e);
     for (const e of entitiesAt(field, ox, oy)) if (e.type === 'plate') updatePlate(field, e);
-    if (!ent.ev.heavy) field.bark('first_block_push');
+    if (field.glass) field.glass.markDirty();     // a mirror bends the beam from its new tile once it lands
+    if (!ent.ev.heavy && ent.type === 'block') field.bark('first_block_push');
     return true;
   };
   const slide = field.slideProp(p, nx, ny, o.frames || 14, null);

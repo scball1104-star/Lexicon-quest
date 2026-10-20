@@ -23,6 +23,21 @@ FLAGS = ['intro_done', 'saw_fading_sign', 'met_mael', 'mira_joined', 'bram_joine
          'archive_entered', 'f1_arrived', 'archive_f1_done', 'f2_arrived', 'echo_warden_defeated', 'lantern_get',
          'archive_f2_done', 'f3_arrived', 'found_thirteenth_bell', 'boss_door_open', 'archivore_defeated', 'returned_home',
          'saw_milestone', 'starter_quest_started', 'first_fight_done', 'campfire_rested']   # not ep1_complete: that rolls the credits
+# Episode 2 maps (E2-world) are walked with the Episode 2 story done up to the King, so no scene fires mid-walk
+# (not ep2_complete: that rolls the Episode 2 credits). Episode 1 maps are walked without them.
+EP2_FLAGS = ['ep2_started', 'ep2_morning_done', 'crossing_done', 'east_road_arrived', 'east_first_fight_done',
+             'saw_old_milestone', 'saw_cairns', 'fog_looped', 'waystation_rested', 'saw_court', 'nh_arrived', 'met_elian',
+             'heard_crisis', 'met_anwen', 'court_ferry_open', 'court_entered', 'court_f1_arrived', 'mira_memory_1',
+             'silverglass_lock_lit', 'silverglass_lock_seen', 'court_f1_done', 'court_f2_arrived', 'portraits_started',
+             'portrait_child_seen', 'portrait_keeper_seen', 'portrait_king_seen', 'remembrance_open', 'mira_memory_2',
+             'vex_met', 'other_selves_defeated', 'court_f2_done', 'court_f3_arrived', 'vow_belonging', 'vow_mercy',
+             'vow_courage', 'vow_belonging_seen', 'vow_mercy_seen', 'vow_courage_seen', 'mira_memory_3', 'vow_door_open',
+             'black_feather_found', 'nameless_king_defeated', 'aurel_named', 'mirror_sigil_get', 'nh_restored']
+EP2_MAPS = ('east_road', 'nameless_hollow', 'nh_', 'court_')
+
+
+def is_ep2(mid):
+    return mid.startswith(EP2_MAPS)
 
 FAR_JS = """(n) => {
   const f = LQ_ENGINE.stack.find(s => s.name === 'field'); if (!f || !f.map) return { reachable: 0, targets: [] };
@@ -70,8 +85,13 @@ def main(argv):
         lab.run('LQ_DEBUG.setSpeed(4)')
         # dismiss any dialogue (first-time companion remarks) so walks never wait on a box
         lab.run('window.__lqAuto = setInterval(() => { const s = LQ_DEBUG.scene(); if (s === "dialog" || s === "choice" || s === "titleCard") LQ_DEBUG.press("confirm", 1); }, 120)')
+        ep2_on = False
         for mid in wanted:
             t1 = time.time()
+            if is_ep2(mid) != ep2_on:
+                ep2_on = is_ep2(mid)
+                for f in EP2_FLAGS:
+                    lab.call('setFlag', f, ep2_on)
             lab.warp(mid)
             lab.frames(20)
             # visible enemies would start fights mid-walk: take them off the map for the route check

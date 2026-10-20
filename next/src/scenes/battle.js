@@ -238,7 +238,7 @@ export class BattleScene {
     // fork the engine rng per battle so no two playthroughs match.
     const rng = data.seed != null ? createRng(hashSeed(`battle:${data.seed}`)) : e.rng.fork(`battle:${n}`);
     const { battle, encounter } = createEncounterBattle(data.encounterId, {
-      party: g.party, rng, inventory: g.items, bestiary: bestiaryForBattle(g), start: data.start || 'normal',
+      party: g.party, rng, inventory: g.items, bestiary: bestiaryForBattle(g), start: data.start || 'normal', flags: data.flags || g.flags,
       forceElite: data.forceElite, noElite: data.noElite, eliteRate: data.eliteRate,
     });
     if (data.canFlee != null) battle.state.options.canFlee = !!data.canFlee && !battle.state.options.boss;
