@@ -111,3 +111,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   same glyphs everywhere; the Victory window fits its contents; Fury READY sits beside its gauge.
 - Still parked (one at a time, as usage allows): loading screen and installable app, enemy animation frames, the
   Whisperwood Hollow secret dungeon.
+
+## 2026-10-20 (Tue) morning: secret dungeon, battle animation, phone fixes (pace back up)
+- Whisperwood Hollow: an optional dungeon off the valley (follow Quill's hint about the pool past the pines; you
+  need the Lantern). An ink crossing, a block puzzle, and the Briar Alpha, a wolf boss that calls its pack and
+  speeds up when hurt. It drops Thornwake, a unique axe that poisons. "The Lost Bridge" shows in the journal.
+- Battles move now: enemies breathe, lunge, flinch, cast and crumble before they vanish; the Archivore's Devour
+  Name has its own wind-up; the Echo Warden visibly changes stance; the party has critical, combo and level-up
+  poses.
+- Phone fixes from the third critique: dialogue boxes size to their text and move to the top when they would hide
+  the speaker; every battle command is on screen at once (two columns, with Flee as a button); the empty window in
+  battle is now a short battle log; the bestiary shows each monster's picture (a silhouette until you meet it);
+  touch screens show A and B button hints instead of keyboard keys.
