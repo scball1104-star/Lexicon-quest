@@ -1,4 +1,4 @@
-# Maps: Episode 1 (W2-maps)
+# Maps: Episode 1 (W2-maps) and Episode 2 (E2-maps, section 6)
 
 Every Episode 1 map is a data module in `src/data/maps/<id>.js` (DESIGN 5.1 plus the fields in section 2).
 Helpers live in `src/data/maps/_kit.js`; the default export is always a plain, JSON-serializable object.
@@ -244,3 +244,158 @@ visible enemies + the boss actor (`ZONES.whisperwood_hollow`, optional, not in `
 - The valley `weatherZone` is the north half; ignore it if the renderer does not do zones.
 - Private homes in Willowmere are not enterable (COMMON.md fixes the map id list).
 - The crystal "sequence" is any order (all three lit); a strict order needs a `seq` rule the engine does not have.
+
+---
+
+## 6. Episode 2 (E2-maps, EPISODE2_PLAN 3 to 5)
+
+Eleven new maps and four edits. Tests: `qa/maps/ep2_maps.test.mjs` (plus the shared checks in `maps.test.mjs`, which
+now read both STAGING checklists). Previews (2x, annotated) in `tools/maps/previews/`; the three Court floors also have
+a `_solved` preview drawing, per receptor and per bridge, the first mirror configuration the walk found that lights it.
+
+```bash
+node tools/maps/mapcheck.mjs walk valley ep1_complete,ep2_started   # the walk under story flags (gated events/overlays)
+node tools/maps/mapcheck.mjs beams court_f3                          # start traces + one solved trace per receptor/bridge
+python tools/maps/preview.py court_f2 --solved                       # beams drawn, bridges lit
+python tools/maps/preview.py nameless_hollow --flags=nh_restored --tag=restored
+```
+
+### 6.1 New vocabulary (agreed with E2-world; docs/WORLD.md 1d)
+
+| type | fields | notes |
+|---|---|---|
+| `beam` | `dir, sprite` (`beam_window` in a north face's lower row, emits from its cell; `beam_lens` on a pedestal), `text` | always on while present |
+| `mirror` | `state` (0 = '/', 1 = backslash), `fixed?`, `push?`, `heavy?` (Shove; draws `mirror_heavy`), `text` | solid; confirm turns it |
+| `receptor` | `target` (gate id), `face?` (the side the crystal looks toward), `latch?`, `flag?` (persists the latch), `script?`, `text` | a gate source while lit |
+| `door` + `kind: 'mirror'` | `sprite: 'mirror_tall'` (or none: the throne room's great mirror), `if` | the event sits on the mirror's walk-in cell; a `dullMirror` object (`ifNot` the same flag) stands there before |
+| `door` + `kind: 'fog'` | same-map `to` | invisible; the Fading Stretch |
+| overlay / overhead `if`, `ifNot` | | Garrick's planks, the Hollow's lettered signs and clock hands |
+| overlay `inlay: '<receptor>'` | | the field shows the `_lit` inlay while that receptor is lit |
+| map `music`, `lighting.tint` | `[{ if, id }, { id }]` | first match (the Hollow and its interiors) |
+| map `ambientFx` | `{ fx: 'mist', area }` | the Fading Stretch |
+
+Kit helpers in `_kit.js`: `wallDepth` (the W8 depth scheme, shared by the Court floors), `beam`, `mirror`, `receptor`,
+`mirrorDoor`, `dullMirror`, `fogDoor`, `silverFont` (`font_silver`, 2 x 1, `safe`).
+
+**The beam walk** (`mapcheck.mjs beamWalk`). Beam systems are found by tracing every source through both states of each
+turnable mirror and every cell a movable mirror can be pushed to; systems that share a mirror merge, and the search runs
+per system over (configuration, cell): step (a dim bridge is a pit, a lit one floor), turn an adjacent mirror, push or
+shove an adjacent movable mirror one tile (never onto a bridge or a door cell). Receptor gates open per configuration;
+a `latch` receptor lit in any reachable configuration stays lit (an outer fixpoint with keys, switches, breakables).
+Push blocks stay out of the configuration: one in a beam line blocks it until the party can reach it (the F1 block sits
+in a three-row corridor so it can always be pushed out of the line; tested). A softlock is a reachable state that can no
+longer reach a map exit, the start or a ferry (leaving resets mirrors and blocks): every Court floor has none. W9
+breakables (`opens`) are modeled in both walks now.
+
+### 6.2 The maps
+
+**valley (edit).** A stream falls from the north cliff at x 45..46 down to the tributary beside the old ford: the gully
+is the washout, so the north bank is out of reach in Episode 1 (tested with Episode 1 flags). Garrick's Crossing: wood
+planks over the gully at rows 16..17 (overlays `if: ep2_started`), the floodwrack `ford_wrack` (42,14) beside the
+approach (always there; its line changes), the rail sign `garrick_rail` (signpost object, `if: crossing_done`), the
+trigger `crossing_trig` (43..44, 16..19) catching every approach, marks `ford` (46,16), `crossing_garrick` (45,16),
+`crossing_hal` (46,17), `east_exit` (58,16). The bank road runs east along rows 16..17 to the exit (59, 16..17) ->
+`east_road` (1,16). Pines keep off the gully, the approach and the bank road.
+
+**willowmere, chapel (edits); hero_home.** `smithy_ford_note` on the smithy door (`if: garrick_at_ford`, not solid: the
+door still opens). The chapel's tall mirror beside the altar (4,3): `wm_mirror` (dull) / `mirror_wm` (to `nh_chapel`
+(9,4)) on `mirror_sigil_get`. hero_home gets `ep2_morning_enter` (asked by E2-world).
+
+### east_road (64 x 36, field): The Fading Road
+![east_road](../tools/maps/previews/east_road.png)
+Bank Road (x 0..19): entry (1,16) from the valley; `east_signpost` (3,15); the first-fight cut `first_fight_trig` down
+column 6 (rows 3..21: every reachable cell of the column); the Mist Wolf pack `e_road_mixed` (13,16) chases, seven
+tiles from the cut; `old_milestone` (16,14). A rock outcrop with a cracked face (`crack_clearing` (10,10), W9 Dash
+Strike, opens (10,9..11)) hides the clearing: wood chest Hi-Ether, a quicksilver group. Fading Stretch (x 20..39): the
+dirt ends; the true path (exact, in the module) zigzags right 4, up 3, right 4, down 5, right 4, up 3, right 7, down 1;
+nine cairns stand beside it, each within six tiles of the last (`cairn_first` (22,17)); the path and its neighbours
+are the corridor, and every other walkable cell of the stretch (rows 11..20) is a fog door (merged into row runs)
+landing on `fog_return` (19,18), where `fog_return_trig` runs `fog_loop`; `fading_trig` at `fog_start` (19,16); the
+mist `ambientFx` covers x 20..39; a beetle group stands guard on the path (28,16). Waystation (x 40..51): `toll_ruin`
+(a chest inside, `toll_board`, `toll_house`), the campfire `waystation_fire` (46,17: `waystation_rest`, `safe`,
+`rest`), the bench, Penny (`penny_e`) at her stall. Mere Shore (x 52..63): the mere (`mere_water`) with the Court far
+off (`court_far` overhead at (56,0)); the rise with `mere_view_trig` (52..54, 13..14); a heavy block plugs the causeway
+to the reed island (Shove it east or west; iron chest `chest_reeds`). The plan's "drops into the shallows as a stepping
+stone" is not a block behaviour the field has, so the block is shoved aside instead. The road crosses the mere's
+outflow on a little bridge to the exit (63, 16..17) -> `nameless_hollow` `gate_in`.
+
+### nameless_hollow (44 x 34, town): Nameless Hollow / Hollowmere
+![nameless_hollow](../tools/maps/previews/nameless_hollow.png)
+The road from the Fading Road comes in along the south-west (`gate_in` (1,32)) and turns north through `gate_hollow`
+(12,31) in the low town wall (the prefab faces south, so the plan's west gate became a south-west gate; Corin at the
+post, Nico chalking at `nico_spot`). The Unwritten Square: the fountain is the event `fountain_obj` (20,19, sprite
+`fountain`, `fountain_check`), the ring `fountain_trig` (19..24, 17..20), the proclamation board, the empty plinth
+(`lantern_pedestal_empty`), benches, lamps; after the Mirror Sigil `mirror_warp_sq` (26,18) to the F1 landing. Hall
+north (door (22,11)), clocktower north-east (door (32,12); the hands overhead at (31,8)), inn west (8,17), shop east
+(37,19), smithy south-west (9,29), chapel south-east (32,29), three homes. The mere along the north and down the east
+edge; Tovin's pier (x 12..13) with `ferry_court` (13,1) to the F1 start; Orla by the rune shrine. Lettered signs are
+overhead tiles at each prefab's `signAt` (`if: nh_restored`); the sign events sit beside each door at street level.
+Music `hollow` -> `hollowmere`, tint `hollow_dusk` -> none (conditional lists).
+
+### Interiors
+![nh_hall](../tools/maps/previews/nh_hall.png)
+`nh_hall` (the library's layout: Elian's desk and ledger, `hall_trig` (9..11, 12), the cracked wall mirror, the town
+notice, the records room up the stair), `nh_chapel` (the chapel's: the register lectern, Anwen, candelabra, the empty
+bell frame, the silver hand-bell save, `anwen_trig`, the Keeper mirror to Willowmere), `nh_inn` (the inn's: Wren, the
+lost-property shelf `lost_property` running `satchel_found`, the guest book, `inn_bed` (17,7) beside the guest beds),
+`nh_shop` (Fitch), `nh_smithy` (Vessa at the glass furnace). Every exit lands in front of its door (tested both ways).
+
+### court_f1 (40 x 30, moonlit): The Silverglass Antechamber
+![court_f1](../tools/maps/previews/court_f1_solved.png)
+Landing A (start (19,27); the pier and `ferry_home` (19,29); the silver font; three dull Keeper mirrors that become
+doors to the square, F2 and F3) -> the great door -> B, the teaching room: the skylight `beam_b` (17,17) onto `mir_b`
+(17,19). Start '/' splashes on B's west wall at (12,19), right above the passage to the west wing; backslash lights
+`rec_b` (27,19, latch) and the inlay to `gate_b`. East wing D (glass key `chest_key1`, iron chest; `pane_d` (33,15) is a
+Dash Strike glass pane in D's south wall, `breakable: 'glass'`, opening the alcove D2 with the Merewarden Helm). West:
+the vestibule, the locked glass door `door_c`, the Lens Hall C. The Silverglass Lock: `beam_c` (6,2) -> `lens_1` (6,13)
+backslash -> glass slot (11,13) -> N, past `block_n` (15,13) (three-row corridor) -> `lens_2` (22,13) '/' -> glass slots
+(22,9..11) -> E -> `lens_3` (22,7) '/' -> `rec_lock` (25,7: latch, flag `silverglass_lock_lit`, script
+`silverglass_lock`) -> `gate_lock` (19,5) -> the stair alcove (`stairs_trig`, the stairs to F2). Every lens starts
+wrong and splashes where it can be seen. `sw_short` in E opens `gate_short`, B's north-west door onto N. 16
+configurations, no softlocks.
+
+### court_f2 (40 x 30, dark 0.25): The Hall of Other Selves
+![court_f2](../tools/maps/previews/court_f2_solved.png)
+Portrait Hall P (the stairs from F1 at (6,2); the child's portrait in the west alcove; the Well's `pitTo` lands here at
+`well_return` (8,6)). North Gallery: `beam_n` (18,2) onto `m_n1` (18,5); backslash lays the moat bridge (25..27, 5) to the
+East Gallery (glass key `chest_key2`); the fixed mirror `m_e0` (32,5) turns it down the arm to `m_e1` (32,12): backslash
+lays bridge A (35..36, 12) to the Keeper's alcove (portrait, iron chest), '/' lays bridge B (23..28, 12) over the Well to
+the Island (the reflection pool, `pool_trig`, an iron chest); `m_i1` (21,12) '/' lays bridge C (21, 15..18) down to the
+South Gallery (three groups, the King's portrait, the Remembrance Cache `if: remembrance_open` with its ledger on the
+bench, the locked glass door `door_w` (2,21)). West Wing: the font room, the corridor of the great mirror (`vex_trig`,
+`vex_glass` (2,11)), the round Arena (`selves_trig` down column 7; the `selves_*` marks by its mirror). After
+`other_selves_defeated` the arena mirror (9,11) is the way down to F3 (`stairs_trig` in front of it sets
+`court_f2_done`), and `mirror_f2_short` (11,11) leads to the F1 landing. The zone plan's boss is the trigger running
+`other_selves` (mapcheck accepts a trigger whose script is the encounter id when no actor carries it).
+
+### court_f3 (44 x 32, dark 0.6): The Unnamed Throne
+![court_f3](../tools/maps/previews/court_f3_solved.png)
+Hub (arrival (16,16) by the mirror back to F2; the empty glass throne with the crowned reflection under it; the vow
+door `door_vow` (21,14), a gate whose sources are the three receptors; inlays from the west and east corridors into it;
+`mirror_f3_short` (27,15) to the F1 landing). The Throne Antechamber behind the vow door: font, the feather on the bench
+(`feather_obj`, stand-in sprite `prop_letter` until a feather prop exists), a wood chest, the throne door. Belonging
+(west, no lights but the beam): `beam_w` (4,5) -> `m_w1` (4,20) backslash -> `m_w2` (11,20) '/' -> `m_w3` (11,12)
+backslash -> `rec_belonging` (7,12) inside a ring of pillars, the vow mirror behind it; the Paper Crown in a niche (2,15)
+beside the beam's way down. Mercy (east): the lens `beam_e` (30,19) -> `m_e1` (34,19) '/' lays the bridge (34, 12..15)
+over the chasm -> `m_e2` (34,8) '/' -> `rec_mercy` (39,8); the chasm drops to the lower ledge (39,27), whose stair climbs
+back; a Faceless Knight patrols across the beam row. Courage (south, through a door pair from the hub): `beam_s` (12,25)
+down onto the silver socket (12,27); `mirh_c` (14,27, heavy) is shoved west twice onto it and turned backslash, and the
+beam lays the long bridge (20..25, 27) to `rec_courage` (30,27); from the east end a hidden ink bridge (31..32, 28)
+reaches the Keeper's cache (the Hollowcrown, `court_note`, `lantern: true`). Three independent beam systems, 92
+configurations, no softlocks.
+
+### court_throne (24 x 20, dark 0.3): The King's Mirror
+![court_throne](../tools/maps/previews/court_throne.png)
+A red runner from the south door (start (12,17)) to the glass dais; the King's actor (12,6, back to the party) before
+the great mirror (three looks: `great_mirror_whole` until he falls, `_broken` until Aurel is named, `_town` after);
+`king_trig` across row 15; `mirror_exit` (11..12, 6; no sprite: the great mirror is the door) to `fountain_out`; Aurel
+and Elian by the dais while `aurel_named` and not `nh_restored`.
+
+### 6.3 Contracts and open items
+
+- `EP2_MAPS_LISTED = true` in `encounters.js`: the five Episode 2 zones are enumerable; `qa/maps` checks their plans.
+- Breakables: `pane_d` uses `breakable: 'glass'` (no glass art in `BREAK_ART` yet; the field falls back to the event
+  sprite and `wall_broken`); `crack_clearing` uses `'rock'`.
+- The chest `chest_remembrance` carries `gold: 140` besides its item (2 Ethers); the chest code must pay it.
+- `feather_obj` draws `prop_letter` until a feather prop exists.
+- Push blocks and movable mirrors must never enter door cells (the map tools assume it).
