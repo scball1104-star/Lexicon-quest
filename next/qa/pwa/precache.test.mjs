@@ -75,7 +75,10 @@ test('load budget: before the tap prompt (wire bytes) and the whole initial down
   console.log(`# load budget: modules ${mb(js)} MB + eager art/data ${mb(eager)} MB = ${mb(beforePrompt)} MB before the tap prompt; ` +
     `+ lazy art ${mb(lazy)} MB + sfx ${mb(sfx)} MB = ${mb(initial)} MB initial download (music streams after the title)`);
   assert.ok(beforePrompt < 2.5 * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, budget 2.5 MB (about 2 s at 10 Mbps)`);
-  assert.ok(initial < 6 * 1048576, `initial download ${mb(initial)} MB, budget 6 MB`);
+  // 6.5 MB since 2026-10-21 (was 6): Episode 2 added 0.3 MB of SFX (22 kHz mono WAV, already lean; MP3 would add
+  // encoder-delay latency to UI clicks). Everything past the tap prompt downloads in the background after the title,
+  // so the felt budget above stays at 2.5 MB. Episode 3 must not raise this again: split audio into per-episode packs.
+  assert.ok(initial < 6.5 * 1048576, `initial download ${mb(initial)} MB, budget 6.5 MB`);
 });
 
 test('index.html modulepreload block lists only files that exist', () => {
