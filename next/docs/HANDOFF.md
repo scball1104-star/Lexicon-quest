@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (2026-10-20, about 14:45 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-21, about 11:10 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -34,11 +34,10 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - **Episode 2 "The Town Without a Name": in progress, NOT yet published.**
   - Wave 10a done and committed: E2-story (`src/data/story/ep2.js`, 48 scenes), E2-battle (enemies, Other Selves,
     Nameless King, Kept; simulator targets met), E2-tiles (court and hollow kits, five backdrops).
-  - Wave 10b: E2-sprites done and committed. **Wave 10b is complete and committed: E2-world, E2-maps, E2-sprites and E2-audio** (precache rebuilt, 2706037).
-    Nothing was left running in the old session. Their files land uncommitted in the working tree. In the new session: `git status`, wait until no
-    files are still changing (or check the old session), run `node next/qa/run.mjs`, view their previews
-    (`next/tools/maps/previews/*`, `next/qa/world/out/*`, `next/tools/music/out/*`), then commit each piece.
-    Next: run the full gate list once, then start Wave 10c.
+  - Wave 10b complete and committed (E2-world, E2-maps, E2-sprites, E2-audio). Full `node next/qa/run.mjs`:
+    485 green on 2026-10-21 after the Appraise latch fix.
+  - Wave 10c: E2-scene-ui launched 2026-10-21 ~11:00 ET as the ONE background agent (Scott: slow and steady this
+    week). When it reports: view its PNGs (qa/battlescene/out, qa/ui/out), run the suite, commit.
   - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
@@ -46,8 +45,15 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - Small backlog: Episode 2 reflection timeline heads read as blobs; drawn Episode 2 portraits are simpler than the
   painted Episode 1 ones; a 2x Briar Alpha avatar; autoplay does not visit the Hollow.
 
+## Hotfixing the live /next while Episode 2 is unpublished
+`overhaul` carries unpublished Episode 2, so `push overhaul:main` would publish it. For a bug Scott reports on the
+live build: commit the fix on overhaul, `git worktree add -b hotfix/<name> ../LexiconQuest-hotfix origin/main`,
+cherry-pick, run the full gate list there (build_pwa first, commit sw.js), `git push origin hotfix/<name>:main`,
+verify live, then `git merge origin/main` into overhaul; sw.js conflicts every time, so take ours and rerun
+build_pwa.py. Done this way 2026-10-21 for the Load page finger (8a1084a).
+
 ## Heartbeat
-The old session's 3-hourly cron dies with it. Recreate it in the new session (CronCreate, e.g. `17 */3 * * *`) with a
+Session 2026-10-21 runs a 3-hourly cron (`17 */3 * * *`, session-only, expires 2026-10-28). A new session must recreate it (CronCreate) with a
 prompt like: "Lexicon Quest NEXT heartbeat with the usage guard: ground the date, check get_usage, read
 next/PLAN.md and next/docs/HANDOFF.md, integrate finished agent work after viewing images, launch the next
 Episode 2 wave within the guard, publish only after the full gate list, update PLAN.md and PROGRESS.md, no em dashes."

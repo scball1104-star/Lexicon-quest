@@ -103,10 +103,11 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] Wave 10a: E2-story, E2-battle, E2-tiles (committed)
 - [x] Wave 10b: E2-sprites (committed edcbfbe); E2-world + E2-maps committed 3862a6d (world systems and
       all 11 maps + valley/chapel edits; 484 qa tests green; every map preview viewed)
-- [~] E2-audio: still running from the prior session at new-session start (verified live via file mtimes and a
-      722MB render process, so NOT relaunched). 3 of 5 tracks rendered + court; boss_king rendering; SFX,
-      ambiences and manifest rebuild still pending. Watching for quiescence, then verify + commit.
-- [ ] Wave 10c: E2-scene-ui (title Episode 2 entry, Kept/boss-intro presentation, per-zone backdrops)
+- [x] E2-audio: five composed tracks, 10 SFX, 2 ambiences, precached (committed b032407, 2706037)
+- [~] Wave 10c: E2-scene-ui running (started 2026-10-21 ~11:00 ET, one agent under the usage guard): title Episode 2
+      entry, Kept/boss-intro presentation, Mirrored Combo bracket, per-zone backdrops (audit first; some exist)
 - [ ] Wave 10d: E2-integrate, then critic-4 + play-critic-3, then a fix pass, then publish
-- Note: mcp__ccd_session_mgmt__get_usage is NOT connected this session, so live usage cannot be read. Last known
-  reading was weekly 67% at ~14:00 today. Proceeding conservatively: one background agent at a time.
+- 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
+  get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
+- 2026-10-21 fixes: Load/Save page finger and highlight (Scott's report; hotfix published alone to main 8a1084a,
+  merged back); Appraise window latches its closing press each logic step (abilities_walks was timing out).
