@@ -175,3 +175,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Next: stitching Episode 2 into one run from start to credits, with the test bot playing it on desktop and phone.
   Still not published; it goes live after two reviews and a fix pass.
 
+## 2026-10-21 (Wed) afternoon: Episode 2 plays start to finish; a shop fix for Episode 1 is live
+- Episode 2 now plays from beginning to end without getting stuck. The test player finished it four times (computer
+  and phone, continuing from a finished Episode 1 save and starting fresh from the title's Episode 2 option) and never
+  lost a fight. A first play looks like about two hours, longer than the 60 to 90 minutes planned; the reviews will
+  say whether to trim it.
+- Fixed along the way: a freeze right after the Episode 1 credits, a fog shortcut that skipped a scene, Mira walking
+  into a fountain, and a dog that could block the smithy door.
+- Live now in Episode 1: the shops never showed the items meant to unlock as the story goes on, so the better
+  weapons and armor after you enter the Archive (and the floor-two upgrades) were missing. They appear now: the
+  smithy grows from 10 items to as many as 27. Close and reopen the game once to pick it up.
+- Next: two reviews of Episode 2 (art and phone usability first, then pacing and puzzles), a fix pass, then it goes live.
+

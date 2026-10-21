@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-21, about 11:10 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-21, about 15:50 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -36,8 +36,11 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
     Nameless King, Kept; simulator targets met), E2-tiles (court and hollow kits, five backdrops).
   - Wave 10b complete and committed (E2-world, E2-maps, E2-sprites, E2-audio). Full `node next/qa/run.mjs`:
     485 green on 2026-10-21 after the Appraise latch fix.
-  - Wave 10c: E2-scene-ui launched 2026-10-21 ~11:00 ET as the ONE background agent (Scott: slow and steady this
-    week). When it reports: view its PNGs (qa/battlescene/out, qa/ui/out), run the suite, commit.
+  - Wave 10c (9fa5caa) and 10d (5f09ee5) committed: Episode 2 plays to credits (autoplay, desktop and phone, from an
+    Episode 1 save and from newGameEp2, 0 game overs); 505 tests green. Load budget cap now 6.5 MB.
+  - Reviews running ONE at a time: critic-4 launched 2026-10-21 ~15:45 ET (writes docs/CRITIQUE_4.md only), then
+    play-critic-3 (docs/PLAYTEST_REVIEW_3.md), then the fix pass (PLAN.md lists the known items), then publish.
+  - Live main = 6ae4f00 (two hotfixes today: Load page finger 8a1084a, shop story stock 6ae4f00), sw 4c0ffd33f8a3.
   - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
