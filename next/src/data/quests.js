@@ -98,9 +98,11 @@ export const EP2_FLAGS = {
   court_f1_done: 'Took the stairs down from the Silverglass Antechamber (court_f1_stairs).',
   vex_met: 'Vex Quill appeared in the great mirror on F2 (vex_mirror).',
   other_selves_defeated: 'The Other Selves are beaten (encounter flag; other_selves also sets it). The great mirror is a stair.',
+  other_selves_tried: 'W11: the Other Selves fight has started once; a retry plays only the reflections, Mira\'s tips and the card.',
   court_f2_done: 'Took the mirror stair down from the Hall of Other Selves (court_f2_stairs).',
   vow_door_open: 'All three vows lit; the vow door opened; Mira remembered (vow_door).',
   nameless_king_defeated: 'The Nameless King is beaten (encounter flag; king_after also sets it).',
+  nameless_king_tried: 'W11: the King fight has started once; a retry plays only his turn, Mira\'s tip and the card.',
   aurel_named: "Elian said his father's name; Aurel is himself again (king_after). The throne mirror leads home.",
   nh_restored: 'The town is Hollowmere again: signs lettered, faces in the water, dusk lifted (hollowmere_restored).',
   ep2_complete: 'The Episode 2 ending played (ep2_ending). Roll CREDITS_EP2, then wake at nh_inn inn_bed.',
@@ -648,6 +650,7 @@ export const MAIN_QUEST_EP2 = {
         { map: 'court_f1', if: 'glass_key_f1', lines: [
           m('We have the glass key. The locked door is off the west side of the antechamber, where the light first pointed.'),
           m('Behind it is a moon window. Carry its light with the lenses, all the way to the crystal by the stairs.'),
+          b('A block sits in the light in the north corridor. Shift it.'),
         ] },
         { map: 'court_f1', lines: [
           m('That mirror in the antechamber turns. Turn it until the light finds the crystal in the east wall.'),
@@ -662,9 +665,17 @@ export const MAIN_QUEST_EP2 = {
       chat: [
         { map: 'court_f1', lines: [b('We found the stairs already. North end of the stairs hall, then down.')] },
         { map: 'court_f2', if: 'other_selves_defeated', lines: [b('The great mirror in the arena is a stair now. Down.')] },
+        { map: 'court_f2', if: 'vex_met', lines: [
+          m('The arena is past the font. If two of them move as one, push one back: a Lunge, or a Pin Shot.'),
+          b('Or break one. Hard to keep a rhythm with your shield in pieces.'),
+        ] },
         { map: 'court_f2', if: 'glass_key_f2', lines: [
           m('We have the key. The locked glass door is at the west end of the south gallery.'),
           b('And past it, a font. Then whatever is making that big mirror hum.'),
+        ] },
+        { map: 'court_f2', if: 'mira_memory_2', lines: [
+          m('The door at the end of the south gallery is glass. The key will be somewhere we already crossed.'),
+          b("The east gallery's far corner. I'd look there."),
         ] },
         { map: 'court_f2', lines: [
           m('Turn the mirror in the north gallery. A lit glass rail holds our weight.'),
@@ -702,6 +713,7 @@ export const MAIN_QUEST_EP2 = {
         { map: ['court_f3', 'court_throne'], lines: [
           m('When his mirror turns to one of us, that one defends, or Bram guards them. Break him and the glass cracks.'),
           b('And if he seals one of us in glass: Recall, or a Silver Salve. Fitch sells them.'),
+          m('When his court stands, the weeping one mends him. Hit past Pride: True Strike, or Dawnname on them all.'),
         ] },
         { lines: [m('The throne room, behind the vow door on the third floor. Drink at the font before we knock.')] },
       ],

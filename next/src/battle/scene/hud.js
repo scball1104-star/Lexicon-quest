@@ -302,13 +302,27 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
     if (s.nullified && ui.frames.weak_null) r.sprite(ui, ui.frames.weak_null, ex + 1, y, { topLeft: true });
     ex += 15;
   }
-  // Status badges above the row.
+  // Status badges above the row (W11: below it when the row is tucked under the help window, opts.top, as the King's
+  // row on the phone is, so the window never hides them).
+  const by = opts.top != null && y - 10 < opts.top ? y + 15 : y - 10;
   let sx = x;
   for (const s of Object.keys(actor.statuses)) {
     const f = ui.frames[`st8_${s}`];
-    if (f) { r.sprite(ui, f, sx, y - 10, { topLeft: true }); sx += 9; }
+    if (f) { r.sprite(ui, f, sx, by, { topLeft: true }); sx += 9; }
   }
+  // W11 (PLAYTEST_REVIEW_3 fixes 6 and 8): the Episode 2 snowballs on screen. After the status badges, one red Fury
+  // badge per stack the foe holds for the rest of the fight: each Kept for the Nameless King, each landed Mirrored
+  // Combo for the reflections.
+  const grown = Math.min(empowerStacks(unit), EMPOWER_SHOWN);
+  const fb = grown && ui.frames.st8_fury;
+  if (fb) for (let i = 0; i < grown; i++) { r.sprite(ui, fb, sx, by, { topLeft: true }); sx += 9; }
   return { x, y, w: ex - x };
+}
+/** Stacks of a lasting Episode 2 buff on a foe: the King's Kept (`keep<n>`) and the reflections' combos (`mirror<n>`). */
+export const EMPOWER_SHOWN = 4;
+export function empowerStacks(unit) {
+  if (!unit || !unit.mods) return 0;
+  return unit.mods.filter((m) => m.stat === 'atk' && m.mult > 1 && /^(keep|mirror)\d+$/.test(String(m.source))).length;
 }
 /** Lift (px) for an enemy row that would touch one already drawn this frame (three foes in a line). */
 export function rowLift(anchor, w, placed) {

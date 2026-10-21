@@ -159,10 +159,10 @@ const events = [
   chest('chest_d', 29, 3, 'iron'),
   object('pane_d', 33, 15, 'glass_pane_cracked_top', { breakable: 'glass', text: 'cracked_pane', opens: [[33, 15], [33, 16], [33, 17]] }),
   chest('chest_helm', 33, 18, 'gold', { item: 'merewarden_helm', behind: 'pane_d' }),
-  // ---- enemies: 8 per ZONES.court_f1.plan (none in B, the teaching room)
+  // ---- enemies: 7 per ZONES.court_f1.plan (none in B, the teaching room). W11 (PLAYTEST_REVIEW_3 section 4): the
+  // East Wing's quicksilver patrol is gone, so the wing holds the two groups its header promises
   enemy('e_d_sentinel', 34, 4, 'glass_sentinel', 'c1_sentinel', 'guard'),
   enemy('e_d_wisps', 34, 11, 'glint_wisp', 'c1_wisps', 'wander', { radius: 2 }),
-  enemy('e_d_quick', 28, 13, 'quicksilver', 'c1_quick', 'patrol', { path: steps('right', 6, 'left', 6) }),
   enemy('e_c_mixed', 4, 6, 'glass_sentinel', 'c1_mixed', 'chase'),
   enemy('e_c_wisps', 8, 11, 'glint_wisp', 'c1_wisps', 'wander', { radius: 2 }),
   enemy('e_n_sentinel', 20, 12, 'glass_sentinel', 'c1_sentinel', 'guard'),

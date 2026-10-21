@@ -5,17 +5,18 @@
 //      portrait in the west alcove (with a wood chest). Everything that falls into a pit climbs back out here.
 //   NG the North Gallery: Puzzle 1 (teach bridges). The skylight in NG's north face shines down onto m_n1. Untouched,
 //      the beam runs west through the Portrait Hall; turned once, it runs east along a dim glass rail over the
-//      three-cell moat into the East Gallery, and the rail lights into a bridge. One group.
+//      three-cell moat into the East Gallery, and the rail lights into a bridge. No enemies (W11).
 //   EG the East Gallery: two groups and the glass key. A fixed mirror where the first bridge lands turns the beam south
 //      down the gallery's arm to m_e1 (Puzzle 2, one beam, two bridges): '\' sends it east along bridge A over a chasm
 //      to the Keeper's portrait alcove (optional, an iron chest); '/' sends it west along bridge B across the Well to
 //      the Island. Lighting one darkens the other. One group in the arm.
 //   The Island: the reflection pool (Mira's second memory), m_i1 at bridge B's end: turned '/', it sends the beam south
 //      along bridge C to the South Gallery. Bridge B is upstream of m_i1, so it stays lit: the island is never a trap.
-//   SG the South Gallery: three groups, the King's portrait, the Remembrance Cache (after all three portraits), and at
+//   SG the South Gallery: two groups, the King's portrait, the Remembrance Cache (after all three portraits), and at
 //      its west end the locked glass door into the West Wing.
-//   WW the West Wing: the font room, the corridor of the great mirror (Vex), the round Arena (the Other Selves). After
-//      the fight the arena's great mirror is the way down to F3, and beside it a Keeper mirror to the F1 landing.
+//   WW the West Wing: the corridor of the great mirror (Vex, at its foot since W11), the font room beside it, the round
+//      Arena (the Other Selves). After the fight the arena's great mirror is the way down to F3, and beside it a Keeper
+//      mirror to the F1 landing.
 import { grid, box, put, rows, room, wallDepth, door, sign, object, trigger, enemy, chest, gate, lockedDoor, steps, enter,
   beam, mirror, mirrorDoor, dullMirror, silverFont, light } from './_kit.js';
 
@@ -114,7 +115,9 @@ const events = [
   // ---- WW: the font room, the great mirror's corridor, the Arena
   silverFont('font_f2', 4, 17),
   object('vex_glass_obj', 2, 11, 'mirror_tall', { text: 'court_wall_mirror', state: 0 }),
-  trigger('vex_trig', 2, 13, 2, 1, 'vex_mirror'),
+  // W11 (PLAYTEST_REVIEW_3 fix 4): Vex at the corridor's foot, the first step past the glass door, so the font sits
+  // between his scene and the arena (it was at row 13, after the font)
+  trigger('vex_trig', 2, 18, 2, 1, 'vex_mirror'),
   trigger('selves_trig', 7, 11, 1, 6, 'other_selves'),
   dullMirror('arena_mirror', 9, 11, 'other_selves_defeated', 'great_mirror_f2'),
   mirrorDoor('stairs_f3', 9, 11, ['court_f3', 16, 16, 'down'], 'other_selves_defeated', { text: 'great_mirror_f2' }),
@@ -124,12 +127,11 @@ const events = [
   // ---- lights (dark 0.25): the candelabra and the font
   light('l_p', 8, 4, 4), light('l_ng', 20, 4, 4), light('l_eg', 32, 4, 4), light('l_sg_a', 9, 24, 5),
   light('l_sg_b', 21, 23, 5), light('l_sg_c', 31, 24, 5), light('l_ww', 4, 16, 3), light('l_arena', 9, 14, 5),
-  // ---- enemies: 8 per ZONES.court_f2.plan, plus the Other Selves (the arena trigger)
-  enemy('e_ng_shadows', 22, 6, 'borrowed_shadow', 'c2_shadows', 'wander', { radius: 2 }),
+  // ---- enemies: 6 per ZONES.court_f2.plan, plus the Other Selves (the arena trigger). W11 (PLAYTEST_REVIEW_3 fix 4):
+  // the two double-Shadow groups (c2_shadows: NG's and SG's) are gone; the North Gallery teaches bridges in peace.
   enemy('e_eg_knight', 30, 4, 'faceless_knight', 'c2_knight', 'guard'),
   enemy('e_eg_sentinel', 35, 6, 'glass_sentinel', 'c2_sentinel', 'wander', { radius: 2 }),
   enemy('e_arm_mixed', 31, 9, 'faceless_knight', 'c2_mixed', 'patrol', { path: steps('down', 5, 'up', 5) }),
-  enemy('e_sg_shadows', 12, 24, 'borrowed_shadow', 'c2_shadows', 'chase'),
   enemy('e_sg_knight', 27, 24, 'faceless_knight', 'c2_knight', 'patrol', { path: steps('right', 5, 'left', 5) }),
   enemy('e_sg_mixed', 6, 23, 'faceless_knight', 'c2_mixed', 'guard'),
   enemy('e_ww_sentinel', 3, 16, 'glass_sentinel', 'c2_sentinel', 'guard'),
@@ -157,8 +159,8 @@ export default {
   exits: [],
   marks: {
     arrival: [6, 4], portrait_child: [2, 5], portrait_keeper: [37, 10], portrait_king: [30, 22], pool: [19, 12],
-    vex_mirror: [2, 11], vex_glass: [2, 11], vex_scene: [3, 12], arena: [9, 15], selves_spot: [9, 13], selves_hero: [9, 12],
-    // vex_scene (W11): the camera between the glass and the party
+    vex_mirror: [2, 11], vex_glass: [2, 11], vex_frame: [3, 15], arena: [9, 15], selves_spot: [9, 13], selves_hero: [9, 12],
+    // vex_frame (W11, replaces vex_scene): the camera between the glass at the corridor's head and the party at its foot
     selves_mira: [8, 13], selves_bram: [10, 13], stairs_down: [9, 12], well_return: [8, 6],
   },
   start: { x: 6, y: 4, dir: 'down' },

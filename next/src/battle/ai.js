@@ -372,7 +372,10 @@ export const MIRROR_COMBOS = [
   ['refl_mira', 'refl_bram', 'mirror_glass_bulwark'],
 ];
 const COMBO_REST = 1;   // each member's own turns before it can start another Mirrored Combo
-export const MIRROR_EMPOWER = 0.15;   // ATK and MAG the reflections gain per Mirrored Combo that lands
+// W11 (PLAYTEST_REVIEW_3 fixes 1 and 8): 0.20 (was 0.15). The reflections' own ATK and MAG are 10% lower, so a careful
+// party at Lv 10 wins about 88% (was 81%); a landed combo costs more, now that the telegraph names the answer ("Break
+// their rhythm!"), Mira's tip says push one back, and the HUD badges each stack: ignoring it costs 13 points at Lv 11.
+export const MIRROR_EMPOWER = 0.20;   // ATK and MAG the reflections gain per Mirrored Combo that lands
 function mirrorComboFor(a, b) {
   const row = MIRROR_COMBOS.find(([x, y]) => (x === a && y === b) || (x === b && y === a));
   return row ? row[2] : null;
@@ -471,7 +474,12 @@ const reflections = {
 // and Pride and the Mirror Ward (25% damage, shields locked, HP stops at 34%); Mirror Rain every 3, Keeping every 5.
 // Both adds down: the ward shatters, he is Broken for a turn (every Kept member is freed) and 3 Aurel Unmasked
 // begins (Haste; Keeping and Last Decree alternate with ordinary turns between).
-export const KEEP_EMPOWER = 0.25;    // ATK and MAG gained per member kept
+// W11 (PLAYTEST_REVIEW_3 fix 6): +20% per Kept (was +25%), Devour Name's figure. The plan's +10% was tried: careful
+// play was unchanged, but ignoring telegraphs at the plan's Lv 13 then cost only 4 points of win rate (the King could
+// not be lost that way); at +20% it costs 16 there and 34 at Lv 12, where ignoring telegraphs still wins 62% (was 49%).
+// The battle HUD shows each stack as a badge over the King's weakness row, so the cost of a missed Defend is on screen.
+export const KEEP_EMPOWER = 0.20;    // ATK and MAG gained per member kept
+export const KEEP_MIRA_BIAS = 0.2;   // chance the King names Mira before the even pick (was 0.4: Mira about 60% of the time)
 export const WARD_MULT = 0.25;       // damage taken under the Mirror Ward
 export const KEEP_TURNS = 2;
 const KING_ADDS = ['false_sorrow', 'false_pride'];
@@ -504,8 +512,9 @@ function shatterWard(ctx, u) {
 function keepTarget(ctx) {
   const pool = partyFoes(ctx);
   if (!pool.length) return null;
+  // a light lean toward Mira (the King knows the girl who ran), not a lock on the one member who carries Recall
   const mira = pool.find((f) => f.id === 'mira');
-  if (mira && ctx.R() < 0.4) return mira.uid;
+  if (mira && ctx.R() < KEEP_MIRA_BIAS) return mira.uid;
   return pool[Math.floor(ctx.R() * pool.length)].uid;
 }
 const namelessKing = {

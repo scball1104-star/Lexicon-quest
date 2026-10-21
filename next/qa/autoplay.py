@@ -2420,7 +2420,7 @@ class Episode2(Episode):
             b.round_trip(2, 'F2 west wing')
             self.ensure_map('court_f2')
         if not self.has('vex_met'):
-            b.walk_to([(2, 13), (3, 13)], label='vex_trig')
+            b.walk_to([(2, 18), (3, 18)], label='vex_trig')
             b.settle()
             if not self.has('vex_met'):
                 raise Fail('vex_mirror did not run')

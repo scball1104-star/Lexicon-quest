@@ -34,7 +34,7 @@ export const TARGETS = {
   whisperwood_alpha: { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6 },
   // Episode 2 (EPISODE2_PLAN.md 6.4, 6.5, 6.8). keptMax: careful play averages one Kept member or fewer per fight.
   other_selves: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
-  nameless_king: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, keptMax: 1 },
+  nameless_king: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, keptMax: 1, winMinAt: { 12: 0.9 } },
   // Party level on entering and leaving each zone if the player fights each zone's plan once
   // (brief: valley Lv 2-3, Archive F1 Lv 4, F2 Lv 5-6, F3 Lv 7, Archivore Lv 8). Also checked at 80%
   // of the plan ("most visible enemies") with a one-level allowance below.
@@ -60,7 +60,10 @@ export const SUITE_LEVELS = {
   east_road: [9, 10], court_f1: [10, 11], court_f2: [11, 12], court_f3: [12, 13], court_throne: [13],
 };
 // The first level is where the plan meets the boss (fighting every plan fight); reckless play is measured there.
-export const BOSS_LEVELS = { echo_warden: [5, 6], whisperwood_alpha: [6, 7], archivore: [8], other_selves: [11, 12], nameless_king: [13] };
+// W11 (PLAYTEST_REVIEW_3 fix 1): the Episode 2 bosses are also played at the 80% route's level (one under the plan:
+// the Other Selves at Lv 10, the King at Lv 12), where most players and the autoplay bot meet them; the King must win
+// 90% there (TARGETS.nameless_king.winMinAt).
+export const BOSS_LEVELS = { echo_warden: [5, 6], whisperwood_alpha: [6, 7], archivore: [8], other_selves: [11, 10, 12], nameless_king: [13, 12] };
 export const EPISODES = { 1: [...ZONE_ORDER, ...OPTIONAL_ZONES], 2: EP2_ZONE_ORDER };
 
 export function makeParty(zone, level) {
@@ -235,7 +238,8 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
       const ar = at.find((r) => r.policy === 'reckless');
       const tag = `${id} Lv${level}`;
       if (ac) {
-        if (ac.win < t.winMin) fails.push(`${tag}: competent win ${pct(ac.win)} < ${pct(t.winMin)}`);
+        const winMin = Math.max(t.winMin, (t.winMinAt && t.winMinAt[level]) || 0);
+        if (ac.win < winMin) fails.push(`${tag}: competent win ${pct(ac.win)} < ${pct(winMin)}`);
         if (ac.rounds < t.roundsMin || ac.rounds > t.roundsMax) fails.push(`${tag}: rounds ${ac.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
         if (t.keptMax !== undefined && ac.kept > t.keptMax) fails.push(`${tag}: careful play is Kept ${ac.kept.toFixed(2)} times per fight (want <= ${t.keptMax})`);
       }

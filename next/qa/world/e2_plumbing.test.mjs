@@ -88,6 +88,13 @@ test('newGameEp2: a Lv 9 party in the simulator\'s east_road loadout, Episode 1 
   assert.equal(creditsPending(g, (f) => !!g.flags[f]), 0, 'no credits roll on waking');
 });
 
+test('newGameEp2 starts at Episode 1\'s full-clear EXP, so a fresh start meets the Episode 2 curve (W11)', async () => {
+  const { progression } = await import('../../tools/sim/simulate.mjs');
+  const ep1End = progression(1).at(-1).exp;
+  assert.equal(EP2_START.exp, ep1End, 'EP2_START.exp follows the simulator\'s Episode 1 full clear');
+  for (const m of newGameEp2('Arden', { seed: 7 }).party) assert.equal(m.exp, ep1End, `${m.id} exp`);
+});
+
 test('the cutscene API gives gold: give(\'gold\', n)', async () => {
   const got = [];
   const F = { engine: { waitFrames: async () => {} }, giveGold: async (n) => got.push(['gold', n]), giveItem: async (id, q) => got.push([id, q]) };

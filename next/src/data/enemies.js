@@ -222,11 +222,16 @@ enemy('briar_alpha', {
 // =============================================================================================
 
 // ---------------------------------------------------------------- The Fading Road (Lv 9-10)
+// W11 (PLAYTEST_REVIEW_3 fix 1): every ordinary Episode 2 foe gives about 10% more EXP (four fewer placed groups and
+// no road respawns; tools/sim progression keeps the plan levels).
+// W11 also: the reflections hit 10% softer (ATK and MAG x0.9) and Sorrow and Pride have 80% of their HP (fix 7); the
+// Glass Sentinel and the Faceless Knight carry a little more gold (96, 112), so the gold the removed groups paid still
+// buys two tier 4 pieces before F3 (simulate.mjs economy2).
 enemy('mist_wolf', {
   name: 'Mist Wolf', family: 'beast', level: 9,
   hp: 280, atk: 31, def: 12, mag: 7, spr: 8, spd: 16, luk: 7,
   shields: 2, weak: ['fire', 'spear'], evade: 0.1,
-  exp: 11, gold: 45, masteryPts: 4,
+  exp: 12, gold: 45, masteryPts: 4,
   moves: [{ skill: 'bite', weight: 50, target: 'lowestHpPct' }, { skill: 'mist_bite', weight: 35 },
           { skill: 'howl', weight: 15, once: true, if: 'notHasted' }],
   drops: [{ item: 'potion', chance: 0.12 }, { item: 'eye_drops', chance: 0.1 }], lootZone: 'east_road',
@@ -236,7 +241,7 @@ enemy('glassback', {
   name: 'Glassback Beetle', family: 'insect', tags: ['glass'], level: 9,
   hp: 180, atk: 34, def: 22, mag: 7, spr: 14, spd: 8, luk: 4,
   shields: 3, weak: ['axe', 'thunder'], resist: ['sword', 'bow', 'ice'],
-  exp: 14, gold: 54, masteryPts: 4,
+  exp: 15, gold: 54, masteryPts: 4,
   opener: 'harden', reflectWhileProtected: 'magic',
   moves: [{ skill: 'shell_bash', weight: 70 }, { skill: 'harden', weight: 30, if: 'notProtected' }],
   charge: { skill: 'glass_ram', first: 2, cooldown: 3 },
@@ -247,7 +252,7 @@ enemy('quicksilver', {
   name: 'Quicksilver', family: 'ooze', level: 9, size: 'small',
   hp: 110, atk: 30, def: 8, mag: 40, spr: 10, spd: 10, luk: 4,
   shields: 2, weak: ['thunder', 'ice'], resist: ['fire'], statusImmune: ['poison'],
-  exp: 8, gold: 33, masteryPts: 3,
+  exp: 9, gold: 33, masteryPts: 3,
   split: { into: 'quicksilver_bead', hp: 0.35 },
   moves: [{ skill: 'slime_tackle', weight: 55 }, { skill: 'mercury_spit', weight: 45 }],
   drops: [{ item: 'antidote', chance: 0.12 }, { item: 'ether', chance: 0.06 }], lootZone: 'east_road',
@@ -268,7 +273,7 @@ enemy('glint_wisp', {
   name: 'Glint Wisp', family: 'spirit', level: 10, flying: true, size: 'small',
   hp: 205, atk: 26, def: 9, mag: 51, spr: 18, spd: 14, luk: 8,
   shields: 2, weak: ['bow', 'thunder'], resist: ['fire', 'light'], evade: 0.2,
-  exp: 20, gold: 66, masteryPts: 4,
+  exp: 22, gold: 66, masteryPts: 4,
   moves: [{ skill: 'glint', weight: 50 }, { skill: 'mirror_dust', weight: 30 }, { skill: 'e_strike', weight: 20 }],
   charge: { skill: 'prism_burst', first: 3, cooldown: 4 },
   drops: [{ item: 'eye_drops', chance: 0.12 }, { item: 'ether', chance: 0.08 }], lootZone: 'court_f1',
@@ -278,7 +283,7 @@ enemy('glass_sentinel', {
   name: 'Glass Sentinel', family: 'construct', tags: ['glass'], level: 10, size: 'large',
   hp: 290, atk: 55, def: 22, mag: 13, spr: 10, spd: 7, luk: 3,
   shields: 4, weak: ['thunder', 'axe'], resist: ['sword', 'spear'], statusImmune: ['poison'],
-  exp: 26, gold: 90, masteryPts: 6,
+  exp: 29, gold: 96, masteryPts: 6,
   moves: [{ skill: 'shard_fist', weight: 70 }, { skill: 'glass_guard', weight: 30, if: 'notProtected' }],
   charge: { skill: 'shatter_quake', first: 2, cooldown: 3 },
   drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'potion', chance: 0.2 }], lootZone: 'court_f1',
@@ -290,7 +295,7 @@ enemy('borrowed_shadow', {
   name: 'Borrowed Shadow', family: 'spirit', level: 11, ai: 'mimic',
   hp: 370, atk: 44, def: 12, mag: 62, spr: 20, spd: 13, luk: 8,
   shields: 3, weak: ['light', 'bow'],
-  exp: 20, gold: 84, masteryPts: 5,
+  exp: 22, gold: 84, masteryPts: 5,
   // ai 'mimic' answers with shadow_strike / shadow_ember / shadow_frost / shadow_spark / shadow_mend (see ai.js)
   moves: [{ skill: 'dusk_touch', weight: 100 }],
   drops: [{ item: 'echo_herb', chance: 0.12 }, { item: 'ether', chance: 0.1 }], lootZone: 'court_f2',
@@ -300,7 +305,7 @@ enemy('faceless_knight', {
   name: 'Faceless Knight', family: 'construct', level: 11, size: 'large',
   hp: 280, atk: 66, def: 24, mag: 26, spr: 14, spd: 10, luk: 5,
   shields: 5, weak: ['axe', 'thunder', 'light'], resist: ['sword', 'spear'], statusImmune: ['poison'],
-  exp: 26, gold: 105, masteryPts: 6,
+  exp: 29, gold: 112, masteryPts: 6,
   moves: [{ skill: 'blank_blade', weight: 70 }, { skill: 'knight_cover', weight: 30, if: 'hasAlly' }],
   charge: { skill: 'judgement', first: 2, cooldown: 3 },
   drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'phoenix_feather', chance: 0.03 }], lootZone: 'court_f2',
@@ -312,7 +317,7 @@ enemy('shard_swarm', {
   name: 'Shard Swarm', family: 'construct', tags: ['glass'], level: 12, size: 'small', flying: true,
   hp: 320, atk: 42, def: 10, mag: 51, spr: 12, spd: 17, luk: 6,
   shields: 2, weak: ['thunder', 'axe', 'light'], resist: ['spear', 'bow'], evade: 0.25, statusImmune: ['poison'],
-  exp: 26, gold: 93, masteryPts: 5,
+  exp: 29, gold: 93, masteryPts: 5,
   moves: [{ skill: 'shard_rain', weight: 60 }, { skill: 'glitter', weight: 40 }],
   charge: { skill: 'shard_storm', first: 3, cooldown: 4 },
   drops: [{ item: 'eye_drops', chance: 0.12 }, { item: 'hi_ether', chance: 0.04 }], lootZone: 'court_f3',
@@ -326,7 +331,7 @@ const REFLECTION = { boss: true, size: 'medium', family: 'reflection', ai: 'refl
   drops: [], lootZone: 'court_f2' };
 enemy('refl_hero', {
   ...REFLECTION, name: 'Nameless Reflection', level: 11,
-  hp: 365, atk: 100, def: 18, mag: 24, spr: 14, spd: 16, luk: 8,
+  hp: 365, atk: 90, def: 18, mag: 22, spr: 14, spd: 16, luk: 8,
   shields: 4, weak: ['spear', 'staff', 'bow'], resist: ['sword', 'axe'],
   exp: 40, gold: 134, masteryPts: 5,
   moves: [{ skill: 'mirror_slash', weight: 55 }, { skill: 'risen_slash', weight: 30 },
@@ -335,7 +340,7 @@ enemy('refl_hero', {
 });
 enemy('refl_mira', {
   ...REFLECTION, name: "Mira's Reflection", level: 11,
-  hp: 285, atk: 40, def: 12, mag: 102, spr: 22, spd: 15, luk: 8,
+  hp: 285, atk: 36, def: 12, mag: 92, spr: 22, spd: 15, luk: 8,
   shields: 3, weak: ['sword', 'axe', 'spear'], resist: ['staff', 'bow'],
   exp: 40, gold: 133, masteryPts: 5,
   moves: [{ skill: 'refl_ember', weight: 40 }, { skill: 'refl_frost', weight: 35 },
@@ -344,7 +349,7 @@ enemy('refl_mira', {
 });
 enemy('refl_bram', {
   ...REFLECTION, name: "Bram's Reflection", level: 11,
-  hp: 375, atk: 88, def: 26, mag: 19, spr: 16, spd: 12, luk: 6,
+  hp: 375, atk: 79, def: 26, mag: 17, spr: 16, spd: 12, luk: 6,
   shields: 5, weak: ['sword', 'staff', 'bow'], resist: ['spear', 'axe'],
   exp: 40, gold: 133, masteryPts: 4,
   moves: [{ skill: 'refl_lunge', weight: 55 }, { skill: 'refl_guard', weight: 25, if: 'allyHurt' },
@@ -382,7 +387,7 @@ enemy('nameless_king', {
 });
 enemy('false_sorrow', {
   name: 'Sorrow', family: 'reflection', level: 13,
-  hp: 240, atk: 40, def: 10, mag: 74, spr: 22, spd: 12, luk: 6,
+  hp: 192, atk: 40, def: 10, mag: 74, spr: 22, spd: 12, luk: 6,
   shields: 2, weak: ['fire', 'bow'], resist: ['ice'], statusImmune: ['poison'],
   exp: 0, gold: 0, masteryPts: 2,
   moves: [{ skill: 'weep', weight: 100 }],
@@ -392,7 +397,7 @@ enemy('false_sorrow', {
 });
 enemy('false_pride', {
   name: 'Pride', family: 'reflection', level: 13,
-  hp: 280, atk: 86, def: 26, mag: 25, spr: 12, spd: 11, luk: 6,
+  hp: 224, atk: 86, def: 26, mag: 25, spr: 12, spd: 11, luk: 6,
   shields: 4, weak: ['spear', 'thunder'], resist: ['fire', 'sword'], statusImmune: ['poison'],
   exp: 0, gold: 0, masteryPts: 2,
   moves: [{ skill: 'proud_stance', weight: 35, if: 'notTaunting' }, { skill: 'glass_lance', weight: 65 }],

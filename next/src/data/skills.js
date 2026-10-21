@@ -401,20 +401,20 @@ foe('refl_taunt', { name: 'Taunt', target: 'self', formula: 'none', rank: 80, ef
 foe('mirror_cinder_edge', { name: 'Cinder Edge', target: 'enemy', formula: 'none', rank: 110,
   mirrorCombo: { pair: ['refl_hero', 'refl_mira'],
     parts: [{ by: 'refl_hero', formula: 'phys', power: 230, types: [] }, { by: 'refl_mira', formula: 'mag', power: 250, types: ['fire'] }] },
-  telegraph: '{name} and {partner} move as one...', help: 'A blade wreathed in fire, reversed.', fx: 'combo_ember' });
+  telegraph: '{name} and {partner} move as one. Break their rhythm!', help: 'A blade wreathed in fire, reversed.', fx: 'combo_ember' });
 foe('mirror_cross_shatter', { name: 'Cross Shatter', target: 'enemy', formula: 'none', rank: 110,
   mirrorCombo: { pair: ['refl_hero', 'refl_bram'],
     parts: [{ by: 'refl_hero', formula: 'phys', power: 230, types: [] }, { by: 'refl_bram', formula: 'phys', power: 230, types: [], pierce: 0.3 }] },
-  telegraph: '{name} and {partner} move as one...', help: 'An X-cut of glass, reversed.', fx: 'combo_cross' });
+  telegraph: '{name} and {partner} move as one. Break their rhythm!', help: 'An X-cut of glass, reversed.', fx: 'combo_cross' });
 foe('mirror_glass_bulwark', { name: 'Glass Bulwark', target: 'none', formula: 'none', rank: 100,
   mirrorCombo: { pair: ['refl_mira', 'refl_bram'], parts: [], buff: [['protect', 3], ['regen', 3], ['focus', 99]] },
-  telegraph: '{name} and {partner} move as one...', help: 'Protect, Regen and Focus, reversed.', fx: 'combo_thorn' });
+  telegraph: '{name} and {partner} move as one. Break their rhythm!', help: 'Protect, Regen and Focus, reversed.', fx: 'combo_thorn' });
 // The Nameless King (ai 'nameless_king') and his court
 foe('glass_sword', { name: 'Glass Sword', target: 'enemy', formula: 'phys', power: 110, help: 'A cut of cold glass.', fx: 'slash' });
 foe('cold_mirror', { name: 'Cold Mirror', target: 'enemy', formula: 'mag', power: 105, types: ['ice'],
   effects: [{ status: 'chill', chance: 0.3 }], help: 'A mirror of frost. May Chill.', fx: 'ice' });
 foe('keeping', { name: 'Keeping', target: 'enemy', formula: 'mag', power: 70, effects: [{ keep: true }],
-  telegraph: '{name} turns his mirror toward {target}. He means to keep them.',
+  telegraph: '{name} turns his mirror toward {target}. He means to keep {target}.',
   help: 'Seals a foe in a mirror shard.', fx: 'keeping', sfx: 'kept' });
 foe('mirror_rain', { name: 'Mirror Rain', target: 'enemies', formula: 'mag', power: 190,
   telegraph: 'Every shard in the hall turns toward you...', help: 'Glass rains on the party.', fx: 'ink_storm' });

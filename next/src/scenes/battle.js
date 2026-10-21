@@ -454,6 +454,8 @@ export class BattleScene {
     if (c === 'telegraph') return this.telegraphs.size > 0;
     if (c === 'kept') return this.b.units().some((x) => x.side === 'party' && x.alive && x.statuses && x.statuses.kept);
     if (c === 'mirror') return [...this.telegraphs.values()].some((t) => t.mirrorCombo && t.partner);
+    // W11: a foe holds a lasting Episode 2 buff (a landed Mirrored Combo, a Kept), so the HUD's Fury badges show
+    if (c === 'grown') return this.b.units().some((x) => x.side === 'enemy' && x.alive && HUD.empowerStacks(x) > 0);
     if (c === 'any') return true;
     return u.uid === c;
   }
@@ -772,7 +774,7 @@ export class BattleScene {
     if (this.menu.state !== 'closed' && this.currentUid) { const a = this.actor(this.currentUid); if (a && !a.dead) HUD.drawTurnMarker(r, a, frame); }
     for (const [uid, p] of rowPlan) {
       const a = this.actor(uid);
-      HUD.drawEnemyRow(r, a, p.know, this.unit(uid), frame, touch, { lift: p.lift, cw: cwNow, at: p.at });
+      HUD.drawEnemyRow(r, a, p.know, this.unit(uid), frame, touch, { lift: p.lift, cw: cwNow, at: p.at, top: helpBottom });
     }
     if (this.menu.state === 'target') {
       const t = this.menu.currentTarget();
@@ -817,7 +819,7 @@ export class BattleScene {
     for (const a of list) {
       const know = this.b.knowledge(a.uid);
       const w = HUD.enemyRowWidth(know);
-      const badges = Object.keys(a.statuses || {}).length > 0;
+      const badges = Object.keys(a.statuses || {}).length > 0 || HUD.empowerStacks(this.unit(a.uid)) > 0;
       // touch: every row is scored (layout.touchRowSpot); desktop: only a foe whose row stands beside it (the King)
       if (touch || a.rowBeside) {
         const s = touchRowSpot(a, w, { cw: cwNow || cmdWin(touch), placed, boxes: boxes.filter((b) => b.uid !== a.uid), blocks });

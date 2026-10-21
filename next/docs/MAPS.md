@@ -80,7 +80,8 @@ Every event: `{ id, type, x, y, if?, ifNot? }`. The event exists only while its 
 `object` / `actor` / `trigger` may add `safe: true` (the F2 Lantern pedestal): using it makes the party's
 tile the game over return point. A map may add `ambientFx: ['motes']` (the library) to its ambient life;
 see docs/WORLD.md 1b. Stairs transfers and map-to-map doors set the return point by themselves; same-map
-notch doors and pits do not.
+notch doors and pits do not. W11: a `field` map may add `respawn: 'reentry'` (the Fading Road): its beaten groups stay
+gone until the party enters the map from another map, instead of returning after 60 s (DESIGN 5.2's field rule).
 
 ## 3. Collision and the walk model
 
@@ -325,7 +326,9 @@ mist `ambientFx` covers x 20..39; a beetle group stands guard on the path (28,16
 off (`court_far` overhead at (56,0)); the rise with `mere_view_trig` (52..54, 13..14); a heavy block plugs the causeway
 to the reed island (Shove it east or west; iron chest `chest_reeds`). The plan's "drops into the shallows as a stepping
 stone" is not a block behaviour the field has, so the block is shoved aside instead. The road crosses the mere's
-outflow on a little bridge to the exit (63, 16..17) -> `nameless_hollow` `gate_in`.
+outflow on a little bridge to the exit (63, 16..17) -> `nameless_hollow` `gate_in`. W11 (PLAYTEST_REVIEW_3 fix 2): six
+groups (the Waystation wolves are gone, so the fire is a haven), and the map's `respawn: 'reentry'` brings a beaten
+group back only when the road is entered from another map, not every 60 s (a fog door's same-map warp keeps them gone).
 
 ### nameless_hollow (44 x 34, town): Nameless Hollow / Hollowmere
 ![nameless_hollow](../tools/maps/previews/nameless_hollow.png)
@@ -369,9 +372,10 @@ Portrait Hall P (the stairs from F1 at (6,2); the child's portrait in the west a
 East Gallery (glass key `chest_key2`); the fixed mirror `m_e0` (32,5) turns it down the arm to `m_e1` (32,12): backslash
 lays bridge A (35..36, 12) to the Keeper's alcove (portrait, iron chest), '/' lays bridge B (23..28, 12) over the Well to
 the Island (the reflection pool, `pool_trig`, an iron chest); `m_i1` (21,12) '/' lays bridge C (21, 15..18) down to the
-South Gallery (three groups, the King's portrait, the Remembrance Cache `if: remembrance_open` with its ledger on the
-bench, the locked glass door `door_w` (2,21)). West Wing: the font room, the corridor of the great mirror (`vex_trig`,
-`vex_glass` (2,11)), the round Arena (`selves_trig` down column 7; the `selves_*` marks by its mirror). After
+South Gallery (two groups, the King's portrait, the Remembrance Cache `if: remembrance_open` with its ledger on the
+bench, the locked glass door `door_w` (2,21)). West Wing: the corridor of the great mirror (`vex_trig` at its foot (2..3,18), the first
+step past the glass door, W11; `vex_glass` (2,11) at its head; `vex_frame` (3,15) frames both), the font room beside it,
+the round Arena (`selves_trig` down column 7; the `selves_*` marks by its mirror). After
 `other_selves_defeated` the arena mirror (9,11) is the way down to F3 (`stairs_trig` in front of it sets
 `court_f2_done`), and `mirror_f2_short` (11,11) leads to the F1 landing. The zone plan's boss is the trigger running
 `other_selves` (mapcheck accepts a trigger whose script is the encounter id when no actor carries it).

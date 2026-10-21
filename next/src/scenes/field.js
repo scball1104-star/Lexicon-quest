@@ -74,6 +74,7 @@ export class FieldScene {
     this.hasFlag = (f) => stateHasFlag(this.game, f);
     this.sessionGone = new Set();      // pots broken, dungeon enemies beaten (until re-entry)
     this.dungeonGone = new Map();      // mapId -> Set(enemyId)
+    this.reentryGone = new Map();      // mapId -> Set(enemyId): field maps with `respawn: 'reentry'`, cleared on entering from another map
     this.warned = new Set();
     this.fadeAlpha = 0; this.fadeTween = null;
     this.lantern = 0;
@@ -151,6 +152,9 @@ export class FieldScene {
     this.actors = []; this.entities = new Map(); this.byTile = new Map();
     installFieldArt(e);                // W9: the ability art (heavy block, root wall, cracked rock) joins the tile db
     this.map = new TileMap(e, mod, { hasFlag: this.hasFlag });
+    // W11 (PLAYTEST_REVIEW_3 fix 2): a field map with `respawn: 'reentry'` (the Fading Road) brings its beaten groups
+    // back only when the party walks in from another map; a same-map warp (the fog doors) keeps them gone.
+    if (mod.id !== this.mapId) this.reentryGone.delete(mod.id);
     this.mapId = mod.id;
     this.abilities.reset();
     this.sliding = [];
@@ -400,6 +404,8 @@ export class FieldScene {
     const key = `${this.mapId}:${id}`;
     const dg = this.dungeonGone.get(this.mapId);
     if (dg && dg.has(id)) return true;
+    const rg = this.reentryGone.get(this.mapId);
+    if (rg && rg.has(id)) return true;
     const t = respawnAt.get(key);
     return t != null && this.engine.time < t;
   }
@@ -663,6 +669,9 @@ export class FieldScene {
       if (this.map.mod.area === 'dungeon') {
         if (!this.dungeonGone.has(this.mapId)) this.dungeonGone.set(this.mapId, new Set());
         this.dungeonGone.get(this.mapId).add(ent.id);
+      } else if (this.map.mod.respawn === 'reentry') {
+        if (!this.reentryGone.has(this.mapId)) this.reentryGone.set(this.mapId, new Set());
+        this.reentryGone.get(this.mapId).add(ent.id);
       } else respawnAt.set(`${this.mapId}:${ent.id}`, this.engine.time + FIELD_RESPAWN_SEC);
       this.particles.burst('shard', enemy.feetX, enemy.feetY - 6, 6, '#8a7cc8');
     } else if (result === 'flee') {

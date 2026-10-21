@@ -15,7 +15,7 @@
 //      the cairns within six tiles burn a pale light through it. A wrong step lands at the last cairn passed (the
 //      `fog.checkpoints`), or at fog_return (19,18) before the first one.
 //   The Waystation (x 40..51): the ruined toll house (a wood chest inside), the toll board, the campfire (rest and a
-//      safe point), the log bench, Penny's cart. Two groups nearby.
+//      safe point), the log bench, Penny's cart. One group nearby, on the far side of the toll house.
 //   The Mere Shore (x 52..63): reeds, the still mere, the Court far off over the water (overhead decal). The rise with
 //      the mere_view trigger. A heavy block plugs the causeway to a reed island (Shove it aside: iron chest). The
 //      wolf pack guards the shore path. The road leaves east to the Nameless Hollow.
@@ -214,18 +214,19 @@ const events = [
   sign('mere_shore', 52, 12, 'mere_shore', { solid: false }),
   { id: 'heavy_shore', type: 'block', x: 58, y: 12, sprite: 'push_block', heavy: true },
   chest('chest_reeds', 59, 8, 'iron'),
-  // ---- enemies: 7 per ZONES.east_road.plan
+  // ---- enemies: 6 per ZONES.east_road.plan. W11 (PLAYTEST_REVIEW_3 fix 2): no wolves at the Waystation fire, so it
+  // is a real haven, and the groups come back only when the road is entered again (`respawn: 'reentry'` below)
   enemy('e_road_mixed', 13, 16, 'mist_wolf', 'road_mixed', 'chase'),
   enemy('e_bank_wolves', 17, 11, 'mist_wolf', 'road_wolves', 'wander', { radius: 2 }),
   enemy('e_clearing_quick', 9, 6, 'quicksilver', 'road_quick', 'wander', { radius: 2 }),
   enemy('e_fog_beetles', 28, 16, 'glassback', 'road_beetles', 'guard'),
-  enemy('e_way_wolves', 46, 19, 'mist_wolf', 'road_wolves', 'wander', { radius: 2 }),
   enemy('e_way_beetles', 50, 11, 'glassback', 'road_beetles', 'patrol', { path: steps('left', 3, 'right', 3) }),
   enemy('e_shore_pack', 57, 17, 'mist_wolf', 'road_pack', 'guard'),
 ];
 
 export default {
   id: 'east_road', name: 'The Fading Road', area: 'field',
+  respawn: 'reentry',   // W11: beaten groups return when the road is entered again, not every 60 s (scenes/field.js)
   music: 'fading_road', ambience: 'wind_valley', tileset: 'town',
   lighting: { tint: 'none', dark: 0 },
   ambientFx: [{ fx: 'mist', area: { x: 20, y: 9, w: 20, h: 13 } }],

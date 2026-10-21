@@ -184,15 +184,19 @@ Any order; the third one seen plays `gate_open` and sets `remembrance_open` (the
 
 **`mira_memory_2`** (step trigger `pool_trig`). Pans to `pool` (30), `sorrow`, back to `court`. Sets `mira_memory_2`.
 
-**`vex_mirror`** (step trigger `vex_trig` in the corridor). Silence, pan to `vex_scene` (40, W11: between the
-corridor's great mirror `vex_mirror` and the party, so both are framed above the dialogue window), spawn `vex` (`npc_vex`, name Vex Quill) at `vex_glass`: a tile drawn in front of the mirror
+**`vex_mirror`** (step trigger `vex_trig` at the corridor's foot, (2..3,18): W11 moved it from row 13 so the font
+sits between Vex and the arena). Silence, pan to `vex_frame` (40, W11: between the corridor's great mirror `vex_mirror`
+at its head and the party at its foot, so both are framed above the dialogue window; it replaces `vex_scene`), spawn `vex` (`npc_vex`, name Vex Quill) at `vex_glass`: a tile drawn in front of the mirror
 glass (E2-world: draw him as a reflection-only actor if possible, plan 5.2). `mystery`, one choice, flash, despawn,
 `court`. Sets `vex_met`.
 
 **`other_selves`** (step trigger `selves_trig` in the arena). Silence, pan to `selves_spot` (40), `reflection_out`;
 spawns `refl_mira_f` at `selves_mira`, `refl_bram_f` at `selves_bram`, `refl_hero_f` at `selves_hero` (field
-sprites `refl_mira`, `refl_bram`, `refl_hero`), title card THE OTHER SELVES / Hall of Reflections, battle
-`other_selves` (boss, no flee). On a win: `glass_break`, the three despawn, `court`. Sets `other_selves_defeated`.
+sprites `refl_mira`, `refl_bram`, `refl_hero`), Mira's two tips (the weapon rule and, W11, the Mirrored Combo: push
+one back), title card THE OTHER SELVES / Hall of Reflections, battle `other_selves` (boss, no flee). On a win:
+`glass_break`, the three despawn, `court`. Sets `other_selves_defeated`. W11: the scene sets `other_selves_tried`
+before the card; after a loss the retry skips the reflections' lines and plays only the spawn, Mira's tips and the
+card. `nameless_king` does the same with `nameless_king_tried` (he turns, Mira's tip, the card).
 
 **`court_f2_stairs`** (step trigger on the arena's mirror stair). Sets `court_f2_done`.
 
@@ -255,7 +259,7 @@ to `rim_w` and `rim_e`; close-up (night, lanterns, the hero's face faint) for th
 | `nh_chapel` | `anwen_spot`, `register` |
 | `nh_inn` | `inn_bed`; object `lost_property` |
 | `court_f1` | `landing`, `pier`, `start`, `great_door`, `b_center`, `mira_window`, `lens_1`, `lens_2`, `rec_lock`, `lock_gate`, `stairs_down`, `shortcut_gate`; actor `tovin_c`; trigger `mira_window_trig` |
-| `court_f2` | `arrival`, `portrait_child`, `portrait_keeper`, `portrait_king`, `pool`, `vex_mirror`, `vex_glass`, `vex_scene`, `arena`, `selves_spot`, `selves_hero`, `selves_mira`, `selves_bram`, `stairs_down`, `well_return`; triggers `pool_trig`, `vex_trig`, `selves_trig` |
+| `court_f2` | `arrival`, `portrait_child`, `portrait_keeper`, `portrait_king`, `pool`, `vex_mirror`, `vex_glass`, `vex_frame`, `arena`, `selves_spot`, `selves_hero`, `selves_mira`, `selves_bram`, `stairs_down`, `well_return`; triggers `pool_trig`, `vex_trig`, `selves_trig` |
 | `court_f3` | `arrival`, `hub_center`, `vow_door`, `vow_belonging`, `vow_mercy`, `vow_courage`, `feather`, `font`, `throne_door`; receptors `rec_belonging`, `rec_mercy`, `rec_courage`; object `feather_obj` |
 | `court_throne` | actor `nameless_king`, `king`, `kneel`, `fragment_spot`, `party_stop`, `elian_enter`, `elian_meet`, `great_mirror`; trigger `king_trig`; door `mirror_exit` |
 

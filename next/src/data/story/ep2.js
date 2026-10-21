@@ -55,11 +55,10 @@ async function ep2_morning(s) {
   await say(s, 'hazel', 'You heard it too. Thirteen.');
   await s.walk('hero', ['down']);
   await s.face('hero', 'hazel');
-  await say(s, 'hazel', 'I lay there after, counting the ceiling. Twelve beams. I checked. Twice.');
-  await say(s, 'hazel', "Mira has been at my table since before the birds, reading Mael's maps. Bram packed twice.");
-  await say(s, 'hazel', 'Once for him, once for you.');
+  // W11 (PLAYTEST_REVIEW_3 fix 3): the opening is trimmed to a departure. Mira's "every map stops at the river" is
+  // gone (Mael says the same of his books a minute later), and the packing pair is one box.
+  await say(s, 'hazel', "Mira has been at my table since before the birds. Bram packed twice: once for him, once for you.");
   await say(s, 'bram', "You didn't pack. I checked that too.");
-  await say(s, 'mira', 'Every map of the east stops at the river. As if the mapmaker forgot the next stroke.');
   await say(s, 'hazel', 'Mael wants the three of you at the well. Take these, for the road.');
   await s.give(REWARDS_EP2.hazel.item, REWARDS_EP2.hazel.qty);
   await say(s, 'hazel', 'Boots. Two. Fingers. Ten. I am counting in advance this time, so you know what I expect back.');
@@ -77,13 +76,11 @@ async function ep2_mael(s) {
   await say(s, 'mael', 'All three of you, and all three names still on my page. I checked the Register before my tea.');
   await say(s, 'mael', '{hero}. Yours is still faint. No fainter. I will take "no fainter" this morning.');
   await say(s, 'mael', 'Every book I own about the Hollow stops in the same place. As if the writer forgot the next word.');
-  await say(s, 'mael', 'So I wrote a letter of introduction, to whoever keeps the names in the town east of the river.');
+  await say(s, 'mael', 'So I wrote to whoever keeps the names there. Three times I tried its name. The pen balked, like a horse at a bad bridge.');
   await narrate(s, 'Mael holds up the envelope. Where the name of the town should be, there is a blank line.');
-  await say(s, 'mael', 'I tried to write it three times. The pen would not go. It stopped, like a horse at a bad bridge.');
   await s.give('mael_letter');
   await say(s, 'mael', "If anyone in the Hollow can say {hero}'s name better than I can, bring me back how.");
   await say(s, 'bram', "My father left before dawn. There's a note on the forge. GONE TO THE FORD. That's the whole note.");
-  await say(s, 'mael', 'The east ford washed out in the spring flood. If Garrick has gone to it, he means to fix it.');
   await say(s, 'mira', "The list had a place scratched out. East. That's where we go.");
   const c = await s.choice(['East, then.', 'What is the Hollow?']);
   if (c === 1) {
@@ -149,20 +146,16 @@ async function garrick_crossing(s) {
   await s.walk('hero', 'garrick_x');
   await s.face('garrick_x', 'hero');
   await say(s, 'bram', 'You went out before dawn and left a note four words long.');
-  await say(s, 'garrick_x', 'Five. Counting the G.');
-  await say(s, 'garrick_x', "Couldn't have you three wading. River's cold this time of year. Any time of year.");
   await s.face('garrick_x', 'bram');
   await say(s, 'garrick_x', "Toll's one word.");
   await say(s, 'bram', 'Garrick.');
   await say(s, 'garrick_x', 'Paid.');
   await s.emote('bram', 'heart');
-  await narrate(s, 'Garrick takes out a knife and cuts letters into the rail, slow and deep, the way he does everything.');
   await s.camera.panTo('garrick_rail', 30);
-  await narrate(s, "GARRICK'S CROSSING. SAY IT WHEN YOU CROSS.");
+  await narrate(s, "Garrick cuts letters into the rail, slow and deep: GARRICK'S CROSSING. SAY IT WHEN YOU CROSS.");
   await say(s, 'mira', 'Is that a sign or an instruction?');
   await say(s, 'bram', 'In this family, both.');
   await s.camera.follow('hero');
-  await say(s, 'hal_x', 'Oren sent rolls. They are in your pack, Bram. Both packs. Go on, before they go stale.');
   await all(s.walk('garrick_x', ['left', 'left', 'left']), s.walk('hal_x', ['left', 'left', 'left']));
   await s.despawn('garrick_x');
   await s.despawn('hal_x');
@@ -288,6 +281,9 @@ async function nh_arrival(s) {
   await say(s, 'nico', "Every sign gets a crown. That's the rule. I made the rule.");
   await s.face('nico', 'hero');
   await say(s, 'nico', "You've got mud on your boots. Real mud. From somewhere.");
+  // W11 (PLAYTEST_REVIEW_3 fix 5): Vex Quill's seed. No mud (he travels by mirror) and black feathers, his calling
+  // card: paid off by the feather on F3's glass bench and Aurel's "left a feather" (Bram: "Vex.").
+  await say(s, 'nico', 'The last stranger had silver hair and no mud at all. He paid for his room in black feathers.');
   await s.camera.follow('hero');
   await s.walk('corin', 'hero');
   await s.face('corin', 'hero');
@@ -332,7 +328,9 @@ async function fountain_faces(s) {
   await s.spawn('elian_f', { sprite: 'npc_elian', name: 'Elian', at: 'elian_from', dir: 'down' });
   await s.walk('elian_f', 'meet_elian');
   await s.face('elian_f', 'mira');
-  await s.wait(40);
+  // W11 (PLAYTEST_REVIEW_3 fix 5): the coat is seen here, so "It was always too big for you" can land as a recognition
+  await narrate(s, "A young man in a mayor's coat several sizes too big stops short, and looks at Mira.");
+  await s.wait(30);
   await say(s, 'elian_f', 'Have we met? You stand like someone I used to wait for.');
   await say(s, 'mira', "I... don't think so.");
   await s.face('elian_f', 'hero');
@@ -348,26 +346,20 @@ async function fountain_faces(s) {
 async function elian_hall(s) {
   await s.walk('hero', 'elian');
   await s.face('elian', 'hero');
-  await say(s, 'elian', 'Sit, if you like. The benches remember being sat on, at least.');
   await say(s, 'elian', 'Fifteen years ago this town lost its name overnight. The next morning, nobody had a reflection.');
   await say(s, 'elian', 'Across the mere, the Court of Mirrors shut its doors. Its king has not been seen since.');
   await say(s, 'elian', 'We remember each other. We simply cannot remember where we are.');
   await narrate(s, 'Elian opens his ledger. Page after page of names, the same names, written fresh each morning.');
   await say(s, 'elian', 'Every morning I write every name in town. If a name is going to go, I want to see it leave.');
-  await say(s, 'elian', 'Lately our mirrors crack, and every crack takes a memory with it. Last week Fitch forgot how to whistle.');
   await say(s, 'elian', 'And two nights ago, at midnight, Sister Anwen heard a bell across the water. Thirteen strokes.');
   await all(s.emote('mira', '!'), s.emote('bram', '!'));
   await say(s, 'mira', 'We heard it too. The whole valley heard it.');
   const c = await s.choice(["Give him Mael's letter", 'Ask about the king']);
-  if (c === 1) {
-    await say(s, 'elian', 'Nobody remembers his face. Only that he was kind, and that we called him our king.');
-    await say(s, 'elian', 'Strange, to miss someone you cannot picture. But you have something for me, I think.');
-  }
+  if (c === 1) await say(s, 'elian', 'Nobody remembers his face. Only that he was kind, and that we called him our king.');
   await s.take('mael_letter');
   await narrate(s, 'Elian reads the letter. At the blank line where the town should be, he smiles for the first time.');
-  await say(s, 'elian', "He couldn't write it either. Good. I thought it was only us.");
-  await say(s, 'elian', "I'll answer it when I have a name to sign. May I write yours, in the meantime?");
-  await narrate(s, 'He writes Mira, then Bram, then {hero}. The last name goes pale while the ink is still wet.');
+  await say(s, 'elian', "He couldn't write it either. Good. I'll answer it when I have a name to sign.");
+  await narrate(s, 'He writes Mira, then Bram, then {hero} in his ledger. The last name goes pale while the ink is still wet.');
   await s.emote('elian', '...');
   await say(s, 'elian', 'Sister Anwen keeps the chapel register, south-east of the square. She heard the bell first.');
   await s.setFlag('heard_crisis');
@@ -392,6 +384,8 @@ async function anwen_register(s) {
   await say(s, 'anwen', 'A little girl counted my candles every night. Forty-one. She was never wrong.');
   await say(s, 'mira', "I don't remember. I just counted.");
   await say(s, 'anwen', "Then your hands remember. That's a start.");
+  // W11 (PLAYTEST_REVIEW_3 fix 5): the chapel step and the coat, on the main path before king_after pays them off
+  await say(s, 'anwen', "I raised half this town's foundlings. Elian came to me on that step, in a coat that still doesn't fit him.");
   await s.music('hollow');
   await say(s, 'anwen', "Tovin rows the only boat on the mere. He won't go to the Court. Ask him anyway.");
   await say(s, 'anwen', 'He mends nets at the pier on the north shore. He will tell you no. Let him. Then ask again.');
@@ -635,10 +629,9 @@ async function silverglass_lock(s) {
   await s.setFlag('silverglass_lock_seen');
 }
 
-// Step trigger on the stairs down to court_f2. Sets court_f1_done.
+// Step trigger on the stairs down to court_f2. Sets court_f1_done. W11 (PLAYTEST_REVIEW_3 section 4): no banter, the
+// stairs speak for themselves.
 async function court_f1_stairs(s) {
-  await say(s, 'bram', 'Down again. Every old place we visit goes down.');
-  await say(s, 'mira', 'The Keepers kept the precious things lowest. They never feared floods. They feared readers.');
   await s.setFlag('court_f1_done');
 }
 
@@ -699,11 +692,13 @@ async function mira_memory_2(s) {
   await s.setFlag('mira_memory_2');
 }
 
-// Step trigger vex_trig in the corridor before the arena. Vex is a scene spawn "in" the mirror. Sets vex_met.
+// Step trigger vex_trig at the foot of the West Wing corridor, the first step past the glass door: Vex, then the font,
+// then the arena (W11, PLAYTEST_REVIEW_3 fix 4: a rest and a save sit between this scene and the Other Selves). Vex
+// is a scene spawn "in" the mirror at the corridor's head. Sets vex_met.
 async function vex_mirror(s) {
   await s.music(null);
   // W11 (CRITIQUE_4 item 11): frame both speakers, the mirror and the party below it, before a line is said
-  await s.camera.panTo('vex_scene', 40);
+  await s.camera.panTo('vex_frame', 40);
   await narrate(s, 'A great mirror fills the corridor wall. It shows the three of you, and a fourth.');
   await s.spawn('vex', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_glass', dir: 'down' });
   await s.music('mystery');
@@ -714,20 +709,16 @@ async function vex_mirror(s) {
   await narrate(s, 'He is not in the corridor. He is only in the glass, silver-haired, leaning on nothing, smiling at you.');
   await s.face('vex', 'hero');
   await say(s, 'vex', 'Yours has no face. Do you know why?');
-  const c = await s.choice(['Do you?', 'Get out of the mirror.']);
-  if (c === 0) await say(s, 'vex', 'I know a great many things. Knowing is cheap. Telling costs extra.');
-  else await say(s, 'vex', "Can't. I'm not in it. That's rather the point of me.");
+  // W11 (PLAYTEST_REVIEW_3 section 4): the choice stays; his next line answers either one
+  await s.choice(['Do you?', 'Get out of the mirror.']);
   await say(s, 'vex', 'If a name can be stolen, perhaps it never belonged to you.');
   await say(s, 'vex', "You're missing a page, {hero}. Not that one. The first one.");
   await say(s, 'mira', 'What does that mean?');
   await say(s, 'vex', 'That someone is reading your story out of order.');
   await s.sfx('crystal_hit');
-  await narrate(s, 'He taps the glass from the inside. It rings like a struck bell.');
   await say(s, 'vex', "Your reflections are restless. I'd hurry.");
   await s.flash('#ffffff', 8);
   await s.despawn('vex');
-  await say(s, 'bram', "I don't like him.");
-  await say(s, 'mira', "He's in a mirror, Bram. Liking him is optional.");
   await s.music('court');
   await s.camera.follow('hero');
   await s.setFlag('vex_met');
@@ -735,23 +726,30 @@ async function vex_mirror(s) {
 
 // Step trigger selves_trig in the arena. Mini-boss intro in the Episode 1 boss style. Sets other_selves_defeated
 // (also the encounter flag). The Twinfold Charm drops in the Victory window.
+// W11 (PLAYTEST_REVIEW_3 fix 4): other_selves_tried is set as the fight starts; after a loss (Retry keeps the flag)
+// the intro is only the reflections stepping out, Mira's two tips and the card.
 async function other_selves(s) {
   if (await s.hasFlag('other_selves_defeated')) return;
+  const retry = await s.hasFlag('other_selves_tried');
   await s.music(null);
   await s.camera.panTo('selves_spot', 40);
-  await s.wait(30);
-  await narrate(s, 'The great mirror at the end of the arena holds the three of you. Then it holds you a moment too long.');
+  await s.wait(retry ? 10 : 30);
   await s.sfx('reflection_out');
   await s.flash('#d8d0ff', 10);
   await s.spawn('refl_mira_f', { sprite: 'refl_mira', name: "Mira's Reflection", at: 'selves_mira', dir: 'down' });
   await s.spawn('refl_bram_f', { sprite: 'refl_bram', name: "Bram's Reflection", at: 'selves_bram', dir: 'down' });
   await s.spawn('refl_hero_f', { sprite: 'refl_hero', name: 'Nameless Reflection', at: 'selves_hero', dir: 'down' });
-  await say(s, 'refl_mira_f', "I ran. You'll run too.");
-  await say(s, 'refl_bram_f', 'Stand still. Guards stand still.');
-  await say(s, 'refl_hero_f', '...');
-  await say(s, 'bram', "That's me. I don't stand like that.");
-  await say(s, 'mira', "You do. That's the trouble.");
+  if (!retry) {
+    await say(s, 'refl_mira_f', "I ran. You'll run too.");
+    await say(s, 'refl_bram_f', 'Stand still. Guards stand still.');
+    await say(s, 'refl_hero_f', '...');
+    await say(s, 'bram', "That's me. I don't stand like that.");
+    await say(s, 'mira', "You do. That's the trouble.");
+  }
   await say(s, 'mira', "They're us, backwards. Hit each one with what its owner doesn't carry.");
+  // W11 (PLAYTEST_REVIEW_3 fix 8): the Mirrored Combo's answer, said once before the fight
+  await say(s, 'mira', 'When two of them stand side by side on the timeline, push one back.');
+  await s.setFlag('other_selves_tried');
   await s.title('THE OTHER SELVES', { sub: 'Hall of Reflections', frames: 100 });
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
@@ -761,7 +759,6 @@ async function other_selves(s) {
   await s.camera.panTo('selves_spot', 20);
   await s.sfx('glass_break');
   await s.flash('#ffffff', 12);
-  await narrate(s, 'The reflections crack from crown to heel and fall as glass.');
   for (const id of ['refl_mira_f', 'refl_bram_f', 'refl_hero_f']) await s.despawn(id);
   await say(s, 'mira', "I'm not running.");
   await say(s, 'bram', 'Never thought you were.');
@@ -771,10 +768,8 @@ async function other_selves(s) {
   await s.setFlag('other_selves_defeated');
 }
 
-// Step trigger on the stair the great mirror became. Sets court_f2_done.
+// Step trigger on the stair the great mirror became. Sets court_f2_done (silently since W11, as court_f1_stairs).
 async function court_f2_stairs(s) {
-  await say(s, 'bram', 'Down through a mirror. Of course it is.');
-  await say(s, 'mira', 'Everything here is a mirror, Bram. Sooner or later one of them had to be a door.');
   await s.setFlag('court_f2_done');
 }
 
@@ -878,6 +873,16 @@ async function black_feather(s) {
 // Step trigger row king_trig. Boss intro in the Episode 1 style; the King is the map actor nameless_king.
 async function nameless_king(s) {
   if (await s.hasFlag('nameless_king_defeated')) return;
+  // W11 (PLAYTEST_REVIEW_3 fix 4): after a loss he turns, Mira gives her tip and the card shows; nothing else replays
+  if (await s.hasFlag('nameless_king_tried')) {
+    await s.music(null);
+    await s.camera.panTo('nameless_king', 40);
+    await s.face('nameless_king', 'down');
+    await s.shake(2, 30);
+    await say(s, 'mira', 'When his mirror turns to one of us, defend. Break him and the glass cracks.');
+    await king_fight(s);
+    return;
+  }
   await s.music(null);
   await s.camera.panTo('nameless_king', 40);
   await s.wait(40);
@@ -900,6 +905,10 @@ async function nameless_king(s) {
   await say(s, 'bram', 'From what?');
   await say(s, 'mira', 'From the list.');
   await say(s, 'mira', 'When his mirror turns to one of us, defend. Break him and the glass cracks.');
+  await king_fight(s);
+}
+async function king_fight(s) {
+  await s.setFlag('nameless_king_tried');
   await s.title('THE NAMELESS KING', { sub: 'Keeper of the Court', frames: 100 });
   await s.shake(4, 30);
   await s.flash('#ffffff', 10);
@@ -934,7 +943,6 @@ async function king_after(s) {
   await s.camera.panTo('elian_meet', 30);
   await s.walk('elian_k', 'elian_meet', { speed: 'run' });
   await say(s, 'elian_k', "I couldn't wait in the hall. I've been waiting fifteen years.");
-  await narrate(s, 'Tovin rowed him over. At the far door, the old ferryman leans on an oar and does not come in.');
   await s.face('aurel_k', 'elian_k');
   await say(s, 'aurel_k', 'That coat. It was always too big for you.');
   await s.camera.panTo('great_mirror', 30);
@@ -959,9 +967,8 @@ async function king_after(s) {
   await s.camera.panTo('fragment_spot', 40);
   await narrate(s, 'From the empty frame of the great mirror rises a single page, edged in gold and covered in names.');
   await s.give('name_fragment_2');
-  await say(s, 'mira', "The second fragment of the Book of Names. The Hollow's names, and at the top, the town's own.");
   await say(s, 'mira', 'Hollowmere.');
-  await narrate(s, 'Mira reads further down the page, and stops.');
+  await s.wait(30);
   await s.music('mystery');
   await say(s, 'mira', '{hero}. Your name is on this page too.');
   await say(s, 'bram', 'It was on the other one.');
@@ -983,9 +990,7 @@ async function king_after(s) {
   await say(s, 'mira', 'Fifteen years late.');
   await say(s, 'elian_k', 'You came back.');
   await s.give(REWARDS_EP2.kept_promise.item, REWARDS_EP2.kept_promise.qty);
-  await say(s, 'elian_k', 'Father called it the Kept Promise. I never knew why. I think I do now.');
   await s.camera.panTo('great_mirror', 30);
-  await narrate(s, "The great mirror's frame holds no reflection now. It holds the square, and the fountain, in morning light.");
   await say(s, 'aurel', 'Go through. The town should see you come home.');
   await s.camera.follow('hero');
   await s.setFlag('aurel_named');

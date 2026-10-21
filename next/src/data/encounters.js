@@ -78,7 +78,8 @@ enc('c1_quick', { zone: 'court_f1', leader: 'quicksilver', enemies: ['quicksilve
 enc('c1_wisps', { zone: 'court_f1', leader: 'glint_wisp', enemies: ['glint_wisp', 'glint_wisp'] });
 enc('c1_sentinel', { zone: 'court_f1', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'quicksilver'] });
 enc('c1_mixed', { zone: 'court_f1', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'glint_wisp'] });
-// F2: The Hall of Other Selves
+// F2: The Hall of Other Selves. W11 (PLAYTEST_REVIEW_3 fix 4): c2_shadows (two Borrowed Shadows, the longest live fight
+// of the floor) is no longer placed; it stays defined for old saves' bestiary and the battle tests.
 enc('c2_shadows', { zone: 'court_f2', leader: 'borrowed_shadow', enemies: ['borrowed_shadow', 'borrowed_shadow'] });
 enc('c2_knight', { zone: 'court_f2', leader: 'faceless_knight', enemies: ['faceless_knight', 'glint_wisp'] });
 enc('c2_sentinel', { zone: 'court_f2', leader: 'glass_sentinel', enemies: ['glass_sentinel', 'borrowed_shadow'] });
@@ -117,14 +118,16 @@ export const ZONE_ORDER = ['valley', 'archive_f1', 'archive_f2', 'archive_f3', '
 export const OPTIONAL_ZONES = ['whisperwood_hollow'];
 
 // ---------------------------------------------------------------- Episode 2 zones
+// W11 (PLAYTEST_REVIEW_3 fixes 1 to 4): 27 placed groups, not 31 (the Waystation wolves, one F1 quicksilver patrol
+// and both F2 Shadow pairs are gone); Episode 2's ordinary foes give about 10% more EXP so the curve still holds.
 // EP2_ZONE_ORDER continues progression() from Episode 1's last EXP (tools/sim). Episode 1's ZONE_ORDER is untouched.
 export const EP2_ZONES = {
   east_road: { id: 'east_road', name: 'The Fading Road', level: [9, 10], backdrop: 'east_road', music: 'battle', episode: 2,
-    plan: [['road_wolves', 2], ['road_beetles', 2], ['road_quick', 1], ['road_mixed', 1], ['road_pack', 1]] },
+    plan: [['road_wolves', 1], ['road_beetles', 2], ['road_quick', 1], ['road_mixed', 1], ['road_pack', 1]] },
   court_f1: { id: 'court_f1', name: 'The Silverglass Antechamber', level: [10, 11], backdrop: 'court', music: 'battle', episode: 2,
-    plan: [['c1_quick', 2], ['c1_wisps', 2], ['c1_sentinel', 2], ['c1_mixed', 2]] },
+    plan: [['c1_quick', 1], ['c1_wisps', 2], ['c1_sentinel', 2], ['c1_mixed', 2]] },
   court_f2: { id: 'court_f2', name: 'The Hall of Other Selves', level: [11, 12], backdrop: 'court', music: 'battle', episode: 2,
-    plan: [['c2_shadows', 2], ['c2_knight', 2], ['c2_sentinel', 2], ['c2_mixed', 2], ['other_selves', 1]] },
+    plan: [['c2_knight', 2], ['c2_sentinel', 2], ['c2_mixed', 2], ['other_selves', 1]] },
   court_f3: { id: 'court_f3', name: 'The Unnamed Throne', level: [12, 13], backdrop: 'court_deep', music: 'battle', episode: 2,
     plan: [['c3_shards', 2], ['c3_knights', 2], ['c3_shadow', 2], ['c3_mixed', 2]] },
   court_throne: { id: 'court_throne', name: "The King's Mirror", level: [13, 13], backdrop: 'throne', music: 'boss_king', episode: 2,

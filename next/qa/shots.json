@@ -4079,6 +4079,128 @@
      "message": "the unmasked portrait shows"
     }
    ]
+  },
+  {
+   "name": "story_vex_corridor",
+   "note": "W11: vex_mirror fired by its own trigger at the West Wing corridor's foot (2,18), framed on vex_frame",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_f2",
+      2,
+      18,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Yours has no face\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_corridor: Vex speaks from the trigger"
+    }
+   ]
+  },
+  {
+   "name": "battle_selves_grown",
+   "note": "W11: a Mirrored Combo landed; the reflections carry a red Fury badge per stack (targeting shows the row)",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "other_selves",
+      {
+       "fresh": true,
+       "seed": 1
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "call": "battleUntil",
+     "args": [
+      "grown"
+     ]
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 4000; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "press": "confirm"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => u.side === 'enemy' && u.alive && (u.mods || []).some(m => /^mirror\\d+$/.test(m.source)))",
+     "message": "a reflection has grown"
+    }
+   ]
+  },
+  {
+   "name": "battle_king_grown",
+   "note": "W11: the King has Kept someone; targeting him shows his row with the Fury badge (+20% per Kept)",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "nameless_king",
+      {
+       "fresh": true,
+       "seed": 3
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "call": "battleUntil",
+     "args": [
+      "kept"
+     ]
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 4000; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "press": "confirm"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => u.boss && (u.mods || []).some(m => /^keep\\d+$/.test(m.source)))",
+     "message": "the King has grown"
+    }
+   ]
   }
  ]
 }

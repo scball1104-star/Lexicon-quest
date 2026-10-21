@@ -49,10 +49,12 @@ export const EP1_DONE_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_jo
   'campfire_rested', 'archive_key_found', 'stacks_key_found', 'returned_home', 'hal_returned'];
 /**
  * The party Episode 2 expects at Lv 9: the simulator's `east_road` loadout (tools/sim/loadouts.mjs; the test in
- * qa/world/ep2_plumbing.test.mjs keeps the two in step).
+ * qa/world/ep2_plumbing.test.mjs keeps the two in step). W11 (PLAYTEST_REVIEW_3 fix 1): `exp` is Episode 1's full
+ * clear (tools/sim progression(1): 1433, Lv 9 and 60 short of 10), not the Lv 9 floor (1156), so a fresh start
+ * meets the Episode 2 curve where a finished Episode 1 save does.
  */
 export const EP2_START = {
-  level: 9, gold: 900, map: 'hero_home', mark: 'bed',
+  level: 9, exp: 1433, gold: 900, map: 'hero_home', mark: 'bed',
   items: { potion: 6, hi_potion: 3, ether: 4, phoenix_feather: 1, name_fragment_1: 1, lantern_of_recall: 1 },
   members: {
     hero: { weapon: 'sword', equip: { sword: 'lanternheart', axe: 'hatchet', body: 'chain_shirt', head: 'leather_hood', boots: 'leather_boots' }, mastery: { sword: 245, axe: 70 } },
@@ -75,7 +77,7 @@ export function newGameEp2(heroName = 'Hero', o = {}) {
     const spec = S.members[m.id];
     m.level = S.level;
     const fresh = newMember(m.id, { level: S.level, name: m.name });
-    m.exp = fresh.exp;
+    m.exp = Math.max(fresh.exp, S.exp || 0);
     if (spec) { m.weapon = spec.weapon; m.equip = { ...m.equip, ...spec.equip }; m.mastery = { ...m.mastery, ...spec.mastery }; }
     m.hp = fresh.hp; m.mp = fresh.mp;
     const s = memberMax(m);
