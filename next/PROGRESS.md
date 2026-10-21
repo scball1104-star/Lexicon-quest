@@ -152,3 +152,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   Alpha waits so it is still a fight. After you get the Lantern, Bram and the Talk menu point you back to the pool.
 - Gold has a use again: Rook the peddler by the floor-three font, and the smithy stocks better gear after floor two.
 - The start is quicker: 16 fewer text boxes before the first fight, with every favourite moment kept.
+
+## 2026-10-21 (Wed) morning: your Load Game bug, fixed and live
+- The Load and Save pages now make the choice obvious: the record the finger points at glows with a gold frame
+  and the others dim, and the finger sits halfway down that record instead of on the line between two of them.
+- With the autosave plus three records, the bottom record used to slide under the help bar and hide the finger.
+  All four now fit on screen, so the finger can never disappear. The title menu's own finger no longer shows
+  through behind the page either.
+- This went out on its own (the half-built Episode 2 stays unpublished). On your phone, close and reopen the game
+  once to pick up the update.
+- Also fixed on the Episode 2 branch: Mira's Appraise window could ignore a quick tap to close it on a busy frame.
+- Episode 2 continues this week at a steady pace, one helper at a time, watching the usage meter so the loops and
+  the schedule generators keep their room.
