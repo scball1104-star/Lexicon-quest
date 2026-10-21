@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '4fa3a88f1b54';
+const SHELL_VERSION = 'b5ccac10a979';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
