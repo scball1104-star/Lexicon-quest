@@ -104,8 +104,11 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] Wave 10b: E2-sprites (committed edcbfbe); E2-world + E2-maps committed 3862a6d (world systems and
       all 11 maps + valley/chapel edits; 484 qa tests green; every map preview viewed)
 - [x] E2-audio: five composed tracks, 10 SFX, 2 ambiences, precached (committed b032407, 2706037)
-- [~] Wave 10c: E2-scene-ui running (started 2026-10-21 ~11:00 ET, one agent under the usage guard): title Episode 2
-      entry, Kept/boss-intro presentation, Mirrored Combo bracket, per-zone backdrops (audit first; some exist)
+- [x] Wave 10c: E2-scene-ui committed 9fa5caa (title Episode 2 entry + card, credits, mirror cracks, unmask, bracket,
+      Kept slot, 3-line telegraphs; 498 tests green; phone and desktop shots viewed). Load budget 6 -> 6.5 MB (b157fd0).
+      Fix-pass backlog: on the phone the taller touch command window hides the lower half of the middle foe in
+      three-foe fights (predates Episode 2, obvious with Mira's Reflection); assets/ui/heads.png reflection blobs
+      are now unused (runtime glass heads).
 - [ ] Wave 10d: E2-integrate, then critic-4 + play-critic-3, then a fix pass, then publish
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
