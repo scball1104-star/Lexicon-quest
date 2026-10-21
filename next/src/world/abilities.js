@@ -574,6 +574,7 @@ export class FieldAbilities {
     const input = e.input;
     for (let i = 0; i < 60 * 30 && !f.dead; i++) {
       await this.wait(1);
+      if (!this.panel) break;              // a map load reset the abilities while the window was open
       if (this.panel.t < 20) continue;
       if (input.pressed('confirm') || input.pressed('cancel') || input.pressed('pageR') || (input.pointer && input.pointer.pressed)) break;
     }
