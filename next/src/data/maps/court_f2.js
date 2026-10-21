@@ -142,7 +142,13 @@ export default {
   under: 'gallery_floor',
   pitTo: ['court_f2', 8, 6, 'down'],
   legend: { '#': 'court_gallery_top', '|': 'court_gallery_face', 'v': 'court_gallery_out_top', 'o': 'court_gallery_out_face',
-    '.': 'gallery_floor', 'r': 'carpet_blue', 'p': 'pit', 'i': 'glass_floor', 'w': 'mere_water' },
+    '.': 'gallery_floor', 'r': 'carpet_blue', 'p': 'pit', 'i': 'gallery_floor', 'w': 'mere_water' },
+  // W11 (CRITIQUE_4 item 13): the island is the gallery's own violet marquetry, edged in a silver inlay, and the
+  // reflection pool has a stone lip (tilemap.js rims); F1's grey flagstone no longer sits pasted in the middle.
+  rims: [
+    { x: 19, y: 11, w: 4, h: 4, inset: 1, thick: 1, color: '#c9cde0', hi: '#f4f6ff', lo: '#241a3a' },
+    { x: 19, y: 11, w: 2, h: 2, thick: 2, color: '#6b6688', hi: '#a8a6c2', lo: '#1c1830', shade: '#3a3654' },
+  ],
   ground,
   overlays,
   decor,
@@ -151,7 +157,8 @@ export default {
   exits: [],
   marks: {
     arrival: [6, 4], portrait_child: [2, 5], portrait_keeper: [37, 10], portrait_king: [30, 22], pool: [19, 12],
-    vex_mirror: [2, 11], vex_glass: [2, 11], arena: [9, 15], selves_spot: [9, 13], selves_hero: [9, 12],
+    vex_mirror: [2, 11], vex_glass: [2, 11], vex_scene: [3, 12], arena: [9, 15], selves_spot: [9, 13], selves_hero: [9, 12],
+    // vex_scene (W11): the camera between the glass and the party
     selves_mira: [8, 13], selves_bram: [10, 13], stairs_down: [9, 12], well_return: [8, 6],
   },
   start: { x: 6, y: 4, dir: 'down' },

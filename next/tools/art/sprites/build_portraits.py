@@ -240,14 +240,33 @@ def make_boss(src, ci, cx, cy, s, n, k):
     return frame(q)
 
 
+# W11 (CRITIQUE_4 item 5): the painted crop above (KING_CROP / make_boss, kept for reference) read as silver noise
+# with a cyan slash. The King's portraits are now re-cropped from his own battle frames (ep2_king.py: 1x pixel art,
+# the art the player fights): the crown, the hood and the glass veil for `nameless_king`, and the same crop of the
+# unmasked frame (the tired, grey-bearded face) for `nameless_king_unmasked`, which the unnamed King speaks with
+# after his veil breaks (ep2.js aurel_k). Crop centre (x, y) in the 142 x 138 frame, per portrait size.
+KING_FRAME_CROP = {48: (70, 30), 32: (70, 27)}
+
+
+def make_from_frame(img, cx, cy, n):
+    """an (n-2)-square 1x crop of a battle frame on the portrait backdrop, framed: no resampling, no requantizing"""
+    s = n - 2
+    crop = square(img, cx, cy, s).copy()
+    comp = paste(backdrop(s, s), crop, 0, 0)
+    comp[..., 3] = 1
+    return frame(comp)
+
+
 def build_ep2():
-    """[(pid, img48, img32)]: the hand-drawn Episode 2 cast (chars/portraits_ep2.py) and the King's crop"""
+    """[(pid, img48, img32)]: the hand-drawn Episode 2 cast (chars/portraits_ep2.py) and the King's crops"""
     import sys
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chars'))
     import portraits_ep2 as PE
+    import ep2_king as EK
     out = [(pid, PE.portrait(pid, 48), PE.portrait(pid, 32)) for pid in PE.IDS]
-    bsrc = load_src('bosses.png')
-    out.append(('nameless_king', make_boss(bsrc, *KING_CROP[48], 48, 22), make_boss(bsrc, *KING_CROP[32], 32, 18)))
+    king = EK.build()
+    for pid in ('nameless_king', 'nameless_king_unmasked'):
+        out.append((pid, make_from_frame(king[pid], *KING_FRAME_CROP[48], 48), make_from_frame(king[pid], *KING_FRAME_CROP[32], 32)))
     return out
 
 
@@ -272,7 +291,7 @@ def build_atlas():
     portraits['vex'] = dict(portraits['silver_rogue'])          # Vex Quill (an alias: the same frames)
     sources = {p: ('portraits.webp cell %d' % CROPS[p][0]) if p in CROPS else ('interior-sprites.png cell %d' % EXTRA[p][0]) for p in ids}
     for p in e2ids:
-        sources[p] = 'bosses.webp cell 1 (crop)' if p == 'nameless_king' else 'hand-drawn (chars/portraits_ep2.py)'
+        sources[p] = 'battle frame %s (1x crop, W11)' % p if p.startswith('nameless_king') else 'hand-drawn (chars/portraits_ep2.py)'
     sources['vex'] = 'alias of silver_rogue'
     meta = {'image': 'portraits.png', 'frames': rects,
             'portraits': portraits,
@@ -281,7 +300,8 @@ def build_atlas():
             'unassigned': ['noble_lady', 'goggles_smith', 'hooded_sage'],
             'notes': '48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. '
                      'E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex '
-                     '(Vex Quill: the silver_rogue frames).'}
+                     '(Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops '
+                     'of the battle frames.'}
     write_json(os.path.join(DST, 'portraits.json'), meta)
     contact(big, os.path.join(OUT, 'portraits_48_4x.png'), scale=4, cols=4, title='portraits 48x48 at 4x')
     contact(small, os.path.join(OUT, 'portraits_32_4x.png'), scale=4, cols=8, title='portraits 32x32 at 4x')

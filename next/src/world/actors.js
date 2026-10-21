@@ -42,6 +42,55 @@ export function resolveSprite(assets, id) {
   return { atlas: 'party_field', kind: 'char', id: 'hero', shadow: 'medium', w: 24, h: 32, missing: id };
 }
 
+// W11 (CRITIQUE_4 item 8): the Court's visible enemies were camouflaged (a grey blob on a grey floor, dark grey on
+// dark violet). Each gets a 1 px outline in its own material's dark (DESIGN 6.1) and, where the art has no bright
+// spot, one accent cluster (the knight's visor glint), built once per frame into a padded copy. Episode 1's field
+// enemies are untouched. accent: [x, y, colour] relative to the top-left of the opaque art of the frame.
+export const FIELD_LOOK = {
+  quicksilver: { outline: '#22223c' },
+  quicksilver_bead: { outline: '#22223c' },
+  glint_wisp: { outline: '#24123e' },
+  glass_sentinel: { outline: '#121828' },
+  faceless_knight: { outline: '#06050c', accent: [[8, 5, '#5fd8e8'], [9, 5, '#d8ffff'], [10, 5, '#5fd8e8']] },
+  borrowed_shadow: { outline: '#0a0614' },
+  shard_swarm: { outline: '#142238' },
+};
+const lookCache = new Map();
+/** The outlined, accented copy of an atlas frame for FIELD_LOOK[id]: { atlas, frame } for renderer.sprite. */
+export function lookFrame(atlas, name, look) {
+  const key = `${name}`;
+  let c = lookCache.get(key);
+  if (c) return c;
+  const f = atlas.frames[name];
+  if (!f || typeof document === 'undefined') return null;
+  const w = f.w + 2, h = f.h + 2;
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.drawImage(atlas.image, f.x, f.y, f.w, f.h, 1, 1, f.w, f.h);
+  const img = g.getImageData(0, 0, w, h), px = img.data;
+  const op = (x, y) => x >= 0 && y >= 0 && x < w && y < h && px[(y * w + x) * 4 + 3] > 0;
+  const hex = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  const ol = hex(look.outline);
+  let top = h, left = w;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (op(x, y)) { if (y < top) top = y; if (x < left) left = x; }
+  const add = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (op(x, y)) continue;
+    if (op(x - 1, y) || op(x + 1, y) || op(x, y - 1) || op(x, y + 1)) add.push(x, y);
+  }
+  for (let i = 0; i < add.length; i += 2) { const j = (add[i + 1] * w + add[i]) * 4; px[j] = ol[0]; px[j + 1] = ol[1]; px[j + 2] = ol[2]; px[j + 3] = 255; }
+  for (const [ax, ay, col] of look.accent || []) {
+    const x = left + ax, y = top + ay;
+    if (x < 0 || y < 0 || x >= w || y >= h) continue;
+    const j = (y * w + x) * 4, cc = hex(col);
+    px[j] = cc[0]; px[j + 1] = cc[1]; px[j + 2] = cc[2]; px[j + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  c = { atlas: { image: cv, frames: {} }, frame: { x: 0, y: 0, w, h, ox: (f.ox || 0) + 1, oy: (f.oy || 0) + 1 } };
+  lookCache.set(key, c);
+  return c;
+}
+
 let nextSerial = 1;
 
 export class Actor {
@@ -229,7 +278,9 @@ export class Actor {
     const opts = { flipX: f.flip, alpha: this.alpha };
     if (this.tint) { opts.tint = this.tint.color; opts.tintAmount = this.tint.amount; }
     if (o.tint) { opts.tint = o.tint; opts.tintAmount = o.tintAmount == null ? 1 : o.tintAmount; }
-    r.sprite(f.atlas, f.name, fx, y, opts);
+    const look = this.spr.kind === 'enemy' && FIELD_LOOK[this.spr.id] ? lookFrame(f.atlas, f.name, FIELD_LOOK[this.spr.id]) : null;
+    if (look) r.sprite(look.atlas, look.frame, fx, y, opts);
+    else r.sprite(f.atlas, f.name, fx, y, opts);
   }
 
   /** Balloon over the head. kinds: ! ? ... heart sweat anger music zzz idea. Returns a Promise. */

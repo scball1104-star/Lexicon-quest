@@ -97,7 +97,8 @@ const events = [
   // ---- Throne Antechamber
   door('throne_door', 21, 3, ['court_throne', 12, 17, 'up'], { kind: 'door' }),
   silverFont('font_f3', 18, 9),
-  object('feather_obj', 24, 7, 'prop_letter', { script: 'black_feather', ifNot: 'black_feather_found', solid: false }),
+  // W11 (CRITIQUE_4 item 14): the black feather itself (it was drawn with the letter prop); `glint` keeps its sparkle
+  object('feather_obj', 24, 7, 'prop_feather_black', { script: 'black_feather', ifNot: 'black_feather_found', solid: false, glint: true }),
   sign('bench_sign', 25, 7, 'glass_bench', { solid: false }),
   chest('chest_ta', 26, 4, 'wood', { item: 'silver_salve', qty: 2 }),
   // ---- West wing: Belonging

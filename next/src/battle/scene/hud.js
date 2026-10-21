@@ -138,7 +138,9 @@ export function drawHead(r, actor, x, y, alpha = 1) {
   const o = typeof alpha === 'object' && alpha ? alpha : { alpha };
   const look = { alpha: o.alpha ?? 1, tint: o.tint || null, tintAmount: o.tint ? (o.tintAmount ?? 0.5) : 0 };
   const heads = headsAtlas(r);
-  if (heads && /^refl_/.test(String(actor.id))) {
+  // W11 (CRITIQUE_4 item 9): the atlas now carries the reflections' own glass heads with their owners' signatures
+  // (build_heads.py GLASS4 / SIGNATURE); the runtime recolour stays as the fallback for an atlas without them.
+  if (heads && /^refl_/.test(String(actor.id)) && !heads.frames[`head_${actor.id}`]) {
     const c = reflectionHead(heads, actor.id);
     if (c) { r.image(c, x, y, look); return true; }
   }
@@ -263,7 +265,8 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
 export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = {}) {
   const ui = uiAtlas(r);
   if (!ui) return null;
-  const anchor = enemyRowAnchor(actor, touch, opts.cw || null);
+  // opts.at: the spot the scene planned (touch layout: layout.touchRowSpot); else the W5 anchor under the feet.
+  const anchor = opts.at || enemyRowAnchor(actor, touch, opts.cw || null);
   const x = anchor.x, y = anchor.y - (opts.lift || 0);
   const badge = ui.frames[unit && unit.broken ? 'shield_badge_broken' : 'shield_badge'];
   if (badge) {
@@ -324,14 +327,24 @@ export function enemyRowWidth(know) {
 }
 
 /** Name tab near the reticle: enemy name (gold + crown for elites), HP when appraised. */
-export function drawNameTag(r, actor, know, unit) {
+export function drawNameTag(r, actor, know, unit, opts = {}) {
   const ui = uiAtlas(r);
   let name = actor.name;
   const appraised = know && know.appraised && unit;
   const hpText = appraised ? `  ${unit.hp}/${unit.maxHp}` : '';
   const w = r.measure(name) + r.measure(hpText) + 14 + (actor.elite ? 14 : 0);
-  const x = Math.max(4, Math.min(W - w - 4, Math.round(actor.x - w / 2)));
-  const y = Math.max(26, actor.top - 26);
+  let x = Math.max(4, Math.min(W - w - 4, Math.round(actor.x - w / 2)));
+  let y = Math.max(26, actor.top - 26);
+  // A row above the head (touch layout, opts.row): the tag stands on the row, or beside it when the top band
+  // leaves no room, so it never covers the row or the foe.
+  const row = opts.row;
+  if (row) {
+    const minY = Math.max(26, opts.minY || 26);
+    y = Math.max(minY, y);
+    const hits = x < row.x + row.w + 2 && x + w + 2 > row.x && y < row.y + row.h + 2 && y + 19 > row.y;
+    if (row.y - 19 >= minY && row.y < actor.top + 4) { y = row.y - 19; x = Math.max(4, Math.min(W - w - 4, row.x + Math.round((row.w - w) / 2))); }
+    else if (hits || row.y < actor.top + 4) { y = Math.max(minY, row.y - 2); x = row.x + row.w + 3 + w <= W - 4 ? row.x + row.w + 3 : Math.max(4, row.x - 3 - w); }
+  }
   drawWindow(r, x, y, w, 17, { kind: 'thin' });
   let tx = x + 7;
   if (actor.elite && ui && ui.frames.elite_mark) { r.sprite(ui, ui.frames.elite_mark, tx, y + 3, { topLeft: true }); tx += 14; }
@@ -361,15 +374,20 @@ export function drawTurnMarker(r, actor, frame) {
   else r.text('▼', actor.cx, actor.top - 14, { align: 'center', color: 'gold' });
 }
 /** Pulsing danger marker over a charging enemy (telegraph), with the turns-until count. */
-export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28) {
+export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28, row = null) {
   const ui = uiAtlas(r);
   const bob = Math.floor(frame / 8) % 2;
-  const y = Math.max(minY, actor.top - 14) - bob;
+  // row (touch layout): the foe's weakness row (with its status badges). The "!" stands on a row above the head,
+  // and moves beside a row it would otherwise cover.
+  const top = row && row.y < actor.top + 4 ? Math.min(actor.top, row.y - 1) : actor.top;
+  const y = Math.max(minY, top - 14) - bob;
+  let x = actor.cx + 4;
+  if (row && y + 15 > row.y && y < row.y + row.h && x + 8 > row.x && x - 8 < row.x + row.w) x = row.x + row.w + 9 <= W - 4 ? row.x + row.w + 9 : row.x - 9;
   const name = ui && animFrameAt(ui.anims.emote_exclaim, frame / 60);
   const f = name && ui.frames[name];
   const on = Math.floor(frame / 6) % 3 !== 2;
-  if (f) r.sprite(ui, f, actor.cx + 4, y + 15, { tint: on ? '#ff8a2a' : '#e06b39', tintAmount: 0.6 });
-  else r.text('!', actor.cx, y - 4, { align: 'center', color: 'orange', outline: '#14101e' });
+  if (f) r.sprite(ui, f, x, y + 15, { tint: on ? '#ff8a2a' : '#e06b39', tintAmount: 0.6 });
+  else r.text('!', x - 4, y - 4, { align: 'center', color: 'orange', outline: '#14101e' });
   void nextTurn;
 }
 

@@ -60,12 +60,14 @@ export function partySlots(n) {
 /** Where a party member stands while striking a melee target (just right of the target's box). */
 export function meleeSpot(target, attacker) {
   const half = Math.max(12, Math.round((target.w || 32) / 2));
-  return { x: Math.min(attacker.homeX - 8, target.x + half + 14), y: attacker.homeY };
+  // A foe on the touch back row (touchEnemySlot) is struck from its own ground line.
+  return { x: Math.min(attacker.homeX - 8, target.x + half + 14), y: target.backRow ? target.homeY : attacker.homeY };
 }
 /** Where an enemy stands while striking a party member (just left of them). */
 export function enemyMeleeSpot(target, attacker) {
   const half = Math.max(12, Math.round((attacker.w || 48) / 2));
-  return { x: Math.max(attacker.homeX + 8, target.x - 18 - half), y: attacker.homeY };
+  // A back-row foe steps down to the party's ground line to strike.
+  return { x: Math.max(attacker.homeX + 8, target.x - 18 - half), y: attacker.backRow ? target.homeY ?? target.y : attacker.homeY };
 }
 
 // Enemy slots by group size: feet on the enemy baseline, spread across the left two thirds of the stage.
@@ -82,6 +84,23 @@ export function enemySlots(n) {
   return xs.map((x) => ({ x, y: BASELINE.enemy }));
 }
 export const BOSS_SLOT = { x: 98, y: BASELINE.enemy };
+
+// W11 (CRITIQUE_4 item 1): the touch stage. The touch command window (CMD_WIN_TOUCH, y 132 up) stands 20 px
+// taller than the desktop one, so a foe in the left slots had its legs, and a party-sized foe all of itself,
+// behind it. On the touch layout a foe whose box meets the window's columns steps back onto a raised back row
+// (FF6 / Lufia II staggered ranks: farther away = higher on the screen): its feet rise to BACK_ROW.feet, or less
+// for a tall foe, which keeps its head at BACK_ROW.headTop or lower so a weakness row still fits above it. A
+// foe right of the window keeps the front baseline. The desktop stage is unchanged.
+export const BACK_ROW = { feet: 126, headTop: 42 };
+/** Touch-layout home for an enemy at desktop `slot` with sprite size {w, h}: { x, y, back }. */
+export function touchEnemySlot(slot, size = {}) {
+  const cw = CMD_WIN_TOUCH;
+  const w = Math.max(24, size.w || 32), h = Math.max(16, size.h || 40);
+  const left = Math.round(slot.x - w / 2);
+  if (left >= cw.x + cw.w) return { x: slot.x, y: slot.y, back: false };
+  const feet = Math.max(BACK_ROW.feet, Math.min(slot.y, BACK_ROW.headTop + h));
+  return { x: slot.x, y: feet, back: feet < slot.y };
+}
 /** Slots for summoned adds (Lost Pages) around the boss: they float, so y is their hover feet line. */
 const SUMMON_SLOTS = [[200, 70], [214, 118], [184, 44], [232, 92]];
 export function summonSlot(i) { const [x, y] = SUMMON_SLOTS[i % SUMMON_SLOTS.length]; return { x, y }; }
@@ -116,14 +135,78 @@ export function enemyFaceRect(frame, id) {
 /** Shield badge + weakness row anchor under an enemy (kept above the bottom windows). The command window
  *  (taller on touch) covers the bottom-left, so a row that would sit over it is lifted clear of it. */
 export const ENEMY_ROW_H = 14;
-export function enemyRowAnchor(unit, touch = false, cwNow = null) {
+export function enemyRowAnchor(unit, touch = false, cwNow = null, ctx = null) {
+  // Touch (W11, CRITIQUE_4 item 1): the row goes where it covers no sprite (touchRowSpot).
+  if (touch) { const s = touchRowSpot(unit, (ctx && ctx.w) || 12 + 15 * 4, { ...(ctx || {}), cw: cwNow || CMD_WIN_TOUCH }); return { x: s.x, y: s.y, place: s.place }; }
   const w = 12 + 15 * 4;
+  // W11 (CRITIQUE_4 item 10): a foe that asks for it (the Nameless King) has its row beside it, at chest height,
+  // in the open stage between it and the party, never across its robe
+  if (unit.rowBeside) {
+    const uw = Math.max(16, unit.w || 32), uh = Math.max(16, unit.h || 40);
+    return { x: Math.max(4, Math.min(W - w - 4, Math.round(unit.x + uw / 2 + 4))), y: Math.max(30, Math.round(unit.y - uh * 0.62)) };
+  }
   const x = Math.max(4, Math.min(W - w - 4, Math.round(unit.x - w / 2)));
   let y = Math.min(STATUS_WIN.y - 16, Math.round(unit.y + 2));
   // cwNow: the command window as drawn this frame (a five-row menu, Mira's with Magic, stands taller than CMD_WIN).
   const cw = cwNow || cmdWin(touch);
   if (x < cw.x + cw.w && x + w > cw.x) y = Math.min(y, cw.y - ENEMY_ROW_H - 2);
   return { x, y };
+}
+
+/** Sprite box of a unit at its home spot (or where it stands): { x, y, w, h } from its feet and frame size. */
+export function spriteBox(u, home = true) {
+  const w = Math.max(16, u.w || 32), h = Math.max(16, u.h || 40);
+  const fx = home && u.homeX != null ? u.homeX : u.x, fy = home && u.homeY != null ? u.homeY : u.y;
+  return { x: Math.round(fx - w / 2), y: Math.round(fy - h), w, h };
+}
+const area = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+/** The touch layout's top band: the help window (its live bottom: it grows to 2-3 lines) and the timeline with
+ *  the Mirrored Combo bracket under it. */
+export function topBlocks(helpBottom = HELP_WIN.y + HELP_WIN.h, bracket = false) {
+  return [{ x: HELP_WIN.x, y: 0, w: HELP_WIN.w, h: helpBottom + 2 }, { x: TL.x - 2, y: 0, w: W - TL.x + 2, h: bracket ? 36 : 27 }];
+}
+/**
+ * Where a weakness row of width `w` goes on the touch layout, as { x, y, place }. The row (ENEMY_ROW_H tall)
+ * prefers, in order: under the feet, above the head, right of the sprite, left of it; each spot is scored by
+ * what it would cover (a window or another row: never; its own sprite or the party: heavily; another foe:
+ * lightly) and the first clean spot wins. Placement uses the HOME boxes (ctx.boxes: other units' spriteBox,
+ * ctx.placed: rows already drawn this frame, ctx.blocks: the top band) so a row does not hop while someone
+ * lunges; the result then follows the unit's own offset from home.
+ */
+export function touchRowSpot(unit, w, ctx = {}) {
+  const own = spriteBox(unit, true);
+  const dx = Math.round((unit.x ?? 0) - (unit.homeX ?? unit.x ?? 0)), dy = Math.round((unit.y ?? 0) - (unit.homeY ?? unit.y ?? 0));
+  const cw = ctx.cw || CMD_WIN_TOUCH;
+  const hard = [cw, STATUS_WIN, ...(ctx.blocks || topBlocks())];
+  const rows = ctx.placed || [];
+  const others = ctx.boxes || [];
+  const h = ENEMY_ROW_H;
+  const clampX = (x) => Math.max(4, Math.min(W - w - 4, Math.round(x)));
+  const feet = own.y + own.h, top = own.y;
+  const cx = clampX((unit.homeX ?? unit.x) - w / 2);
+  const midY = Math.max(top, Math.min(feet - h, top + 4));
+  // The lowest bottom edge of the top band over this row's columns (a row clamped there covers the head instead).
+  const bandBottom = (x) => Math.max(0, ...hard.filter((b) => b.y === 0 && x < b.x + b.w && x + w > b.x).map((b) => b.y + b.h));
+  const cands = [
+    { place: 'below', x: cx, y: feet + 3 },
+    { place: 'above', x: cx, y: top - h - 2 },
+    { place: 'right', x: clampX(own.x + own.w + 3), y: midY },
+    { place: 'left', x: clampX(own.x - 3 - w), y: midY },
+    { place: 'above', x: cx, y: Math.max(top - h - 2, bandBottom(cx) + 1) },
+  ];
+  let best = null;
+  for (const c of cands) {
+    const box = { x: c.x, y: c.y, w, h };
+    let s = 0;
+    if (box.y < 0 || box.y + h > H) s += 1e7;
+    for (const b of hard) s += area(box, b) * 50;
+    for (const p of rows) s += area({ x: box.x - 2, y: box.y - 1, w: w + 4, h: h + 2 }, p) * 50;
+    s += area(box, own) * 6;
+    for (const o of others) s += area(box, o) * (o.party ? 6 : 1);
+    if (!best || s < best.s) best = { ...c, s };
+    if (s === 0) break;
+  }
+  return { x: best.x + dx, y: best.y + dy, place: best.place, score: best.s };
 }
 
 /** Bounding box of a unit on screen for tap targeting. */

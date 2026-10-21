@@ -29,7 +29,8 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, enemyRowAnchor } from '../battle/scene/layout.js';
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, enemyRowAnchor,
+  touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
 import * as HUD from '../battle/scene/hud.js';
@@ -272,7 +273,7 @@ export class BattleScene {
     const startEv = startEvents.find((x) => x.type === 'battle_start');
     this.units = startEv ? startEv.units : battle.units();
     this.info = unitInfo(battle.units());
-    this.actors = createActors(e, this.units);
+    this.actors = createActors(e, this.units, { touch: touchUi(e) });
     for (const a of this.actors.values()) if (a.side === 'party') a.enterT = ENTER_FRAMES;
     this.seenKeys = battle.units().filter((u) => u.side === 'enemy').map((u) => u.weakKey);
     // Intro: encounter sound, battle music over the field track, shatter the field snapshot.
@@ -568,7 +569,7 @@ export class BattleScene {
         const u = this.unit(op.uid);
         if (u && !this.actors.has(op.uid)) {
           const na = addSummon(e, this.actors, u, this.summons++);
-          if (op.split) { const src = this.actor(u.uid) || null; const parent = [...this.actors.values()].find((x) => x.side === 'enemy' && x.id === u.id && x.dead); if (parent) { na.homeX = parent.homeX + (this.summons % 2 ? 18 : -18); na.homeY = parent.homeY; na.x = na.homeX; na.y = na.homeY; } void src; }
+          if (op.split) { const src = this.actor(u.uid) || null; const parent = [...this.actors.values()].find((x) => x.side === 'enemy' && x.id === u.id && x.dead); if (parent) { na.homeX = parent.homeX + (this.summons % 2 ? 18 : -18); na.homeY = parent.homeY; na.backRow = parent.backRow; na.x = na.homeX; na.y = na.homeY; } void src; }
           this.info[u.uid] = { uid: u.uid, id: u.id, name: u.name, side: 'enemy', weapon: null, boss: false, elite: false, maxHp: u.maxHp };
           this.seenKeys.push(u.weakKey);
         }
@@ -756,26 +757,28 @@ export class BattleScene {
     const frame = this.frame;
     const hv = this.phase !== 'rewards' ? this.helpView(r) : null;
     const helpBottom = hv ? 4 + HUD.helpHeight(r, hv.text, hv.color, { rightW: hv.rightW }) : 23;
-    for (const [uid, t] of this.telegraphs) { const a = this.actor(uid); if (a && !a.dead) HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6)); }
+    // Enemy rows: the targeted foe, the acting foe and anything hit recently. Placed first (drawn below) so the
+    // telegraph "!" and the name tag can stand clear of a row that sits above a head (touch layout).
+    const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys()]);
+    const touch = touchUi(this.engine);
+    const cwNow = this.menu.state !== 'closed' && this.menu.cmdRect ? this.menu.cmdRect : null;
+    const rowPlan = this.planEnemyRows([...rows], touch, cwNow, helpBottom);
+    for (const [uid, t] of this.telegraphs) {
+      const a = this.actor(uid);
+      if (a && !a.dead) { const p = rowPlan.get(uid); HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6), (touch || a.rowBeside) && p ? (p.badges ? { ...p.rect, y: p.rect.y - 10, h: p.rect.h + 10 } : p.rect) : null); }
+    }
     if (this.eliteTag) { const a = this.actor(this.eliteTag.uid); if (a && !a.dead) HUD.drawEliteTag(r, a); if (--this.eliteTag.t <= 0) this.eliteTag = null; }
     for (const uid of targetIds) { const a = this.actor(uid); if (a && !a.dead) HUD.drawReticle(r, a, frame); }
     if (this.menu.state !== 'closed' && this.currentUid) { const a = this.actor(this.currentUid); if (a && !a.dead) HUD.drawTurnMarker(r, a, frame); }
-    // Enemy rows: the targeted foe, the acting foe and anything hit recently.
-    const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys()]);
-    const touch = touchUi(this.engine);
-    const placed = [];
-    const cwNow = this.menu.state !== 'closed' && this.menu.cmdRect ? this.menu.cmdRect : null;
-    const rowActors = [...rows].map((uid) => this.actor(uid)).filter((a) => a && !a.dead && a.side === 'enemy').sort((p, q) => p.x - q.x);
-    for (const a of rowActors) {
-      const know = this.b.knowledge(a.uid);
-      const lift = HUD.rowLift(enemyRowAnchor(a, touch, cwNow), HUD.enemyRowWidth(know), placed);
-      const rect = HUD.drawEnemyRow(r, a, know, this.unit(a.uid), frame, touch, { lift, cw: cwNow });
-      if (rect) placed.push(rect);
+    for (const [uid, p] of rowPlan) {
+      const a = this.actor(uid);
+      HUD.drawEnemyRow(r, a, p.know, this.unit(uid), frame, touch, { lift: p.lift, cw: cwNow, at: p.at });
     }
     if (this.menu.state === 'target') {
       const t = this.menu.currentTarget();
       const a = t ? this.actor(t) : null;
-      if (a && a.side === 'enemy') HUD.drawNameTag(r, a, this.b.knowledge(t), this.unit(t));
+      const p = t ? rowPlan.get(t) : null;
+      if (a && a.side === 'enemy') HUD.drawNameTag(r, a, this.b.knowledge(t), this.unit(t), { row: (touch || a.rowBeside) && p ? p.rect : null, minY: helpBottom + 2 });
       const prev = this.menu.preview;
       if (prev) for (const ef of prev.effects || []) { const ta = this.actor(ef.target); if (ta && targetIds.includes(ef.target)) HUD.drawPreviewTag(r, ta, ef); }
     }
@@ -795,6 +798,41 @@ export class BattleScene {
     if (this.bossIntro && this.bossIntro.t < this.bossIntro.frames && this.phase !== 'rewards') HUD.drawBossCard(r, this.bossIntro);
     if (this.phase === 'rewards') this.drawRewards(r);
     void e;
+  }
+
+  /**
+   * Where each shown enemy row goes this frame: Map uid -> { know, at, lift, rect, place, badges }. Desktop keeps
+   * the W5 rule (under the feet, lifted clear of the command window, stacked by rowLift). Touch uses
+   * layout.touchRowSpot (W11, CRITIQUE_4 item 1): under the feet, above the head or beside the sprite, whichever
+   * covers no window, no other row and no sprite (its own or the party's heavily, another foe's lightly).
+   */
+  planEnemyRows(uids, touch, cwNow, helpBottom) {
+    const plan = new Map();
+    const list = uids.map((uid) => this.actor(uid)).filter((a) => a && !a.dead && a.side === 'enemy').sort((p, q) => p.x - q.x);
+    const placed = [];
+    const scored = touch || list.some((a) => a.rowBeside);
+    const boxes = scored ? [...this.actors.values()].filter((a) => !a.dead && !a.ko).map((a) => ({ ...spriteBox(a, true), uid: a.uid, party: a.side === 'party' })) : null;
+    const bracket = [...this.telegraphs.values()].some((t) => t.mirrorCombo && t.partner);
+    const blocks = scored ? topBlocks(helpBottom, bracket) : null;
+    for (const a of list) {
+      const know = this.b.knowledge(a.uid);
+      const w = HUD.enemyRowWidth(know);
+      const badges = Object.keys(a.statuses || {}).length > 0;
+      // touch: every row is scored (layout.touchRowSpot); desktop: only a foe whose row stands beside it (the King)
+      if (touch || a.rowBeside) {
+        const s = touchRowSpot(a, w, { cw: cwNow || cmdWin(touch), placed, boxes: boxes.filter((b) => b.uid !== a.uid), blocks });
+        const rect = { x: s.x, y: s.y, w, h: ENEMY_ROW_H };
+        placed.push(badges ? { x: s.x, y: s.y - 10, w, h: ENEMY_ROW_H + 10 } : rect);
+        plan.set(a.uid, { know, at: { x: s.x, y: s.y }, lift: 0, rect, place: s.place, badges });
+      } else {
+        const anchor = enemyRowAnchor(a, false, cwNow);
+        const lift = HUD.rowLift(anchor, w, placed);
+        const rect = { x: anchor.x, y: anchor.y - lift, w, h: ENEMY_ROW_H };
+        placed.push(rect);
+        plan.set(a.uid, { know, at: null, lift, rect, place: 'below', badges });
+      }
+    }
+    return plan;
   }
 
   /**

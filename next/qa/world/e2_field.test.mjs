@@ -222,3 +222,26 @@ test('reflections: never more than MAX_REFLECTIONS a frame', () => {
   assert.equal(R.drawn, MAX_REFLECTIONS);
   assert.equal(calls.length, MAX_REFLECTIONS);
 });
+
+test('fountain close-up (W11, CRITIQUE_4 item 2): whole faces in the water, the hero blank then faint', async () => {
+  const { faceLayout, heroFaceStyle, INSERT, INSERT_Y, Closeup } = await import('../../src/world/closeup.js');
+  const { DIALOG_MAX_H } = await import('../../src/ui/dialog.js');
+  assert.equal(heroFaceStyle(false), 'smudge');
+  assert.equal(heroFaceStyle(true), 'faint');
+  const L = faceLayout(['mira', 'hero', 'bram']);
+  assert.deepEqual(L.map((f) => f.id), ['mira', 'hero', 'bram']);
+  assert.ok(L.every((f) => f.size === 48 && f.party), 'party faces are whole 48 px portraits');
+  // the three faces fit side by side inside the water (rim 7 + 3 px each side) without overlapping
+  for (let i = 1; i < L.length; i++) assert.ok(L[i].x - L[i - 1].x >= 48, 'faces never overlap');
+  assert.ok(Math.max(...L.map((f) => Math.abs(f.x))) + 24 <= INSERT.w / 2 - 10, 'the outer faces stay inside the rim');
+  const crowd = faceLayout(['mira', 'hero', 'bram'], true);
+  assert.ok(crowd.filter((f) => f.stranger).length >= 8, 'fountain_check fills the water with strangers');
+  assert.ok(crowd.slice(-3).every((f) => f.party), 'the party is drawn last, in front of the crowd');
+  // the insert stays above the tallest bottom dialogue window and its name tab
+  assert.ok(INSERT_Y + INSERT.h <= 216 - 4 - DIALOG_MAX_H - 14, 'the insert clears the dialogue window');
+  // headless (no document): open and close resolve at once and nothing is drawn
+  const c = new Closeup({ engine: { settings: {} }, hasFlag: () => false, lighting: { tintName: 'hollow_dusk' } });
+  await c.open('fountain');
+  await c.close();
+  assert.equal(c.isOpen, false);
+});

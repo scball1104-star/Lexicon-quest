@@ -50,7 +50,10 @@ export default {
   lighting: { tint: 'none', dark: 0.3 },
   under: 'throne_floor',
   legend: { '#': 'court_throne_top', '|': 'court_throne_face', 'v': 'court_throne_out_top', 'o': 'court_throne_out_face',
-    '.': 'throne_floor', 'r': 'carpet_red', 'd': 'glass_floor' },
+    '.': 'throne_floor', 'r': 'carpet_red', 'd': 'throne_floor' },
+  // W11 (CRITIQUE_4 item 13): the dais is the hall's own black glass, raised on a silver rim (tilemap.js rims), not
+  // a block of F1's grey flagstone
+  rims: [{ x: 9, y: 6, w: 6, h: 3, thick: 2, color: '#b8bdd4', hi: '#eef1ff', lo: '#0c0a16', shade: '#5a5e7a' }],
   ground,
   overlays,
   decor,

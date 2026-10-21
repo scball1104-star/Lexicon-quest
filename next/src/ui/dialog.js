@@ -59,11 +59,20 @@ export function pickPosition(hBox, actors, prefer = 'bottom', o = {}) {
     bottom: [H - BOTTOM_MARGIN - hBox - 2, H],
     top: [0, (o.topY ?? DIALOG_TOP_Y) + hBox + 2],
   };
-  const hidden = (side) => actors.filter((a) => a && a.bottom > spans[side][0] && a.top < spans[side][1]).length;
+  const hides = (side, a) => a && a.bottom > spans[side][0] && a.top < spans[side][1];
+  const hidden = (side) => actors.filter((a) => hides(side, a)).length;
   const other = prefer === 'bottom' ? 'top' : 'bottom';
   const hp = hidden(prefer);
   if (hp === 0) return prefer;
-  return hidden(other) < hp ? other : prefer;
+  const ho = hidden(other);
+  if (ho < hp) return other;
+  // W11 (CRITIQUE_4 item 11): a tie keeps the ADDRESSED actor (the one spoken to, not the speaker whose portrait is
+  // in the window) in view: the window goes to the side that does not cover them.
+  if (ho === hp) {
+    const addressed = actors.find((a) => a && a.addressed);
+    if (addressed && hides(prefer, addressed) && !hides(other, addressed)) return other;
+  }
+  return prefer;
 }
 
 let lastClosed = { frame: -100, text: null, who: null };
@@ -127,6 +136,15 @@ export class DialogScene {
     this._startPage(instant || !!box.instant);
   }
 
+  /** The field scene under this dialog (and any chained dialog / choice), or null. */
+  _fieldBelow() {
+    const stack = this.engine.scenes || [];
+    let i = stack.indexOf(this) - 1;
+    while (i >= 0 && (stack[i].name === 'dialog' || stack[i].name === 'choice')) i--;
+    const f = i >= 0 ? stack[i] : null;
+    return f && f.name === 'field' ? f : null;
+  }
+
   /** Screen spans (top, bottom) of the speaker's actor and the hero, when the field is the scene underneath. */
   _actorSpans() {
     const e = this.engine;
@@ -146,7 +164,8 @@ export class DialogScene {
       if (!a || a.visible === false || a.dead) continue;
       const [sx, sy] = field.camera.toScreen(a.feetX, a.feetY);
       if (sx < -8 || sx > e.renderer.W + 8) continue;
-      out.push({ top: sy - ((a.spr && a.spr.h) || 20) + 2, bottom: sy + 2 });
+      // the leader, when someone else speaks, is the one spoken to
+      out.push({ top: sy - ((a.spr && a.spr.h) || 20) + 2, bottom: sy + 2, addressed: a === field.leader && a !== speaker });
     }
     return out;
   }
@@ -154,6 +173,8 @@ export class DialogScene {
   _pickPosition(box, h) {
     if (box.position === 'top' || box.position === 'bottom') return box.position;
     if (box.rect || box.y != null) return 'bottom';
+    // W11: a close-up insert (world/closeup.js) holds the top and middle of the screen; the window stays below it.
+    if (this._fieldBelow() && this._fieldBelow().closeup && this._fieldBelow().closeup.isOpen) return 'bottom';
     const prefer = this.position || 'bottom';
     return pickPosition(h, this._actorSpans(), prefer, { H: this.engine.renderer.H });
   }

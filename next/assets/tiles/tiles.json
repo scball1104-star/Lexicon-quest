@@ -7364,6 +7364,25 @@
    "note": "the King's great mirror, 6 x 5 tiles, in the north face; frames by state: 0 = whole (the town), 1 = shattered, 2 = empty frame",
    "sheet": "court.png"
   },
+  "prop_feather_black": {
+   "rect": [
+    0,
+    496,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "prop",
+   "note": "the black feather on the glass bench (court_f3 feather_obj); event prop, not solid",
+   "sheet": "court.png"
+  },
   "chapel_hollow": {
    "rect": [
     0,

@@ -17,7 +17,9 @@ const PORTRAIT = {
   hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael', tess: 'tess', iris: 'iris', hazel: 'hazel',
   garrick_x: 'garrick', elian: 'elian', elian_f: 'elian', elian_k: 'elian', elian_g: 'elian',
   anwen: 'anwen', anwen_g: 'anwen', tovin: 'tovin', tovin_c: 'tovin', lena: 'lena',
-  aurel: 'aurel', aurel_k: 'aurel', aurel_g: 'aurel', nameless_king: 'nameless_king', vex: 'silver_rogue',
+  // W11 (CRITIQUE_4 item 5): the unnamed King, his veil broken, speaks with the crop of his unmasked battle frame;
+  // under the naming flash he becomes Aurel and the portrait changes with the name tag.
+  aurel: 'aurel', aurel_k: 'nameless_king_unmasked', aurel_g: 'aurel', nameless_king: 'nameless_king', vex: 'silver_rogue',
 };
 
 const say = (s, who, text) => s.say(who, text, PORTRAIT[who] ? { portrait: PORTRAIT[who] } : {});
@@ -304,7 +306,13 @@ async function nh_arrival(s) {
 async function fountain_faces(s) {
   await s.walk('hero', 'fountain_view');
   await s.face('hero', 'up');
+  // W11 (CRITIQUE_4 item 2): Mira and Bram step to the basin's sides so the water stays clear, and the camera cuts
+  // to the water itself (world/closeup.js): whole faces for Mira and Bram, a blank smudge for the hero.
+  await all(s.walk('mira', 'rim_w'), s.walk('bram', 'rim_e'));
+  await all(s.face('mira', 'right'), s.face('bram', 'left'));
+  await s.closeup('fountain');
   await narrate(s, 'The Fountain of Faces. In its still water, three faces look back at you.');
+  await s.closeup(null);
   await s.walk('sava', 'crowd_a');
   await say(s, 'sava', 'You have faces in the water!');
   await s.spawn('nh_crowd_a', { sprite: 'npc_old_woman', name: 'Old Woman', at: 'crowd_b', dir: 'up' });
@@ -315,9 +323,11 @@ async function fountain_faces(s) {
   await say(s, 'nh_crowd_c', 'Mama, look. That one has a nose.');
   await say(s, 'nh_crowd_a', 'Hush. Everyone has a nose. Theirs just... shows.');
   await s.music('mystery');
+  await s.closeup('fountain');
   await say(s, 'bram', '{hero}. Yours is... faint.');
   await narrate(s, 'Your reflection is a smudge on the water, like breath on glass.');
   await say(s, 'mira', 'Like the name.');
+  await s.closeup(null);
   await s.music('hollow');
   await s.spawn('elian_f', { sprite: 'npc_elian', name: 'Elian', at: 'elian_from', dir: 'down' });
   await s.walk('elian_f', 'meet_elian');
@@ -461,23 +471,31 @@ async function anwen_testimony(s) {
 }
 
 async function fountain_check(s) {
+  // W11: every look into the fountain is a close-up of the water (world/closeup.js); closed before anything moves.
   if (await s.hasFlag('fountain_done')) {
-    if (await s.hasFlag('nh_restored')) await narrate(s, 'The Fountain of Faces. The square leans over it all day, laughing at itself.');
+    const restored = await s.hasFlag('nh_restored');
+    await s.closeup('fountain', { strangers: restored });
+    if (restored) await narrate(s, 'The Fountain of Faces. The square leans over it all day, laughing at itself.');
     else await narrate(s, 'The Fountain of Faces. Still water, the dusk sky, and your three faces. It listened once.');
+    await s.closeup(null);
     return;
   }
   const ready = (await s.hasFlag('fountain_started')) && (await s.hasFlag('testimony_lena'))
     && (await s.hasFlag('testimony_tovin')) && (await s.hasFlag('testimony_anwen'));
   if (!ready) {
+    await s.closeup('fountain');
     await narrate(s, "The Fountain of Faces. Its water shows the sky over the square, and your three faces. Nobody else's.");
+    await s.closeup(null);
     if (await s.hasFlag('fountain_started')) {
       await say(s, 'mira', 'Orla said it listens when all three witnesses have spoken. Lena, Tovin and Sister Anwen.');
     }
     return;
   }
   await s.music('mystery');
+  await s.closeup('fountain', { strangers: true });
   await narrate(s, 'You lean over the water, as the three witnesses once did. For one breath, the fountain fills with faces.');
   await narrate(s, 'Every face in town, looking up. And a whisper, half a word, rising off the water: "Hollow..."');
+  await s.closeup(null);
   await s.wait(40);
   await say(s, 'mira', "Hollow... and then the rest. It's in there. It's still in there somewhere.");
   await narrate(s, 'On the fountain floor lie offerings left long ago: a sea-green mantle, folded, and two silver flasks.');
@@ -684,7 +702,8 @@ async function mira_memory_2(s) {
 // Step trigger vex_trig in the corridor before the arena. Vex is a scene spawn "in" the mirror. Sets vex_met.
 async function vex_mirror(s) {
   await s.music(null);
-  await s.camera.panTo('vex_mirror', 40);
+  // W11 (CRITIQUE_4 item 11): frame both speakers, the mirror and the party below it, before a line is said
+  await s.camera.panTo('vex_scene', 40);
   await narrate(s, 'A great mirror fills the corridor wall. It shows the three of you, and a fourth.');
   await s.spawn('vex', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_glass', dir: 'down' });
   await s.music('mystery');
@@ -782,9 +801,14 @@ async function vowOpen(s, mark) {
 async function vowClose(s, flag) {
   await s.wait(30);
   await s.music('mystery');
-  await s.camera.follow('hero');
   await s.setFlag(flag);
   await s.setFlag(`${flag}_seen`);
+  // W11 (CRITIQUE_4 item 7): a beat on the vow door while its new crystal lights, so the floor's goal (three vows,
+  // three crystals) shows its progress on screen, then back to the party.
+  await s.camera.panTo('vow_door', 40);
+  await s.sfx('beam_hit');
+  await s.wait(36);
+  await s.camera.follow('hero');
 }
 
 async function vow_belonging(s) {
@@ -983,7 +1007,9 @@ async function hollowmere_restored(s) {
   await s.walk('hero', 'restored_spot');
   await s.music('hollowmere');
   await s.setFlag('nh_restored');
-  await s.tint('none', 120);
+  // W11 (CRITIQUE_4 item 3): the silver dusk burns off into a warm gold for the rest of the scene (the map's own
+  // tint after nh_restored is plain day; the ending goes to night).
+  await s.tint('hollow_dawn', 120);
   await s.sfx('name_restore');
   await s.camera.panTo('gate_sign', 40);
   await narrate(s, 'Silver letters fill the blank signs one by one: the inn, the hall, the smithy, the gate. HOLLOWMERE.');
@@ -1006,7 +1032,9 @@ async function hollowmere_restored(s) {
   await say(s, 'elian_g', 'Hollowmere. I can sign my letters properly now.');
   await s.walk('mira', 'fountain_rim');     // the north rim (the fountain mark itself is inside the basin)
   await s.face('mira', 'down');
+  await s.closeup('fountain', { faces: ['mira'] });
   await narrate(s, 'Mira leans over the fountain rim. Her reflection leans back.');
+  await s.closeup(null);
   await say(s, 'mira', "Hollowmere. I'm from Hollowmere.");
   await say(s, 'bram', 'Took you long enough to say it.');
   await say(s, 'mira', 'Fifteen years. I counted.');
@@ -1027,8 +1055,12 @@ async function ep2_ending(s) {
   await s.camera.follow('hero');
   await s.walk('hero', 'fountain_view');
   await s.face('hero', 'up');
+  await all(s.walk('mira', 'rim_w'), s.walk('bram', 'rim_e'));
+  await all(s.face('mira', 'right'), s.face('bram', 'left'));
+  await s.closeup('fountain');   // night: the lanterns on the water, the hero's face whole but faint
   await narrate(s, 'You look into the fountain. Your reflection is there now. Faint, like writing seen through water.');
   await say(s, 'mira', "It's there. That's more than yesterday.");
+  await s.closeup(null);
   await s.camera.panTo('emberpeak_glow', 60);
   await narrate(s, 'Far to the north-east, a red glow lies along the mountains.');
   await s.wait(60);

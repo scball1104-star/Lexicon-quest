@@ -3985,6 +3985,100 @@
      "message": "story_ep2_ending: the narration is up"
     }
    ]
+  },
+  {
+   "name": "field_fountain_check_faces",
+   "note": "W11: fountain_check, the close-up of the water filled with the town's faces (CRITIQUE_4 item 2)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"fountain_started\", \"testimony_lena\", \"testimony_tovin\", \"testimony_anwen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "nameless_hollow",
+      21,
+      20,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"fountain_check\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Every face in town\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "field_fountain_check_faces: the narration is up"
+    },
+    {
+     "assert": "LQ_DEBUG.call('closeup') && LQ_DEBUG.call('closeup').faces.length > 3",
+     "message": "the close-up shows the crowd of faces"
+    }
+   ]
+  },
+  {
+   "name": "story_king_unmasked",
+   "note": "W11: king_after, the unnamed King speaks with his unmasked portrait (CRITIQUE_4 item 5)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\", \"vex_met\", \"other_selves_defeated\", \"court_f2_done\", \"court_f3_arrived\", \"vow_belonging\", \"vow_belonging_seen\", \"vow_mercy\", \"vow_mercy_seen\", \"vow_courage\", \"vow_courage_seen\", \"mira_memory_3\", \"vow_door_open\", \"nameless_king_defeated\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_throne",
+      12,
+      12,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"I traded my name for theirs\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_king_unmasked: the King speaks"
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.portrait === 'nameless_king_unmasked'",
+     "message": "the unmasked portrait shows"
+    }
+   ]
   }
  ]
 }

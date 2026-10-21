@@ -39,7 +39,11 @@ export class Cutscene {
     this.running = id;
     try { await fn(this.api); }
     catch (e) { console.error(`[cutscene] scene "${id}" failed`, e); }
-    finally { this.running = null; }
+    finally {
+      this.running = null;
+      // a close-up never outlives its scene (a scene that throws or forgets to close it)
+      if (this.field.closeup && this.field.closeup.kind) this.field.closeup.reset();
+    }
     return true;
   }
 
@@ -168,6 +172,8 @@ export class Cutscene {
       async flash(color, frames) { E.renderer.flash(color || '#ffffff', frames || 8, 0.85); await self.frames(frames || 8); },
       async fade(dir, frames) { await F.fadeScreen(dir === 'out' ? 1 : 0, frames == null ? 30 : frames); },
       async tint(name, frames) { await F.lighting.setTint(name, frames || 0); },
+      /** W11: a framed close-up insert ('fountain'); closeup(null) closes it. See world/closeup.js. */
+      async closeup(kind, o = {}) { if (self.dead) return; if (kind) await F.closeup.open(kind, o); else await F.closeup.close(); },
       async music(id) { if (id) E.audio.music(id); else E.audio.stopMusic(0.8); F.sceneMusic = id || null; },
       async sfx(id) { E.audio.sfx(id); },
       async spawn(id, o = {}) {

@@ -13,7 +13,7 @@
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
 import { ENEMIES } from '../../data/enemies.js';
-import { partySlots, enemySlots, summonSlot, BOSS_SLOT, BASELINE, shadowFor } from './layout.js';
+import { partySlots, enemySlots, summonSlot, BOSS_SLOT, BASELINE, shadowFor, touchEnemySlot } from './layout.js';
 
 const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory', 'crit', 'combo', 'levelup']);
 const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko', 'combo', 'levelup']);
@@ -51,6 +51,7 @@ export class Actor {
     this.stance = null; this.stanceT = 0;
     this.flash = null; this.dissolve = null; this.dead = false; this.ko = false;
     this.move = null; this.fallT = 0; this.enterT = 0;
+    this.backRow = false;           // on the touch stage's raised back row (layout.touchEnemySlot)
     this.hp = unit.hp; this.maxHp = unit.maxHp; this.mp = unit.mp; this.maxMp = unit.maxMp; this.fury = unit.fury || 0;
     this.shownHp = unit.hp; this.lagHp = unit.hp; this.lagWait = 0; this.shownMp = unit.mp; this.shownFury = unit.fury || 0;
     this.shields = unit.shields; this.maxShields = unit.shields; this.broken = false; this.shieldFlash = 0;
@@ -58,6 +59,8 @@ export class Actor {
     this.rowFlash = 0; this.furyFlash = 0; this.koLabel = false;
     this.bobPhase = (unit.uid.charCodeAt(unit.uid.length - 1) * 7) % 60;
     this.def = unit.side === 'enemy' ? ENEMIES[unit.id] || null : null;
+    this.rowBeside = !!(this.def && this.def.rowBeside);   // W11: the weakness row stands beside the sprite
+    this.backlight = !!(this.def && this.def.family === 'reflection');   // W11: the Other Selves' pale backlight
     this.size = this.def ? this.def.size : 'medium';
     this.flying = !!(this.def && this.def.flying);
     // Borrowed art (ENEMIES[id].sprite = { frame, scale, tint }): drawn scaled, and tinted when the unit has no tint.
@@ -269,6 +272,13 @@ export class Actor {
       r.sprite(misc, sf, sx, sy, { alpha: (this.flying ? 0.6 : 1) * k });
       if (!this.flying) r.sprite(misc, sf, sx, sy, { alpha: k });
     }
+    // W11 (CRITIQUE_4 item 9): the Other Selves stand in a pale backlight, the glass catching the mirror's light, so
+    // the violet reflections separate from the violet stage
+    if (this.backlight && !this.dissolve && this.alive) {
+      const hw = Math.round(this.w / 2) + 5, hh = Math.round(this.h / 2) + 4;
+      r.withAlpha(0.3, () => r.ditherEllipse(x, y - Math.round(this.h / 2), hw, hh, '#d8ecff', 0.55));
+      r.withAlpha(0.22, () => r.ditherEllipse(x, y - Math.round(this.h / 2), hw - 4, hh - 4, '#ffffff', 0.5));
+    }
     if (this.dissolve) {
       // W8-art: the dissolve draws at the unit's own scale with its resting tint (variant / borrowed-art tint or
       // the elite gold), the same as the frame before it, so nothing jumps when the dissolve starts.
@@ -305,20 +315,34 @@ export class Actor {
 
 const approach = (c, t, step) => (c < t ? Math.min(c + step, t) : Math.max(c - step, t));
 
-/** Build the actor map for a battle_start unit list. */
-export function createActors(engine, units) {
+/** Build the actor map for a battle_start unit list. opts.touch: the touch stage (layout.touchEnemySlot lifts a
+ *  foe that would stand behind the taller touch command window onto the back row). */
+export function createActors(engine, units, opts = {}) {
   const actors = new Map();
   const party = units.filter((u) => u.side === 'party');
   const enemies = units.filter((u) => u.side === 'enemy');
   const pslots = partySlots(party.length);
   party.forEach((u, i) => actors.set(u.uid, new Actor(engine, u, pslots[i])));
   const boss = enemies.find((u) => u.boss);
-  if (boss && enemies.length === 1) actors.set(boss.uid, new Actor(engine, boss, BOSS_SLOT));
+  const foes = [];
+  if (boss && enemies.length === 1) {
+    // a tall floating boss (ENEMIES[id].stageFeet, the Nameless King) stands lower so its crown clears the help window
+    const def = ENEMIES[boss.id];
+    const a = new Actor(engine, boss, def && def.stageFeet ? { x: BOSS_SLOT.x, y: def.stageFeet } : BOSS_SLOT);
+    actors.set(boss.uid, a); foes.push(a);
+  }
   else {
     const eslots = enemySlots(enemies.length);
-    enemies.forEach((u, i) => actors.set(u.uid, new Actor(engine, u, eslots[i])));
+    enemies.forEach((u, i) => { const a = new Actor(engine, u, eslots[i]); actors.set(u.uid, a); foes.push(a); });
   }
+  if (opts.touch) for (const a of foes) placeOnTouchStage(a);
   return actors;
+}
+/** Move an enemy actor to its touch-stage home (back row when the touch command window would hide it). */
+export function placeOnTouchStage(a) {
+  const s = touchEnemySlot({ x: a.homeX, y: a.homeY }, { w: a.w, h: a.h });
+  a.homeX = a.x = s.x; a.homeY = a.y = s.y; a.backRow = s.back;
+  return a;
 }
 
 /** Add a summoned unit (Lost Page, split child) at the next free summon slot. */

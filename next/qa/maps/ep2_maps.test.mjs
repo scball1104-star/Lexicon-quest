@@ -121,6 +121,50 @@ test('east_road: the Fading Stretch is a cairn corridor; every other cell is a f
   assert.ok(m.ambientFx.some((a) => a.fx === 'mist' && a.area.x <= 20 && a.area.x + a.area.w >= 40));
 });
 
+test('east_road fog (W11, CRITIQUE_4 item 4 + PLAYTEST_REVIEW_3 item 9): no road, a fog bank, cairn checkpoints', async () => {
+  const { checkpointNear, fogDensityAt } = await import('../../src/world/fog.js');
+  const m = maps.east_road;
+  const g = buildGrid(m, db);
+  // no road through the stretch: not one dirt cell between the bank road and the waystation
+  let dirt = 0;
+  for (let y = 11; y <= 20; y++) for (let x = 20; x <= 39; x++) if (m.legend[m.ground[y][x]] === 'dirt') dirt++;
+  assert.equal(dirt, 0, 'the Fading Stretch has no dirt road');
+  const f = m.fog;
+  assert.ok(f && f.area.x <= 20 && f.area.x + f.area.w >= 40, 'the fog bank covers x 20..39');
+  assert.ok(f.clear[0] >= 3 && f.clear[1] >= 4, 'a clear ring of at least four tiles round the leader (phone)');
+  assert.ok(f.cairnLight >= 4.5, 'the next cairn (at most about four tiles on) is always lit');
+  // cairns at most four and a half tiles apart in a straight line, each lit from the last
+  const cairns = f.cairns;
+  for (let i = 1; i < cairns.length; i++) assert.ok(Math.hypot(cairns[i][0] - cairns[i - 1][0], cairns[i][1] - cairns[i - 1][1]) <= 4.5, `cairns ${i - 1} -> ${i}`);
+  // checkpoints: on the corridor (never a fog door, never solid), beside a cairn, in path order, none beside a foe
+  const fogCells = new Set();
+  for (const e of m.events.filter((x) => x.kind === 'fog')) for (let i = 0; i < e.w; i++) fogCells.add(`${e.x + i},${e.y}`);
+  const foes = m.events.filter((e) => e.type === 'enemy');
+  assert.ok(f.checkpoints.length >= 6);
+  for (const c of f.checkpoints) {
+    assert.ok(!fogCells.has(`${c.x},${c.y}`) && g.code[c.y][c.x] === 'none', `checkpoint ${c.x},${c.y} is open corridor`);
+    assert.ok(cairns.some(([x, y]) => Math.abs(x - c.x) + Math.abs(y - c.y) === 1), `checkpoint ${c.x},${c.y} is beside a cairn`);
+    assert.ok(!foes.some((e) => Math.abs(e.x - c.x) <= 1 && Math.abs(e.y - c.y) <= 1), `checkpoint ${c.x},${c.y} is not beside a foe`);
+    assert.ok(['up', 'down', 'left', 'right'].includes(c.dir));
+    assert.equal(checkpointNear(f, c.x, c.y), c);
+  }
+  // a miss costs a few tiles: from any fog door, the nearest checkpoint (or fog_return before the first) is close
+  const landings = [m.marks.fog_return, ...f.checkpoints.map((c) => [c.x, c.y])];
+  let worst = 0;
+  for (const cell of fogCells) {
+    const [x, y] = cell.split(',').map(Number);
+    worst = Math.max(worst, Math.min(...landings.map(([lx, ly]) => Math.abs(lx - x) + Math.abs(ly - y))));
+  }
+  assert.ok(worst <= 9, `the furthest fog door is ${worst} tiles from a landing`);
+  // the density: none round the leader, fog away from it, nothing outside the bank
+  const o = { spec: { ...f, density: f.density }, leader: [30 * 16, 15 * 16], lit: [], t: 0 };
+  assert.equal(fogDensityAt(30 * 16, 15 * 16, o), 0);
+  assert.equal(fogDensityAt(5 * 16, 15 * 16, o), 0);
+  let some = 0;
+  for (let x = 20; x < 40; x++) if (fogDensityAt(x * 16, 19 * 16, { ...o, leader: [0, 0] }) > 0.05) some++;
+  assert.ok(some > 12, 'the bank is foggy away from the leader');
+});
+
 test('east_road: the waystation rests and saves, Penny trades, the shore block and the reed island, the exits', () => {
   const m = maps.east_road;
   const fire = byId(m, 'waystation_fire');

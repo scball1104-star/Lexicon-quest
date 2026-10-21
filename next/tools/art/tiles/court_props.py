@@ -10,7 +10,7 @@ Light: top-left. Glass is a night-blue to ice ramp with a diagonal white sheen; 
 metal 3..4. Translucent pixels are glows and cast shadows (the renderer composites them).
 """
 import math
-from pxlib import Canvas, C, SH, DARK, WHITE, rnd, h32
+from pxlib import Canvas, C, SH, DARK, WHITE, rnd, h32, hexc
 from court_kit import K, MT, ICE, WA, RB, CY, VI, CP, INK, GD
 
 SIL = [K(1), K(2), K(3), K(4), K(5), MT(3), MT(4)]        # silver ramp 0..6
@@ -318,14 +318,19 @@ def glass_bridge(orient, state):
         cv.put(x, y, c)
 
     if state == 'dim':
+        # W11 (CRITIQUE_4 item 7): the waiting bridge must show where it will form. A pale glass deck at about a
+        # quarter strength between two continuous faint rails, a pane seam every 8 px, a silver rail post at the
+        # head of each cell and one diagonal glint, so a dim bridge reads as glass over the void, not as nothing.
         for i in range(16):
-            if i % 2 == 0:
-                P(i, 3, glow(ICE(2), 110))
-                P(i, 12, glow(ICE(1), 90))
-            if i % 8 == 3:
-                for j in range(4, 12):
-                    if j % 2 == 1:
-                        P(i, j, glow(ICE(1), 70))
+            for j in range(4, 12):
+                P(i, j, glow(ICE(1) if i % 8 == 7 else ICE(2), 92 if i % 8 == 7 else 64))
+            P(i, 3, glow(ICE(3), 150))
+            P(i, 12, glow(ICE(1), 140))
+            g = i - 2
+            if 4 <= g <= 11:
+                P(i, g, glow(WHITE, 96))
+        for j in (2, 3, 12, 13):
+            P(0, j, MT(3) if j in (2, 12) else K(4))
         return cv
     for i in range(16):
         for j in range(3, 13):
@@ -437,13 +442,13 @@ def inlay(kind, lit=False):
                 if r < 1e-6:
                     continue
                 o, nx, ny = r - 8, (px - cx) / r, (py - cy) / r
-            lit_side = (o * nx + o * ny) < 0          # offset points up-left
-            ao = abs(o)
-            if ao < 1:
-                c = core if o < 0 else (core if lit else K(4))
-            elif ao < 2:
-                c = mid if lit_side else lo
-            elif lit and ao < 3 and (x + y) % 2 == 0:
+            # W11 (CRITIQUE_4 item 7): a flush line let into the glass, not a raised tube: one px of silver (or
+            # light) with a one px highlight on its up-left side; lit, a dithered cyan glow either side.
+            if -1 <= o < 0:
+                c = CY(3) if lit else K(5)
+            elif -2 <= o < -1:
+                c = WHITE if lit else MT(3)
+            elif lit and abs(o) < 3 and (x + y) % 2 == 0:
                 cv.put(x, y, glow(CY(3), 60))
                 continue
             else:
@@ -656,16 +661,17 @@ def door_vow(state):
         if cv.get(x, spring - 2)[3]:
             cv.set(x, spring - 2, MT(3) if x < cx else K(4))
             cv.set(x, spring - 1, K(2))
-    # three crystals in an arc
+    # three crystals in an arc. W11 (CRITIQUE_4 item 7): each sits in a clear dark socket ringed in silver, the
+    # crystal a 5 x 5 diamond: dull slate while waiting, white-cyan with a halo when its vow is kept, so the
+    # door's progress (one, two, three) reads from across the room.
     for k, (px, py) in enumerate(((9, 13), (16, 8), (23, 13))):
         on = k < lit
+        ellipse(cv, px, py, 3.6, 3.6, lambda dx, dy, d: (MT(3) if dx + dy < 0 else K(3)) if d > 0.78 else INK(0))
         if on:
-            ellipse(cv, px, py, 4.5, 4.5, lambda dx, dy, d: glow(CY(3), int(110 * (1 - d))) if d > 0.4 else None)
+            ellipse(cv, px, py, 5.6, 5.6, lambda dx, dy, d: glow(CY(3), int(150 * (1 - d))) if d > 0.62 else None)
         cmap = {'a': ICE(3) if on else K(4), 'W': WHITE if on else K(5), 'b': ICE(2) if on else RB(2),
-                'c': CY(3) if on else RB(1)}
-        cv.stamp(['.a.', 'aWb', 'abc', '.c.'], px - 1, py - 2, cmap)
-        cv.set(px - 2, py + 1, MT(3))
-        cv.set(px + 2, py + 1, K(3))
+                'c': CY(3) if on else RB(1), 'd': CY(2) if on else INK(2)}
+        cv.stamp(['..a..', '.aWb.', 'aWbbc', '.bcd.', '..d..'], px - 2, py - 2, cmap)
     for x in range(W):
         cv.set(x, H - 1, K(2))
     return cv
@@ -1221,6 +1227,41 @@ def crowned_reflection():
 
 
 # ====================================================================== assemble
+def feather_black():
+    """W11: a black feather lying on the bench (16 x 16, top view): a pale quill at the lower left, the vane black
+    and deep indigo, a violet sheen along its upper edge, one white highlight on the shaft."""
+    cv = Canvas(16, 16)
+    x0, y0, x1, y1 = 1.5, 7.0, 14.5, 1.5           # lying along the bench's top (rows 1..8 of the tile)
+    L = math.hypot(x1 - x0, y1 - y0)
+    ux, uy = (x1 - x0) / L, (y1 - y0) / L
+    nx, ny = uy, -ux                                  # normal pointing up-left
+    for y in range(16):
+        for x in range(16):
+            px, py = x + 0.5 - x0, y + 0.5 - y0
+            t = (px * ux + py * uy) / L
+            d = px * nx + py * ny
+            if t < -0.02 or t > 1.02:
+                continue
+            w = 0 if t < 0.16 else 2.9 * math.sin(math.pi * min(1.0, (t - 0.16) / 0.9)) ** 0.7
+            if abs(d) < 0.55:
+                c = hexc('#b9b2cc') if t < 0.16 else hexc('#4a4064')
+            elif abs(d) <= w:
+                edge = abs(d) > w - 0.9
+                if d > 0:
+                    c = hexc('#7a58b8') if edge else (hexc('#2c2048') if (x + y) % 3 else hexc('#3a2a5e'))
+                else:
+                    c = hexc('#0e0b18') if edge else hexc('#1a1428')
+            else:
+                continue
+            cv.set(x, y, c)
+    cv.set(8, 4, WHITE)                                # the one highlight, mid shaft
+    for x in range(3, 13):                             # a soft shadow on the glass, down-right of the vane
+        y = int(round(y0 + (x + 0.5 - x0) * (y1 - y0) / (x1 - x0))) + 2
+        if 0 <= y < 16 and not cv.get(x, y)[3]:
+            cv.put(x, y, SH(60))
+    return cv
+
+
 def strip(frames):
     w, h = frames[0].w, frames[0].h
     s = Canvas(w * len(frames), h)
@@ -1317,3 +1358,6 @@ def build_into(sh):
         for kind in ('h', 'v', 'corner_ne', 'corner_nw', 'corner_se', 'corner_sw', 'socket'):
             sh.tile('inlay_%s%s' % (kind, '_lit' if lit else ''), inlay(kind, lit), collision='none')
     sh.newline()
+    # W11 (CRITIQUE_4 item 14): Vex's black feather on the F3 glass bench (it was drawn as a letter)
+    sh.obj('prop_feather_black', feather_black(), [0, 0], [], 0, collision='none',
+           note='the black feather on the glass bench (court_f3 feather_obj); event prop, not solid')

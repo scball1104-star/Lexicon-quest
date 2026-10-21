@@ -355,6 +355,9 @@ enemy('refl_bram', {
 // ---------------------------------------------------------------- The Nameless King (Lv 13) and his court
 enemy('nameless_king', {
   name: 'The Nameless King', family: 'king', tags: ['glass'], level: 13, size: 'boss', boss: true, ai: 'nameless_king',
+  // W11 (CRITIQUE_4 item 10), presentation only: he floats lower on the stage (feet at y 164, the hem passing behind
+  // the bottom windows) so the crown clears the help window, and his weakness row stands beside him, not on the robe
+  stageFeet: 164, rowBeside: true,
   hp: 1400, mp: 99, atk: 158, def: 22, mag: 149, spr: 20, spd: 13, luk: 10,
   shields: 6, weak: ['thunder', 'spear'], resist: ['ice'],
   statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],

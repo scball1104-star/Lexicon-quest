@@ -27,8 +27,15 @@ export const TINTS = {
   dusk: { color: '#c48ab8', alpha: 0.46, desat: 0.14 },
   night: { color: '#262a66', alpha: 0.84, desat: 0.42 },
   ink: { color: '#a498c4', alpha: 0.42 },
-  // E2: the Nameless Hollow's evening. Silver-violet, lighter and greyer than dusk; lamps lit, no fireflies.
-  hollow_dusk: { color: '#b6b0d4', alpha: 0.36, desat: 0.26 },
+  // E2: the Nameless Hollow's evening. W11 (CRITIQUE_4 item 3): it read as daylight (0.36 of #b6b0d4 took about a
+  // tenth off each channel; luminance 0.444 against 0.491 restored). Now most of the colour is drained FIRST
+  // (desatFirst), so the cold violet multiply lays one silver-violet over grass and cobble alike, and a pale haze
+  // screened back over it lifts the shadows into mist: a town without colour, the lamps the only warm thing in it.
+  // Measured (qa/integrate/w11_hollow_tint.py): luminance 0.36, saturation 0.17 (restored: 0.49, 0.43).
+  hollow_dusk: { color: '#6c6aac', alpha: 0.64, desat: 0.75, desatFirst: true, haze: '#d4d4f4', hazeAlpha: 0.07 },
+  // W11: the restoration's light (hollowmere_restored): a warm gold that lifts the square above plain day, so the
+  // moment the name comes back the town gets brighter, not just less grey.
+  hollow_dawn: { color: '#ffdcae', alpha: 0.2, glow: '#ffc27a', glowAlpha: 0.12 },
 };
 
 /** Tints under which lamps are lit, windows glow and fireflies come out. */
@@ -148,7 +155,7 @@ export class Lighting {
   get glowStrength() {
     if (this.tintName === 'night') return 1;
     if (this.tintName === 'dusk') return 0.6;
-    if (this.tintName === 'hollow_dusk') return 0.45;
+    if (this.tintName === 'hollow_dusk') return 0.6;
     if (this.tintName === 'dawn') return 0.25;
     return 0;
   }
@@ -163,9 +170,10 @@ export class Lighting {
     }
   }
 
-  /** Alpha-weighted tint list while cross-fading: [{ color, alpha, desat }]. */
+  /** Alpha-weighted tint list while cross-fading: [{ color, alpha, desat, haze, hazeAlpha, glow, glowAlpha }]. */
   currentTints() {
-    const spec = (t, k) => ({ color: t.color, alpha: t.alpha * k, desat: (t.desat || 0) * k });
+    const spec = (t, k) => ({ color: t.color, alpha: t.alpha * k, desat: (t.desat || 0) * k, desatFirst: !!t.desatFirst,
+      haze: t.haze || null, hazeAlpha: (t.hazeAlpha || 0) * k, glow: t.glow || null, glowAlpha: (t.glowAlpha || 0) * k });
     if (!this.tintFade) return this.tint ? [spec(this.tint, 1)] : [];
     const f = this.tintFade, k = f.t / f.dur;
     const out = [];
@@ -193,11 +201,27 @@ export class Lighting {
     for (const t of this.currentTints()) {
       if (t.alpha <= 0.005) continue;
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
-      g.globalCompositeOperation = 'multiply';
-      g.globalAlpha = t.alpha; g.fillStyle = t.color; g.fillRect(0, 0, r.W, r.H);
-      if (t.desat > 0.005) {
+      // W11: `desatFirst` drains the colour before the multiply, so the tint colours a near-grey frame evenly
+      // (a silver evening) instead of being drained with it.
+      if (t.desatFirst && t.desat > 0.005) {
         g.globalCompositeOperation = 'saturation';
         g.globalAlpha = t.desat; g.fillStyle = '#808080'; g.fillRect(0, 0, r.W, r.H);
+      }
+      g.globalCompositeOperation = 'multiply';
+      g.globalAlpha = t.alpha; g.fillStyle = t.color; g.fillRect(0, 0, r.W, r.H);
+      if (t.desat > 0.005 && !t.desatFirst) {
+        g.globalCompositeOperation = 'saturation';
+        g.globalAlpha = t.desat; g.fillStyle = '#808080'; g.fillRect(0, 0, r.W, r.H);
+      }
+      // W11: a pale haze screened over the tint lifts the shadows into mist (hollow_dusk); a warm glow added on
+      // top brightens the frame (hollow_dawn). Both flat fills: no gradient, so no banding.
+      if (t.haze && t.hazeAlpha > 0.005) {
+        g.globalCompositeOperation = 'screen';
+        g.globalAlpha = t.hazeAlpha; g.fillStyle = t.haze; g.fillRect(0, 0, r.W, r.H);
+      }
+      if (t.glow && t.glowAlpha > 0.005) {
+        g.globalCompositeOperation = 'lighter';
+        g.globalAlpha = t.glowAlpha; g.fillStyle = t.glow; g.fillRect(0, 0, r.W, r.H);
       }
       g.restore();
     }

@@ -156,9 +156,14 @@ export class Reflections {
     g.beginPath();
     for (const [x, y] of cells) g.rect(x * TILE, y * TILE, TILE, TILE);
     g.clip();
-    const tint = style.tint || (water ? SURFACE_TINT.water : SURFACE_TINT.glass);
+    let tint = style.tint || (water ? SURFACE_TINT.water : SURFACE_TINT.glass);
+    let alpha = style.alpha, amount = style.amount;
+    // W11 (CRITIQUE_4 item 12): a pale glass floor (F1) asks for a deeper, darker image (mod.reflectLook) so the
+    // reflection reads on the glass; the hero's smudge and faint image keep their own colour.
+    const look = !water && this.f.map.mod && this.f.map.mod.reflectLook;
+    if (look) { alpha = Math.min(1, alpha * (look.alpha || 1)); if (!style.hero) { tint = look.tint || tint; amount = look.amount ?? amount; } }
     const fx = a.feetX, fy = a.feetY + 1 + (a.lift || 0);
-    const opts = { flipX: fr.flip, flipY: true, alpha: style.alpha, tint, tintAmount: style.amount };
+    const opts = { flipX: fr.flip, flipY: true, alpha, tint, tintAmount: amount };
     if (water && !(this.f.engine.settings && this.f.engine.settings.reduceMotion)) {
       // ripple: the reflection in water wavers a pixel, band by band
       const fobj = fr.atlas.frames[fr.name];

@@ -51,6 +51,23 @@ box(g, 19, 25, 20, 27, 'r'); box(g, 19, 18, 20, 22, 'r'); box(g, 19, 6, 20, 8, '
 box(g, 5, 4, 7, 12, 'r');                   // C: the moonlit aisle under the window, up to the first lens
 const ground = rows(wallDepth(g.map((r) => r)));
 
+// W11 (CRITIQUE_4 item 6): moonlight. The floor is lit by its windows, not evenly: a cool pool on the floor under
+// every third window of each north face, a brighter one under each skylight that feeds a beam, and a warm pool at
+// every candelabra; the rest of the hall sits in a dim, cool dark (lighting.dark), so the beam reads as light.
+const MOON = [];
+for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+  if (ground[y][x] !== '|' || !['.', 'r'].includes(ground[y + 1][x])) continue;
+  if (ground[y][x - 1] === '|' && ground[y][x + 1] === '|' && x % 3 !== 1) continue;
+  MOON.push({ x: x * 16 + 8, y: (y + 1) * 16 + 8, r: 36, kind: 'cool' });
+}
+const SKYLIGHTS = [[17, 17], [6, 2]];
+const CANDLES = [[18, 25], [21, 25], [18, 6], [21, 6], [2, 19], [5, 19], [12, 18], [27, 21]];
+const LIGHTS = [
+  ...MOON,
+  ...SKYLIGHTS.map(([x, y]) => ({ x: x * 16 + 8, y: (y + 2) * 16, r: 44, kind: 'cool' })),
+  ...CANDLES.map(([x, y]) => ({ x: x * 16 + 8, y: y * 16 - 4, r: 36, color: '#ffd9a0' })),
+];
+
 // Inlays (silver lines from a receptor to what it opens); `inlay` names the receptor that lights them.
 const inl = (t, x, y, rec) => ({ t, x, y, inlay: rec });
 const overlays = [
@@ -85,8 +102,7 @@ const decor = [
   { t: 'pillar', x: 4, y: 5 }, { t: 'pillar', x: 8, y: 5 }, { t: 'pillar', x: 4, y: 9 }, { t: 'pillar', x: 8, y: 9 },
   { t: 'glass_bench', x: 2, y: 7 }, { t: 'glass_bench', x: 9, y: 7 },
   // candelabra flank the great door, the gate to the stairs and the key door
-  { t: 'candelabra', x: 18, y: 25 }, { t: 'candelabra', x: 21, y: 25 }, { t: 'candelabra', x: 18, y: 6 }, { t: 'candelabra', x: 21, y: 6 },
-  { t: 'candelabra', x: 2, y: 19 }, { t: 'candelabra', x: 5, y: 19 }, { t: 'candelabra', x: 12, y: 18 }, { t: 'candelabra', x: 27, y: 21 },
+  ...CANDLES.map(([x, y]) => ({ t: 'candelabra', x, y })),
 ];
 
 const events = [
@@ -157,7 +173,16 @@ const events = [
 export default {
   id: 'court_f1', name: 'The Silverglass Antechamber', area: 'dungeon',
   music: 'court', ambience: 'court_hush', tileset: 'court',
-  lighting: { tint: 'none', dark: 0 },
+  lighting: { tint: 'none', dark: 0.42, lights: LIGHTS },
+  // W11 (CRITIQUE_4 item 6): the floor darkens at the foot of every wall, the glass floor shows its cracks, shards and
+  // stars more often, and the deep between the halls is the mere at night (tilemap.js floorShade / voidWater).
+  floorShade: { color: '#14101e', alpha: 0.5, rows: 8, side: 3 },
+  variantWeights: { glass_floor: [14, 3, 2, 3, 2, 3, 2] },
+  voidWater: { sys: 'court_out' },
+  // W11 (CRITIQUE_4 item 12): the violet runner is a carpet here (no reflections on it); the glass shows a deeper,
+  // darker image so the reflection lives on the glass
+  noReflect: ['gallery_floor'],
+  reflectLook: { alpha: 1.45, tint: '#2c2a5e', amount: 0.5 },
   under: 'glass_floor',
   legend: { '#': 'court_top', '|': 'court_face', 'v': 'court_out_top', 'o': 'court_out_face', '.': 'glass_floor', 'r': 'gallery_floor', 'w': 'mere_water' },
   ground,

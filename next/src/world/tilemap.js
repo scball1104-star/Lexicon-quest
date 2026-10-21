@@ -31,6 +31,52 @@ export function gatedPresent(entry, hasFlag) {
   return !!hasFlag && matches(entry, hasFlag);
 }
 
+/**
+ * W11 (CRITIQUE_4 item 13): a rim round a tile rect (mod.rims = [{ x, y, w, h, color, hi, lo, inset }], tiles): a
+ * dark outer line, the rim itself and a light inner highlight on its north and west sides, so an island, a dais or
+ * a pool sits in its floor with a dressed edge instead of a pasted block.
+ */
+function paintRim(g, o) {
+  const x0 = o.x * 16 + (o.inset || 0), y0 = o.y * 16 + (o.inset || 0);
+  const w = o.w * 16 - 2 * (o.inset || 0), h = o.h * 16 - 2 * (o.inset || 0);
+  g.save();
+  const line = (c, x, y, ww, hh) => { g.fillStyle = c; g.fillRect(x, y, ww, hh); };
+  const t = o.thick || 2;
+  if (o.lo) { line(o.lo, x0 - 1, y0 - 1, w + 2, 1); line(o.lo, x0 - 1, y0 + h, w + 2, 1); line(o.lo, x0 - 1, y0, 1, h); line(o.lo, x0 + w, y0, 1, h); }
+  line(o.color, x0, y0, w, t); line(o.color, x0, y0 + h - t, w, t); line(o.color, x0, y0, t, h); line(o.color, x0 + w - t, y0, t, h);
+  if (o.hi) { line(o.hi, x0, y0, w, 1); line(o.hi, x0, y0, 1, h); }
+  if (o.shade) { line(o.shade, x0 + t, y0 + h - t, w - t, 1); line(o.shade, x0 + w - t, y0 + t, 1, h - t); }
+  g.restore();
+}
+
+const BAYER4_T = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const hashT = (x, y, salt) => { let h = (x * 374761393 + y * 668265263 + salt * 2246822519) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; };
+/**
+ * W11: one cell of still night water (mod.voidWater = { sys, ramp: [4 colours dark to light], glint }): deep navy
+ * with long dithered swells, a few short pale ripple dashes and, now and then, the moon's glint. Static (baked into
+ * the ground layer), seeded per cell so it never repeats on a grid.
+ */
+function paintNightWater(g, x, y, o) {
+  const ramp = o.ramp || ['#0c0f24', '#121733', '#1a2145', '#28335e'];
+  const px = x * 16, py = y * 16;
+  g.save();
+  for (let yy = 0; yy < 16; yy++) for (let xx = 0; xx < 16; xx++) {
+    const wx = px + xx, wy = py + yy;
+    const swell = 0.5 + 0.5 * Math.sin(wy * 0.55 + Math.sin(wx * 0.09 + wy * 0.02) * 2.2);
+    const v = swell * 1.6 + (hashT(wx >> 3, wy >> 2, 7) - 0.5) * 0.5;
+    const th = (BAYER4_T[(wy & 3) * 4 + (wx & 3)] + 0.5) / 16;
+    const i = Math.max(0, Math.min(2, Math.floor(v) + (v - Math.floor(v) > th ? 1 : 0)));
+    g.fillStyle = ramp[i];
+    g.fillRect(wx, wy, 1, 1);
+  }
+  // ripple dashes and a glint
+  const r1 = hashT(x, y, 11), r2 = hashT(x, y, 12);
+  g.fillStyle = ramp[3];
+  if (r1 < 0.55) { const dx = Math.floor(r2 * 9), dy = 3 + Math.floor(hashT(x, y, 13) * 10); g.fillRect(px + dx, py + dy, 4 + Math.floor(r1 * 6), 1); }
+  if (hashT(x, y, 14) < 0.12) { g.fillStyle = o.glint || '#cfd8ff'; const gx = px + 3 + Math.floor(r2 * 10), gy = py + 2 + Math.floor(r1 * 11); g.fillRect(gx, gy, 2, 1); g.globalAlpha = 0.6; g.fillRect(gx - 2, gy + 1, 6, 1); }
+  g.restore();
+}
+
 export class TileMap {
   constructor(engine, mod, opts = {}) {
     this.engine = engine;
@@ -134,7 +180,7 @@ export class TileMap {
     for (const d of this.decorObjects) this.placeDecor(d);
     this.overheadTiles = (mod.overhead || []).filter((o) => o && (TILES[o.t] || this.warn('overhead:' + o.t, `unknown overhead tile "${o.t}"`)));
     for (const o of this.overheadTiles) if (o.if != null || o.ifNot != null) this.gatedOverhead.push(o);
-    for (const l of (mod.lighting && mod.lighting.lights) || []) this.lights.push({ x: l.x, y: l.y, r: l.r || 48, color: l.color || null });
+    for (const l of (mod.lighting && mod.lighting.lights) || []) this.lights.push({ x: l.x, y: l.y, r: l.r || 48, color: l.color || null, kind: l.kind || null });
   }
 
   inBounds(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
@@ -212,7 +258,8 @@ export class TileMap {
     for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
       if (this.walls[y][x]) continue;
       const terr = this.terrain[y][x];
-      let on = !!(terr && T[terr] && T[terr].reflect);
+      // W11 (CRITIQUE_4 item 12): a map may name floors that do not reflect here (F1's violet runner is cloth)
+      let on = !!(terr && T[terr] && T[terr].reflect) && !(this.mod.noReflect && this.mod.noReflect.includes(terr));
       const wet = !!(terr && T[terr] && T[terr].collision === 'water');
       for (const id of this.idsAt(x, y)) {
         const m = TILES[id];
@@ -523,6 +570,8 @@ export class TileMap {
     const ty0 = Math.max(0, y0 - 1);
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) this.paintTerrainCell(g, x, y, phase);
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) this.paintWallCell(g, x, y);
+    if (this.mod.floorShade) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) this.paintFloorShade(g, x, y);
+    for (const rm of this.mod.rims || []) paintRim(g, rm);
     for (let y = ty0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const id = this.tiles[y][x]; if (id) this.paintTile(g, id, x, y, phase); }
     for (let y = ty0; y <= y1; y++) for (let x = x0; x <= x1; x++) for (const id of this.decorTiles[y][x] || []) this.paintTile(g, id, x, y, phase);
     for (let y = ty0; y <= y1; y++) for (let x = x0; x <= x1; x++) for (const id of this.overlays[y][x] || []) this.paintTile(g, id, x, y, phase);
@@ -540,7 +589,9 @@ export class TileMap {
       let sx = m.x, sy = m.y;
       if (m.anim) sx += phase * m.anim.frameDx;
       if (L.full && m.variants && m.variants.length) {
-        const k = pickVariant(x, y, m.variantWeights || [4, ...m.variants.slice(1).map(() => 2)]);
+        // W11: a map may weight a shared floor's variants its own way (mod.variantWeights[terrainId])
+        const own = this.mod.variantWeights && this.mod.variantWeights[L.id];
+        const k = pickVariant(x, y, own || m.variantWeights || [4, ...m.variants.slice(1).map(() => 2)]);
         const [vx, vy] = m.variants[k];
         g.drawImage(img, vx, vy, TILE, TILE, px, py, TILE, TILE);
       } else {
@@ -560,6 +611,8 @@ export class TileMap {
     const meta = this.db.walls[w.sys];
     const img = this.sheet(meta.sheet);
     const px = x * TILE, py = y * TILE;
+    // W11 (CRITIQUE_4 item 6): the deep beyond a Court floor's walls is the mere at night, not a flat black
+    if (w.part === 'top' && this.mod.voidWater && this.mod.voidWater.sys === w.sys) { paintNightWater(g, x, y, this.mod.voidWater); return; }
     if (w.part === 'top') {
       const topId = w.sys + '_top';
       const nb = neighbours(this.ids, x, y, (o) => o === topId, true);
@@ -585,6 +638,35 @@ export class TileMap {
         g.drawImage(img, meta.face[0] + qx * 8, meta.face[1] + qy * 8, 8, 8, px + ox, py + oy, 8, 8);
       }
     }
+  }
+
+  /**
+   * W11 (CRITIQUE_4 item 6): mod.floorShade = { color, alpha, rows, side } darkens the floor along the foot of a
+   * wall: a dithered band `rows` px deep under a north wall (the wall's shadow), `side` px beside a west or east wall,
+   * so a room reads as a room and not a tile grid floating in the dark.
+   */
+  paintFloorShade(g, x, y) {
+    if (this.walls[y][x] || !this.terrain[y] || this.terrain[y][x] == null) return;
+    const o = this.mod.floorShade;
+    const wall = (xx, yy) => !this.inBounds(xx, yy) || !!this.walls[yy][xx];
+    const n = wall(x, y - 1), wv = wall(x - 1, y), ev = wall(x + 1, y);
+    if (!n && !wv && !ev) return;
+    const rows = o.rows || 6, side = o.side || 3;
+    g.save();
+    g.fillStyle = o.color || '#14101e';
+    const px = x * TILE, py = y * TILE;
+    for (let yy = 0; yy < TILE; yy++) for (let xx = 0; xx < TILE; xx++) {
+      let k = 0;
+      if (n && yy < rows) k = Math.max(k, 1 - yy / rows);
+      if (wv && xx < side) k = Math.max(k, 0.7 * (1 - xx / side));
+      if (ev && xx >= TILE - side) k = Math.max(k, 0.7 * (1 - (TILE - 1 - xx) / side));
+      if (k <= 0) continue;
+      const th = (BAYER4_T[((py + yy) & 3) * 4 + ((px + xx) & 3)] + 0.5) / 16;
+      if (th > k * (o.alpha || 0.5) * 2) continue;
+      g.globalAlpha = Math.min(1, (o.alpha || 0.5) + 0.2);
+      g.fillRect(px + xx, py + yy, 1, 1);
+    }
+    g.restore();
   }
 
   paintTile(g, id, x, y, phase) {

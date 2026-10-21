@@ -35,6 +35,8 @@ import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF } from '../game/story.js';
 import { Silverglass } from '../world/silverglass.js';
 import { Reflections, inGlass } from '../world/reflections.js';
+import { Closeup } from '../world/closeup.js';
+import { FogBank } from '../world/fog.js';
 import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
 import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
@@ -95,6 +97,8 @@ export class FieldScene {
     this.abilities = new FieldAbilities(this);   // W9: Dash Strike, Appraise, the Lantern, Shove
     this.glass = new Silverglass(this);          // E2: silverglass beams, receptors, glass bridges
     this.reflections = new Reflections(this);    // E2: who has a face in the water
+    this.closeup = new Closeup(this);            // W11: the framed close-up of the fountain (cutscene s.closeup)
+    this.fog = new FogBank(this);                // W11: the Fading Stretch's fog bank and its cairn checkpoints
   }
 
   warnOnce(key, msg) { if (!this.warned.has(key)) { this.warned.add(key); console.warn(`[field] ${msg}`); } }
@@ -171,6 +175,8 @@ export class FieldScene {
     EV.applySavedReveals(this);
     this.glass.reset();
     this.reflections.reset();
+    this.closeup.reset();
+    this.fog.reset();
     this.gateCheck();
     // camera, lighting, particles, music
     this.camera.snapTo(this.leader);
@@ -756,6 +762,8 @@ export class FieldScene {
     }
     this.camera.update();
     this.lighting.update();
+    this.closeup.update();
+    this.fog.update();
     this.syncTimeOfDay();
     this.particles.setShade(this.lighting.shade());
     this.particles.update(this.camera);
@@ -790,6 +798,7 @@ export class FieldScene {
     const L = this.leader, g = this.game;
     setPosition(g, this.mapId, L.tx, L.ty, L.dir);
     this.checkFxTriggers();
+    this.fog.onLeaderArrived(L.tx, L.ty);      // W11: the last cairn passed is where a wrong step into the fog lands
     if (this.pendingWarp || this.inputLocked) return;
     const code = this.map.codeAt(L.tx, L.ty);
     // only pit TILES swallow the party; a `pit` area event just says where those tiles drop to (docs/MAPS.md)
@@ -813,9 +822,11 @@ export class FieldScene {
   }
 
   useDoor(ent) {
-    const to = ent.ev.to;
+    let to = ent.ev.to;
     const k = ent.ev.kind;
     const kind = k === 'stairs' || k === 'mirror' || k === 'fog' ? k : 'door';
+    // W11 (PLAYTEST_REVIEW_3 item 9): a fog door lands the party at the last cairn passed, not the stretch's start
+    if (kind === 'fog' && to[0] === this.mapId) { const at = this.fog.landing(); if (at) to = [to[0], ...at]; }
     this.warpTo(to[0], to[1], to[2], to[3] || this.leader.dir, kind);
   }
 
@@ -986,6 +997,7 @@ export class FieldScene {
     this.particles.draw(r, cam, 'mid');
     map.drawOverhead(r, cam);
     r.popCamera();
+    this.fog.draw(r, cam);             // W11: the fog bank over the Fading Stretch (above the actors), cairn lights
     // lighting (tints, darkness, glows)
     this.lightSources = this.collectLights();
     const L = this.leader;
@@ -1000,8 +1012,9 @@ export class FieldScene {
     ab.drawOverlay(r, idle);
     r.popCamera();
     ab.drawScreen(r, idle);
+    this.closeup.draw(r);              // W11: the fountain close-up (screen space, over the lighting)
     if (this.fadeAlpha > 0) r.fade('#000000', this.fadeAlpha);
-    this.banner.draw(r);
+    if (!this.closeup.isOpen) this.banner.draw(r);
   }
 
   /**
@@ -1041,9 +1054,16 @@ export class FieldScene {
       out.push({ x: L.feetX, y: L.feetY - 10, r: 58 + (this.lantern > 0 ? 40 : 0), color: null, kind: this.lantern > 0 ? 'lantern' : 'cool' });
       for (const f of this.followers) out.push({ x: f.feetX, y: f.feetY - 10, r: 34, color: null, kind: 'cool' });
     }
-    for (const l of map.lights) out.push({ ...l, kind: l.color ? 'warm' : 'neutral', flicker: !!l.color });
+    for (const l of map.lights) out.push({ ...l, kind: l.kind || (l.color ? 'warm' : 'neutral'), flicker: !!l.color && l.kind !== 'cool' });
     for (const p of map.props) if (p.light && p.visible) out.push({ ...p.light, kind: 'warm', flicker: true });
     if (dark && this.glass.active) out.push(...this.glass.lights());   // E2: the beam is a light in dark rooms
+    // W11 (CRITIQUE_4 item 2): Hollowmere's night lanterns on the fountain water warm the basin under the night tint.
+    if (this.lighting.tintName === 'night' && this.reflections.fountains.length && this.hasFlag('nh_restored')) {
+      for (const p of this.reflections.fountains) {
+        const d = p.draw, cx = d.dx + p.offX + d.w / 2, cy = d.dy + p.offY + d.h * 0.55;
+        for (const [ox, oy] of [[-14, 2], [0, -4], [14, 2]]) out.push({ x: cx + ox, y: cy + oy, r: 26, color: '#ffd27a', kind: 'warm', flicker: true });
+      }
+    }
     return out;
   }
 
@@ -1168,6 +1188,8 @@ export class FieldScene {
     D.register('abilityState', () => { const f = self.current(); return f ? { ...f.abilities.debugState(), resolve: (() => { const c = f.abilities.resolve(); return c ? { id: c.id, kind: c.kind || null, at: c.at || null, target: !!c.target } : null; })() } : null; });
     D.register('fieldState', () => { const f = self.current(); return f ? f.debugState() : null; });
     // E2-world: the silverglass state, turning a mirror by id (as confirm would), the reflections drawn last frame
+    D.register('fog', () => { const f = self.current(); return f ? f.fog.debugState() : null; });
+    D.register('closeup', () => { const f = self.current(); return f ? f.closeup.debugState() : null; });
     D.register('beams', () => { const f = self.current(); return f ? f.glass.debugState() : null; });
     D.register('turnMirror', async (id) => {
       const f = self.current(); if (!f) return null;

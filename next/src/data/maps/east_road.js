@@ -8,8 +8,12 @@
 //      a clearing: a wood chest and a quicksilver group.
 //   The Fading Stretch (x 20..39): the dirt ends. Between the rock line and the river, the mist. The true path zigzags
 //      from cairn to cairn (each visible from the last); the cells beside it make a three-wide forgiving corridor and
-//      every other cell of the stretch is a fog door that lands on fog_return (19,18), back at the start (plan 5.4).
-//      A beetle group stands guard on the path halfway.
+//      every other cell of the stretch is a fog door (plan 5.4). A beetle group stands guard on the path halfway.
+//      W11 (CRITIQUE_4 item 4, PLAYTEST_REVIEW_3 item 9): no road to follow. The old road shows only as worn flecks
+//      (loose pebbles where the stones were), the false turns at each bend are worn the same way,
+//      and the fog bank (`fog`, world/fog.js) covers the stretch above the actors with a clear ring round the leader;
+//      the cairns within six tiles burn a pale light through it. A wrong step lands at the last cairn passed (the
+//      `fog.checkpoints`), or at fog_return (19,18) before the first one.
 //   The Waystation (x 40..51): the ruined toll house (a wood chest inside), the toll board, the campfire (rest and a
 //      safe point), the log bench, Penny's cart. Two groups nearby.
 //   The Mere Shore (x 52..63): reeds, the still mere, the Court far off over the water (overhead decal). The rise with
@@ -77,16 +81,51 @@ for (const [dir, n] of [['r', 4], ['u', 3], ['r', 4], ['d', 5], ['r', 4], ['u', 
 const onPath = new Set(PATH.map(([x, y]) => `${x},${y}`));
 const corridor = new Set();
 for (const [px, py] of PATH) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) corridor.add(`${px + dx},${py + dy}`);
-// the stretch floor is grass with tall drifts off the corridor; the cairn path itself is worn, not dirt
+// W11: one ground for the whole stretch. Tall drifts lie everywhere off the true path (the corridor's sides too, so
+// the safe band does not show as a lawn), and the true path is only worn: loose pebbles on most of its cells (a 16 px
+// dirt cell read as a stepping-stone trail straight through the fog, so there is none). The straight-on continuation
+// at every bend (the way a hurried walker would go) is worn the same way for three cells, so the old road is not
+// the only trail in the grass.
 for (let y = 11; y <= 20; y++) for (let x = 20; x <= 39; x++) {
-  if (g[y][x] !== '.') continue;
-  if (!corridor.has(`${x},${y}`) && hash01(x, y, 75) < 0.5) put(g, x, y, ',');
+  if (g[y][x] !== '.' || onPath.has(`${x},${y}`)) continue;
+  if (hash01(x, y, 75) < (corridor.has(`${x},${y}`) ? 0.4 : 0.55)) put(g, x, y, ',');
 }
-for (const [x, y] of PATH) if (x >= 20 && x <= 39 && g[y][x] !== '~') put(g, x, y, 'p');
+const WORN = [];                               // [x, y, kind]: 'dirt' patch or 'pebbles'
+PATH.forEach(([x, y], i) => {
+  if (x < 20 || x > 39 || g[y][x] === '~') return;
+  if (hash01(x, y, 80) < 0.62) WORN.push([x, y, 'pebbles']);
+});
+const DECOYS = [];
+for (let i = 1; i < PATH.length - 1; i++) {
+  const [ax, ay] = PATH[i - 1], [bx, by] = PATH[i], [cx, cy] = PATH[i + 1];
+  const dx = bx - ax, dy = by - ay;
+  if (cx - bx === dx && cy - by === dy) continue;          // not a bend
+  for (let k = 1; k <= 3; k++) {
+    const x = bx + dx * k, y = by + dy * k;
+    if (x < 20 || x > 39 || y < 11 || y > 20 || onPath.has(`${x},${y}`) || !['.', ','].includes(g[y][x])) break;
+    DECOYS.push([x, y]);
+    if (k < 3 || hash01(x, y, 81) < 0.5) WORN.push([x, y, 'pebbles']);
+  }
+}
 // cairns beside the path every 3 to 4 tiles (each visible from the last), on corridor cells off the path
 const CAIRNS = [[22, 17], [25, 15], [27, 12], [27, 15], [27, 18], [31, 17], [33, 14], [36, 16], [38, 14]];
 
 const ground = rows(g.map((r) => r));
+// Checkpoints (PLAYTEST_REVIEW_3 item 9): for each cairn, the path cell beside it furthest along the path (never one
+// beside an enemy's post, so a landing never starts a fight), facing the way the path goes on.
+const FOES_ON_PATH = [[28, 16]];
+const DIR_OF = (a, b) => (b[0] > a[0] ? 'right' : b[0] < a[0] ? 'left' : b[1] > a[1] ? 'down' : 'up');
+const CHECKPOINTS = CAIRNS.map(([cx, cy]) => {
+  let best = -1;
+  PATH.forEach(([x, y], i) => {
+    if (Math.abs(x - cx) + Math.abs(y - cy) !== 1) return;
+    if (FOES_ON_PATH.some(([fx, fy]) => Math.abs(fx - x) <= 1 && Math.abs(fy - y) <= 1)) return;
+    if (i > best) best = i;
+  });
+  if (best < 0) return null;
+  const [x, y] = PATH[best];
+  return { x, y, dir: DIR_OF(PATH[best], PATH[best + 1] || [x + 1, y]) };
+}).filter(Boolean);
 const walkableGround = (x, y) => inb(x, y) && ['.', ',', '=', 's', 'p'].includes(ground[y][x]);
 // fog: every walkable stretch cell that is not corridor, merged into horizontal runs (same-map fog doors)
 const fogRuns = [];
@@ -106,6 +145,8 @@ const overlays = [
   ...scatter(ground, ['.'], ['flowers_white', 'flowers_blue', 'tuft_0', 'tuft_1', 'pebbles_0', 'flowers_violet'], 0.06, 81),
   ...scatter(ground, [','], ['flowers_white', 'hydrangea_blue'], 0.05, 82),
   ...scatter(ground, ['s'], ['pebbles_0', 'pebbles_1', 'pebbles_2'], 0.25, 83),
+  // W11: the worn flecks of the old road and its false turns
+  ...WORN.filter(([, , k]) => k === 'pebbles').map(([x, y], i) => ({ t: `pebbles_${i % 3}`, x, y })),
   // reeds along the mere shore and around the island
   ...[[52, 11], [53, 12], [54, 11], [57, 9], [59, 9], [60, 9], [56, 8], [61, 8], [55, 12], [60, 12], [61, 14], [60, 18]]
     .filter(([x, y]) => ground[y][x] !== 'm').map(([x, y], i) => ({ t: `reeds_${i % 3}`, x, y })),
@@ -188,6 +229,11 @@ export default {
   music: 'fading_road', ambience: 'wind_valley', tileset: 'town',
   lighting: { tint: 'none', dark: 0 },
   ambientFx: [{ fx: 'mist', area: { x: 20, y: 9, w: 20, h: 13 } }],
+  // W11: the fog bank over the Fading Stretch (world/fog.js): the grey veil is the stretch's own tint (x 20..39),
+  // clear within 3 tiles of the leader and full beyond 5; cairns within 6 tiles light up through it; a fog door lands
+  // at the last checkpoint passed.
+  fog: { area: { x: 20, y: 9, w: 20, h: 13 }, edge: 2, clear: [3, 5], density: 0.62, veil: '#a2a8ba', veilAlpha: 0.38,
+    cairns: CAIRNS, cairnLight: 6, checkpoints: CHECKPOINTS },
   under: 'grass',
   legend: { '.': 'grass', ',': 'tallgrass', '=': 'dirt', 'p': 'dirt', 's': 'sand', '~': 'water', 'm': 'mere_water',
     '^': 'cliff_top', '|': 'cliff_face' },

@@ -229,38 +229,50 @@
    48,
    48
   ],
-  "elian_32": [
+  "nameless_king_unmasked_48": [
    96,
+   272,
+   48,
+   48
+  ],
+  "elian_32": [
+   144,
    272,
    32,
    32
   ],
   "anwen_32": [
-   128,
+   176,
    272,
    32,
    32
   ],
   "tovin_32": [
-   160,
+   208,
    272,
    32,
    32
   ],
   "lena_32": [
-   192,
-   272,
+   0,
+   320,
    32,
    32
   ],
   "aurel_32": [
-   224,
-   272,
+   32,
+   320,
    32,
    32
   ],
   "nameless_king_32": [
-   0,
+   64,
+   320,
+   32,
+   32
+  ],
+  "nameless_king_unmasked_32": [
+   96,
    320,
    32,
    32
@@ -355,6 +367,10 @@
    "48": "nameless_king_48",
    "32": "nameless_king_32"
   },
+  "nameless_king_unmasked": {
+   "48": "nameless_king_unmasked_48",
+   "32": "nameless_king_unmasked_32"
+  },
   "vex": {
    "48": "silver_rogue_48",
    "32": "silver_rogue_32"
@@ -382,7 +398,8 @@
   "tovin": "hand-drawn (chars/portraits_ep2.py)",
   "lena": "hand-drawn (chars/portraits_ep2.py)",
   "aurel": "hand-drawn (chars/portraits_ep2.py)",
-  "nameless_king": "bosses.webp cell 1 (crop)",
+  "nameless_king": "battle frame nameless_king (1x crop, W11)",
+  "nameless_king_unmasked": "battle frame nameless_king_unmasked (1x crop, W11)",
   "vex": "alias of silver_rogue"
  },
  "aliases": {
@@ -393,5 +410,5 @@
   "goggles_smith",
   "hooded_sage"
  ],
- "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex (Vex Quill: the silver_rogue frames)."
+ "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex (Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops of the battle frames."
 }

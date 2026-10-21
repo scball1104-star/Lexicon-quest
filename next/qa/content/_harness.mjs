@@ -12,7 +12,7 @@ export const NEXT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // The only methods a scene may call. camera is an object with panTo and follow.
 export const API = new Set(['say', 'choice', 'walk', 'face', 'jump', 'emote', 'wait', 'camera', 'shake', 'flash',
   'fade', 'tint', 'music', 'sfx', 'spawn', 'despawn', 'setFlag', 'hasFlag', 'give', 'take', 'battle', 'addMember',
-  'title', 'lockInput', 'unlockInput']);
+  'title', 'lockInput', 'unlockInput', 'closeup']);   // closeup: W11 (world/closeup.js)
 export const CAMERA_API = new Set(['panTo', 'follow']);
 
 // Canonical ids from COMMON.md / DESIGN.md.
@@ -44,7 +44,7 @@ export const SFX = [
 ];
 export const EMOTES = ['!', '?', '...', 'heart', 'sweat', 'anger', 'music', 'zzz'];
 export const DIRS = ['up', 'down', 'left', 'right'];
-export const TINTS = ['none', 'dawn', 'day', 'dusk', 'night', 'ink'];
+export const TINTS = ['none', 'dawn', 'day', 'dusk', 'night', 'ink', 'hollow_dawn'];   // hollow_dawn: W11 (lighting.js)
 export const ENCOUNTER_IDS_FALLBACK = ['echo_warden', 'archivore'];
 
 // ------------------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ export const EP2_MAP_IDS = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chape
 export const EP2_NPC_SPRITES = ['npc_elian', 'npc_anwen', 'npc_tovin', 'npc_lena', 'npc_vessa', 'npc_nico', 'npc_sava',
   'npc_corin', 'npc_orla', 'npc_wren', 'npc_fitch', 'npc_vex', 'npc_aurel'];
 export const EP2_FIELD_SPRITES = ['refl_hero', 'refl_mira', 'refl_bram', 'nameless_king_avatar']; // enemies_field
-export const EP2_PORTRAITS = ['elian', 'anwen', 'tovin', 'lena', 'aurel', 'nameless_king', 'silver_rogue'];
+export const EP2_PORTRAITS = ['elian', 'anwen', 'tovin', 'lena', 'aurel', 'nameless_king', 'nameless_king_unmasked', 'silver_rogue'];
 export const EP2_MUSIC = ['hollow', 'hollowmere', 'fading_road', 'court', 'boss_king'];
 export const EP2_SFX = ['mirror_turn', 'beam_hit', 'glass_bridge', 'glass_break', 'mirror_step', 'ferry_oars', 'clock_chime',
   'reflection_out', 'kept', 'kept_break'];
@@ -100,7 +100,7 @@ export async function runOnce(sceneFn, { decisions = [], flags = [], branchFlags
     say: fn('say'), walk: fn('walk'), face: fn('face'), jump: fn('jump'), emote: fn('emote'), wait: fn('wait'),
     shake: fn('shake'), flash: fn('flash'), fade: fn('fade'), tint: fn('tint'), music: fn('music'), sfx: fn('sfx'),
     spawn: fn('spawn'), despawn: fn('despawn'), give: fn('give'), take: fn('take'), addMember: fn('addMember'),
-    title: fn('title'), lockInput: fn('lockInput'), unlockInput: fn('unlockInput'),
+    title: fn('title'), lockInput: fn('lockInput'), unlockInput: fn('unlockInput'), closeup: fn('closeup'),
     camera: new Proxy({ panTo: fn('camera.panTo'), follow: fn('camera.follow') }, {
       get(t, k) { if (!CAMERA_API.has(k)) throw new Error(`camera.${String(k)} is not part of the cutscene API`); return t[k]; },
     }),

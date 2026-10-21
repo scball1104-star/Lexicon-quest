@@ -12,7 +12,14 @@ at, and every inspect line id below appears in this file, so keep it in step wit
 
 ## 1. Cutscene API
 
-Exactly the Episode 1 API (`STAGING.md` section 1); `ep2.js` uses nothing new. Two details matter more here:
+Exactly the Episode 1 API (`STAGING.md` section 1), plus one W11 primitive. Details that matter more here:
+
+- **`closeup('fountain', opts)` / `closeup(null)`** (W11, `world/closeup.js`). A framed close-up of the Fountain of
+  Faces over the field: the water, the sky in it, and whole upright faces (the 48 px portraits) left to right in
+  `opts.faces` (default Mira, the hero, Bram). The hero is a blank smudge before `nh_restored` and faint after.
+  `opts.strangers` fills the water with the town's faces (`fountain_check`); night (the `night` tint) lays the
+  lanterns on the water. It resolves when open or closed; the dialogue window stays at the bottom while it is open,
+  and a scene that ends with it open closes it. Close it before anyone walks or the camera pans.
 
 - **Speakers without an actor.** `say(who, ...)` with a `who` that has no actor on the map shows the name from
   `SPEAKER_NAMES` in `npcs.js` and no portrait. The vow memories use this: `king_memory` (The King), `boy_memory`
@@ -119,7 +126,8 @@ exchange is `BARKS.fog_loop` if the world system prefers a bark there.)
 `nico_spot`; Corin walks from his post to the hero. Sets `nh_arrived`.
 
 **`fountain_faces`** (step ring `fountain_trig` around the fountain). The hero walks to `fountain_view` and faces
-up (the fountain is north of it). Sava walks to `crowd_a`. Spawns `nh_crowd_a` (`npc_old_woman`) at `crowd_b`,
+up (the fountain is north of it); Mira and Bram step to the basin's sides, `rim_w` and `rim_e`, facing the water.
+Close-up on the water for the first narration, and again from Bram's "Yours is... faint" to "Like the name." Sava walks to `crowd_a`. Spawns `nh_crowd_a` (`npc_old_woman`) at `crowd_b`,
 `nh_crowd_b` (`npc_farmer`) at `crowd_c`, `nh_crowd_c` (`npc_child_b`) at `crowd_d`, all facing up at the water.
 `mystery` on the hero's faint reflection, `hollow` for Elian. Spawns `elian_f` (`npc_elian`) at `elian_from`, who
 walks to `meet_elian`, then to `hall_door` and despawns; the crowd despawns. Sets `met_elian`.
@@ -141,7 +149,7 @@ no movement. Set `fountain_started`, `testimony_lena`, `testimony_anwen`.
 
 **`fountain_check`** (nameless_hollow, object `fountain_obj` on the fountain, script). Plain narration until the
 three witnesses have spoken; then the vision (`mystery`, back to `hollow`), gives `merewarden_mantle` and 2
-`hi_ether`. Sets `fountain_done` (the King fight's +25 Fury).
+`hi_ether`. Every look is a close-up of the water; the vision fills it with the town's faces (`strangers`). Sets `fountain_done` (the King fight's +25 Fury).
 
 **`nico_crowns`** (Nico's talk entry after `court_entered`). Start, reminder, and the crown scene once
 `paper_crown_found`. Sets `nico_crowns_started`, `nico_crowns_done`.
@@ -176,8 +184,8 @@ Any order; the third one seen plays `gate_open` and sets `remembrance_open` (the
 
 **`mira_memory_2`** (step trigger `pool_trig`). Pans to `pool` (30), `sorrow`, back to `court`. Sets `mira_memory_2`.
 
-**`vex_mirror`** (step trigger `vex_trig` in the corridor). Silence, pan to the corridor's great mirror
-`vex_mirror` (40), spawn `vex` (`npc_vex`, name Vex Quill) at `vex_glass`: a tile drawn in front of the mirror
+**`vex_mirror`** (step trigger `vex_trig` in the corridor). Silence, pan to `vex_scene` (40, W11: between the
+corridor's great mirror `vex_mirror` and the party, so both are framed above the dialogue window), spawn `vex` (`npc_vex`, name Vex Quill) at `vex_glass`: a tile drawn in front of the mirror
 glass (E2-world: draw him as a reflection-only actor if possible, plan 5.2). `mystery`, one choice, flash, despawn,
 `court`. Sets `vex_met`.
 
@@ -219,13 +227,15 @@ the hero's name twice; back to `kneel` for the warning (gives `mirror_sigil`); `
 
 **`hollowmere_restored`** (nameless_hollow, `on: 'enter'` when arriving through `mirror_exit` at `fountain_out`).
 `mirror_step`, flash. Spawns `aurel_g` at `restored_aurel` and `elian_g` at `restored_elian`; the hero walks to
-`restored_spot`. `hollowmere`; sets `nh_restored`; tint to `none` over 120 frames. Pans to `gate_sign` (40) and
+`restored_spot`. `hollowmere`; sets `nh_restored`; tint to `hollow_dawn` (warm gold, W11) over 120 frames. Pans to `gate_sign` (40) and
 `fountain` (30), `bell_peal`. Corin runs to `gather_corin`, Lena walks to `gather_lena` (`clock_chime`), Nico runs
 to `gather_nico`; spawns `anwen_g` (`npc_anwen`) at `gather_anwen`. Mira walks to `fountain_rim` (the north rim; the
-`fountain` mark is inside the basin) and faces down at the water. Chains `ep2_ending`.
+`fountain` mark is inside the basin) and faces down at the water; close-up on her face alone for the narration.
+Chains `ep2_ending`.
 
 **`ep2_ending`** (straight after). Fade out; despawns `aurel_g`, `elian_g`, `anwen_g`; tint `night`; silence; camera
-cut to `night_view` (lanterns on the mere); fade in. The hero walks to `fountain_view` and faces up. Pan to
+cut to `night_view` (lanterns on the mere); fade in. The hero walks to `fountain_view` and faces up, Mira and Bram
+to `rim_w` and `rim_e`; close-up (night, lanterns, the hero's face faint) for the reflection line and Mira's reply. Pan to
 `emberpeak_glow` (60, the north-east mountains; a red glow decal there at night is welcome). `bell_toll`, "Thirteen",
 `mystery`. Title cards "End of Episode 2" and "Episode 3: The Forge of Ash". Sets `ep2_complete`.
 
@@ -240,12 +250,12 @@ cut to `night_view` (lanterns on the mere); fade in. The hero walks to `fountain
 | `chapel` (Willowmere) | the mirror decor with text `wm_chapel_mirror` |
 | `valley` | `ford`, `crossing_garrick`, `crossing_hal`, `east_exit`; trigger `crossing_trig`; signs `ford_wrack`, `garrick_rail` |
 | `east_road` | `entry`, `fog_start`, `fog_return`, `fog_end`, `cairn_first`, `waystation_fire`, `penny_cart`, `mere_view`, `court_far`, `town_gate`; sign `east_signpost`; enemy `e_road_mixed`; trigger `first_fight_trig`; object `old_milestone` |
-| `nameless_hollow` | `gate_in`, `gate_sign`, `fountain`, `fountain_view`, `fountain_rim`, `fountain_out`, `meet_elian`, `elian_from`, `hall_door`, `chapel_door`, `inn_door`, `ferry_landing`, `tovin_spot`, `pier_end`, `plinth`, `clocktower`, `nico_spot`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_anwen`, `gather_lena`, `gather_corin`, `gather_nico`, `restored_spot`, `restored_aurel`, `restored_elian`, `night_view`, `emberpeak_glow`, `mirror_warp_sq`; trigger `fountain_trig`; object `fountain_obj` |
+| `nameless_hollow` | `gate_in`, `gate_sign`, `fountain`, `fountain_view`, `fountain_rim`, `rim_w`, `rim_e`, `fountain_out`, `meet_elian`, `elian_from`, `hall_door`, `chapel_door`, `inn_door`, `ferry_landing`, `tovin_spot`, `pier_end`, `plinth`, `clocktower`, `nico_spot`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_anwen`, `gather_lena`, `gather_corin`, `gather_nico`, `restored_spot`, `restored_aurel`, `restored_elian`, `night_view`, `emberpeak_glow`, `mirror_warp_sq`; trigger `fountain_trig`; object `fountain_obj` |
 | `nh_hall` | `elian_desk`, `hall_entry`; trigger `hall_trig` |
 | `nh_chapel` | `anwen_spot`, `register` |
 | `nh_inn` | `inn_bed`; object `lost_property` |
 | `court_f1` | `landing`, `pier`, `start`, `great_door`, `b_center`, `mira_window`, `lens_1`, `lens_2`, `rec_lock`, `lock_gate`, `stairs_down`, `shortcut_gate`; actor `tovin_c`; trigger `mira_window_trig` |
-| `court_f2` | `arrival`, `portrait_child`, `portrait_keeper`, `portrait_king`, `pool`, `vex_mirror`, `vex_glass`, `arena`, `selves_spot`, `selves_hero`, `selves_mira`, `selves_bram`, `stairs_down`, `well_return`; triggers `pool_trig`, `vex_trig`, `selves_trig` |
+| `court_f2` | `arrival`, `portrait_child`, `portrait_keeper`, `portrait_king`, `pool`, `vex_mirror`, `vex_glass`, `vex_scene`, `arena`, `selves_spot`, `selves_hero`, `selves_mira`, `selves_bram`, `stairs_down`, `well_return`; triggers `pool_trig`, `vex_trig`, `selves_trig` |
 | `court_f3` | `arrival`, `hub_center`, `vow_door`, `vow_belonging`, `vow_mercy`, `vow_courage`, `feather`, `font`, `throne_door`; receptors `rec_belonging`, `rec_mercy`, `rec_courage`; object `feather_obj` |
 | `court_throne` | actor `nameless_king`, `king`, `kneel`, `fragment_spot`, `party_stop`, `elian_enter`, `elian_meet`, `great_mirror`; trigger `king_trig`; door `mirror_exit` |
 

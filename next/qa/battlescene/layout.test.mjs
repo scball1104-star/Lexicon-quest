@@ -89,3 +89,44 @@ test('an enemy weakness row never sits under the command window (desktop and tou
     }
   }
 });
+
+test('touch stage (W11, CRITIQUE_4 item 1): no foe stands behind the touch command window, rows cover no sprite', async () => {
+  const L = await import('../../src/battle/scene/layout.js');
+  const cw = L.CMD_WIN_TOUCH;
+  // Sizes of the real formations: the Other Selves (party-sized), slimes, wolves, a knight + sentinel + swarm.
+  const groups = [
+    [{ w: 24, h: 31 }, { w: 24, h: 30 }, { w: 23, h: 31 }],
+    [{ w: 51, h: 50 }, { w: 51, h: 50 }, { w: 51, h: 50 }],
+    [{ w: 66, h: 62 }, { w: 66, h: 62 }],
+    [{ w: 95, h: 98 }, { w: 90, h: 90 }, { w: 34, h: 31 }],
+    [{ w: 44, h: 40 }, { w: 44, h: 40 }, { w: 44, h: 40 }, { w: 70, h: 74 }],
+  ];
+  for (const sizes of groups) {
+    const slots = L.enemySlots(sizes.length).map((s, i) => ({ ...L.touchEnemySlot(s, sizes[i]), ...sizes[i] }));
+    const units = slots.map((s) => ({ x: s.x, y: s.y, homeX: s.x, homeY: s.y, w: s.w, h: s.h }));
+    for (const u of units) {
+      const box = L.spriteBox(u);
+      const covered = Math.max(0, Math.min(box.x + box.w, cw.x + cw.w) - Math.max(box.x, cw.x)) * Math.max(0, box.y + box.h - cw.y);
+      assert.ok(covered <= box.w * box.h * 0.1, `at most a tenth of a ${u.w}x${u.h} foe is behind the touch command window (${covered})`);
+      assert.ok(box.y >= 26, 'its head stays under the help window');
+    }
+    // Every row at once (the worst case), placed left to right as the scene does.
+    const placed = [];
+    for (const u of units) {
+      const boxes = units.filter((o) => o !== u).map((o) => L.spriteBox(o));
+      const s = L.touchRowSpot(u, 75, { placed, boxes });
+      const row = { x: s.x, y: s.y, w: 75, h: L.ENEMY_ROW_H };
+      const own = L.spriteBox(u);
+      const onOwn = Math.max(0, Math.min(row.x + row.w, own.x + own.w) - Math.max(row.x, own.x)) * Math.max(0, Math.min(row.y + row.h, own.y + own.h) - Math.max(row.y, own.y));
+      if (u.h <= 74) assert.equal(onOwn, 0, `a ${u.w}x${u.h} foe's row is off its sprite (${s.place})`);
+      assert.ok(onOwn <= own.w * 12, `a ${u.w}x${u.h} foe's row covers at most a sliver of its top`);
+      for (const win of [cw, L.STATUS_WIN, ...L.topBlocks()]) {
+        const hit = row.x < win.x + win.w && row.x + row.w > win.x && row.y < win.y + win.h && row.y + row.h > win.y;
+        assert.ok(!hit, `row (${s.place} at ${row.x},${row.y}) stays off the windows`);
+      }
+      placed.push(row);
+    }
+  }
+  // The desktop stage does not move.
+  for (let n = 1; n <= 5; n++) assert.deepEqual(L.enemySlots(n).map((s) => s.y), Array(n).fill(L.BASELINE.enemy));
+});

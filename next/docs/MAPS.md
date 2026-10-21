@@ -273,6 +273,13 @@ python tools/maps/preview.py nameless_hollow --flags=nh_restored --tag=restored
 | overlay `inlay: '<receptor>'` | | the field shows the `_lit` inlay while that receptor is lit |
 | map `music`, `lighting.tint` | `[{ if, id }, { id }]` | first match (the Hollow and its interiors) |
 | map `ambientFx` | `{ fx: 'mist', area }` | the Fading Stretch |
+| map `fog` (W11) | `{ area, edge, clear: [inner, outer], density, color, veil, veilAlpha, cairns, cairnLight, checkpoints: [{ x, y, dir }] }` | `world/fog.js`: the Fading Stretch's fog bank above the actors, a clear ring round the leader, cairn lights; a fog door lands at the last checkpoint passed |
+| map `floorShade` (W11) | `{ color, alpha, rows, side }` | `tilemap.js`: the floor darkens along the foot of every wall (Court F1) |
+| map `voidWater` (W11) | `{ sys, ramp?, glint? }` | the wall system's deep (`court_out`) painted as still night water (Court F1) |
+| map `variantWeights` (W11) | `{ <terrain>: [weights] }` | a map's own weighting of a shared floor's variants |
+| map `rims` (W11) | `[{ x, y, w, h, color, hi, lo, shade, thick, inset }]` | a dressed edge round an island, a dais or a pool (F2, throne) |
+| map `noReflect`, `reflectLook` (W11) | `[terrain ids]`; `{ alpha, tint, amount }` | F1: the violet runner is cloth; reflections on the pale glass are deeper |
+| `lighting.lights[].kind` (W11) | `'cool' \| 'warm' \| 'neutral'` | F1's moonlight pools are `cool` |
 
 Kit helpers in `_kit.js`: `wallDepth` (the W8 depth scheme, shared by the Court floors), `beam`, `mirror`, `receptor`,
 `mirrorDoor`, `dullMirror`, `fogDoor`, `silverFont` (`font_silver`, 2 x 1, `safe`).
