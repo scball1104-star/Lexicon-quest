@@ -166,7 +166,7 @@ back stops it as a wall would. 256 cells max, loop guard on (cell, direction). S
   radius-18 light every 32 px (at most 24) and one on each lit receptor (`glass.lights()`). Dark room with the beam
   lit: field draw 0.43 ms headless.
 - **Barks** (text.js BARKS, once per save): `first_mirror` when the party first faces a turnable mirror,
-  `first_glass_bridge` when a bridge first lights, `first_receptor` when a receptor is first on screen.
+  `first_glass_bridge` when a bridge first lights, `first_receptor` when a receptor without its own scene first lights (on sight it fired through walls).
 
 **Reflections** (`world/reflections.js`, `field.reflections`, drawn right after the ground). Cells are reflective when
 their terrain or a tile on them says `reflect: true` (glass_floor, gallery_floor, throne_floor, mere_water); a solid

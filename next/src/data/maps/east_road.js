@@ -152,7 +152,11 @@ const events = [
   object('crack_clearing', 10, 10, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2, opens: [[10, 10], [10, 11], [10, 9]] }),
   chest('chest_clearing', 12, 6, 'wood', { item: 'hi_ether', qty: 1 }),
   // ---- the Fading Stretch
-  trigger('fading_trig', 19, 16, 1, 1, 'fading_stretch'),
+  // the whole west edge of the band (rows 11..17, 20 and the shore at 21; 18 is the fog_return landing, 19 rock): a party
+  // that walks in along row 17, the meadow or the shore still gets the cairns scene before the fog can loop it
+  trigger('fading_trig', 19, 16, 1, 2, 'fading_stretch'),
+  trigger('fading_trig_n', 19, 11, 1, 5, 'fading_stretch'),
+  trigger('fading_trig_s', 19, 20, 1, 2, 'fading_stretch'),
   trigger('fog_return_trig', 19, 18, 1, 1, 'fog_loop'),
   ...fogRuns.map(([x, y, w], i) => fogDoor(`fog_${i}`, x, y, w, 1, ['east_road', 19, 18, 'left'])),
   sign('cairn_sign', CAIRNS[0][0], CAIRNS[0][1], 'cairn'),

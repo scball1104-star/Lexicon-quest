@@ -932,7 +932,9 @@ export class FieldScene {
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);
       await e.fadeTo(() => this.loadMap(h.map, null, null, 'down', { mark: h.mark, landmark: true }), { duration: 1.0, hold: 0.2 });
-      this.fadeAlpha = 0; this.fadeTween = null;
+      // A scene the wake-up map starts on entry (Episode 2's ep2_morning, right after the Episode 1 credits) owns the
+      // fade from here: dropping its tween left it waiting forever with input locked (E2-integrate).
+      if (!(this.fadeTween && this.cutscene.running)) { this.fadeAlpha = 0; this.fadeTween = null; }
       this.lighting.setTint('day', 0);
     } finally { this.unlockInput(); }
   }

@@ -1004,8 +1004,8 @@ async function hollowmere_restored(s) {
   await s.emote('anwen_g', 'heart');
   await say(s, 'anwen_g', 'It rang for him. And now we remember who it rang for.');
   await say(s, 'elian_g', 'Hollowmere. I can sign my letters properly now.');
-  await s.walk('mira', 'fountain');
-  await s.face('mira', 'up');
+  await s.walk('mira', 'fountain_rim');     // the north rim (the fountain mark itself is inside the basin)
+  await s.face('mira', 'down');
   await narrate(s, 'Mira leans over the fountain rim. Her reflection leans back.');
   await say(s, 'mira', "Hollowmere. I'm from Hollowmere.");
   await say(s, 'bram', 'Took you long enough to say it.');

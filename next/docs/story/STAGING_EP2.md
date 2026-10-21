@@ -221,7 +221,8 @@ the hero's name twice; back to `kneel` for the warning (gives `mirror_sigil`); `
 `mirror_step`, flash. Spawns `aurel_g` at `restored_aurel` and `elian_g` at `restored_elian`; the hero walks to
 `restored_spot`. `hollowmere`; sets `nh_restored`; tint to `none` over 120 frames. Pans to `gate_sign` (40) and
 `fountain` (30), `bell_peal`. Corin runs to `gather_corin`, Lena walks to `gather_lena` (`clock_chime`), Nico runs
-to `gather_nico`; spawns `anwen_g` (`npc_anwen`) at `gather_anwen`. Mira walks to the fountain. Chains `ep2_ending`.
+to `gather_nico`; spawns `anwen_g` (`npc_anwen`) at `gather_anwen`. Mira walks to `fountain_rim` (the north rim; the
+`fountain` mark is inside the basin) and faces down at the water. Chains `ep2_ending`.
 
 **`ep2_ending`** (straight after). Fade out; despawns `aurel_g`, `elian_g`, `anwen_g`; tint `night`; silence; camera
 cut to `night_view` (lanterns on the mere); fade in. The hero walks to `fountain_view` and faces up. Pan to
@@ -239,7 +240,7 @@ cut to `night_view` (lanterns on the mere); fade in. The hero walks to `fountain
 | `chapel` (Willowmere) | the mirror decor with text `wm_chapel_mirror` |
 | `valley` | `ford`, `crossing_garrick`, `crossing_hal`, `east_exit`; trigger `crossing_trig`; signs `ford_wrack`, `garrick_rail` |
 | `east_road` | `entry`, `fog_start`, `fog_return`, `fog_end`, `cairn_first`, `waystation_fire`, `penny_cart`, `mere_view`, `court_far`, `town_gate`; sign `east_signpost`; enemy `e_road_mixed`; trigger `first_fight_trig`; object `old_milestone` |
-| `nameless_hollow` | `gate_in`, `gate_sign`, `fountain`, `fountain_view`, `fountain_out`, `meet_elian`, `elian_from`, `hall_door`, `chapel_door`, `inn_door`, `ferry_landing`, `tovin_spot`, `pier_end`, `plinth`, `clocktower`, `nico_spot`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_anwen`, `gather_lena`, `gather_corin`, `gather_nico`, `restored_spot`, `restored_aurel`, `restored_elian`, `night_view`, `emberpeak_glow`, `mirror_warp_sq`; trigger `fountain_trig`; object `fountain_obj` |
+| `nameless_hollow` | `gate_in`, `gate_sign`, `fountain`, `fountain_view`, `fountain_rim`, `fountain_out`, `meet_elian`, `elian_from`, `hall_door`, `chapel_door`, `inn_door`, `ferry_landing`, `tovin_spot`, `pier_end`, `plinth`, `clocktower`, `nico_spot`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_anwen`, `gather_lena`, `gather_corin`, `gather_nico`, `restored_spot`, `restored_aurel`, `restored_elian`, `night_view`, `emberpeak_glow`, `mirror_warp_sq`; trigger `fountain_trig`; object `fountain_obj` |
 | `nh_hall` | `elian_desk`, `hall_entry`; trigger `hall_trig` |
 | `nh_chapel` | `anwen_spot`, `register` |
 | `nh_inn` | `inn_bed`; object `lost_property` |

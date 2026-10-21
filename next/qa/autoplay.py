@@ -1,4 +1,6 @@
-"""Autoplay: a headless bot that plays Episode 1 of Lexicon Quest NEXT from New Game to the credits.
+"""Autoplay: a headless bot that plays Lexicon Quest NEXT: Episode 1 from New Game to the credits, and
+Episode 2 ("The Town Without a Name") from an Episode 1 credits save or from the title's Episode 2 entry
+(newGameEp2) to the Episode 2 credits.
 
 It observes through LQ_DEBUG (state, the live field snapshot) and acts through the input layer
 (LQ_DEBUG.press injects actions for a number of logic frames; --keys sends real keyboard events instead).
@@ -19,9 +21,22 @@ opens and at the end of each floor (`maintain`), drinks Ethers through the Items
     python next/qa/autoplay.py --until stacks        stop after the named main step (quests.js step ids)
     python next/qa/autoplay.py --no-side             skip the optional side quests and secrets
 
+Episode 2 (E2-integrate, EPISODE2_PLAN 10d). The Episode 1 run writes <device>-ep1-credits-save.json: the
+autosave the game writes as the party wakes at home after the Episode 1 credits. The Episode 2 run either loads
+that save through the title's Continue (--start save, the default) or picks the title's "Episode 2" entry, which
+calls newGameEp2 (--start new). It then plays the morning, the crossing, the Fading Road, the Hollow, the three
+Court floors (the beam puzzles from the maps' own solutions: tools/maps/mapcheck.mjs beams), the Other Selves,
+the Nameless King and the ending to the Episode 2 credits, with the Fountain of Faces, the Last Route, Nico's
+Crowns and A Letter Answered on the way (not with --no-side).
+
+    python next/qa/autoplay.py --episode 2                       from <device>-ep1-credits-save.json
+    python next/qa/autoplay.py --episode 2 --start new           the title's Episode 2 entry (newGameEp2)
+    python next/qa/autoplay.py --episode 2 --resume <game.json>  any saved game (e.g. <device>-ep2-last-game.json)
+
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
-Exit code 1 on any console error, page error, engine error, crash, or softlock (no progress for 90 s).
+Episode 2 runs write <device>-ep2-* files instead. Exit code 1 on any console error, page error, engine error,
+crash, or softlock (no progress for 90 s).
 """
 import argparse
 import collections
@@ -52,6 +67,10 @@ MAIN_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town
               'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open', 'archivore_defeated', 'ep1_complete']
 MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
            'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss']
+EP2_MAIN_FLAGS = ['ep2_started', 'crossing_done', 'east_road_arrived', 'east_first_fight_done', 'nh_arrived', 'met_elian',
+                  'heard_crisis', 'met_anwen', 'court_ferry_open', 'court_entered', 'court_f1_done', 'vex_met',
+                  'other_selves_defeated', 'court_f2_done', 'vow_door_open', 'nameless_king_defeated', 'aurel_named',
+                  'nh_restored', 'ep2_complete']
 
 # Live field snapshot (observation only).
 FIELD_JS = """() => {
@@ -65,13 +84,17 @@ FIELD_JS = """() => {
     ents.push({ id: e.id, type: e.type, x: e.x, y: e.y, cells: e.cells, state: e.state,
       blocked: e.cells.map(([x, y]) => !!f.map.blockedAt(x, y)), to: e.ev.to || null, on: e.ev.on || null,
       script: e.ev.script || null, item: e.ev.item || null, key: e.ev.key || null, kind: e.ev.kind || null,
-      doorAt: e.prop && e.prop.doorAt ? e.prop.doorAt : null, hidden: !!(e.data && e.data.ink) });
+      doorAt: e.prop && e.prop.doorAt ? e.prop.doorAt : null, hidden: !!(e.data && e.data.ink),
+      opens: e.state === 'broken' && e.ev.opens ? e.ev.opens.filter(([x, y]) => f.map.collisionAt(x, y) === 'none') : null });
   }
   const actors = f.actors.map(a => ({ id: a.id, kind: a.kind, x: a.tx, y: a.ty, solid: a.solid, dir: a.dir, moving: a.moving,
     fighting: !!(a.data && a.data.fighting), mode: a.brain && a.brain.mode || null }));
+  // E2: glass bridges, lit (walkable) or dim (a pit) right now
+  const bridges = f.glass && f.glass.bridges ? [...f.glass.bridges.values()].map(b => [b.x, b.y, !!b.lit]) : [];
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null };
+    lantern: f.lantern, ents, actors, bridges, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
 SCENE_LIST_JS = "(() => { const s = LQ_ENGINE.scene; const l = s && s.list; return l ? l.items.map(i => ({ id: i.id, price: i.price, disabled: !!i.disabled })) : null; })()"
@@ -87,9 +110,10 @@ class Softlock(Fail):
 
 # ================================================================================================ driver
 class Bot:
-    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag=''):
+    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag='', query=''):
         from playwright.sync_api import sync_playwright
-        self.device = device + tag          # output prefix (the wrong-order sweep keeps its own files)
+        self.device = device + tag          # output prefix (the wrong-order sweep and Episode 2 keep their own files)
+        self.query = query                  # extra URL params (Episode 2's title entry: &ep=2)
         self.speed = speed
         self.keys = keys
         self.hero = name
@@ -105,7 +129,7 @@ class Bot:
         if resume:
             data = json.loads(pathlib.Path(resume).read_text(encoding='utf-8'))
             env = {'v': 1, 'savedAt': int(time.time() * 1000), 'meta': {'name': data.get('heroName'), 'level': data['party'][0]['level'], 'map': data['map'],
-                   'playtime': data.get('playtime', 0), 'chapter': 1, 'gold': data.get('gold'), 'party': [m['id'] for m in data['party']]}, 'data': data}
+                   'playtime': data.get('playtime', 0), 'chapter': data.get('chapter', 1), 'gold': data.get('gold'), 'party': [m['id'] for m in data['party']]}, 'data': data}
             seed = 'localStorage.setItem("lq-next-slot-1", ' + json.dumps(json.dumps(env)) + ');'
             name = data.get('heroName') or name
         self.resume = resume
@@ -115,6 +139,7 @@ class Bot:
         self.page.on('console', self._on_console)
         self.page.on('pageerror', lambda e: self.errors.append(f'pageerror: {e}'))
         self.grids = {}
+        self.gated = {}         # map id -> the flags its gated overlays depend on (autoplay_grid.mjs)
         self.shot_n = 0
         self.last_shot = 0
         self.t0 = time.time()
@@ -129,7 +154,7 @@ class Bot:
         self.last_map = None
         self.battle_seen = None
         OUT.mkdir(parents=True, exist_ok=True)
-        self.dialog_file = open(OUT / f'{device}-dialog.log', 'a', encoding='utf-8')
+        self.dialog_file = open(OUT / f'{self.device}-dialog.log', 'a', encoding='utf-8')
         self.dialog_file.write(f'=== run {time.strftime("%Y-%m-%d %H:%M:%S")} speed {speed} keys {keys} ===\n')
 
     # ------------------------------------------------------------------ plumbing
@@ -143,7 +168,7 @@ class Bot:
             self.warnings.append(text)
 
     def open(self):
-        self.page.goto(f'http://127.0.0.1:{self.server.server_port}/next/index.html?debug=1&fps=0', wait_until='load')
+        self.page.goto(f'http://127.0.0.1:{self.server.server_port}/next/index.html?debug=1&fps=0{self.query}', wait_until='load')
         self.page.wait_for_function('window.LQ_DEBUG && true', timeout=30000)
         self.page.evaluate('Promise.race([LQ_DEBUG.ready(), new Promise((_, no) => setTimeout(() => no(new Error("ready timeout")), 30000))])')
         self.js(f'LQ_DEBUG.setSpeed({self.speed})')
@@ -347,7 +372,10 @@ class Bot:
             else:
                 self.frames(10)
             if self.battle_seen is None:
-                self.battle_seen = {'start': time.time(), 'rounds': 0}
+                info = self.js("(() => { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return {}; "
+                               "return { enc: s.data ? s.data.encounterId : null, elite: s.b.units().some(u => u.side === 'enemy' && u.elite && u.elite.length) }; })()") or {}
+                self.battle_seen = {'start': time.time(), 'rounds': 0, 'enc': info.get('enc'), 'elite': bool(info.get('elite')),
+                                    'level': ((self.game() or {}).get('party') or [{}])[0].get('level')}
             self.battle_seen['rounds'] = max(self.battle_seen['rounds'], b.get('round') or 0)
             sig = ('battle', b.get('phase'), b.get('round'), b.get('current'), tuple((u.get('uid'), u.get('hp')) for u in (b.get('units') or [])))
         elif sc == 'gameover':
@@ -374,7 +402,8 @@ class Bot:
             sig = ('title',)
         elif sc == 'field':
             if self.battle_seen:
-                self.battles.append({'map': self.last_map, 'rounds': self.battle_seen['rounds'], 'wall_s': round(time.time() - self.battle_seen['start'], 1)})
+                self.battles.append({'map': self.last_map, 'rounds': self.battle_seen['rounds'], 'wall_s': round(time.time() - self.battle_seen['start'], 1),
+                                     'enc': self.battle_seen.get('enc'), 'elite': self.battle_seen.get('elite'), 'level': self.battle_seen.get('level')})
                 self.battle_seen = None
             f = self.field() or {}
             L = f.get('leader') or {}
@@ -406,14 +435,22 @@ class Bot:
 
     # ------------------------------------------------------------------ walk model
     def grid(self, map_id):
-        if map_id not in self.grids:
-            r = subprocess.run(['node', str(HERE / 'autoplay_grid.mjs'), map_id], capture_output=True, text=True, timeout=60, cwd=str(NEXT))
+        """The static walk model of a map as the save's flags see it: gated overlays (Garrick's planks, the
+        Hollow's lettered signs) are present only when their flags hold. One cached grid per combination."""
+        have = {k for k, v in (self.flags() or {}).items() if v}
+        gated = self.gated.get(map_id)
+        key = (map_id, tuple(sorted(f for f in gated if f in have))) if gated is not None else None
+        if key is None or key not in self.grids:
+            args = ['node', str(HERE / 'autoplay_grid.mjs'), map_id, '--flags=' + ','.join(sorted(have))]
+            r = subprocess.run(args, capture_output=True, text=True, timeout=60, cwd=str(NEXT))
             if r.returncode != 0:
                 raise Fail(f'grid {map_id}: {r.stderr[-400:]}')
             g = json.loads(r.stdout)
             g['by_id'] = {e['id']: e for e in g['events']}
-            self.grids[map_id] = g
-        return self.grids[map_id]
+            self.gated[map_id] = g.get('gated') or []
+            key = (map_id, tuple(sorted(f for f in self.gated[map_id] if f in have)))
+            self.grids[key] = g
+        return self.grids[key]
 
     def model(self, f, fight=False, goal=None, allow_pits=False, extra_block=(), ignore=()):
         """Walkability for the current field: returns (passable(x,y,dir), enemy cells). `ignore` = entity ids
@@ -432,6 +469,8 @@ class Bot:
                     blocked.add(c)
                 elif e['type'] in ('door', 'gate', 'locked_door'):
                     unblocked.add(c)        # a doorway cut into a wall face: the static grid calls it solid
+            if e.get('opens'):
+                unblocked.update(tuple(c) for c in e['opens'])      # W9: a broken crack carved these cells to floor
             if e['type'] == 'door' or (e['type'] in ('gate', 'locked_door') and e['state'] == 'open' and e['to']) or e['type'] == 'ferry':
                 for c in cells:
                     avoid.add(c)
@@ -451,6 +490,9 @@ class Bot:
             elif a['solid']:
                 blocked.add((a['x'], a['y']))
         goal_t = tuple(goal) if goal else None
+        # E2 glass bridges: a lit one is floor, a dim one is a pit, whatever the static grid says
+        lit_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if lit}
+        dim_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if not lit}
 
         def passable(x, y, d):
             if not (0 <= x < W and 0 <= y < H):
@@ -461,6 +503,10 @@ class Bot:
                 return False
             if (x, y) in unblocked:
                 return True
+            if (x, y) in lit_bridges:
+                return True
+            if (x, y) in dim_bridges:
+                return allow_pits or (x, y) == goal_t
             c = code[y][x]
             if faint[y][x]:
                 return bool(opened.get(f'{f["map"]}:ink:{x},{y}'))
@@ -517,9 +563,10 @@ class Bot:
             passable, enemies = self.model(f, fight=fight, goal=goals[0] if len(goals) == 1 else None, allow_pits=allow_pits)
             path = self.bfs(L, goals, passable, stop_at_enemy=enemies if fight else None)
             if path is None:
-                if attempt >= 2:
+                # a wandering NPC (a dog in a doorway) can close the only way for a while: wait it out
+                if attempt >= 4:
                     raise Fail(f'no route to {goals} on {f["map"]} from {L} ({label})')
-                self.frames(30)
+                self.frames(45)
                 continue
             # Execute straight segments, verifying after each one.
             i = 0
@@ -686,8 +733,9 @@ class Bot:
             return 'right' if dx > 0 else 'left'
         return 'down' if dy > 0 else 'up'
 
-    def through(self, ent_id, label=''):
-        """Step onto a door / exit / stairs entity and wait for the new map."""
+    def through(self, ent_id, label='', exact=True):
+        """Step onto a door / exit / stairs entity and wait for the new map. exact=False: a door to another map
+        whose arrival scene moves the party at once (the throne room's great mirror): the map change is enough."""
         f = self.settle()
         e = self.ent(f, ent_id)
         if not e:
@@ -700,8 +748,20 @@ class Bot:
                 raise Fail(f'{ent_id} stayed locked (key {e.get("key")}, carried {self.items().get(e.get("key") or "", 0)})')
         cell = tuple(e['doorAt']) if e.get('doorAt') else tuple(e['cells'][0])
         to = e['to']
+        f = self.settle()
+        if (f['leader']['x'], f['leader']['y']) == cell:
+            # landed on the door cell itself (an interior's exit): a door fires on stepping onto it, so step off first
+            passable, _ = self.model(f)
+            for d, (dx, dy) in DIRS.items():
+                if passable(cell[0] + dx, cell[1] + dy, d):
+                    self.hold_dir(d, 1, run=False)
+                    self.frames(WALK + 4)
+                    break
         self.walk_to([cell], label=label or ent_id)
-        if to:
+        if to and not exact and to[0] != f['map']:
+            # walk_to may already have settled through the arrival scene (and anything it chains): any other map will do
+            self.page.wait_for_function(f"(() => {{ const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id !== {json.dumps(f['map'])} && !f.loading; }})()", timeout=30000, polling=20)
+        elif to:
             # the far side may be on this map (a notch) or another one: wait until the party stands on it
             self.page.wait_for_function(f"(() => {{ const f = LQ_ENGINE.stack.find(s => s.name === 'field'); if (!f || !f.map || f.loading || f.pendingWarp || !f.leader) return false; "
                                         f"const to = {json.dumps(to)}; return f.map.id === to[0] && f.leader.tx === to[1] && f.leader.ty === to[2]; }})()", timeout=30000, polling=20)
@@ -856,6 +916,22 @@ class Bot:
     def menu_command(self, cmd):
         """Move the command cursor to a command id and confirm it."""
         ids = ['items', 'tech', 'magic', 'equip', 'status', 'journal', 'talk', 'config', 'save', 'quit']
+        geo = self.js("(() => { const s = LQ_ENGINE.scene; const l = s && s.commands; return l ? { cm: !!l.columnMajor, cols: l.columns || 1, rows: l.rows } : null; })()") or {}
+        if geo.get('cm') and geo.get('cols', 1) > 1:
+            # touch layout (phone): two columns of five, column major; up / down wrap inside a column
+            R = geo['rows']
+            want = ids.index(cmd)
+            for _ in range(16):
+                cur = ids.index((self.scene_state()['ss'] or {}).get('command') or 'items')
+                if cur == want:
+                    break
+                if cur // R != want // R:
+                    self.tap('right' if want // R > cur // R else 'left', 3)
+                else:
+                    self.tap('down' if want % R > cur % R else 'up', 3)
+            self.tap('confirm', 2)
+            self.frames(6)
+            return
         ss = self.scene_state()['ss'] or {}
         cur = ids.index(ss.get('command') or 'items')
         self.pick(ids.index(cmd), cur)
@@ -996,8 +1072,14 @@ class Bot:
                 for _ in range(n - 1):
                     self.tap('right', 3)
                 self.tap('confirm', 8)
-            bought.append((item, n))
+            else:
+                for _ in range(n - 1):        # equipment: one confirm buys one (no quantity window)
+                    self.tap('confirm', 8)
             self.frames(6)
+            spent = gold - self.game()['gold']
+            got = spent // max(1, price)
+            if got:
+                bought.append((item, got))
             self.tap('cancel', 6)         # back to the command strip
         # Leave: cancel from the command strip leaves the shop.
         for _ in range(6):
@@ -1020,12 +1102,15 @@ class Bot:
             return []
         self.interact_no_settle(actor_id=npc)
         bought = []
+        calm = 0
         for _ in range(80):
             sc = self.handle(allow_shop=True)
             if sc == 'shop':
                 bought = self.shop_buy(wants)
                 break
-            if sc == 'field' and not (self.field() or {}).get('locked'):
+            # the shop is pushed right after the last line closes: the field shows for a frame in between
+            calm = calm + 1 if sc == 'field' and not (self.field() or {}).get('locked') else 0
+            if calm >= 4:
                 break
         self.settle()
         if bought:
@@ -1063,11 +1148,13 @@ class Bot:
         self.face(d)
         self.tap('confirm', 3)
 
-    def rest_at_inn(self):
-        self.interact_no_settle(actor_id='hob')
+    def rest_at_inn(self, keeper='hob'):
+        self.interact_no_settle(actor_id=keeper)
+        calm = 0
         for _ in range(80):
             sc = self.handle(prefer='Rest')
-            if sc == 'field' and not (self.field() or {}).get('locked'):
+            calm = calm + 1 if sc == 'field' and not (self.field() or {}).get('locked') else 0
+            if calm >= 4:
                 break
         self.settle()
 
@@ -1111,7 +1198,10 @@ class Bot:
         """Ethers for anyone under `frac` of their MP (casters first), as long as Ethers remain."""
         used = []
         for _ in range(6):
-            if self.items().get('ether', 0) <= 0:
+            # Ethers first; Episode 2's Hi-Ethers once they are gone
+            have = self.items()
+            potion = 'ether' if have.get('ether', 0) > 0 else 'hi_ether' if have.get('hi_ether', 0) > 0 else None
+            if not potion:
                 break
             vit = self.party_vitals()
             low = [(i, v) for i, v in enumerate(vit) if v['maxMp'] > 0 and v['mp'] < v['maxMp'] * frac]
@@ -1119,7 +1209,7 @@ class Bot:
                 break
             low.sort(key=lambda iv: (iv[1]['id'] != 'mira', iv[1]['mp'] / max(1, iv[1]['maxMp'])))
             i, v = low[0]
-            if not self.menu_use_item('ether', i):
+            if not self.menu_use_item(potion, i):
                 break
             used.append(v['id'])
         if used:
@@ -1193,6 +1283,125 @@ class Bot:
             if len(self.battles) == before:
                 # the enemy moved; try again from the top (bounded by limit)
                 continue
+
+    # ------------------------------------------------------------------ Episode 2: silverglass, Shove, Dash
+    def beam_solutions(self, map_id):
+        """The map's own beam solutions (tools/maps/mapcheck.mjs beams): for each receptor and glass bridge, the
+        mirror states and heavy-mirror cells of the first configuration the walk found that lights it."""
+        key = ('beams', map_id)
+        if key not in self.grids:
+            r = subprocess.run(['node', str(NEXT / 'tools' / 'maps' / 'mapcheck.mjs'), 'beams', map_id], capture_output=True, text=True, timeout=120, cwd=str(NEXT))
+            if r.returncode != 0:
+                raise Fail(f'beams {map_id}: {r.stderr[-400:]}')
+            data = json.loads(r.stdout)
+            sols = {}
+            for s in data.get('solved') or []:
+                sols[s.get('receptor') or s.get('bridge')] = {'states': s.get('states') or {}, 'positions': s.get('positions') or {}}
+            self.grids[key] = sols
+        return self.grids[key]
+
+    def reachable_spot(self, f, cells):
+        """(path length, spot, dir) of the nearest tile from which confirm reaches one of `cells`, or None."""
+        passable, _ = self.model(f)
+        L = (f['leader']['x'], f['leader']['y'])
+        best = None
+        for spot, d in self.stand_spots(f, cells, True):
+            p = self.bfs(L, [spot], passable)
+            if p is not None and (best is None or len(p) < best[0]):
+                best = (len(p), spot, d)
+        return best
+
+    def solve_beam(self, map_id, goal, skip=(), label=''):
+        """Light a receptor or a bridge ('bridge x,y') with the map's solution: shove the heavy mirrors to their cells,
+        then turn every mirror the party can reach to its state, nearest first, looking again after each turn (a
+        turn can lay the bridge to the next mirror). Mirrors in `skip` are left as they are."""
+        sol = self.beam_solutions(map_id).get(goal)
+        if not sol:
+            raise Fail(f'no beam solution for {goal} on {map_id}')
+        for mid, cell in sol['positions'].items():
+            self.shove_to(mid, tuple(cell), label=f'{label} {mid}')
+        targets = {m: s for m, s in sol['states'].items() if m not in skip}
+        turned = 0
+        for _ in range(4 * len(targets) + 6):
+            f = self.settle()
+            todo = []
+            for m, s in targets.items():
+                e = self.ent(f, m)
+                if e and int(e['state'] or 0) != int(s):
+                    todo.append(m)
+            if not todo:
+                self.notes.append(f'beam {goal} on {map_id}: {turned} turns')
+                return f
+            best = None
+            for m in todo:
+                e = self.ent(f, m)
+                r = self.reachable_spot(f, [(e['x'], e['y'])])
+                if r and (best is None or r[0] < best[0]):
+                    best = (r[0], m)
+            if best is None:
+                raise Fail(f'beam {goal} on {map_id}: no reachable mirror among {todo} ({label})')
+            self.interact(ent_id=best[1], label=f'turn {best[1]}')
+            turned += 1
+        raise Fail(f'beam {goal} on {map_id}: mirrors did not settle ({label})')
+
+    def press_ability(self, settle_frames=40):
+        """pageR (the field ability that fits what the leader faces), then wait for it to finish."""
+        self.tap('pageR', 2)
+        self.frames(6)
+        self.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !f || !f.abilities || !f.abilities.busy; })()", timeout=20000, polling=20)
+        self.frames(settle_frames)
+        return self.settle()
+
+    def shove_to(self, ent_id, target, label=''):
+        """Bram's Shove (W9): push a heavy block or mirror one tile per shove, in a straight line, to `target`."""
+        for _ in range(12):
+            f = self.settle()
+            e = self.ent(f, ent_id)
+            if not e:
+                raise Fail(f'no heavy {ent_id} ({label})')
+            pos = (e['x'], e['y'])
+            if pos == tuple(target):
+                return
+            dx, dy = target[0] - pos[0], target[1] - pos[1]
+            if dx and dy:
+                raise Fail(f'{ent_id} at {pos} is not in line with {target} ({label})')
+            d = ('right' if dx > 0 else 'left') if dx else ('down' if dy > 0 else 'up')
+            behind = (pos[0] - DIRS[d][0], pos[1] - DIRS[d][1])
+            self.walk_to([behind], label=f'shove {ent_id}')
+            self.face(d)
+            self.press_ability()
+            f = self.settle()
+            e = self.ent(f, ent_id)
+            if (e['x'], e['y']) == pos:
+                self.notes.append(f'shove {ent_id} {d} from {pos} did not move it')
+                self.press_ability()
+        f = self.settle()
+        e = self.ent(f, ent_id)
+        if (e['x'], e['y']) != tuple(target):
+            raise Fail(f'{ent_id} did not reach {target} ({label}); at {(e["x"], e["y"])}')
+
+    def dash_break(self, ent_id, label=''):
+        """Dash Strike (W9) into a cracked rock or glass pane: stand next to it, face it, pageR."""
+        for _ in range(3):
+            f = self.settle()
+            e = self.ent(f, ent_id)
+            if not e or e['state'] == 'broken':
+                return True
+            r = self.reachable_spot(f, [tuple(c) for c in e['cells']])
+            if not r:
+                raise Fail(f'no spot to dash at {ent_id} ({label})')
+            _, spot, d = r
+            self.walk_to([spot], label=f'dash {ent_id}')
+            self.face(d)
+            self.press_ability()
+        f = self.settle()
+        e = self.ent(f, ent_id)
+        return not e or e['state'] == 'broken'
+
+    def rest_at_fire(self, ent_id, prefer=None):
+        """A campfire object with `rest` (the Waystation): its scene, then the rest flow."""
+        self.interact(ent_id=ent_id, prefer=prefer or ['Rest', 'Not now'], label=f'rest {ent_id}')
+        self.settle(prefer=['Not now'])
 
 
 # ================================================================================================ the plan
@@ -1721,6 +1930,14 @@ class Episode:
             if sc == 'field' and (b.field() or {}).get('map') == 'hero_home' and not (b.field() or {}).get('locked'):
                 break
         b.settle()
+        # The autosave the game wrote as the party woke at home after the credits: the "Episode 1 credits save"
+        # the Episode 2 run starts from (python qa/autoplay.py --episode 2).
+        env = b.js('LQ_ENGINE.save.loadEnvelope(0)')
+        if env and env.get('data') and (env['data'].get('flags') or {}).get('ep1_complete'):
+            (OUT / f'{b.device}-ep1-credits-save.json').write_text(json.dumps(env['data']), encoding='utf-8')
+            b.notes.append(f'credits save written: {b.device}-ep1-credits-save.json ({env["data"].get("map")}, Lv {env["data"]["party"][0]["level"]})')
+        else:
+            b.notes.append('no autosave with ep1_complete after the credits')
         b.mark('epilogue')
 
     def epilogue(self):
@@ -1754,6 +1971,675 @@ class Episode:
             fn()
             if b.resume and step_id == 'wake':
                 b.resume = None          # loaded: from here on the plan runs as usual
+                self.ensure_any()
+            b.check_errors()
+            if self.until == step_id:
+                print(f'stopping after {step_id} (--until)', flush=True)
+                return
+
+
+# ================================================================================================ Episode 2
+class Episode2(Episode):
+    """Episode 2, "The Town Without a Name" (docs/story/EPISODE2.md, STAGING_EP2.md, MAPS.md section 6): from the
+    morning after the Episode 1 credits to the Episode 2 credits in Hollowmere's inn. Every phase is guarded by
+    its flags, so a run resumed from any save skips what is done. Beam puzzles use the maps' own solutions
+    (Bot.solve_beam); fights are Auto at 2x, every visible enemy on the way."""
+
+    # Gear the bot buys, best first (shop_buy skips what is not listed or not affordable).
+    TIER3 = [('steel_cuirass', 2), ('sage_robe', 1), ('steel_helm', 2), ('moon_circlet', 1), ('strider_boots', 1)]
+    TIER4 = [('mere_pike', 1), ('mirror_rod', 1), ('silverglass_blade', 1), ('silver_mail', 2), ('mirrorweave_robe', 1),
+             ('glass_helm', 2), ('mirror_circlet', 1)]
+
+    def __init__(self, bot, side=True, until=None, start='save'):
+        super().__init__(bot, side=side, until=until)
+        self.start = start
+
+    def level(self):
+        return (self.b.game() or {}).get('party', [{}])[0].get('level')
+
+    def where(self):
+        return self.b.settle()['map']
+
+    # ---- phases
+    def title_start(self):
+        """Title -> Continue on the Episode 1 credits save (record 1), or Title -> Episode 2 -> name -> home."""
+        b = self.b
+        if b.scene() != 'title':
+            return
+        b.shot('title')
+        ss = b.scene_state()['ss'] or {}
+        items = ss.get('items') or []
+        if 'ep2' not in items:
+            raise Fail(f'the title does not offer Episode 2 (items {items}; ep2 {ss.get("ep2")})')
+        if b.resume:
+            b.title_continue(1)
+            b.notes.append(f'resumed from {b.resume}')
+            b.mark('resume')
+            return
+        b.pick(items.index('ep2'), ss.get('index') or 0)
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'nameEntryEp2' && !LQ_DEBUG.state().transition", timeout=20000, polling=30)
+        b.frames(10)
+        for _ in range(8):
+            b.page.keyboard.press('Backspace')
+        b.page.keyboard.type(b.hero, delay=30)
+        b.frames(6)
+        b.shot('name_entry_ep2')
+        b.page.keyboard.press('Enter')
+        b.page.wait_for_function("LQ_DEBUG.state().scenes.includes('field')", timeout=30000, polling=30)
+        b.frames(30)
+        b.shot('ep2_card')
+        b.settle()
+        g = b.game() or {}
+        if g.get('heroName') != b.hero:
+            raise Fail(f'hero name is {g.get("heroName")!r}, typed {b.hero!r}')
+        b.mark('ep2_new_game')
+
+    def morning(self):
+        b = self.b
+        if self.has('ep2_started'):
+            return
+        f = b.settle()
+        if f['map'] == 'hero_home':
+            if not self.has('ep2_morning_done'):
+                raise Fail('ep2_morning did not run at home')
+            self.talk('hazel')
+            b.through('home_exit')
+        self.ensure_map('willowmere')
+        b.mark('ep2_mael')
+        self.talk('mael')                                            # ep2_mael: the letter
+        if not self.has('ep2_started'):
+            raise Fail('ep2_mael did not set ep2_started')
+        if not b.items().get('mael_letter'):
+            raise Fail('ep2_mael did not give mael_letter')
+
+    def farewells(self):
+        """Optional Act I beats: Tess (The Last Route), Iris, the smithy note. Cheap and in town."""
+        b = self.b
+        if not self.side or self.has('crossing_done'):
+            return
+        self.ensure_map('willowmere')
+        if not self.has('last_route_started'):
+            self.talk('tess')
+        # (smithy_ford_note sits on the smithy's door cell: facing it reads it, a step more walks in; not read here)
+        if not self.has('iris_farewell_done'):
+            b.through('door_library')
+            self.ensure_map('library')
+            self.talk('iris')
+            b.through('library_exit')
+        b.menu_talk()
+        b.menu_journal()
+
+    def crossing(self):
+        b = self.b
+        if self.has('crossing_done'):
+            return
+        f = b.settle()
+        if f['map'] == 'willowmere':
+            b.exit_to((20, 31), label='to the valley')
+        self.ensure_map('valley')
+        b.mark('crossing')
+        self.sign('ford_wrack')
+        b.walk_to([(43, y) for y in range(16, 20)] + [(44, y) for y in range(16, 20)], label='crossing_trig')
+        b.settle()
+        if not self.has('crossing_done'):
+            raise Fail('garrick_crossing did not set crossing_done')
+        self.sign('garrick_rail')
+        b.exit_to((59, 16), label='the east road')
+        self.ensure_map('east_road')
+        b.mark('fading_road')
+
+    def east_road(self):
+        b = self.b
+        if self.has('nh_arrived'):
+            return
+        self.ensure_map('east_road')
+        b.settle()                                                   # east_road_arrival
+        if not self.has('east_road_arrived'):
+            raise Fail('east_road_arrival did not run')
+        self.sign('east_signpost')
+        if not self.has('east_first_fight_done'):
+            for attempt in range(4):
+                b.walk_to([(6, 16), (6, 17)], label='first fight cut')
+                b.settle()
+                if self.has('east_first_fight_done'):
+                    break
+                b.notes.append(f'east_first_fight attempt {attempt + 1}')
+                b.walk_to([(3, 16), (3, 17)], label='back from the cut')
+            if not self.has('east_first_fight_done'):
+                raise Fail('east_first_fight did not resolve')
+        b.hunt(limit=3, label='bank road')
+        if self.side and not b.opened('east_road', 'chest_clearing'):
+            try:
+                if b.dash_break('crack_clearing', label='clearing'):
+                    b.hunt(limit=2, label='clearing')
+                    self.chest('chest_clearing')
+                else:
+                    b.notes.append('the clearing crack did not break')
+            except Fail as e:
+                b.notes.append(f'clearing skipped: {e}')
+        if not self.has('saw_old_milestone'):
+            b.interact(ent_id='old_milestone', label='old milestone')
+        b.top_up_mp()
+        b.walk_to([(19, 16)], label='fog_start')
+        b.settle()
+        if not self.has('saw_cairns'):
+            raise Fail('fading_stretch did not run at fog_start')
+        self.sign('cairn_sign')
+        b.hunt(limit=1, label='fog guard')
+        b.walk_to([(40, 16), (40, 17)], label='fog_end')
+        if self.has('fog_looped'):
+            b.notes.append('the fog looped the bot (it left the cairn corridor)')
+        b.mark('waystation')
+        if not self.has('waystation_rested'):
+            b.rest_at_fire('waystation_fire', prefer=['Mira, that tune?', 'Rest', 'Not now'])
+        self.chest('chest_toll')
+        self.sign('toll_board')
+        b.visit_shop('penny_e', [('hi_potion', 2)])
+        b.hunt(limit=3, label='waystation')
+        b.maintain('waystation')
+        if b.party_vitals() and min(v['hp'] / max(1, v['maxHp']) for v in b.party_vitals()) < 0.6:
+            b.rest_at_fire('waystation_fire')
+        b.walk_to([(52, 13), (53, 13), (54, 13), (52, 14), (53, 14), (54, 14)], label='mere_view')
+        b.settle()
+        if not self.has('saw_court'):
+            raise Fail('mere_view did not run on the rise')
+        if self.side and not b.opened('east_road', 'chest_reeds'):
+            try:
+                self.reed_island()
+            except Fail as e:
+                b.notes.append(f'reed island skipped: {e}')
+        b.hunt(limit=2, label='mere shore')
+        b.exit_to((63, 16), label='to the Hollow')
+        self.ensure_map('nameless_hollow')
+        b.mark('nameless_hollow')
+
+    def reed_island(self):
+        """The heavy block on the causeway (W9 Shove): shove it aside, then the iron chest on the reed island."""
+        b = self.b
+        f = b.settle()
+        e = b.ent(f, 'heavy_shore')
+        if not e:
+            return
+        if not b.reachable_spot(f, [(59, 8)]):
+            for d in ('left', 'right', 'up', 'down'):
+                tgt = (e['x'] + DIRS[d][0], e['y'] + DIRS[d][1])
+                behind = (e['x'] - DIRS[d][0], e['y'] - DIRS[d][1])
+                passable, _ = b.model(f)
+                if passable(tgt[0], tgt[1], d) and b.bfs((f['leader']['x'], f['leader']['y']), [behind], passable) is not None:
+                    b.shove_to('heavy_shore', tgt, label='causeway block')
+                    break
+        self.chest('chest_reeds')
+
+    def hollow(self):
+        """The Nameless Hollow: Elian at the fountain, the hall, Anwen, the ferry; shops; the Fountain of Faces."""
+        b = self.b
+        if self.has('court_entered'):
+            return
+        self.ensure_map('nameless_hollow')
+        b.settle()                                                   # nh_arrival
+        if not self.has('nh_arrived'):
+            raise Fail('nh_arrival did not run')
+        self.sign('gate_sign')
+        if not self.has('met_elian'):
+            b.walk_to([(x, 20) for x in range(19, 25)] + [(19, 18), (24, 18)], label='fountain ring')
+            b.settle()
+            if not self.has('met_elian'):
+                raise Fail('fountain_faces did not set met_elian')
+        self.sign('proclamation')
+        self.sign('plinth')
+        if not self.has('heard_crisis'):
+            b.through('door_hall')
+            self.ensure_map('nh_hall')
+            b.walk_to([(9, 12), (10, 12), (11, 12)], label='hall_trig')
+            b.settle()
+            if not self.has('heard_crisis'):
+                raise Fail('elian_hall did not set heard_crisis')
+            b.interact(ent_id='nh_ledger_book', label='ledger')
+            b.through('hall_exit')
+        self.ensure_map('nameless_hollow')
+        if not self.has('met_anwen'):
+            b.through('door_chapel')
+            self.ensure_map('nh_chapel')
+            b.walk_to([(8, 11), (9, 11), (10, 11)], label='anwen_trig')
+            b.settle()
+            if not self.has('met_anwen'):
+                raise Fail('anwen_register did not set met_anwen')
+            self.sign('register')
+            b.interact_no_settle(ent_id='save_bell')
+            self.save_from_bell(1)
+            b.close_menu()
+            b.round_trip(1, 'the Hollow chapel')
+            self.ensure_map('nh_chapel')
+            b.through('chapel_exit')
+        self.ensure_map('nameless_hollow')
+        if not self.has('court_ferry_open'):
+            self.talk('tovin')
+            if not self.has('court_ferry_open'):
+                raise Fail('tovin_ferry did not open the ferry')
+        b.mark('outfit_hollow')
+        self.shop_hollow(self.TIER3)
+        if self.side:
+            self.fountain_quest()
+            if not self.has('satchel_found'):
+                b.through('door_inn')
+                self.ensure_map('nh_inn')
+                b.interact(ent_id='lost_property', label='lost property')
+                b.through('inn_exit')
+        self.inn_if_hurt()
+        self.ensure_map('nameless_hollow')
+        b.interact(ent_id='ferry_court', prefer='Ring', label='ferry to the Court')
+        self.ensure_map('court_f1')
+        b.settle()                                                   # court_crossing
+        if not self.has('court_entered'):
+            raise Fail('court_crossing did not set court_entered')
+        b.mark('court_f1')
+
+    def shop_hollow(self, wants, salves=0):
+        """Vessa's smithy (armour, later the tier 4 list), then Fitch (Silver Salves once the Court is open)."""
+        b = self.b
+        self.ensure_map('nameless_hollow')
+        b.through('door_smithy')
+        self.ensure_map('nh_smithy')
+        b.visit_shop('vessa', wants)
+        b.through('smithy_exit')
+        b.menu_optimize_all()
+        if salves:
+            self.ensure_map('nameless_hollow')
+            b.through('door_shop')
+            self.ensure_map('nh_shop')
+            b.visit_shop('fitch', [('silver_salve', salves), ('hi_potion', 2)])
+            b.through('shop_exit')
+        self.ensure_map('nameless_hollow')
+
+    def inn_if_hurt(self, frac=0.7):
+        b = self.b
+        vit = b.party_vitals()
+        if not vit or min(v['hp'] / max(1, v['maxHp']) for v in vit) >= frac:
+            return
+        self.ensure_map('nameless_hollow')
+        b.through('door_inn')
+        self.ensure_map('nh_inn')
+        b.rest_at_inn('wren')
+        b.through('inn_exit')
+
+    def fountain_quest(self):
+        """The Fountain of Faces: Orla, Lena, Anwen (Tovin testified at the pier), then the fountain itself."""
+        b = self.b
+        if self.has('fountain_done'):
+            return
+        self.ensure_map('nameless_hollow')
+        if not self.has('fountain_started'):
+            self.talk('orla')
+        if self.has('fountain_started') and not self.has('testimony_lena'):
+            self.talk('lena')
+        if self.has('fountain_started') and not self.has('testimony_anwen'):
+            b.through('door_chapel')
+            self.ensure_map('nh_chapel')
+            self.talk('anwen')
+            b.through('chapel_exit')
+            self.ensure_map('nameless_hollow')
+        b.interact(ent_id='fountain_obj', label='the fountain')
+        if not self.has('fountain_done'):
+            b.notes.append('the Fountain of Faces did not complete (witnesses: ' + ', '.join(
+                f for f in ('fountain_started', 'testimony_lena', 'testimony_tovin', 'testimony_anwen') if self.has(f)) + ')')
+
+    def court_f1(self):
+        b = self.b
+        if self.has('court_f1_done'):
+            return
+        f = b.settle()
+        if f['map'] == 'nameless_hollow':
+            b.interact(ent_id='ferry_court', prefer='Ring', label='ferry to the Court')
+        self.ensure_map('court_f1')
+        if not self.has('court_f1_arrived'):
+            f = b.settle()
+            if f['leader']['y'] > 23:
+                b.through('great_door_in')
+            b.walk_to([(19, 21), (20, 21)], label='arrival_trig')
+            b.settle()
+            if not self.has('court_f1_arrived'):
+                raise Fail('court_f1_arrival did not run at the great door')
+        # B: the teaching room. One mirror, one receptor, the gate to the east wing.
+        if b.items().get('glass_key', 0) == 0 and not b.opened('court_f1', 'chest_key1'):
+            f = b.settle()
+            if f['leader']['y'] > 23:
+                b.through('great_door_in')
+            b.solve_beam('court_f1', 'rec_b', label='teaching room')
+            f = b.settle()
+            if (b.ent(f, 'rec_b') or {}).get('state') != 'lit':
+                raise Fail('rec_b did not light')
+            b.through('gate_b')
+            b.hunt(limit=4, label='east wing')
+            self.chest('chest_key1')
+            self.chest('chest_d')
+            if self.side and not b.opened('court_f1', 'chest_helm'):
+                try:
+                    if b.dash_break('pane_d', label='cracked pane'):
+                        self.chest('chest_helm')
+                    else:
+                        b.notes.append('the cracked pane did not break')
+                except Fail as e:
+                    b.notes.append(f'Merewarden Helm skipped: {e}')
+            b.maintain('east wing')
+            b.through('notch_b')
+        # C, N, E: the Silverglass Lock (three lenses, a block in the corridor)
+        if not self.has('silverglass_lock_lit'):
+            f = b.settle()
+            in_west = f['leader']['x'] <= 11 and f['leader']['y'] <= 15      # C, or N's west end
+            if not in_west and f['leader']['y'] >= 17:
+                b.hunt(limit=2, label='antechamber')
+                b.through('door_c')
+            b.hunt(limit=3, label='lens hall')
+            self.chest('chest_c')
+            b.hunt(limit=2, label='north corridor')
+            f = b.settle()
+            blk = b.ent(f, 'block_n')
+            if blk and blk['y'] == 13:
+                try:
+                    b.push_block('block_n', (blk['x'], 12), label='out of the beam (north)')
+                except Fail:
+                    b.push_block('block_n', (blk['x'], 14), label='out of the beam (south)')
+            b.solve_beam('court_f1', 'rec_lock', label='silverglass lock')
+            b.settle()
+            if not self.has('silverglass_lock_lit'):
+                raise Fail('the Silverglass Lock did not light')
+        if not self.has('mira_memory_1'):
+            b.walk_to([(16, 9), (17, 9)], label='mira_window_trig')
+            b.settle()
+        b.hunt(limit=2, label='stairs hall')
+        self.chest('chest_e')
+        b.maintain('end of F1')
+        b.through('gate_lock')
+        b.walk_to([(19, 2), (20, 2)], label='stairs_trig')
+        b.settle()
+        if not self.has('court_f1_done'):
+            raise Fail('court_f1_stairs did not set court_f1_done')
+        b.through('stairs_f2')
+        self.ensure_map('court_f2')
+        b.mark('court_f2')
+
+    def court_f2(self):
+        b = self.b
+        if self.has('court_f2_done'):
+            return
+        self.ensure_map('court_f2')
+        b.settle()                                                   # court_f2_arrival
+        if not self.has('other_selves_defeated'):
+            if not b.opened('court_f2', 'door_w') and (b.ent(b.settle(), 'door_w') or {}).get('state') != 'open':
+                self.f2_galleries()
+            self.f2_west_wing()
+        b.walk_to([(9, 12)], label='arena stair')
+        b.settle()
+        if not self.has('court_f2_done'):
+            raise Fail('court_f2_stairs did not set court_f2_done')
+        b.mark('court_f3')
+
+    def f2_galleries(self):
+        b = self.b
+        if self.side:
+            if not self.has('portrait_child_seen'):
+                b.interact(ent_id='portrait_child', label='portrait child')
+            self.chest('chest_alcove')
+        b.hunt(limit=2, label='north gallery')
+        b.solve_beam('court_f2', 'bridge 25,5', skip=('m_e1', 'm_i1'), label='moat bridge')
+        b.hunt(limit=4, label='east gallery')
+        self.chest('chest_key2')
+        if self.side:
+            try:
+                if not self.has('portrait_keeper_seen'):
+                    b.interact(ent_id='portrait_keeper', label='portrait keeper')
+                self.chest('chest_keeper')
+            except Fail as e:
+                b.notes.append(f'keeper alcove skipped: {e}')
+        b.solve_beam('court_f2', 'bridge 28,12', skip=('m_i1',), label='bridge to the island')
+        if not self.has('mira_memory_2'):
+            b.walk_to([(22, 11), (22, 12), (22, 13)], label='pool_trig')
+            b.settle()
+        self.chest('chest_island')
+        b.solve_beam('court_f2', 'bridge 21,15', label='bridge to the south gallery')
+        b.walk_to([(21, 19), (21, 20), (21, 21)], fight=True, label='south gallery')
+        b.hunt(limit=4, label='south gallery')
+        if self.side:
+            if not self.has('portrait_king_seen'):
+                b.interact(ent_id='portrait_king', label='portrait king')
+            if self.has('remembrance_open'):
+                self.chest('chest_remembrance')
+                f = b.settle()
+                if b.ent(f, 'cache_ledger'):
+                    b.interact(ent_id='cache_ledger', label='court ledger')
+        b.maintain('south gallery')
+        b.through('door_w')
+
+    def f2_west_wing(self):
+        b = self.b
+        b.hunt(limit=2, label='west wing')
+        b.maintain('west wing')
+        f = b.settle()
+        if b.ent(f, 'font_f2'):
+            b.rest_at_font('font_f2', label='font F2')
+            b.round_trip(2, 'F2 west wing')
+            self.ensure_map('court_f2')
+        if not self.has('vex_met'):
+            b.walk_to([(2, 13), (3, 13)], label='vex_trig')
+            b.settle()
+            if not self.has('vex_met'):
+                raise Fail('vex_mirror did not run')
+        for attempt in range(5):
+            if self.has('other_selves_defeated'):
+                break
+            if attempt:
+                b.notes.append(f'Other Selves attempt {attempt + 1}')
+                b.maintain('before the Other Selves again')
+                f = b.settle()
+                if b.ent(f, 'font_f2'):
+                    b.rest_at_font('font_f2', label='font F2 again')
+            b.mark('other_selves')
+            b.walk_to([(7, y) for y in range(11, 17)], label='selves_trig')
+            b.settle(max_s=900)
+        if not self.has('other_selves_defeated'):
+            raise Fail('the Other Selves did not fall in 5 attempts')
+
+    def hollow_trip(self):
+        """After the Other Selves: the mirror shortcut to the F1 landing, the ferry home, Vessa's tier 4 stock,
+        Fitch's Silver Salves, Nico, the inn; then the ferry and the F1 mirror back down to F2."""
+        b = self.b
+        if not self.side or self.has('court_f3_arrived') or not self.has('court_f2_done'):
+            return
+        f = b.settle()
+        if f['map'] == 'court_f2':
+            b.through('mirror_f2_short')
+        self.ensure_map('court_f1')
+        b.interact(ent_id='ferry_home', prefer='Ring', label='ferry home')
+        self.ensure_map('nameless_hollow')
+        b.mark('hollow_trip')
+        self.shop_hollow(self.TIER4, salves=3)
+        if not self.has('nico_crowns_started'):
+            self.talk('nico')
+        if not self.has('fountain_done'):
+            self.fountain_quest()
+        self.inn_if_hurt(0.95)
+        self.ensure_map('nameless_hollow')
+        b.interact(ent_id='ferry_court', prefer='Ring', label='ferry back')
+        self.ensure_map('court_f1')
+        b.through('mirror_f1_f2')
+        self.ensure_map('court_f2')
+
+    def court_f3(self):
+        b = self.b
+        if self.has('vow_door_open'):
+            return
+        f = b.settle()
+        if f['map'] == 'court_f2':
+            b.through('stairs_f3')
+        self.ensure_map('court_f3')
+        b.settle()                                                   # court_f3_arrival
+        if not self.has('court_f3_arrived'):
+            raise Fail('court_f3_arrival did not run')
+        # West: Belonging, in the dark
+        if not self.has('vow_belonging'):
+            b.hunt(limit=2, label='belonging wing')
+            b.solve_beam('court_f3', 'rec_belonging', label='belonging')
+            b.settle()
+            if not self.has('vow_belonging'):
+                raise Fail('rec_belonging did not latch')
+        if self.side:
+            self.chest('chest_crown')
+        # East: Mercy, the bridge over the chasm
+        if not self.has('vow_mercy'):
+            b.hunt(limit=2, label='mercy wing')
+            b.solve_beam('court_f3', 'rec_mercy', label='mercy')
+            b.settle()
+            if not self.has('vow_mercy'):
+                raise Fail('rec_mercy did not latch')
+            b.hunt(limit=2, label='mercy wing north')
+            if self.side:
+                self.chest('chest_e')
+        b.maintain('after mercy')
+        # South: Courage, Bram's Shove
+        if not self.has('vow_courage'):
+            f = b.settle()
+            if f['leader']['y'] < 24:
+                b.through('notch_south')
+            b.hunt(limit=3, label='courage wing')
+            b.solve_beam('court_f3', 'rec_courage', label='courage')
+            b.settle()
+            if not self.has('vow_courage'):
+                raise Fail('rec_courage did not latch')
+            if self.side and not b.opened('court_f3', 'chest_hollowcrown'):
+                try:
+                    b.walk_to([(30, 28)], label='courage east end')
+                    b.reveal_near([(31, 28), (32, 28)], label='courage ink bridge')
+                    self.chest('chest_hollowcrown')
+                    self.sign('court_note')
+                except Fail as e:
+                    b.notes.append(f'Hollowcrown cache skipped: {e}')
+            f = b.settle()
+            if f['leader']['y'] >= 24:
+                b.through('south_door')
+        b.hunt(limit=4, label='hub sweep')
+        b.maintain('before the vow door')
+        b.walk_to([(21, 15), (22, 15)], label='vow_door_trig')
+        b.settle()
+        if not self.has('vow_door_open'):
+            raise Fail('vow_door did not run')
+        b.mark('antechamber')
+
+    def antechamber(self):
+        b = self.b
+        if self.has('nameless_king_defeated'):
+            return
+        f = b.settle()
+        if f['map'] == 'court_f3' and f['leader']['y'] > 12:
+            b.through('door_vow')
+        self.ensure_map('court_f3')
+        if self.side and not self.has('black_feather_found'):
+            b.interact(ent_id='feather_obj', label='black feather')
+        self.chest('chest_ta')
+        b.maintain('antechamber')
+        b.rest_at_font('font_f3', label='font F3')
+        b.round_trip(3, 'before the King')
+        f = self.ensure_map('court_f3')
+        # EPISODE2_PLAN 11: a save written mid-dungeon reloads with latched receptors and opened doors intact
+        lit = [r for r in ('rec_belonging', 'rec_mercy', 'rec_courage') if (b.ent(f, r) or {}).get('state') == 'lit']
+        if len(lit) != 3 or (b.ent(f, 'door_vow') or {}).get('state') != 'open':
+            raise Fail(f'after the reload the vows lit {lit} and the vow door is {(b.ent(f, "door_vow") or {}).get("state")}')
+        b.notes.append('reload at the antechamber: three latched receptors lit, the vow door open')
+
+    def king(self):
+        b = self.b
+        if self.has('aurel_named'):
+            return
+        for attempt in range(5):
+            f = b.settle()
+            if f['map'] == 'court_f3':
+                if f['leader']['y'] > 12:
+                    b.through('door_vow')
+                b.through('throne_door')
+            self.ensure_map('court_throne')
+            if attempt == 0:
+                b.mark('nameless_king')
+            b.walk_to([(x, 15) for x in range(4, 20)], label='king_trig')
+            b.settle(max_s=1200)                                     # the scene, the fight, king_after
+            if self.has('aurel_named'):
+                break
+            b.notes.append(f'Nameless King attempt {attempt + 1} (Lv {self.level()})')
+            f = b.settle()
+            if f['map'] == 'court_throne':
+                b.through('throne_exit')
+            self.ensure_map('court_f3')
+            b.rest_at_font('font_f3', label='font before the King again')
+            b.maintain('before the King again')
+        if not self.has('aurel_named'):
+            raise Fail('the Nameless King did not fall in 5 attempts')
+        b.mark('hollowmere')
+
+    def ending(self):
+        b = self.b
+        if self.has('ep2_complete'):
+            return
+        f = b.settle()
+        if f['map'] == 'court_throne':
+            b.through('mirror_exit', exact=False)                    # hollowmere_restored walks the party off the landing
+        b.settle(max_s=900)                                          # hollowmere_restored, ep2_ending, the credits
+        if not self.has('ep2_complete'):
+            raise Fail(f'ep2_complete was not set (on {b.settle()["map"]})')
+        for _ in range(400):
+            sc = b.handle()
+            fs = b.field() or {}
+            if sc == 'field' and fs.get('map') == 'nh_inn' and not fs.get('locked'):
+                break
+        f = b.settle()
+        if f['map'] != 'nh_inn':
+            raise Fail(f'after the Episode 2 credits the party woke on {f["map"]}, not nh_inn')
+        if not (b.game() or {}).get('counters', {}).get('credits2_rolled'):
+            raise Fail('credits2_rolled was not counted')
+        b.mark('ep2_credits_done')
+
+    def epilogue2(self):
+        """After the credits: Elian's letter, Nico's crown, the chapel mirror to Willowmere, Mael and Tess."""
+        b = self.b
+        if not self.side or not self.has('ep2_complete'):
+            return
+        self.ensure_map('nh_inn')
+        f = b.settle()
+        if f['leader']['x'] >= 13:
+            b.through('inn_down')                                    # the guest room is up the inn's stair
+        self.talk('wren')
+        b.through('inn_exit')
+        self.ensure_map('nameless_hollow')
+        if not self.has('letter_answer_started'):
+            b.through('door_hall')
+            self.talk('elian')
+            b.through('hall_exit')
+            self.ensure_map('nameless_hollow')
+        if self.has('paper_crown_found') and not self.has('nico_crowns_done'):
+            self.talk('nico')
+        self.talk('aurel')
+        b.through('door_chapel')
+        self.ensure_map('nh_chapel')
+        b.through('mirror_nh_wm')
+        self.ensure_map('chapel')
+        b.through('chapel_exit')
+        self.ensure_map('willowmere')
+        if self.has('letter_answer_started') and not self.has('letter_answer_done'):
+            self.talk('mael')
+        if self.has('satchel_found') and not self.has('last_route_done'):
+            self.talk('tess')
+        b.mark('ep2_epilogue')
+
+    def run(self):
+        b = self.b
+        b.mark('boot')
+        phases = [('ep2_start', self.title_start), ('ep2_morning', self.morning), ('ep2_farewells', self.farewells),
+                  ('crossing', self.crossing), ('fading_road', self.east_road), ('nameless_hollow', self.hollow),
+                  ('court_f1', self.court_f1), ('court_f2', self.court_f2), ('hollow_trip', self.hollow_trip),
+                  ('court_f3', self.court_f3), ('antechamber', self.antechamber), ('king', self.king),
+                  ('hollowmere', self.ending), ('epilogue2', self.epilogue2)]
+        for step_id, fn in phases:
+            print(f'-- {step_id}', flush=True)
+            fn()
+            if b.resume and step_id == 'ep2_start':
+                b.resume = None
                 self.ensure_any()
             b.check_errors()
             if self.until == step_id:
@@ -1825,14 +2711,29 @@ def main(argv):
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2])
+    ap.add_argument('--start', default='save', choices=['save', 'new'],
+                    help='Episode 2: load the Episode 1 credits save (save) or use the title\'s Episode 2 entry (new)')
     a = ap.parse_args(argv)
     shots.watchdog(3 * 3600)
-    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=a.resume, tag='-wo' if a.wrong_order else '')
+    tag, query, resume = ('-wo' if a.wrong_order else ''), '', a.resume
+    if a.episode == 2:
+        tag = '-ep2' + ('-new' if a.start == 'new' and not a.resume else '')
+        if a.start == 'new' and not a.resume:
+            query = '&ep=2'                   # the title offers Episode 2 without a finished save (title.js ep2Offer)
+        elif not resume:
+            resume = str(OUT / f'{a.device}-ep1-credits-save.json')
+            if not pathlib.Path(resume).exists():
+                print(f'no Episode 1 credits save at {resume}: run the Episode 1 autoplay first, or use --start new')
+                return 2
+    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=resume, tag=tag, query=query)
     status, detail, wrong = 'ok', '', []
     try:
         bot.open()
         if a.wrong_order:
             wrong = wrong_order(bot)
+        elif a.episode == 2:
+            Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
         else:
             Episode(bot, side=not a.no_side, until=a.until).run()
         bot.check_errors()

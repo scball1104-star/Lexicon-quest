@@ -41,7 +41,7 @@ export default {
   overhead: [],
   events: [
     npc('garrick', 10, 5, 'up'),
-    npc('anvil', 7, 9, 'left'),
+    npc('anvil', 6, 9, 'left'),     // radius 1 keeps him off (8,9), the one tile in front of the door
     npc('starter_dough', 6, 4, 'down'),
     door('smithy_exit', 8, 10, ['willowmere', 29, 26, 'down']),
     sign('forge', 8, 3, 'forge', { solid: false }),

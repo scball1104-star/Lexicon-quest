@@ -174,6 +174,9 @@ export class Silverglass {
         f.engine.audio.sfx('beam_hit');
         if (f.particles) f.particles.sparkle(ent.x * TILE + 8, ent.y * TILE - 4, 6, '#e8fffb');
         if (ev.script && first && !flagWasSet) this.queue.push(ev.script);
+        // the first receptor the party lights earns Mira's remark (once per save; its line says "just unlocked",
+        // so it waits for the light: on sight it fired at the F1 landing, through a wall, before anything was lit)
+        else if (first) f.bark('first_receptor');
       }
     }
     for (const t of targetsOf(ev)) fireTarget(f, t, { quiet: !!o.quiet });
@@ -204,14 +207,7 @@ export class Silverglass {
         if (!this.occupied(b.x, b.y)) { this.setBridge(b, false); this.grace.delete(k); }
       }
     }
-    // the first receptor the party sees on screen earns Mira's remark (once per save)
     const f = this.f;
-    if (this.frame % 30 === 0 && f.camera && !(f.game.counters && f.game.counters['bark:first_receptor'])) {
-      for (const ent of f.entities.values()) {
-        if (!ent.present || ent.type !== 'receptor') continue;
-        if (f.camera.visible(ent.x * TILE, ent.y * TILE - 16, 16, 32, -16)) { f.bark('first_receptor'); break; }
-      }
-    }
     // a little shimmer where the light bends
     if (f.particles && this.result && this.frame % 40 === 0 && !(f.engine.settings && f.engine.settings.reduceMotion)) {
       const list = this.result.bounces;

@@ -310,7 +310,8 @@ Strike, opens (10,9..11)) hides the clearing: wood chest Hi-Ether, a quicksilver
 dirt ends; the true path (exact, in the module) zigzags right 4, up 3, right 4, down 5, right 4, up 3, right 7, down 1;
 nine cairns stand beside it, each within six tiles of the last (`cairn_first` (22,17)); the path and its neighbours
 are the corridor, and every other walkable cell of the stretch (rows 11..20) is a fog door (merged into row runs)
-landing on `fog_return` (19,18), where `fog_return_trig` runs `fog_loop`; `fading_trig` at `fog_start` (19,16); the
+landing on `fog_return` (19,18), where `fog_return_trig` runs `fog_loop`; `fading_trig` at `fog_start` (19,16), with
+`fading_trig_n` / `_s` covering the rest of the band's west edge (rows 11..21 but the landing) so no way in skips it; the
 mist `ambientFx` covers x 20..39; a beetle group stands guard on the path (28,16). Waystation (x 40..51): `toll_ruin`
 (a chest inside, `toll_board`, `toll_house`), the campfire `waystation_fire` (46,17: `waystation_rest`, `safe`,
 `rest`), the bench, Penny (`penny_e`) at her stall. Mere Shore (x 52..63): the mere (`mere_water`) with the Court far

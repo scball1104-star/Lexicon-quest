@@ -3453,6 +3453,538 @@
      "message": "story_epilogue: expected the field scene on top"
     }
    ]
+  },
+  {
+   "name": "field_fading_road_mist",
+   "note": "E2: the Fading Stretch, mist over the cairn path (east_road)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "east_road",
+      23,
+      16,
+      "right"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_fading_road_mist: the field is on top"
+    }
+   ]
+  },
+  {
+   "name": "field_hollow_fountain_faces",
+   "note": "E2: fountain_faces, three faces in the water and the hero a smudge",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "nameless_hollow",
+      22,
+      22,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"fountain_faces\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"a smudge on the water\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "field_hollow_fountain_faces: the narration is up"
+    }
+   ]
+  },
+  {
+   "name": "field_court_f1_beam_teach",
+   "note": "E2: F1 teaching room, mir_b turned, the beam in rec_b, gate_b open (snap -start: the splash west)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_f1",
+      18,
+      19,
+      "left"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "snap": "start"
+    },
+    {
+     "call": "turnMirror",
+     "args": [
+      "mir_b"
+     ]
+    },
+    {
+     "frames": 120
+    },
+    {
+     "assert": "LQ_DEBUG.call('beams').litReceptors.includes('rec_b')",
+     "message": "rec_b is lit"
+    }
+   ]
+  },
+  {
+   "name": "field_court_f2_bridge",
+   "note": "E2: F2 north gallery, m_n1 turned, the party on the lit glass bridge over the moat",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_f2",
+      23,
+      5,
+      "right"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 240
+    },
+    {
+     "call": "turnMirror",
+     "args": [
+      "m_n1"
+     ]
+    },
+    {
+     "frames": 30
+    },
+    {
+     "call": "walk",
+     "args": [
+      "right right right"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 90
+    }
+   ]
+  },
+  {
+   "name": "field_court_f3_dark_beam",
+   "note": "E2: F3 Belonging wing (dark 0.6), the beam the only light, rec_belonging lit",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\", \"vex_met\", \"other_selves_defeated\", \"court_f2_done\", \"court_f3_arrived\", \"vow_belonging_seen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_f3",
+      8,
+      17,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 240
+    },
+    {
+     "call": "turnMirror",
+     "args": [
+      "m_w1"
+     ]
+    },
+    {
+     "call": "turnMirror",
+     "args": [
+      "m_w2"
+     ]
+    },
+    {
+     "call": "turnMirror",
+     "args": [
+      "m_w3"
+     ]
+    },
+    {
+     "frames": 120
+    }
+   ]
+  },
+  {
+   "name": "story_vex_mirror",
+   "note": "E2: vex_mirror, Vex Quill in the corridor glass (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_f2",
+      3,
+      14,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_mirror\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Yours has no face\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_mirror: Vex speaks"
+    }
+   ]
+  },
+  {
+   "name": "battle_other_selves",
+   "note": "E2: the Other Selves, the Mirrored Combo announced (silver bracket on the timeline)",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "other_selves",
+      {
+       "fresh": true,
+       "seed": 1
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "call": "battleUntil",
+     "args": [
+      "mirror"
+     ]
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 4000; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_DEBUG.state().battle.telegraphs.length > 0",
+     "message": "a Mirrored Combo is telegraphed"
+    }
+   ]
+  },
+  {
+   "name": "battle_kept",
+   "note": "E2: the Nameless King, a party member Kept in a mirror shard",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "nameless_king",
+      {
+       "fresh": true,
+       "seed": 3
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "call": "battleUntil",
+     "args": [
+      "kept"
+     ]
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 4000; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => u.side === 'party' && u.statuses && u.statuses.kept)",
+     "message": "someone is Kept"
+    }
+   ]
+  },
+  {
+   "name": "battle_king_unmasked",
+   "note": "E2: the Nameless King, phase 3 (Aurel Unmasked)",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "nameless_king",
+      {
+       "fresh": true,
+       "seed": 3
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "call": "battleUntil",
+     "args": [
+      "phase3"
+     ]
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 4000; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "(() => { const k = LQ_ENGINE.scene.b.units().find(u => u.boss); return !!(k && k.ai && k.ai.phase >= 2); })()",
+     "message": "the King is unmasked"
+    }
+   ]
+  },
+  {
+   "name": "story_aurel",
+   "note": "E2: king_after, the King named Aurel, Elian beside him (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\", \"vex_met\", \"other_selves_defeated\", \"court_f2_done\", \"court_f3_arrived\", \"vow_belonging\", \"vow_belonging_seen\", \"vow_mercy\", \"vow_mercy_seen\", \"vow_courage\", \"vow_courage_seen\", \"mira_memory_3\", \"vow_door_open\", \"nameless_king_defeated\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "court_throne",
+      12,
+      12,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"^Elian\\\\.$\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_aurel: Aurel speaks"
+    }
+   ]
+  },
+  {
+   "name": "story_hollowmere_restored",
+   "note": "E2: hollowmere_restored, the signs lettered, Mira at the fountain rim (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\", \"vex_met\", \"other_selves_defeated\", \"court_f2_done\", \"court_f3_arrived\", \"vow_belonging\", \"vow_belonging_seen\", \"vow_mercy\", \"vow_mercy_seen\", \"vow_courage\", \"vow_courage_seen\", \"mira_memory_3\", \"vow_door_open\", \"nameless_king_defeated\", \"aurel_named\", \"mirror_sigil_get\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "nameless_hollow",
+      24,
+      21,
+      "down"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"from Hollowmere\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_hollowmere_restored: Mira speaks"
+    }
+   ]
+  },
+  {
+   "name": "story_ep2_ending",
+   "note": "E2: ep2_ending, night in Hollowmere, the hero's faint reflection (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep2_morning_done\", \"ep2_started\", \"last_route_started\", \"iris_farewell_done\", \"crossing_done\", \"east_road_arrived\", \"east_first_fight_done\", \"saw_old_milestone\", \"saw_cairns\", \"waystation_rested\", \"saw_court\", \"nh_arrived\", \"met_elian\", \"heard_crisis\", \"met_anwen\", \"testimony_tovin\", \"court_ferry_open\", \"court_entered\", \"court_f1_arrived\", \"mira_memory_1\", \"silverglass_lock_lit\", \"silverglass_lock_seen\", \"court_f1_done\", \"court_f2_arrived\", \"portraits_started\", \"mira_memory_2\", \"vex_met\", \"other_selves_defeated\", \"court_f2_done\", \"court_f3_arrived\", \"vow_belonging\", \"vow_belonging_seen\", \"vow_mercy\", \"vow_mercy_seen\", \"vow_courage\", \"vow_courage_seen\", \"mira_memory_3\", \"vow_door_open\", \"nameless_king_defeated\", \"aurel_named\", \"mirror_sigil_get\", \"nh_restored\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "nameless_hollow",
+      22,
+      21,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 120
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ep2_ending\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Your reflection is there now\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep2_ending: the narration is up"
+    }
+   ]
   }
  ]
 }

@@ -175,7 +175,7 @@ export default {
   events,
   exits: [{ x: 0, y: 32, w: 1, h: 2, to: ['east_road', 62, 16, 'left'] }],
   marks: {
-    gate_in: [1, 32], gate_sign: [14, 30], fountain: [21, 18], fountain_view: [21, 20], fountain_out: [24, 21],
+    gate_in: [1, 32], gate_sign: [14, 30], fountain: [21, 18], fountain_view: [21, 20], fountain_rim: [21, 17], fountain_out: [24, 21],
     meet_elian: [22, 21], elian_from: [22, 12], hall_door: [22, 12], chapel_door: [32, 30], inn_door: [8, 18],
     ferry_landing: [12, 2], tovin_spot: [12, 5], pier_end: [12, 1], plinth: [27, 16], clocktower: [32, 13],
     nico_spot: [17, 28], crowd_a: [19, 20], crowd_b: [24, 20], crowd_c: [18, 19], crowd_d: [25, 19],
