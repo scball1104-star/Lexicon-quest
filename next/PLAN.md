@@ -115,10 +115,12 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Live Episode 1 bug found: shops never offered story-unlocked stock (1cfe993); hotfix to main in progress.
 - [x] Reviews: critic-4 (1d6fa2a, docs/CRITIQUE_4.md) and play-critic-3 (4cda434, docs/PLAYTEST_REVIEW_3.md: well
       built, every beam puzzle readable from the screen; fixes are pacing and a level-curve spike; trim ~11 to 13 min)
-- [~] W11 fix pass, brief docs/briefs/W11-ep2-fixes.md. Part A (CRITIQUE_4 S/M items: phone foe visibility, fountain
-      faces, Hollow dusk, Fading Road fog, King portrait re-crop, items 6 to 14) running since 2026-10-21 16:05 ET.
-      Part B (PLAYTEST_REVIEW_3 items 1 to 8 and 10 + the length trim) runs after Part A is committed.
-      Deferred: five Episode 2 portrait repaints (L); CRITIQUE_4 items 9 and 15 (M) unless Part A reaches them.
+- [~] W11 fix pass, brief docs/briefs/W11-ep2-fixes.md. Part A committed 0f49e22 (CRITIQUE_4 items 1 to 8 and 10 to 14;
+      6 partial: per-room wall strips need new art; 9 half: Other Selves battle sprites still need repainting; 15
+      skipped; 508 tests; precache 3951b04). Part B (PLAYTEST_REVIEW_3 items 1 to 8 and 10 + the length trim)
+      running since 2026-10-21 17:58 ET.
+      Deferred to a later art pass: five Episode 2 portrait repaints (L); Other Selves sprites; Court wall strips;
+      CRITIQUE_4 item 15 (the King's battle art focal point).
 - [ ] Full gate list, then publish Episode 2 to /next
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).

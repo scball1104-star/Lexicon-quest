@@ -199,3 +199,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - The fix pass runs in two parts, one helper at a time: art and phone first (now), then pacing and balance. The
   five new character portraits that look flatter than Episode 1's wait for a later pass.
 
+## 2026-10-21 (Wed) evening: Episode 2's look is fixed; pacing next
+- On a phone, every monster in a fight is now visible, including the one that used to hide behind the battle menu.
+  This also improves Episode 1's three-monster fights on the phone.
+- The fountain scenes cut to a close-up of the water, so you see the townsfolk's faces, and the ending shows your
+  own reflection, faint, among lantern lights.
+- The nameless town is a grey, colourless evening that turns warm gold when its name returns.
+- The Fading Road has real fog now: follow the glowing cairns; a wrong turn sends you back only to the last cairn.
+- The mirror palace is moonlit instead of a flat grey grid, its monsters stand out, the King's crown is no longer
+  cut off, and he has a proper unmasked portrait.
+- Still to come in a later art pass: repainting the five new character portraits and the reflection monsters.
+- Now running: the pacing and balance half (a shorter opening, road monsters that stop coming back every minute,
+  a smoother difficulty curve).
+
