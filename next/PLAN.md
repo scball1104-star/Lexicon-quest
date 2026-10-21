@@ -113,7 +113,10 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       newGameEp2, desktop and phone, 0 game overs, King at Lv 13 (save) and Lv 12 (new); 505 tests; 12 shots x 7 devices.
       Story timer: first play 110 to 153 min (plan said 60 to 90; Episode 1 measures 96 to 113 the same way).
       Live Episode 1 bug found: shops never offered story-unlocked stock (1cfe993); hotfix to main in progress.
-- [ ] Reviews (one at a time): critic-4 (docs/CRITIQUE_4.md), then play-critic-3 (docs/PLAYTEST_REVIEW_3.md)
+- [~] Reviews (one at a time): critic-4 done 1d6fa2a (docs/CRITIQUE_4.md: not yet at Episode 1's level on the phone;
+      top: phone foe hidden by the touch command window (S), fountain faces unreadable (M), Hollow dusk reads as day
+      (S/M), no fog on the Fading Road (M), Episode 2 portraits a tier below Episode 1 (L)); play-critic-3 running
+      since 2026-10-21 15:37 ET (docs/PLAYTEST_REVIEW_3.md)
 - [ ] Fix pass. Known going in (from E2-integrate, ranked): length over target (33 min of reading, ~36 fights);
       Fading Road true path painted as a dirt road and the mist faint (no tension); hollow_dusk tint reads as daylight;
       phone Other Selves: command window hides a reflection, weakness rows overlap sprites; newGameEp2 meets the

@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-21, about 15:50 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-21, 15:37 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -38,8 +38,8 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
     485 green on 2026-10-21 after the Appraise latch fix.
   - Wave 10c (9fa5caa) and 10d (5f09ee5) committed: Episode 2 plays to credits (autoplay, desktop and phone, from an
     Episode 1 save and from newGameEp2, 0 game overs); 505 tests green. Load budget cap now 6.5 MB.
-  - Reviews running ONE at a time: critic-4 launched 2026-10-21 ~15:45 ET (writes docs/CRITIQUE_4.md only), then
-    play-critic-3 (docs/PLAYTEST_REVIEW_3.md), then the fix pass (PLAN.md lists the known items), then publish.
+  - Reviews ONE at a time: critic-4 done (docs/CRITIQUE_4.md, 1d6fa2a); play-critic-3 launched 15:37 ET (writes
+    docs/PLAYTEST_REVIEW_3.md only); then the fix pass (PLAN.md lists the known items), then publish.
   - Live main = 6ae4f00 (two hotfixes today: Load page finger 8a1084a, shop story stock 6ae4f00), sw 4c0ffd33f8a3.
   - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
