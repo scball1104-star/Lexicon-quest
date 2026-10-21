@@ -187,3 +187,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   smithy grows from 10 items to as many as 27. Close and reopen the game once to pick it up.
 - Next: two reviews of Episode 2 (art and phone usability first, then pacing and puzzles), a fix pass, then it goes live.
 
+## 2026-10-21 (Wed) late afternoon: both Episode 2 reviews are in; the fix pass has started
+- The art and phone review says Episode 2 is not yet at Episode 1's level on a phone. Its three key images do not
+  come through: no real fog on the Fading Road, the Hollow sits in daylight, and the faces in the fountain are blobs.
+  On the phone, one fight hides a monster behind the battle menu. A few Episode 2 screens beat Episode 1 and are
+  marked to keep.
+- The play review says it is well built: every light-beam puzzle can be solved from the screen alone, and the boss
+  fights give real choices. The fixes are pacing (49 text boxes before the first fight, road monsters that keep
+  coming back) and a difficulty spike for players a level behind. Trimming about 12 minutes brings it to about
+  Episode 1's length.
+- The fix pass runs in two parts, one helper at a time: art and phone first (now), then pacing and balance. The
+  five new character portraits that look flatter than Episode 1's wait for a later pass.
+

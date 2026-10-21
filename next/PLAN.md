@@ -113,15 +113,12 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       newGameEp2, desktop and phone, 0 game overs, King at Lv 13 (save) and Lv 12 (new); 505 tests; 12 shots x 7 devices.
       Story timer: first play 110 to 153 min (plan said 60 to 90; Episode 1 measures 96 to 113 the same way).
       Live Episode 1 bug found: shops never offered story-unlocked stock (1cfe993); hotfix to main in progress.
-- [~] Reviews (one at a time): critic-4 done 1d6fa2a (docs/CRITIQUE_4.md: not yet at Episode 1's level on the phone;
-      top: phone foe hidden by the touch command window (S), fountain faces unreadable (M), Hollow dusk reads as day
-      (S/M), no fog on the Fading Road (M), Episode 2 portraits a tier below Episode 1 (L)); play-critic-3 running
-      since 2026-10-21 15:37 ET (docs/PLAYTEST_REVIEW_3.md)
-- [ ] Fix pass. Known going in (from E2-integrate, ranked): length over target (33 min of reading, ~36 fights);
-      Fading Road true path painted as a dirt road and the mist faint (no tension); hollow_dusk tint reads as daylight;
-      phone Other Selves: command window hides a reflection, weakness rows overlap sprites; newGameEp2 meets the
-      King at Lv 12 not 13; feather drawn as a letter; reflections on the F1 carpet runner; mapcheck treats a prop as
-      only its event cell.
+- [x] Reviews: critic-4 (1d6fa2a, docs/CRITIQUE_4.md) and play-critic-3 (4cda434, docs/PLAYTEST_REVIEW_3.md: well
+      built, every beam puzzle readable from the screen; fixes are pacing and a level-curve spike; trim ~11 to 13 min)
+- [~] W11 fix pass, brief docs/briefs/W11-ep2-fixes.md. Part A (CRITIQUE_4 S/M items: phone foe visibility, fountain
+      faces, Hollow dusk, Fading Road fog, King portrait re-crop, items 6 to 14) running since 2026-10-21 16:05 ET.
+      Part B (PLAYTEST_REVIEW_3 items 1 to 8 and 10 + the length trim) runs after Part A is committed.
+      Deferred: five Episode 2 portrait repaints (L); CRITIQUE_4 items 9 and 15 (M) unless Part A reaches them.
 - [ ] Full gate list, then publish Episode 2 to /next
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
