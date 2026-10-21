@@ -881,16 +881,65 @@ export class BattleFx {
     }, 'top');
     this.particles(cx, cy, 14, { colors: [C.white, C.cyan, C.ice], speed: 2.6, life: 16, gravity: 0.12, size: 2, shrink: true });
   }
+  /** "The mirror cracks!": the view cracks from the King outward (jagged rays, branches, a spider ring; 46 frames). */
+  fx_mirror_crack(o) {
+    const { cx, cy } = this.center(o);
+    const seed = this.seed++;
+    const N = 10;
+    const rays = [];
+    for (let i = 0; i < N; i++) {
+      let a = (i / N) * TAU + jit(seed, i, 1) * 0.25;
+      const len = 80 + hash2d(i, 2, seed) * 170;
+      const segs = 6;
+      const pts = [[Math.round(cx + cos(a) * 6), Math.round(cy + sin(a) * 6)]];
+      for (let s = 1; s <= segs; s++) {
+        a += jit(seed, i * 10 + s, 3) * 0.28;
+        const d = 6 + (len * s) / segs;
+        pts.push([Math.round(cx + cos(a) * d), Math.round(cy + sin(a) * d * 0.85)]);
+      }
+      const bi = 2 + Math.floor(hash2d(i, 4, seed) * 3);
+      const ba = a + (hash2d(i, 5, seed) < 0.5 ? -0.7 : 0.7);
+      const bl = 16 + hash2d(i, 6, seed) * 26;
+      const b0 = pts[bi];
+      rays.push({ pts, branch: [b0, [Math.round(b0[0] + cos(ba) * bl), Math.round(b0[1] + sin(ba) * bl)]], bi });
+    }
+    const ring = rays.map((ry) => ry.pts[1]);
+    const seg = (r, p, q, col, alpha) => r.withAlpha(alpha, () => {
+      r.line(p[0] + 1, p[1] + 1, q[0] + 1, q[1] + 1, C.ink);
+      r.line(p[0], p[1], q[0], q[1], col);
+    });
+    this.add(46, (r, t) => {
+      const grow = Math.min(1, (t + 1) / 8);
+      const alpha = t < 30 ? 1 : Math.max(0, 1 - (t - 30) / 16);
+      if (alpha <= 0) return;
+      for (const ry of rays) {
+        const upto = Math.max(1, Math.round(grow * (ry.pts.length - 1)));
+        for (let s = 0; s < upto; s++) seg(r, ry.pts[s], ry.pts[s + 1], s % 2 ? C.white : C.ice, alpha * (1 - s * 0.06));
+        if (upto > ry.bi) seg(r, ry.branch[0], ry.branch[1], C.ice, alpha * 0.8);
+        const tip = ry.pts[upto];
+        if (t < 10) r.withAlpha(alpha, () => r.rect(tip[0] - 1, tip[1] - 1, 3, 3, C.white));
+      }
+      if (grow >= 0.5) for (let i = 0; i < ring.length; i++) seg(r, ring[i], ring[(i + 1) % ring.length], C.cyan, alpha * 0.85);
+    }, 'top');
+    this.particles(cx, cy, 18, { colors: [C.white, C.cyan, C.ice], speed: 2.4, life: 22, gravity: 0.1, size: 2, shrink: true, radius: 10 });
+  }
   /** A pane of glass shatters over a unit (the King's veil; o.big by default). */
   fx_shatter(o) {
     const { cx, cy } = this.center(o);
     const big = o.big !== false;
-    this.add(14, (r, t) => {
-      const k = t / 14;
-      for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + 0.2; const r1 = (big ? 46 : 28) * Math.min(1, k * 1.4); r.withAlpha(1 - k, () => r.line(cx, cy, cx + cos(a) * r1, cy + sin(a) * r1 * 0.9, i % 2 ? C.white : C.cyan)); }
+    const h = o.h || 40;
+    const R = big ? Math.max(46, Math.round(h * 0.5)) : 28;
+    const fy = big && h > 90 ? Math.round(cy - h * 0.25) : cy;
+    this.add(16, (r, t) => {
+      const k = t / 16;
+      for (let i = 0; i < 10; i++) {
+        const a = i * TAU / 10 + 0.2, r1 = R * (0.7 + 0.3 * ((i * 7) % 3) / 2) * Math.min(1, k * 1.6);
+        r.withAlpha(1 - k, () => { r.line(cx + 1, fy + 1, Math.round(cx + cos(a) * r1) + 1, Math.round(fy + sin(a) * r1 * 0.9) + 1, C.ink); r.line(cx, fy, Math.round(cx + cos(a) * r1), Math.round(fy + sin(a) * r1 * 0.9), i % 2 ? C.white : C.cyan); });
+      }
     }, 'top');
-    this.particles(cx, cy, big ? 22 : 12, { colors: [C.white, C.cyan, C.ice, C.violet], speed: big ? 3 : 2, life: 20, gravity: 0.14, size: 2, shrink: true });
-    this.fx_ring(o, { color: C.white, r0: 2, r1: big ? 40 : 24, frames: 10 });
+    this.particles(cx, fy, big ? 22 + Math.round(h / 8) : 12, { colors: [C.white, C.cyan, C.ice, C.violet], speed: big ? 3 : 2, life: 20, gravity: 0.14, size: 2, shrink: true, radius: big ? Math.round(R * 0.2) : 0 });
+    if (big) this.particles(cx, fy, 18, { colors: [C.white, C.ice, C.cyan], speed: 0.8, life: 40, gravity: 0.18, size: 3, shrink: true, radius: Math.round(R * 0.6), radiusY: Math.round(h * 0.2), delay: 6 });
+    this.fx_ring({ ...o, y: fy + (o.h || 40) / 2 }, { color: C.white, r0: 2, r1: big ? R : 24, frames: 12 });
   }
   /** A reflection steps out of the great mirror: a reversed shimmer that settles into the figure, with a low gleam. */
   fx_reflection_out(o) {

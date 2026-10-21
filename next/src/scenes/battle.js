@@ -14,9 +14,9 @@
 // once; LQ_DEBUG.battleWait() -> Promise of the result; LQ_DEBUG.battleResult() -> last result;
 // LQ_DEBUG.battleAct(action) performs an action for the waiting party member; LQ_DEBUG.battleUntil(cond)
 // fast-forwards with Auto decisions until cond ('hero' | 'mira' | 'bram' = that member's command,
-// 'telegraph' = a party turn with a telegraph pending, 'over' = the end).
+// 'telegraph' = a party turn with a telegraph pending, 'kept', 'mirror' (Mirrored Combo), 'phase2' / 'phase3', 'over').
 
-import { createEncounterBattle } from '../battle/rules.js';
+import { createEncounterBattle, memberStats } from '../battle/rules.js';
 import { partyAction } from '../battle/ai.js';
 import { ENCOUNTERS, ZONES } from '../data/encounters.js';
 import { CONSUMABLES } from '../data/items.js';
@@ -29,7 +29,7 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS } from '../battle/scene/layout.js';
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, enemyRowAnchor } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
 import * as HUD from '../battle/scene/hud.js';
@@ -41,7 +41,8 @@ import { createRng, hashSeed } from '../core/rng.js';
 const LOG_KEEP = 6;          // lines kept; the idle command window shows the last LOG_SHOW (W7)
 const LOG_SHOW = 3;
 
-const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8 };
+const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
+  east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
 // In-battle boss name card (the W5 cutscene title style, laid on the battlefield): name + subtitle, keyed by the
 // encounter's leader id. The field cutscene still shows its own full-screen `s.title` card before the swirl; this
@@ -62,6 +63,9 @@ const DROP_INTRO = 46;
 const AUTO_PAGE_HOLD = 150;
 
 function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function titleCase(s) {
+  return String(s).toLowerCase().split(' ').map((w, i) => (i > 0 && ['of', 'the', 'and', 'a'].includes(w) ? w : cap(w))).join(' ');
+}
 // Backdrop per zone. Preferred: the art agent's palette-quantized stage `assets/backdrops/<asset>.png` (384x216)
 // with its sidecar json { bandY, bandAlpha } (CRITIQUE C1/C3). Fallback when that file is not there: the
 // environments.webp cell, box-downscaled and posterized as before. `tint` and `bright` apply in both cases.
@@ -285,7 +289,15 @@ export class BattleScene {
       const card = (leaderId && BOSS_CARD[leaderId]) || null;
       const fallbackName = this.units.find((u) => u.side === 'enemy' && u.boss);
       this.bossIntro = { name: card ? card.name : (fallbackName ? String(fallbackName.name).toUpperCase() : 'BOSS'), sub: card ? card.sub : '', t: 0, frames: BOSS_CARD_FRAMES };
+      const rects = [...this.actors.values()].filter((a) => a.side === 'enemy').map((a) => ({ y0: a.top, y1: Math.round(a.y) }));
+      this.bossIntro.cy = HUD.bossCardY(rects, !!this.bossIntro.sub);
       this.reflectionEntrance = leaderId === 'refl_hero' || encounter.id === 'other_selves';
+      // A boss group of several names (the Other Selves) opens under its card's name.
+      const foes = this.units.filter((u) => u.side === 'enemy');
+      if (card && new Set(foes.map((u) => u.name)).size > 1) {
+        const help = this.startOps.find((op) => op.op === 'help');
+        if (help) { help.text = `{c:orange}${titleCase(card.name)}{/c}`; help.color = null; }
+      }
     }
     this.timeline = battle.timeline(8);
     this.help = { text: '', color: null, chars: 0 };
@@ -439,6 +451,8 @@ export class BattleScene {
     if (c === 'summoned') return this.b.units().some((x) => x.summoned && x.alive);
     if (c === 'ko') return this.b.units().some((x) => x.side === 'party' && !x.alive);
     if (c === 'telegraph') return this.telegraphs.size > 0;
+    if (c === 'kept') return this.b.units().some((x) => x.side === 'party' && x.alive && x.statuses && x.statuses.kept);
+    if (c === 'mirror') return [...this.telegraphs.values()].some((t) => t.mirrorCombo && t.partner);
     if (c === 'any') return true;
     return u.uid === c;
   }
@@ -738,18 +752,25 @@ export class BattleScene {
     // Kept members are sealed in a mirror shard on the stage (drawn in stage space so it tracks the sprite).
     for (const a of this.party()) if (a.statuses && a.statuses.kept && !a.dead && !a.ko) HUD.drawKeptShard(r, a, this.frame);
     if (kicked) r.popCamera();
-    // Markers.
+    // Markers (a help window grown to 2-3 lines pushes the "!" below it).
     const frame = this.frame;
-    for (const [uid, t] of this.telegraphs) { const a = this.actor(uid); if (a && !a.dead) HUD.drawTelegraphMarker(r, a, frame, t.nextTurn); }
+    const hv = this.phase !== 'rewards' ? this.helpView(r) : null;
+    const helpBottom = hv ? 4 + HUD.helpHeight(r, hv.text, hv.color, { rightW: hv.rightW }) : 23;
+    for (const [uid, t] of this.telegraphs) { const a = this.actor(uid); if (a && !a.dead) HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6)); }
     if (this.eliteTag) { const a = this.actor(this.eliteTag.uid); if (a && !a.dead) HUD.drawEliteTag(r, a); if (--this.eliteTag.t <= 0) this.eliteTag = null; }
     for (const uid of targetIds) { const a = this.actor(uid); if (a && !a.dead) HUD.drawReticle(r, a, frame); }
     if (this.menu.state !== 'closed' && this.currentUid) { const a = this.actor(this.currentUid); if (a && !a.dead) HUD.drawTurnMarker(r, a, frame); }
     // Enemy rows: the targeted foe, the acting foe and anything hit recently.
     const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys()]);
-    for (const uid of rows) {
-      const a = this.actor(uid);
-      if (!a || a.dead || a.side !== 'enemy') continue;
-      HUD.drawEnemyRow(r, a, this.b.knowledge(uid), this.unit(uid), frame, touchUi(this.engine));
+    const touch = touchUi(this.engine);
+    const placed = [];
+    const cwNow = this.menu.state !== 'closed' && this.menu.cmdRect ? this.menu.cmdRect : null;
+    const rowActors = [...rows].map((uid) => this.actor(uid)).filter((a) => a && !a.dead && a.side === 'enemy').sort((p, q) => p.x - q.x);
+    for (const a of rowActors) {
+      const know = this.b.knowledge(a.uid);
+      const lift = HUD.rowLift(enemyRowAnchor(a, touch, cwNow), HUD.enemyRowWidth(know), placed);
+      const rect = HUD.drawEnemyRow(r, a, know, this.unit(a.uid), frame, touch, { lift, cw: cwNow });
+      if (rect) placed.push(rect);
     }
     if (this.menu.state === 'target') {
       const t = this.menu.currentTarget();
@@ -807,15 +828,15 @@ export class BattleScene {
    * side names the two global toggles with device glyphs ("[Enter] Auto [E] Speed", or the gold x2 when fast).
    * Touch: two small AUTO / x2 buttons sit there throughout the fight (touchButtons), lit when on.
    */
-  drawHelpWindow(r) {
-    let text = this.help.text, color = this.help.color, chars = this.help.chars;
+  helpView(r) {
+    let text = this.help.text, color = this.help.color;
     const tele = this.telegraphs.size ? [...this.telegraphs.values()][0] : null;
     if (this.menu.state !== 'closed') {
-      if (tele && !this.menu.showHelp) { text = tele.text; color = 'orange'; chars = undefined; }
-      else if (this.menu.helpText) { text = this.menu.helpText; color = this.menu.helpColor; chars = undefined; }
-      else if (tele) { text = tele.text; color = 'orange'; chars = undefined; }
-      else { const a = this.actor(this.currentUid); text = a ? `${a.name}'s turn.` : ''; color = null; chars = undefined; }
-    } else if (this.phase === 'play' && tele && !text) { text = tele.text; color = 'orange'; chars = undefined; }
+      if (tele && !this.menu.showHelp) { text = tele.text; color = 'orange'; }
+      else if (this.menu.helpText) { text = this.menu.helpText; color = this.menu.helpColor; }
+      else if (tele) { text = tele.text; color = 'orange'; }
+      else { const a = this.actor(this.currentUid); text = a ? `${a.name}'s turn.` : ''; color = null; }
+    } else if (this.phase === 'play' && tele && !text) { text = tele.text; color = 'orange'; }
     const tb = this.touchButtons();
     const idle = this.menu.state === 'root' && !tele && !this.auto;
     let right = this.auto ? 'AUTO' : this.speed > 1 ? 'x2' : null;
@@ -823,6 +844,10 @@ export class BattleScene {
     if (tb) right = null;
     else if (idle) { right = `${btn('start')} Auto ${btn('pageR')} ${this.speed > 1 ? '{c:gold}x2{/c}' : 'Speed'}`; rightColor = 'gray'; }
     const rightW = tb ? 94 : right ? r.measure(right) + 2 : 0;
+    return { text, color, right, rightColor, rightW, tb };
+  }
+  drawHelpWindow(r) {
+    const { text, color, right, rightColor, rightW, tb } = this.helpView(r);
     HUD.drawHelp(r, text, color, { right, rightColor, rightW });
     if (tb) {
       const pulse = Math.floor(this.frame / 20) % 2 === 0;
@@ -836,7 +861,6 @@ export class BattleScene {
       drawWindow(r, b2.x, b2.y, b2.w, b2.h, { kind: 'thin', alpha: 0.96 });
       r.text(this.speed > 1 ? 'x2' : 'x1', b2.x + b2.w / 2, b2.y + 2, { align: 'center', color: this.speed > 1 ? 'gold' : 'gray' });
     }
-    void chars;
   }
 
   drawDrop(r, d) {
@@ -990,12 +1014,34 @@ export function makeDebugGame(encounterId, opts = {}) {
     archive_f3: { hero: { equip: { sword: 'longsword', axe: 'hatchet', body: 'chain_shirt', head: 'leather_hood', boots: 'leather_boots' }, mastery: { sword: 170, axe: 50 } }, mira: { equip: { staff: 'crystal_rod', bow: 'short_bow', body: 'mirrorguard_mail', head: 'leather_hood', charm: 'bronze_charm' }, mastery: { staff: 110, bow: 40 } }, bram: { equip: { spear: 'iron_pike', axe: 'hatchet', body: 'chain_shirt', head: 'iron_helm', boots: 'leather_boots' }, mastery: { spear: 170, axe: 50 } }, items: { potion: 5, hi_potion: 2, ether: 2, antidote: 1, eye_drops: 2, echo_herb: 2, phoenix_feather: 1 } },
   };
   LOAD.archive_boss = { ...LOAD.archive_f3, hero: { ...LOAD.archive_f3.hero, mastery: { sword: 210, axe: 60 } }, mira: { ...LOAD.archive_f3.mira, mastery: { staff: 140, bow: 45 } }, bram: { ...LOAD.archive_f3.bram, mastery: { spear: 210, axe: 60 } } };
+  // Episode 2: the simulator's expected party per zone (tools/sim/loadouts.mjs).
+  const AB = LOAD.archive_boss;
+  LOAD.east_road = { hero: { equip: { ...AB.hero.equip, sword: 'lanternheart' }, mastery: { sword: 245, axe: 70 } }, mira: { equip: { ...AB.mira.equip }, mastery: { staff: 160, bow: 50 } },
+    bram: { equip: { ...AB.bram.equip }, mastery: { spear: 245, axe: 70 } }, items: { potion: 6, hi_potion: 3, ether: 3, hi_ether: 1, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2 } };
+  const ER = LOAD.east_road;
+  LOAD.court_f1 = { hero: { equip: { ...ER.hero.equip, axe: 'bearded_axe', head: 'iron_helm', boots: 'traveler_boots' }, mastery: { sword: 290, axe: 90 } },
+    mira: { equip: { ...ER.mira.equip, staff: 'archivist_staff', bow: 'hunters_bow', head: 'silver_circlet', charm: 'owl_charm' }, mastery: { staff: 200, bow: 70 } },
+    bram: { equip: { ...ER.bram.equip, spear: 'winged_lance', body: 'bronze_plate' }, mastery: { spear: 290, axe: 90 } },
+    items: { potion: 6, hi_potion: 4, ether: 3, hi_ether: 1, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2, silver_salve: 1 } };
+  const C1 = LOAD.court_f1;
+  LOAD.court_f2 = { hero: { equip: { ...C1.hero.equip, head: 'steel_helm', body: 'steel_cuirass' }, mastery: { sword: 330, axe: 110 } },
+    mira: { equip: { ...C1.mira.equip, head: 'moon_circlet' }, mastery: { staff: 240, bow: 90 } }, bram: { equip: { ...C1.bram.equip }, mastery: { spear: 330, axe: 110 } },
+    items: { potion: 6, hi_potion: 4, ether: 3, hi_ether: 2, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 2, silver_salve: 1 } };
+  const C2 = LOAD.court_f2;
+  LOAD.court_f3 = { hero: { equip: { ...C2.hero.equip, body: 'silver_mail' }, mastery: { sword: 380, axe: 130 } }, mira: { equip: { ...C2.mira.equip, staff: 'mirror_rod' }, mastery: { staff: 280, bow: 110 } },
+    bram: { equip: { ...C2.bram.equip, spear: 'mere_pike' }, mastery: { spear: 380, axe: 130 } },
+    items: { potion: 6, hi_potion: 5, ether: 3, hi_ether: 2, antidote: 1, eye_drops: 3, echo_herb: 3, phoenix_feather: 2, silver_salve: 2 } };
+  const C3 = LOAD.court_f3;
+  LOAD.court_throne = { hero: { equip: { ...C3.hero.equip, charm: 'twinfold_charm' }, mastery: { sword: 420, axe: 150 } }, mira: { equip: { ...C3.mira.equip }, mastery: { staff: 320, bow: 130 } },
+    bram: { equip: { ...C3.bram.equip }, mastery: { spear: 420, axe: 150 } },
+    items: { potion: 5, hi_potion: 5, ether: 3, hi_ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 3, silver_salve: 2 } };
   const load = LOAD[zone] || LOAD.valley;
   const members = (opts.party || ['hero', 'mira', 'bram']).map((id) => {
     const m = newMember(id, { level, name: id === 'hero' ? g.heroName : undefined });
     const L = load[id] || {};
     if (L.equip) m.equip = { ...m.equip, ...L.equip };
     if (L.mastery) m.mastery = { ...m.mastery, ...L.mastery };
+    if (ZONES[zone] && ZONES[zone].episode === 2) { const s = memberStats(m); m.hp = s.maxHp; m.mp = s.maxMp; }
     return m;
   });
   g.party = members;

@@ -508,6 +508,7 @@ class Planner {
       this.push({ op: 'sfx', id: 'glass_break' });
       this.push({ op: 'screenFlash', color: '#ffffff', frames: 10, alpha: 0.7 });
       this.push({ op: 'shake', mag: 4, frames: 20 });
+      this.wait(6);
       this.push({ op: 'swapSprite', uid: e.actor, sprite: e.sprite });
     } else {
       this.push({ op: 'fx', kind: 'phase', uid: e.actor, phase: e.phase });
@@ -622,6 +623,7 @@ class Planner {
     // "The mirror cracks!" (the King is Broken and frees every Kept member): a glass crack and a bright beat;
     // the per-member shatter follows on each status_remove 'freed'.
     if (e.kind === 'kept_break') {
+      if (e.target) this.push({ op: 'fx', kind: 'mirror_crack', uid: e.target });
       this.push({ op: 'sfx', id: 'glass_break' });
       this.push({ op: 'screenFlash', color: '#ffffff', frames: 8, alpha: 0.5 });
       this.push({ op: 'shake', mag: 3, frames: 12 });

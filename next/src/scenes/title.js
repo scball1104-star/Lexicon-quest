@@ -1,7 +1,8 @@
 // Title screen: logo with sparkles over the quantized `title` backdrop (assets/backdrops, 2 px drift; the
-// painted crop is the fallback), New Game / Continue / Config, version string, attract mode after 20 s idle
-// (prologue cards, then back). Also the UI module's install(): toasts, the 'choice' and '_uiStage' scenes,
-// the stats provider, and LQ_DEBUG.newGame / give / uiStage.
+// painted crop is the fallback), New Game / Continue / [Episode 2] / Config, version string, attract mode after
+// 20 s idle (prologue cards, then back). Also the UI module's install(): toasts, the 'choice', '_uiStage' and
+// 'nameEntryEp2' scenes, the stats provider, and LQ_DEBUG.newGame / give / uiStage.
+// Episode 2 shows once any slot has `ep1_complete` (or with ?ep=2): name step, newGameEp2, the card, home in bed.
 
 import { List, rowHeightFor } from '../ui/list.js';
 import { drawWindow, installToasts, ChoiceScene, uiAudit } from '../ui/index.js';
@@ -9,7 +10,8 @@ import { KeyArt, DARK } from '../ui/keyart.js';
 import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
 import { animFrameAt } from '../core/assets.js';
-import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear } from '../game/state.js';
+import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, cleanName, EP2_START } from '../game/state.js';
+import { NameEntryScene } from './nameEntry.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
 
@@ -27,15 +29,18 @@ export class TitleScene {
     this.nextSparkle = 0.6;
     this.points = null;
     this.hasSaves = this.anySave();
+    this.ep2 = ep2Offer(e.save, typeof location !== 'undefined' ? location.search : '');
     const items = [
       { id: 'new', label: 'New Game' },
       { id: 'continue', label: 'Continue', disabled: !this.hasSaves },
+      ...(this.ep2.show ? [{ id: 'ep2', label: 'Episode 2' }] : []),
       { id: 'config', label: 'Config' },
     ];
-    // Menu window: anchored at the bottom (y 196) and grown to fit touch-sized rows.
+    // Menu window: anchored at the bottom (y 196; 210 for four touch rows, clear of the subtitle).
     const rowH = rowHeightFor(e, 11);
     const h = items.length * rowH + 13;
-    this.win = { x: 142, y: 196 - h, w: 100, h };
+    const bottom = items.length > 3 && rowH > 11 ? 210 : 196;
+    this.win = { x: 142, y: bottom - h, w: 100, h };
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
     this.busy = false;
     e.audio.music('title');
@@ -50,7 +55,8 @@ export class TitleScene {
   onResume() {
     this.idle = 0; this.busy = false;
     this.hasSaves = this.anySave();
-    this.menu.items[1].disabled = !this.hasSaves;
+    const cont = this.menu.items.find((it) => it.id === 'continue');
+    if (cont) cont.disabled = !this.hasSaves;
   }
 
   samplePoints(r) {
@@ -87,6 +93,7 @@ export class TitleScene {
       const id = this.menu.item.id;
       if (id === 'new') { this.busy = true; e.fadeTo(() => e.replace('nameEntry'), { duration: 0.7 }); }
       else if (id === 'continue') { this.busy = true; e.pushAwait('loadGame', { mode: 'load' }).then(() => { this.busy = false; }); }
+      else if (id === 'ep2') { this.busy = true; e.fadeTo(() => e.replace('nameEntryEp2', { name: this.ep2.name || undefined, artT: this.art.t }), { duration: 0.7 }); }
       else if (id === 'config') { this.busy = true; e.pushAwait('config').then(() => { this.busy = false; }); }
       return;
     }
@@ -125,7 +132,47 @@ export class TitleScene {
     r.text(VERSION, 4, 205, { color: 'gray' });
   }
 
-  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop }; }
+  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
+    items: this.menu.items.map((it) => it.id), ep2: this.ep2 }; }
+}
+
+/** { show, url, name, slot }: Episode 2 is offered; the newest `ep1_complete` save names the hero. Pure. */
+export function ep2Offer(save, search = '') {
+  let url = false;
+  try { url = new URLSearchParams(search || '').get('ep') === '2'; } catch (err) { url = false; }
+  let best = null;
+  const last = save && Number.isFinite(save.slots) ? save.slots : 3;
+  for (let n = 0; save && n <= last; n++) {
+    let env = null;
+    try { env = save.loadEnvelope(n); } catch (err) { env = null; }
+    const d = env && env.data;
+    if (!d || !d.flags || !d.flags.ep1_complete) continue;
+    const at = Date.parse(env.savedAt || '') || 0;
+    if (!best || at > best.at) best = { slot: n, at, name: (env.meta && env.meta.name) || d.heroName || null };
+  }
+  return { show: url || !!best, url, name: best ? best.name : null, slot: best ? best.slot : null };
+}
+
+/** newGameEp2(name), the field at home in bed, and the Episode 2 card on top (the field waits under it). */
+export function startEpisode2(engine, name) {
+  const e = engine;
+  const g = newGameEp2(cleanName(name));
+  e.game = g;
+  return e.fadeTo(() => {
+    if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP2_START.mark || 'bed', dir: 'down' });
+    else e.reset('_uiStage', {});
+    if (e.hasScene('titleCard')) e.push('titleCard', { text: 'Episode 2', sub: 'The Town Without a Name', frames: 180, backdrop: 'dialog_keyart_ep2' });
+  }, { duration: 0.8 });
+}
+
+export class NameEntryEp2Scene extends NameEntryScene {
+  constructor(engine) { super(engine); this.name = 'nameEntryEp2'; }
+  done() {
+    const e = this.engine;
+    e.audio.sfx('confirm');
+    this.busy = true;
+    startEpisode2(e, this.value);
+  }
 }
 
 // ---------------------------------------------------------------- install (runs once at boot from the registry)
@@ -134,6 +181,7 @@ export async function install(engine) {
   bindGlyphs(engine);   // device-aware {i:btn_*} glyphs everywhere (D10)
   if (!engine.hasScene('choice')) engine.registerScene('choice', ChoiceScene);
   if (!engine.hasScene('_uiStage')) engine.registerScene('_uiStage', UiStageScene);
+  if (!engine.hasScene('nameEntryEp2')) engine.registerScene('nameEntryEp2', NameEntryEp2Scene);
   setStatsProvider((m) => { const s = memberStats(m); return { hp: s.maxHp, mp: s.maxMp }; });
   engine.audio.preload(['jingle:item_get', 'jingle:level_up', 'jingle:save', 'jingle:inn_rest']);
 

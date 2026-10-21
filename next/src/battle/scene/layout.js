@@ -116,11 +116,12 @@ export function enemyFaceRect(frame, id) {
 /** Shield badge + weakness row anchor under an enemy (kept above the bottom windows). The command window
  *  (taller on touch) covers the bottom-left, so a row that would sit over it is lifted clear of it. */
 export const ENEMY_ROW_H = 14;
-export function enemyRowAnchor(unit, touch = false) {
+export function enemyRowAnchor(unit, touch = false, cwNow = null) {
   const w = 12 + 15 * 4;
   const x = Math.max(4, Math.min(W - w - 4, Math.round(unit.x - w / 2)));
   let y = Math.min(STATUS_WIN.y - 16, Math.round(unit.y + 2));
-  const cw = cmdWin(touch);
+  // cwNow: the command window as drawn this frame (a five-row menu, Mira's with Magic, stands taller than CMD_WIN).
+  const cw = cwNow || cmdWin(touch);
   if (x < cw.x + cw.w && x + w > cw.x) y = Math.min(y, cw.y - ENEMY_ROW_H - 2);
   return { x, y };
 }

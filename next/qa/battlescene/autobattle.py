@@ -16,6 +16,11 @@ a spear thrust, Ember, an axe chop and an arrow, zoomed on the target), and _zoo
 W6-anim adds anim_enemy (lunge + hurt), anim_cast, anim_death (die_0..2, flash, dissolve), anim_devour,
 anim_stance (Echo Warden Mirror -> Bulwark) and anim_party (crit, combo, level-up hop): zoomed strips with the
 frame name each actor drew under every tile, failing when a generator frame never reaches the screen.
+E2-scene-ui adds other_selves (the mirror entrance, the boss card, the Mirrored Combo's silver bracket, then Auto to
+the end) and nameless_king (the boss card, a Kept member with its timeline zoom, "The mirror cracks!" filmstrip, the
+unmask filmstrip, then Auto to the end) and glass_reflect (the Glassback's mirror marker in its row), on desktop
+and phone:
+  python next/qa/battlescene/autobattle.py --only other_selves,nameless_king,glass_reflect
 """
 import argparse
 import json
@@ -739,6 +744,129 @@ def sc_anim_party(page, ctx):
     ctx['note'] = f'{uid} level-up frames: {sorted(set(n for n in names if n))}'
 
 
+# ------------------------------------------------------------------------------------------ Episode 2 (E2-scene-ui)
+WAIT_PLAYER = WAIT_MENU + " && !LQ_DEBUG.state().battle.fast"
+
+
+def _card_shot(page, ctx, enc, seed):
+    """Start an Episode 2 boss fight and shoot its entrance and the in-battle boss card at full strength."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate(f"LQ_DEBUG.battle('{enc}', {{ fresh: true, seed: {seed} }})")
+    advance_until(page, "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.phase !== 'intro'", max_frames=400, step=2)
+    page.evaluate(ADVANCE.format(8)); shot(page, ctx, 'entrance')
+    page.evaluate(ADVANCE.format(30)); shot(page, ctx, 'card')
+    card = page.evaluate("(() => { const s = LQ_ENGINE.scene; return s.bossIntro ? { name: s.bossIntro.name, sub: s.bossIntro.sub } : null; })()")
+    return card
+
+
+def _auto_to_end(page, ctx):
+    """Finish the fight on Auto (fast) and return the result."""
+    page.evaluate("LQ_DEBUG.settings({ autoBattle: true })")
+    page.evaluate("LQ_DEBUG.battleUntil('over')")
+    advance_until(page, "LQ_DEBUG.battleResult() !== null", max_frames=40000, step=60)
+    page.evaluate("LQ_DEBUG.settings({ autoBattle: false })")
+    return page.evaluate('LQ_DEBUG.battleResult()')
+
+
+def sc_other_selves(page, ctx):
+    d = ctx['device']
+    card = _card_shot(page, ctx, 'other_selves', 1)
+    assert card and card['name'] == 'THE OTHER SELVES', card
+    # The Mirrored Combo: two reflections side by side on the timeline, announced, with the silver bracket.
+    page.evaluate("LQ_DEBUG.battleUntil('mirror')")
+    advance_until(page, WAIT_PLAYER, max_frames=20000, step=10)
+    s = bstate(page)
+    assert any(True for _ in s['telegraphs']), s['telegraphs']
+    page.evaluate(ADVANCE.format(4)); shot(page, ctx, 'bracket')
+    if d == 'desktop':  # zoom() maps css px; the phone shots are dpr 3
+        zoom(page, ctx, f'{d}_selves_timeline', (236, 2, 148, 34), scale=5)
+    result = _auto_to_end(page, ctx)
+    ctx['note'] = f"card {card['name']} / {card['sub']}; mirror combo telegraphed; auto result {result}"
+
+
+def sc_nameless_king(page, ctx):
+    d = ctx['device']
+    card = _card_shot(page, ctx, 'nameless_king', 3)
+    assert card and card['name'] == 'THE NAMELESS KING', card
+    # Kept: a member sealed in the shard, greyed on the timeline with icon_kept, gone from the King's targets.
+    page.evaluate("LQ_DEBUG.battleUntil('kept')")
+    advance_until(page, WAIT_PLAYER, max_frames=20000, step=10)
+    page.evaluate(ADVANCE.format(30)); shot(page, ctx, 'kept')
+    if d == 'desktop':  # zoom() maps css px; the phone shots are dpr 3
+        zoom(page, ctx, f'{d}_kept_timeline', (236, 2, 148, 34), scale=5)
+    if d == 'desktop':  # zoom() maps css px; the phone shots are dpr 3
+        zoom(page, ctx, f'{d}_kept_stage', (240, 60, 144, 100), scale=4)
+    kept = page.evaluate("LQ_ENGINE.scene.b.units().filter(u => u.side === 'party' && u.statuses.kept).map(u => u.uid)")
+    assert kept, 'nobody kept'
+    # "The mirror cracks!": Break the King while someone is Kept (one shield left, then a weakness hit).
+    king = page.evaluate("(() => { const k = LQ_ENGINE.scene.b.units().find(u => u.boss); k.shields = 1; return k.uid; })()")
+    cracked = False
+    for _ in range(12):
+        s = bstate(page)
+        cur = s['current']
+        if cur == 'bram':
+            page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'attack', target: '{king}' }})")
+            cracked = True
+        elif cur == 'mira':
+            page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'skill', skill: 'spark', target: '{king}' }})")
+            cracked = True
+        else:
+            page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+        if cracked:
+            filmstrip(page, ctx, 'mirror_cracks', 12, 6, full=True)
+            break
+        advance_until(page, WAIT_PLAYER, max_frames=6000, step=10)
+    assert cracked, 'no Bram or Mira turn to break the King'
+    # The unmask: on Auto to the Shattered Court (phase 2), then the two adds are cut to 1 HP and struck down by
+    # hand; the last one dying shatters the ward, the veil breaks and the frames swap to nameless_king_unmasked.
+    page.evaluate("LQ_DEBUG.battleUntil('phase2')")
+    advance_until(page, WAIT_PLAYER, max_frames=40000, step=20)
+    adds_js = "LQ_ENGINE.scene.b.units().filter(u => u.alive && (u.id === 'false_pride' || u.id === 'false_sorrow')).sort((a, b) => (a.id === 'false_pride' ? -1 : 1)).map(u => u.uid)"
+    page.evaluate(f"{adds_js}.forEach(uid => {{ LQ_ENGINE.scene.b.unit(uid).hp = 1; }})")
+    filmed = False
+    for _ in range(10):
+        adds = page.evaluate(adds_js)
+        if not adds:
+            break
+        page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'attack', target: '{adds[0]}' }})")
+        if len(adds) == 1:
+            # Wait for the phase banner (the shatter, flash and swap ops run from there), then film it.
+            banner = "!!(LQ_ENGINE.scene.banner && LQ_ENGINE.scene.banner.style === 'phase')"
+            advance_until(page, f"{banner} || ({WAIT_PLAYER}) || LQ_DEBUG.battleResult() !== null", max_frames=3000, step=1)
+            if page.evaluate(banner):
+                filmstrip(page, ctx, 'unmask', 12, 3, full=True)
+                filmed = True
+                break
+            continue
+        advance_until(page, WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=20000, step=10)
+    assert filmed, 'never reached the last add'
+    advance_until(page, WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=20000, step=10)
+    shot(page, ctx, 'unmasked')
+    art = page.evaluate("(() => { const k = [...LQ_ENGINE.scene.actors.values()].find(a => a.boss || a.id === 'nameless_king'); return k ? k.stem : null; })()")
+    assert art == 'nameless_king_unmasked', art
+    result = _auto_to_end(page, ctx)
+    ctx['note'] = f"card {card['name']} / {card['sub']}; kept {kept}; unmasked frames {art}; auto result {result}"
+
+
+def sc_glass_reflect(page, ctx):
+    """The Glassback under Protect: the mirror marker leads its weakness row (the east road's teaching fight)."""
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate("LQ_DEBUG.battle('road_mixed', { fresh: true, seed: 2 })")
+    cond = ("(() => { const s = LQ_ENGINE.scene; if (!s.b) return false; const g = s.b.units().find(u => u.id === 'glassback' && u.alive);"
+            " return !!(g && s.b.knowledge(g.uid).reflect); })()")
+    for _ in range(12):
+        advance_until(page, WAIT_PLAYER, max_frames=6000, step=10)
+        if page.evaluate(cond):
+            break
+        page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+    assert page.evaluate(cond), 'the Glassback never raised its reflect'
+    page.evaluate("(() => { const s = LQ_ENGINE.scene; for (const a of s.actors.values()) if (a.side === 'enemy') s.rowShow.set(a.uid, 999); })()")
+    page.evaluate(ADVANCE.format(4)); shot(page, ctx, 'rows')
+    if ctx['device'] == 'desktop':
+        zoom(page, ctx, 'desktop_glass_reflect_row', (0, 110, 240, 50), scale=4)
+    ctx['note'] = 'reflect marker shown'
+
+
 SCENARIOS = {
     'start': (sc_start, ['desktop', 'phone']),
     'stage': (sc_stage, ['desktop']),
@@ -769,6 +897,9 @@ SCENARIOS = {
     'anim_devour': (sc_anim_devour, ['desktop']),
     'anim_stance': (sc_anim_stance, ['desktop']),
     'anim_party': (sc_anim_party, ['desktop']),
+    'other_selves': (sc_other_selves, ['desktop', 'phone']),
+    'nameless_king': (sc_nameless_king, ['desktop', 'phone']),
+    'glass_reflect': (sc_glass_reflect, ['desktop', 'phone']),
 }
 
 

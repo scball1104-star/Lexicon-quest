@@ -10,20 +10,39 @@ import { frameOrigin } from './actors.js';
 const PARTY_STATUS_ORDER = ['kept', 'poison', 'burn', 'chill', 'stun', 'silence', 'blind', 'nameless', 'regen', 'protect', 'haste', 'focus', 'taunt'];
 const WEAK_TYPES = ['sword', 'spear', 'staff', 'axe', 'bow', 'fire', 'ice', 'thunder', 'light'];
 
+export const HELP_LINE_H = 11;
+export const HELP_MAX_LINES = 3;
+/** Help lines: one beside the toggles, else the window grows (later lines full width, max 3, last ellipsized). */
+export function helpLines(r, text, color, opts = {}) {
+  if (!text) return [];
+  const hw = HELP_WIN;
+  const t = color ? `{c:${color}}${text}{/c}` : String(text);
+  const first = hw.w - 12 - (opts.rightW || 0), full = hw.w - 12;
+  if (r.measure(t) <= first) return [t];
+  const maxLines = Math.max(1, opts.maxLines ?? HELP_MAX_LINES);
+  const out = [];
+  let rest = t;
+  while (rest && out.length < maxLines) {
+    const ls = r.wrap(rest, out.length ? full : first);
+    if (!ls.length) break;
+    const more = ls.length > 1;
+    if (more && out.length === maxLines - 1) { out.push(ls[0] + '…'); break; }
+    out.push(ls[0]);
+    rest = more ? ls.slice(1).join(' ') : '';
+  }
+  return out;
+}
+export function helpHeight(r, text, color, opts = {}) {
+  return HELP_WIN.h + Math.max(0, helpLines(r, text, color, opts).length - 1) * HELP_LINE_H;
+}
 export function drawHelp(r, text, color, opts = {}) {
   const hw = HELP_WIN;
-  drawWindow(r, hw.x, hw.y, hw.w, hw.h, { kind: 'thin', alpha: opts.alpha ?? 0.96 });
-  if (!text) return;
-  let t = text;
-  if (color) t = `{c:${color}}${text}{/c}`;
-  const maxW = hw.w - 12 - (opts.rightW || 0);
-  if (r.measure(t) > maxW) {
-    // Keep the start of the line; the tail is the least important part of a telegraph sentence.
-    const lines = r.wrap(t, maxW);
-    t = lines[0] + (lines.length > 1 ? '…' : '');
-  }
-  r.text(t, hw.x + 6, hw.y + 4);
+  const lines = helpLines(r, text, color, opts);
+  const h = hw.h + Math.max(0, lines.length - 1) * HELP_LINE_H;
+  drawWindow(r, hw.x, hw.y, hw.w, h, { kind: 'thin', alpha: opts.alpha ?? 0.96 });
+  lines.forEach((line, i) => r.text(line, hw.x + 6, hw.y + 4 + i * HELP_LINE_H));
   if (opts.right) r.text(opts.right, hw.x + hw.w - 6, hw.y + 4, { align: 'right', color: opts.rightColor || 'gold' });
+  return h;
 }
 
 /** 14x14 face crop for a unit (legacy fallback): portrait crop for the party, a head crop of the battle frame for enemies. */
@@ -70,12 +89,62 @@ function thumbnail(actor) {
   thumbs.set(key, c);
   return c;
 }
-/** Draw a unit's 12x12 head at (x, y) (top-left). Returns false when nothing could be drawn. */
+// A reflection's timeline head: its owner's head in the reflections' glass ramp, white eyes, the hero's face blank.
+export const REFL_RAMP = ['#522a84', '#7040aa', '#9062c3', '#bc94e2'];
+const REFL_WHITE = '#f6f4ee';
+const REFL_KEEP = new Set(['#14101e', '#251d34']);
+const REFL_EYES = new Set(['#1d2a67', '#3e88ca', '#292657', '#f9d77a']);
+const REFL_SKIN = { '#e8b585': 3, '#cc875b': 2, '#a66142': 1 };
+export function reflectionColor(hex, owner) {
+  const h = String(hex).toLowerCase();
+  if (REFL_KEEP.has(h)) return null;
+  const blank = owner === 'hero';
+  if (REFL_EYES.has(h)) return blank ? REFL_RAMP[3] : REFL_WHITE;
+  if (h in REFL_SKIN) return blank ? REFL_RAMP[3] : REFL_RAMP[REFL_SKIN[h]];
+  const n = parseInt(h.slice(1), 16);
+  const y = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  return REFL_RAMP[y < 0.22 ? 0 : y < 0.38 ? 1 : y < 0.55 ? 2 : 3];
+}
+const reflHeads = new Map();
+function reflectionHead(heads, id) {
+  if (reflHeads.has(id)) return reflHeads.get(id);
+  let out = null;
+  const owner = String(id).replace(/^refl_/, '');
+  const f = heads && heads.frames[`head_${owner}`];
+  if (f && heads.image && typeof document !== 'undefined') {
+    try {
+      const c = document.createElement('canvas'); c.width = f.w; c.height = f.h;
+      const g = c.getContext('2d');
+      g.drawImage(heads.image, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+      const img = g.getImageData(0, 0, f.w, f.h), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] === 0) continue;
+        const hex = '#' + [d[i], d[i + 1], d[i + 2]].map((v) => v.toString(16).padStart(2, '0')).join('');
+        const col = reflectionColor(hex, owner);
+        if (!col) continue;
+        const n = parseInt(col.slice(1), 16);
+        d[i] = (n >> 16) & 255; d[i + 1] = (n >> 8) & 255; d[i + 2] = n & 255;
+      }
+      g.putImageData(img, 0, 0);
+      out = c;
+    } catch (e) { out = null; }
+  }
+  reflHeads.set(id, out);
+  return out;
+}
+/** Draw a unit's 12x12 head at (x, y); `alpha` is a number or { alpha, tint, tintAmount }. False when nothing drew. */
 export function drawHead(r, actor, x, y, alpha = 1) {
   if (!actor) { r.rect(x, y, 12, 12, '#2a2440'); return false; }
+  const o = typeof alpha === 'object' && alpha ? alpha : { alpha };
+  const look = { alpha: o.alpha ?? 1, tint: o.tint || null, tintAmount: o.tint ? (o.tintAmount ?? 0.5) : 0 };
   const heads = headsAtlas(r);
+  if (heads && /^refl_/.test(String(actor.id))) {
+    const c = reflectionHead(heads, actor.id);
+    if (c) { r.image(c, x, y, look); return true; }
+  }
   const hf = heads && (heads.frames[`head_${actor.id}`] || (actor.side === 'enemy' && heads.frames[`head_${String(actor.id).replace(/_\d+$/, '')}`]));
-  if (hf) { r.sprite(heads, hf, x, y, { topLeft: true, alpha }); return true; }
+  if (hf) { r.sprite(heads, hf, x, y, { topLeft: true, ...look }); return true; }
+  alpha = look.alpha;
   if (actor.side === 'party') {
     const face = faceRect(r, actor);
     if (face) { r.image(face.image, x, y, { sx: face.x + 1, sy: face.y + 1, sw: 12, sh: 12, alpha }); return true; }
@@ -117,13 +186,14 @@ export function drawTimeline(r, order, actors, preview, frame) {
     const f = ui.frames[kind];
     r.rect(sx + 2, sy + 2, 14, 14, '#14101e');       // ink backing: heads have transparent corners, the rail must not show through
     if (f) r.sprite(ui, f, sx, sy, { topLeft: true, tint: i === 0 && pulse ? '#fff7d6' : null, tintAmount: i === 0 && pulse ? 0.35 : 0 });
-    drawHead(r, a, sx + 3, sy + 3, row.skip ? 0.45 : 1);
+    drawHead(r, a, sx + 3, sy + 3, row.skip === 'kept' ? { alpha: 0.95, tint: '#b8c2e8', tintAmount: 0.5 } : row.skip ? 0.45 : 1);
     if (i === 0 && pulse) r.strokeRect(sx - 1, sy - 1, 20, 20, '#f9d77a');
     if (row.skip) {
       // Kept turns (the Nameless King) grey the head and carry the icon_kept shard marker; stun / break keep theirs.
       const mk = row.skip === 'kept' ? (ui.frames.icon_kept || ui.frames.st8_silence || ui.frames.shield_broken)
         : row.skip === 'stun' ? ui.frames.st8_stun : ui.frames.shield_broken;
-      if (mk) r.sprite(ui, mk, sx + 18 - Math.min(10, mk.w), sy + 18 - Math.min(10, mk.h), { topLeft: true });
+      if (mk && row.skip === 'kept' && mk.w > 8) r.sprite(ui, mk, sx + 19 - mk.w, sy + 19 - mk.h, { topLeft: true });
+      else if (mk) r.sprite(ui, mk, sx + 18 - Math.min(10, mk.w), sy + 18 - Math.min(10, mk.h), { topLeft: true });
     } else if (row.charging) {
       r.rect(sx + 11, sy + 1, 6, 8, '#14101e');
       r.text('!', sx + 12, sy - 1, { color: 'orange', shadow: false });
@@ -178,10 +248,11 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     for (const s of ids.slice(0, 5)) {
       // Kept has no 8 px timeline badge; use the icon_kept shard (or st8_silence as a stand-in) so the row still marks it.
       const bf = ui && (ui.frames[`st8_${s}`] || (s === 'kept' ? (ui.frames.icon_kept || ui.frames.st8_silence) : null));
-      if (bf) r.sprite(ui, bf, ix, L.status[1], { topLeft: true });
-      ix += 9;
+      if (bf) r.sprite(ui, bf, ix, L.status[1] - (bf.h > 8 ? Math.floor((bf.h - 8) / 2) : 0), { topLeft: true });
+      ix += bf && bf.w > 8 ? bf.w + 1 : 9;
     }
-    if (a.defending && ui && ui.frames.icon_shield) r.sprite(ui, ui.frames.icon_shield, L.status[0] + 46, L.status[1] - 2, { topLeft: true, alpha: 0.9 });
+    // Defending: the shield follows the badges, inside the window.
+    if (a.defending && ui && ui.frames.icon_shield) { const f = ui.frames.icon_shield; r.sprite(ui, f, Math.min(ix + 1, STATUS_WIN.x + STATUS_WIN.w - 6 - f.w), L.status[1] - 2, { topLeft: true, alpha: 0.9 }); }
   });
 }
 
@@ -189,10 +260,11 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
  * Enemy row under a foe: shield badge (count, or broken) + weakness slots (known icons, '?' for unknown,
  * resist frames) + status badges. know = b.knowledge(uid), unit = live rules unit.
  */
-export function drawEnemyRow(r, actor, know, unit, frame, touch = false) {
+export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = {}) {
   const ui = uiAtlas(r);
-  if (!ui) return;
-  const { x, y } = enemyRowAnchor(actor, touch);
+  if (!ui) return null;
+  const anchor = enemyRowAnchor(actor, touch, opts.cw || null);
+  const x = anchor.x, y = anchor.y - (opts.lift || 0);
   const badge = ui.frames[unit && unit.broken ? 'shield_badge_broken' : 'shield_badge'];
   if (badge) {
     r.sprite(ui, badge, x, y, { topLeft: true });
@@ -203,8 +275,7 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false) {
     }
   }
   let ex = x + 15;
-  // Reflect marker (Episode 2): while a foe rebounds attacks (the Glassback under Protect), a mirror badge leads the
-  // row so the player sees not to throw a spell at it. know.reflect is 'magic' | 'phys' | null (rules.knowledge).
+  // Reflect marker (the Glassback under Protect) leads the row; know.reflect is 'magic' | 'phys' | null.
   if (know && know.reflect) {
     const fr = ui.frames.weak_frame;
     if (fr) r.sprite(ui, fr, ex, y - 1, { topLeft: true });
@@ -234,6 +305,22 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false) {
     const f = ui.frames[`st8_${s}`];
     if (f) { r.sprite(ui, f, sx, y - 10, { topLeft: true }); sx += 9; }
   }
+  return { x, y, w: ex - x };
+}
+/** Lift (px) for an enemy row that would touch one already drawn this frame (three foes in a line). */
+export function rowLift(anchor, w, placed) {
+  const LIFT = 16;
+  for (let lift = 0; lift <= LIFT * 2; lift += LIFT) {
+    const y = anchor.y - lift;
+    const hit = placed.some((p) => anchor.x < p.x + p.w + 3 && anchor.x + w + 3 > p.x && Math.abs(p.y - y) < 14);
+    if (!hit) return lift;
+  }
+  return 0;
+}
+export function enemyRowWidth(know) {
+  const weak = (know && know.weak) || [], resist = ((know && know.resist) || []).filter((t) => WEAK_TYPES.includes(t));
+  const slots = Math.min(4, weak.length + ((know && know.unknown) || 0) + resist.length);
+  return 15 + (know && know.reflect ? 15 : 0) + slots * 15;
 }
 
 /** Name tab near the reticle: enemy name (gold + crown for elites), HP when appraised. */
@@ -274,10 +361,10 @@ export function drawTurnMarker(r, actor, frame) {
   else r.text('▼', actor.cx, actor.top - 14, { align: 'center', color: 'gold' });
 }
 /** Pulsing danger marker over a charging enemy (telegraph), with the turns-until count. */
-export function drawTelegraphMarker(r, actor, frame, nextTurn) {
+export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28) {
   const ui = uiAtlas(r);
   const bob = Math.floor(frame / 8) % 2;
-  const y = Math.max(28, actor.top - 14) - bob;
+  const y = Math.max(minY, actor.top - 14) - bob;
   const name = ui && animFrameAt(ui.anims.emote_exclaim, frame / 60);
   const f = name && ui.frames[name];
   const on = Math.floor(frame / 6) % 3 !== 2;
@@ -311,10 +398,7 @@ export function drawBigBanner(r, text, style, k) {
   });
 }
 
-/**
- * A Kept member sealed in a mirror shard on the stage (the Nameless King). Drawn over the sprite: a faceted glass
- * prism (cyan outline + white gleam + travelling shimmer) that reads as "held behind glass" without hiding the unit.
- */
+/** A Kept member sealed in a mirror shard: a faceted glass prism over the sprite with a travelling gleam. */
 export function drawKeptShard(r, actor, frame) {
   const cx = actor.cx;
   const h = actor.h || 40, w = Math.max(18, actor.w || 28);
@@ -333,10 +417,7 @@ export function drawKeptShard(r, actor, frame) {
   r.withAlpha(0.7, () => r.line(cx - hw + 3, gy, cx + hw - 3, gy - 2, '#ffffff'));
 }
 
-/**
- * The Other Selves' Mirrored Combo telegraph: a silver bracket under the two reflections' timeline slots, so the
- * player sees the pair that is about to act as one (and can break the link). aUid / bUid are the two actors.
- */
+/** The Mirrored Combo telegraph: a silver bracket under the two reflections' timeline slots. */
 export function drawMirrorBracket(r, order, aUid, bUid, frame) {
   if (!aUid || !bUid) return;
   const ia = order.findIndex((o) => o.uid === aUid);
@@ -344,15 +425,34 @@ export function drawMirrorBracket(r, order, aUid, bUid, frame) {
   if (ia < 0 || ib < 0) return;
   const lo = Math.min(ia, ib), hi = Math.max(ia, ib);
   if (hi >= TL.slots) return;
-  const x0 = timelineSlotX(lo) + 9, x1 = timelineSlotX(hi) + 9;
-  const y = TL.y + 19;
-  const pulse = Math.floor(frame / 8) % 2 === 0;
-  const col = pulse ? '#e8ecff' : '#9aa6d8';
-  r.line(x0 + 1, y, x1 - 1, y, col);
-  r.line(x0, y, x0, y - 4, col);
-  r.line(x1, y, x1, y - 4, col);
+  // 2 px, ink-outlined, legs into the slots, a glass gem mid-bar; breathes silver to white.
+  const x0 = timelineSlotX(lo) + 4, x1 = timelineSlotX(hi) + 14;
+  const top = TL.y + 18, bar = TL.y + 23;
+  const pulse = Math.floor(frame / 10) % 2 === 0;
+  const ink = '#14101e', col = pulse ? '#e8ecff' : '#b8c2e8', shade = '#7880b0', hi1 = '#ffffff';
+  r.rect(x0 - 1, top, 4, bar - top + 3, ink);
+  r.rect(x1 - 2, top, 4, bar - top + 3, ink);
+  r.rect(x0 - 1, bar - 1, x1 - x0 + 2, 4, ink);
+  r.rect(x0, top, 2, bar - top + 2, col);
+  r.rect(x1 - 1, top, 2, bar - top + 2, col);
+  r.rect(x0, bar, x1 - x0 + 1, 2, col);
+  r.rect(x0 + 2, bar + 1, x1 - x0 - 3, 1, shade);
   const mx = Math.round((x0 + x1) / 2);
-  r.rect(mx - 1, y - 1, 3, 3, pulse ? '#ffffff' : '#cfefff');
+  const gem = [[0, -3, 1], [-1, -2, 3], [-2, -1, 5], [-3, 0, 7], [-2, 1, 5], [-1, 2, 3], [0, 3, 1]];
+  for (const [dx, dy, w] of gem) r.rect(mx + dx - 1, bar + dy, w + 2, 1, ink);
+  r.rect(mx, bar - 4, 1, 1, ink); r.rect(mx, bar + 4, 1, 1, ink);
+  for (const [dx, dy, w] of gem) r.rect(mx + dx, bar + dy, w, 1, dy < 0 ? hi1 : dy === 0 ? (pulse ? hi1 : '#cfefff') : '#8af0e8');
+}
+
+/** Boss card band cy: the W5 spot (0.4 H) unless it covers a foe ({ y0, y1 } rects) and cy 40 would not. */
+export function bossCardY(rects, sub = true) {
+  const bh = sub ? 40 : 28;
+  const spots = [Math.round(H * 0.4), 40];
+  for (const cy of spots) {
+    const y0 = cy - 2, y1 = cy - 2 + bh;
+    if (!rects.some((e) => e.y0 < y1 && e.y1 > y0)) return cy;
+  }
+  return spots[0];
 }
 
 /**
@@ -365,7 +465,7 @@ export function drawBossCard(r, card) {
   const inK = Math.min(1, t / 14), outK = t > frames - 16 ? Math.max(0, (frames - t) / 16) : 1;
   const a = Math.max(0, Math.min(inK, outK));
   if (a <= 0) return;
-  const cy = Math.round(H * 0.4);
+  const cy = Number.isFinite(card.cy) ? card.cy : Math.round(H * 0.4);
   const bh = sub ? 40 : 28;
   r.withAlpha(a * 0.72, () => r.rect(0, cy - 2, W, bh, '#14101e'));
   r.withAlpha(a, () => {

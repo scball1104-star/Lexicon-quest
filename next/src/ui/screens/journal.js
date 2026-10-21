@@ -44,6 +44,22 @@ export function enemyArt(r, id) {
 }
 
 
+/** Fit a label to maxW: drop a leading "The ", then ellipsize. */
+export function fitLine(r, text, maxW) {
+  let t = String(text || '');
+  if (r.measure(t) <= maxW) return t;
+  if (/^The /.test(t) && r.measure(t.slice(4)) <= maxW) return t.slice(4);
+  t = t.replace(/^The /, '');
+  while (t.length > 1 && r.measure(t + '…') > maxW) t = t.slice(0, -1).trimEnd();
+  return t + '…';
+}
+
+export function statLine(r, level, hp, shields, maxW = STAT_W) {
+  const forms = [`Lv ${level}  HP ${hp}  Shields ${shields}`, `Lv ${level} HP ${hp} Shields ${shields}`, `Lv ${level} HP ${hp} Sh ${shields}`];
+  return forms.find((t) => r.measure(t) <= maxW) || forms[forms.length - 1];
+}
+export const STAT_W = 112;
+
 /** Largest integer scale (or 1/n) of a w x h sprite that fits the box; never below 1/4. */
 export function fitScale(w, h, bw, bh) {
   for (const sc of SCALES) if (w * sc <= bw && h * sc <= bh) return sc;
@@ -142,7 +158,7 @@ export class JournalScreen {
       for (const line of r.wrap(fillHero(q.text, g), 344)) { if (seen(y)) r.text(line, 27, y, { color: q.done ? 'dim' : 'white' }); y += 11; }
       y += 3;
     }
-    if (!j.side.length && seen(y)) { r.text('No errands yet. Talk to the people of Willowmere.', 14, y, { color: 'dim' }); }
+    if (!j.side.length && seen(y)) { r.text(`No errands yet. Talk to the people of ${hasFlag(g, 'nh_arrived') ? 'the Hollow' : 'Willowmere'}.`, 14, y, { color: 'dim' }); }
     r.popClip();
     this.maxScroll = Math.max(0, Math.ceil((end - 164) / 11));
     if (this.scroll < this.maxScroll) drawScrollArrow(r, 'down', 192, 172);
@@ -161,7 +177,7 @@ export class JournalScreen {
     // The text column is 114 px wide (the picture box takes the right 92).
     const big = r.measure(b.name, 'large') <= 112;   // a long name (Thornback Wolf) drops to the small font instead of running under the picture
     r.text(b.name, x, big ? 35 : 38, { font: big ? 'large' : 'main', color: 'cream' });
-    r.text(b.where, x, 52, { color: 'gray' });
+    r.text(fitLine(r, b.where, 116), x, 52, { color: 'gray' });
     r.text(`Seen ${e.seen}  Defeated ${e.killed}`, x, 63, { color: 'gray' });
     r.text('Weak:', x, 76, { color: 'gold' });
     let wx = x + 34;
@@ -175,7 +191,7 @@ export class JournalScreen {
       for (const t of d.resist) { drawIcon(r, WEAK_ICON[t] || t, rx, ly, { alpha: e.resist.includes(t) ? 1 : 0.35 }); rx += 14; }
       ly += 14;
     }
-    if (d) r.text(`Lv ${d.level}  HP ${e.killed || e.appraised ? d.hp : '???'}  Shields ${d.shields}`, x, Math.min(ly, 100), { color: 'gray' });
+    if (d) r.text(statLine(r, d.level, e.killed || e.appraised ? d.hp : '???', d.shields), x, Math.min(ly, 100), { color: 'gray' });
     drawDivider(r, 164, 116, 210);
     // Lore sits in a box from y 121 down to 174 (6 px above the frame); only whole lines are drawn, never a cut
     // one. Left / Right (or a tap on its lower / upper half) scroll an entry that is taller than the box.
