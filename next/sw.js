@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'bc497e517b5b';
+const SHELL_VERSION = '4fa3a88f1b54';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -137,9 +137,11 @@ const PRECACHE = [
   'src/world/autotile.js',
   'src/world/beam.js',
   'src/world/camera.js',
+  'src/world/closeup.js',
   'src/world/cutscene.js',
   'src/world/events.js',
   'src/world/fieldart.js',
+  'src/world/fog.js',
   'src/world/lighting.js',
   'src/world/maps.js',
   'src/world/npc.js',
