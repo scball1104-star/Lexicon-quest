@@ -74,9 +74,9 @@ export const SHOPS = {
   },
 };
 
-/** Stock visible for a set of story flags (array or Set or {flag:true}). */
+/** Stock visible for a set of story flags (array or Set or {flag:true}, or a hasFlag function as the shop scene passes). */
 export function shopStock(shopId, flags = {}) {
-  const has = (f) => (flags instanceof Set ? flags.has(f) : Array.isArray(flags) ? flags.includes(f) : !!flags[f]);
+  const has = (f) => (typeof flags === 'function' ? !!flags(f) : flags instanceof Set ? flags.has(f) : Array.isArray(flags) ? flags.includes(f) : !!flags[f]);
   const shop = SHOPS[shopId];
   if (!shop) return [];
   return shop.stock.filter((s) => (!s.ifFlag || has(s.ifFlag)) && (!s.ifNotFlag || !has(s.ifNotFlag)));
