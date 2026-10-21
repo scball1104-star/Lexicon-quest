@@ -109,8 +109,17 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Fix-pass backlog: on the phone the taller touch command window hides the lower half of the middle foe in
       three-foe fights (predates Episode 2, obvious with Mira's Reflection); assets/ui/heads.png reflection blobs
       are now unused (runtime glass heads).
-- [~] Wave 10d: E2-integrate running (started 2026-10-21 11:30 ET, the one agent); then critic-4 + play-critic-3,
-      then a fix pass, then publish
+- [x] Wave 10d: E2-integrate committed 5f09ee5: autoplay finishes Episode 2 from an Episode 1 save and from
+      newGameEp2, desktop and phone, 0 game overs, King at Lv 13 (save) and Lv 12 (new); 505 tests; 12 shots x 7 devices.
+      Story timer: first play 110 to 153 min (plan said 60 to 90; Episode 1 measures 96 to 113 the same way).
+      Live Episode 1 bug found: shops never offered story-unlocked stock (1cfe993); hotfix to main in progress.
+- [ ] Reviews (one at a time): critic-4 (docs/CRITIQUE_4.md), then play-critic-3 (docs/PLAYTEST_REVIEW_3.md)
+- [ ] Fix pass. Known going in (from E2-integrate, ranked): length over target (33 min of reading, ~36 fights);
+      Fading Road true path painted as a dirt road and the mist faint (no tension); hollow_dusk tint reads as daylight;
+      phone Other Selves: command window hides a reflection, weakness rows overlap sprites; newGameEp2 meets the
+      King at Lv 12 not 13; feather drawn as a letter; reflections on the F1 carpet runner; mapcheck treats a prop as
+      only its event cell.
+- [ ] Full gate list, then publish Episode 2 to /next
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
 - 2026-10-21 fixes: Load/Save page finger and highlight (Scott's report; hotfix published alone to main 8a1084a,
