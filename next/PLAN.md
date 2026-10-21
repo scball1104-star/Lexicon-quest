@@ -109,7 +109,8 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Fix-pass backlog: on the phone the taller touch command window hides the lower half of the middle foe in
       three-foe fights (predates Episode 2, obvious with Mira's Reflection); assets/ui/heads.png reflection blobs
       are now unused (runtime glass heads).
-- [ ] Wave 10d: E2-integrate, then critic-4 + play-critic-3, then a fix pass, then publish
+- [~] Wave 10d: E2-integrate running (started 2026-10-21 11:30 ET, the one agent); then critic-4 + play-critic-3,
+      then a fix pass, then publish
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
 - 2026-10-21 fixes: Load/Save page finger and highlight (Scott's report; hotfix published alone to main 8a1084a,

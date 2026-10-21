@@ -164,3 +164,14 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Also fixed on the Episode 2 branch: Mira's Appraise window could ignore a quick tap to close it on a busy frame.
 - Episode 2 continues this week at a steady pace, one helper at a time, watching the usage meter so the loops and
   the schedule generators keep their room.
+
+## 2026-10-21 (Wed) late morning: Episode 2's battles and title screen
+- Once you have finished Episode 1, the title screen offers "Episode 2": it picks up your hero's name, shows an
+  "Episode 2: The Town Without a Name" card, and starts you at home.
+- Boss fights got their big moments: intro cards for The Other Selves and The Nameless King, a full-screen
+  "the mirror cracks" effect, the King's unmasking, a party member sealed in glass (Kept), and a silver bracket on
+  the turn order when two reflections are about to strike together.
+- Long battle warnings no longer get cut off (this also fixes the Archivore's warning in Episode 1).
+- Next: stitching Episode 2 into one run from start to credits, with the test bot playing it on desktop and phone.
+  Still not published; it goes live after two reviews and a fix pass.
+
