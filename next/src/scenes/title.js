@@ -120,7 +120,8 @@ export class TitleScene {
     }
     // Opaque: a translucent window over the key art would blend hundreds of off-palette colours (D1).
     drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h);
-    this.menu.draw(r, { frame: this.frame, bar: false });
+    // Only the page on top shows a finger: under Load Game or Config the title's would read as a second cursor.
+    this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
     r.text(VERSION, 4, 205, { color: 'gray' });
   }
 
