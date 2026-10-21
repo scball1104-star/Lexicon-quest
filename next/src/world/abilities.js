@@ -288,7 +288,13 @@ export class FieldAbilities {
     this.fx = this.fx.filter((x) => x.t < x.life);
     if (this.float) { this.float.t++; if (this.float.t > 70) this.float = null; }
     if (this.label) { this.label.t++; if (this.label.t > 44) this.label = null; }
-    if (this.panel) this.panel.t++;
+    if (this.panel) {
+      this.panel.t++;
+      // latch the closing press here, every logic step: the awaiting loop below can resume after two steps ran
+      // in one browser frame, by which time a one-frame press is gone
+      const inp = this.engine.input;
+      if (this.panel.t >= 20 && (inp.pressed('confirm') || inp.pressed('cancel') || inp.pressed('pageR') || (inp.pointer && inp.pointer.pressed))) this.panel.closed = true;
+    }
     // the first time the party meets an ability's target, the companion who owns it says how
     if (canIdle && !this.busy) {
       const c = this.context();
@@ -571,12 +577,10 @@ export class FieldAbilities {
     this.lastHit = { kind: 'appraise', encounter: enc, keys };
     this.panel = { rows: appraisalRows(enc), t: 0 };
     // the window waits for confirm / cancel / a tap (but at least 20 frames, so a held button does not skip it)
-    const input = e.input;
     for (let i = 0; i < 60 * 30 && !f.dead; i++) {
       await this.wait(1);
       if (!this.panel) break;              // a map load reset the abilities while the window was open
-      if (this.panel.t < 20) continue;
-      if (input.pressed('confirm') || input.pressed('cancel') || input.pressed('pageR') || (input.pointer && input.pointer.pressed)) break;
+      if (this.panel.closed) break;
     }
     e.audio.sfx('confirm', { volume: 0.7 });
     this.panel = null;
