@@ -224,3 +224,12 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Next, at the same steady pace: an art pass to bring the five new character portraits and the reflection monsters up
   to Episode 1's painted look. I will not start Episode 3 until you say what you want it to be.
 
+## 2026-10-21 (Wed) late night: Episode 2 art pass is live
+- The five new Episode 2 faces (Elian, Sister Anwen, Tovin, Lena, Aurel) are redrawn turned three-quarters and lit
+  from the upper left, like Episode 1's. They are a clear step up, though still smoother than Episode 1's painted
+  portraits; tell me if any of them bothers you.
+- The reflection monsters now look like glass statues of your own party, each with its owner's mark (the hero's
+  scarf, Mira's staff gem, Bram's shield cross).
+- The Nameless King has a clear crown and a glowing veil, and his face reads when he is unmasked.
+- Each room of the mirror palace has its own wall: tapestries, broken mirrors, black glass, crimson banners.
+
