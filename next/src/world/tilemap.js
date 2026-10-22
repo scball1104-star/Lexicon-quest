@@ -160,6 +160,8 @@ export class TileMap {
       }
       this.terrain.push(tr); this.ids.push(ir); this.walls.push(wr); this.tiles.push(tl); this.decorTiles.push(dr); this.overlays.push(ov);
     }
+    // W12 (CRITIQUE_4 item 6): a wall system with faceStyles gives each room's wall run its own face art
+    this.faceBlocks = faceBlockGrid(this.ids, this.db, mod.id);
     if (this.animated.length) {
       const first = T[this.terrain[this.animated[0][1]][this.animated[0][0]]].anim;
       this.animPhases = [...new Set(first.frames)].sort((a, b) => a - b);
@@ -632,10 +634,11 @@ export class TileMap {
       const faceId = w.sys + '_face';
       const same = (xx, yy) => !this.inBounds(xx, yy) || this.ids[yy][xx] === faceId;
       const qs = faceQuarters(same(x - 1, y), same(x, y - 1), same(x + 1, y), same(x, y + 1));
+      const [fx, fy] = (this.faceBlocks && this.faceBlocks[y] && this.faceBlocks[y][x]) || meta.face;
       for (let i = 0; i < 4; i++) {
         const [qx, qy] = qs[i];
         const [ox, oy] = QUARTER_OFFSET[QUARTERS[i]];
-        g.drawImage(img, meta.face[0] + qx * 8, meta.face[1] + qy * 8, 8, 8, px + ox, py + oy, 8, 8);
+        g.drawImage(img, fx + qx * 8, fy + qy * 8, 8, 8, px + ox, py + oy, 8, 8);
       }
     }
   }
@@ -735,4 +738,90 @@ export class TileMap {
     const m = this.mod.marks && this.mod.marks[name];
     return Array.isArray(m) ? [m[0], m[1]] : null;
   }
+}
+
+// W12 (CRITIQUE_4 item 6): per-room wall art. Pure helpers (no DOM), exported for node tests.
+//
+// A wall system in tiles.json may carry `faceStyles`: a list of styles, each a list of 32x32 face blocks ([x, y] in
+// its sheet) that repeat tile by tile along a wall (so a style can alternate a tapestry and a pilaster). Every
+// connected run of that system's face cells on a map (a room's north wall, or one stretch of it) takes ONE style:
+//
+//   faceStyles:      [[[fx, fy]], [[ax, ay], [bx, by]], ...]   style 0 is normally the system's own `face` block
+//   faceStyleByMap:  { <mapId>: { cycle: [i, ...], at: [[x, y, i], ...] } }
+//                    `at` pins the run that contains cell (x, y) to style i; every other run takes the next style
+//                    of `cycle` in reading order (top to bottom, left to right); a plan without `cycle` cycles
+//                    through every style. A map without an entry keeps the system's own face on every run.
+//
+// faceBlockGrid(ids, db, mapId) -> rows of [fx, fy] (or null where the system's plain `face` block applies).
+
+/** Connected runs (4-neighbour) of cells whose legend id is `faceId`, in reading order. */
+export function faceRuns(ids, faceId) {
+  const H = ids.length, W = H ? Math.max(...ids.map((r) => r.length)) : 0;
+  const seen = ids.map((r) => r.map(() => false));
+  const runs = [];
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (seen[y][x] || ids[y][x] !== faceId) continue;
+      const cells = [];
+      const stack = [[x, y]];
+      seen[y][x] = true;
+      while (stack.length) {
+        const [cx, cy] = stack.pop();
+        cells.push([cx, cy]);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = cx + dx, ny = cy + dy;
+          if (ny < 0 || ny >= H || nx < 0 || nx >= (ids[ny] || []).length) continue;
+          if (seen[ny][nx] || ids[ny][nx] !== faceId) continue;
+          seen[ny][nx] = true;
+          stack.push([nx, ny]);
+        }
+      }
+      let minX = Infinity;
+      for (const [cx] of cells) minX = Math.min(minX, cx);
+      runs.push({ cells, minX, y });
+    }
+  }
+  return runs;
+}
+
+/** The style index of every run of one wall system on one map (see the header). */
+export function runStyles(runs, nStyles, plan) {
+  const out = new Array(runs.length).fill(-1);
+  const at = (plan && plan.at) || [];
+  for (const [px, py, s] of at) {
+    const i = runs.findIndex((r) => r.cells.some(([x, y]) => x === px && y === py));
+    if (i >= 0 && s >= 0 && s < nStyles) out[i] = s;
+  }
+  const cycle = (plan && plan.cycle && plan.cycle.length ? plan.cycle : [...Array(nStyles).keys()]).filter((s) => s >= 0 && s < nStyles);
+  let k = 0;
+  for (let i = 0; i < runs.length; i++) {
+    if (out[i] >= 0) continue;
+    out[i] = cycle.length ? cycle[k++ % cycle.length] : 0;
+  }
+  return out;
+}
+
+export function faceBlockGrid(ids, db, mapId) {
+  const H = ids.length;
+  const grid = ids.map((r) => r.map(() => null));
+  const walls = (db && db.walls) || {};
+  for (const [sys, meta] of Object.entries(walls)) {
+    const styles = meta.faceStyles;
+    if (!Array.isArray(styles) || styles.length < 2) continue;
+    const faceId = sys + '_face';
+    if (!ids.some((r) => r.includes(faceId))) continue;
+    // a map opts in: without a plan for this map every run keeps the system's own face
+    const plan = meta.faceStyleByMap ? meta.faceStyleByMap[mapId] : null;
+    if (!plan) continue;
+    const runs = faceRuns(ids, faceId);
+    const pick = runStyles(runs, styles.length, plan);
+    runs.forEach((run, i) => {
+      const blocks = styles[pick[i]];
+      if (!blocks || !blocks.length) return;
+      for (const [x, y] of run.cells) {
+        if (y < H) grid[y][x] = blocks[((x - run.minX) % blocks.length + blocks.length) % blocks.length];
+      }
+    });
+  }
+  return grid;
 }

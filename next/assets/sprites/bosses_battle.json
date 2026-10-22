@@ -206,8 +206,8 @@
    19
   ],
   "nameless_king": [
-   0,
-   1279,
+   288,
+   1138,
    142,
    138
   ],
@@ -218,7 +218,7 @@
    139
   ],
   "nameless_king_attack": [
-   144,
+   0,
    1279,
    144,
    138
@@ -236,10 +236,10 @@
    152
   ],
   "nameless_king_die_0": [
-   144,
-   1138,
+   146,
+   1279,
    142,
-   139
+   138
   ],
   "nameless_king_die_1": [
    0,
@@ -260,7 +260,7 @@
    138
   ],
   "nameless_king_unmasked_idle_1": [
-   288,
+   144,
    1138,
    142,
    139
@@ -287,7 +287,7 @@
    312,
    984,
    142,
-   142
+   140
   ],
   "nameless_king_unmasked_die_1": [
    144,
@@ -461,7 +461,7 @@
   ],
   "nameless_king_die_0": [
    72,
-   138
+   137
   ],
   "nameless_king_die_1": [
    72,
@@ -493,7 +493,7 @@
   ],
   "nameless_king_unmasked_die_0": [
    72,
-   141
+   139
   ],
   "nameless_king_unmasked_die_1": [
    72,

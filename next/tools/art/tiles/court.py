@@ -2,6 +2,8 @@
 
 court_kit.py    floor terrains (glass_floor, gallery_floor, throne_floor) and the wall systems
                 court / court_gallery / court_throne (+ *_out), W8 per-floor kit style
+court_faces_w12.py  W12 per-room wall styles (faceStyles: tapestries, broken mirrors, niches, black glass,
+                banners, the throne room's gold-framed glass)
 court_props.py  the beam mechanism (mirrors, sources, receptors, glass bridges, slots, inlays), doors,
                 stairs, fonts, the throne, tall and great mirrors, portraits, benches, glass panes
 """
@@ -19,5 +21,8 @@ def build():
     if court_props:
         court_props.build_into(sh)
     sh.newline()
+    # W12: per-room wall styles, appended below everything so no existing rect moves
+    import court_faces_w12
+    court_faces_w12.build_into(sh)
     H = sh.y
     return sh.cv.crop(0, 0, 512, H), sh.meta

@@ -1,9 +1,10 @@
 """The Other Selves (E2-sprites): the party's reflections, stepped out of the great mirror of the Court's F2.
 
 Battle (`refl_hero`, `refl_mira`, `refl_bram`, packed into enemies_battle): each party member's own battle frames
-(party_battle, built just before this runs) flipped to face RIGHT and recoloured onto a silver-violet glass ramp
-by lightness, with white eyes; the hero's reflection has a blank face (no eyes, no mouth: "Nameless
-Reflection"). Weapons follow the owner's first weapon: hero sword, Mira staff, Bram spear.
+(party_battle, built just before this runs) flipped to face RIGHT and recoloured into clear glass (W12,
+recolour_glass: an eight-step indigo-violet-cyan-white ramp by lightness, a light rim, glint stripes, the owner's
+signature accent kept); the hero's reflection has a blank face (no eyes, no mouth: "Nameless Reflection"). The
+W11-era flat violet `recolour` is kept for reference and no longer used. Weapons follow the owner's first weapon: hero sword, Mira staff, Bram spear.
   base <- <id>_<w>_idle_0, idle_1 <- _idle_1, attack <- _strike, hurt <- <id>_hurt, cast <- <id>_cast,
   die_0..2 <- the shared dissolve. Origin: the owner's feet, mirrored.
 
@@ -94,6 +95,73 @@ def recolour(a, blank_face=False):
     return out
 
 
+# W12 (CRITIQUE_4 item 9): the battle frames were one flat violet (the face, the hair and the coat all one value), so
+# the Other Selves read as cutouts. They are now their owners' frames in clear glass: an eight-step glass ramp by
+# lightness (deep indigo, violet, periwinkle, cyan, pale, white: the same family as the W11 timeline heads, GLASS4 in
+# build_heads.py) that keeps the owner's own value structure (hair darker than face, coat folds, the weapon), a
+# light rim on the edges that face the mirror's light and a deep indigo edge below, two diagonal glint stripes that
+# sit at the same place relative to the feet in every frame, and each owner's signature accent kept in colour: the
+# hero's white scarf (and no face), Mira's staff gem in cyan, Bram's shield cross in gold.
+GLASS8 = ['#1a1238', '#2c2266', '#463a98', '#6a5ab8', '#6f94d4', '#82cfe4', '#cdf0f7', '#f6faff']
+GLINT = (-4.0, 6.0)      # diagonal glint bands: x - ox - 0.45 * (y - oy) in [g, g + 2) (relative to the feet)
+SIG = {
+    'mira': {'#e8fffb': '#ffffff', '#b4e4f2': '#8af0e8', '#6ab3e4': '#3cb8d8', '#3e88ca': '#2a8cb8'},
+    'bram': {'#f9d77a': '#f9d77a'},
+}
+
+
+def _hex(c):
+    return '#%02x%02x%02x' % tuple(int(round(v * 255)) for v in c[:3])
+
+
+def recolour_glass(a, pid, ox, oy, blank_face=False):
+    """party frame (as drawn, facing left) -> glass reflection; flip after. (ox, oy) = the feet in this frame."""
+    a = a.copy()
+    op = a[..., 3] > 0.5
+    H, W = op.shape
+    skin = skin_mask(a)
+    p = np.pad(skin, 1)
+    nskin = sum(p[1 + dy:H + 1 + dy, 1 + dx:W + 1 + dx].astype(int) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx)
+    eyes = op & ~skin & (nskin >= 4)
+    lab = to_oklab(a[..., :3].reshape(-1, 3)).reshape(H, W, 3)
+    L = lab[..., 0]
+    t = np.clip((L - 0.24) / 0.72, 0, 1)
+    idx = np.clip(np.round(t * 7).astype(int), 0, 7)
+    # the face is pale glass a step above its own value, so hair and face separate
+    idx = np.where(skin, np.clip(idx + 1, 5, 6), idx)
+    # glint stripes (two diagonal bands, fixed relative to the feet)
+    yy, xx = np.mgrid[0:H, 0:W]
+    u = (xx - ox) - 0.45 * (yy - oy)
+    for g, lift in ((GLINT[0], 2), (GLINT[1], 1)):
+        band = op & (u >= g) & (u < g + 2) & ~skin & ~eyes
+        idx = np.where(band, np.minimum(7, idx + lift), idx)
+    # edges: light rim where the edge faces up or toward the mirror (this frame's right = the reflection's left after
+    # the flip, where the backlight sits), a deep indigo edge below
+    pp = np.pad(op, 1)
+    up_open = op & ~pp[:-2, 1:-1]
+    side_open = op & ~pp[1:-1, 2:]
+    down_open = op & ~pp[2:, 1:-1]
+    left_open = op & ~pp[1:-1, :-2]
+    ring = up_open | side_open | down_open | left_open
+    cols = np.array([hex2rgb(h) for h in GLASS8], np.float32) / 255
+    out = a.copy()
+    out[op, :3] = cols[idx][op]
+    out[ring, :3] = cols[0]
+    rim = (up_open | side_open) & ~down_open & (L > 0.22)
+    out[rim, :3] = cols[6]
+    # the hero's white scarf and every near-white stays white (the blade, the scarf)
+    white = op & (L > 0.88) & ~ring
+    out[white, :3] = cols[7]
+    if blank_face:
+        out[eyes, :3] = cols[6]           # the Nameless Reflection: no eyes, one smooth pane
+    else:
+        out[eyes, :3] = cols[1]           # dark glass eyes, so the pale glass face reads as a face
+    for src, dst in SIG.get(pid, {}).items():
+        m = op & np.all(np.abs(a[..., :3] - np.array(hex2rgb(src), np.float32) / 255) < 1.5 / 255, -1)
+        out[m, :3] = np.array(hex2rgb(dst), np.float32) / 255
+    return out
+
+
 def _sheet(name):
     m = json.load(open(os.path.join(DST, name + '.json'), encoding='utf-8'))
     sh = from_pil(Image.open(os.path.join(DST, m['image'])))
@@ -114,7 +182,7 @@ def battle_frames():
                'hurt': f'{pid}_hurt', 'cast': f'{pid}_cast'}
         frames = {}
         for suf, n in src.items():
-            f = flip_x(recolour(_frame(m, sh, n), blank_face=(pid == 'hero')))
+            f = flip_x(recolour_glass(_frame(m, sh, n), pid, ox0, oy0, blank_face=(pid == 'hero')))
             frames[suf] = f
         base = frames['']
         H, W = base.shape[:2]
@@ -135,7 +203,10 @@ def field_blocks():
     for rid, (pid, w) in IDS.items():
         blk = {}
         for d in ('down', 'left', 'right', 'up'):
-            blk[d] = [recolour(_frame(m, sh, f'{pid}_{d}_{k}'), blank_face=(pid == 'hero')) for k in ('0', '1', '2', 'blink')]
+            # W12: the field frames take the same glass as the battle frames (the origin is the field cell's feet)
+            ox, oy = m.get('origin', [12, 31])
+            blk[d] = [recolour_glass(_frame(m, sh, f'{pid}_{d}_{k}'), pid, ox, oy, blank_face=(pid == 'hero'))
+                      for k in ('0', '1', '2', 'blink')]
         out[rid] = blk
     return out
 

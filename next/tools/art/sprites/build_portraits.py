@@ -258,10 +258,14 @@ def make_from_frame(img, cx, cy, n):
 
 
 def build_ep2():
-    """[(pid, img48, img32)]: the hand-drawn Episode 2 cast (chars/portraits_ep2.py) and the King's crops"""
+    """[(pid, img48, img32)]: the Episode 2 cast and the King's crops.
+
+    W12 (CRITIQUE_4 item 5): elian, anwen, tovin, lena and aurel are rendered by chars/portraits_w12.py (three-quarter
+    view, key light from the upper left, 4 to 5 skin steps, hair in clusters, shoulders: Episode 1's standard).
+    chars/portraits_ep2.py (the flat W11-era drawings) is kept for reference and no longer used."""
     import sys
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chars'))
-    import portraits_ep2 as PE
+    import portraits_w12 as PE
     import ep2_king as EK
     out = [(pid, PE.portrait(pid, 48), PE.portrait(pid, 32)) for pid in PE.IDS]
     king = EK.build()
@@ -291,7 +295,7 @@ def build_atlas():
     portraits['vex'] = dict(portraits['silver_rogue'])          # Vex Quill (an alias: the same frames)
     sources = {p: ('portraits.webp cell %d' % CROPS[p][0]) if p in CROPS else ('interior-sprites.png cell %d' % EXTRA[p][0]) for p in ids}
     for p in e2ids:
-        sources[p] = 'battle frame %s (1x crop, W11)' % p if p.startswith('nameless_king') else 'hand-drawn (chars/portraits_ep2.py)'
+        sources[p] = 'battle frame %s (1x crop, W11)' % p if p.startswith('nameless_king') else 'SDF render (chars/portraits_w12.py, W12)'
     sources['vex'] = 'alias of silver_rogue'
     meta = {'image': 'portraits.png', 'frames': rects,
             'portraits': portraits,
@@ -299,7 +303,7 @@ def build_atlas():
             'aliases': {'vex': 'silver_rogue'},
             'unassigned': ['noble_lady', 'goggles_smith', 'hooded_sage'],
             'notes': '48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. '
-                     'E2-sprites: elian, anwen, tovin, lena, aurel (hand-drawn), nameless_king (the veiled King), and vex '
+                     'E2-sprites: elian, anwen, tovin, lena, aurel (W12: SDF renders, chars/portraits_w12.py), nameless_king (the veiled King), and vex '
                      '(Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops '
                      'of the battle frames.'}
     write_json(os.path.join(DST, 'portraits.json'), meta)

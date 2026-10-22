@@ -146,19 +146,21 @@ of glass tines, the veil, blue cape, glass sword, four floating shards; `_0`/`_1
 | `hob` | interior-sprites.png cell 7 |
 | `garrick` | interior-sprites.png cell 2 |
 | `pip` | interior-sprites.png cell 0 |
-| `elian` | hand-drawn (chars/portraits_ep2.py) |
-| `anwen` | hand-drawn (chars/portraits_ep2.py) |
-| `tovin` | hand-drawn (chars/portraits_ep2.py) |
-| `lena` | hand-drawn (chars/portraits_ep2.py) |
-| `aurel` | hand-drawn (chars/portraits_ep2.py) |
-| `nameless_king` | bosses.webp cell 1 (crop) |
+| `elian` | SDF render (chars/portraits_w12.py, W12) |
+| `anwen` | SDF render (chars/portraits_w12.py, W12) |
+| `tovin` | SDF render (chars/portraits_w12.py, W12) |
+| `lena` | SDF render (chars/portraits_w12.py, W12) |
+| `aurel` | SDF render (chars/portraits_w12.py, W12) |
+| `nameless_king` | battle frame nameless_king (1x crop, W11) |
+| `nameless_king_unmasked` | battle frame nameless_king_unmasked (1x crop, W11) |
 | `vex` | alias of silver_rogue |
 
 Garrick and Pip are recoloured from the NPC paintings (iron-grey hair, chapel purple). No sources exist yet for
 Oren, Edda, Holt, Cobb, Quill, Penny: the UI should fall back to no portrait for them.
-Episode 2: `elian`, `anwen`, `tovin`, `lena`, `aurel` are drawn from shapes in `chars/portraits_ep2.py` (no painted
-source exists) and finished like the NPC-painting portraits; `nameless_king` is a crop of bosses.png cell 1 with the
-glass veil sheen; `vex` is an alias of `silver_rogue` (`aliases`). No portraits for the other Hollow townsfolk.
+Episode 2: `elian`, `anwen`, `tovin`, `lena`, `aurel` are W12 renders from `chars/portraits_w12.py` (a small SDF
+model per character, three-quarter view, key light from the upper left; no painted source exists) finished like the
+NPC-painting portraits; `nameless_king` and `nameless_king_unmasked` are 1x crops of the battle frames; `vex` is an
+alias of `silver_rogue` (`aliases`). No portraits for the other Hollow townsfolk.
 
 ## ../ui/heads.png / .json  (timeline head icons, 12x12)
 `head_<id>` for hero, mira, bram and every enemy and boss id: a 10x10 head on `#251d34` inside a 1 px `#14101e` frame.

@@ -21,7 +21,8 @@ change the generator and rebuild. Everything is 16 px tiles, top-left light, col
   terrains: { id: {sheet, x, y, w:32, h:48, autotile:'A2'|'A1', kind:'fill'|'hole', collision, order,
                    variants:[[x,y],...], variantWeights:[...], anim?:{frames:[0,1,2,1], frameDx:32, ms}} },
   walls:    { id: {sheet, top:[x,y] (A2 block), face:[x,y] (32x32 face block), collision:'solid',
-                   topVariants?, topVariantWeights?} },
+                   topVariants?, topVariantWeights?,
+                   faceStyles?, faceStyleByMap?} },   W12: per-room face art, see "Court wall styles" below
   tiles:    { id: {sheet, x, y, w, h, collision, autotile?:'line16'} },
   objects:  { id: {sheet, rect:[x,y,w,h], anchor:[tx,ty], footprint:[[dx,dy],...], overheadRows,
                    doorAt:[dx,dy]|null, collision, kind:'building'|'prop'|'door'|'piece', anim?, note?} },
@@ -276,3 +277,14 @@ Deliverable previews (3x): `out/preview_riverside.png`, `out/preview_lantern_squ
 Scenes may reference ids from `assets/sprites/props.json` (trees, lamp posts, benches); the composer draws
 them read-only so previews show real context. Translucent pixels in the sheets are cast shadows
 (indigo `#14101e` at about 42%) meant to be composited by the renderer.
+
+## Court wall styles (W12)
+
+`court` and `court_throne` carry `faceStyles`: a list of styles, each a list of 32x32 face blocks that repeat tile by
+tile along a wall (style 0 is the system's own `face`). Each connected run of a system's face cells on a map (a room's
+north wall) takes one style; `faceStyleByMap[mapId]` = `{ cycle: [style, ...], at: [[x, y, style], ...] }` pins the
+run holding cell (x, y) and cycles the rest in reading order; a map without an entry keeps style 0 everywhere. Resolved by `faceBlockGrid` in `src/world/tilemap.js`;
+drawn by `tools/art/tiles/court_faces_w12.py`. court: 0 arched mirror windows (entry hall, teaching room),
+1 tapestries and candle sconces, 2 broken mirrors, 3 niches with blank-faced busts. court_throne: 0 the carved-crown
+frieze (F3's dark beam wing), 1 black-glass panels, 2 crimson banners, 3 the throne room's gold-framed glass.
+The map previews (`tools/maps/preview.py`, via compose.py) still draw style 0 everywhere.
