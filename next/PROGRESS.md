@@ -212,3 +212,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Now running: the pacing and balance half (a shorter opening, road monsters that stop coming back every minute,
   a smoother difficulty curve).
 
+## 2026-10-21 (Wed) night: Episode 2 is live
+- Episode 2, "The Town Without a Name", is on the /next link. Finish Episode 1 and the title screen offers
+  "Episode 2"; to jump straight in, open https://scball1104-star.github.io/Lexicon-quest/next/?ep=2 . Close and reopen
+  the game once if your phone still shows the old version.
+- The pacing half of the fix pass: about 11 fewer fights and 45 fewer lines of dialogue, the first fight now comes in
+  under five minutes, road monsters no longer come back every minute, and the reflection mini-boss is no longer harder
+  than the final boss. A first play is about one and a half to two hours.
+- Episode 1 also gets the improvements to shared parts: every monster visible on the phone, the speaker kept in view
+  during dialogue, and the shop fix from this afternoon.
+- Next, at the same steady pace: an art pass to bring the five new character portraits and the reflection monsters up
+  to Episode 1's painted look. I will not start Episode 3 until you say what you want it to be.
+

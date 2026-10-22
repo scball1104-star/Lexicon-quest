@@ -115,13 +115,18 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Live Episode 1 bug found: shops never offered story-unlocked stock (1cfe993); hotfix to main in progress.
 - [x] Reviews: critic-4 (1d6fa2a, docs/CRITIQUE_4.md) and play-critic-3 (4cda434, docs/PLAYTEST_REVIEW_3.md: well
       built, every beam puzzle readable from the screen; fixes are pacing and a level-curve spike; trim ~11 to 13 min)
-- [~] W11 fix pass, brief docs/briefs/W11-ep2-fixes.md. Part A committed 0f49e22 (CRITIQUE_4 items 1 to 8 and 10 to 14;
-      6 partial: per-room wall strips need new art; 9 half: Other Selves battle sprites still need repainting; 15
-      skipped; 508 tests; precache 3951b04). Part B (PLAYTEST_REVIEW_3 items 1 to 8 and 10 + the length trim)
-      running since 2026-10-21 17:58 ET.
-      Deferred to a later art pass: five Episode 2 portrait repaints (L); Other Selves sprites; Court wall strips;
-      CRITIQUE_4 item 15 (the King's battle art focal point).
-- [ ] Full gate list, then publish Episode 2 to /next
+- [x] W11 fix pass: Part A 0f49e22 (art and UX), Part B 2f33648 (pacing and balance: story timer 98 to 136 min,
+      first fight ~4.5 min, Other Selves Lv 10 win 88%, King Lv 12 96%; 509 tests).
+- [x] PUBLISHED Episode 2 to /next 2026-10-21 ~20:20 ET: main 35cf470, sw b5ccac10a979. Gates: release pwa 16/16,
+      root gate, 509 tests, 159/159 shots; live headless check desktop + phone (plain and ?ep=2) zero console errors.
+
+## Next (slow and steady, one agent at a time)
+- [ ] W12 Episode 2 art pass (deferred from W11): five Episode 2 portrait repaints to Episode 1's painted level;
+      Other Selves battle sprites; Court per-room wall strips; CRITIQUE_4 item 15 (the King's battle art focal point).
+- [ ] Small backlog: a 2x Briar Alpha avatar; autoplay does not visit Whisperwood Hollow; assets/ui/heads.png
+      reflection blobs unused; DESIGN.md proposals (closeup step in 5.4, respawn: 'reentry' in 5.2).
+- [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
+
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
 - 2026-10-21 fixes: Load/Save page finger and highlight (Scott's report; hotfix published alone to main 8a1084a,

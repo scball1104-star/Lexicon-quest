@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-21, 18:00 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-21, 20:25 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -31,17 +31,17 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   Whisperwood Hollow, battle animation, distinct Archive floors, field abilities (Dash Strike, Appraise, Shove),
   PWA install, phone UX, two playtest-review fix passes. Autoplay bot (`next/qa/autoplay.py`) clears it with 0 game
   overs.
-- **Episode 2 "The Town Without a Name": in progress, NOT yet published.**
+- **Episode 2 "The Town Without a Name": PUBLISHED to /next 2026-10-21 ~20:20 ET (main 35cf470, sw b5ccac10a979).**
+  Players see "Episode 2" on the title once any save has ep1_complete, or with `?ep=2` on the URL.
   - Wave 10a done and committed: E2-story (`src/data/story/ep2.js`, 48 scenes), E2-battle (enemies, Other Selves,
     Nameless King, Kept; simulator targets met), E2-tiles (court and hollow kits, five backdrops).
   - Wave 10b complete and committed (E2-world, E2-maps, E2-sprites, E2-audio). Full `node next/qa/run.mjs`:
     485 green on 2026-10-21 after the Appraise latch fix.
   - Wave 10c (9fa5caa) and 10d (5f09ee5) committed: Episode 2 plays to credits (autoplay, desktop and phone, from an
     Episode 1 save and from newGameEp2, 0 game overs); 505 tests green. Load budget cap now 6.5 MB.
-  - Both reviews done. W11 Part A committed (0f49e22); Part B running (one agent, since 17:58 ET); then the full
-    gate list and publish Episode 2. Brief: docs/briefs/W11-ep2-fixes.md. Part A changed shared Episode 1 systems
-    (phone battle layout, dialog placement): they go live with the Episode 2 publish, not as a hotfix.
-  - Live main = 6ae4f00 (two hotfixes today: Load page finger 8a1084a, shop story stock 6ae4f00), sw 4c0ffd33f8a3.
+  - W10c, W10d, critic-4, play-critic-3 and the W11 fix pass (Parts A and B) all committed and published.
+  - Next: W12 Episode 2 art pass (PLAN.md "Next"), one agent; Episode 3 waits for Scott.
+  - Live main = 35cf470 (Episode 2), after two hotfixes earlier today (Load page finger 8a1084a, shop stock 6ae4f00).
   - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
