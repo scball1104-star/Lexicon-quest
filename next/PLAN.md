@@ -121,7 +121,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       root gate, 509 tests, 159/159 shots; live headless check desktop + phone (plain and ?ep=2) zero console errors.
 
 ## Next (slow and steady, one agent at a time)
-- [ ] W12 Episode 2 art pass (deferred from W11): five Episode 2 portrait repaints to Episode 1's painted level;
+- [~] W12 Episode 2 art pass (running since 2026-10-21 21:50 ET, brief docs/briefs/W12-ep2-art.md; deferred from W11): five Episode 2 portrait repaints to Episode 1's painted level;
       Other Selves battle sprites; Court per-room wall strips; CRITIQUE_4 item 15 (the King's battle art focal point).
 - [ ] Small backlog: a 2x Briar Alpha avatar; autoplay does not visit Whisperwood Hollow; assets/ui/heads.png
       reflection blobs unused; DESIGN.md proposals (closeup step in 5.4, respawn: 'reentry' in 5.2).
