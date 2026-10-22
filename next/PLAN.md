@@ -126,8 +126,9 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       ones), Other Selves as glass party, King crown and unmasked face, per-room Court walls. 514 tests, 159/159 shots.
       Left over: the "!" telegraph bubble covers the King's veil and a two-line help box hides the crown's top
       (battle hud placement); tools/maps previews still show the old Court walls.
-- [ ] Small backlog: a 2x Briar Alpha avatar; autoplay does not visit Whisperwood Hollow; assets/ui/heads.png
-      reflection blobs unused; DESIGN.md proposals (closeup step in 5.4, respawn: 'reentry' in 5.2).
+- [~] W13 small backlog (running since 2026-10-22 00:50 ET, brief docs/briefs/W13-backlog.md): King fight HUD
+      placement, Court map previews, 2x Briar Alpha avatar, autoplay option for Whisperwood Hollow, DESIGN.md
+      (closeup step, respawn: 'reentry'). Not doing: the unused reflection blobs in assets/ui/heads.png (harmless).
 - [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
 
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
