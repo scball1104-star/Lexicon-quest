@@ -233,3 +233,9 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - The Nameless King has a clear crown and a glowing veil, and his face reads when he is unmasked.
 - Each room of the mirror palace has its own wall: tapestries, broken mirrors, black glass, crimson banners.
 
+## 2026-10-22 (Thu) overnight: small cleanup is live
+- In the final boss fight, the message box and warning markers now stay off the King's crown and face.
+- The test bot can now play the optional forest dungeon (Whisperwood Hollow) and win it, so it gets checked too.
+- Next: one fresh-eyes review of the live game, played as a brand-new player from the title to the Episode 2
+  credits, then a last fix pass. After that I stop and wait for you on what Episode 3 should be.
+

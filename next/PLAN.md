@@ -126,9 +126,13 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       ones), Other Selves as glass party, King crown and unmasked face, per-room Court walls. 514 tests, 159/159 shots.
       Left over: the "!" telegraph bubble covers the King's veil and a two-line help box hides the crown's top
       (battle hud placement); tools/maps previews still show the old Court walls.
-- [~] W13 small backlog (running since 2026-10-22 00:50 ET, brief docs/briefs/W13-backlog.md): King fight HUD
-      placement, Court map previews, 2x Briar Alpha avatar, autoplay option for Whisperwood Hollow, DESIGN.md
-      (closeup step, respawn: 'reentry'). Not doing: the unused reflection blobs in assets/ui/heads.png (harmless).
+- [x] W13 small backlog committed 2accd81, PUBLISHED 2026-10-22 ~02:05 ET (main b04d6f7, sw 34b003adde62): King fight
+      HUD clear of crown and face, Echo Warden bubble, Court map previews, autoplay --hollow (0 game overs),
+      DESIGN.md closeup() and respawn: 'reentry'. Briar Alpha avatar skipped (nothing stretched). 519 tests.
+- [ ] W14 fresh-eyes review of the LIVE build (read-only, one agent): both episodes as a brand-new player, phone
+      first, from the title to the Episode 2 credits; writes docs/PLAYTEST_REVIEW_4.md with the top 10 fixes ranked
+      by player impact (S/M/L). Must not repeat items already fixed in CRITIQUE_4 or PLAYTEST_REVIEW_3.
+- [ ] W15 fix pass on W14's S and M items, full gate list, publish. Then STOP and wait for Scott.
 - [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
 
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
