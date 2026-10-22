@@ -35,7 +35,7 @@ sys.path.insert(0, TILES_TOOLS)
 import pxlib                                             # noqa: E402
 from pxlib import Canvas                                 # noqa: E402
 import compose                                           # noqa: E402
-from compose import TileDB, SpriteDB, terrain_cell, wall_cells, draw_tile, draw_object, draw_prop  # noqa: E402
+from compose import TileDB, SpriteDB, terrain_cell, wall_cells, face_block_grid, draw_tile, draw_object, draw_prop  # noqa: E402
 
 
 # ------------------------------------------------------------------ fast alpha blit (compose.py's is per pixel)
@@ -268,12 +268,13 @@ def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
     under = mp.get('under', 'grass')
     tgrid = [[(i if i in db.terrains else under) for i in r] for r in ids]
     cv = Canvas(W * 16, H * 16)
+    faces = face_block_grid(db, ids, mp.get('id'))      # W12 per-room wall art, as the game draws it
     for y in range(H):
         for x in range(W):
             t = terrain_cell(db, tgrid, x, y, frame)
             if t:
                 cv.blit(t, x * 16, y * 16)
-            w = wall_cells(db, ids, x, y)
+            w = wall_cells(db, ids, x, y, faces)
             if w:
                 cv.blit(w, x * 16, y * 16)
             tid = ids[y][x]

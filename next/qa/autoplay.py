@@ -20,6 +20,10 @@ opens and at the end of each floor (`maintain`), drinks Ethers through the Items
     python next/qa/autoplay.py --wrong-order         visit every map and talk to everyone before/after each main flag
     python next/qa/autoplay.py --until stacks        stop after the named main step (quests.js step ids)
     python next/qa/autoplay.py --no-side             skip the optional side quests and secrets
+    python next/qa/autoplay.py --hollow              W13: also play the optional Whisperwood Hollow right after the
+                                                     Lantern (out to the valley, the dungeon and the Briar Alpha, back
+                                                     to F3); off by default so the gate run does not grow. Writes
+                                                     <device>-hollow-* files.
 
 Episode 2 (E2-integrate, EPISODE2_PLAN 10d). The Episode 1 run writes <device>-ep1-credits-save.json: the
 autosave the game writes as the party wakes at home after the Episode 1 credits. The Episode 2 run either loads
@@ -1406,10 +1410,11 @@ class Bot:
 
 # ================================================================================================ the plan
 class Episode:
-    def __init__(self, bot, side=True, until=None):
+    def __init__(self, bot, side=True, until=None, hollow=False):
         self.b = bot
         self.side = side
         self.until = until
+        self.hollow_on = hollow             # W13: visit Whisperwood Hollow after the Lantern (--hollow)
 
     def done(self, step_id):
         return self.until == step_id
@@ -1797,6 +1802,83 @@ class Episode:
         b.through('stairs_f3')
         self.ensure_map('archive_f3')
 
+    def hollow(self):
+        """W13 (--hollow): the optional Whisperwood Hollow, at the time the game points at it (Bram's nudge after the
+        Lantern, so the Alpha is the base tier, not an Elder). From the F3 landing: back up through F2, F1's back-stair
+        and out to the valley; the root arch at the pool; the hidden bridge (Lantern); the hollow's wolves and Blot;
+        the braziers; the iron chest; the block onto the plate; the shrine; the Briar Alpha; the pilgrims' stone; the
+        gold chest; then back through the Archive to the F3 landing, where the route goes on. Asserts hollow_cleared
+        and Thornwake (the Alpha's unique drop) in the party's gear."""
+        b = self.b
+        if not self.hollow_on or self.has('hollow_cleared') or not self.has('lantern_get') or self.has('boss_door_open'):
+            return
+        f = b.settle()
+        start_map = f['map']
+        # out of the Archive
+        if f['map'] == 'archive_f3':
+            b.through('stairs_f2')
+        self.ensure_map('archive_f2')
+        b.through('stairs_f1')
+        self.ensure_map('archive_f1')
+        b.through('shortcut_b')                                  # the Keepers' back-stair to the entrance hall
+        b.through('exit_valley')
+        self.ensure_map('valley')
+        b.mark('hollow')
+        b.walk_to([(51, 28)], fight=True, label='to the root arch')
+        b.through('hollow_mouth')
+        self.ensure_map('whisperwood_hollow')
+        b.settle()                                               # hollow_entry: the pool, the piles, Mira's nudge
+        if not self.has('hollow_found'):
+            raise Fail('hollow_entry did not set hollow_found')
+        # the lost bridge: five cells of hidden ink across the pool
+        b.reveal_near([(5, 16), (6, 16), (7, 16), (8, 16), (9, 16)], label='lost bridge')
+        b.walk_to([(10, 16)], fight=True, label='over the lost bridge')
+        b.hunt(limit=6, label='the hollow')
+        for br in ('brazier_m1', 'brazier_m2'):
+            f = b.settle()
+            e = b.ent(f, br)
+            if e and e['state'] != 'lit':
+                b.interact(ent_id=br, label=br)
+        self.chest('chest_bay')
+        b.maintain('the hollow')
+        # the block: down two, then east four onto the plate (the root column blocks the straight push)
+        b.push_block('block_m', (18, 16), label='hollow plate')
+        b.through('gate_b')
+        self.ensure_map('whisperwood_hollow')
+        b.rest_at_font('hollow_shrine', label='the pilgrims shrine')
+        for attempt in range(4):
+            b.walk_to([(20, 7)], label='the Alpha den')         # alpha_trig: hollow_alpha, the fight, hollow_after
+            b.settle(max_s=900)
+            if self.has('briar_alpha_defeated'):
+                break
+            # a loss returns the party to the shrine (the game over return point): rest and go again
+            b.notes.append(f'Briar Alpha attempt {attempt + 1}')
+            self.ensure_map('whisperwood_hollow')
+            b.rest_at_font('hollow_shrine', label='shrine again')
+        if not self.has('hollow_cleared'):
+            raise Fail('the Briar Alpha fight did not resolve (hollow_cleared not set)')
+        self.chest('chest_alpha')
+        thorn = b.js("(() => { const g = LQ_ENGINE.game; const worn = g.party.flatMap(m => Object.values(m.equip || {})); "
+                     "return [...g.gear, ...worn].some(it => it && (it === 'thornwake' || it.base === 'thornwake')); })()")
+        if not thorn:
+            raise Fail('no Thornwake after the Briar Alpha')
+        b.notes.append(f"Whisperwood Hollow cleared at Lv {b.game()['party'][0]['level']}: Thornwake in hand, both chests opened")
+        b.menu_optimize_all()
+        # back to the route: the hollow, the valley, the Archive door, F1's back-stair, F2, the F3 landing
+        b.through('notch_b')
+        b.through('hollow_exit')
+        self.ensure_map('valley')
+        b.walk_to([(36, 6)], fight=True, label='back to the Archive door')
+        b.through('archive_entrance')
+        self.ensure_map('archive_f1')
+        b.through('shortcut_j')
+        b.through('stairs_f2')
+        self.ensure_map('archive_f2')
+        if start_map == 'archive_f3':
+            b.through('stairs_f3')
+            self.ensure_map('archive_f3')
+        b.mark('stacks')
+
     def f3(self):
         b = self.b
         if self.has('boss_door_open'):
@@ -1964,7 +2046,7 @@ class Episode:
         b.mark('boot')
         phases = [('wake', self.title_to_bed), ('find_mael', self.town_morning), ('errands', self.town_errands), ('find_mira', self.library),
                   ('south_gate', self.south_gate), ('outfit', self.outfit), ('to_archive', self.leave_town), ('valley', self.valley),
-                  ('catalog_halls', self.f1), ('galleries', self.f2), ('stacks', self.f3), ('archivore', self.boss), ('go_home', self.go_home),
+                  ('catalog_halls', self.f1), ('galleries', self.f2), ('hollow', self.hollow), ('stacks', self.f3), ('archivore', self.boss), ('go_home', self.go_home),
                   ('epilogue', self.epilogue)]
         for step_id, fn in phases:
             print(f'-- {step_id}', flush=True)
@@ -2708,6 +2790,7 @@ def main(argv):
     ap.add_argument('--name', default='Arden')
     ap.add_argument('--until', default=None)
     ap.add_argument('--no-side', action='store_true')
+    ap.add_argument('--hollow', action='store_true', help='W13: also play Whisperwood Hollow after the Lantern (Episode 1; off by default)')
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
@@ -2716,7 +2799,7 @@ def main(argv):
                     help='Episode 2: load the Episode 1 credits save (save) or use the title\'s Episode 2 entry (new)')
     a = ap.parse_args(argv)
     shots.watchdog(3 * 3600)
-    tag, query, resume = ('-wo' if a.wrong_order else ''), '', a.resume
+    tag, query, resume = ('-wo' if a.wrong_order else '-hollow' if a.hollow and a.episode == 1 else ''), '', a.resume
     if a.episode == 2:
         tag = '-ep2' + ('-new' if a.start == 'new' and not a.resume else '')
         if a.start == 'new' and not a.resume:
@@ -2735,7 +2818,7 @@ def main(argv):
         elif a.episode == 2:
             Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
         else:
-            Episode(bot, side=not a.no_side, until=a.until).run()
+            Episode(bot, side=not a.no_side, until=a.until, hollow=a.hollow).run()
         bot.check_errors()
     except Fail as e:
         status, detail = 'FAIL', str(e)

@@ -13,7 +13,7 @@
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
 import { ENEMIES } from '../../data/enemies.js';
-import { partySlots, enemySlots, summonSlot, BOSS_SLOT, BASELINE, shadowFor, touchEnemySlot } from './layout.js';
+import { partySlots, enemySlots, summonSlot, BOSS_SLOT, BASELINE, shadowFor, touchEnemySlot, planStage } from './layout.js';
 
 const WEAPON_POSES = new Set(['idle', 'ready', 'windup', 'strike', 'victory', 'crit', 'combo', 'levelup']);
 const SHARED_POSES = new Set(['cast', 'hurt', 'defend', 'kneel', 'ko', 'combo', 'levelup']);
@@ -336,6 +336,8 @@ export function createActors(engine, units, opts = {}) {
     enemies.forEach((u, i) => { const a = new Actor(engine, u, eslots[i]); actors.set(u.uid, a); foes.push(a); });
   }
   if (opts.touch) for (const a of foes) placeOnTouchStage(a);
+  // W13: a foe whose crown would sit under a two-line help window docks the help window under the timeline
+  planStage(foes, actors);
   return actors;
 }
 /** Move an enemy actor to its touch-stage home (back row when the touch command window would hide it). */

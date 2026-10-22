@@ -125,8 +125,73 @@ def terrain_cell(db, grid, x, y, frame):
     return out
 
 
-def wall_cells(db, grid_ids, x, y):
-    """grid_ids: raw legend ids. Wall systems: '<sys>_top' and '<sys>_face'."""
+def face_runs(ids, face_id):
+    """Connected runs (4-neighbour) of cells whose legend id is face_id, in reading order (src/world/tilemap.js faceRuns)."""
+    H = len(ids)
+    W = max((len(r) for r in ids), default=0)
+    seen = [[False] * len(r) for r in ids]
+    runs = []
+    for y in range(H):
+        for x in range(W):
+            if x >= len(ids[y]) or seen[y][x] or ids[y][x] != face_id:
+                continue
+            cells, stack = [], [(x, y)]
+            seen[y][x] = True
+            while stack:
+                cx, cy = stack.pop()
+                cells.append((cx, cy))
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = cx + dx, cy + dy
+                    if 0 <= ny < H and 0 <= nx < len(ids[ny]) and not seen[ny][nx] and ids[ny][nx] == face_id:
+                        seen[ny][nx] = True
+                        stack.append((nx, ny))
+            runs.append({'cells': cells, 'minX': min(c[0] for c in cells), 'y': y})
+    return runs
+
+
+def run_styles(runs, n_styles, plan):
+    """The style index of every run (src/world/tilemap.js runStyles): `at` pins a run, the rest follow `cycle`."""
+    out = [-1] * len(runs)
+    for px, py, st in (plan or {}).get('at', []):
+        for i, r in enumerate(runs):
+            if (px, py) in r['cells'] and 0 <= st < n_styles:
+                out[i] = st
+                break
+    cycle = [c for c in ((plan or {}).get('cycle') or list(range(n_styles))) if 0 <= c < n_styles]
+    k = 0
+    for i in range(len(runs)):
+        if out[i] >= 0:
+            continue
+        out[i] = cycle[k % len(cycle)] if cycle else 0
+        k += 1
+    return out
+
+
+def face_block_grid(db, ids, map_id):
+    """W12 per-room wall art (tiles.json walls[sys].faceStyles / faceStyleByMap): rows of (fx, fy) face blocks, or None
+    where the system's own `face` applies. The same rules as src/world/tilemap.js faceBlockGrid, so previews match the game."""
+    grid = [[None] * len(r) for r in ids]
+    for sys_id, meta in db.walls.items():
+        styles = meta.get('faceStyles')
+        if not isinstance(styles, list) or len(styles) < 2:
+            continue
+        plan = (meta.get('faceStyleByMap') or {}).get(map_id)
+        face_id = sys_id + '_face'
+        if not plan or not any(face_id in r for r in ids):
+            continue
+        runs = face_runs(ids, face_id)
+        for run, pick in zip(runs, run_styles(runs, len(styles), plan)):
+            blocks = styles[pick]
+            if not blocks:
+                continue
+            for x, y in run['cells']:
+                grid[y][x] = tuple(blocks[(x - run['minX']) % len(blocks)])
+    return grid
+
+
+def wall_cells(db, grid_ids, x, y, face_blocks=None):
+    """grid_ids: raw legend ids. Wall systems: '<sys>_top' and '<sys>_face'. face_blocks: face_block_grid() for a map
+    with per-room wall art (W12)."""
     tid = grid_ids[y][x]
     if not tid:
         return None
@@ -148,7 +213,7 @@ def wall_cells(db, grid_ids, x, y):
             sheet = db.sheet(meta['sheet'])
             H, W = len(grid_ids), len(grid_ids[0])
             same = lambda xx, yy: (not (0 <= xx < W and 0 <= yy < H)) or grid_ids[yy][xx] == tid
-            fx, fy = meta['face']
+            fx, fy = (face_blocks[y][x] if face_blocks and face_blocks[y][x] else None) or meta['face']
             return compose_face(sheet, same(x - 1, y), same(x, y - 1), same(x + 1, y), same(x, y + 1), fx, fy)
     return None
 

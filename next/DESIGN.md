@@ -188,6 +188,9 @@ In dungeons and the valley's wild areas, enemies are on the map. In dungeons the
 steps** (Lufia II rule), so the player can plan around them. Types: `wander`, `patrol` (path list), `chase`
 (moves toward player when within 5 tiles), `guard` (stationary until adjacent). Touching one starts its
 encounter. After victory it is removed until the map is re-entered (dungeon) or for 60 s (field).
+A field map may set `respawn: 'reentry'` (W11, the Fading Road): its beaten groups stay gone until the party walks
+in from another map, instead of the 60 s timer; a same-map warp (a fog door) does not bring them back
+(`scenes/field.js`).
 No random encounters on any map in Episode 1.
 
 ### 5.3 Dungeon toolkit (Lufia II)
@@ -212,7 +215,12 @@ export async function mael_intro(s) {
 ```
 Primitives: `say, choice, walk, face, jump, emote(! ? ... heart sweat anger music zzz), wait, camera.panTo,
 camera.follow, shake, flash, fade, tint, music, sfx, spawn, despawn, setFlag, hasFlag, give, take, battle,
-addMember, title(card text)`. Text is held in `data/story/*.js` by id, not inlined in maps. Position arguments
+addMember, title(card text), closeup(kind, opts)`. `closeup` (W11) cuts to a framed close-up insert drawn over the
+field in screen space at the game's own pixel density (`world/closeup.js`; `kind` is `'fountain'`, the Fountain of
+Faces); `opts.faces` lists the faces left to right (default the party, the hero in the middle), `opts.strangers`
+adds the town's faces, `opts.mode` is `'dusk' | 'day' | 'night'` (default from the map's tint and `nh_restored`).
+It resolves once the insert is open; `await s.closeup(null)` closes it, and scripts close it before anything on the
+field moves. Text is held in `data/story/*.js` by id, not inlined in maps. Position arguments
 (`walk`, `camera.panTo`, `spawn`) accept a map mark name or x,y. `hasFlag` may be sync or async (always `await` it).
 When `ep1_complete` is set, the field scene hands off to the credits scene using `CREDITS` from `data/text.js`;
 there is no `credits()` cutscene primitive.
@@ -281,7 +289,10 @@ shimmer, day tint. Respect a `reduceMotion` setting (no shake/flash).
 - **Layout (FF6/Lufia II side view):** backdrop = region key art (`../assets/art/environments.webp`, 2 cols x
   4 rows, cell 0 Willowmere) cropped/scaled to 384x216 with a darkened lower band. Enemies left side, party on
   the right in a diagonal. Bottom: command window (left) and party status window (right: name, HP, MP, Fury).
-  Top right: **turn timeline** (next 8 actors as mini icons).
+  Top right: **turn timeline** (next 8 actors as mini icons). Top left: the help window (1 to 3 lines). On a stage
+  where a boss's crown would sit under a second help line (the Nameless King), the help window, with its touch
+  buttons, docks under the timeline and the boss's weakness row and name tag take the corner; the telegraph "!" and
+  the name tag never cover a head (W13, `battle/scene/layout.js` `helpDock`, `headBox`).
 - **Turn system: CTB timeline** (FFX-like). Each action has a delay; speed lowers delay. Selecting an action
   previews where the actor lands on the timeline. Status effects can push/pull timeline positions. No real-time
   pressure. Battle speed 1x/2x and an Auto toggle in Config.

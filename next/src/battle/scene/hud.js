@@ -4,14 +4,15 @@
 
 import { drawWindow, drawSelBar, drawGauge, drawLabel, drawIcon, uiAtlas } from '../../ui/window.js';
 import { animFrameAt } from '../../core/assets.js';
-import { HELP_WIN, STATUS_WIN, TL, timelineSlotX, statusRow, enemyRowAnchor, PORTRAIT_FACE, enemyFaceRect, BANNER_Y, W, H } from './layout.js';
+import { HELP_WIN, STATUS_WIN, TL, timelineSlotX, statusRow, enemyRowAnchor, PORTRAIT_FACE, enemyFaceRect, BANNER_Y, W, H,
+  HELP_LINE, HELP_LINES_MAX, helpDock, helpOrigin, headBox } from './layout.js';
 import { frameOrigin } from './actors.js';
 
 const PARTY_STATUS_ORDER = ['kept', 'poison', 'burn', 'chill', 'stun', 'silence', 'blind', 'nameless', 'regen', 'protect', 'haste', 'focus', 'taunt'];
 const WEAK_TYPES = ['sword', 'spear', 'staff', 'axe', 'bow', 'fire', 'ice', 'thunder', 'light'];
 
-export const HELP_LINE_H = 11;
-export const HELP_MAX_LINES = 3;
+export const HELP_LINE_H = HELP_LINE;
+export const HELP_MAX_LINES = HELP_LINES_MAX;
 /** Help lines: one beside the toggles, else the window grows (later lines full width, max 3, last ellipsized). */
 export function helpLines(r, text, color, opts = {}) {
   if (!text) return [];
@@ -32,11 +33,18 @@ export function helpLines(r, text, color, opts = {}) {
   }
   return out;
 }
+/**
+ * How far the help window reaches down the top-left band, below its 4 px margin: its height, or 0 while it is docked
+ * under the timeline (W13, layout.helpDock), when the band holds no window. The scene adds the margin for the bottom
+ * that the "!", the rows and the name tag keep clear of.
+ */
 export function helpHeight(r, text, color, opts = {}) {
+  if (helpDock()) return 0;
   return HELP_WIN.h + Math.max(0, helpLines(r, text, color, opts).length - 1) * HELP_LINE_H;
 }
+/** Draw the help window where it stands this battle (HELP_WIN, or the W13 dock under the timeline). */
 export function drawHelp(r, text, color, opts = {}) {
-  const hw = HELP_WIN;
+  const hw = { ...HELP_WIN, ...helpOrigin() };
   const lines = helpLines(r, text, color, opts);
   const h = hw.h + Math.max(0, lines.length - 1) * HELP_LINE_H;
   drawWindow(r, hw.x, hw.y, hw.w, h, { kind: 'thin', alpha: opts.alpha ?? 0.96 });
@@ -347,18 +355,25 @@ export function drawNameTag(r, actor, know, unit, opts = {}) {
   const appraised = know && know.appraised && unit;
   const hpText = appraised ? `  ${unit.hp}/${unit.maxHp}` : '';
   const w = r.measure(name) + r.measure(hpText) + 14 + (actor.elite ? 14 : 0);
+  // The help window's bottom (26), or the screen's top margin when the help window is docked (W13)
+  const floor = helpDock() ? 4 : 26;
   let x = Math.max(4, Math.min(W - w - 4, Math.round(actor.x - w / 2)));
-  let y = Math.max(26, actor.top - 26);
+  let y = Math.max(floor, actor.top - 26);
   // A row above the head (touch layout, opts.row): the tag stands on the row, or beside it when the top band
   // leaves no room, so it never covers the row or the foe.
   const row = opts.row;
   if (row) {
-    const minY = Math.max(26, opts.minY || 26);
+    const minY = Math.max(floor, opts.minY || floor);
     y = Math.max(minY, y);
     const hits = x < row.x + row.w + 2 && x + w + 2 > row.x && y < row.y + row.h + 2 && y + 19 > row.y;
     if (row.y - 19 >= minY && row.y < actor.top + 4) { y = row.y - 19; x = Math.max(4, Math.min(W - w - 4, row.x + Math.round((row.w - w) / 2))); }
     else if (hits || row.y < actor.top + 4) { y = Math.max(minY, row.y - 2); x = row.x + row.w + 3 + w <= W - 4 ? row.x + row.w + 3 : Math.max(4, row.x - 3 - w); }
   }
+  // W13: never on the face. A tag that would cover the foe's head (a tall boss under a grown help window, where
+  // nothing above is free) hangs just under the head instead.
+  const head = headBox(actor, false);
+  const onHead = Math.min(x + w, head.x + head.w) - Math.max(x, head.x) > 0 && Math.min(y + 17, head.y + head.h) - Math.max(y, head.y) > 2;
+  if (onHead) { y = Math.min(STATUS_WIN.y - 19, head.y + head.h + 2); x = Math.max(4, Math.min(W - w - 4, Math.round(head.x + head.w / 2 - w / 2))); }
   drawWindow(r, x, y, w, 17, { kind: 'thin' });
   let tx = x + 7;
   if (actor.elite && ui && ui.frames.elite_mark) { r.sprite(ui, ui.frames.elite_mark, tx, y + 3, { topLeft: true }); tx += 14; }
@@ -394,8 +409,18 @@ export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28, row = 
   // row (touch layout): the foe's weakness row (with its status badges). The "!" stands on a row above the head,
   // and moves beside a row it would otherwise cover.
   const top = row && row.y < actor.top + 4 ? Math.min(actor.top, row.y - 1) : actor.top;
-  const y = Math.max(minY, top - 14) - bob;
+  let y = Math.max(minY, top - 14) - bob;
   let x = actor.cx + 4;
+  // W13: never on the face. The bubble (16 px, its tail at the bottom-left: x - 4 .. x + 12) may touch the head by
+  // the 2 px of its tail; when the help window or a row above leaves no room over the head (the Nameless King, the
+  // Echo Warden under a two-line help), it stands beside the head on the party's side, its tail toward the head.
+  const head = headBox(actor, false);
+  const over = (bx, by) => Math.min(bx + 12, head.x + head.w) - Math.max(bx - 4, head.x) > 0 && Math.min(by + 16, head.y + head.h) - Math.max(by, head.y) > 2;
+  if (over(x, y)) {
+    x = head.x + head.w + 6;
+    if (x + 12 > W - 4) x = head.x - 14;
+    y = Math.max(minY, head.y) - bob;
+  }
   if (row && y + 15 > row.y && y < row.y + row.h && x + 8 > row.x && x - 8 < row.x + row.w) x = row.x + row.w + 9 <= W - 4 ? row.x + row.w + 9 : row.x - 9;
   const name = ui && animFrameAt(ui.anims.emote_exclaim, frame / 60);
   const f = name && ui.frames[name];

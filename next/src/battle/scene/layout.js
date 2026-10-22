@@ -33,12 +33,42 @@ export function cmdWin(touch) { return touch ? CMD_WIN_TOUCH : CMD_WIN; }
 export function subWin(touch) { return touch ? SUB_WIN_TOUCH : SUB_WIN; }
 /** Rows of `rowH` that fit a command-style window (`padding` px in all: 6 on top and bottom by default). */
 export function cmdRowsFor(win, rowH, padding = 12) { return Math.max(1, Math.floor((win.h - padding) / rowH)); }
-/** The touch layout's AUTO, x2 and FLEE buttons inside the help window (tap targets; the desktop shows glyphs). */
-export const HELP_TOUCH_BTNS = { flee: { x: 124, y: 6, w: 31, h: 15 }, auto: { x: 158, y: 6, w: 30, h: 15 }, speed: { x: 190, y: 6, w: 28, h: 15 } };
 
 // Timeline (top right): 8 slots of 18 px, the first (current) gets one extra px of air.
 export const TL = { x: 226, y: 6, slots: 8, slot: 18, railW: 154 };
 export function timelineSlotX(i) { return TL.x + 2 + (i === 0 ? 0 : 19 + (i - 1) * TL.slot); }
+
+// The help window grows down by HELP_LINE px per extra line, up to HELP_LINES_MAX lines (hud.helpLines).
+export const HELP_LINE = 11;
+export const HELP_LINES_MAX = 3;
+// W13 (the King fight's HUD): the help window's dock. On a stage where a foe's head (headBox) would sit under a
+// two-line help window (the Nameless King: crown at y 27, a second line reaches y 34), the help window, with the
+// touch FLEE / AUTO / x1 buttons in it, stands under the timeline instead: right-aligned with the rail, below the
+// landing slot and arrow that hang from it while targeting (to y 42). The top-left band is then the boss's own: its
+// weakness row and name tag stand there beside the crown. createActors() plans the tall foes once per battle
+// (planStage); the dock holds while no other living foe has its head under it (the King's Sorrow and Pride do, so in
+// phase 2 the help window is back in its corner and returns to the dock when they fall).
+export const HELP_DOCK = { x: W - 4 - HELP_WIN.w, y: TL.y + 38 };
+/** The dock at its tallest (three lines), with a 2 px margin: what it blocks for rows and heads. */
+export const HELP_DOCK_MAX = { x: HELP_DOCK.x - 2, y: HELP_DOCK.y - 2, w: HELP_WIN.w + 4, h: HELP_WIN.h + (HELP_LINES_MAX - 1) * HELP_LINE + 4 };
+export const STAGE = { tall: new Set(), actors: null };
+/** The dock while it is in use (see HELP_DOCK), else null. */
+export function helpDock() {
+  if (!STAGE.tall.size) return null;
+  if (STAGE.actors) {
+    for (const a of STAGE.actors.values()) {
+      if (!a || a.side === 'party' || a.dead || STAGE.tall.has(a.uid)) continue;
+      if (area(headBox(a, true), HELP_DOCK_MAX) > 0) return null;
+    }
+  }
+  return HELP_DOCK;
+}
+/** Where the help window's top-left corner is now: the dock, else HELP_WIN. */
+export function helpOrigin() { return helpDock() || { x: HELP_WIN.x, y: HELP_WIN.y }; }
+/** The touch layout's AUTO, x2 and FLEE buttons inside the help window (tap targets; the desktop shows glyphs). They
+ *  move with the help window (helpOrigin), so the getters always give where they are drawn and tapped. */
+const helpBtn = (x, y, w, h) => ({ get x() { return x + helpOrigin().x - HELP_WIN.x; }, get y() { return y + helpOrigin().y - HELP_WIN.y; }, w, h });
+export const HELP_TOUCH_BTNS = { flee: helpBtn(124, 6, 31, 15), auto: helpBtn(158, 6, 30, 15), speed: helpBtn(190, 6, 28, 15) };
 
 // The stage (W4-battle-polish, CRITIQUE C3): one ground plane. An indigo band darkens the lower part of
 // the backdrop (bandY..216, drawn under the sprites, top edge dithered 2 px); every unit's feet sit on ONE
@@ -131,6 +161,37 @@ export function enemyFaceRect(frame, id) {
   const x = Math.round(frame.x + frame.w * f[0] - 7), y = Math.round(frame.y + frame.h * f[1] - 7);
   return { x: Math.max(frame.x, Math.min(frame.x + frame.w - 14, x)), y: Math.max(frame.y, Math.min(frame.y + frame.h - 14, y)) };
 }
+// W13: the part of a foe's battle frame the HUD leaves clear, its crown and face, as fractions of the frame
+// [x0, x1, y0, y1] (measured on assets/sprites/bosses_battle.png and enemies_battle.png: the King's crown and hood,
+// the Archivore's eye, the Warden's helmet and crest, the Alpha's head). Other foes: a box from the top of the frame
+// down past their ENEMY_FACE point.
+export const HEAD_BOX = {
+  nameless_king: [0.32, 0.65, 0, 0.27], archivore: [0.44, 0.62, 0.37, 0.58], echo_warden: [0.5, 0.72, 0, 0.22],
+  briar_alpha: [0.75, 1, 0.35, 0.8],
+};
+/** A unit's head on screen { x, y, w, h }, at its home spot (home) or where it stands now. */
+export function headBox(u, home = true) {
+  const b = spriteBox(u, home);
+  const id = String(u.id || '');
+  let f = HEAD_BOX[id];
+  if (!f) { const p = ENEMY_FACE[id] || ENEMY_FACE.default; f = [p[0] - 0.2, p[0] + 0.2, 0, Math.min(1, p[1] + 0.15)]; }
+  const x0 = b.x + Math.round(b.w * f[0]), x1 = b.x + Math.round(b.w * f[1]);
+  const y0 = b.y + Math.round(b.h * f[2]), y1 = b.y + Math.round(b.h * f[3]);
+  return { x: x0, y: y0, w: Math.max(1, x1 - x0), h: Math.max(1, y1 - y0) };
+}
+/**
+ * Plan this battle's HUD around its foes (at their home spots): the foes whose heads sit under the rows a second help
+ * line adds are STAGE.tall (they dock the help window, helpDock, and their rows keep off their faces); `actors` is the
+ * battle's live actor map, which helpDock reads for summoned foes. Returns the dock or null. createActors() calls it
+ * once per battle; until then (and in node tests) the plain layout holds.
+ */
+export function planStage(foes, actors = null) {
+  const grow = { x: HELP_WIN.x, y: HELP_WIN.y + HELP_WIN.h, w: HELP_WIN.w, h: HELP_LINE };
+  const tall = (foes || []).filter((u) => u && u.side !== 'party' && area(headBox(u, true), grow) > 0);
+  STAGE.tall = new Set(tall.map((u) => u.uid));
+  STAGE.actors = actors;
+  return helpDock();
+}
 
 /** Shield badge + weakness row anchor under an enemy (kept above the bottom windows). The command window
  *  (taller on touch) covers the bottom-left, so a row that would sit over it is lifted clear of it. */
@@ -163,7 +224,11 @@ const area = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x
 /** The touch layout's top band: the help window (its live bottom: it grows to 2-3 lines) and the timeline with
  *  the Mirrored Combo bracket under it. */
 export function topBlocks(helpBottom = HELP_WIN.y + HELP_WIN.h, bracket = false) {
-  return [{ x: HELP_WIN.x, y: 0, w: HELP_WIN.w, h: helpBottom + 2 }, { x: TL.x - 2, y: 0, w: W - TL.x + 2, h: bracket ? 36 : 27 }];
+  const tl = { x: TL.x - 2, y: 0, w: W - TL.x + 2, h: bracket ? 36 : 27 };
+  // W13: a docked help window leaves the top-left band free and blocks its dock at its tallest (three lines), so a
+  // row does not hop as the help text changes length
+  if (helpDock()) return [tl, { ...HELP_DOCK_MAX }];
+  return [{ x: HELP_WIN.x, y: 0, w: HELP_WIN.w, h: helpBottom + 2 }, tl];
 }
 /**
  * Where a weakness row of width `w` goes on the touch layout, as { x, y, place }. The row (ENEMY_ROW_H tall)
@@ -175,6 +240,7 @@ export function topBlocks(helpBottom = HELP_WIN.y + HELP_WIN.h, bracket = false)
  */
 export function touchRowSpot(unit, w, ctx = {}) {
   const own = spriteBox(unit, true);
+  const tall = STAGE.tall.has(unit.uid), head = headBox(unit, true);
   const dx = Math.round((unit.x ?? 0) - (unit.homeX ?? unit.x ?? 0)), dy = Math.round((unit.y ?? 0) - (unit.homeY ?? unit.y ?? 0));
   const cw = ctx.cw || CMD_WIN_TOUCH;
   const hard = [cw, STATUS_WIN, ...(ctx.blocks || topBlocks())];
@@ -188,11 +254,17 @@ export function touchRowSpot(unit, w, ctx = {}) {
   // The lowest bottom edge of the top band over this row's columns (a row clamped there covers the head instead).
   const bandBottom = (x) => Math.max(0, ...hard.filter((b) => b.y === 0 && x < b.x + b.w && x + w > b.x).map((b) => b.y + b.h));
   const cands = [
+    // W13: a tall foe on a docked stage keeps its row in the free top band, left of its crown, where the name tag
+    // can stand beside it (drawNameTag) and the "!" beside the head (drawTelegraphMarker)
+    ...(tall && helpDock() ? [{ place: 'band', x: clampX(head.x - 3 - w), y: Math.max(2, head.y - h - 3) }] : []),
     { place: 'below', x: cx, y: feet + 3 },
     { place: 'above', x: cx, y: top - h - 2 },
     { place: 'right', x: clampX(own.x + own.w + 3), y: midY },
     { place: 'left', x: clampX(own.x - 3 - w), y: midY },
     { place: 'above', x: cx, y: Math.max(top - h - 2, bandBottom(cx) + 1) },
+    // W13: a tall foe under a grown help window: beside the sprite just below the band, rather than on its face
+    ...(tall ? [{ place: 'right', x: clampX(own.x + own.w + 3), y: Math.max(midY, bandBottom(clampX(own.x + own.w + 3)) + 1) },
+      { place: 'left', x: clampX(own.x - 3 - w), y: Math.max(midY, bandBottom(clampX(own.x - 3 - w)) + 1) }] : []),
   ];
   let best = null;
   for (const c of cands) {
@@ -202,6 +274,7 @@ export function touchRowSpot(unit, w, ctx = {}) {
     for (const b of hard) s += area(box, b) * 50;
     for (const p of rows) s += area({ x: box.x - 2, y: box.y - 1, w: w + 4, h: h + 2 }, p) * 50;
     s += area(box, own) * 6;
+    if (tall) s += area(box, head) * 40;      // W13: a tall foe's row keeps off its crown and face
     for (const o of others) s += area(box, o) * (o.party ? 6 : 1);
     if (!best || s < best.s) best = { ...c, s };
     if (s === 0) break;
