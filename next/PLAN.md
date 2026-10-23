@@ -129,11 +129,12 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] W13 small backlog committed 2accd81, PUBLISHED 2026-10-22 ~02:05 ET (main b04d6f7, sw 34b003adde62): King fight
       HUD clear of crown and face, Echo Warden bubble, Court map previews, autoplay --hollow (0 game overs),
       DESIGN.md closeup() and respawn: 'reentry'. Briar Alpha avatar skipped (nothing stretched). 519 tests.
-- [~] W14 fresh-eyes review of the LIVE build (first launch 2026-10-22 02:10 ET died at its start on a network outage
-      (API unreachable) that lasted until 10/23 afternoon; relaunched 2026-10-23 15:50 ET; read-only, one agent): both episodes as a brand-new player, phone
-      first, from the title to the Episode 2 credits; writes docs/PLAYTEST_REVIEW_4.md with the top 10 fixes ranked
-      by player impact (S/M/L). Must not repeat items already fixed in CRITIQUE_4 or PLAYTEST_REVIEW_3.
-- [ ] W15 fix pass on W14's S and M items, full gate list, publish. Then STOP and wait for Scott.
+- [x] W14 fresh-eyes review done (docs/PLAYTEST_REVIEW_4.md): no softlocks; top issue is a LIVE save trap (the title's
+      Episode 2 quick start or New Game overwrites the shared autosave holding a finished Episode 1, no prompt);
+      then phone hints showing keyboard keys, Episode 2 ending toward a road that does not exist, Talk never
+      introduced, no portrait-orientation hint, and five smaller items.
+- [~] W15 fix pass running (since 2026-10-23 16:25 ET): save trap first (S version: clear label + confirm before
+      overwriting another run's autosave), then the S items; full gate list, publish. Then STOP and wait for Scott.
 - [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
 
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;

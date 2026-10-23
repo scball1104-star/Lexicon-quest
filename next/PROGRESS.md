@@ -239,3 +239,13 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Next: one fresh-eyes review of the live game, played as a brand-new player from the title to the Episode 2
   credits, then a last fix pass. After that I stop and wait for you on what Episode 3 should be.
 
+## 2026-10-23 (Fri) afternoon: a fresh-eyes review found a save trap; fixing it now
+- A network outage stopped work from early Thursday until this afternoon; nothing was lost.
+- A review played the live game as a brand-new phone player from the title to the Episode 2 credits. No dead ends
+  and no crashes. But it found one real trap: on the title screen, "Episode 2" (and New Game) start a fresh party,
+  and the first door it walks through overwrites the autosave, so a finished Episode 1 kept only in the autosave
+  is lost. Until the fix is live: if you have finished Episode 1, use Continue, not Episode 2, or save to a
+  Record first.
+- Also being fixed: phones being told to press keyboard keys (E, Q) in a few hints, Episode 2 ending by pointing at a
+  road that does not exist yet, the Talk command never being introduced, and a hint to turn the phone sideways.
+
