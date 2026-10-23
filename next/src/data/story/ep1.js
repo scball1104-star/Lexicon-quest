@@ -205,6 +205,9 @@ async function mira_joins(s) {
   await s.despawn('mira');
   await s.addMember('mira');
   await narrate(s, '{c:gold}Mira{/c} joined the party!');
+  // W15 (PLAYTEST_REVIEW_4 fix 4): the one place the game introduces Talk, its hint system ({i:btn_menu} is the
+  // device's own button: a key cap, a pad button, or the MENU cap on a phone).
+  await say(s, 'mira', 'If we ever lose the thread, ask me: {i:btn_menu}, then Talk. I keep notes.');
   await s.setFlag('mira_joined');
 }
 
@@ -534,7 +537,7 @@ async function lantern_get(s) {
   await say(s, 'mira', "It's a priceless relic of the Keepers' order that restores concealed text.");
   await say(s, 'bram', 'A lamp that finds things.');
   await say(s, 'mira', "...Yes. Fine. It's a lamp that finds things.");
-  await say(s, 'mira', "If a path ends where it shouldn't, raise the Lantern with {i:btn_pageR}. The Keepers hid their bridges in ink.");
+  await say(s, 'mira', "If a path ends where it shouldn't, raise the Lantern with {i:btn_pageR_lantern}. The Keepers hid their bridges in ink.");
   // W10: the moment the party holds the Lantern, someone remembers Quill's lost bridge (the Hollow is tuned for now)
   if ((await s.hasFlag('lost_bridge_started')) && !(await s.hasFlag('hollow_found'))) {
     await say(s, 'bram', "A lamp that finds things. Quill's lost bridge, then. The black pool, east of the fork.");
@@ -1025,7 +1028,7 @@ async function hollow_entry(s) {
     await s.camera.follow('hero');
     return;
   }
-  await say(s, 'mira', 'Lost, not broken. Raise the Lantern with {i:btn_pageR}, {hero}. The bridge is still here.');
+  await say(s, 'mira', 'Lost, not broken. Raise the Lantern with {i:btn_pageR_lantern}, {hero}. The bridge is still here.');
   await s.camera.follow('hero');
   await s.setFlag('hollow_found');
 }

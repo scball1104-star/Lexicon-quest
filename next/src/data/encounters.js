@@ -87,11 +87,16 @@ enc('c2_mixed', { zone: 'court_f2', leader: 'faceless_knight', enemies: ['facele
 // The mini-boss: the party's own reflections. Boss loot is keyed by the encounter (loot-tables BOSS_LOOT.other_selves).
 enc('other_selves', { zone: 'court_f2', leader: 'refl_hero', enemies: ['refl_hero', 'refl_mira', 'refl_bram'], boss: true,
   noFlee: true, music: 'battle', noElite: true, flag: 'other_selves_defeated', backdrop: 'court', bossLoot: 'other_selves' });
-// F3: The Unnamed Throne
-enc('c3_shards', { zone: 'court_f3', leader: 'shard_swarm', enemies: ['shard_swarm', 'shard_swarm'] });
-enc('c3_knights', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'faceless_knight'] });
-enc('c3_shadow', { zone: 'court_f3', leader: 'borrowed_shadow', enemies: ['borrowed_shadow', 'shard_swarm'] });
-enc('c3_mixed', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'glass_sentinel', 'shard_swarm'] });
+// F3: The Unnamed Throne. W15 (PLAYTEST_REVIEW_4 fix 8): the last floor before the King was the softest ordinary floor
+// of the game (careful play lost 11 to 13% HP a fight, attack-only won 90 to 97%). C3_POWER makes its foes hit harder
+// (ATK and MAG) on this floor only, with the same fights, HP, shields and rounds: at Lv 12 careful play now loses about
+// 18% a fight and attack-only wins about 78% (tools/sim). c3_mixed was already the hardest group, so it gets the least.
+// qa/battle/data.test.mjs checks no boosted foe can fell a full-HP member with one ordinary action.
+export const C3_POWER = { c3_shards: 1.9, c3_knights: 2.1, c3_shadow: 1.9, c3_mixed: 1.1 };
+enc('c3_shards', { zone: 'court_f3', leader: 'shard_swarm', enemies: ['shard_swarm', 'shard_swarm'], power: C3_POWER.c3_shards });
+enc('c3_knights', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'faceless_knight'], power: C3_POWER.c3_knights });
+enc('c3_shadow', { zone: 'court_f3', leader: 'borrowed_shadow', enemies: ['borrowed_shadow', 'shard_swarm'], power: C3_POWER.c3_shadow });
+enc('c3_mixed', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['faceless_knight', 'glass_sentinel', 'shard_swarm'], power: C3_POWER.c3_mixed });
 // The King's Mirror. startFury: with the story flag set the party starts with +25 Fury (the Fountain of Faces).
 enc('nameless_king', { zone: 'court_throne', leader: 'nameless_king', enemies: ['nameless_king'], boss: true, noFlee: true,
   music: 'boss_king', noElite: true, flag: 'nameless_king_defeated', startFury: { flag: 'fountain_done', amount: 25 } });
@@ -154,7 +159,9 @@ function rand(rng) { return typeof rng === 'function' ? rng() : rng.next(); }
 export function rollEncounter(id, rng, opts = {}) {
   const e = ENCOUNTERS[id];
   if (!e) throw new Error(`unknown encounter ${id}`);
-  const enemies = e.enemies.map((eid) => ({ id: eid, elite: null }));
+  // `power` (W15): the encounter's foes hit this much harder (ATK and MAG), so a floor can be tightened without
+  // changing an enemy that other floors share. HP, shields and rewards stay the enemy's own.
+  const enemies = e.enemies.map((eid) => (e.power ? { id: eid, elite: null, power: e.power } : { id: eid, elite: null }));
   const rate = opts.eliteRate ?? ELITE_RATE;
   // A fixed elite written into the encounter (`elite: { mods, index? }`) is part of the group: it ignores the
   // rate and the caller's noElite (which exists to keep scripted and simulated fights from rolling extras).

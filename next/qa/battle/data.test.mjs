@@ -167,9 +167,12 @@ test('a full-HP party at the expected level survives any single non-telegraphed 
   firstZone.false_sorrow = 'court_throne';
   firstZone.false_pride = 'court_throne';
   const entry = Object.fromEntries([...progression(1), ...progression(1, 2)].map((p) => [p.zone, p.startLevel]));
-  for (const [id, zone] of Object.entries(firstZone)) {
+  // W15: an encounter's `power` (Court F3) makes its foes hit harder there, so they are checked again at that floor
+  const cases = Object.entries(firstZone).map(([id, zone]) => [id, zone, 1]);
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) if (ENCOUNTERS[enc].power) for (const id of ENCOUNTERS[enc].enemies) cases.push([id, z, ENCOUNTERS[enc].power]);
+  for (const [id, zone, power] of cases) {
     const e = ENEMIES[id];
-    const boost = e.boss ? 1 : ELITE_BASE.atk; // assume an elite
+    const boost = (e.boss ? 1 : ELITE_BASE.atk) * power; // assume an elite
     for (const level of [entry[zone], Math.max(1, entry[zone] - 1)]) {
       const party = makeParty(zone, level).map((m) => ({ m, s: memberStats(m) }));
       for (const mv of e.moves) {

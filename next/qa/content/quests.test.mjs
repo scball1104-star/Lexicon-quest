@@ -103,7 +103,7 @@ test('W5 clarity hints: F1 key west / door east, F2 names the button, F3 crystal
   assert.match(after, /east/i); assert.match(after, /key/i);
   assert.notEqual(before, after);
   const f2 = partyChat((f) => ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done', 'echo_warden_defeated', 'lantern_get'].includes(f), 'archive_f2');
-  assert.ok(f2.lines.some((l) => /raise the Lantern with \{i:btn_pageR\}/.test(l.text)), 'the F2 hint names the button');
+  assert.ok(f2.lines.some((l) => /raise the Lantern with \{i:btn_pageR_lantern\}/.test(l.text)), 'the F2 hint names the button');
   const f3 = partyChat((f) => ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done'].includes(f), 'archive_f3');
   assert.ok(f3.lines.some((l) => /Three lights, one door/.test(l.text)), 'the F3 hint says three lights, one door');
   for (const f of ['first_fight_done', 'campfire_rested', 'archive_key_found']) assert.ok(f in FLAGS, f);

@@ -32,7 +32,7 @@ import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
-import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF } from '../game/story.js';
+import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF, sceneAllowed } from '../game/story.js';
 import { Silverglass } from '../world/silverglass.js';
 import { Reflections, inGlass } from '../world/reflections.js';
 import { Closeup } from '../world/closeup.js';
@@ -207,6 +207,15 @@ export class FieldScene {
     this.frame = 0;
     // enter triggers after the fade-in, then any step trigger under the landing tile
     e.after(o.first ? 20 : 8, async () => {
+      // W15 (PLAYTEST_REVIEW_4 fix 7): an arrival scene waits until the location banner has been read (it starts as
+      // the banner slides out), with input held, so its first window never covers the floor's name. Not under a
+      // scene-owned fade (Episode 2's morning after the credits starts on a black screen).
+      if (this.banner.active && this.fadeAlpha < 0.5 && !this.fadeTween
+          && this.enterTriggers.some((ent) => ent.present && ent.ev.script && sceneAllowed(ent.ev.script, this.hasFlag))) {
+        this.lockInput();
+        try { await this.untilBannerRead(mod.id); } finally { this.unlockInput(); }
+      }
+      if (this.dead || this.mapId !== mod.id) return;
       await this.runEnterTriggers();
       if (this.dead || this.mapId !== mod.id) return;
       const L = this.leader;
@@ -270,6 +279,12 @@ export class FieldScene {
     } else if (music) { if (music !== this.currentMusic) e.audio.music(music); this.currentMusic = music; }
     else { e.audio.stopMusic(1.0); this.currentMusic = null; }
     this.sceneMusic = null;
+  }
+
+  /** Resolves once the location banner starts to slide out (or is gone, or the map changed). */
+  async untilBannerRead(mapId) {
+    const b = this.banner;
+    for (let guard = 0; guard < 300 && !this.dead && this.mapId === mapId && b.active && b.t < b.total - 22; guard++) await this.engine.waitFrames(1);
   }
 
   autosave() {
@@ -949,6 +964,9 @@ export class FieldScene {
     this.lockInput();
     try {
       if (e.hasScene('credits')) await e.pushAwait('credits', episode === 2 ? { cards: h.cards, music: h.music } : undefined);
+      // W15: Episode 2 ends on a card that says the story goes on and the next road is not in the game yet; the night
+      // square stays dark under it.
+      if (h.endCard && e.hasScene('titleCard')) { this.fadeAlpha = 1; this.fadeTween = null; await e.pushAwait('titleCard', { ...h.endCard }); }
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);
       await e.fadeTo(() => this.loadMap(h.map, null, null, 'down', { mark: h.mark, landmark: true }), { duration: 1.0, hold: 0.2 });

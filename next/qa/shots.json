@@ -1448,6 +1448,9 @@
   {
    "name": "ui_load",
    "note": "load slots from the title (W2-ui)",
+   "settings": {
+    "rotateHintSeen": true
+   },
    "storage": {
     "lq-next-slot-1": {
      "v": 1,
@@ -2547,7 +2550,11 @@
      ]
     },
     {
-     "frames": 230
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -2629,7 +2636,11 @@
      ]
     },
     {
-     "frames": 130
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -2769,7 +2780,11 @@
      ]
     },
     {
-     "frames": 110
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -2870,7 +2885,11 @@
      ]
     },
     {
-     "frames": 100
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -3234,7 +3253,11 @@
      ]
     },
     {
-     "frames": 180
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -3302,7 +3325,11 @@
      ]
     },
     {
-     "frames": 140
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 8
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",

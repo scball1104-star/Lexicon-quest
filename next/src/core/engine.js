@@ -112,6 +112,8 @@ const BOOT_STATUS = {
   error: 'Some pages did not load.',
 };
 const BAR = { w: 160, h: 6, y: 146 };
+/** The gate's line for a phone held upright (W15, PLAYTEST_REVIEW_4 fix 5). */
+export const BOOT_ROTATE = 'Turn your phone sideways for a bigger picture.';
 const MOTES = 26;
 
 export class BootScene {
@@ -254,6 +256,12 @@ export class BootScene {
       if (first) r.text(`Missing: ${first}${n > 1 ? ' and more' : ''}`, W / 2, sy + 28, { align: 'center', color: BOOT_TEXT.dim });
     } else if (this.phase === 'ready' && this.waiting) {
       if ((this.frame % 56) < 42) r.text(BOOT_STATUS.ready, W / 2, sy, { align: 'center', color: BOOT_GOLD.light });
+      // W15: held upright on a phone the game is a small strip; say so under the prompt (the title repeats it once).
+      const v = this.engine.renderer && this.engine.renderer.view;
+      if (v && v.touchMode === 'below' && !(this.engine.settings && this.engine.settings.rotateHintSeen)) {
+        r.text(BOOT_ROTATE, W / 2, sy + 14, { font: 'large', align: 'center', color: BOOT_TEXT.cream });
+        return;
+      }
     } else {
       r.text(BOOT_STATUS[this.phase] || BOOT_STATUS.assets, W / 2, sy, { align: 'center', color: BOOT_TEXT.body });
     }
@@ -783,7 +791,7 @@ export class Engine {
       this.fonts.setIconResolver((id) => {
         let name = null;
         if (id.startsWith('btn_')) {
-          const action = id.slice(4);
+          const action = id.slice(4).split('_')[0];   // {i:btn_pageR_shove}: the ability suffix is for touch words (ui/glyphs.js)
           const dev = this.input.lastDevice === 'gamepad' ? 'gamepad' : this.input.lastDevice === 'touch' ? 'touch' : 'keyboard';
           name = (glyphs[dev] && glyphs[dev][action]) || (glyphs.keyboard && glyphs.keyboard[action]);
         } else name = ui.frames[`icon_${id}`] ? `icon_${id}` : id;

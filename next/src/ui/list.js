@@ -66,6 +66,8 @@ export class List {
     this.rows = o.rows || Math.max(1, Math.ceil(this.items.length / (o.columns || 1)));
     this.rowH = o.rowH || 12;
     this.tapMode = o.tapMode === 'single' ? 'single' : 'double';
+    this.slop = o.slop;                    // touch slop override in px (default: one row)
+    this._nudge = 0;                       // frames left on a glove nudge (nudge())
     this.columns = Math.max(1, o.columns || 1);
     this.columnMajor = !!o.columnMajor && this.columns > 1;
     this.x = o.x || 0; this.y = o.y || 0; this.w = o.w || 100;
@@ -208,6 +210,7 @@ export class List {
   /** Returns 'confirm' | 'cancel' | 'pageL' | 'pageR' | null. */
   update(input, audio) {
     this._changedThisFrame = false;
+    if (this._nudge > 0) this._nudge--;
     if (!this.active) return null;
     const snd = (id) => { if (this.sounds && audio) audio.sfx(id); };
     const d = input.repeatDir();
@@ -222,7 +225,7 @@ export class List {
     if (this.touch && input.pointer) {
       const p = input.pointer;
       // Fingers are wide: a touch within one row of the list still lands on the nearest row.
-      const slop = p.type === 'touch' ? this.rowH : 0;
+      const slop = p.type === 'touch' ? (this.slop ?? this.rowH) : 0;
       // The scroll arrows are tappable: one tap pages the list (a finger cannot be expected to know about drag).
       if (p.pressed && this.maxScroll > 0) {
         const cx = this.x + Math.floor(this.w / 2), yd = this.y + this.rows * this.rowH + 1, yu = this.y - 7;
@@ -312,7 +315,11 @@ export class List {
     if (showCursor && this.index >= first && this.index < last) {
       const rr = this.rowRect(this.index);
       const [hx, hy] = cursorHotspotForRow(rr.x, rr.y, this.rowH);
-      drawCursor(r, hx + this.cursorDx, hy + this.cursorDy, { alpha, frame: o.frame });
+      drawCursor(r, hx + this.cursorDx + this.nudgeDx, hy + this.cursorDy, { alpha, frame: o.frame });
     }
   }
+
+  /** Bob the glove toward its option (a tap that missed the list: "choose here"). */
+  nudge(frames = 16) { this._nudge = frames; }
+  get nudgeDx() { return this._nudge > 0 ? [0, 1, 2, 3, 3, 2, 1, 0][Math.floor((16 - this._nudge) / 2) % 8] : 0; }
 }

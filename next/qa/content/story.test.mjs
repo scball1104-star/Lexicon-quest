@@ -292,7 +292,7 @@ test('the Archivore scene gives Lanternheart after the fragment, with a line fro
 
 test('clarity lines name the button and the places', async () => {
   const { log } = await runOnce(scenes.lantern_get, { flags: ['echo_warden_defeated', 'mira_joined', 'bram_joined'], branchFlags: false });
-  assert.ok(ops(log, 'say').some((e) => /raise the Lantern with \{i:btn_pageR\}/.test(e.args[1])), 'lantern_get names the button');
+  assert.ok(ops(log, 'say').some((e) => /raise the Lantern with \{i:btn_pageR_lantern\}/.test(e.args[1])), 'lantern_get names the button');
   assert.match(lines.crystal_plaque, /THREE LIGHTS, ONE DOOR/);
   assert.ok(Array.isArray(lines.keeper_font_galleries) && lines.keeper_font_galleries.length === 2, 'the F2 font has a two-box text');
   const bell = await runOnce(scenes.archive_f1_bell, { flags: ['archive_entered', 'mira_joined', 'bram_joined'], branchFlags: false });

@@ -4,7 +4,9 @@
 
 import { scenes as EP1_SCENES, lines as EP1_LINES } from '../data/story/ep1.js';
 import { scenes as EP2_SCENES, lines as EP2_LINES } from '../data/story/ep2.js';
-import { BOOKS, BANNERS, BARKS, CREDITS, CREDITS_EP2 } from '../data/text.js';
+import { BOOKS, BANNERS, BARKS, CREDITS, CREDITS_EP2, END_CARD_EP2 } from '../data/text.js';
+import { SCENE_CONDITIONS as EP1_CONDITIONS } from '../data/story/ep1.js';
+import { SCENE_CONDITIONS as EP2_CONDITIONS } from '../data/story/ep2.js';
 import { resolve, pick, matches } from '../data/story/dialogue.js';
 import { speakerName } from '../data/npcs.js';
 
@@ -19,6 +21,17 @@ export function storyCollisions() {
   const sc = Object.keys(EP2_SCENES).filter((k) => k in EP1_SCENES);
   const li = Object.keys(EP2_LINES).filter((k) => k in EP1_LINES);
   return { scenes: sc, lines: li };
+}
+
+/**
+ * Would the scene's own guard let it run now ({ if, ifNot } in SCENE_CONDITIONS)? A scene with no conditions does.
+ * The field asks before it holds an arrival scene for the location banner (W15).
+ */
+export function sceneAllowed(id, hasFlag) {
+  const c = EP1_CONDITIONS[id] || EP2_CONDITIONS[id];
+  if (!c) return !!SCENES[id];
+  const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+  return list(c.if).every((f) => hasFlag(f)) && !list(c.ifNot).some((f) => hasFlag(f));
 }
 
 /** The scripted scene for an id (already wrapped with its guard and input lock), or null. */
@@ -127,9 +140,10 @@ export function markCreditsRolled(game, episode = 1) {
 }
 /**
  * The episode handoffs: the cards, the credits music and where the party wakes afterwards. Episode 1 wakes at home
- * (hero_home, bed); Episode 2 in Hollowmere's inn (nh_inn, inn_bed). Both in day light.
+ * (hero_home, bed); Episode 2 in Hollowmere's inn (nh_inn, inn_bed), after `endCard` (W15: "To be continued").
+ * Both in day light.
  */
 export const CREDITS_HANDOFF = {
   1: { cards: CREDITS, music: null, map: 'hero_home', mark: 'bed', counter: 'credits_rolled' },
-  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled' },
+  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled', endCard: END_CARD_EP2 },
 };

@@ -3,9 +3,17 @@
 // 20 s idle (prologue cards, then back). Also the UI module's install(): toasts, the 'choice', '_uiStage' and
 // 'nameEntryEp2' scenes, the stats provider, and LQ_DEBUG.newGame / give / uiStage.
 // Episode 2 shows once any slot has `ep1_complete` (or with ?ep=2): name step, newGameEp2, the card, home in bed.
+// The row says it is a ready-made party ("Episode 2: new party") and a note beside the menu says the player's own
+// game stays under Continue (W15, PLAYTEST_REVIEW_4 fix 1). Both fresh starts share the autosave (slot 0) with
+// every other run, so when it already holds a game New Game and the Episode 2 start ask once first (the save guard:
+// name, level and place of what would be replaced; "Keep my save" is the default and the cancel answer, a free
+// record can take a copy first).
+// Held upright on a phone the game is a 384 px strip, so the title first shows a one-time card that says to turn the
+// phone (W15, PLAYTEST_REVIEW_4 fix 5): any tap or key dismisses it, settings.rotateHintSeen remembers it, landscape
+// never shows it and turning the phone counts as reading it. The portrait layout stays for players who keep it.
 
-import { List, rowHeightFor } from '../ui/list.js';
-import { drawWindow, installToasts, ChoiceScene, uiAudit } from '../ui/index.js';
+import { List, rowHeightFor, tapRowHeight } from '../ui/list.js';
+import { drawWindow, installToasts, ChoiceScene, ChoiceBox, uiAudit } from '../ui/index.js';
 import { KeyArt, DARK } from '../ui/keyart.js';
 import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
@@ -14,9 +22,13 @@ import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, STAR
 import { NameEntryScene } from './nameEntry.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
+import { BANNERS } from '../data/text.js';
 
 export const VERSION = 'v0.2 NEXT';
 const ATTRACT_AFTER = 20;   // seconds idle
+/** The title row for the Episode 2 quick start: it starts a ready-made party, it does not continue a game. */
+export const EP2_ROW_LABEL = 'Episode 2: new party';
+const AUTO_SLOT = 0;
 
 export class TitleScene {
   constructor(engine) { this.engine = engine; this.name = 'title'; }
@@ -33,14 +45,19 @@ export class TitleScene {
     const items = [
       { id: 'new', label: 'New Game' },
       { id: 'continue', label: 'Continue', disabled: !this.hasSaves },
-      ...(this.ep2.show ? [{ id: 'ep2', label: 'Episode 2' }] : []),
+      ...(this.ep2.show ? [{ id: 'ep2', label: EP2_ROW_LABEL }] : []),
       { id: 'config', label: 'Config' },
     ];
-    // Menu window: anchored at the bottom (y 196; 210 for four touch rows, clear of the subtitle).
+    // Menu window: anchored at the bottom (y 196; 210 for four touch rows, clear of the subtitle), centred, as wide
+    // as its longest row needs (100 px for the three plain rows).
     const rowH = rowHeightFor(e, 11);
     const h = items.length * rowH + 13;
     const bottom = items.length > 3 && rowH > 11 ? 210 : 196;
-    this.win = { x: 142, y: bottom - h, w: 100, h };
+    let tw = 0;
+    for (const it of items) tw = Math.max(tw, e.renderer && e.renderer.measure ? e.renderer.measure(it.label) : it.label.length * 5);
+    const w = Math.max(100, tw + 34);
+    this.win = { x: Math.round(192 - w / 2), y: bottom - h, w, h };
+    this.guard = null;
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
     this.busy = false;
     e.audio.music('title');
@@ -80,6 +97,8 @@ export class TitleScene {
     this.art.update(dt);
     if (this.busy) return;
     if (input.anyPressed() || input.heldDir()) this.idle = 0; else this.idle += dt;
+    if (this.updateRotateHint()) return;
+    if (this.guard) { this.updateGuard(); return; }
     this.nextSparkle -= dt;
     if (this.nextSparkle <= 0 && this.points && this.points.length) {
       this.nextSparkle = 1.1 + e.rng.next() * 0.9;
@@ -91,9 +110,11 @@ export class TitleScene {
     const act = this.menu.update(input, audio);
     if (act === 'confirm') {
       const id = this.menu.item.id;
-      if (id === 'new') { this.busy = true; e.fadeTo(() => e.replace('nameEntry'), { duration: 0.7 }); }
+      if (id === 'new' || id === 'ep2') {
+        const auto = autosaveGuard(e.save);
+        if (auto) this.openGuard(id, auto); else this.startFresh(id);
+      }
       else if (id === 'continue') { this.busy = true; e.pushAwait('loadGame', { mode: 'load' }).then(() => { this.busy = false; }); }
-      else if (id === 'ep2') { this.busy = true; e.fadeTo(() => e.replace('nameEntryEp2', { name: this.ep2.name || undefined, artT: this.art.t }), { duration: 0.7 }); }
       else if (id === 'config') { this.busy = true; e.pushAwait('config').then(() => { this.busy = false; }); }
       return;
     }
@@ -102,6 +123,67 @@ export class TitleScene {
       this.idle = 0; this.busy = true;
       e.fadeTo(() => e.push('prologue', { attract: true }), { duration: 0.8 }).then(() => { this.busy = false; });
     }
+  }
+
+  /** The upright-phone card: true while it is up (the title waits under it). */
+  updateRotateHint() {
+    const e = this.engine;
+    if (rotateHintWanted(e)) {
+      this.rotateShown = true;
+      if (e.input.anyPressed() || e.input.heldDir()) { e.input.consumeAll(); e.audio.sfx('cursor'); this.rotateShown = false; e.setSetting('rotateHintSeen', true); }
+      return true;
+    }
+    // turned sideways while the card was up: the player got the message
+    if (this.rotateShown) { this.rotateShown = false; if (!e.settings.rotateHintSeen) e.setSetting('rotateHintSeen', true); }
+    return false;
+  }
+
+  /** New Game or the Episode 2 quick start, once nothing (or the player) objects. */
+  startFresh(id) {
+    const e = this.engine;
+    this.busy = true;
+    if (id === 'ep2') e.fadeTo(() => e.replace('nameEntryEp2', { name: this.ep2.name || undefined, artT: this.art.t }), { duration: 0.7 });
+    else e.fadeTo(() => e.replace('nameEntry'), { duration: 0.7 });
+  }
+
+  /** The save guard: what the autosave holds, and Keep my save (default, cancel) / Copy it, then start / Replace it. */
+  openGuard(id, auto) {
+    const e = this.engine;
+    const free = freeRecord(e.save);
+    const options = [{ id: 'keep', label: 'Keep my save' }];
+    if (free) options.push({ id: 'copy', label: 'Copy it, then start' });
+    options.push({ id: 'replace', label: 'Replace it' });
+    const lines = [
+      { text: 'Your autosave holds another game:', color: 'white' },
+      { text: auto.line, color: 'gold' },
+      { text: id === 'ep2' ? 'The Episode 2 party would replace it.' : 'A new game would replace it.', color: 'white' },
+    ];
+    if (free) lines.push({ text: `Copy keeps it safe in Record ${free}.`, color: 'gray' });
+    const msgH = lines.length * 11 + 12;
+    const rowH = tapRowHeight(e, 11);
+    const boxH = options.length * rowH + 12;
+    const top = Math.max(4, Math.round((216 - (msgH + 4 + boxH)) / 2));
+    // Two taps on a row that is not highlighted (the List default): one tap can never replace a save by accident.
+    const box = new ChoiceBox(e, options.map((o) => o.label), { x: 192, y: top + msgH + 4 + Math.floor(boxH / 2), anchor: 'center', minWidth: 150, index: 0, cancel: 0, tapMode: 'double' });
+    this.guard = { id, auto, free, options, lines, msg: { x: 52, y: top, w: 280, h: msgH }, box };
+    e.audio.sfx('menu_open');
+  }
+
+  updateGuard() {
+    const e = this.engine;
+    const g = this.guard;
+    const res = g.box.update();
+    if (res == null) return;
+    const pick = (g.options[res] || g.options[0]).id;
+    this.guard = null;
+    if (pick === 'keep') return;
+    if (pick === 'copy') {
+      let ok = false;
+      try { ok = !!e.save.importSlot(g.free, e.save.exportSlot(AUTO_SLOT)); } catch (err) { ok = false; }
+      if (!ok) { e.audio.sfx('buzzer'); return; }
+      if (e.toasts && e.toasts.flash) e.toasts.flash(`Copied to Record ${g.free}.`, { frames: 120 });
+    }
+    this.startFresh(g.id);
   }
 
   draw(r) {
@@ -126,14 +208,99 @@ export class TitleScene {
       r.text('The Reforged Realms', r.W / 2, 56, { align: 'center', color: 'cream' });
     }
     // Opaque: a translucent window over the key art would blend hundreds of off-palette colours (D1).
-    drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h);
-    // Only the page on top shows a finger: under Load Game or Config the title's would read as a second cursor.
-    this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
+    // The save guard stands in for the menu while it asks (two stacked menus read as one muddle).
+    if (!this.guard) {
+      drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h);
+      // Only the page on top shows a finger: under Load Game or Config the title's would read as a second cursor.
+      this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
+    }
     r.text(VERSION, 4, 205, { color: 'gray' });
+    const note = this.menu.item && this.menu.item.id === 'ep2' && !this.guard ? this.ep2Note() : null;
+    if (note) {
+      const lines = r.wrap(note, 108);
+      const nh = lines.length * 11 + 10, nx = this.win.x + this.win.w + 6;
+      const ny = this.win.y + this.win.h - nh;
+      drawWindow(r, nx, ny, 384 - 4 - nx, nh, { kind: 'thin' });
+      lines.forEach((l, i) => r.text(l, nx + 6, ny + 5 + i * 11, { color: 'cream' }));
+    }
+    if (this.guard) this.drawGuard(r);
+    if (rotateHintWanted(e)) drawRotateHint(r, this.frame);
+  }
+
+  /** The help beside the Episode 2 row: what it starts, and where the player's own game is. */
+  ep2Note() {
+    const own = this.hasSaves ? ' Your own game stays under Continue.' : '';
+    return `Starts Episode 2 with a ready-made Lv ${EP2_START.level} party.${own}`;
+  }
+
+  drawGuard(r) {
+    const g = this.guard;
+    r.withAlpha(0.55, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
+    const m = g.msg;
+    drawWindow(r, m.x, m.y, m.w, m.h);
+    g.lines.forEach((l, i) => r.text(l.text, r.W / 2, m.y + 6 + i * 11, { align: 'center', color: l.color }));
+    g.box.draw(r);
   }
 
   debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
-    items: this.menu.items.map((it) => it.id), ep2: this.ep2 }; }
+    items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2,
+    guard: this.guard ? { id: this.guard.id, line: this.guard.auto.line, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
+}
+
+/** The upright-phone card is wanted: the touch layout in portrait (game above the controls) and not yet read. */
+export function rotateHintWanted(engine) {
+  const v = engine && engine.renderer && engine.renderer.view;
+  return !!(v && v.touchMode === 'below' && !(engine.settings && engine.settings.rotateHintSeen));
+}
+
+/** A phone outline (upright when `side` is false), 1 px ink rim, cream body, dark screen. */
+function drawPhone(r, x, y, side) {
+  const w = side ? 22 : 13, h = side ? 13 : 22;
+  r.rect(x, y, w, h, '#14101e');
+  r.rect(x + 1, y + 1, w - 2, h - 2, '#e2e0de');
+  if (side) { r.rect(x + 3, y + 2, w - 6, h - 4, '#292657'); r.rect(x + w - 2, y + 5, 1, 3, '#66637f'); }
+  else { r.rect(x + 2, y + 3, w - 4, h - 6, '#292657'); r.rect(x + 5, y + h - 2, 3, 1, '#66637f'); }
+}
+
+/** The upright-phone card over the title: an upright phone, an arrow, a sideways phone, and the line. */
+export function drawRotateHint(r, frame = 0) {
+  r.withAlpha(0.6, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
+  const w = 300, h = 96, x = Math.round((r.W - w) / 2), y = Math.round((r.H - h) / 2);
+  drawWindow(r, x, y, w, h);
+  const cx = Math.round(r.W / 2);
+  drawPhone(r, cx - 40, y + 10, false);
+  // the arrow between the two phones, nudging toward the sideways one
+  const ax = cx - 18 + (Math.floor(frame / 20) % 2), ay = y + 20;
+  r.rect(ax, ay, 14, 2, '#f9d77a');
+  r.rect(ax + 14, ay - 3, 2, 8, '#f9d77a'); r.rect(ax + 16, ay - 2, 2, 6, '#f9d77a'); r.rect(ax + 18, ay - 1, 2, 4, '#f9d77a'); r.rect(ax + 20, ay, 1, 2, '#f9d77a');
+  drawPhone(r, cx + 14, y + 15, true);
+  r.text('Turn your phone sideways', cx, y + 40, { font: 'large', align: 'center', color: 'cream' });
+  r.text('for a bigger picture.', cx, y + 56, { font: 'large', align: 'center', color: 'cream' });
+  if (Math.floor(frame / 28) % 3 !== 2) r.text('Tap to continue', cx, y + 79, { align: 'center', color: 'gray' });
+}
+
+/**
+ * The save guard's question (W15): null when a fresh start would overwrite nothing (no readable autosave), else
+ * { name, level, place, line } for the game slot 0 holds. Every fresh start is a different run from the one in the
+ * autosave, so an occupied slot 0 is always asked about. Pure (fake saves in node tests).
+ */
+export function autosaveGuard(save) {
+  let env = null;
+  try { env = save && save.loadEnvelope(AUTO_SLOT); } catch (err) { env = null; }
+  if (!env || !env.data) return null;
+  const m = env.meta || {}, d = env.data;
+  const name = m.name || d.heroName || 'Hero';
+  const level = m.level || (d.party && d.party[0] && d.party[0].level) || 1;
+  const map = m.map || d.map || '';
+  const place = (BANNERS[map] && BANNERS[map].title) || map || 'somewhere';
+  return { name, level, place, line: `${name}, Lv ${level}, ${place}` };
+}
+
+/** The first empty manual record (1..3), or 0 when all three are taken. */
+export function freeRecord(save) {
+  const n = save && Number.isFinite(save.slots) ? save.slots : 3;
+  for (let i = 1; i <= n; i++) { try { if (!save.exists(i)) return i; } catch (err) { return 0; } }
+  return 0;
 }
 
 /** { show, url, name, slot }: Episode 2 is offered; the newest `ep1_complete` save names the hero. Pure. */

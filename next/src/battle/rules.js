@@ -249,6 +249,7 @@ export function createBattle(cfg = {}) {
       variant = LOST_PAGE_VARIANTS.find((v) => v.id === spec.variant) || null;
       if (variant) { weak = variant.weak.slice(); name = variant.name; weakKey = `${id}:${variant.id}`; }
     }
+    if (spec && spec.power > 0) { atk *= spec.power; mag *= spec.power; }   // the encounter's `power` (encounters.js)
     if (extra.hpScale) hp *= extra.hpScale;
     if (extra.hp) hp = extra.hp;
     hp = Math.round(hp);

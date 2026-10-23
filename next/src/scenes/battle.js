@@ -761,13 +761,20 @@ export class BattleScene {
     const helpBottom = hv ? 4 + HUD.helpHeight(r, hv.text, hv.color, { rightW: hv.rightW }) : 23;
     // Enemy rows: the targeted foe, the acting foe and anything hit recently. Placed first (drawn below) so the
     // telegraph "!" and the name tag can stand clear of a row that sits above a head (touch layout).
-    const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys()]);
+    // W15 (PLAYTEST_REVIEW_4 fix 6): while a party member chooses a command, every living foe shows its shields and
+    // weak points (Octopath), so the plan is made with them in view; during the actions today's rule stands.
+    const choosing = this.phase !== 'rewards' && this.menu.state !== 'closed' && this.currentUid
+      ? [...this.actors.values()].filter((a) => a.side === 'enemy' && !a.dead && a.visible !== false).map((a) => a.uid) : [];
+    const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys(), ...choosing]);
     const touch = touchUi(this.engine);
     const cwNow = this.menu.state !== 'closed' && this.menu.cmdRect ? this.menu.cmdRect : null;
-    const rowPlan = this.planEnemyRows([...rows], touch, cwNow, helpBottom);
+    let rowPlan = this.planEnemyRows([...rows], touch, cwNow, helpBottom);
+    // desktop: rows stacked by lifting climb into the bodies above them; with every foe's row up, place them the way the
+    // touch layout does (scored clear of bodies, windows and each other) instead
+    if (!touch && choosing.length > 1 && [...rowPlan.values()].some((p) => p.lift > 0)) rowPlan = this.planEnemyRows([...rows], touch, cwNow, helpBottom, true);
     for (const [uid, t] of this.telegraphs) {
       const a = this.actor(uid);
-      if (a && !a.dead) { const p = rowPlan.get(uid); HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6), (touch || a.rowBeside) && p ? (p.badges ? { ...p.rect, y: p.rect.y - 10, h: p.rect.h + 10 } : p.rect) : null); }
+      if (a && !a.dead) { const p = rowPlan.get(uid); HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6), (touch || a.rowBeside || (p && p.at)) && p ? (p.badges ? { ...p.rect, y: p.rect.y - 10, h: p.rect.h + 10 } : p.rect) : null); }
     }
     if (this.eliteTag) { const a = this.actor(this.eliteTag.uid); if (a && !a.dead) HUD.drawEliteTag(r, a); if (--this.eliteTag.t <= 0) this.eliteTag = null; }
     for (const uid of targetIds) { const a = this.actor(uid); if (a && !a.dead) HUD.drawReticle(r, a, frame); }
@@ -780,7 +787,7 @@ export class BattleScene {
       const t = this.menu.currentTarget();
       const a = t ? this.actor(t) : null;
       const p = t ? rowPlan.get(t) : null;
-      if (a && a.side === 'enemy') HUD.drawNameTag(r, a, this.b.knowledge(t), this.unit(t), { row: (touch || a.rowBeside) && p ? p.rect : null, minY: helpBottom + 2 });
+      if (a && a.side === 'enemy') HUD.drawNameTag(r, a, this.b.knowledge(t), this.unit(t), { row: (touch || a.rowBeside || (p && p.at)) && p ? p.rect : null, minY: helpBottom + 2 });
       const prev = this.menu.preview;
       if (prev) for (const ef of prev.effects || []) { const ta = this.actor(ef.target); if (ta && targetIds.includes(ef.target)) HUD.drawPreviewTag(r, ta, ef); }
     }
@@ -808,11 +815,11 @@ export class BattleScene {
    * layout.touchRowSpot (W11, CRITIQUE_4 item 1): under the feet, above the head or beside the sprite, whichever
    * covers no window, no other row and no sprite (its own or the party's heavily, another foe's lightly).
    */
-  planEnemyRows(uids, touch, cwNow, helpBottom) {
+  planEnemyRows(uids, touch, cwNow, helpBottom, scoreAll = false) {
     const plan = new Map();
     const list = uids.map((uid) => this.actor(uid)).filter((a) => a && !a.dead && a.side === 'enemy').sort((p, q) => p.x - q.x);
     const placed = [];
-    const scored = touch || list.some((a) => a.rowBeside);
+    const scored = touch || scoreAll || list.some((a) => a.rowBeside);
     const boxes = scored ? [...this.actors.values()].filter((a) => !a.dead && !a.ko).map((a) => ({ ...spriteBox(a, true), uid: a.uid, party: a.side === 'party' })) : null;
     const bracket = [...this.telegraphs.values()].some((t) => t.mirrorCombo && t.partner);
     const blocks = scored ? topBlocks(helpBottom, bracket) : null;
@@ -821,7 +828,7 @@ export class BattleScene {
       const w = HUD.enemyRowWidth(know);
       const badges = Object.keys(a.statuses || {}).length > 0 || HUD.empowerStacks(this.unit(a.uid)) > 0;
       // touch: every row is scored (layout.touchRowSpot); desktop: only a foe whose row stands beside it (the King)
-      if (touch || a.rowBeside) {
+      if (touch || scoreAll || a.rowBeside) {
         const s = touchRowSpot(a, w, { cw: cwNow || cmdWin(touch), placed, boxes: boxes.filter((b) => b.uid !== a.uid), blocks });
         const rect = { x: s.x, y: s.y, w, h: ENEMY_ROW_H };
         placed.push(badges ? { x: s.x, y: s.y - 10, w, h: ENEMY_ROW_H + 10 } : rect);

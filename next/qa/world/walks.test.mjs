@@ -31,3 +31,13 @@ test('the Episode 2 field systems work in the game with zero console errors', { 
   assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
   assert.match(out, /E2_LAB: PASS/);
 });
+
+// W15 (PLAYTEST_REVIEW_4 fix 1): the save trap repro in the real game on the phone profile (qa/integrate/w15_save_trap.py):
+// an Episode 1 credits save in the autosave, the title's Episode 2 quick start and one door leave slot 0 untouched unless
+// the player confirms; "Copy it, then start" keeps the run in a record. Here so it runs in the solo slot.
+test('the Episode 2 quick start never overwrites a finished run without asking', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
+  const r = spawnSync('python', [path.resolve(HERE, '..', 'integrate', 'w15_save_trap.py')], { timeout: 150000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const out = (r.stdout || '') + (r.stderr || '');
+  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
+  assert.match(out, /W15_SAVE_TRAP: PASS/);
+});

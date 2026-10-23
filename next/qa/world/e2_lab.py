@@ -237,6 +237,11 @@ def case_plumbing(lab):
     lab.frames(30)
     has_trig = lab.run(field_js('return (f.map.mod.events || []).some(e => e.type === "trigger" && e.script === "ep2_morning");'))
     if has_trig:
+        # W15: an arrival scene starts once the location banner has been read (about 2 s), so wait for it
+        try:
+            lab.page.wait_for_function(field_js('return f.cutscene.running === "ep2_morning";'), timeout=15000, polling=50)
+        except Exception:  # noqa: BLE001
+            pass
         sc = lab.run(field_js('return f.cutscene.running;'))
         check(sc == 'ep2_morning', f'ep2_morning runs on waking at home ({sc})')
     else:

@@ -13,7 +13,8 @@ import { fillHero } from './text.js';
 export class ChoiceBox {
   /**
    * options: string[] or [{label, disabled}]. opts: x, y (anchor point), anchor ('top-left' default,
-   * 'bottom-right', 'bottom-left', 'top-right', 'center'), minWidth, cancel (index | false), scheme, field.
+   * 'bottom-right', 'bottom-left', 'top-right', 'center'), minWidth, cancel (index | false), scheme, field,
+   * tapMode ('single' default: a tap chooses; 'double': the first tap on another row only moves the glove).
    */
   constructor(engine, options, o = {}) {
     this.engine = engine;
@@ -38,12 +39,21 @@ export class ChoiceBox {
     this.rect = { x, y, w, h };
     this.scheme = o.scheme; this.field = !!o.field; this.alpha = o.alpha;
     this.cancelIndex = o.cancel === false ? -1 : (o.cancel ?? this.items.length - 1);
-    this.list = new List({ x: x + 6, y: y + 6, w: w - 12, rowH, rows: this.items.length, items: this.items, textX: 16, index: o.index || 0, cancelSfx: false, confirmSfx: true, wrap: true });
+    // W15 (PLAYTEST_REVIEW_4 fix 9): one tap on an option chooses it (the rows are 45 css px on a phone, and the slop
+    // stays inside the window so a tap on the text box below never lands on a row); opts.tapMode 'double' keeps the
+    // two-step tap (select, then confirm) for a choice that destroys something.
+    const tapMode = o.tapMode === 'double' ? 'double' : 'single';
+    this.list = new List({ x: x + 6, y: y + 6, w: w - 12, rowH, rows: this.items.length, items: this.items, textX: 16, index: o.index || 0, cancelSfx: false, confirmSfx: true, wrap: true,
+      tapMode, slop: tapMode === 'single' ? 4 : undefined });
     this.anim = new WindowAnim(engine, o.animate === false ? 0 : 5);
     this.anim.open();
     this.done = false;
   }
   get index() { return this.list.index; }
+  /** A tap outside the box while it waits: bob the glove (with the cursor sound) so the player looks here. */
+  nudge() { this.list.nudge(); if (this.engine.audio) this.engine.audio.sfx('cursor'); }
+  /** True when a game-pixel point is on the window (taps there belong to the list). */
+  contains(x, y) { const b = this.rect; return x >= b.x && y >= b.y && x < b.x + b.w && y < b.y + b.h; }
   /** Returns the chosen index, -1 when cancelled, or null while still open. */
   update() {
     const { input, audio } = this.engine;

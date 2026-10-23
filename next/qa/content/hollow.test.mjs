@@ -56,7 +56,7 @@ test('hollow_entry without the Lantern: two boxes, the quest starts, the bridge 
   assert.equal(ops(log, 'say').length, 2);
   assert.deepEqual(ops(log, 'setFlag').map((e) => e.args[0]), ['lost_bridge_started']);
   const lit = await runOnce(scenes.hollow_entry, { flags: [...PARTY, 'lantern_get', 'lost_bridge_started'], branchFlags: false });
-  assert.ok(ops(lit.log, 'say').some((e) => /Raise the Lantern with \{i:btn_pageR\}/.test(e.args[1])), 'names the button');
+  assert.ok(ops(lit.log, 'say').some((e) => /Raise the Lantern with \{i:btn_pageR_lantern\}/.test(e.args[1])), 'names the button');
   assert.deepEqual(ops(lit.log, 'camera.panTo')[0].args, ['bridge_far', 30]);
   assert.deepEqual(ops(lit.log, 'setFlag').map((e) => e.args[0]), ['hollow_found']);
 });

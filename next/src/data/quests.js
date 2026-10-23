@@ -277,7 +277,7 @@ export const MAIN_QUEST = {
       journal: 'Use the Lantern of Recall to reveal hidden ink and find the stairs down.',
       chat: [
         { map: 'archive_f2', lines: [
-          { who: 'mira', text: 'Where a path stops, raise the Lantern with {i:btn_pageR}. The Keepers wrote their bridges in ink.' },
+          { who: 'mira', text: 'Where a path stops, raise the Lantern with {i:btn_pageR_lantern}. The Keepers wrote their bridges in ink.' },
           { who: 'bram', text: 'Lamp. Finds bridges. I remember.' },
         ] },
         { lines: [{ who: 'mira', text: 'Back to the Reading Galleries. The Lantern will show us the way across.' }] },
@@ -728,15 +728,17 @@ export const MAIN_QUEST_EP2 = {
     },
     {
       id: 'epilogue2', title: 'Toward Emberpeak', done: null,
-      journal: 'Hollowmere has its name. Yours is in the Book twice. Far to the north-east, Emberpeak is burning.',
+      // W15 (PLAYTEST_REVIEW_4 fix 3): Episode 3 is not in the game, so the journal and Talk say the road is not open
+      // yet and point at what is (placeholder wording, Scott chooses the final words).
+      journal: 'Hollowmere has its name. Yours is in the Book twice. Emberpeak is burning, but the road there is not open yet.',
       chat: [
         { map: NH_MAPS, lines: [
-          b("Emberpeak is north-east, past the mountains. When you're ready, {hero}. Not before."),
+          b("The road to Emberpeak isn't open yet, {hero}. When it is, we go."),
           m('The mirror in the chapel opens onto Willowmere now. Mael will want to hear all of it.'),
         ] },
         { lines: [
           m('Hollowmere has its name. Yours is in the Book twice. I want to know why.'),
-          b("And Emberpeak is burning. That's my mountain. When we're ready, we go."),
+          b("Emberpeak is burning. That's my mountain. The road there isn't open yet."),
         ] },
       ],
     },

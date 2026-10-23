@@ -1,6 +1,8 @@
 // FF-style name entry: 8 characters, a 13x5 glyph grid (A-Z, a-z, 0-9, space, erase, done), keyboard
 // typing through input.startText(), touch taps (one tap types the glyph: the cells are 15 px on a touch
-// layout). Over the quantized `title` backdrop. Default name "Hero". Result: createGame(name) on
+// layout). Over the quantized `title` backdrop. Default name "Hero", shown as a dim placeholder that the first typed
+// letter replaces (W15, PLAYTEST_REVIEW_4 fix 10: one tap on A used to give "HeroA"); confirming with nothing typed
+// keeps "Hero". The Episode 2 entry passes the player's own name, which stays filled in. Result: createGame(name) on
 // engine.game, then the prologue.
 
 import { List, rowHeightFor, touchUi } from '../ui/list.js';
@@ -22,7 +24,8 @@ export class NameEntryScene {
 
   enter(data = {}) {
     const e = this.engine;
-    this.value = data.name != null ? String(data.name) : 'Hero';
+    this.value = data.name != null ? String(data.name) : '';
+    this.placeholder = data.name != null ? '' : 'Hero';
     this.t = 0; this.frame = 0; this.busy = false;
     this.art = new KeyArt(e, { backdrop: 'title', cell: 0, drift: 1, t: data.artT || 0 });
     const items = [];
@@ -114,8 +117,10 @@ export class NameEntryScene {
     for (let i = 0; i < MAX; i++) {
       const x = cx + i * (cmp ? 19 : 17);
       const ch = this.value[i];
+      const hint = !this.value.length && this.placeholder ? this.placeholder[i] : null;
       r.rect(x, cy + 13, 14, 1, i < this.value.length ? '#f9d77a' : '#6b6a8a');
       if (ch) r.text(ch, x + 7, cy, { align: 'center', color: 'white' });
+      else if (hint) r.text(hint, x + 7, cy, { align: 'center', color: 'dim' });
       else if (i === this.value.length && Math.floor(this.frame / 20) % 2 === 0) r.rect(x + 2, cy + 11, 10, 1, '#f6f4ee');
     }
     r.text(`${this.value.length}/${MAX}`, nx + nw - 8, ny + (cmp ? 30 : 42), { align: 'right', color: 'dim' });
@@ -136,7 +141,7 @@ export class NameEntryScene {
     return `${btn('confirm')} pick   ${btn('cancel')} erase   ${dev === 'keyboard' ? '✓ or Enter when done' : '✓ when done'}`;
   }
 
-  debugState() { return { help: this.helpText(), device: deviceOf(this.engine), value: this.value, index: this.grid.index, busy: this.busy, cell: [this.grid.colW, this.grid.rowH], grid: this.gridRect }; }
+  debugState() { return { help: this.helpText(), device: deviceOf(this.engine), value: this.value, placeholder: this.placeholder, name: cleanName(this.value), index: this.grid.index, busy: this.busy, cell: [this.grid.colW, this.grid.rowH], grid: this.gridRect }; }
 }
 
 export default NameEntryScene;

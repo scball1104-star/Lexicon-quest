@@ -216,7 +216,11 @@ export class DialogScene {
 
     if (this.choiceBox) {
       const res = this.choiceBox.update();
-      if (res != null) this._finish(res < 0 ? undefined : res);
+      if (res != null) { this._finish(res < 0 ? undefined : res); return; }
+      // W15 (PLAYTEST_REVIEW_4 fix 9): a tap on the text (or anywhere off the choice window) while it waits bobs the
+      // glove, so the tap that used to advance the text now points at the choice instead of doing nothing.
+      const p = input.pointer;
+      if (this.choiceBox.anim.isOpen && input.tapIn(0, 0, e.renderer.W, e.renderer.H) && !this.choiceBox.contains(p.x, p.y)) this.choiceBox.nudge();
       return;
     }
 

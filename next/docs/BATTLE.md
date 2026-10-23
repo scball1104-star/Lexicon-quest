@@ -502,6 +502,11 @@ cancelling); Sorrow and Pride are not (Lunge cancels Lament).
 - **Fountain blessing**: `createEncounterBattle(id, { flags })` reads the encounter's `startFury: { flag, amount }`
   (the King: `fountain_done`, +25); `flags` is a Set, array, `{flag: true}` or a function; a number in `opts.startFury`
   overrides. A `message` kind `blessing` announces it. **The battle scene must pass `flags`** (today it does not).
+- **Encounter power** (W15, Court F3): an encounter's `power` (a number) multiplies its foes' ATK and MAG in that
+  encounter only (`rollEncounter` puts it on each enemy spec, `makeEnemyUnit` applies it); HP, shields and rewards stay
+  the enemy's own. `C3_POWER` in `data/encounters.js` tightens the last floor before the King without touching the
+  Knights and Sentinels Court F1 and F2 share. qa/battle/data.test.mjs checks no boosted foe fells a full-HP member
+  with one ordinary action.
 
 ### 10.3 The Other Selves (`other_selves`)
 

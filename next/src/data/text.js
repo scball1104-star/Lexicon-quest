@@ -327,13 +327,13 @@ export const BARKS = {
   ],
   // W9-abilities: the one hint line per field ability, spoken the first time the party meets its target.
   first_heavy_block: [
-    { if: 'bram_joined', lines: [{ who: 'bram', text: "That one won't budge for you. Stand aside and let me shove it: {i:btn_pageR}." }] },
+    { if: 'bram_joined', lines: [{ who: 'bram', text: "That one won't budge for you. Stand aside and let me shove it: {i:btn_pageR_shove}." }] },
   ],
   first_dash_target: [
-    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Hear how hollow that sounds? Hit it at a run, {hero}: {i:btn_pageR}.' }] },
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Hear how hollow that sounds? Hit it at a run, {hero}: {i:btn_pageR_dash}.' }] },
   ],
   first_appraise_target: [
-    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Want its weak spots before we fight? {i:btn_pageL} to my lens, then {i:btn_pageR}.' }] },
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Want its weak spots before we fight? {i:btn_pageL} to my lens, then {i:btn_pageR_appraise}.' }] },
   ],
   first_elite: [
     { if: 'bram_joined', lines: [{ who: 'bram', text: 'That one has a gold shine to it. Tougher, but it will drop something good.' }] },
@@ -583,6 +583,10 @@ Object.assign(BARKS, {
 // Help lines for the Hollow's save bell and inn (one line each, max 40 characters).
 Object.assign(HELP.save, { bell_hollow: 'The silver bell rings. Someone listens.' });
 Object.assign(HELP.inn, { poor_wren: 'Not enough gold. Wren looks sorry.' });
+
+// W15 (PLAYTEST_REVIEW_4 fix 3): the card after the Episode 2 credits, before the party wakes in Hollowmere's inn, so
+// nobody goes looking for a road that is not in the game yet. Placeholder wording: Scott chooses the final words.
+export const END_CARD_EP2 = { text: 'To be continued', sub: 'Episode 3 is not playable yet.', frames: 300, backdrop: 'dialog_keyart_ep2' };
 
 // Credits for Episode 2. Played after ep2_complete over the "hollowmere" theme (same card shape as CREDITS).
 export const CREDITS_EP2 = [

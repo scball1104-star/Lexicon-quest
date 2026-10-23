@@ -1,7 +1,7 @@
 // Status screen: full stats, EXP, mastery per weapon with the next unlock, equipment summary.
 
 import { drawWindow, drawPortrait, drawLabel, drawGauge, drawIcon, drawDivider } from '../window.js';
-import { btn, hasBtn } from '../glyphs.js';
+import { btn, hasBtn, deviceOf } from '../glyphs.js';
 import { drawHelpBar } from '../help.js';
 import { memberInfo, memberName, WEAPON_ICON, SLOT_ICON, SLOT_NAMES } from '../party.js';
 import { PARTY, masteryLevel, masteryUnlocks, MASTERY_XP, MAX_MASTERY, expForLevel } from '../../data/party.js';
@@ -124,5 +124,6 @@ export class StatusScreen {
   debugState() { return { screen: 'status', member: this.member.id }; }
 }
 
-function btnHint(engine) { return hasBtn('pageL', engine) ? `${btn('pageL')} ${btn('pageR')} or Left / Right:` : 'Left / Right:'; }
+// Touch draws pageL as the field's swap tab and pageR as the ability word (W15), neither of which switches members here.
+function btnHint(engine) { return deviceOf(engine) !== 'touch' && hasBtn('pageL', engine) ? `${btn('pageL')} ${btn('pageR')} or Left / Right:` : 'Left / Right:'; }
 export { expForLevel };

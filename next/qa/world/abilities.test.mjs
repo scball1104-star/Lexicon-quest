@@ -213,10 +213,11 @@ test('one hint line per ability: Bram at the heavy block, Mira at the crack and 
   assert.equal(BARKS.first_heavy_block[0].lines[0].who, 'bram');
   assert.equal(BARKS.first_dash_target[0].lines[0].who, 'mira');
   assert.equal(BARKS.first_appraise_target[0].lines[0].who, 'mira');
-  for (const k of ['first_heavy_block', 'first_dash_target', 'first_appraise_target']) {
+  // W15: each names its button with the ability it means, so a touch screen shows the touch button's word
+  for (const [k, ab] of [['first_heavy_block', 'shove'], ['first_dash_target', 'dash'], ['first_appraise_target', 'appraise']]) {
     assert.equal(BARKS[k].length, 1);
     assert.equal(BARKS[k][0].lines.length, 1);
-    assert.match(BARKS[k][0].lines[0].text, /\{i:btn_pageR\}/, `${k} names the button`);
+    assert.ok(BARKS[k][0].lines[0].text.includes(`{i:btn_pageR_${ab}}`), `${k} names the button`);
   }
   assert.match(BARKS.first_appraise_target[0].lines[0].text, /\{i:btn_pageL\}/, 'and the wheel button for the lens');
 });

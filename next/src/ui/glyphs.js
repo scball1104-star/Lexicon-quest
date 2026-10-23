@@ -4,8 +4,14 @@
 // glyphs for A / B and small word caps (MENU, RUN, LANTERN) drawn in the same style as the key caps, so a
 // phone never shows a "Z" or "E" key the player does not have.
 //
-//   bindGlyphs(engine)            installed once at boot (title.js install): wraps the fonts' icon resolver
+//   bindGlyphs(engine)            installed at boot (title.js install) and again once the engine has installed its
+//                                 UI art (engine 'loaded'), which replaces the fonts' resolver (W15: the device-aware
+//                                 resolver was lost there, so phones showed the E and Q key caps)
 //   btn('confirm')                -> '{i:btn_confirm}' (the inline code; the resolver does the rest)
+//   {i:btn_pageR_shove}           an action with the ability it means (W15): the E / RB glyph on a keyboard or pad,
+//                                 on touch the word the touch ability button shows (SHOVE, DASH, APPRAISE, LANTERN);
+//                                 a bare {i:btn_pageR} on touch says what the button would do now (the field's
+//                                 ability context), and {i:btn_pageL} on touch is the swap tab's icon
 //   hasBtn('pageR', engine)       -> true when the current device shows something for that action
 //   deviceOf(engine)              -> 'keyboard' | 'gamepad' | 'touch'
 //   glyphNameFor('confirm', 'touch', table) -> ui frame name | 'word:MENU' | null   (pure, node-tested)
@@ -14,7 +20,18 @@
 import { touchUi } from './list.js';
 
 /** Words the touch layout shows for actions that have an on-screen control but no glyph in ui.json. */
-export const TOUCH_WORDS = { menu: 'MENU', start: 'MENU', run: 'RUN', pageR: 'LANTERN' };
+export const TOUCH_WORDS = { menu: 'MENU', start: 'MENU', run: 'RUN', pageR: 'USE' };
+/** The touch ability button's word per field ability (abilities.js SHORT, in caps): {i:btn_pageR_<ability>}. */
+export const ABILITY_WORDS = { dash: 'DASH', appraise: 'APPRAISE', lantern: 'LANTERN', shove: 'SHOVE' };
+/** Touch frames for actions whose on-screen control is an icon: pageL is the ability swap tab. */
+const TOUCH_FRAMES = { pageL: 'icon_swap' };
+
+/** 'pageR_shove' -> ['pageR', 'shove']; 'confirm' -> ['confirm', null]. Actions never contain '_'. */
+export function splitBtn(code) {
+  const s = String(code || '');
+  const i = s.indexOf('_');
+  return i < 0 ? [s, null] : [s.slice(0, i), s.slice(i + 1) || null];
+}
 /** Fallback names when a device table lacks an action entirely (nothing drawn would eat 13 px). */
 const PROMPT_WORDS = { touch: { confirm: 'Tap', cancel: 'B', start: 'Tap', menu: 'MENU' } };
 
@@ -32,11 +49,28 @@ export function deviceOf(engine) {
  * Returns a ui frame name, 'word:<WORD>' for a drawn word cap (touch only), or null when the device has nothing
  * (the keyboard table is the last resort for keyboard and gamepad, never for touch).
  */
-export function glyphNameFor(action, device, table = {}) {
+export function glyphNameFor(action, device, table = {}, variant = null) {
+  if (variant == null && String(action).includes('_')) [action, variant] = splitBtn(action);
   const t = table[device] || {};
   if (t[action]) return t[action];
-  if (device === 'touch') return TOUCH_WORDS[action] ? `word:${TOUCH_WORDS[action]}` : null;
+  if (device === 'touch') {
+    if (TOUCH_FRAMES[action]) return TOUCH_FRAMES[action];
+    if (action === 'pageR' && variant && ABILITY_WORDS[variant]) return `word:${ABILITY_WORDS[variant]}`;
+    return TOUCH_WORDS[action] ? `word:${TOUCH_WORDS[action]}` : null;
+  }
   return (table.keyboard && table.keyboard[action]) || null;
+}
+
+/** The ability the field's tool button would use now (the touch button's word), or null off the field. */
+export function liveAbility(engine) {
+  try {
+    const stack = (engine && engine.stack) || [];
+    for (let i = stack.length - 1; i >= 0; i--) {
+      const f = stack[i];
+      if (f && f.name === 'field' && f.abilities && typeof f.abilities.context === 'function') { const c = f.abilities.context(); return (c && c.id) || null; }
+    }
+  } catch (err) { return null; }
+  return null;
 }
 
 /** Inline code for an action's glyph (unchanged contract: `{i:btn_<action>}`). */
@@ -109,7 +143,10 @@ export function bindGlyphs(engine) {
     if (!id.startsWith('btn_')) return prev ? prev(id) : null;
     const ui = engine.assets && engine.assets.has('ui') ? engine.assets.atlas('ui') : null;
     const table = (ui && ui.meta && ui.meta.buttonGlyphs) || {};
-    const name = glyphNameFor(id.slice(4), deviceOf(engine), table);
+    const dev = deviceOf(engine);
+    let [action, variant] = splitBtn(id.slice(4));
+    if (dev === 'touch' && action === 'pageR' && !variant) variant = liveAbility(engine);
+    const name = glyphNameFor(action, dev, table, variant);
     if (!name) return prev ? prev(id) : null;
     if (name.startsWith('word:')) return wordCap(name.slice(5));
     const f = ui && ui.frames[name];
@@ -118,5 +155,11 @@ export function bindGlyphs(engine) {
   resolve.__lqGlyphs = true;
   resolve.__prev = prev;
   fonts.setIconResolver(resolve);
+  // The engine installs its own (table-only) resolver with the UI art at the end of boot, after the scene modules
+  // ran this: wrap that one too, once, or the device-aware glyphs never reach the screen.
+  if (!engine.loaded && typeof engine.on === 'function' && !engine.__lqGlyphsRebind) {
+    engine.__lqGlyphsRebind = true;
+    const off = engine.on('loaded', () => { off(); engine.__lqGlyphsRebind = false; bindGlyphs(engine); });
+  }
   return true;
 }
