@@ -249,3 +249,20 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Also being fixed: phones being told to press keyboard keys (E, Q) in a few hints, Episode 2 ending by pointing at a
   road that does not exist yet, the Talk command never being introduced, and a hint to turn the phone sideways.
 
+## 2026-10-23 (Fri) evening: the save trap is fixed and live; the week's queue is done
+- Starting "Episode 2" or New Game from the title can no longer wipe a finished game. If your autosave holds
+  another run, the game names it (for example "Arden, Lv 10, Home") and asks: Keep my save (the default), Copy it,
+  then start, or Replace it.
+- Phones now show the right button names (SHOVE, DASH, APPRAISE, LANTERN) instead of keyboard keys.
+- Mira tells new players about Talk; holding the phone upright shows a hint to turn it sideways; choices take one
+  tap; monsters' weak points show while you pick a command.
+- The last floor before the King (Court floor 3) was the easiest in the game; its monsters now hit about twice as
+  hard there. Tell me if it feels too much.
+- Episode 2 now ends with a "To be continued" card. Placeholder words, yours to change:
+  - Card: "To be continued" / "Episode 3 is not playable yet."
+  - Journal: "Hollowmere has its name. Yours is in the Book twice. Emberpeak is burning, but the road there is not
+    open yet."
+  - Bram (Talk): "The road to Emberpeak isn't open yet, {hero}. When it is, we go."
+- That finishes everything queued. I have stopped the check-ins and will not start Episode 3 until you say what
+  you want it to be.
+

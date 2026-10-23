@@ -133,8 +133,14 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Episode 2 quick start or New Game overwrites the shared autosave holding a finished Episode 1, no prompt);
       then phone hints showing keyboard keys, Episode 2 ending toward a road that does not exist, Talk never
       introduced, no portrait-orientation hint, and five smaller items.
-- [~] W15 fix pass running (since 2026-10-23 16:25 ET): save trap first (S version: clear label + confirm before
-      overwriting another run's autosave), then the S items; full gate list, publish. Then STOP and wait for Scott.
+- [x] W15 fix pass committed 06ee810, PUBLISHED 2026-10-23 ~18:25 ET (main 11bdafd, sw f9f5ee9c0a9f): save trap
+      closed (confirm before replacing another run's autosave, Keep my save default), touch glyphs, To be continued
+      card (placeholder wording), Talk introduced, portrait hint, battle rows while choosing, banner wait, Court F3
+      foes ATK/MAG x1.9 to x2.1 on that floor only (careful play loses 18% HP a fight at Lv 12), one-tap choices,
+      name placeholder. 529 tests, 159/159 shots.
+- QUEUE DONE 2026-10-23. Heartbeat cron stopped. Waiting for Scott on: Episode 3 (scope and story), the final
+      wording of the Episode 2 ending lines (PROGRESS.md 10/23 evening), and whether Court F3 now feels right.
+- Later, if wanted: per-run autosaves (M; the confirm prompt already prevents the loss).
 - [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
 
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;

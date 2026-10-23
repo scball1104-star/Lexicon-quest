@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-23, 16:25 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-23, 18:30 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -40,8 +40,8 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   - Wave 10c (9fa5caa) and 10d (5f09ee5) committed: Episode 2 plays to credits (autoplay, desktop and phone, from an
     Episode 1 save and from newGameEp2, 0 game overs); 505 tests green. Load budget cap now 6.5 MB.
   - W10c, W10d, critic-4, play-critic-3 and the W11 fix pass (Parts A and B) all committed and published.
-  - W12 art pass and W13 backlog published (live main b04d6f7, sw 34b003adde62). W14 review done (PLAYTEST_REVIEW_4); W15 fix pass
-    running since 16:25 ET (save trap first: it is live); then publish and stop. Episode 3 waits for Scott.
+  - W12 art pass and W13 backlog published (live main b04d6f7, sw 34b003adde62). W14 review and W15 fixes published (live main
+    11bdafd, sw f9f5ee9c0a9f). QUEUE DONE; heartbeat cron stopped. Everything further waits for Scott. Episode 3 waits for Scott.
   - Live main = 35cf470 (Episode 2), after two hotfixes earlier today (Load page finger 8a1084a, shop stock 6ae4f00).
   - E2-world delivered the ep2 merge, `give('gold', n)` and story flags into battles. E2-maps set `EP2_MAPS_LISTED = true`.
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
@@ -58,7 +58,7 @@ verify live, then `git merge origin/main` into overhaul; sw.js conflicts every t
 build_pwa.py. Done this way 2026-10-21 for the Load page finger (8a1084a).
 
 ## Heartbeat
-Session 2026-10-21 runs a 3-hourly cron (`17 */3 * * *`, session-only, expires 2026-10-28). A new session must recreate it (CronCreate) with a
+The 3-hourly heartbeat cron was STOPPED 2026-10-23 when the queue emptied. If Scott restarts work, recreate it (CronCreate) with a
 prompt like: "Lexicon Quest NEXT heartbeat with the usage guard: ground the date, check get_usage, read
 next/PLAN.md and next/docs/HANDOFF.md, integrate finished agent work after viewing images, launch the next
 Episode 2 wave within the guard, publish only after the full gate list, update PLAN.md and PROGRESS.md, no em dashes."
