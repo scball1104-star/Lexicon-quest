@@ -15,7 +15,10 @@
 //   charge               telegraphed move: { skill, first, cooldown, target? } -- announced at the end
 //                        of the enemy's turn number `first`, then every `cooldown` turns after it fires
 //   ai                   'basic' | 'echo_warden' | 'archivore' | 'lost_page' | 'phased' | 'mimic' | 'reflections'
-//                        | 'nameless_king' (battle/ai.js)
+//                        | 'nameless_king' | 'specter' | 'cinder_warden' | 'coil' (battle/ai.js)
+//   heat                 Episode 3: { max: 3, step: 0.15, flare: skillId }. A foe with Heat gains 1 per Stoke; each level adds
+//                        `step` to its ATK and MAG; at `max` it announces `flare` (a telegraphed skill) and fires it next
+//                        turn, which resets Heat. Ice damage, a Quench Flask or a Break sets Heat to 0 and cancels the flare.
 //   drops                consumable drops [{ item, chance }]; equipment comes from loot-tables.js
 //   lootZone             zone loot table for equipment drops
 //   sprite               presentation hint: atlas + frame ids from W1-sprites (frame id = enemy id)
@@ -403,6 +406,156 @@ enemy('false_pride', {
   moves: [{ skill: 'proud_stance', weight: 35, if: 'notTaunting' }, { skill: 'glass_lance', weight: 65 }],
   drops: [], lootZone: null,
   flavor: 'A reflection of pride. It stands in front of what it guards.',
+});
+
+// =============================================================================================
+// Episode 3: The Forge of Ash (E3-battle; EPISODE3_PLAN.md 6.2 to 6.5). Names and flavors are mirrored by BESTIARY_EP3 in
+// data/text.js (E3-story): lore[0] is the flavor here, word for word. Most ordinary foes stoke toward a telegraphed flare
+// (the Hound, the Miner and the Phantom do not); the Defender also Covers. Traits handled in battle/ai.js and rules.js:
+//   heat: { max, step, flare }       the Heat counter (see the schema above)
+//   ai 'specter'                     the Bellows Specter: every attack feeds it, the fans reverse at 50%
+//   ai 'cinder_warden'               three phases, two coils, the shell, Strike the Name, Last Hammer
+//   ai 'coil'                        bellows_coil stokes the Warden every turn, smelter_coil sprays every second turn
+// =============================================================================================
+
+// ---------------------------------------------------------------- The Old Sand Road (Lv 13-14)
+enemy('cinder_hound', {
+  name: 'Cinder Hound', family: 'beast', level: 13,
+  hp: 340, atk: 60, def: 18, mag: 12, spr: 12, spd: 17, luk: 6,
+  shields: 2, weak: ['ice', 'spear'], resist: ['fire'], evade: 0.1,
+  exp: 60, gold: 70, masteryPts: 6,
+  moves: [{ skill: 'bite', weight: 55, target: 'lowestHpPct' }, { skill: 'ember_snap', weight: 45 }],
+  drops: [{ item: 'potion', chance: 0.12 }, { item: 'echo_herb', chance: 0.08 }], lootZone: 'sand_road',
+  flavor: 'A hound that slept too near the furnace road, and woke with an ember for a mane.',
+});
+enemy('cinder_beetle', {
+  name: 'Cinder Beetle', family: 'insect', level: 13,
+  hp: 290, atk: 62, def: 30, mag: 10, spr: 16, spd: 9, luk: 4,
+  shields: 3, weak: ['ice', 'axe'], resist: ['fire', 'sword', 'bow'],
+  heat: { max: 3, step: 0.15, flare: 'flare_ram' }, opener: 'stoke',
+  exp: 55, gold: 80, masteryPts: 6,
+  moves: [{ skill: 'shell_ram', weight: 60 }, { skill: 'stoke', weight: 40 }],
+  drops: [{ item: 'potion', chance: 0.15 }, { item: 'hi_potion', chance: 0.04 }], lootZone: 'sand_road',
+  flavor: 'A beetle in a black carapace with glowing seams. It stokes itself.',
+});
+
+// ---------------------------------------------------------------- The Ashen Foundry F1 (Lv 14)
+enemy('slag_slime', {
+  name: 'Slag Slime', family: 'ooze', level: 14, size: 'small',
+  hp: 290, atk: 50, def: 12, mag: 64, spr: 18, spd: 10, luk: 4,
+  shields: 2, weak: ['ice', 'thunder'], resist: ['fire'], statusImmune: ['poison'],
+  heat: { max: 3, step: 0.15, flare: 'slag_burst' },
+  exp: 40, gold: 70, masteryPts: 6,
+  moves: [{ skill: 'slag_splash', weight: 55 }, { skill: 'stoke', weight: 45 }],
+  drops: [{ item: 'antidote', chance: 0.1 }, { item: 'ether', chance: 0.08 }], lootZone: 'foundry_f1',
+  flavor: 'A slime of molten orange with a dark crust, still learning how to cool.',
+});
+enemy('ashbound_miner', {
+  name: 'Ashbound Miner', family: 'spirit', level: 14,
+  hp: 410, atk: 70, def: 16, mag: 30, spr: 22, spd: 12, luk: 6,
+  shields: 3, weak: ['light', 'bow'], resist: ['ice'],
+  exp: 50, gold: 90, masteryPts: 7,
+  moves: [{ skill: 'pick_swing', weight: 65 }, { skill: 'lamp_flash', weight: 35 }],
+  drops: [{ item: 'eye_drops', chance: 0.12 }, { item: 'hi_potion', chance: 0.05 }], lootZone: 'foundry_f1',
+  flavor: "A soot-black shade in a miner's coat, still carrying its lamp into a shift that ended long ago.",
+});
+
+// ---------------------------------------------------------------- The Ashen Foundry F2 (Lv 15)
+enemy('furnace_construct', {
+  name: 'Furnace Construct', family: 'construct', level: 15, size: 'large',
+  hp: 390, atk: 82, def: 30, mag: 30, spr: 18, spd: 7, luk: 3,
+  shields: 5, weak: ['ice', 'thunder'], resist: ['fire', 'sword', 'spear'], statusImmune: ['poison'],
+  heat: { max: 3, step: 0.15, flare: 'overheat' },
+  exp: 60, gold: 120, masteryPts: 9,
+  moves: [{ skill: 'iron_fist', weight: 60 }, { skill: 'stoke', weight: 40 }],
+  drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'potion', chance: 0.2 }], lootZone: 'foundry_f2',
+  flavor: 'A bronze golem with a furnace for a core. It was built to carry heat. It was not built to stop.',
+});
+enemy('soot_phantom', {
+  name: 'Soot Phantom', family: 'spirit', level: 15, flying: true,
+  hp: 340, atk: 50, def: 14, mag: 80, spr: 26, spd: 14, luk: 8,
+  shields: 3, weak: ['light', 'bow'], resist: ['fire'], evade: 0.2,
+  exp: 50, gold: 100, masteryPts: 7,
+  moves: [{ skill: 'soot_cloud', weight: 30 }, { skill: 'choke', weight: 30 }, { skill: 'cinder_touch', weight: 40 }],
+  drops: [{ item: 'eye_drops', chance: 0.1 }, { item: 'echo_herb', chance: 0.1 }], lootZone: 'foundry_f2',
+  flavor: 'A cloud of soot with ember eyes, drifting where the fans left it.',
+});
+
+// ---------------------------------------------------------------- The Ashen Foundry F3 (Lv 16)
+enemy('forge_defender', {
+  name: 'Forge Defender', family: 'construct', level: 16, size: 'large',
+  hp: 520, atk: 92, def: 34, mag: 30, spr: 20, spd: 10, luk: 4,
+  shields: 5, weak: ['ice', 'axe', 'light'], resist: ['fire', 'sword', 'spear'], statusImmune: ['poison'],
+  heat: { max: 3, step: 0.15, flare: 'brand' },
+  exp: 75, gold: 140, masteryPts: 10,
+  moves: [{ skill: 'tempered_blow', weight: 50 }, { skill: 'knight_cover', weight: 20, if: 'hasAlly' }, { skill: 'stoke', weight: 30 }],
+  drops: [{ item: 'hi_potion', chance: 0.1 }, { item: 'phoenix_feather', chance: 0.03 }], lootZone: 'foundry_f3',
+  flavor: 'A bronze knight with a molten visor, set to guard the lower forge and never relieved.',
+});
+
+// ---------------------------------------------------------------- The Bellows Specter (F2 mini-boss, Lv 15)
+// The fans feed it: every attack it makes raises its Heat by one. At Heat 3 it announces Furnace Breath. Quench it
+// (ice, a Quench Flask, a Break) or Defend. At 50% "the fans reverse": Haste, and it stokes a second time each turn
+// unless ice hit it since its last turn.
+enemy('bellows_specter', {
+  name: 'The Bellows Specter', family: 'spirit', level: 15, size: 'large', flying: true, boss: true, ai: 'specter',
+  hp: 2100, atk: 170, def: 20, mag: 200, spr: 20, spd: 14, luk: 8,
+  shields: 6, weak: ['ice', 'bow', 'spear'], resist: ['fire'], statusImmune: ['blind'],
+  heat: { max: 3, step: 0.15, flare: 'furnace_breath' },
+  exp: 160, gold: 600, masteryPts: 16,
+  moves: [{ skill: 'soot_wing', weight: 55 }, { skill: 'draft_lash', weight: 45 }],
+  phases: [
+    { id: 'updraft', name: 'The Updraft', at: 1.0, weak: ['ice', 'bow', 'spear'], resist: ['fire'], shields: 6,
+      text: 'The Specter rises on the updraft. Every wingbeat feeds it.' },
+    { id: 'fans_reverse', name: 'The Fans Reverse', at: 0.5, weak: ['ice', 'bow', 'spear'], resist: ['fire'], shields: 6, haste: true,
+      text: 'The fans reverse. The draft roars back into the Specter, twice as hard.' },
+  ],
+  drops: [], lootZone: 'foundry_f2',
+  flavor: "The foundry's breath given a body: a bird of smoke and soot in the fan hall's updraft.",
+});
+
+// ---------------------------------------------------------------- The Cinder Warden (Lv 16) and its coils
+// Three phases (ai 'cinder_warden'): Tempered Iron to 70% (HP locked there), Molten Shell (two coils; while either stands it
+// takes 25% damage, its shields hold and its HP stops at 31%), Quenched Core (the shell cracks and it is Broken; Last Hammer
+// every third turn). Strike the Name is its Heat flare in every phase.
+enemy('cinder_warden', {
+  name: 'The Cinder Warden', family: 'construct', level: 16, size: 'boss', boss: true, ai: 'cinder_warden',
+  hp: 2300, atk: 230, def: 22, mag: 200, spr: 18, spd: 18, luk: 10,
+  shields: 9, weak: ['ice', 'spear'], resist: ['fire', 'sword'],
+  statusImmune: ['stun', 'silence', 'poison', 'blind'],
+  heat: { max: 3, step: 0.15, flare: 'strike_the_name' },
+  exp: 620, gold: 900, masteryPts: 26,
+  moves: [{ skill: 'hammerfall', weight: 50 }, { skill: 'ember_spray', weight: 25 }, { skill: 'stoke', weight: 25 }],
+  phases: [
+    { id: 'tempered_iron', name: 'Tempered Iron', at: 1.0, weak: ['ice', 'spear'], resist: ['fire', 'sword'], shields: 9,
+      text: 'The Warden sets its hammer. The forge hums behind it.' },
+    { id: 'molten_shell', name: 'Molten Shell', at: 0.7, floor: 0.31, weak: ['ice', 'spear'], resist: ['fire', 'sword'], shields: 9,
+      summon: ['bellows_coil', 'smelter_coil'],
+      text: 'The Warden pulls the forge around itself. Two coils bleed fire into its shell.' },
+    { id: 'quenched_core', name: 'Quenched Core', at: 0.31, weak: ['ice', 'spear', 'light'], resist: [], shields: 10, haste: true,
+      moves: [{ skill: 'hammerfall', weight: 70 }, { skill: 'stoke', weight: 30 }],
+      text: "The shell cracks. The hammer's head is a bell's clapper." },
+  ],
+  drops: [], lootZone: 'foundry_f3',
+  flavor: 'The Keeper of the Heartforge: a tool of bronze that was given a bad order, and carried it out for twenty-five years.',
+});
+enemy('bellows_coil', {
+  name: 'Bellows Coil', family: 'construct', level: 16, size: 'small', ai: 'coil',
+  hp: 260, atk: 60, def: 16, mag: 40, spr: 18, spd: 11, luk: 4,
+  shields: 2, weak: ['ice', 'spear'], resist: ['fire'], statusImmune: ['poison', 'stun'],
+  exp: 0, gold: 0, masteryPts: 2,
+  moves: [{ skill: 'stoke_warden', weight: 100 }, { skill: 'e_strike', weight: 0 }],
+  drops: [], lootZone: null,
+  flavor: "A coil of glowing pipe on a bronze stand. It feeds the Warden's fire.",
+});
+enemy('smelter_coil', {
+  name: 'Smelter Coil', family: 'construct', level: 16, size: 'small', ai: 'coil',
+  hp: 300, atk: 60, def: 18, mag: 62, spr: 16, spd: 10, luk: 4,
+  shields: 3, weak: ['ice', 'axe'], resist: ['fire'], statusImmune: ['poison', 'stun'],
+  exp: 0, gold: 0, masteryPts: 2,
+  moves: [{ skill: 'slag_spray', weight: 100 }, { skill: 'coil_pressure', weight: 0 }],
+  drops: [], lootZone: null,
+  flavor: 'A coil of pipe that never stopped sending slag where the old order said to.',
 });
 
 // Lost Page variants: each summon picks distinct variants so the pages want different answers.

@@ -628,3 +628,217 @@ Known gaps: no Episode 2 route simulation (`route.mjs` carries HP and MP through
 assume more gear than battle gold buys (about 10,400 of purchases against 5,800 of gold): chests, drops and sales must
 cover the rest, or fights run longer for a thrifty player. The scene does not pass `flags` yet, so the Fountain's Fury
 is off until E2-scene-ui adds `flags` (the save's story flags) to its `createEncounterBattle` call.
+
+
+---
+
+## 11. Episode 3: The Forge of Ash (E3-battle, wave 17a)
+
+Design: `docs/EPISODE3_PLAN.md` sections 6 and 7. Nothing in Episode 1's or 2's data, order or targets moved:
+`simulate.mjs --check` passes all three episodes ("All targets met").
+
+### 11.1 Enemies (final numbers after tuning)
+
+| Enemy | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold), trait |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Cinder Hound | 13 | 340 | 60/12 | 18/12 | 17 | 2 | ice, spear | fire | 60 / 70 | Bite, Ember Snap (Burn 20%); evade 10% |
+| Cinder Beetle | 13 | 290 | 62/10 | 30/16 | 9 | 3 | ice, axe | fire, sword, bow | 55 / 80 | Stoke (forced opener), Shell Ram, **Flare Ram** (single 200%); Heat |
+| Slag Slime | 14 | 290 | 50/64 | 12/18 | 10 | 2 | ice, thunder | fire | 40 / 70 | Splash (Burn 25%), Stoke, **Slag Burst** (party mag fire 110%); Heat |
+| Ashbound Miner | 14 | 410 | 70/30 | 16/22 | 12 | 3 | light, bow | ice | 50 / 90 | Pick Swing, Lamp Flash (Blind 25%) |
+| Furnace Construct | 15 | 390 | 82/30 | 30/18 | 7 | 5 | ice, thunder | fire, sword, spear | 60 / 120 | Iron Fist, Stoke, **Overheat** (party 140%); Heat |
+| Soot Phantom | 15 | 340 | 50/80 | 14/26 | 14 | 3 | light, bow | fire | 50 / 100 | Soot Cloud (party Blind 15%), Choke (Silence 25%), Cinder Touch; flying, evade 20% |
+| Forge Defender | 16 | 520 | 92/30 | 34/20 | 10 | 5 | ice, axe, light | fire, sword, spear | 75 / 140 | Tempered Blow, Cover, Stoke, **Brand** (single 220%); Heat |
+| The Bellows Specter | 15 | 2100 | 170/200 | 20/20 | 14 | 6 | ice, bow, spear | fire | 160 / 600 | Soot Wing, Draft Lash (each feeds it +2 Heat), **Furnace Breath** (party mag fire 240%, Burn 30%); ai `specter`, immune Blind |
+| The Cinder Warden | 16 | 2300 | 230/200 | 22/18 | 18 | 9 / 9 / 10 | by phase | fire, sword (phases 1 and 2) | 620 / 900 | Hammerfall, Ember Spray, Stoke, **Strike the Name** (its Heat flare), **Last Hammer** (party phys 260%); ai `cinder_warden`, immune Stun, Silence, Poison, Blind |
+| Bellows Coil | 16 | 260 | 60/40 | 16/18 | 11 | 2 | ice, spear | fire | 0 / 0 | **Stoke the Warden** every turn |
+| Smelter Coil | 16 | 300 | 60/62 | 18/16 | 10 | 3 | ice, axe | fire | 0 / 0 | Slag Spray (party mag fire 100%, Burn 30%) on its 1st, 3rd, 5th turn, Build Pressure between |
+
+Names and `flavor` are `BESTIARY_EP3`'s (lore[0] word for word; nothing was changed in `text.js`). EXP is lower than the plan's
+first pass for the same reason as always: a 3-foe group paid 200 EXP and Lv 15 came before the Foundry.
+
+### 11.2 Heat and Quench
+
+- **Heat is a counter on the foe**, not a status: `enemies.js heat: { max: 3, step: 0.15, flare }`. Each Stoke is +1 (`stoke`
+  has `stokeSelf: 1`; the Bellows Coil's `stoke` effect targets the Warden). Each level is +15% ATK and MAG (`eff()`).
+- **The flare.** A foe that reaches max Heat with no charge pending announces its flare (a normal telegraph one turn ahead,
+  `telegraph.flare: true`, `telegraph.heat`) and fires it on its next turn; the firing resets Heat (`heat` event reason
+  `flare`). A flare that a Stun cancelled is announced again at the end of the foe's next turn.
+- **Quench** (`quench` event; `rules.js quench()`): any ice damage (a Frost, an ice-weapon hit, the Tempered Lexicon Blade), a
+  Quench Flask, or a Break sets Heat to 0 and cancels a pending flare (`telegraph_cancel` reason `quench`).
+- **Quench Flask** (`quench_flask`, 90 gold): thrown at a foe (`CONSUMABLES.target: 'enemy'`; `b.targets()` answers
+  `{ side: 'enemy' }`); `effect.throw = { fixed: 60, power: 120, types: ['ice'] }`, so it hits for the same amount in any hand
+  (about 40 on a Lv 15 foe) and always quenches, even a foe that resists ice. It is not usable in the field.
+- **fireRes** (new stat): -% damage taken from fire-typed attacks (`types: ['fire']`: Ember Snap, Slag Burst, Overheat,
+  Brand, Furnace Breath, Ember Spray, Slag Spray; capped at 80). Cinder Boots 10, Coalheart Charm 25, Ashwalker Boots 10, the
+  set +20, Ember Heart 30, Emberglass Charm 15.
+- `knowledge(uid)` gains `heat`, `heatMax`, `flare` (the pending flare skill id). `battle_start.units[]` gains `heat`, `heatMax`.
+
+### 11.3 The Bellows Specter (`bellows_specter`, ai `specter`)
+
+Every attack it makes feeds it (+2 Heat): Heat 3 on its second action, the flare announced at the end of it, **Furnace Breath**
+on the next. Quench it (any ice, a flask, a Break) or Defend. Each Breath that lands makes it +20% ATK and MAG for the rest of the
+fight (the Devour Name rule). At 50% "the fans reverse": `phase` event 2, permanent Haste, and at the end of each of its turns it
+stokes once more unless ice hit it since its last turn. Plan 6.4 said "Stokes every turn"; at +1 per action a party with a
+Frost always quenched it by accident (the flare came 0.8 times a fight and ignoring it cost nothing), so the number is +2.
+Loot: Updraft Charm, one rare (ilvl 15), 2 Hi-Potions; 160 EXP, 600 gold.
+
+### 11.4 The Cinder Warden (`cinder_warden`, ai `cinder_warden`) and Tempered Oath
+
+1. **Tempered Iron** (100 to 70%, HP locked at 70%): Hammerfall, Ember Spray, Stoke. At Heat 3 it announces **Strike the Name** on
+   one member who is not already Nameless (`telegraph.flare`). Defend holds (`message` kind `name_hold`), Tempered Oath holds
+   (kind `oath_hold`: "Bram is saying her name!"); otherwise the target gets Nameless and 3 turns of Silence (kind `name_struck`)
+   and the Warden is +20% ATK and MAG for the fight.
+2. **Molten Shell** (from 70%): `phase` 2 summons the Bellows Coil and the Smelter Coil (`summon` events), `message` kind `ward`.
+   While either stands the Warden takes 25% damage, its shields cannot be chipped and its HP stops at 31%. The Bellows Coil
+   stokes the Warden every turn; the Smelter Coil sprays the party every second turn. Killing the last coil: `message` kind
+   `ward_break` ("The shell cracks!"), `phase` 3, the Warden is Broken (`break`) and Hasted.
+3. **Quenched Core**: weak ice, spear, light (no resists), 10 shields. Hammerfall, Stoke, Strike the Name at Heat 3, and the
+   **Last Hammer** (party phys 260%, `telegraph` text "The Cinder Warden raises the Last Hammer. The whole forge holds its
+   breath...") announced on every third turn, the first a turn early. Answers: everyone Defends, a Break, Lunge's knock-back
+   (a boss is pushed back 35% of a turn), or **Tempered Oath**.
+
+**Tempered Oath** (`tempered_oath`, Bram, 8 MP, self, `learn: { flag: 'bram_memory_3' }`): Taunt, Protect and the `oath` status
+(icon `taunt`) for Bram. Single-target attacks on allies go to him (the existing Taunt), he cannot be made Nameless, and a Last
+Hammer (`turnable`) lands on him alone at 50% (`oath_ring` event, `message` kind `oath_ring`: "The hammer rings on Bram like a
+bell.") and Breaks the Warden. **One change from the plan:** the Oath ends when Bram's next turn begins, *unless a hammer is
+raised and has not fallen*: then it holds until it does (statuses last 3 of his turns). Without it the Oath is only useful when
+Bram's next turn comes after the Warden's, which a player cannot read off the timeline fast enough (Auto managed 27%).
+
+**`learn: { flag }`** (the flag path, not the level 15 fallback): `party.js knownSkills(member, flags)` takes the save's story
+flags (Set, array, `{flag: true}` or a function); without them a flag-learned skill is unknown. `createEncounterBattle` passes
+`opts.flags` (the battle scene already does) to `createBattle({ options: { flags } })`, so Bram has the Oath in battle. The
+menus (`skills.js`, `status.js`, `inventory.js`) call `knownSkills(m)` without flags and will not list it until E3-scene-ui
+passes `g.flags`.
+
+`coolant_done`: the Warden encounter's `startFury: { flag: 'coolant_done', amount: 25, text }`; the `message` kind `blessing` now
+carries the encounter's own text ("The station still runs cold behind you. Fury rises! (+25)").
+
+### 11.5 Items, shops, loot
+
+- Key items `lift_key` ("The Founder's Lift Key": the plan's "Mara's Lift Key" leaked a name; the content test checks it),
+  `ash_key` (counted), `crucible_hook`, `struck_list`, `name_fragment_3`, `glass_sand`.
+- Tier 5 (ilvl 14): Ashsteel Cuirass and Helm, Founder's Robe, Soot Hood, Cinder Boots, Carter's Mantle, Coalheart Charm, Bellchime
+  Charm. Tier 6 (ilvl 16): Tempered Sword, Forge Axe, Heartforge Pike, Founder's Rod, Bellwire Bow, Tempered Mail, Ashweave Robe, Forge
+  Helm. Plan numbers.
+- Uniques: First Bell Hammer (staged by `warden_after`, never dropped), Tempered Lexicon Blade (strikes as ice: `extraTypes:
+  ['ice']`, so its hits quench; against Lanternheart's light and the Silverglass Blade's edge it is a choice), Ember Heart
+  (Warden, guaranteed), Updraft Charm (Specter, guaranteed), Emberglass Charm, Ashwalker Boots and Mantle (set `ashwalkers_road`: +20% fire
+  resist, +1 SPD).
+- Affixes with four tiers get a fifth at ilvl 14 (about +15%; resist suffixes cap at 100; `of_dawn` has three tiers and none was
+  added). Rare names draw `RARE_NAME_A_EP3` (Ashen, Tempered, Forged, Banked, Cinder) at ilvl 14 and up only.
+- `ZONE_LOOT`: sand_road 13 / 0.16, foundry_f1 14 / 0.16, foundry_f2 15 / 0.17, foundry_f3 16 / 0.18. `BOSS_LOOT.bellows_specter`
+  and `.cinder_warden` (two rares, a Phoenix Feather, 2 Hi-Ethers).
+- Shops: `sand_peddler` (Penny; road prices, flask 100, Cinder Boots 970), `ventworks` (Taro; list prices), `pk_smithy` (Sella;
+  tier 5, the tier 4 weapons, and tier 6 behind `ifFlag: ['foundry_f2_done', 'forge_relit']`: `shopStock` now takes a list of
+  flags that must all be set), Vessa's tier 5 for Mira after `sand_done`.
+
+### 11.6 Zones, encounters, the scene contract
+
+`EP3_ZONES` / `EP3_ZONE_ORDER` (sand_road, foundry_f1, foundry_f2, foundry_f3, foundry_heart; backdrops `ash_road`, `foundry`,
+`foundry`, `crucible`, `heartforge`; the Specter's and the Warden's encounters name `foundry` and `heartforge`). They resolve through
+`ZONES[id]` but stay non-enumerable until **E3-maps sets `EP3_MAPS_LISTED = true`** (a one-word change; `episodes.js
+ep3MapsListed()` reads it). `zoneOrder(3)` returns the order. Encounter groups are plan 6.2 exactly, with `sr_first` led by the
+Cinder Beetle (the scene calls it with `canFlee: false`).
+
+New for the scene (all additive; names are what the scene draws):
+- `heat` { target, heat, max, delta, reason: 'stoke' | 'coil' | 'fans' | 'flare' | 'quench' }: redraw the Heat pips (3 small
+  flames under the feet or above the head, readable while a command is being chosen; `knowledge(uid).heat` and `.heatMax` give the
+  current value at any time).
+- `quench` { target, reason: 'ice' | 'flask' | 'break', heat, cancelled: skillId | null, sfx: 'quench_hiss' }: the steam puff;
+  followed by `message` kind `quench` ("Quenched!") and `telegraph_cancel` reason `quench`.
+- `telegraph` gains `flare: true` (and `heat`) for a Heat flare: draw it as the glowing-white announce.
+- `oath_ring` { actor: Bram, target: Warden, sfx: 'oath_ring' }: the bell; the Warden then gets a `break`.
+- `message` kinds: `quench`, `ward`, `ward_break`, `name_hold`, `name_struck`, `oath_hold`, `oath_ring`, `blessing`.
+- `phase` events for the Specter and the Warden (ids `updraft`, `fans_reverse`; `tempered_iron`, `molten_shell`, `quenched_core`);
+  the Warden's three looks switch on `phase` 1, 2, 3 (the coils arrive by `summon`).
+- Statuses: `oath` (icon `taunt`). Items: `quench_flask` targets foes (`b.targets` side `enemy`; `estimate` gives `quench: true`
+  and damage numbers). `sfx` ids named by skills and events: `furnace_roar`, `quench_hiss`, `oath_ring`, `hammer_charge`.
+- Presentation hints for E3-sprites: enemy frames are `<id>` as always (the coils are small); the Specter is `size: 'large'` and
+  flying, the Warden `size: 'boss'`.
+
+### 11.7 Auto (the competent policy) in Episode 3
+
+Quench a flare that is announced: a Break first (as before), then the best ice skill (Mira's Frost), else a Quench Flask (unless
+Mira's Frost comes before the foe acts); Defend otherwise (the existing telegraph rules). Ice on a foe at Heat 2 or more scores
+a bonus before any flare is announced. At a Last Hammer Bram raises Tempered Oath at once (the others attack: with the Oath up or
+about to be, they do not brace or Break), and Bram keeps 8 MP back for it in a Warden fight (combos that spend his MP count whoever
+starts them). The coils score x1.6 (the Warden's shell holds up until they fall). The **reckless** policy reads neither
+telegraphs nor Heat.
+
+### 11.8 Simulator and the final table
+
+`node tools/sim/simulate.mjs` runs all three episodes (`--episode 3`, `--zone foundry_f3`, `--trace cinder_warden 2 competent`,
+`--trace bellows_specter 2 competent --level 15`). The table has three new columns: quenches a fight, names struck out a fight,
+and the share of Last Hammers turned by Tempered Oath. `LOADOUTS` sand_road to foundry_heart follow plan 6.6: sand_road is the
+court_throne row plus the Kept Promise and tier 4 gear (and is the Episode 3 quick start, `state.js EP3_START`), foundry_f1 adds
+Ashsteel Helm and Cinder Boots, foundry_f2 Ashwalker Boots and Soot Hood, foundry_f3 the Heartforge Pike and Founder's Rod,
+foundry_heart the Updraft Charm and `flags: ['bram_memory_3']`. `progression(share, 3)` starts at 2,900 EXP (`EP3_START_EXP`).
+Levels: sand_road [13, 14], F1 [14, 15], F2 [15, 16], F3 [16, 17], the Specter [15, 16] (reckless at 15), the Warden [16, 17]
+(reckless at 16). `economy3()` / `checkEconomy3()`: from the quick start's 1,500, 590 battle gold on the road, 2,090 at Emberpeak
+(two tier 5 pieces, Ashsteel Helm and Cinder Boots: 1,800), 4,930 before F3 (the cheapest tier 6 piece, the Forge Helm: 1,400),
+7,110 at the end (the whole smithy: 29,550). That is one tier 6 piece before F3 from battle gold alone, a second from chests and
+sales (the plan said two); never everything.
+
+Final run, 400 battles per row (92,500 battles in 167 s), **all targets met for all three episodes**:
+
+| Encounter | Lv | Careful: win / rounds (p10-p90) / HP lost; quenches | Attack-only: win / rounds | Ignoring telegraphs | Elite (careful) |
+|---|---|---|---|---|---|
+| sr_first | 13 | 100% / 3.87 (3.3-4.3) / 12%; 1.05 | 100% / 6.99 | - | - |
+| sr_first | 14 | 100% / 3.73 (3.0-4.7) / 11%; 0.68 | 100% / 6.75 | - | 4.97 |
+| sr_hounds | 13 | 100% / 3.03 (2.3-3.7) / 15%; 0.00 | 100% / 5.59 | - | - |
+| sr_hounds | 14 | 100% / 2.88 (2.3-3.3) / 14%; 0.00 | 100% / 5.45 | - | 4.07 |
+| sr_beetles | 13 | 100% / 4.00 (3.3-4.7) / 10%; 1.18 | 100% / 8.41 | - | - |
+| sr_beetles | 14 | 100% / 3.82 (3.3-4.7) / 9%; 0.58 | 100% / 8.11 | - | 5.48 |
+| sr_mixed | 13 | 100% / 2.81 (2.3-3.3) / 14%; 0.10 | 100% / 4.98 | - | - |
+| sr_mixed | 14 | 100% / 2.62 (2.3-3.0) / 12%; 0.07 | 100% / 4.84 | - | 3.82 |
+| fo1_beetles | 14 | 100% / 5.23 (4.7-6.0) / 12%; 1.59 | 100% / 10.16 | - | - |
+| fo1_beetles | 15 | 100% / 5.10 (4.3-6.0) / 11%; 1.50 | 100% / 9.86 | - | 6.14 |
+| fo1_slimes | 14 | 100% / 3.64 (3.0-4.0) / 15%; 0.28 | 100% / 6.35 | - | - |
+| fo1_slimes | 15 | 100% / 3.53 (3.0-4.0) / 14%; 0.20 | 100% / 6.11 | - | 4.74 |
+| fo1_miners | 14 | 100% / 2.95 (2.7-3.3) / 10%; 0.00 | 100% / 5.77 | - | - |
+| fo1_miners | 15 | 100% / 2.90 (2.3-3.3) / 9%; 0.00 | 100% / 5.53 | - | 4.20 |
+| fo1_mixed | 14 | 100% / 3.65 (2.7-4.7) / 8%; 0.67 | 100% / 6.77 | - | - |
+| fo1_mixed | 15 | 100% / 3.54 (2.7-4.0) / 7%; 0.61 | 100% / 6.54 | - | 4.64 |
+| fo2_phantoms | 15 | 100% / 3.12 (2.3-4.0) / 13%; 0.00 | 100% / 5.89 | - | - |
+| fo2_phantoms | 16 | 100% / 2.94 (2.3-3.7) / 11%; 0.00 | 100% / 5.58 | - | 4.24 |
+| fo2_constructs | 15 | 100% / 4.54 (3.7-5.0) / 9%; 0.13 | 100% / 9.76 | - | - |
+| fo2_constructs | 16 | 100% / 4.31 (3.7-5.0) / 8%; 0.07 | 100% / 9.35 | - | 5.90 |
+| fo2_mixed | 15 | 100% / 4.52 (3.7-5.0) / 8%; 0.14 | 100% / 9.54 | - | - |
+| fo2_mixed | 16 | 100% / 4.36 (3.7-5.0) / 7%; 0.11 | 100% / 9.19 | - | 5.67 |
+| **bellows_specter** | 15 | 99% / 8.07 (7.0-9.7) / 19%; 2.71 | 0% / 3.48 | 63% / 7.20 | - |
+| **bellows_specter** | 16 | 100% / 7.65 (6.7-8.7) / 19%; 2.32 | 0% / 4.09 | - | - |
+| fo3_defenders | 16 | 100% / 3.75 (3.0-4.7) / 19%; 0.39 | 80% / 7.53 | - | - |
+| fo3_defenders | 17 | 100% / 3.64 (3.0-4.7) / 18%; 0.34 | 94% / 7.39 | - | 5.08 |
+| fo3_mixed | 16 | 100% / 4.24 (3.7-5.0) / 19%; 0.48 | 77% / 8.34 | - | - |
+| fo3_mixed | 17 | 100% / 3.94 (3.3-4.7) / 18%; 0.42 | 92% / 8.32 | - | 5.26 |
+| fo3_furnace | 16 | 100% / 5.19 (4.7-6.0) / 18%; 0.40 | 77% / 11.26 | - | - |
+| fo3_furnace | 17 | 100% / 4.95 (4.3-5.7) / 17%; 0.37 | 92% / 11.11 | - | 7.33 |
+| **cinder_warden** | 16 | 99% / 12.73 (9.7-15.7) / 19%; 1.72; Oath on 55% of hammers | 0% / 7.51 | 71% / 12.83 | - |
+| **cinder_warden** | 17 | 99% / 11.64 (9.0-14.7) / 21%; 1.68; Oath on 54% of hammers | 0% / 7.98 | - | - |
+
+Episode 3 level curve (all fights / 80%): road 13 to 14 / 13 to 13, F1 14 to 15 / 13 to 14, F2 15 to 16 / 14 to 15, F3 16 to 17 /
+15 to 16, the Warden at 17 (leaving at 18) / at 16 (leaving at 17), total EXP 6,060 / 5,584. The plan wanted a full clear to reach
+the Warden at 16 and the 80% route to be a level behind; with its own EXP column the full clear is a level above, which is why the
+Warden is measured at both 16 and 17.
+
+Tuning notes (what moved from the plan's first pass, and why):
+- EXP per foe: 60 / 55 / 40 / 50 / 60 / 50 / 75 (plan 60 / 66 / 62 / 72 / 90 / 80 / 100). At the plan's numbers the Foundry paid
+  1,000 EXP on F1 and 988 on F3 against 600 and 460 planned, and the party was Lv 17 before F2.
+- HP: Hound 300 to 340, Slag Slime 260 to 290, Miner 330 to 410 (the Hound and Slime groups and the Miners ended in 2.4 rounds),
+  Furnace Construct 480 to 390 (the F3 pair took 6.1).
+- Foundry F3 is the tightest ordinary floor (target: careful 18 to 24% HP lost, attack-only wins 70 to 85%, as zone averages at Lv 16).
+  `power` alone could not do it: careful play heals, so 3.5x ATK moved its HP loss from 13% to 17% while attack-only collapsed.
+  Encounters now also take `speed` (like `power`, in `rollEncounter` and `makeEnemyUnit`): the F3 foes act 1.5x as often
+  (`F3_SPEED`) and hit 1.9 to 2.3x as hard (`F3_POWER`), which is steady chip damage rather than bigger single hits. Result: 19%
+  and 78%. qa/battle/data.test.mjs checks no boosted foe fells a full-HP member with one ordinary action.
+- The Specter: HP 1400 to 2100, ATK/MAG 90/96 to 170/200, Furnace Breath 160 to 240, +2 Heat per attack and +20% per Breath that
+  lands. First pass: 5 rounds, attack-only won 92%, ignoring the telegraph cost nothing.
+- The Warden: HP 3000 to 2300, ATK/MAG 170/150 to 230/200, SPD 12 to 18 (a SPD 12 Warden acted once every two rounds), shields 7/7/8
+  to 9/9/10, coils 380/420 to 260/300 HP, Last Hammer 230 to 260, Strike the Name +20% per name. First pass: 15 to 18 rounds,
+  ignoring telegraphs cost nothing, Auto never used the Oath (Bram was out of MP; and a timeline-bound Oath fired 27% of the time).
+- The Auto reckless gap: the policy's Heat bonus is off for reckless play, otherwise Frost on an ice-weak Specter quenches it by
+  accident and the telegraph never matters.
+
+Known gaps: no Episode 3 route simulation (`route.mjs` is Episode 1 only). The Tempered Lexicon Blade, the Emberglass Charm, the
+Ashwalker pieces and the Dash and Lantern secrets are not in any `LOADOUTS` row (placed, optional). The menus do not know the flag-learned
+Oath yet (see 11.4).

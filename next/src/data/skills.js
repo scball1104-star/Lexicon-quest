@@ -74,6 +74,11 @@ export const STATUSES = {
   // King is Broken. Every living member Kept (or KO) loses the battle.
   kept:     { id: 'kept', name: 'Kept', icon: 'kept', kind: 'bad', turns: 2,
               help: 'Sealed in a mirror. Skips its turns.' },
+  // Episode 3: Bram's Tempered Oath. Taunt and Protect come with it; this one marks the Oath itself. It ends when Bram's
+  // next turn begins. While it holds, a hammer blow aimed at the party lands on Bram alone (50%) and Strike the Name
+  // cannot make him Nameless. The icon reuses Taunt's.
+  oath:     { id: 'oath', name: 'Oath', icon: 'taunt', kind: 'good', turns: 3,
+              help: 'Foes aim at Bram. Turns a hammer blow.' },
 };
 
 // Statuses a cleanse (Purify, Wellspring, items) can remove. Nameless lifts when the battle ends.
@@ -203,6 +208,14 @@ def('shatter', { name: 'Shatter', kind: 'tech', user: 'bram', learn: { level: 10
 def('true_strike', { name: 'True Strike', kind: 'tech', user: 'hero', learn: { level: 11 }, mp: 5,
   target: 'enemy', formula: 'phys', power: 170, types: ['$weapon'], trueStrike: true,
   help: 'A strike that goes where it is aimed.', fx: 'dash_cut', sfx: 'sword_slash' });
+
+// --- Episode 3 (E3-battle): Tempered Oath, learned in bram_memory_3 (EPISODE3_PLAN.md 6.5) ---------------
+// `learn: { flag }`: known once the story flag is set (party.js knownSkills(member, flags); the battle scene passes the
+// save's flags to createEncounterBattle). The fallback if flags are ever not at hand is level 15 (not used: the scenes pass them).
+def('tempered_oath', { name: 'Tempered Oath', kind: 'tech', user: 'bram', learn: { flag: 'bram_memory_3' }, mp: 8,
+  target: 'self', formula: 'none', rank: 80,
+  effects: [{ status: 'taunt', turns: 3 }, { status: 'protect', turns: 3 }, { status: 'oath', turns: 3 }],
+  help: 'Stand in front. Turns a hammer blow.', fx: 'taunt', sfx: 'oath_ring' });
 
 // --- Fury arts (one per weapon type, unlocked at mastery 2) ---------------------------------
 def('fury_dawnsplitter', { name: 'Dawnsplitter', kind: 'fury', weapon: 'sword', learn: { mastery: 2 },
@@ -427,6 +440,68 @@ foe('lament', { name: 'Lament', target: 'boss', formula: 'none', rank: 90, effec
 foe('proud_stance', { name: 'Proud Stance', target: 'self', formula: 'none', rank: 80, effects: [{ status: 'taunt', turns: 2 }],
   help: 'Pride stands in front.', fx: 'taunt' });
 foe('glass_lance', { name: 'Glass Lance', target: 'enemy', formula: 'phys', power: 120, help: 'A lance of silverglass.', fx: 'thrust' });
+
+// ---------------------------------------------------------------------------------------------
+// Episode 3 enemy skills (E3-battle). Heat (EPISODE3_PLAN.md 6.3): `stoke` / `stokeSelf` raise a foe's Heat, a foe at its
+// maximum announces its flare (a telegraphed skill named in the enemy's `heat.flare`), and ice, a Quench Flask or a Break
+// quench it. Fire attacks carry types ['fire'] so the party's `fireRes` gear applies.
+// ---------------------------------------------------------------------------------------------
+foe('stoke', { name: 'Stoke', target: 'self', formula: 'none', rank: 80, effects: [{ stokeSelf: 1 }],
+  help: 'Burns hotter. Ice or a Break cools it.', fx: 'buff', sfx: 'furnace_roar' });
+// Cinder Hound
+foe('ember_snap', { name: 'Ember Snap', target: 'enemy', formula: 'phys', power: 90, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.2 }], help: 'A smouldering bite. May Burn.', fx: 'bite' });
+// Cinder Beetle
+foe('shell_ram', { name: 'Shell Ram', target: 'enemy', formula: 'phys', power: 100, help: 'A shell of hot iron.', fx: 'bump' });
+foe('flare_ram', { name: 'Flare Ram', target: 'enemy', formula: 'phys', power: 200, types: ['fire'],
+  telegraph: '{name} glows white and lowers its head at {target}...', help: 'A white-hot charge.', fx: 'charge' });
+// Slag Slime
+foe('slag_splash', { name: 'Splash', target: 'enemy', formula: 'mag', power: 80, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.25 }], help: 'Molten splash. May Burn.', fx: 'ink_spit' });
+foe('slag_burst', { name: 'Slag Burst', target: 'enemies', formula: 'mag', power: 110, types: ['fire'],
+  telegraph: '{name} swells and glows white-hot...', help: 'Slag bursts over the party.', fx: 'fire' });
+// Ashbound Miner
+foe('pick_swing', { name: 'Pick Swing', target: 'enemy', formula: 'phys', power: 105, help: 'A miner\'s pick.', fx: 'slash' });
+foe('lamp_flash', { name: 'Lamp Flash', target: 'enemy', formula: 'mag', power: 55,
+  effects: [{ status: 'blind', chance: 0.25 }], help: 'A lamp flash. May Blind.', fx: 'light' });
+// Furnace Construct
+foe('iron_fist', { name: 'Iron Fist', target: 'enemy', formula: 'phys', power: 105, help: 'A fist of hot bronze.', fx: 'slam' });
+foe('overheat', { name: 'Overheat', target: 'enemies', formula: 'phys', power: 140, types: ['fire'],
+  telegraph: '{name}\'s core burns white. The air begins to shimmer...', help: 'The core vents on the party.', fx: 'quake' });
+// Soot Phantom
+foe('soot_cloud', { name: 'Soot Cloud', target: 'enemies', formula: 'mag', power: 40,
+  effects: [{ status: 'blind', chance: 0.15 }], help: 'Soot over the party. May Blind.', fx: 'ink_wave' });
+foe('choke', { name: 'Choke', target: 'enemy', formula: 'mag', power: 60,
+  effects: [{ status: 'silence', chance: 0.25 }], help: 'Steals a voice. May Silence.', fx: 'hush' });
+foe('cinder_touch', { name: 'Cinder Touch', target: 'enemy', formula: 'mag', power: 100, types: ['fire'],
+  help: 'A touch of hot cinder.', fx: 'drain' });
+// Forge Defender
+foe('tempered_blow', { name: 'Tempered Blow', target: 'enemy', formula: 'phys', power: 100, help: 'A blow of tempered bronze.', fx: 'slash' });
+foe('brand', { name: 'Brand', target: 'enemy', formula: 'phys', power: 220, types: ['fire'],
+  telegraph: '{name}\'s visor glows white. It marks {target}...', help: 'A white-hot brand.', fx: 'slash' });
+// The Bellows Specter (ai 'specter'): each attack feeds it (stokeSelf), the fans feed it again once reversed
+foe('soot_wing', { name: 'Soot Wing', target: 'enemy', formula: 'phys', power: 100, effects: [{ stokeSelf: 2 }],
+  help: 'A wing of soot. It draws the draft.', fx: 'slash' });
+foe('draft_lash', { name: 'Draft Lash', target: 'enemy', formula: 'mag', power: 85, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.2 }, { stokeSelf: 2 }], help: 'A lash of hot draft. May Burn.', fx: 'fire' });
+foe('furnace_breath', { name: 'Furnace Breath', target: 'enemies', formula: 'mag', power: 240, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.3 }],
+  telegraph: '{name} draws the whole draft into its chest...', help: 'The whole draft, breathed out.', fx: 'fire_big' });
+// The Cinder Warden (ai 'cinder_warden') and its coils
+foe('hammerfall', { name: 'Hammerfall', target: 'enemy', formula: 'phys', power: 115, help: 'The molten hammer comes down.', fx: 'slam' });
+foe('ember_spray', { name: 'Ember Spray', target: 'enemies', formula: 'mag', power: 90, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.2 }], help: 'Embers over the party. May Burn.', fx: 'fire' });
+foe('strike_the_name', { name: 'Strike the Name', target: 'enemy', formula: 'mag', power: 60, effects: [{ nameStrike: true }],
+  telegraph: '{name} raises its hammer over {target}...', help: 'Strikes a name out. Defend, or Bram.', fx: 'devour' });
+foe('last_hammer', { name: 'Last Hammer', target: 'enemies', formula: 'phys', power: 260, turnable: true,
+  telegraph: '{name} raises the Last Hammer. The whole forge holds its breath...', help: 'The last blow. Defend, Break, or Bram.',
+  fx: 'shockwave', sfx: 'hammer_charge' });
+foe('stoke_warden', { name: 'Stoke the Warden', target: 'boss', formula: 'none', rank: 80, effects: [{ stoke: 1 }],
+  help: 'Feeds the Warden. Break it first.', fx: 'buff', sfx: 'furnace_roar' });
+foe('slag_spray', { name: 'Slag Spray', target: 'enemies', formula: 'mag', power: 100, types: ['fire'],
+  effects: [{ status: 'burn', chance: 0.3 }], help: 'Slag over the party. May Burn.', fx: 'fire' });
+foe('coil_pressure', { name: 'Build Pressure', target: 'none', formula: 'none', rank: 60,
+  help: 'The coil builds pressure.', fx: 'buff' });
 
 export const SKILLS = S;
 

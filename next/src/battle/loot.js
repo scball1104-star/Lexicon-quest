@@ -8,7 +8,7 @@
 //     affixes: [{ id: 'gleaming', tier: 2, value: 5 }, { id: 'of_embers', tier: 2, value: 14 }] }
 //   uniques/sets: { base: 'lanternheart', rarity: 'legendary', unique: true, name: 'Lanternheart', affixes: [] }
 
-import { EQUIPMENT, UNIQUES, SETS, AFFIXES, RARITIES, RARE_NAME_A, RARE_NAME_A_EP2, RARE_NAME_B, CONSUMABLES } from '../data/items.js';
+import { EQUIPMENT, UNIQUES, SETS, AFFIXES, RARITIES, RARE_NAME_A, RARE_NAME_A_EP2, RARE_NAME_A_EP3, RARE_NAME_B, CONSUMABLES } from '../data/items.js';
 import { RARITY_TABLES, ZONE_LOOT, SLOT_WEIGHTS, BOSS_LOOT, CHEST_TIERS, AFFIX_COUNTS, RARITY_SELL_MULT } from '../data/loot-tables.js';
 
 function rand(rng) { return typeof rng === 'function' ? rng() : rng.next(); }
@@ -68,8 +68,10 @@ export function rollBase(rng, { slot, ilvl = 1, type } = {}) {
 
 // Item level 9 and up (Episode 2) also draws the Episode 2 words; below it the Episode 1 pool rolls exactly as before.
 const EP2_NAME_ILVL = 9;
+const EP3_NAME_ILVL = 14;   // item level 14 and up (Episode 3) also draws the Episode 3 words
 function rareName(rng, base, ilvl = 1) {
-  const pool = ilvl >= EP2_NAME_ILVL ? RARE_NAME_A.concat(RARE_NAME_A_EP2) : RARE_NAME_A;
+  let pool = ilvl >= EP2_NAME_ILVL ? RARE_NAME_A.concat(RARE_NAME_A_EP2) : RARE_NAME_A;
+  if (ilvl >= EP3_NAME_ILVL) pool = pool.concat(RARE_NAME_A_EP3);
   const a = pool[int(rng, 0, pool.length - 1)];
   const list = RARE_NAME_B[base.slot] || RARE_NAME_B.weapon;
   const b = list[int(rng, 0, list.length - 1)];
@@ -180,7 +182,7 @@ export function describeItem(item) {
   return Object.entries(stats).filter(([, v]) => v).map(([k, v]) => {
     const pct = /Dmg|Res|crit|furyGain|lifesteal|healPow|res[A-Z]|OnHit/.test(k);
     const label = { atk: 'ATK', def: 'DEF', mag: 'MAG', spr: 'SPR', spd: 'SPD', luk: 'LUK', hp: 'HP', mp: 'MP',
-      crit: 'Critical', fireDmg: 'Fire', iceDmg: 'Ice', thunderDmg: 'Thunder', lightDmg: 'Light', inkRes: 'Ink resist',
+      crit: 'Critical', fireDmg: 'Fire', iceDmg: 'Ice', thunderDmg: 'Thunder', lightDmg: 'Light', inkRes: 'Ink resist', fireRes: 'Fire resist',
       furyGain: 'Fury gain', lifesteal: 'Life steal', healPow: 'Healing', resPoison: 'Poison resist',
       resBlind: 'Blind resist', resSilence: 'Silence resist', resBurn: 'Burn resist', resChill: 'Chill resist',
       mpCostDown: 'MP cost', poisonOnHit: 'Poison on hit', startHaste: 'Haste at start' }[k] || k;

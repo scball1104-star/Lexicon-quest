@@ -1,7 +1,7 @@
 // Shops: Willowmere item shop, the smithy, a valley peddler, Rook's salvage in the Rootbound Stacks, and Episode 2's
 // Waystation peddler, Hollow Provisioner and Silverglass Smithy. Pure data.
 //
-// stock entries: { item, price?, ifFlag?, ifNotFlag? }  (price defaults to the item's price; flags are
+// stock entries: { item, price?, ifFlag?, ifNotFlag? }  (ifFlag may be a list: all must be set; price defaults to the item's price; flags are
 // story flags from COMMON.md / data/quests.js). Selling pays battle/loot.js itemValue() for gear and
 // half price for consumables. Key items cannot be sold.
 
@@ -115,6 +115,42 @@ export const SHOPS = {
       { item: 'mirrorweave_robe', ifFlag: 'court_f2_done' }, { item: 'glass_helm', ifFlag: 'court_f2_done' },
       { item: 'mirror_circlet', ifFlag: 'court_f2_done' }, { item: 'mere_boots', ifFlag: 'court_f2_done' },
       { item: 'veil_mantle', ifFlag: 'court_f2_done' },
+      // Episode 3 restock (Vessa, EPISODE3_PLAN.md 7.6): tier 5 for Mira once the sand is delivered (the charm is not sold)
+      { item: 'founders_robe', ifFlag: 'sand_done' }, { item: 'soot_hood', ifFlag: 'sand_done' },
+    ],
+  },
+
+  // ---------------------------------------------------------------- Episode 3 (EPISODE3_PLAN.md 7.6)
+  // Penny on the Old Sand Road: road prices (about 8% over list), a flask for the first slag, and the first look at tier 5 boots.
+  sand_peddler: {
+    id: 'sand_peddler', name: "Penny's Cart", map: 'sand_road', keeper: 'penny_s', kind: 'items',
+    stock: [
+      { item: 'potion', price: 24 }, { item: 'hi_potion', price: 100 }, { item: 'ether', price: 70 },
+      { item: 'hi_ether', price: 230 }, { item: 'antidote', price: 12 }, { item: 'eye_drops', price: 14 },
+      { item: 'echo_herb', price: 30 }, { item: 'phoenix_feather', price: 170 }, { item: 'tent', price: 90 },
+      { item: 'silver_salve', price: 135 }, { item: 'quench_flask', price: 100 }, { item: 'cinder_boots', price: 970 },
+    ],
+  },
+  // Taro's Ventworks Supplies (pk_shop): list prices, the flask, and the three tier 5 accessories.
+  ventworks: {
+    id: 'ventworks', name: 'Ventworks Supplies', map: 'pk_shop', keeper: 'taro', kind: 'items',
+    stock: [
+      { item: 'potion' }, { item: 'hi_potion' }, { item: 'ether' }, { item: 'hi_ether' }, { item: 'antidote' },
+      { item: 'eye_drops' }, { item: 'echo_herb' }, { item: 'phoenix_feather' }, { item: 'tent' }, { item: 'silver_salve' },
+      { item: 'quench_flask' }, { item: 'coalheart_charm' }, { item: 'bellchime_charm' }, { item: 'carter_mantle' },
+    ],
+  },
+  // Sella's forge in Emberpeak (pk_smithy; Garrick takes the anvil after forge_relit): tier 5 from arrival, the tier 4 weapons
+  // for a party that skipped Vessa's, and tier 6 once the Galleries are crossed and the forge is lit again.
+  pk_smithy: {
+    id: 'pk_smithy', name: 'Emberpeak Weaponsmith', map: 'pk_smithy', keeper: 'sella', kind: 'equipment',
+    stock: [
+      { item: 'ashsteel_cuirass' }, { item: 'founders_robe' }, { item: 'ashsteel_helm' }, { item: 'soot_hood' }, { item: 'cinder_boots' },
+      { item: 'silverglass_blade' }, { item: 'moonsteel_axe' }, { item: 'mere_pike' }, { item: 'mirror_rod' }, { item: 'glasswing_bow' },
+      { item: 'tempered_sword', ifFlag: ['foundry_f2_done', 'forge_relit'] }, { item: 'forge_axe', ifFlag: ['foundry_f2_done', 'forge_relit'] },
+      { item: 'heartforge_pike', ifFlag: ['foundry_f2_done', 'forge_relit'] }, { item: 'founders_rod', ifFlag: ['foundry_f2_done', 'forge_relit'] },
+      { item: 'bellwire_bow', ifFlag: ['foundry_f2_done', 'forge_relit'] }, { item: 'tempered_mail', ifFlag: ['foundry_f2_done', 'forge_relit'] },
+      { item: 'ashweave_robe', ifFlag: ['foundry_f2_done', 'forge_relit'] }, { item: 'forge_helm', ifFlag: ['foundry_f2_done', 'forge_relit'] },
     ],
   },
 };
@@ -124,5 +160,7 @@ export function shopStock(shopId, flags = {}) {
   const has = (f) => (typeof flags === 'function' ? !!flags(f) : flags instanceof Set ? flags.has(f) : Array.isArray(flags) ? flags.includes(f) : !!flags[f]);
   const shop = SHOPS[shopId];
   if (!shop) return [];
-  return shop.stock.filter((s) => (!s.ifFlag || has(s.ifFlag)) && (!s.ifNotFlag || !has(s.ifNotFlag)));
+  // ifFlag: a flag, or a list of flags that must all be set (Episode 3: the tier 6 gear needs two)
+  const all = (f) => (Array.isArray(f) ? f.every(has) : has(f));
+  return shop.stock.filter((s) => (!s.ifFlag || all(s.ifFlag)) && (!s.ifNotFlag || !has(s.ifNotFlag)));
 }

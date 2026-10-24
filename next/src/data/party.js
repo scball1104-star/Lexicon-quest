@@ -193,13 +193,27 @@ export function newMember(id, opts = {}) {
   return m;
 }
 
-/** Skills a member knows now: character skills by level, weapon techs and Fury arts by mastery. */
-export function knownSkills(member) {
+/** True when a flag container (Set, array, {flag: true} or a has(flag) function) holds `flag`; false for no container. */
+function flagIn(flags, flag) {
+  if (!flags || !flag) return false;
+  if (typeof flags === 'function') return !!flags(flag);
+  if (flags instanceof Set) return flags.has(flag);
+  if (Array.isArray(flags)) return flags.includes(flag);
+  return !!flags[flag];
+}
+
+/**
+ * Skills a member knows now: character skills by level, weapon techs and Fury arts by mastery, and (Episode 3) skills
+ * with `learn: { flag }` once the story flag is set. `flags` (optional; Set, array, {flag: true} or a function) is the
+ * save's story flags; without it a flag-learned skill is unknown.
+ */
+export function knownSkills(member, flags) {
   const def = PARTY[member.id];
   const out = [];
   for (const s of Object.values(SKILLS)) {
     if (!s.learn) continue;
-    if (s.user === member.id && s.learn.level && member.level >= s.learn.level) out.push(s.id);
+    if (s.learn.flag) { if (s.user === member.id && flagIn(flags, s.learn.flag)) out.push(s.id); }
+    else if (s.user === member.id && s.learn.level && member.level >= s.learn.level) out.push(s.id);
     else if (s.weapon && def.weapons.includes(s.weapon) && s.learn.mastery
       && masteryLevel((member.mastery || {})[s.weapon]) >= s.learn.mastery) out.push(s.id);
   }

@@ -58,3 +58,18 @@ test('Episode 2: ordinary fights, the Other Selves, the Nameless King, the EXP c
   const kingRows = rows.filter((r) => r.encounter === 'nameless_king');
   assert.ok(kingRows.some((r) => r.policy === 'reckless'), 'ignoring telegraphs is measured');
 });
+
+// Episode 3 (E3-battle): every ordinary fight, the Bellows Specter, the Cinder Warden (Tempered Oath turns at least half the Last
+// Hammers), Foundry F3 as the tightest floor, the EXP curve from the quick start and the Emberpeak gold meet their targets
+// (smaller sample than the full report).
+test('Episode 3: ordinary fights, the Specter, the Warden, Foundry F3, the EXP curve and the gold meet the targets', async () => {
+  const { EP3_ZONE_ORDER } = await import('../../src/data/encounters.js');
+  const { economy3, checkEconomy3 } = await import('../../tools/sim/simulate.mjs');
+  const rows = runSuite({ n: 60, zones: EP3_ZONE_ORDER, elites: false });
+  assert.deepEqual(checkTargets(rows, [...progression(1, 3), ...progression(0.8, 3)]), []);
+  assert.deepEqual(checkEconomy3(economy3()), []);
+  for (const id of ['bellows_specter', 'cinder_warden']) assert.ok(rows.some((r) => r.encounter === id && r.policy === 'reckless'), `${id}: ignoring telegraphs is measured`);
+  const w = rows.find((r) => r.encounter === 'cinder_warden' && r.policy === 'competent');
+  assert.ok(w.hammers > 0 && w.oathShare >= 0.5, `Oath share ${w.oathShare}`);
+  assert.ok(rows.filter((r) => r.zone === 'foundry_f3' && r.policy === 'competent').every((r) => r.quenched >= 0));
+});

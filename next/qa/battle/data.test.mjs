@@ -8,7 +8,7 @@ import { PARTY, PARTY_IDS, statsAt, STAT_KEYS, expForLevel, levelForExp, MASTERY
   grantExp, grantMastery } from '../../src/data/party.js';
 import { ITEMS, EQUIPMENT, UNIQUES, SETS, AFFIXES, CONSUMABLES, KEY_ITEMS, RARITIES, canEquip } from '../../src/data/items.js';
 import { ENEMIES, ELITE_MODS, LOST_PAGE_VARIANTS, ELITE_BASE, RANDOM_ELITE_MODS } from '../../src/data/enemies.js';
-import { ENCOUNTERS, ZONES, ZONE_ORDER, EP2_ZONE_ORDER, rollEncounter } from '../../src/data/encounters.js';
+import { ENCOUNTERS, ZONES, ZONE_ORDER, EP2_ZONE_ORDER, EP3_ZONE_ORDER, rollEncounter } from '../../src/data/encounters.js';
 import { SHOPS } from '../../src/data/shops.js';
 import { BOSS_LOOT, RARITY_TABLES, ZONE_LOOT } from '../../src/data/loot-tables.js';
 import { memberStats, DEF_K, VARIANCE, ENEMY_CRIT, CRIT_MULT, makeRng } from '../../src/battle/rules.js';
@@ -85,7 +85,7 @@ test('encounters, zones, shops, loot tables and party kits reference real ids', 
     assert.ok(enc.enemies.includes(enc.leader), `${enc.id} leader`);
     assert.ok(ZONES[enc.zone], `${enc.id} zone`);
   }
-  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc, n] of ZONES[z].plan) assert.ok(ENCOUNTERS[enc] && n > 0, `${z} ${enc}`);
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER, ...EP3_ZONE_ORDER]) for (const [enc, n] of ZONES[z].plan) assert.ok(ENCOUNTERS[enc] && n > 0, `${z} ${enc}`);
   for (const shop of Object.values(SHOPS)) {
     for (const s of shop.stock) {
       const it = ITEMS[s.item];
@@ -160,16 +160,19 @@ test('no em dashes in battle data, rules, tools or docs', () => {
 test('a full-HP party at the expected level survives any single non-telegraphed enemy action', () => {
   // first zone each enemy appears in, and the party's level on entering it (one level lower too)
   const firstZone = {};
-  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) for (const id of ENCOUNTERS[enc].enemies) firstZone[id] = firstZone[id] || z;
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER, ...EP3_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) for (const id of ENCOUNTERS[enc].enemies) firstZone[id] = firstZone[id] || z;
   firstZone.lost_page = 'archive_boss';
   // Episode 2's summoned and split foes, met where their parent is
   firstZone.quicksilver_bead = 'east_road';
   firstZone.false_sorrow = 'court_throne';
   firstZone.false_pride = 'court_throne';
-  const entry = Object.fromEntries([...progression(1), ...progression(1, 2)].map((p) => [p.zone, p.startLevel]));
+  // Episode 3's coils are summoned by the Warden
+  firstZone.bellows_coil = 'foundry_heart';
+  firstZone.smelter_coil = 'foundry_heart';
+  const entry = Object.fromEntries([...progression(1), ...progression(1, 2), ...progression(1, 3)].map((p) => [p.zone, p.startLevel]));
   // W15: an encounter's `power` (Court F3) makes its foes hit harder there, so they are checked again at that floor
   const cases = Object.entries(firstZone).map(([id, zone]) => [id, zone, 1]);
-  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) if (ENCOUNTERS[enc].power) for (const id of ENCOUNTERS[enc].enemies) cases.push([id, z, ENCOUNTERS[enc].power]);
+  for (const z of [...ZONE_ORDER, ...EP2_ZONE_ORDER, ...EP3_ZONE_ORDER]) for (const [enc] of ZONES[z].plan) if (ENCOUNTERS[enc].power) for (const id of ENCOUNTERS[enc].enemies) cases.push([id, z, ENCOUNTERS[enc].power]);
   for (const [id, zone, power] of cases) {
     const e = ENEMIES[id];
     const boost = (e.boss ? 1 : ELITE_BASE.atk) * power; // assume an elite

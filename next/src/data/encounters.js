@@ -101,6 +101,39 @@ enc('c3_mixed', { zone: 'court_f3', leader: 'faceless_knight', enemies: ['facele
 enc('nameless_king', { zone: 'court_throne', leader: 'nameless_king', enemies: ['nameless_king'], boss: true, noFlee: true,
   music: 'boss_king', noElite: true, flag: 'nameless_king_defeated', startFury: { flag: 'fountain_done', amount: 25 } });
 
+// ---------------------------------------------------------------- Episode 3 (EPISODE3_PLAN.md 6.2)
+// The Old Sand Road. sr_first is the scripted first fight of the episode (ep3.js sand_first_fight passes canFlee false):
+// the Cinder Beetle's first move is always Stoke (`opener` in enemies.js), so the Heat rule is taught by the first turn.
+enc('sr_first', { zone: 'sand_road', leader: 'cinder_beetle', enemies: ['cinder_beetle', 'cinder_hound'] });
+enc('sr_hounds', { zone: 'sand_road', leader: 'cinder_hound', enemies: ['cinder_hound', 'cinder_hound'] });
+enc('sr_beetles', { zone: 'sand_road', leader: 'cinder_beetle', enemies: ['cinder_beetle', 'cinder_beetle'] });
+enc('sr_mixed', { zone: 'sand_road', leader: 'cinder_hound', enemies: ['cinder_hound', 'slag_slime'] });
+// The Ashen Foundry F1: The Cinder Liftworks
+enc('fo1_beetles', { zone: 'foundry_f1', leader: 'cinder_beetle', enemies: ['cinder_beetle', 'cinder_beetle', 'slag_slime'] });
+enc('fo1_slimes', { zone: 'foundry_f1', leader: 'slag_slime', enemies: ['slag_slime', 'slag_slime', 'slag_slime'] });
+enc('fo1_miners', { zone: 'foundry_f1', leader: 'ashbound_miner', enemies: ['ashbound_miner', 'ashbound_miner'] });
+enc('fo1_mixed', { zone: 'foundry_f1', leader: 'ashbound_miner', enemies: ['ashbound_miner', 'cinder_beetle'] });
+// F2: The Ventilation Galleries, and the Bellows Specter (mini-boss; boss loot keyed by the enemy id)
+enc('fo2_phantoms', { zone: 'foundry_f2', leader: 'soot_phantom', enemies: ['soot_phantom', 'soot_phantom'] });
+enc('fo2_constructs', { zone: 'foundry_f2', leader: 'furnace_construct', enemies: ['furnace_construct', 'soot_phantom'] });
+enc('fo2_mixed', { zone: 'foundry_f2', leader: 'furnace_construct', enemies: ['furnace_construct', 'ashbound_miner'] });
+enc('bellows_specter', { zone: 'foundry_f2', leader: 'bellows_specter', enemies: ['bellows_specter'], boss: true, noFlee: true,
+  music: 'battle', noElite: true, flag: 'bellows_specter_defeated', backdrop: 'foundry' });
+// F3: The Heartforge Crucible
+// The tightest ordinary floor (PLAYTEST_REVIEW_4 fix 8, the Court F3 lesson): `power` makes this floor's foes hit harder (ATK and
+// MAG) without touching the Defenders' and Constructs' other floors; qa/battle/data.test.mjs checks that no boosted foe fells a
+// full-HP member with one ordinary action.
+export const F3_POWER = { fo3_defenders: 2.3, fo3_mixed: 1.9, fo3_furnace: 2.2 };
+export const F3_SPEED = 1.5;
+enc('fo3_defenders', { zone: 'foundry_f3', leader: 'forge_defender', enemies: ['forge_defender', 'soot_phantom'], power: F3_POWER.fo3_defenders, speed: F3_SPEED });
+enc('fo3_mixed', { zone: 'foundry_f3', leader: 'forge_defender', enemies: ['forge_defender', 'slag_slime', 'slag_slime'], power: F3_POWER.fo3_mixed, speed: F3_SPEED });
+enc('fo3_furnace', { zone: 'foundry_f3', leader: 'furnace_construct', enemies: ['furnace_construct', 'furnace_construct'], power: F3_POWER.fo3_furnace, speed: F3_SPEED });
+// The Heartforge. startFury: with the story flag set (the Coolant Station side story) the party starts with +25 Fury.
+// The Warden's coils join mid-fight (ai 'cinder_warden'), so the encounter lists only the Warden.
+enc('cinder_warden', { zone: 'foundry_heart', leader: 'cinder_warden', enemies: ['cinder_warden'], boss: true, noFlee: true,
+  music: 'boss_warden', noElite: true, flag: 'cinder_warden_defeated', backdrop: 'heartforge',
+  startFury: { flag: 'coolant_done', amount: 25, text: 'The station still runs cold behind you. Fury rises! (+25)' } });
+
 // ---------------------------------------------------------------- Zones
 // level: the party level the zone is tuned for. plan: [encounterId, count] visible enemies to place.
 export const ZONES = {
@@ -146,8 +179,30 @@ export const EP2_MAPS_LISTED = true;
 for (const [id, z] of Object.entries(EP2_ZONES)) {
   Object.defineProperty(ZONES, id, { value: z, enumerable: EP2_MAPS_LISTED, configurable: true, writable: true });
 }
-/** Zone order of an episode (1 or 2). */
-export function zoneOrder(episode = 1) { return episode === 2 ? EP2_ZONE_ORDER : ZONE_ORDER; }
+// ---------------------------------------------------------------- Episode 3 zones (EPISODE3_PLAN.md 6.1, 6.2)
+// EP3_ZONE_ORDER continues progression() from the Episode 3 quick start (Lv 13, 2,900 EXP; tools/sim). Same pattern as
+// Episode 2: the zones resolve through ZONES[id] but stay non-enumerable until E3-maps lists them (EP3_MAPS_LISTED), because
+// qa/maps iterates ZONES and wants a map per listed zone. Backdrops are the battle_<id> keys of the plan (E3-sprites).
+export const EP3_ZONES = {
+  sand_road: { id: 'sand_road', name: 'The Old Sand Road', level: [13, 14], backdrop: 'ash_road', music: 'battle', episode: 3,
+    plan: [['sr_first', 1], ['sr_hounds', 1], ['sr_beetles', 1], ['sr_mixed', 1]] },
+  foundry_f1: { id: 'foundry_f1', name: 'The Cinder Liftworks', level: [14, 15], backdrop: 'foundry', music: 'battle', episode: 3,
+    plan: [['fo1_beetles', 2], ['fo1_slimes', 1], ['fo1_miners', 2], ['fo1_mixed', 1]] },
+  foundry_f2: { id: 'foundry_f2', name: 'The Ventilation Galleries', level: [15, 16], backdrop: 'foundry', music: 'battle', episode: 3,
+    plan: [['fo2_phantoms', 2], ['fo2_constructs', 1], ['fo2_mixed', 2], ['bellows_specter', 1]] },
+  foundry_f3: { id: 'foundry_f3', name: 'The Heartforge Crucible', level: [16, 16], backdrop: 'crucible', music: 'battle', episode: 3,
+    plan: [['fo3_defenders', 2], ['fo3_mixed', 2], ['fo3_furnace', 1]] },
+  foundry_heart: { id: 'foundry_heart', name: 'The Heartforge', level: [16, 17], backdrop: 'heartforge', music: 'boss_warden', episode: 3,
+    plan: [['cinder_warden', 1]] },
+};
+export const EP3_ZONE_ORDER = ['sand_road', 'foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart'];
+/** E3-maps: set to true once the five Episode 3 maps are in src/data/maps (lists the zones for qa/maps and the quick start). */
+export const EP3_MAPS_LISTED = false;
+for (const [id, z] of Object.entries(EP3_ZONES)) {
+  Object.defineProperty(ZONES, id, { value: z, enumerable: EP3_MAPS_LISTED, configurable: true, writable: true });
+}
+/** Zone order of an episode (1, 2 or 3). */
+export function zoneOrder(episode = 1) { return episode === 3 ? EP3_ZONE_ORDER : episode === 2 ? EP2_ZONE_ORDER : ZONE_ORDER; }
 
 function rand(rng) { return typeof rng === 'function' ? rng() : rng.next(); }
 
@@ -161,7 +216,14 @@ export function rollEncounter(id, rng, opts = {}) {
   if (!e) throw new Error(`unknown encounter ${id}`);
   // `power` (W15): the encounter's foes hit this much harder (ATK and MAG), so a floor can be tightened without
   // changing an enemy that other floors share. HP, shields and rewards stay the enemy's own.
-  const enemies = e.enemies.map((eid) => (e.power ? { id: eid, elite: null, power: e.power } : { id: eid, elite: null }));
+  // `speed` (Episode 3, Foundry F3) does the same for SPD: the floor's foes act more often, so careful play takes steady chip damage
+  // without any single hit growing past what `power` allows.
+  const enemies = e.enemies.map((eid) => {
+    const spec = { id: eid, elite: null };
+    if (e.power) spec.power = e.power;
+    if (e.speed) spec.speed = e.speed;
+    return spec;
+  });
   const rate = opts.eliteRate ?? ELITE_RATE;
   // A fixed elite written into the encounter (`elite: { mods, index? }`) is part of the group: it ignores the
   // rate and the caller's noElite (which exists to keep scripted and simulated fights from rolling extras).

@@ -9,6 +9,7 @@
 //   crit                               +% critical chance
 //   fireDmg iceDmg thunderDmg lightDmg +% damage of that element
 //   inkRes                             -% damage taken from ink attacks
+//   fireRes                            -% damage taken from fire attacks (Episode 3)
 //   furyGain lifesteal healPow         +% Fury gain, % of damage healed, +% healing done
 //   resPoison resBlind resSilence resBurn resChill   % chance to resist (100 = immune)
 //   mpCostDown                         flat MP cost reduction (min cost 1)
@@ -30,7 +31,7 @@ export const ARMOR_SLOTS = ['body', 'head', 'charm', 'boots', 'mantle'];
 export const STAT_LABELS = {
   atk: 'ATK', def: 'DEF', mag: 'MAG', spr: 'SPR', spd: 'SPD', luk: 'LUK', hp: 'Max HP', mp: 'Max MP',
   crit: '% Critical', fireDmg: '% Fire', iceDmg: '% Ice', thunderDmg: '% Thunder', lightDmg: '% Light',
-  inkRes: '% Ink resist', furyGain: '% Fury gain', lifesteal: '% Life steal', healPow: '% Healing',
+  inkRes: '% Ink resist', fireRes: '% Fire resist', furyGain: '% Fury gain', lifesteal: '% Life steal', healPow: '% Healing',
   resPoison: '% Poison resist', resBlind: '% Blind resist', resSilence: '% Silence resist',
   resBurn: '% Burn resist', resChill: '% Chill resist', mpCostDown: 'MP cost down',
   poisonOnHit: '% Poison on hit', startHaste: 'Haste at start (turns)',
@@ -64,6 +65,11 @@ export const CONSUMABLES = {
   silver_salve:    { id: 'silver_salve', name: 'Silver Salve', icon: 'potion', price: 120, battle: true, field: true,
                      target: 'ally', canTargetKept: true, effect: { cure: ['kept', 'nameless', 'silence'] },
                      desc: 'Cures Kept, Nameless and Silence.' },
+  // Episode 3 (EPISODE3_PLAN.md 7.1): thrown at a foe (`target: 'enemy'`). `throw` is a fixed-strength ice hit (it does not
+  // depend on who throws it) and it always quenches the foe's Heat, even when the foe resists ice.
+  quench_flask:    { id: 'quench_flask', name: 'Quench Flask', icon: 'potion', price: 90, battle: true, field: false,
+                     target: 'enemy', effect: { throw: { fixed: 60, power: 120, types: ['ice'] } },
+                     desc: 'Ice blast on one foe. Quenches Heat.' },
 };
 // Battle item use costs this timeline rank (a bit quicker than an attack).
 export const ITEM_RANK = 80;
@@ -101,17 +107,31 @@ export const KEY_ITEMS = {
     desc: 'Signed: Elian, Mayor of Hollowmere. For Mael.' },
   black_feather:     { id: 'black_feather', name: 'Black Feather', icon: 'feather', key: true,
     desc: 'Left where a list used to be.' },
+  // Episode 3 (EPISODE3_PLAN.md 2.3). The lift key's name carries no name: the founder's name is withheld until
+  // bram_memory_3 (qa/content/ep3.test.mjs checks it), so the plan's "Mara's Lift Key" reads "The Founder's Lift Key".
+  lift_key:          { id: 'lift_key', name: "The Founder's Lift Key", icon: 'key', key: true,
+    desc: 'An old brass key, kept oiled for twenty-five years. Opens the foundry lift.' },
+  ash_key:           { id: 'ash_key', name: 'Ash Key', icon: 'key', key: true, counted: true,
+    desc: 'A soot-black key. Opens one door in the foundry.' },
+  crucible_hook:     { id: 'crucible_hook', name: 'Crucible Hook', icon: 'key', key: true,
+    desc: "A smith's hook of black iron. Opens the Heartforge." },
+  struck_list:       { id: 'struck_list', name: 'Corner of a List', icon: 'letter', key: true,
+    desc: 'Cheap paper the fire would not take. The seal of an empty book.' },
+  name_fragment_3:   { id: 'name_fragment_3', name: 'Third Name Fragment', icon: 'book', key: true,
+    desc: "The Steel Leaf: the Book's names stamped in steel." },
+  glass_sand:        { id: 'glass_sand', name: 'Sack of Glass Sand', icon: 'letter', key: true,
+    desc: 'Emberpeak sand, for Vessa.' },
 };
 
 // ---------------------------------------------------------------------------------------------
-// Equipment bases. tier 1..4, ilvl = item level used by affix tiers and drop pools.
+// Equipment bases. tier 1..6, ilvl = item level used by affix tiers and drop pools.
 // who: character ids that can equip it (weapons: derived from weapon type).
 // ---------------------------------------------------------------------------------------------
 const ALL = ['hero', 'mira', 'bram'];
 export const EQUIPMENT = {};
 function eq(id, o) { EQUIPMENT[id] = { id, ...o, stats: o.stats || {} }; }
 function weapon(id, type, tier, name, price, stats, desc) {
-  eq(id, { name, slot: 'weapon', type, tier, ilvl: [0, 2, 5, 8, 11][tier], price, stats, icon: type, desc });
+  eq(id, { name, slot: 'weapon', type, tier, ilvl: [0, 2, 5, 8, 11, 14, 16][tier], price, stats, icon: type, desc });
 }
 
 // Swords (hero): fast and reliable, small crit bonus.
@@ -215,6 +235,37 @@ eq('mere_boots', { name: 'Mere Boots', slot: 'boots', tier: 4, ilvl: 11, price: 
 eq('veil_mantle', { name: 'Veil Mantle', slot: 'mantle', tier: 4, ilvl: 11, price: 650, who: ALL, icon: 'mantle',
   stats: { def: 4, spr: 4, inkRes: 10 }, desc: 'A mantle like a fold of mist.' });
 
+// --- Episode 3 (EPISODE3_PLAN.md 7.2) ------------------------------------------------------------
+// Tier 5 (ilvl 14): Emberpeak's shops from arrival. Fire resistance is the Episode 3 stat (`fireRes`, -% damage from fire).
+eq('ashsteel_cuirass', { name: 'Ashsteel Cuirass', slot: 'body', tier: 5, ilvl: 14, price: 1900, who: HB, icon: 'armor',
+  stats: { def: 17 }, desc: 'Steel quenched in ash water. Dull, and very hard.' });
+eq('founders_robe', { name: "Founder's Robe", slot: 'body', tier: 5, ilvl: 14, price: 1850, who: ['mira'], icon: 'armor',
+  stats: { def: 11, spr: 9, mag: 4 }, desc: 'Cut from an old bellfounder\'s pattern.' });
+eq('ashsteel_helm', { name: 'Ashsteel Helm', slot: 'head', tier: 5, ilvl: 14, price: 900, who: HB, icon: 'helm',
+  stats: { def: 8, spr: 2 }, desc: 'A close helm with a grey bloom on the steel.' });
+eq('soot_hood', { name: 'Soot Hood', slot: 'head', tier: 5, ilvl: 14, price: 950, who: ['mira'], icon: 'helm',
+  stats: { def: 4, spr: 7, mag: 4 }, desc: 'A hood of fireproofed felt, black as a flue.' });
+eq('cinder_boots', { name: 'Cinder Boots', slot: 'boots', tier: 5, ilvl: 14, price: 900, who: ALL, icon: 'boots',
+  stats: { spd: 2, def: 2, fireRes: 10 }, desc: 'Soles that shrug off hot ground.' });
+eq('carter_mantle', { name: "Carter's Mantle", slot: 'mantle', tier: 5, ilvl: 14, price: 850, who: ALL, icon: 'mantle',
+  stats: { def: 4, spr: 3, luk: 3 }, desc: 'A sand carter\'s coat, waxed against ash.' });
+eq('coalheart_charm', { name: 'Coalheart Charm', slot: 'charm', tier: 5, ilvl: 14, price: 800, who: ALL, icon: 'charm',
+  stats: { fireRes: 25, def: 2 }, desc: 'A lump of coal that never warms.' });
+eq('bellchime_charm', { name: 'Bellchime Charm', slot: 'charm', tier: 5, ilvl: 14, price: 850, who: ALL, icon: 'charm',
+  stats: { spr: 4, resSilence: 50 }, desc: 'A small bell. Its note keeps a voice steady.' });
+// Tier 6 (ilvl 16): the family forge, after foundry_f2_done and forge_relit.
+weapon('tempered_sword', 'sword', 6, 'Tempered Sword', 3200, { atk: 36, crit: 6 }, 'Forged cold, tempered twice. It rings.');
+weapon('forge_axe', 'axe', 6, 'Forge Axe', 3300, { atk: 42, spd: -1 }, 'A smith\'s axe from the heart of the forge.');
+weapon('heartforge_pike', 'spear', 6, 'Heartforge Pike', 3250, { atk: 38, def: 3 }, 'A pike drawn out in one long heat.');
+weapon('founders_rod', 'staff', 6, "Founder's Rod", 3200, { atk: 11, mag: 31, spr: 5, mp: 10 }, 'A bellfounder\'s stir-rod, tipped with bronze.');
+weapon('bellwire_bow', 'bow', 6, 'Bellwire Bow', 3200, { atk: 33, spd: 1, crit: 3 }, 'Strung with bell wire. It hums when drawn.');
+eq('tempered_mail', { name: 'Tempered Mail', slot: 'body', tier: 6, ilvl: 16, price: 2800, who: HB, icon: 'armor',
+  stats: { def: 23, spr: 4 }, desc: 'Rings of steel, each one tempered by hand.' });
+eq('ashweave_robe', { name: 'Ashweave Robe', slot: 'body', tier: 6, ilvl: 16, price: 2700, who: ['mira'], icon: 'armor',
+  stats: { def: 14, spr: 12, mag: 5 }, desc: 'Woven with ash-grey thread that does not burn.' });
+eq('forge_helm', { name: 'Forge Helm', slot: 'head', tier: 6, ilvl: 16, price: 1400, who: HB, icon: 'helm',
+  stats: { def: 10, spr: 3 }, desc: 'A heavy helm, still warm from the anvil.' });
+
 // ---------------------------------------------------------------------------------------------
 // Uniques (legendary) and sets for Episode 1. Fixed stats; placed, not randomly dropped.
 // ---------------------------------------------------------------------------------------------
@@ -281,6 +332,39 @@ export const UNIQUES = {
     source: 'The Last Route (Tess)', desc: 'A cord tied in a courier\'s knot. It never slips.' },
 };
 
+// ---- Episode 3 (EPISODE3_PLAN.md 7.3): placed, never random. The Tempered Lexicon Blade strikes as ice (it quenches), the
+// Silverglass Blade has the best raw edge and Lanternheart strikes as light: a choice, not an upgrade.
+Object.assign(UNIQUES, {
+  first_bell_hammer: { id: 'first_bell_hammer', name: 'First Bell Hammer', rarity: 'legendary', slot: 'weapon', type: 'axe',
+    ilvl: 16, price: 3600, icon: 'axe',
+    stats: { atk: 46, crit: 6, furyGain: 15, lightDmg: 10 },
+    source: 'Garrick, in warden_after', desc: "The founder's hammer. It was kept in the Heartforge's tool rack." },
+  tempered_blade: { id: 'tempered_blade', name: 'Tempered Lexicon Blade', rarity: 'legendary', slot: 'weapon', type: 'sword',
+    ilvl: 16, price: 3400, icon: 'sword', extraTypes: ['ice'],
+    stats: { atk: 40, crit: 8, iceDmg: 15 },
+    source: 'Foundry F3 secret chest (Lantern)', desc: 'A blade tempered in the Book\'s own ink-water. Strikes as ice.' },
+  warden_heart: { id: 'warden_heart', name: 'Ember Heart', rarity: 'legendary', slot: 'charm',
+    ilvl: 16, price: 3000, icon: 'charm', who: ALL,
+    stats: { atk: 5, mag: 5, fireRes: 30, furyGain: 10 },
+    source: 'The Cinder Warden (guaranteed)', desc: 'The Warden\'s heart, banked. It is warm, and it is yours.' },
+  updraft_charm: { id: 'updraft_charm', name: 'Updraft Charm', rarity: 'legendary', slot: 'charm',
+    ilvl: 15, price: 2600, icon: 'charm', who: ALL,
+    stats: { spd: 2, furyGain: 15 },
+    source: 'The Bellows Specter (guaranteed)', desc: 'A feather of soot that always rises.' },
+  emberglass_charm: { id: 'emberglass_charm', name: 'Emberglass Charm', rarity: 'rare', slot: 'charm',
+    ilvl: 14, price: 900, icon: 'charm', who: ALL,
+    stats: { mag: 4, fireRes: 15, resBurn: 50 },
+    source: "Vessa's Sand (side story)", desc: 'Glass from Emberpeak sand, melted once and kept.' },
+  ashwalker_boots: { id: 'ashwalker_boots', name: 'Ashwalker Boots', rarity: 'set', set: 'ashwalkers_road', slot: 'boots',
+    ilvl: 14, price: 1000, icon: 'boots', who: ALL,
+    stats: { spd: 2, def: 3, fireRes: 10 },
+    source: 'Foundry F1 secret (Dash Strike)', desc: 'Resoled with slag crust. They do not mind heat.' },
+  ashwalker_mantle: { id: 'ashwalker_mantle', name: 'Ashwalker Mantle', rarity: 'set', set: 'ashwalkers_road', slot: 'mantle',
+    ilvl: 14, price: 900, icon: 'mantle', who: ALL,
+    stats: { def: 5, spr: 4, resBurn: 30 },
+    source: 'The Coolant Station (side story)', desc: 'A coat of the station\'s cooled plates.' },
+});
+
 export const SETS = {
   wayfarers_promise: { id: 'wayfarers_promise', name: 'Wayfarer\'s Promise',
     pieces: ['wayfarer_boots', 'wayfarer_mantle'],
@@ -290,6 +374,10 @@ export const SETS = {
     pieces: ['merewarden_helm', 'merewarden_mantle'],
     bonus: { 2: { spr: 3, def: 2, healPow: 10 } },
     desc: 'Both pieces: +3 SPR, +2 DEF and +10% healing.' },
+  ashwalkers_road: { id: 'ashwalkers_road', name: "Ashwalker's Road",
+    pieces: ['ashwalker_boots', 'ashwalker_mantle'],
+    bonus: { 2: { fireRes: 20, spd: 1 } },
+    desc: 'Both pieces: +20% fire resist and +1 SPD.' },
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -327,11 +415,24 @@ affix('of_the_root', 'suffix', 'of the Root', 'resPoison', ['boots', 'charm', 'b
 affix('of_sight', 'suffix', 'of Sight', 'resBlind', ['head', 'charm'], [[1, 30, 50], [4, 50, 70], [7, 70, 100], [10, 90, 100]], 6);
 affix('of_haste', 'suffix', 'of Haste', 'spd', ['boots', 'mantle'], [[1, 1, 1], [4, 1, 2], [7, 2, 3], [10, 3, 3]], 6);
 
+// Episode 3: a fifth tier at ilvl 14 for every affix that has four (about +15% over tier 4; resist suffixes cap at 100;
+// a range that would not grow, such as Fleet's 3 to 3, gains 1 at the top).
+for (const a of Object.values(AFFIXES)) {
+  if (a.tiers.length !== 4) continue;
+  const [, lo, hi] = a.tiers[3];
+  const res = /^res[A-Z]/.test(a.stat);
+  let lo2 = Math.round(lo * 1.15), hi2 = Math.round(hi * 1.15);
+  if (res) { lo2 = Math.min(100, lo2); hi2 = Math.min(100, hi2); } else if (hi2 <= hi) hi2 = hi + 1;
+  a.tiers.push([14, Math.max(lo, lo2), Math.max(Math.max(lo, lo2), hi2)]);
+}
+
 // Rare item names (Diablo style two-word names), themed on names, books and the valley.
 export const RARE_NAME_A = ['Ember', 'Hollow', 'Quill', 'Thorn', 'Dusk', 'Willow', 'Bell', 'Root', 'Ash', 'Lantern',
   'Ink', 'River', 'Vellum', 'Echo', 'Dawn', 'Moss', 'Iron', 'Silent', 'Gilded', 'Bramble'];
 // Episode 2 words, added to the pool for items of ilvl 9 and up only (battle/loot.js), so Episode 1 names roll as before.
 export const RARE_NAME_A_EP2 = ['Silver', 'Glass', 'Mere', 'Mirror', 'Veiled', 'Still'];
+// Episode 3 words, added for items of ilvl 14 and up only (battle/loot.js).
+export const RARE_NAME_A_EP3 = ['Ashen', 'Tempered', 'Forged', 'Banked', 'Cinder'];
 export const RARE_NAME_B = {
   weapon: ['Fang', 'Song', 'Bite', 'Edge', 'Verse', 'Mark', 'Thorn', 'Wake', 'Oath', 'Call'],
   body: ['Ward', 'Shroud', 'Coat', 'Hide', 'Shell', 'Mantle'],

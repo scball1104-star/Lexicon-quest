@@ -43,6 +43,7 @@ export const FURY = { deal: 8, weak: 4, brk: 12, takenScale: 35, takenFlat: 3, d
 export const DEFEND_MP = 0.05;    // Defend restores 5% max MP (min 1)
 export const REFLECT_PHYS = 0.5;  // Echo Warden Bulwark: the attacker takes half the blow
 export const BOSS_INTERRUPT_DELAY = 0.35;
+export const OATH_HAMMER = 0.5;   // Episode 3: the share of a Last Hammer that Bram takes when his Tempered Oath turns it
 export const SPLIT_EXP = 0.25;
 
 // ------------------------------------------------------------------------------- rng
@@ -73,7 +74,7 @@ function toFn(rng) {
 // ------------------------------------------------------------------------------- party stats
 const STAT_ZERO = { crit: 0, fireDmg: 0, iceDmg: 0, thunderDmg: 0, lightDmg: 0, inkRes: 0, furyGain: 0, lifesteal: 0,
   healPow: 0, resPoison: 0, resBlind: 0, resSilence: 0, resBurn: 0, resChill: 0, mpCostDown: 0, poisonOnHit: 0,
-  startHaste: 0 };
+  startHaste: 0, fireRes: 0 };
 
 /**
  * Effective stats of a member record with its gear (active weapon only, except that max HP/MP
@@ -174,7 +175,8 @@ export function hasFlag(flags, flag) {
  * forceElite, noElite, flags, startFury }. Returns { battle, encounter } where encounter = { id, zone, music, boss,
  * enemies, flag, startFury }.
  * `flags` (Set, array, {flag: true} or a has(flag) function) is read for the encounter's `startFury: { flag, amount }`
- * (the Nameless King: +25 Fury with `fountain_done`); `startFury` (a number) overrides it.
+ * (the Nameless King: +25 Fury with `fountain_done`, the Cinder Warden with `coolant_done`); `startFury` (a number) overrides
+ * it. The same `flags` decide the skills learned by a story flag (Bram's Tempered Oath, `bram_memory_3`).
  */
 export function createEncounterBattle(encounterId, opts = {}) {
   const e = ENCOUNTERS[encounterId];
@@ -182,11 +184,12 @@ export function createEncounterBattle(encounterId, opts = {}) {
   const rng = opts.rng || makeRng(1);
   const enc = rollEncounter(encounterId, rng, { eliteRate: opts.eliteRate, forceElite: opts.forceElite, noElite: opts.noElite });
   let startFury = Number(opts.startFury) || 0;
-  if (!startFury && e.startFury && hasFlag(opts.flags, e.startFury.flag)) startFury = e.startFury.amount;
+  let startFuryText = null;
+  if (!startFury && e.startFury && hasFlag(opts.flags, e.startFury.flag)) { startFury = e.startFury.amount; startFuryText = e.startFury.text || null; }
   const battle = createBattle({
     party: opts.party, enemies: enc.enemies, rng,
     options: { inventory: opts.inventory || {}, bestiary: opts.bestiary || {}, boss: e.boss, canFlee: !e.noFlee,
-      start: opts.start || 'normal', zone: e.zone, encounter: encounterId, startFury },
+      start: opts.start || 'normal', zone: e.zone, encounter: encounterId, startFury, startFuryText, flags: opts.flags },
   });
   return { battle, encounter: { ...enc, music: e.music, flag: e.flag || null, startFury } };
 }
@@ -195,6 +198,7 @@ export function createEncounterBattle(encounterId, opts = {}) {
 export function createBattle(cfg = {}) {
   const R = toFn(cfg.rng);
   const options = cfg.options || {};
+  const storyFlags = options.flags;   // the save's story flags (skills learned by a flag); never stored in the battle state
   let state;
   let E = [];
   const emit = (ev) => { E.push(ev); return ev; };
@@ -211,7 +215,7 @@ export function createBattle(cfg = {}) {
       uid: m.id, side: 'party', id: m.id, name: m.name || def.name, level: m.level || 1,
       hp, maxHp: s.maxHp, mp, maxMp: s.maxMp, startMp: mp, fury: clamp((m.fury || 0) + (hp > 0 ? Number(options.startFury) || 0 : 0), 0, FURY_MAX),
       weapon: s.weapon, weapons: def.weapons.filter((w) => equip[w]), equip,
-      mastery: { ...(m.mastery || {}) }, stats: s, skills: knownSkills(m),
+      mastery: { ...(m.mastery || {}) }, stats: s, skills: knownSkills(m, storyFlags),
       statuses: {}, mods: [], defending: false, cover: null, coveredBy: null,
       alive: hp > 0, next: 0, tie: i, uses: {}, lastTarget: null,
     };
@@ -250,6 +254,7 @@ export function createBattle(cfg = {}) {
       if (variant) { weak = variant.weak.slice(); name = variant.name; weakKey = `${id}:${variant.id}`; }
     }
     if (spec && spec.power > 0) { atk *= spec.power; mag *= spec.power; }   // the encounter's `power` (encounters.js)
+    if (spec && spec.speed > 0) spd *= spec.speed;                           // and its `speed` (Episode 3, Foundry F3)
     if (extra.hpScale) hp *= extra.hpScale;
     if (extra.hp) hp = extra.hp;
     hp = Math.round(hp);
@@ -267,6 +272,8 @@ export function createBattle(cfg = {}) {
       rewards: { exp: Math.round(exp * (extra.rewardScale ?? 1)), gold: Math.round(gold * (extra.rewardScale ?? 1)),
         masteryPts: Math.round(masteryPts * (extra.rewardScale ?? 1)) },
       lootZone: d.lootZone, ai: { turns: 0, used: {}, chargeAt: null },
+      // Episode 3 Heat: a counter on the foe (not a status). heatMax 0 = no Heat. heatStep is the ATK and MAG gain per level.
+      heat: 0, heatMax: d.heat ? d.heat.max : 0, heatStep: d.heat ? d.heat.step : 0, heatFlare: d.heat ? d.heat.flare : null,
     };
   }
 
@@ -282,7 +289,7 @@ export function createBattle(cfg = {}) {
       revealed: JSON.parse(JSON.stringify(options.bestiary || {})), appraised: {},
       options: { canFlee: options.canFlee !== false && !options.boss, boss: !!options.boss,
         start: options.start || 'normal', encounter: options.encounter || null, zone: options.zone || null,
-        startFury: Number(options.startFury) || 0 },
+        startFury: Number(options.startFury) || 0, startFuryText: options.startFuryText || null },
       killed: [], fleeAttempts: 0, rewards: null, startEvents: [],
     };
     for (const u of party) { state.units[u.uid] = u; state.order.push(u.uid); }
@@ -309,6 +316,7 @@ export function createBattle(cfg = {}) {
     for (const m of u.mods || []) if (m.stat === k) v *= m.mult;
     if (k === 'def' && has(u, 'burn')) v *= ST.BURN_DEF;
     if ((k === 'atk' || k === 'mag') && has(u, 'nameless')) v *= ST.NAMELESS_MULT;
+    if ((k === 'atk' || k === 'mag') && u.heat) v *= 1 + u.heatStep * u.heat;   // Episode 3: each Heat level
     return Math.max(1, v);
   }
   function delayOf(u, rank) { return CTB.actionDelay(eff(u, 'spd'), rank, u.statuses); }
@@ -379,7 +387,9 @@ export function createBattle(cfg = {}) {
       unknown: u.weak.length - weak.length, appraised: !!state.appraised[u.weakKey],
       // Episode 2 markers for the weakness row: `reflect` ('magic' | 'phys' | null, icon_reflect) while a reflect is
       // up (the Glassback under Protect, the Echo Warden's stance), `adapted` (the Borrowed Shadow's borrowed resist).
-      reflect: AI.reflectState(ctx, u), adapted: AI.adaptedType(ctx, u) };
+      reflect: AI.reflectState(ctx, u), adapted: AI.adaptedType(ctx, u),
+      // Episode 3: the Heat counter, always readable (no hidden information): { heat, heatMax, flare: pending flare skill id }
+      heat: u.heat || 0, heatMax: u.heatMax || 0, flare: u.charging && u.heatFlare && u.charging.skill === u.heatFlare ? u.heatFlare : null };
   }
 
   // ----------------------------------------------------------------------------- damage math
@@ -426,7 +436,7 @@ export function createBattle(cfg = {}) {
   function baseHit(src, tgt, part) {
     const types = hitTypes(src, part);
     const phys = part.formula === 'phys';
-    const A = eff(src, phys ? 'atk' : 'mag');
+    const A = part.fixed || eff(src, phys ? 'atk' : 'mag');   // `fixed`: a thrown flask hits for the same amount in any hand
     const D = eff(tgt, phys ? 'def' : 'spr') * (1 - (part.pierce || 0));
     let dmg = A * ((part.power || 0) / 100) * DEF_K / (DEF_K + D);
     if (src.side === 'party') {
@@ -442,6 +452,7 @@ export function createBattle(cfg = {}) {
     if (tgt.defending) dmg *= ST.DEFEND_MULT;
     if (has(tgt, 'protect')) dmg *= ST.PROTECT_MULT;
     if (tgt.side === 'party' && types.includes('ink')) dmg *= 1 - clamp(tgt.stats.inkRes || 0, 0, 80) / 100;
+    if (tgt.side === 'party' && types.includes('fire')) dmg *= 1 - clamp(tgt.stats.fireRes || 0, 0, 80) / 100;   // Episode 3
     if (tgt.stoneskin && phys) dmg *= 0.75;
     dmg *= AI.damageTakenMult(ctx, tgt, part, types);
     return { dmg, aff, types };
@@ -509,11 +520,43 @@ export function createBattle(cfg = {}) {
     u.delayed = (u.delayed || 0) + 1;   // pushes taken (a Mirrored Combo falls apart when either member is pushed)
     emit({ type: 'delay', target: u.uid, amount, reason });
   }
+  // ---- Heat (Episode 3, EPISODE3_PLAN.md 6.3) -------------------------------------------------------
+  // A foe with a Heat counter gains a level per Stoke; at its maximum it announces its flare (a telegraph one turn early,
+  // `telegraph.flare: true`) and fires it on its next turn, which resets Heat. Ice damage, a Quench Flask or a Break sets
+  // Heat to 0 and cancels a pending flare. Events: `heat` { target, heat, max, delta, reason } and `quench`.
+  let quenchReason = 'ice';
+  function stoke(u, n = 1, info = {}) {
+    if (!u || !u.alive || !u.heatMax) return 0;
+    const before = u.heat;
+    u.heat = Math.min(u.heatMax, u.heat + n);
+    if (u.heat !== before) emit({ type: 'heat', target: u.uid, heat: u.heat, max: u.heatMax, delta: u.heat - before, reason: info.reason || 'stoke' });
+    if (u.heat >= u.heatMax && !u.charging && !u.broken) AI.planFlare(ctx, u);
+    return u.heat - before;
+  }
+  function heatReset(u, reason) {
+    if (!u || !u.heatMax || !u.heat) return;
+    const had = u.heat;
+    u.heat = 0;
+    emit({ type: 'heat', target: u.uid, heat: 0, max: u.heatMax, delta: -had, reason });
+  }
+  function quench(u, reason = 'ice') {
+    if (!u || !u.alive || !u.heatMax) return false;
+    const had = u.heat || 0;
+    const pending = u.charging && u.heatFlare && u.charging.skill === u.heatFlare ? u.charging.skill : null;
+    if (!had && !pending) return false;
+    u.heat = 0;
+    emit({ type: 'quench', target: u.uid, reason, heat: had, cancelled: pending, sfx: 'quench_hiss' });
+    emit({ type: 'heat', target: u.uid, heat: 0, max: u.heatMax, delta: -had, reason: 'quench' });
+    emit({ type: 'message', text: 'Quenched!', kind: 'quench', target: u.uid });
+    if (pending) cancelCharge(u, 'quench');
+    return true;
+  }
   function breakUnit(u) {
     if (u.broken || !u.alive) return;
     u.broken = true;
     u.shields = 0;
     emit({ type: 'break', target: u.uid });
+    quench(u, 'break');
     cancelCharge(u, 'break');
     u.next = Math.max(u.next, state.now) + Math.round(CTB.BREAK_PUSH * CTB.baseDelay(eff(u, 'spd')));
     AI.onBreak(ctx, u);
@@ -634,6 +677,8 @@ export function createBattle(cfg = {}) {
       types, element: types[0] || null, shieldLost, shields: tgt.side === 'enemy' ? tgt.shields : null, broken: wasBroken });
     let broke = false;
     if (shieldLost && tgt.alive && tgt.shields <= 0 && !tgt.broken) { breakUnit(tgt); broke = true; }
+    // Episode 3: any ice damage quenches a foe's Heat (and cancels a pending flare)
+    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes('ice')) quench(tgt, quenchReason);
     // status interplay: fire thaws Chill, ice puts out Burn
     for (const t of types) for (const s of ST.CURED_BY_TYPE[t] || []) if (tgt.alive && has(tgt, s)) removeStatus(tgt, s, 'countered');
     // on-hit extras
@@ -662,6 +707,10 @@ export function createBattle(cfg = {}) {
       if (it.target === 'ko_ally') {
         const ids = all().filter((u) => u.side === 'party' && !u.alive).map((u) => u.uid);
         return { mode: 'single', side: 'party', ids, default: ids[0] || null };
+      }
+      if (it.target === 'enemy') {   // the Quench Flask: thrown at a foe
+        const foes = opponentsOf(actor).map((u) => u.uid);
+        return { mode: 'single', side: 'enemy', ids: foes, default: actor.lastTarget && foes.includes(actor.lastTarget) ? actor.lastTarget : foes[0] || null };
       }
       const pool = it.canTargetKept ? living('party') : alliesOf(actor);
       const ids = pool.map((u) => u.uid);
@@ -842,6 +891,13 @@ export function createBattle(cfg = {}) {
     // enemy single-target attacks: Taunt pulls them, Guard redirects them
     if (user.side === 'enemy' && sk.target === 'enemy' && targets.length) targets = targets.map((t) => redirect(t, sk));
     if (user.side === 'party' && sk.target === 'enemy' && targets.length && !sk.trueStrike) targets = targets.map((t) => redirect(t, sk));
+    // Episode 3: a hammer blow aimed at the party (`turnable`, the Last Hammer) lands on Bram alone, at half strength, while
+    // his Tempered Oath holds; the Warden is Broken by the ring of it
+    let turned = null;
+    if (sk.turnable && user.side === 'enemy' && sk.target === 'enemies') {
+      turned = living('party').find((x) => has(x, 'oath') && !kept(x)) || null;
+      if (turned) targets = [turned];
+    }
     if (!opts.silentStart) {
       emit({ type: 'action_start', actor: user.uid, action: { type: sk.kind === 'enemy' ? 'enemy' : sk.kind, skill: sk.id, name: sk.name },
         targets: sk.target === 'random' ? opponentsOf(user).map((u) => u.uid) : targets.map((t) => t.uid),
@@ -850,7 +906,8 @@ export function createBattle(cfg = {}) {
     if (sk.formula === 'phys' && sk.target === 'enemy' && targets[0] && !hitTypes(user, sk).includes('bow')) {
       emit({ type: 'move_to', actor: user.uid, target: targets[0].uid });
     }
-    const part = { id: sk.id, formula: sk.formula, power: sk.power, types: sk.types, pierce: sk.pierce, trueStrike: !!sk.trueStrike };
+    const part = { id: sk.id, formula: sk.formula, power: turned ? sk.power * OATH_HAMMER : sk.power, types: sk.types, pierce: sk.pierce,
+      trueStrike: !!sk.trueStrike };
     const landed = new Set();
     if (sk.formula === 'phys' || sk.formula === 'mag') {
       if (sk.target === 'random') {
@@ -882,6 +939,11 @@ export function createBattle(cfg = {}) {
       }
     } else {
       for (const t of targets) landed.add(t.uid);
+    }
+    if (turned) {
+      emit({ type: 'oath_ring', actor: turned.uid, target: user.uid, sfx: 'oath_ring' });
+      emit({ type: 'message', text: `The hammer rings on ${turned.name} like a bell.`, kind: 'oath_ring', target: turned.uid });
+      breakUnit(user);
     }
     // effects
     const effTargets = sk.target === 'random' ? [...landed].map(U) : targets.filter((t) => landed.has(t.uid) || sk.formula === 'none');
@@ -920,6 +982,7 @@ export function createBattle(cfg = {}) {
 
   function applyEffect(user, sk, e, targets, act) {
     if (e.selfStatus) { addStatus(user, e.selfStatus, e.turns, user); return; }
+    if (e.stokeSelf) { stoke(user, e.stokeSelf); return; }
     const toUser = !(sk.target === 'ally' || sk.target === 'allies');
     if (e.furyGain && toUser) { gainFury(user, e.furyGain, 'skill'); return; }
     if (e.mpGain && toUser) { changeMp(user, e.mpGain, { skill: sk.id }); return; }
@@ -927,7 +990,7 @@ export function createBattle(cfg = {}) {
       for (const a of alliesOf(user)) heal(a, a.maxHp * e.partyHeal, user, { skill: sk.id });
       return;
     }
-    if (e.feast || e.devour || e.keep) { AI.special(ctx, user, sk, e, targets); return; }
+    if (e.feast || e.devour || e.keep || e.nameStrike) { AI.special(ctx, user, sk, e, targets); return; }
     if (e.coverAlly) {
       // enemy Cover / Guard: the lowest-HP ally is shielded until the user's next turn
       const pool = alliesOf(user).filter((a) => a.uid !== user.uid);
@@ -962,6 +1025,7 @@ export function createBattle(cfg = {}) {
         if (chance >= 1 || R() < chance) addStatus(t, e.status, e.turns, user);
       }
       if (e.furyGain) gainFury(t, e.furyGain, 'skill');
+      if (e.stoke) stoke(t, e.stoke, { reason: 'coil' });
       if (e.mpGain) changeMp(t, e.mpGain, { skill: sk.id });
       if (e.delay) delayUnit(t, e.delay, sk.id);
       if (e.shieldChip) { const lost = chipShields(t, e.shieldChip, user); if (lost && act) { act.weak = true; if (t.broken) act.broke = true; } }
@@ -1093,6 +1157,15 @@ export function createBattle(cfg = {}) {
     const t = U(target);
     emit({ type: 'action_start', actor: u.uid, action: { type: 'item', item: it.id, name: it.name }, targets: [t.uid] });
     const e = it.effect;
+    if (e.throw) {
+      // Episode 3: the Quench Flask. Ice damage that does not depend on who throws it, and it always quenches.
+      const part = { id: it.id, formula: 'mag', power: e.throw.power, types: e.throw.types, fixed: e.throw.fixed };
+      quenchReason = 'flask';
+      if (t.alive) strike(u, t, part, null);
+      if (t.alive) quench(t, 'flask');
+      quenchReason = 'ice';
+      return [u, ITEM_RANK];
+    }
     if (e.revive) {
       if (!t.alive) {
         t.alive = true; t.hp = Math.max(1, Math.round(t.maxHp * e.revive)); t.statuses = {}; t.mods = [];
@@ -1160,6 +1233,12 @@ export function createBattle(cfg = {}) {
     emit({ type: 'turn_start', actor: u.uid, time: state.now, round: Math.floor(state.partyTurns / state.partySize) + 1 });
     if (u.defending) { u.defending = false; emit({ type: 'defend_end', actor: u.uid }); }
     if (u.cover) { const c = U(u.cover); if (c) c.coveredBy = null; u.cover = null; }
+    if (has(u, 'oath')) {
+      // Tempered Oath holds until Bram's next turn begins (its Taunt and Protect go with it), unless a hammer is raised and has not
+      // fallen yet: he stands in front until it does (so the player only has to read the telegraph, not the timeline)
+      const raised = living('enemy').some((e) => e.charging && SKILLS[e.charging.skill] && SKILLS[e.charging.skill].turnable);
+      if (!raised) for (const id of ['oath', 'taunt', 'protect']) removeStatus(u, id, 'expired');
+    }
     if (kept(u)) {
       // sealed in the mirror: no ticks, no action; Kept counts down at the end of this skipped turn
       emit({ type: 'skip', actor: u.uid, reason: 'kept' });
@@ -1264,7 +1343,7 @@ export function createBattle(cfg = {}) {
   const ctx = {
     get state() { return state; }, R, emit, U, all, living, opponentsOf, alliesOf, has, eff,
     addStatus, removeStatus, heal, damage, kill, summon, cancelCharge, delayUnit, breakUnit, chipShields, changeMp,
-    addMod, revealAll, learnTypes, turnsUntil, timeline, fill, skill: (id) => SKILLS[id],
+    addMod, revealAll, learnTypes, turnsUntil, timeline, fill, skill: (id) => SKILLS[id], stoke, quench, heatReset,
     strike, useSkill, redirect, kept, delayOf, endTurnOf: (u, rank) => endTurn(u, rank),
     setWeak(u, weak, resist, key) {
       u.weak = weak.slice(); u.resist = resist ? resist.slice() : u.resist; u.weakKey = key;
@@ -1299,11 +1378,13 @@ export function createBattle(cfg = {}) {
     emit({ type: 'battle_start', start, boss: state.options.boss,
       units: all().map((u) => ({ uid: u.uid, id: u.id, side: u.side, name: u.name, hp: u.hp, maxHp: u.maxHp, mp: u.mp,
         maxMp: u.maxMp, fury: u.fury, elite: u.elite || null, shields: u.side === 'enemy' ? u.shields : null, boss: !!u.boss,
-        weapon: u.weapon || null, variant: u.variant || null })) });
+        weapon: u.weapon || null, variant: u.variant || null, heat: u.heatMax ? u.heat : null, heatMax: u.heatMax || 0 })) });
     if (start === 'preemptive') emit({ type: 'message', text: 'You caught them off guard!' });
     if (start === 'ambush') emit({ type: 'message', text: 'Ambushed!' });
     for (const u of living('enemy')) if (u.elite) emit({ type: 'message', text: `${u.name} appears! (Elite)`, kind: 'elite', target: u.uid });
-    if (state.options.startFury > 0) emit({ type: 'message', text: `The faces in the fountain remember you. Fury rises! (+${state.options.startFury})`, kind: 'blessing' });
+    if (state.options.startFury > 0) {
+      emit({ type: 'message', text: state.options.startFuryText || `The faces in the fountain remember you. Fury rises! (+${state.options.startFury})`, kind: 'blessing' });
+    }
     for (const u of living('party')) {
       if (u.stats.startHaste) addStatus(u, 'haste', u.stats.startHaste, u);
       if (u.fury >= FURY_MAX) emit({ type: 'fury_ready', target: u.uid });
@@ -1411,7 +1492,10 @@ export function createBattle(cfg = {}) {
       if (action.type === 'item') {
         const it = CONSUMABLES[action.item];
         const t = U(target);
-        if (it && t) out.push({ target: t.uid, heal: it.effect.heal || 0, mp: it.effect.mp || 0, revive: !!it.effect.revive,
+        if (it && t && it.effect.throw) {
+          const r = one(u, t, { formula: 'mag', power: it.effect.throw.power, types: it.effect.throw.types, fixed: it.effect.throw.fixed });
+          out.push({ target: t.uid, min: r.lo, max: r.hi, avg: r.avg, weak: r.weak, resist: r.resist, hit: 1, quench: true });
+        } else if (it && t) out.push({ target: t.uid, heal: it.effect.heal || 0, mp: it.effect.mp || 0, revive: !!it.effect.revive,
           cure: it.effect.cure || [] });
       }
       return out;

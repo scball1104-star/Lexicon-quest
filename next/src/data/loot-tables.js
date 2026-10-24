@@ -26,6 +26,11 @@ export const ZONE_LOOT = {
   court_f1:   { ilvl: 10, equipChance: 0.15 },
   court_f2:   { ilvl: 11, equipChance: 0.16 },
   court_f3:   { ilvl: 12, equipChance: 0.18 },
+  // Episode 3 (EPISODE3_PLAN.md 7.5). Random tables never roll legendaries.
+  sand_road:  { ilvl: 13, equipChance: 0.16 },
+  foundry_f1: { ilvl: 14, equipChance: 0.16 },
+  foundry_f2: { ilvl: 15, equipChance: 0.17 },
+  foundry_f3: { ilvl: 16, equipChance: 0.18 },
 };
 
 // Which slot a random equipment drop fills.
@@ -46,6 +51,11 @@ export const BOSS_LOOT = {
   other_selves: { unique: 'twinfold_charm', rolls: 1, table: 'boss', ilvl: 11, encounter: true,
     consumables: [{ item: 'hi_potion', qty: 2 }, { item: 'hi_ether', qty: 1 }] },
   nameless_king: { unique: null, rolls: 2, table: 'boss', ilvl: 13,
+    consumables: [{ item: 'phoenix_feather', qty: 1 }, { item: 'hi_ether', qty: 2 }] },
+  // Episode 3. The First Bell Hammer is staged in warden_after (like Lanternheart and the Kept Promise), not dropped.
+  bellows_specter: { unique: 'updraft_charm', rolls: 1, table: 'boss', ilvl: 15,
+    consumables: [{ item: 'hi_potion', qty: 2 }] },
+  cinder_warden: { unique: 'warden_heart', rolls: 2, table: 'boss', ilvl: 16,
     consumables: [{ item: 'phoenix_feather', qty: 1 }, { item: 'hi_ether', qty: 2 }] },
 };
 

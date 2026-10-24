@@ -201,15 +201,15 @@ test('EP3_START: a Lv 13 party with the Episode 1 and 2 flags, key items and the
   assert.deepEqual(deserialize(serialize(g)), g, 'round trips through a save');
 });
 
-test('EP3_START: every gear and item id exists, and the loadout is the court_throne row', () => {
+test('EP3_START: every gear and item id exists, and the loadout is the simulator\'s sand_road row', () => {
   for (const [who, spec] of Object.entries(EP3_START.members)) {
     for (const [slot, id] of Object.entries(spec.equip)) assert.ok(ITEMS[id], `${who} ${slot}: ${id}`);
   }
   for (const id of Object.keys(EP3_START.items)) assert.ok(ITEMS[id] || KEY_ITEMS[id], id);
-  // tools/sim/loadouts.mjs court_throne (derived by the layered spreads; the sand_road row does not exist yet)
+  // tools/sim/loadouts.mjs sand_road (E3-battle): the court_throne row plus the Kept Promise and tier 4 gear
   const e = EP3_START.members;
-  assert.deepEqual(e.hero.equip, { sword: 'lanternheart', axe: 'bearded_axe', body: 'silver_mail', head: 'steel_helm', boots: 'traveler_boots', charm: 'twinfold_charm' });
-  assert.equal(e.mira.equip.staff, 'mirror_rod'); assert.equal(e.bram.equip.spear, 'mere_pike');
+  assert.deepEqual(e.hero.equip, { sword: 'lanternheart', axe: 'moonsteel_axe', body: 'silver_mail', head: 'glass_helm', boots: 'mere_boots', charm: 'twinfold_charm' });
+  assert.equal(e.mira.equip.staff, 'mirror_rod'); assert.equal(e.mira.equip.bow, 'kept_promise'); assert.equal(e.bram.equip.spear, 'mere_pike');
   assert.equal(newMember('hero', { level: 13 }).level, 13);
 });
 
@@ -224,4 +224,12 @@ test('Episode 3 start vs Episode 2 start: the older quick start is unchanged', (
 test('PENDING (E3-integrate): the Episode 2 credits save reaches ep3_morning with EP3_LIVE on, and not with it off', { skip: 'needs ep3.js scenes and sceneAllowed() support for EP3_LIVE (E3-story / E3-integrate)' }, () => {});
 test('PENDING (E3-integrate): the quick start plays through a full map change on the real Episode 3 maps writing only its own slot', { skip: 'needs the Episode 3 maps (E3-maps) and the browser autoplay' }, () => {});
 test('PENDING (E3-scene-ui): the title shows "Episode 3: new party" and the slot picker panel with the real ?ep=3 URL', { skip: 'needs EP3_MAPS_LISTED in encounters.js (E3-battle/E3-maps) and a title shot' }, () => {});
-test('PENDING (E3-battle): EP3_START matches the simulator\'s sand_road loadout', { skip: 'tools/sim/loadouts.mjs has no sand_road row yet; EP3_START uses court_throne' }, () => {});
+test('EP3_START matches the simulator\'s sand_road loadout (gear and mastery, member by member)', async () => {
+  const { LOADOUTS } = await import('../../tools/sim/loadouts.mjs');
+  for (const id of ['hero', 'mira', 'bram']) {
+    const row = LOADOUTS.sand_road[id], start = EP3_START.members[id];
+    assert.equal(start.weapon, row.weapon, `${id} weapon`);
+    assert.deepEqual(start.equip, row.equip, `${id} equip`);
+    assert.deepEqual(start.mastery, row.mastery, `${id} mastery`);
+  }
+});

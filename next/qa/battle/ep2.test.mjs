@@ -51,7 +51,7 @@ test('Episode 2 ids: enemies, encounters, zones, items, uniques and the set are 
   }
   assert.deepEqual(SETS.merewardens_watch.pieces, ['merewarden_helm', 'merewarden_mantle']);
   assert.equal(EQUIPMENT.silverglass_blade.ilvl, 11);
-  for (const a of Object.values(AFFIXES)) assert.equal(a.tiers[a.tiers.length - 1][0], 10, `${a.id} has an ilvl 10 tier`);
+  for (const a of Object.values(AFFIXES)) assert.ok(a.tiers.some((t) => t[0] === 10), `${a.id} has an ilvl 10 tier`);   // Episode 3 adds a fifth at 14
   assert.ok(STATUSES.kept && STATUSES.kept.turns === 2);
   for (const id of ['recall', 'shatter', 'true_strike']) assert.ok(SKILLS[id], id);
 });

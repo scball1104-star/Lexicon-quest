@@ -106,20 +106,20 @@ export const EP2_DONE_FLAGS = ['ep2_started', 'crossing_done', 'east_road_arrive
   'court_f1_arrived', 'court_f2_arrived', 'court_f3_arrived', 'mira_memory_1', 'mira_memory_2', 'mira_memory_3',
   'vow_belonging', 'vow_mercy', 'vow_courage', 'mirror_sigil_get'];
 /**
- * The party Episode 3 expects at Lv 13: the simulator's `court_throne` loadout (tools/sim/loadouts.mjs). The simulator
- * has no `sand_road` loadout yet, so this is the last Episode 2 row, as the plan allows; E3-battle's `sand_road` row
- * should replace these values when it lands (the test in qa/core/e3_saves.test.mjs only checks that every id exists).
- * `exp` 2900 is the plan's figure (Lv 13 floor 2800, Episode 2 finishers 2850 to 3100). The run starts awake in the
- * Hollowmere inn so `ep3_morning` runs, with the Episode 2 key items.
+ * The party Episode 3 expects at Lv 13: the simulator's `sand_road` loadout (tools/sim/loadouts.mjs, E3-battle): the
+ * `court_throne` row plus the Kept Promise, tier 4 gear (Moonsteel Axe, Glass Helm, Mere Boots, Silver Mail on Bram, Mirror
+ * Circlet) and mastery up a step. `qa/core/e3_saves.test.mjs` holds the two together. `exp` 2900 is the plan's figure (Lv 13
+ * floor 2800, Episode 2 finishers 2850 to 3100; tools/sim EP3_START_EXP). The run starts awake in the Hollowmere inn so
+ * `ep3_morning` runs, with the Episode 2 key items; the Quench Flasks come from Vessa at the sand gate.
  */
 export const EP3_START = {
   level: 13, exp: 2900, gold: 1500, map: 'nh_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
   items: { potion: 6, hi_potion: 4, hi_ether: 3, phoenix_feather: 2, silver_salve: 2,
     name_fragment_1: 1, name_fragment_2: 1, lantern_of_recall: 1, mirror_sigil: 1 },
   members: {
-    hero: { weapon: 'sword', equip: { sword: 'lanternheart', axe: 'bearded_axe', body: 'silver_mail', head: 'steel_helm', boots: 'traveler_boots', charm: 'twinfold_charm' }, mastery: { sword: 420, axe: 150 } },
-    mira: { weapon: 'staff', equip: { staff: 'mirror_rod', bow: 'hunters_bow', body: 'mirrorguard_mail', head: 'moon_circlet', charm: 'owl_charm' }, mastery: { staff: 320, bow: 130 } },
-    bram: { weapon: 'spear', equip: { spear: 'mere_pike', axe: 'hatchet', body: 'bronze_plate', head: 'iron_helm', boots: 'leather_boots' }, mastery: { spear: 420, axe: 150 } },
+    hero: { weapon: 'sword', equip: { sword: 'lanternheart', axe: 'moonsteel_axe', body: 'silver_mail', head: 'glass_helm', boots: 'mere_boots', charm: 'twinfold_charm' }, mastery: { sword: 460, axe: 170 } },
+    mira: { weapon: 'staff', equip: { staff: 'mirror_rod', bow: 'kept_promise', body: 'mirrorguard_mail', head: 'mirror_circlet', charm: 'owl_charm' }, mastery: { staff: 350, bow: 150 } },
+    bram: { weapon: 'spear', equip: { spear: 'mere_pike', axe: 'hatchet', body: 'silver_mail', head: 'glass_helm', boots: 'mere_boots' }, mastery: { spear: 460, axe: 170 } },
   },
 };
 

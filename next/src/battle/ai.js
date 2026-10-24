@@ -40,6 +40,7 @@ function pickTarget(ctx, u, rule = 'random') {
 
 function moveOk(ctx, u, m) {
   if (m.once && u.ai.used[m.skill]) return false;
+  if (m.skill === 'stoke' && u.heatMax && u.heat >= u.heatMax) return false;   // Episode 3: nothing left to stoke
   switch (m.if) {
     case 'notHasted': return !ctx.has(u, 'haste');
     case 'notProtected': return !ctx.has(u, 'protect');
@@ -595,8 +596,169 @@ const namelessKing = {
   },
 };
 
+// =============================================================================== Episode 3 scripts (E3-battle)
+// --- Heat (EPISODE3_PLAN.md 6.3) -----------------------------------------------------------------------------------
+// rules.js `stoke` calls planFlare when a foe reaches its maximum Heat; the exported afterTurn re-announces a flare that a
+// Stun cancelled. The flare is an ordinary charge (a telegraph one turn ahead) and `heatReset` runs when it fires.
+function flareTarget(ctx, u, sk) {
+  const foes = partyFoes(ctx);
+  if (!foes.length) return null;
+  // Strike the Name picks a name that is still its own (it already struck the Nameless ones out)
+  const fresh = sk.effects && sk.effects.some((e) => e.nameStrike) ? foes.filter((f) => !ctx.has(f, 'nameless')) : foes;
+  const pool = fresh.length ? fresh : foes;
+  return pool[Math.floor(ctx.R() * pool.length)].uid;
+}
+/** Announce the flare of a foe at full Heat (called by rules.js stoke() and by afterTurn below). */
+export function planFlare(ctx, u) {
+  const d = ENEMIES[u.id];
+  if (!d || !d.heat || !u.alive || u.charging || u.broken) return;
+  const sk = SKILLS[d.heat.flare];
+  ctx.planCharge(u, sk.id, sk.target === 'enemy' ? flareTarget(ctx, u, sk) : null, { event: { flare: true, heat: u.heat } });
+}
+
+// --- The Bellows Specter (ai 'specter') -----------------------------------------------------------------------------
+// Every attack it makes feeds it (stokeSelf in soot_wing and draft_lash), so Heat 3 comes on its third turn. At 50% the
+// fans reverse: Haste, and it stokes a second time at the end of each of its turns unless ice hit it since its last turn.
+export const BREATH_EMPOWER = 0.2;     // ATK and MAG the Specter gains per Furnace Breath that lands
+const specter = {
+  start(ctx, u) {
+    u.ai.phase = 0;
+    const p = ENEMIES[u.id].phases[0];
+    ctx.emit({ type: 'phase', actor: u.uid, phase: 1, id: p.id, name: p.name, text: p.text });
+  },
+  decide: basic.decide,
+  afterTurn(ctx, u) {
+    if (u.alive && u.ai.phase === 1 && !u.broken && !u.charging && !u.ai.iceSince) ctx.stoke(u, 1, { reason: 'fans' });
+    u.ai.iceSince = false;
+  },
+  onHit(ctx, u, src, types) { if (types.includes('ice')) u.ai.iceSince = true; },
+  onDamaged(ctx, u) {
+    const d = ENEMIES[u.id];
+    if ((u.ai.phase ?? 0) === 0 && u.hp <= Math.floor(u.maxHp * d.phases[1].at)) {
+      const p = d.phases[1];
+      u.ai.phase = 1;
+      ctx.emit({ type: 'phase', actor: u.uid, phase: 2, id: p.id, name: p.name, text: p.text });
+      ctx.addStatus(u, 'haste', 99, u);
+    }
+  },
+  // every Furnace Breath that lands feeds it: +20% ATK and MAG for the rest of the fight (a quenched flare never fires)
+  onChargeFired(ctx, u) {
+    u.ai.breaths = (u.ai.breaths || 0) + 1;
+    ctx.addMod(u, 'atk', 1 + BREATH_EMPOWER, 99, `breath${u.ai.breaths}`);
+    ctx.addMod(u, 'mag', 1 + BREATH_EMPOWER, 99, `breath${u.ai.breaths}`);
+  },
+  onChargeCancelled() {},
+};
+
+// --- The coils (ai 'coil') ------------------------------------------------------------------------------------------
+// bellows_coil stokes the Warden every turn; smelter_coil sprays the party on its 1st, 3rd, 5th turn and builds pressure between.
+const coil = {
+  decide(ctx, u) {
+    if (u.id === 'bellows_coil') return { skill: 'stoke_warden', target: null };
+    return { skill: u.ai.turns % 2 === 1 ? 'slag_spray' : 'coil_pressure', target: null };
+  },
+  afterTurn() {},
+};
+
+// --- The Cinder Warden (ai 'cinder_warden') --------------------------------------------------------------------------
+// 1 Tempered Iron (100 to 70%, HP locked at 70%): Hammerfall, Ember Spray, Stoke; Strike the Name at Heat 3.
+// 2 Molten Shell (from 70%): the Bellows Coil and the Smelter Coil. While either stands the Warden takes 25% damage, its
+//   shields cannot be chipped and its HP stops at 31%. When both are gone the shell cracks: Broken for a turn, phase 3.
+// 3 Quenched Core: Haste, a new weakness (light), Last Hammer announced on every third turn (party phys 230%).
+//   Answers: everyone Defends, a Break, Lunge's knock-back, or Bram's Tempered Oath (he takes it alone at 50% and the
+//   Warden is Broken: rules.js useSkill `turnable`).
+export const SHELL_MULT = 0.25;        // damage taken under the Molten Shell
+export const HAMMER_EVERY = 3;
+export const NAME_EMPOWER = 0.2;       // ATK and MAG the Warden gains per name it strikes out         // the Warden's own turns between Last Hammers
+const WARDEN_COILS = ['bellows_coil', 'smelter_coil'];
+const coilsStanding = (ctx) => ctx.living('enemy').filter((e) => WARDEN_COILS.includes(e.id));
+function enterWardenPhase(ctx, u, idx) {
+  const p = ENEMIES[u.id].phases[idx];
+  u.ai.phase = idx;
+  // an announced flare survives the move to the next phase (the shell does not wipe a raised hammer); nothing else is pending
+  if (!(u.charging && u.charging.skill === ENEMIES[u.id].heat.flare)) ctx.cancelCharge(u, 'phase');
+  ctx.emit({ type: 'phase', actor: u.uid, phase: idx + 1, id: p.id, name: p.name, text: p.text });
+  ctx.setWeak(u, p.weak, p.resist, idx < 2 ? `${u.id}:iron` : `${u.id}:${p.id}`);
+  if (idx > 0) ctx.setShields(u, p.shields);
+  if (p.summon) p.summon.forEach((id, i) => ctx.summon(id, { by: u, summoned: true, firstTurn: 0.4 + 0.3 * i }));
+  if (idx === 1) {
+    u.ai.ward = true;
+    ctx.emit({ type: 'message', text: 'A shell of fire closes around the Warden. While its coils stand, little reaches it.', kind: 'ward', target: u.uid });
+  }
+  if (idx === 2) {
+    ctx.addStatus(u, 'haste', 99, u);
+    u.ai.hammerAt = u.ai.turns + HAMMER_EVERY - 1;   // the first one comes a turn early: phase 3 is short
+  }
+}
+function shatterShell(ctx, u) {
+  u.ai.ward = false;
+  ctx.emit({ type: 'message', text: 'The shell cracks!', kind: 'ward_break', target: u.uid });
+  enterWardenPhase(ctx, u, 2);
+  ctx.breakUnit(u);
+}
+const cinderWarden = {
+  start(ctx, u) {
+    u.ai.phase = 0;
+    const p = ENEMIES[u.id].phases[0];
+    ctx.emit({ type: 'phase', actor: u.uid, phase: 1, id: p.id, name: p.name, text: p.text });
+    ctx.setWeak(u, p.weak, p.resist, `${u.id}:iron`);
+  },
+  decide(ctx, u, d) {
+    const p = d.phases[u.ai.phase ?? 0];
+    return planFromMove(ctx, u, weightedMove(ctx, u, (p && p.moves) || d.moves));
+  },
+  afterTurn(ctx, u) {
+    if (u.charging || u.broken || (u.ai.phase ?? 0) < 2) return;
+    if (u.ai.turns >= (u.ai.hammerAt ?? 99)) {
+      ctx.planCharge(u, 'last_hammer', null);
+      u.ai.hammerAt = u.ai.turns + HAMMER_EVERY;   // announced on every third turn (a Break that cancels it does not reset the beat)
+    }
+  },
+  clampDamage(ctx, u, amt) {
+    const d = ENEMIES[u.id];
+    const ph = u.ai.phase ?? 0;
+    let floorHp = null;
+    if (ph === 0) floorHp = Math.floor(u.maxHp * d.phases[1].at);
+    else if (ph === 1 && u.ai.ward) floorHp = Math.floor(u.maxHp * d.phases[1].floor);
+    if (floorHp === null) return amt;
+    return u.hp - amt < floorHp ? Math.max(0, u.hp - floorHp) : amt;
+  },
+  onDamaged(ctx, u) {
+    if ((u.ai.phase ?? 0) === 0 && u.hp <= Math.floor(u.maxHp * ENEMIES[u.id].phases[1].at)) enterWardenPhase(ctx, u, 1);
+  },
+  damageTakenMult(ctx, u) { return u.ai.ward ? SHELL_MULT : 1; },
+  shieldLocked(ctx, u) { return !!u.ai.ward; },
+  onDeath(ctx, dead) {
+    if (!WARDEN_COILS.includes(dead.id)) return;
+    const w = ctx.living('enemy').find((e) => e.id === 'cinder_warden');
+    if (w && w.ai.ward && !coilsStanding(ctx).length) shatterShell(ctx, w);
+  },
+  special(ctx, u, sk, e, targets) {
+    if (!e.nameStrike) return null;
+    for (const t of targets) {
+      if (!t || !t.alive) continue;
+      if (t.defending) {
+        ctx.emit({ type: 'message', text: `${t.name} holds fast to their name!`, kind: 'name_hold', target: t.uid });
+        continue;
+      }
+      if (ctx.has(t, 'oath')) {
+        ctx.emit({ type: 'message', text: `${t.name} is saying her name!`, kind: 'oath_hold', target: t.uid });
+        continue;
+      }
+      ctx.emit({ type: 'message', text: `${t.name}'s name is struck out!`, kind: 'name_struck', target: t.uid });
+      ctx.addStatus(t, 'silence', 3, u);
+      ctx.addStatus(t, 'nameless', 99, u);
+      // every name it strikes out makes the Warden stronger for the rest of the fight (Devour Name's rule: a missed Defend costs)
+      u.ai.namesStruck = (u.ai.namesStruck || 0) + 1;
+      ctx.addMod(u, 'atk', 1 + NAME_EMPOWER, 99, `name${u.ai.namesStruck}`);
+      ctx.addMod(u, 'mag', 1 + NAME_EMPOWER, 99, `name${u.ai.namesStruck}`);
+    }
+    return null;
+  },
+};
+
 const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased, mimic, reflections,
-  nameless_king: namelessKing };
+  nameless_king: namelessKing, specter, coil, cinder_warden: cinderWarden };
 function scriptOf(u) {
   const d = ENEMIES[u.id];
   return (d && SCRIPTS[d.ai]) || basic;
@@ -607,9 +769,16 @@ export function onStart(ctx) {
   for (const u of ctx.living('enemy')) { const s = scriptOf(u); if (s.start) s.start(ctx, u); }
 }
 export function decide(ctx, u) { return scriptOf(u).decide(ctx, u, ENEMIES[u.id]); }
-export function afterTurn(ctx, u) { const s = scriptOf(u); if (s.afterTurn) s.afterTurn(ctx, u, ENEMIES[u.id]); }
+export function afterTurn(ctx, u) {
+  const s = scriptOf(u);
+  if (s.afterTurn) s.afterTurn(ctx, u, ENEMIES[u.id]);
+  // Episode 3: a flare that a Stun cancelled is announced again while the foe is still at full Heat
+  if (u.alive && u.heatMax && u.heat >= u.heatMax && !u.charging && !u.broken) planFlare(ctx, u);
+}
 export function onChargeFired(ctx, u, sk) {
   u.ai.lastCharge = sk.id;
+  const dh = ENEMIES[u.id];
+  if (dh && dh.heat && sk.id === dh.heat.flare) ctx.heatReset(u, 'flare');
   const s = scriptOf(u);
   if (s.onChargeEnd) s.onChargeEnd(ctx, u, null, sk.id);
   else if (s.onChargeFired) s.onChargeFired(ctx, u, s === archivore ? sk : ENEMIES[u.id]);
@@ -625,7 +794,7 @@ export function onBreak(ctx, u) { const s = scriptOf(u); if (s.onBreak) s.onBrea
 export function onRecover(ctx, u) { const s = scriptOf(u); if (s.onRecover) s.onRecover(ctx, u); }
 /** A unit died: every script that watches deaths hears it (the Archivore's pages, the Nameless King's court). */
 export function onDeath(ctx, u) {
-  for (const s of [archivore, namelessKing]) s.onDeath(ctx, u);
+  for (const s of [archivore, namelessKing, cinderWarden]) s.onDeath(ctx, u);
 }
 /** An enemy was hit (after the damage): the Borrowed Shadow learns the type. */
 export function onHit(ctx, u, src, types, weakHit) {
@@ -714,6 +883,53 @@ function chargingThreats(b, me) {
   return out;
 }
 
+
+/** Episode 3: the threat is the foe's own Heat flare. */
+function isHeatFlare(foe, sk) {
+  const d = ENEMIES[foe.id];
+  return !!(d && d.heat && d.heat.flare === sk.id);
+}
+
+/** Episode 3: an action that quenches `foe` now (an ice skill, else a Quench Flask), or null. */
+function quenchAction(b, me, foe, hasItem, order) {
+  const cmds = b.commands(me);
+  let best = null;
+  for (const g of ['tech', 'magic']) {
+    const c = cmds.find((x) => x.id === g);
+    if (!c || !c.list) continue;
+    for (const e of c.list) {
+      const sk = SKILLS[e.skill];
+      if (!e.enabled || sk.target !== 'enemy' || !sk.types.includes('ice') || !(sk.formula === 'phys' || sk.formula === 'mag')) continue;
+      const est = b.estimate(me, { type: 'skill', skill: e.skill, target: foe.uid }).find((x) => x.target === foe.uid);
+      if (!est || est.redirect) continue;
+      const score = est.avg - (sk.mp || 0) * 0.5;
+      if (!best || score > best.score) best = { score, action: { type: 'skill', skill: e.skill, target: foe.uid } };
+    }
+  }
+  if (best) return best.action;
+  // Mira's Frost is coming before the foe acts: leave the flask for later
+  const mira = b.unit('mira');
+  if (me.id !== 'mira' && mira && mira.alive && mira.mp >= 4 && !(mira.statuses && (mira.statuses.silence || mira.statuses.kept))) {
+    const mi = order.indexOf('mira');
+    const fi = order.indexOf(foe.uid);
+    if (mi >= 0 && fi >= 0 && mi < fi && SKILLS.frost) return null;
+  }
+  if (hasItem('quench_flask')) return { type: 'item', item: 'quench_flask', target: foe.uid };
+  return null;
+}
+
+/** Episode 3: Bram's Tempered Oath is up, or Bram will raise it before `foe` acts. */
+function oathCovers(b, foe, order) {
+  const bram = b.unit('bram');
+  if (!bram || !bram.alive) return false;
+  if (bram.statuses && bram.statuses.oath && bram.statuses.oath.turns > 0) return true;
+  const sil = bram.statuses && (bram.statuses.silence || bram.statuses.kept);
+  const known = bram.skills && bram.skills.includes('tempered_oath');
+  const bi = order.indexOf('bram');
+  const fi = order.indexOf(foe.uid);
+  return !!(known && !sil && bram.mp >= (SKILLS.tempered_oath.mp || 0) && bi >= 0 && fi >= 0 && bi < fi);
+}
+
 /** Rough expected damage of an enemy skill against a party unit (for defend decisions). */
 function threatDamage(foe, sk, target) {
   if (!sk.power) return 0;
@@ -762,6 +978,7 @@ function finishingBlow(b, me, foes) {
  * and Defends when a member is under 35% with no potion in hand and the healer not ready.
  */
 export function competentPolicy(b, me, opts = {}) {
+  heatAware = !opts.ignoreTelegraphs;   // reckless play does not read Heat either (scoreHit)
   const cmds = b.commands(me);
   const foes = b.living('enemy');
   const isKept = (u) => !!(u.statuses && u.statuses.kept && u.statuses.kept.turns > 0);
@@ -784,9 +1001,23 @@ export function competentPolicy(b, me, opts = {}) {
   const threats = opts.ignoreTelegraphs ? [] : chargingThreats(b, me);
   const order = b.timeline(14).map((r) => r.uid);
   for (const t of threats) {
+    // Episode 3: the Last Hammer is Bram's to answer. He raises Tempered Oath as soon as it is announced (it holds until the
+    // hammer falls, so the blow lands on him alone and breaks the Warden); everyone else gets on with the fight meanwhile.
+    if (t.skill.turnable) {
+      if (me.id === 'bram' && !(me.statuses.oath && me.statuses.oath.turns > 0) && canSkill('tempered_oath')) {
+        return { type: 'skill', skill: 'tempered_oath', target: me.uid };
+      }
+      if (oathCovers(b, t.foe, order)) continue;
+    }
     // can we break or interrupt it right now?
     const breakAct = bestBreakAction(b, me, t.foe, canSkill);
     if (breakAct) return breakAct;
+    // Episode 3: a Heat flare is answered by quenching it (ice, or a Quench Flask when Mira's Frost is not coming first)
+    if (isHeatFlare(t.foe, t.skill)) {
+      const q = quenchAction(b, me, t.foe, hasItem, order);
+      if (q) return q;
+    }
+
     if (!t.foe.boss && canSkill('lunge') && me.weapon === 'spear') return { type: 'skill', skill: 'lunge', target: t.foe.uid };
     // a Mirrored Combo falls apart when either reflection is pushed back: Lunge knocks even a boss back
     if (t.skill.mirrorCombo && me.weapon === 'spear' && canSkill('lunge')) return { type: 'skill', skill: 'lunge', target: t.foe.uid };
@@ -797,6 +1028,8 @@ export function competentPolicy(b, me, opts = {}) {
     if (chip && !t.foe.broken && t.foe.shields <= partyTurnsBefore(b, t.foe.uid)) return chip;
   }
   for (const t of threats) {
+    // Tempered Oath up (or Bram about to raise it before the hammer falls): the rest of the party attacks instead of bracing
+    if (t.skill.turnable && oathCovers(b, t.foe, order)) continue;
     const mineIdx = nextTurnIndex(b, me, { type: 'defend' });
     const foeIdx = (() => { const p = b.previewTimeline(me, { type: 'defend' }); return p.order.findIndex((r) => r.uid === t.foe.uid); })();
     const hitsBeforeMyTurn = foeIdx >= 0 && (mineIdx < 0 || foeIdx < mineIdx);
@@ -897,10 +1130,13 @@ export function competentPolicy(b, me, opts = {}) {
     }
   }
   const comboCmd = cmds.find((c) => c.id === 'combo');
-  const comboBudgetOk = (sk) => isBossFight || sk.members.every((m) => {
+  // Episode 3: Bram keeps the MP for Tempered Oath while a foe on the field raises the Last Hammer
+  const reserve = oathReserve(b, me);
+  const bramReserve = oathReserve(b, b.unit('bram') || me);   // combos that spend Bram's MP count whoever starts them
+  const comboBudgetOk = (sk) => (isBossFight && !(bramReserve && sk.members.includes('bram') && b.unit('bram').mp - (sk.cost.bram || 0) < bramReserve)) || (!isBossFight && sk.members.every((m) => {
     const u = b.unit(m);
     return u && u.maxMp && ((u.startMp ?? u.maxMp) - u.mp + (sk.cost[m] || 0)) / u.maxMp <= 0.4;
-  });
+  }));
   if (comboCmd && comboCmd.enabled) {
     for (const c of comboCmd.list.filter((x) => x.enabled)) {
       const sk = SKILLS[c.skill];
@@ -933,7 +1169,7 @@ export function competentPolicy(b, me, opts = {}) {
     if (unknown) return { type: 'skill', skill: 'appraise', target: unknown.uid };
   }
   const broken = foes.filter((f) => f.broken);
-  if (me.id === 'bram' && canSkill('rally') && isBossFight && broken.length && allies.filter((a) => a.uid !== me.uid && !a.statuses.focus).length >= 2) {
+  if (me.id === 'bram' && canSkill('rally') && isBossFight && me.mp - SKILLS.rally.mp >= reserve && broken.length && allies.filter((a) => a.uid !== me.uid && !a.statuses.focus).length >= 2) {
     return { type: 'skill', skill: 'rally' };
   }
   if (me.id === 'hero' && canSkill('steady') && !me.statuses.focus) {
@@ -942,7 +1178,7 @@ export function competentPolicy(b, me, opts = {}) {
   }
 
   // ---------------------------------------------------------------- 5. best damage, maybe after a swap
-  const options = damageOptions(b, me, cmds, canSkill);
+  const options = damageOptions(b, me, cmds, canSkill, reserve);
   let best = null;
   for (const o of options) if (!best || o.score > best.score) best = o;
   const other = me.weapons.find((w) => w !== me.weapon);
@@ -959,7 +1195,14 @@ export function competentPolicy(b, me, opts = {}) {
 }
 
 /** All damaging options with a score. */
-function damageOptions(b, me, cmds, canSkill) {
+/** Episode 3: MP Bram holds back for Tempered Oath in a fight with a Last Hammer in it (0 elsewhere). */
+function oathReserve(b, me) {
+  if (me.id !== 'bram' || !me.skills || !me.skills.includes('tempered_oath')) return 0;
+  const warden = b.living('enemy').some((f) => f.id === 'cinder_warden');
+  return warden ? SKILLS.tempered_oath.mp : 0;
+}
+
+function damageOptions(b, me, cmds, canSkill, reserve = 0) {
   const out = [];
   const foes = b.living('enemy');
   const candidates = [{ type: 'attack' }];
@@ -983,6 +1226,7 @@ function damageOptions(b, me, cmds, canSkill) {
     const rank = (sk.kind === 'attack' ? 100 : sk.rank) / 100;
     const cost = sk.mp || 0;
     if (cost && overBudget) continue;
+    if (cost && reserve && me.mp - cost < reserve) continue;
     // Mira keeps MP for healing; everyone saves a little in long fights
     const mpWeight = me.id === 'mira' ? (mpFrac < 0.35 ? 6 : 2.2) : (mpFrac < 0.25 ? 3 : 1.2);
     // W10: MP the action gives back (Mira's Channel) is worth what the same MP costs. The field has no MP
@@ -1017,6 +1261,9 @@ function mpGainOf(sk) {
   return n;
 }
 
+// Set by competentPolicy on every call: whether ice on a foe at Heat 2 is worth a bonus (careful play) or not (reckless play).
+let heatAware = true;
+
 /** Value of a hit: damage that matters + shields + breaking a dangerous foe. */
 function scoreHit(b, me, f, est, sk) {
   const hitP = est.hit ?? 1;
@@ -1039,8 +1286,11 @@ function scoreHit(b, me, f, est, sk) {
   if (f.broken) s *= 1.1;
   if (f.id === 'lost_page') s *= 1.6;
   if (f.id === 'false_sorrow') s *= 1.5;   // she heals the King: the court's first target
+  if (f.id === 'bellows_coil' || f.id === 'smelter_coil') s *= 1.6;   // Episode 3: the coils hold the shell up; the Bellows Coil first
   if (f.charging && f.charging.skill === 'feast') s *= 1.5;
   if (f.elite) s *= 1.1;
+  // Episode 3: ice on a foe at Heat 2 or more quenches it before it flares
+  if (heatAware && f.heatMax && f.heat >= 2 && sk.types && sk.types.includes('ice') && (est.hit ?? 1) > 0) s += 30 + f.maxHp * 0.06;
   return s;
 }
 
