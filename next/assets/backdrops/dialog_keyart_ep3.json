@@ -1,0 +1,14 @@
+{
+ "image": "dialog_keyart_ep3.png",
+ "w": 384,
+ "h": 216,
+ "cell": 2,
+ "note": "Episode 3 title cards and CREDITS_EP3: cell 2 darkened, vignette",
+ "extraColors": [
+  "#72231f",
+  "#4e1310",
+  "#4b2d41",
+  "#3c2236"
+ ],
+ "colors": 37
+}

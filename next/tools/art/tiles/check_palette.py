@@ -10,7 +10,7 @@ from pxlib import TILES_DIR, ASSETS
 pal = json.load(open(os.path.join(ASSETS, 'palette.json')))
 cols = {tuple(int(h[i:i + 2], 16) for i in (1, 3, 5)) for h in pal['colors']}
 bad_total = 0
-for name in ('terrain', 'cliffs', 'town', 'archive', 'interior', 'court', 'hollow'):
+for name in ('terrain', 'cliffs', 'town', 'archive', 'interior', 'court', 'hollow', 'forge', 'ember'):
     p = os.path.join(TILES_DIR, name + '.png')
     if not os.path.exists(p):
         continue

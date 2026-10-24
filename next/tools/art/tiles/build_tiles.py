@@ -6,7 +6,7 @@
 import json, os, sys, importlib
 from pxlib import TILES_DIR, OUT_DIR, snap_to_palette
 
-SHEETS = ['terrain', 'cliffs', 'town', 'archive', 'interior', 'court', 'hollow']
+SHEETS = ['terrain', 'cliffs', 'town', 'archive', 'interior', 'court', 'hollow', 'forge', 'ember']
 
 COLLISION_CODES = {
     'none': 'walkable',

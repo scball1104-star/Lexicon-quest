@@ -1141,8 +1141,9 @@ TERRAINS_A1 = [Water(), Ink()]
 # draw order, low -> high. Fill terrains sit on lower ones; holes (water, ink, pit) are highest.
 # E2-tiles: the Court floors (court.png) sit with the other dungeon floors; mere_water (hollow.png) is a hole beside water.
 TERRAIN_ORDER = ['archive_floor', 'catalog_wood', 'gallery_stone', 'stacks_wood', 'glass_floor', 'gallery_floor', 'throne_floor',
-                 'stone_floor', 'wood_floor', 'dirt', 'sand', 'grass', 'moss', 'tallgrass', 'plaza',
-                 'carpet_red', 'carpet_blue', 'water', 'mere_water', 'shallow', 'ink', 'pit']
+                 'foundry_floor', 'ash_floor', 'crucible_floor',
+                 'stone_floor', 'wood_floor', 'dirt', 'sand', 'ash_ground', 'cinder_path', 'grass', 'moss', 'tallgrass', 'plaza',
+                 'carpet_red', 'carpet_blue', 'water', 'mere_water', 'shallow', 'ink', 'pit', 'slag']
 
 SHEET_W = 256
 

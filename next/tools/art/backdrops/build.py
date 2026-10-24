@@ -75,6 +75,21 @@ RECIPES = {
                           note='the Nameless King: a tight crop on the glass towers, violet grade'),
     'dialog_keyart_ep2': dict(cell=1, zoom=1.0, frameY=0.0, bright=0.62, contrast=0.9, sat=0.85, extras=4,
                               vignette=0.55, note='Episode 2 title cards and CREDITS_EP2: cell 1 darkened, vignette'),
+    # E3-tiles (EPISODE3_PLAN 9.3): Episode 3, the Ashen Foundry. Cell 2 is Emberpeak (a mountain forge city
+    # over rivers of slag). The ash road is composed (compose_ash_road.py) like the valley and east road.
+    'battle_ash_road': dict(indexed=True, compose='ash_road', extras=0, max_pair=0.16, stage=(118, 0.44),
+                            note='Old Sand Road battle stage: ash hills, charred pines, the mountain glow (composed)'),
+    'battle_foundry': dict(indexed=True, cell=2, zoom=1.0, frameY=0.0, bright=0.8, contrast=0.95, sat=0.95, extras=4,
+                           tint=('#e09a5a', 0.10), stage=(118, 0.42),
+                           note='Liftworks and Galleries battle stage: cell 2, brightness 0.8, warm grade'),
+    'battle_crucible': dict(indexed=True, cell=2, zoom=1.0, frameY=0.0, bright=0.55, contrast=1.0, sat=1.0, extras=4,
+                            tint=('#c8402e', 0.30), stage=(118, 0.46),
+                            note='Heartforge Crucible battle stage: cell 2, brightness 0.55, deep red grade'),
+    'battle_heartforge': dict(indexed=True, cell=2, zoom=1.7, frameX=0.18, frameY=-0.25, bright=0.78, contrast=1.05, sat=1.05,
+                              extras=4, tint=('#ff8a2a', 0.22), vignette=0.30, stage=(118, 0.48),
+                              note='the Cinder Warden: a tight crop on the forge cascades, hot grade'),
+    'dialog_keyart_ep3': dict(indexed=True, cell=2, zoom=1.0, frameY=0.0, bright=0.66, contrast=0.92, sat=0.9, extras=4,
+                              vignette=0.55, note='Episode 3 title cards and CREDITS_EP3: cell 2 darkened, vignette'),
 }
 
 
@@ -306,6 +321,9 @@ def build_one(bid, rec, pal):
     elif rec.get('compose') == 'east_road':
         import compose_east_road
         a = compose_east_road.compose(rec['compose'])
+    elif rec.get('compose') == 'ash_road':
+        import compose_ash_road
+        a = compose_ash_road.compose(rec['compose'])
     elif rec.get('compose'):
         import compose_valley
         a = compose_valley.compose(rec['compose'])
@@ -319,12 +337,21 @@ def build_one(bid, rec, pal):
     out = (pal2[idx] * 255 + 0.5).astype(np.uint8)
     img = Image.fromarray(out, 'RGB')
     os.makedirs(DST, exist_ok=True)
-    img.save(os.path.join(DST, bid + '.png'), optimize=True)
+    if rec.get('indexed'):
+        # lossless indexed PNG (at most 256 colours): about half the bytes, identical pixels (E3 size budget)
+        cols = np.unique(out.reshape(-1, 3), axis=0)
+        lut = {tuple(c): i for i, c in enumerate(cols)}
+        idxim = np.array([lut[tuple(p)] for p in out.reshape(-1, 3)], np.uint8).reshape(H, W)
+        pim = Image.fromarray(idxim, 'P')
+        pim.putpalette(cols.astype(np.uint8).flatten().tolist())
+        pim.save(os.path.join(DST, bid + '.png'), optimize=True)
+    else:
+        img.save(os.path.join(DST, bid + '.png'), optimize=True)
     meta = {'image': bid + '.png', 'w': W, 'h': H, 'cell': rec.get('cell'), 'note': rec.get('note', ''),
             'extraColors': extras, 'colors': int(len(np.unique(idx)))}
     if rec.get('compose'):
         meta['composed'] = 'tools/art/backdrops/%s.py (%s)' % (
-            {'hollow': 'compose_hollow', 'east_road': 'compose_east_road'}.get(rec['compose'], 'compose_valley'),
+            {'hollow': 'compose_hollow', 'east_road': 'compose_east_road', 'ash_road': 'compose_ash_road'}.get(rec['compose'], 'compose_valley'),
             rec['compose'])
     if rec.get('stage'):
         meta['bandY'] = int(rec['stage'][0])

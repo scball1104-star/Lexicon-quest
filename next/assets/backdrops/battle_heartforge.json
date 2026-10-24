@@ -1,0 +1,17 @@
+{
+ "image": "battle_heartforge.png",
+ "w": 384,
+ "h": 216,
+ "cell": 2,
+ "note": "the Cinder Warden: a tight crop on the forge cascades, hot grade",
+ "extraColors": [
+  "#75130c",
+  "#c71c01",
+  "#4b0e10",
+  "#a62610"
+ ],
+ "colors": 40,
+ "bandY": 118,
+ "bandAlpha": 0.48,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

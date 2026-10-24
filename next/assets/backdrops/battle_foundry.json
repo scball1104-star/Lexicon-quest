@@ -1,0 +1,14 @@
+{
+ "image": "battle_foundry.png",
+ "w": 384,
+ "h": 216,
+ "cell": 2,
+ "note": "Liftworks and Galleries battle stage: cell 2, brightness 0.8, warm grade",
+ "extraColors": [
+  "#5e323c"
+ ],
+ "colors": 46,
+ "bandY": 118,
+ "bandAlpha": 0.42,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

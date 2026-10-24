@@ -20,10 +20,15 @@
   "glass_floor",
   "gallery_floor",
   "throne_floor",
+  "foundry_floor",
+  "ash_floor",
+  "crucible_floor",
   "stone_floor",
   "wood_floor",
   "dirt",
   "sand",
+  "ash_ground",
+  "cinder_path",
   "grass",
   "moss",
   "tallgrass",
@@ -34,7 +39,8 @@
   "mere_water",
   "shallow",
   "ink",
-  "pit"
+  "pit",
+  "slag"
  ],
  "terrains": {
   "grass": {
@@ -46,7 +52,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 11,
+   "order": 16,
    "variants": [
     [
      0,
@@ -91,7 +97,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 13,
+   "order": 18,
    "variants": [
     [
      96,
@@ -116,7 +122,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 9,
+   "order": 12,
    "variants": [
     [
      128,
@@ -151,7 +157,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 14,
+   "order": 19,
    "variants": [
     [
      0,
@@ -196,7 +202,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 10,
+   "order": 13,
    "variants": [
     [
      96,
@@ -231,7 +237,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 19,
+   "order": 24,
    "variants": [
     [
      160,
@@ -256,7 +262,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 7,
+   "order": 10,
    "variants": [
     [
      0,
@@ -296,7 +302,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 8,
+   "order": 11,
    "variants": [
     [
      80,
@@ -331,7 +337,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 15,
+   "order": 20,
    "variants": []
   },
   "carpet_blue": {
@@ -343,7 +349,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 16,
+   "order": 21,
    "variants": []
   },
   "pit": {
@@ -355,7 +361,7 @@
    "autotile": "A2",
    "kind": "hole",
    "collision": "pit",
-   "order": 21,
+   "order": 26,
    "variants": []
   },
   "moss": {
@@ -367,7 +373,7 @@
    "autotile": "A2",
    "kind": "fill",
    "collision": "none",
-   "order": 12,
+   "order": 17,
    "variants": [
     [
      144,
@@ -392,7 +398,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 17,
+   "order": 22,
    "anim": {
     "frames": [
      0,
@@ -414,7 +420,7 @@
    "autotile": "A1",
    "kind": "hole",
    "collision": "water",
-   "order": 20,
+   "order": 25,
    "anim": {
     "frames": [
      0,
@@ -801,7 +807,265 @@
    },
    "variants": [],
    "sheet": "hollow.png",
-   "order": 18
+   "order": 23
+  },
+  "foundry_floor": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ],
+    [
+     128,
+     0
+    ]
+   ],
+   "variantWeights": [
+    24,
+    3,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "sheet": "forge.png",
+   "order": 7
+  },
+  "ash_floor": {
+   "x": 144,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ],
+    [
+     224,
+     0
+    ],
+    [
+     240,
+     0
+    ],
+    [
+     256,
+     0
+    ],
+    [
+     272,
+     0
+    ]
+   ],
+   "variantWeights": [
+    22,
+    3,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "sheet": "forge.png",
+   "order": 8
+  },
+  "crucible_floor": {
+   "x": 288,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     320,
+     0
+    ],
+    [
+     336,
+     0
+    ],
+    [
+     352,
+     0
+    ],
+    [
+     368,
+     0
+    ],
+    [
+     384,
+     0
+    ],
+    [
+     400,
+     0
+    ],
+    [
+     416,
+     0
+    ]
+   ],
+   "variantWeights": [
+    22,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "sheet": "forge.png",
+   "order": 9
+  },
+  "slag": {
+   "x": 0,
+   "y": 224,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "flow": "slag",
+   "light": {
+    "color": "#e06b39",
+    "radius": 3.2
+   },
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 380
+   },
+   "variants": [],
+   "note": "molten slag; water that reaches a slag cell turns it into slag_crust for good",
+   "sheet": "forge.png",
+   "order": 27
+  },
+  "ash_ground": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ]
+   ],
+   "variantWeights": [
+    5,
+    3,
+    2,
+    2,
+    1,
+    2
+   ],
+   "sheet": "ember.png",
+   "order": 14
+  },
+  "cinder_path": {
+   "x": 128,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     160,
+     0
+    ],
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ]
+   ],
+   "variantWeights": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "sheet": "ember.png",
+   "order": 15
   }
  },
  "walls": {
@@ -1531,6 +1795,363 @@
    ],
    "note": "the deep beyond the walls (court_throne_out_top, no edges) and the outer face under a band's south lip (court_throne_out_face)",
    "sheet": "court.png"
+  },
+  "foundry": {
+   "top": [
+    0,
+    48
+   ],
+   "face": [
+    32,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "E3 foundry wall band (foundry_top) and inner face (foundry_face); faceStyles per room (tools/art/tiles/forge_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      48
+     ]
+    ],
+    [
+     [
+      0,
+      192
+     ]
+    ],
+    [
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      64,
+      192
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "foundry_f1": {
+     "cycle": [
+      1,
+      0,
+      2,
+      3
+     ]
+    }
+   },
+   "sheet": "forge.png"
+  },
+  "foundry_out": {
+   "top": [
+    64,
+    48
+   ],
+   "face": [
+    96,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ],
+    [
+     224,
+     48
+    ],
+    [
+     240,
+     48
+    ],
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (foundry_out_top, no edges) and the outer face under a band's south lip (foundry_out_face)",
+   "sheet": "forge.png"
+  },
+  "galleries": {
+   "top": [
+    0,
+    96
+   ],
+   "face": [
+    32,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     96
+    ],
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "E3 foundry wall band (galleries_top) and inner face (galleries_face); faceStyles per room (tools/art/tiles/forge_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      96
+     ]
+    ],
+    [
+     [
+      96,
+      192
+     ]
+    ],
+    [
+     [
+      128,
+      192
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "foundry_f2": {
+     "cycle": [
+      1,
+      0,
+      2
+     ]
+    }
+   },
+   "sheet": "forge.png"
+  },
+  "galleries_out": {
+   "top": [
+    64,
+    96
+   ],
+   "face": [
+    96,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ],
+    [
+     240,
+     96
+    ],
+    [
+     256,
+     96
+    ],
+    [
+     272,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    7,
+    3,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (galleries_out_top, no edges) and the outer face under a band's south lip (galleries_out_face)",
+   "sheet": "forge.png"
+  },
+  "crucible": {
+   "top": [
+    0,
+    144
+   ],
+   "face": [
+    32,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     144
+    ],
+    [
+     144,
+     144
+    ],
+    [
+     160,
+     144
+    ],
+    [
+     176,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2
+   ],
+   "note": "E3 foundry wall band (crucible_top) and inner face (crucible_face); faceStyles per room (tools/art/tiles/forge_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      144
+     ]
+    ],
+    [
+     [
+      160,
+      192
+     ]
+    ],
+    [
+     [
+      192,
+      192
+     ]
+    ],
+    [
+     [
+      224,
+      192
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "foundry_f3": {
+     "cycle": [
+      1,
+      0,
+      2
+     ]
+    },
+    "foundry_heart": {
+     "cycle": [
+      3
+     ]
+    }
+   },
+   "sheet": "forge.png"
+  },
+  "crucible_out": {
+   "top": [
+    64,
+    144
+   ],
+   "face": [
+    96,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     144
+    ],
+    [
+     208,
+     144
+    ],
+    [
+     224,
+     144
+    ],
+    [
+     240,
+     144
+    ],
+    [
+     256,
+     144
+    ],
+    [
+     272,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    9,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (crucible_out_top, no edges) and the outer face under a band's south lip (crucible_out_face)",
+   "sheet": "forge.png"
   }
  },
  "tiles": {
@@ -3636,6 +4257,890 @@
    "note": "128 x 96 distant Court silhouette; draw in the overhead layer over the mere",
    "sheet": "hollow.png"
   },
+  "slag_crust": {
+   "x": 0,
+   "y": 272,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "note": "cooled slag (walkable); b and c are variants whose cracks join the plain tile's",
+   "sheet": "forge.png"
+  },
+  "slag_crust_b": {
+   "x": 16,
+   "y": 272,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "note": "cooled slag (walkable); b and c are variants whose cracks join the plain tile's",
+   "sheet": "forge.png"
+  },
+  "slag_crust_c": {
+   "x": 32,
+   "y": 272,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "note": "cooled slag (walkable); b and c are variants whose cracks join the plain tile's",
+   "sheet": "forge.png"
+  },
+  "slag_crust_fresh": {
+   "x": 48,
+   "y": 272,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "note": "the same tile for the first two seconds after cooling: cracks still bright",
+   "sheet": "forge.png"
+  },
+  "slag_crust_rim": {
+   "x": 64,
+   "y": 272,
+   "w": 128,
+   "h": 32,
+   "collision": "none",
+   "flow": "channel",
+   "autotile": "line16",
+   "note": "crust with a glowing rim: index N*1+E*2+S*4+W*8, bit set where the neighbour is still molten slag",
+   "sheet": "forge.png"
+  },
+  "slag_crust_rim_fresh": {
+   "x": 192,
+   "y": 272,
+   "w": 128,
+   "h": 32,
+   "collision": "none",
+   "flow": "channel",
+   "autotile": "line16",
+   "note": "slag_crust_rim, first two seconds after cooling",
+   "sheet": "forge.png"
+  },
+  "trough_h": {
+   "x": 0,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "EW",
+   "wet": {
+    "x": 16,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_h_wet",
+   "sheet": "forge.png"
+  },
+  "trough_h_wet": {
+   "x": 16,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "EW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_v": {
+   "x": 64,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NS",
+   "wet": {
+    "x": 80,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_v_wet",
+   "sheet": "forge.png"
+  },
+  "trough_v_wet": {
+   "x": 80,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NS",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_ne": {
+   "x": 128,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NE",
+   "wet": {
+    "x": 144,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_ne_wet",
+   "sheet": "forge.png"
+  },
+  "trough_ne_wet": {
+   "x": 144,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NE",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_nw": {
+   "x": 192,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NW",
+   "wet": {
+    "x": 208,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_nw_wet",
+   "sheet": "forge.png"
+  },
+  "trough_nw_wet": {
+   "x": 208,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_se": {
+   "x": 256,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "SE",
+   "wet": {
+    "x": 272,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_se_wet",
+   "sheet": "forge.png"
+  },
+  "trough_se_wet": {
+   "x": 272,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "SE",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_sw": {
+   "x": 320,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "SW",
+   "wet": {
+    "x": 336,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_sw_wet",
+   "sheet": "forge.png"
+  },
+  "trough_sw_wet": {
+   "x": 336,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "SW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_t_n": {
+   "x": 384,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "ESW",
+   "wet": {
+    "x": 400,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_t_n_wet",
+   "sheet": "forge.png"
+  },
+  "trough_t_n_wet": {
+   "x": 400,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "ESW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_t_e": {
+   "x": 448,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NSW",
+   "wet": {
+    "x": 464,
+    "y": 304,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_t_e_wet",
+   "sheet": "forge.png"
+  },
+  "trough_t_e_wet": {
+   "x": 464,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NSW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_t_s": {
+   "x": 0,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NEW",
+   "wet": {
+    "x": 16,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_t_s_wet",
+   "sheet": "forge.png"
+  },
+  "trough_t_s_wet": {
+   "x": 16,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NEW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_t_w": {
+   "x": 64,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NES",
+   "wet": {
+    "x": 80,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_t_w_wet",
+   "sheet": "forge.png"
+  },
+  "trough_t_w_wet": {
+   "x": 80,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NES",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_x": {
+   "x": 128,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NESW",
+   "wet": {
+    "x": 144,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_x_wet",
+   "sheet": "forge.png"
+  },
+  "trough_x_wet": {
+   "x": 144,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "NESW",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_end_n": {
+   "x": 192,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "N",
+   "wet": {
+    "x": 208,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_end_n_wet",
+   "sheet": "forge.png"
+  },
+  "trough_end_n_wet": {
+   "x": 208,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "N",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_end_e": {
+   "x": 256,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "E",
+   "wet": {
+    "x": 272,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_end_e_wet",
+   "sheet": "forge.png"
+  },
+  "trough_end_e_wet": {
+   "x": 272,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "E",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_end_s": {
+   "x": 320,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "S",
+   "wet": {
+    "x": 336,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_end_s_wet",
+   "sheet": "forge.png"
+  },
+  "trough_end_s_wet": {
+   "x": 336,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "S",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "trough_end_w": {
+   "x": 384,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "W",
+   "wet": {
+    "x": 400,
+    "y": 320,
+    "anim": {
+     "frames": [
+      0,
+      1,
+      2,
+      1
+     ],
+     "frameDx": 16,
+     "ms": 160
+    }
+   },
+   "note": "dry frame; wet = this entry's `wet` (3 frames) or tile trough_end_w_wet",
+   "sheet": "forge.png"
+  },
+  "trough_end_w_wet": {
+   "x": 400,
+   "y": 320,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "flow": "channel",
+   "arms": "W",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 160
+   },
+   "sheet": "forge.png"
+  },
+  "splash_puddle": {
+   "x": 0,
+   "y": 736,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2
+    ],
+    "frameDx": 16,
+    "ms": 200
+   },
+   "note": "decal on a non-flow cell where water stops (EPISODE3_PLAN 5.1)",
+   "sheet": "forge.png"
+  },
+  "roof_iron_ridge_l": {
+   "x": 0,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_ridge_m": {
+   "x": 16,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_ridge_r": {
+   "x": 32,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_field_l": {
+   "x": 48,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_field_m": {
+   "x": 64,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_field_r": {
+   "x": 80,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_eave_l": {
+   "x": 96,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_eave_m": {
+   "x": 112,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "roof_iron_eave_r": {
+   "x": 128,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_top_l": {
+   "x": 144,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_top_m": {
+   "x": 160,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_top_r": {
+   "x": 176,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_bot_l": {
+   "x": 192,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_bot_m": {
+   "x": 208,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "wall_slag_bot_r": {
+   "x": 224,
+   "y": 48,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "emberpeak_far": {
+   "x": 0,
+   "y": 680,
+   "w": 128,
+   "h": 96,
+   "collision": "none",
+   "note": "128 x 96 silhouette decal of Emberpeak (overhead layer at ash_view)",
+   "sheet": "ember.png"
+  },
   "flowers_white": {
    "sheet": "terrain.png",
    "x": 0,
@@ -3780,6 +5285,69 @@
    "h": 16,
    "collision": "none",
    "sheet": "hollow.png"
+  },
+  "ash_drift_a": {
+   "x": 0,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "ash_drift_b": {
+   "x": 16,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "ash_drift_c": {
+   "x": 32,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_flat": {
+   "x": 48,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), flat, blank",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_soft": {
+   "x": 96,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), soft, blank",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_flat_lettered": {
+   "x": 72,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), flat, names engraved (after pk_restored)",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_soft_lettered": {
+   "x": 120,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), soft, names engraved (after pk_restored)",
+   "sheet": "ember.png"
   }
  },
  "objects": {
@@ -9022,6 +10590,2553 @@
    "kind": "prop",
    "note": "recoloured from props.json tree_willow",
    "sheet": "hollow.png"
+  },
+  "spout_wall": {
+   "rect": [
+    0,
+    352,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 140
+   },
+   "note": "water spout set in a north face (EPISODE3_PLAN 5.1 `spout` sprite); the stream leaves its lowest row southward onto the first flow cell",
+   "sheet": "forge.png"
+  },
+  "spout_cistern": {
+   "rect": [
+    48,
+    352,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 140
+   },
+   "note": "water source on the floor (`spout` sprite spout_cistern): a tank with a spigot, water falls south onto the next cell",
+   "sheet": "forge.png"
+  },
+  "sluice": {
+   "rect": [
+    96,
+    352,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     352,
+     16,
+     32
+    ],
+    [
+     112,
+     352,
+     16,
+     32
+    ]
+   ],
+   "note": "paddle at a trough junction; frames by state: 0 = '/', 1 = '\\\\'. Draw it over a trough floor cell (it is solid, one cell, like a mirror)",
+   "sheet": "forge.png"
+  },
+  "basin": {
+   "rect": [
+    128,
+    352,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     352,
+     16,
+     32
+    ],
+    [
+     144,
+     352,
+     16,
+     32
+    ],
+    [
+     160,
+     352,
+     16,
+     32
+    ],
+    [
+     176,
+     352,
+     16,
+     32
+    ]
+   ],
+   "note": "water receptor; frames by state: 0 = empty, 1 = full. Frames 1..3 are the full glint cycle (`fullAnim`)",
+   "fullAnim": {
+    "frames": [
+     1,
+     2,
+     3,
+     2
+    ],
+    "frameDx": 16,
+    "ms": 180
+   },
+   "sheet": "forge.png"
+  },
+  "waterwheel": {
+   "rect": [
+    192,
+    352,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     192,
+     352,
+     32,
+     32
+    ],
+    [
+     224,
+     352,
+     32,
+     32
+    ],
+    [
+     256,
+     352,
+     32,
+     32
+    ],
+    [
+     288,
+     352,
+     32,
+     32
+    ]
+   ],
+   "note": "water receptor sprite `waterwheel`; frames by state: 0 = still, 1 = turning. Frames 1..3 are the turning cycle (`turnAnim`)",
+   "turnAnim": {
+    "frames": [
+     1,
+     2,
+     3
+    ],
+    "frameDx": 32,
+    "ms": 110
+   },
+   "sheet": "forge.png"
+  },
+  "hot_grate_closed": {
+   "rect": [
+    0,
+    384,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 220
+   },
+   "note": "hot gate, closed: glowing bars (solid). set into a 2-tile wall face",
+   "sheet": "forge.png"
+  },
+  "hot_grate_open": {
+   "rect": [
+    96,
+    384,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "hot gate, cooled and open: dark doorway with steam wisps",
+   "sheet": "forge.png"
+  },
+  "ore_crate": {
+   "rect": [
+    0,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "heavy block skin (`heavy: true`): iron-banded ore crate",
+   "sheet": "forge.png"
+  },
+  "anvil_oath": {
+   "rect": [
+    16,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     16,
+     416,
+     16,
+     32
+    ],
+    [
+     32,
+     416,
+     16,
+     32
+    ]
+   ],
+   "note": "oath anvil; frames by state: 0 = cold, 1 = struck",
+   "sheet": "forge.png"
+  },
+  "ledger_burned": {
+   "rect": [
+    48,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the burned ledger on a stand (`ledger_obj`)",
+   "sheet": "forge.png"
+  },
+  "bellows_decor": {
+   "rect": [
+    64,
+    416,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "decor bellows",
+   "sheet": "forge.png"
+  },
+  "tool_rack": {
+   "rect": [
+    96,
+    416,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "decor tool rack",
+   "sheet": "forge.png"
+  },
+  "pipes_h": {
+   "rect": [
+    0,
+    448,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "decor pipe, drawn over a wall face",
+   "sheet": "forge.png"
+  },
+  "pipes_v": {
+   "rect": [
+    16,
+    448,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "decor pipe, drawn over a wall face",
+   "sheet": "forge.png"
+  },
+  "pipes_elbow": {
+   "rect": [
+    32,
+    448,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "decor pipe, drawn over a wall face",
+   "sheet": "forge.png"
+  },
+  "pipes_valve": {
+   "rect": [
+    48,
+    448,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "decor pipe, drawn over a wall face",
+   "sheet": "forge.png"
+  },
+  "furnace_mouth": {
+   "rect": [
+    64,
+    448,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 150
+   },
+   "light": {
+    "color": "#e06b39",
+    "radius": 4.0
+   },
+   "note": "furnace mouth set in a face (gives light)",
+   "sheet": "forge.png"
+  },
+  "font_cistern": {
+   "rect": [
+    0,
+    480,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "the cistern font (rest and save)",
+   "sheet": "forge.png"
+  },
+  "ore_lift_closed": {
+   "rect": [
+    96,
+    480,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "lift door, closed (set into a 2-tile wall face)",
+   "sheet": "forge.png"
+  },
+  "ore_lift_open": {
+   "rect": [
+    128,
+    480,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "lift door, open (the car waits)",
+   "sheet": "forge.png"
+  },
+  "bell_gate": {
+   "rect": [
+    0,
+    512,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     512,
+     48,
+     48
+    ],
+    [
+     48,
+     512,
+     48,
+     48
+    ],
+    [
+     96,
+     512,
+     48,
+     48
+    ],
+    [
+     144,
+     512,
+     48,
+     48
+    ],
+    [
+     192,
+     512,
+     48,
+     48
+    ]
+   ],
+   "note": "the Bell Gate; frames by state: 0..3 = bell sockets lit, 4 = open (art only: use bell_gate_open for the walkable doorway)",
+   "sheet": "forge.png"
+  },
+  "bell_gate_closed": {
+   "rect": [
+    240,
+    512,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     240,
+     512,
+     48,
+     48
+    ],
+    [
+     288,
+     512,
+     48,
+     48
+    ],
+    [
+     336,
+     512,
+     48,
+     48
+    ],
+    [
+     384,
+     512,
+     48,
+     48
+    ]
+   ],
+   "note": "frames by state: 0..3 = sockets lit",
+   "sheet": "forge.png"
+  },
+  "bell_gate_open": {
+   "rect": [
+    432,
+    512,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "forge.png"
+  },
+  "door_crucible": {
+   "rect": [
+    0,
+    560,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     560,
+     48,
+     48
+    ],
+    [
+     48,
+     560,
+     48,
+     48
+    ]
+   ],
+   "note": "the Crucible Hook door; frames by state: 0 = closed, 1 = open",
+   "sheet": "forge.png"
+  },
+  "door_crucible_closed": {
+   "rect": [
+    96,
+    560,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "forge.png"
+  },
+  "door_crucible_open": {
+   "rect": [
+    144,
+    560,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "sheet": "forge.png"
+  },
+  "fan_great": {
+   "rect": [
+    0,
+    608,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     608,
+     48,
+     48
+    ],
+    [
+     48,
+     608,
+     48,
+     48
+    ],
+    [
+     96,
+     608,
+     48,
+     48
+    ]
+   ],
+   "note": "the great fan: frames 0 and 1 spin (`anim`), frame 2 = stopped",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 48,
+    "ms": 70
+   },
+   "sheet": "forge.png"
+  },
+  "heartforge": {
+   "rect": [
+    0,
+    656,
+    96,
+    80
+   ],
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     656,
+     96,
+     80
+    ],
+    [
+     96,
+     656,
+     96,
+     80
+    ],
+    [
+     192,
+     656,
+     96,
+     80
+    ],
+    [
+     288,
+     656,
+     96,
+     80
+    ]
+   ],
+   "note": "the Heartforge, 6 x 5 tiles, in the north face; frames by state: 0 = roaring, 1 = banked; roaring cycle = `roarAnim` (frames 0, 2, 3, 2)",
+   "light": {
+    "color": "#e06b39",
+    "radius": 7.0
+   },
+   "roarAnim": {
+    "frames": [
+     0,
+     2,
+     3,
+     2
+    ],
+    "frameDx": 96,
+    "ms": 140
+   },
+   "sheet": "forge.png"
+  },
+  "furnace_glow": {
+   "rect": [
+    0,
+    88,
+    64,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     88,
+     64,
+     32
+    ],
+    [
+     64,
+     88,
+     64,
+     32
+    ]
+   ],
+   "note": "64 x 32 translucent glow decal above the foundry gate (overhead layer, collision none); frames: 0 = bright, 1 = dim (after pk_restored)",
+   "sheet": "ember.png"
+  },
+  "bell_tower_ember": {
+   "rect": [
+    0,
+    120,
+    96,
+    160
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    9
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 6,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "frames": [
+    [
+     0,
+     120,
+     96,
+     160
+    ],
+    [
+     96,
+     120,
+     96,
+     160
+    ],
+    [
+     192,
+     120,
+     96,
+     160
+    ]
+   ],
+   "ringAnim": {
+    "frames": [
+     1,
+     2
+    ],
+    "frameDx": 96,
+    "ms": 260
+   },
+   "note": "First Bell tower; frames by state: 0 = silent, 1 = ringing (swing left), 2 = ringing (swing right). Ringing cycle = `ringAnim` (frames 1, 2). Unlisted state = silent.",
+   "sheet": "ember.png"
+  },
+  "bellhouse": {
+   "rect": [
+    288,
+    120,
+    112,
+    128
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    7
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "inn_coal": {
+   "rect": [
+    0,
+    280,
+    144,
+    112
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "house_ember_b": {
+   "rect": [
+    144,
+    280,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "shop_vent": {
+   "rect": [
+    240,
+    280,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "smithy_ember": {
+   "rect": [
+    0,
+    392,
+    112,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 112,
+    "ms": 420
+   },
+   "note": "chimney smoke frames (3), animate with `anim`; light after forge_relit",
+   "sheet": "ember.png"
+  },
+  "house_ember_a": {
+   "rect": [
+    336,
+    392,
+    80,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "shelter_ruin": {
+   "rect": [
+    0,
+    488,
+    112,
+    64
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "sheet": "ember.png"
+  },
+  "foundry_gate_closed": {
+   "rect": [
+    0,
+    552,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "the gate in the mountain face (needs lift_key); 4 tiles wide, footprint the bottom row",
+   "sheet": "ember.png"
+  },
+  "foundry_gate_open": {
+   "rect": [
+    64,
+    552,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "lift door open (after foundry_entered); the walkable cells are (1, 0) and (2, 0)",
+   "sheet": "ember.png"
+  },
+  "ember_pit": {
+   "rect": [
+    0,
+    616,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 130
+   },
+   "light": {
+    "color": "#e06b39",
+    "radius": 3.5
+   },
+   "note": "ember pit with a grate (anim)",
+   "sheet": "ember.png"
+  },
+  "carters_fire": {
+   "rect": [
+    48,
+    616,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 130
+   },
+   "light": {
+    "color": "#e06b39",
+    "radius": 4.0
+   },
+   "note": "carters_fire: campfire in a stone ring (anim)",
+   "sheet": "ember.png"
+  },
+  "lamp_ember": {
+   "rect": [
+    96,
+    616,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 140
+   },
+   "light": {
+    "color": "#e06b39",
+    "radius": 4.0
+   },
+   "note": "iron fire basket on a post (anim)",
+   "sheet": "ember.png"
+  },
+  "sand_milestone": {
+   "rect": [
+    144,
+    616,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "carters' milestone (EMBERPEAK 3 MI.)",
+   "sheet": "ember.png"
+  },
+  "charred_stump": {
+   "rect": [
+    160,
+    616,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "ember.png"
+  },
+  "coolant_station": {
+   "rect": [
+    176,
+    616,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "coolant_obj",
+   "sheet": "ember.png"
+  },
+  "proclamation_board": {
+   "rect": [
+    208,
+    616,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Smelter Proclamation board",
+   "sheet": "ember.png"
+  },
+  "bench_iron": {
+   "rect": [
+    240,
+    616,
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "sheet": "ember.png"
+  },
+  "cart_penny": {
+   "rect": [
+    272,
+    616,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Penny's cart (penny_s)",
+   "sheet": "ember.png"
+  },
+  "charred_pine": {
+   "rect": [
+    320,
+    616,
+    32,
+    64
+   ],
+   "anchor": [
+    1,
+    3
+   ],
+   "footprint": [
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "trunk base solid, limbs overhead",
+   "sheet": "ember.png"
+  },
+  "memorial": {
+   "rect": [
+    352,
+    616,
+    64,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "\"Names Etched in Iron\" (script memorial_wall): 4 x 3 tiles; two 24 x 24 plate slots at rect pixel (8, 10) and (32, 10) (plateSlots); overlay memorial_plate_* there",
+   "plateSlots": [
+    [
+     8,
+     10
+    ],
+    [
+     32,
+     10
+    ]
+   ],
+   "sheet": "ember.png"
   }
  },
  "overlays": {
@@ -9169,6 +13284,69 @@
    "h": 16,
    "collision": "none",
    "sheet": "hollow.png"
+  },
+  "ash_drift_a": {
+   "x": 0,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "ash_drift_b": {
+   "x": 16,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "ash_drift_c": {
+   "x": 32,
+   "y": 64,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "translucent drift on ash ground",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_flat": {
+   "x": 48,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), flat, blank",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_soft": {
+   "x": 96,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), soft, blank",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_flat_lettered": {
+   "x": 72,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), flat, names engraved (after pk_restored)",
+   "sheet": "ember.png"
+  },
+  "memorial_plate_soft_lettered": {
+   "x": 120,
+   "y": 64,
+   "w": 24,
+   "h": 24,
+   "collision": "solid",
+   "note": "24 x 24 plate overlay for the memorial: at the memorial's plateAt cell (top-left of the slot), soft, names engraved (after pk_restored)",
+   "sheet": "ember.png"
   }
  }
 }

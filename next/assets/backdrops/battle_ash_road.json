@@ -1,0 +1,13 @@
+{
+ "image": "battle_ash_road.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "Old Sand Road battle stage: ash hills, charred pines, the mountain glow (composed)",
+ "extraColors": [],
+ "colors": 31,
+ "composed": "tools/art/backdrops/compose_ash_road.py (ash_road)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}
