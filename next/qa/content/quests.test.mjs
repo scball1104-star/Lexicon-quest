@@ -7,7 +7,7 @@ import { FLAGS, MAIN_QUEST, SIDE_QUESTS, REWARDS, BANTER, partyChat, currentStep
 import { NPCS } from '../../src/data/npcs.js';
 import { ITEMS } from '../../src/data/items.js';
 import { fits, boxLines } from '../../src/data/story/dialogue.js';
-import { MAP_IDS, EP2_MAP_IDS } from './_harness.mjs';
+import { MAP_IDS, EP2_MAP_IDS, EP3_MAP_IDS } from './_harness.mjs';
 
 const MAIN_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered',
   'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open',
@@ -119,7 +119,7 @@ test('party chat adds a side-quest reminder after the main hint', () => {
 
 test('banter: real maps, declared flags, only joined companions speak, every line fits', () => {
   for (const [map, list] of Object.entries(BANTER)) {
-    assert.ok(MAP_IDS.includes(map) || EP2_MAP_IDS.includes(map), `banter for unknown map ${map}`);
+    assert.ok(MAP_IDS.includes(map) || EP2_MAP_IDS.includes(map) || EP3_MAP_IDS.includes(map), `banter for unknown map ${map}`);
     for (const e of list) {
       const conds = list.length ? [e.if].flat().filter(Boolean) : [];
       for (const f of conds) assert.ok(f in FLAGS, `${map}: ${f}`);

@@ -1,8 +1,10 @@
-// Episode 1 and Episode 2 text (Episode 2 at the end): bestiary lore, books (library and Archive), location banners, menu help lines,
+// Episode 1, 2 and 3 text (later episodes at the end): bestiary lore, books (library and Archive), location banners, menu help lines,
 // field remarks (party "barks"), game over lines and the credits. Pure data.
 //
 // Box rules (checked by qa/content): at most 3 lines of 42 characters per box, no em dashes.
 // Book pages and lore entries are lists of boxes. {hero} = the player's chosen name.
+
+import { ENEMIES } from './enemies.js';
 
 // ------------------------------------------------------------------------------------------------
 // Bestiary. Every enemy id in COMMON.md. `flavor` matches data/enemies.js; `lore` is the full entry,
@@ -606,4 +608,182 @@ export const CREDITS_EP2 = [
   { heading: 'Thank you for playing', lines: ['Far away, the mountains begin to smolder.'] },
 ];
 
-export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES, CREDITS_EP2 };
+// ================================================================================================
+// Episode 3 (E3-story): bestiary for the 11 new foes, two books, banners for the 10 new maps, the three quench barks,
+// help lines for the Bell House and the inn, the end card and the credits.
+// ================================================================================================
+
+// Bestiary. lore[0] is the enemies.js `flavor` (E3-battle aligns names and flavor when it writes enemies.js). Staged in
+// BESTIARY_EP3 and merged into BESTIARY entry by entry as enemies.js defines each id, so the Bestiary never lists a foe
+// the game does not have (qa/ui/ep2.test.mjs and qa/content/text.test.mjs hold every merged entry to enemies.js).
+export const BESTIARY_EP3 = {
+  cinder_hound: {
+    name: 'Cinder Hound', where: 'The Old Sand Road',
+    lore: [
+      'A hound that slept too near the furnace road, and woke with an ember for a mane.',
+      'It bites, and the bite sometimes smoulders. Its snap is quick, and it dodges the slow.',
+      'Ice and spears find it. Fire only keeps it warm.',
+    ],
+  },
+  cinder_beetle: {
+    name: 'Cinder Beetle', where: 'The Old Sand Road',
+    lore: [
+      'A beetle in a black carapace with glowing seams. It stokes itself.',
+      'Each stoke burns it hotter. At white heat it rams. Cool it with ice or a Quench Flask, or break its shell first.',
+      'Ice and axes. Swords and arrows skid off, and fire is its favorite meal.',
+    ],
+  },
+  slag_slime: {
+    name: 'Slag Slime', where: 'The Ashen Foundry',
+    lore: [
+      'A slime of molten orange with a dark crust, still learning how to cool.',
+      'It splashes burns, and when it has stoked enough it bursts over the whole party. Cool it first.',
+      'Ice sets it and thunder shakes it loose. Fire only makes it brighter.',
+    ],
+  },
+  ashbound_miner: {
+    name: 'Ashbound Miner', where: 'The Ashen Foundry',
+    lore: [
+      'A soot-black shade in a miner\'s coat, still carrying its lamp into a shift that ended long ago.',
+      'Its lamp flash blinds. Its pick does not care.',
+      'Light and arrows. Ice passes through the coat as if it were not there.',
+    ],
+  },
+  furnace_construct: {
+    name: 'Furnace Construct', where: 'The Ventilation Galleries',
+    lore: [
+      'A bronze golem with a furnace for a core. It was built to carry heat. It was not built to stop.',
+      'It stokes until it vents its whole core at the party. Quench it before the glow turns white.',
+      'Ice and thunder. Swords and spears ring off the bronze.',
+    ],
+  },
+  soot_phantom: {
+    name: 'Soot Phantom', where: 'The Ventilation Galleries',
+    lore: [
+      'A cloud of soot with ember eyes, drifting where the fans left it.',
+      'It blinds the party with a cloud, then chokes the voices out of them. It is hard to hit twice.',
+      'Light and arrows. Fire passes through it and only makes it glow.',
+    ],
+  },
+  forge_defender: {
+    name: 'Forge Defender', where: 'The Heartforge Crucible',
+    lore: [
+      'A bronze knight with a molten visor, set to guard the lower forge and never relieved.',
+      'It steps in for its allies, and brands one foe when it glows white. Cool it first.',
+      'Ice, axes and light. Swords and spears ring off its plate.',
+    ],
+  },
+  bellows_specter: {
+    name: 'The Bellows Specter', where: 'The Fan Hall',
+    lore: [
+      "The foundry's breath given a body: a bird of smoke and soot in the fan hall's updraft.",
+      'It stokes itself every turn. When it draws the whole draft into its chest, the party burns. Quench it, or defend.',
+      'When the fans reverse it stokes twice. Ice every round, or a spear to break its shield.',
+    ],
+  },
+  cinder_warden: {
+    name: 'The Cinder Warden', where: 'The Heartforge',
+    lore: [
+      'The Keeper of the Heartforge: a tool of bronze that was given a bad order, and carried it out for twenty-five years.',
+      'It raises its hammer over one of you and means to strike the name out. Defend, or let Bram stand in front.',
+      'Its last hammer shakes the whole forge. Everyone defends, or Bram takes it, and then the Warden breaks.',
+    ],
+  },
+  bellows_coil: {
+    name: 'Bellows Coil', where: 'The Heartforge',
+    lore: [
+      "A coil of glowing pipe on a bronze stand. It feeds the Warden's fire.",
+      'Every turn it stokes the Warden. Break it first, and the Warden slows down.',
+    ],
+  },
+  smelter_coil: {
+    name: 'Smelter Coil', where: 'The Heartforge',
+    lore: [
+      'A coil of pipe that never stopped sending slag where the old order said to.',
+      'Every second turn it sprays the whole party. Break it first, and the burning stops.',
+      'Ice and axes. Spears find the seam.',
+    ],
+  },
+};
+for (const [id, entry] of Object.entries(BESTIARY_EP3)) if (ENEMIES[id]) BESTIARY[id] = entry;
+
+// Books. Map events: { type: 'book', book: '<id>' }. Nothing here names the founder or the Smith (read before the reveal).
+Object.assign(BOOKS, {
+  foundry_ledger: {
+    title: 'The Foundry Ledger', where: 'foundry_f2',
+    pages: [
+      'A burned ledger, read by the Lantern. Every row is a name and a shift, in the same careful hand.',
+      "The last shift's list runs for three pages. At the end the hand changes, pressing harder: ALL OUT.",
+      'In one row, where a name should be, there is only a stamp: a small bell, pressed so hard it cut the page.',
+    ],
+  },
+  pk_records: {
+    title: "The Bell House Records", where: 'pk_bellhouse',
+    pages: [
+      'Emberpeak kept three kinds of record: the foundry ledger, the memorial plates, and the Bell House book.',
+      'The Bell House book lists every bell on the mountain: when it was cast, who tuned it, and what it was tuned to say.',
+      'The newest entry stops mid-line. The ink runs out, and below it someone has pressed a thumb into the paper, once.',
+    ],
+  },
+});
+
+// Banners for the 10 new maps. Emberpeak has two states (the bell).
+Object.assign(BANNERS, {
+  sand_road: { title: 'The Old Sand Road', sub: 'Into the Ash Hills' },
+  emberpeak: { title: 'Emberpeak', sub: 'Bellows Square',
+    states: [{ if: 'pk_restored', title: 'Emberpeak', sub: 'The First Bell' }] },
+  pk_inn: { title: 'The Coal Lantern Inn' },
+  pk_shop: { title: 'Ventworks Supplies' },
+  pk_smithy: { title: 'Emberpeak Weaponsmith' },
+  pk_bellhouse: { title: 'The Bell House' },
+  foundry_f1: { title: 'The Ashen Foundry', sub: 'I. The Cinder Liftworks' },
+  foundry_f2: { title: 'The Ashen Foundry', sub: 'II. The Ventilation Galleries' },
+  foundry_f3: { title: 'The Ashen Foundry', sub: 'III. The Heartforge Crucible' },
+  foundry_heart: { title: 'The Heartforge' },
+});
+
+// Field remarks for the quench mechanic (one each per save). first_quench is also the end of scene slag_crossing's
+// lesson; first_sluice fires the first time the party faces a sluice paddle, first_basin when a basin first fills.
+Object.assign(BARKS, {
+  first_sluice: [
+    { if: ['sand_gate_open', 'bram_joined'], lines: [{ who: 'bram', text: 'Paddle. Turns the water. Carters used these.' }] },
+  ],
+  first_quench: [
+    { if: ['sand_gate_open', 'mira_joined'], lines: [{ who: 'mira', text: "It stays cooled. Good. I'd hate to do that twice." }] },
+  ],
+  first_basin: [
+    { if: ['sand_gate_open', 'mira_joined'], lines: [{ who: 'mira', text: 'Full basin, cooled grate. Water opens things here.' }] },
+  ],
+});
+
+// Help lines for the Bell House's save bell and the Coal Lantern's innkeeper (one line each, max 40 characters).
+Object.assign(HELP.save, { bell_pk: 'The old bell rings. Someone hears.' });
+Object.assign(HELP.inn, { poor_bess: 'Not enough gold. Bess looks sorry.' });
+
+// The card after the Episode 3 credits, before the party wakes at the Coal Lantern. Episode 4 is not in the game.
+export const END_CARD_EP3 = { text: 'To be continued', sub: 'Episode 4 is not playable yet.', frames: 300, backdrop: 'dialog_keyart_ep3' };
+// The same card for Episode 2 once Episode 3 is live: story.js CREDITS_HANDOFF[2].endCard becomes this when EP3_LIVE.
+export const END_CARD_EP2_LIVE = { text: 'To be continued', sub: 'Episode 3 begins in the morning.', frames: 300, backdrop: 'dialog_keyart_ep2' };
+// The Episode 4 title card text (placeholder wording, Scott chooses the final words): used by ep3_ending.
+export const EPISODE4_CARD = { text: 'Episode 4: The Sunken Keep', sub: 'Downriver, a kingdom forgets who rules it.' };
+
+// Credits for Episode 3. Played after ep3_complete over the "first_bell" theme (same card shape as CREDITS).
+export const CREDITS_EP3 = [
+  { heading: 'LEXICON QUEST', lines: ['Episode 3: The Forge of Ash'] },
+  { heading: 'Created by', lines: ['Scott Ball'] },
+  { heading: 'Story, World and Direction', lines: ['Scott Ball'] },
+  { heading: 'Music', lines: ['Composed for Lexicon Quest with Suno'] },
+  { heading: 'The Party', lines: ['{hero}', 'Mira, who counted the steps', 'Bram, son of Garrick and Mara'] },
+  { heading: 'Emberpeak', lines: ['Foreman Veyra', 'Ilya the Bell Founder', 'Sella of the Weaponsmith', 'Harl the Surveyor'] },
+  { heading: 'Emberpeak', lines: ['Bess of the Coal Lantern', 'Taro of Ventworks', 'Rusk the Watch'] },
+  { heading: 'The Old Sand Road', lines: ['Garrick, who walked all night', 'Penny, who goes where roads go', 'Vessa, and her key'] },
+  { heading: 'The Ashen Foundry', lines: ['The Bellows Specter', 'The Bellows and Smelter Coils', 'The Cinder Warden, who kept the fire'] },
+  { heading: 'Mara of the First Bell', lines: ['She counted the people.'] },
+  { heading: 'And', lines: ['Vex Quill, who tore a name off a list'] },
+  { heading: 'Hollowmere and Willowmere', lines: ['Wren, who put an egg in his pocket', 'Elian, Aurel and Sister Anwen', 'Hazel, Mael, Holt and Hal'] },
+  { heading: '', lines: ['You can file off the letters.', "You can't file off the press."] },
+  { heading: 'Thank you for playing', lines: ['Far away, a bell rings under water.'] },
+];
+
+
+export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES, CREDITS_EP2, CREDITS_EP3 };

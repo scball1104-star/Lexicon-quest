@@ -1,0 +1,220 @@
+zone | encounter | Lv | policy | win | rounds | p10-p90 | hp lost | KOs | items | kept
+--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+valley | valley_wolves | 2 | competent | 100% | 3.15 | 2.7-4.0 | 16% | 0.00 | 0.05 | 0.00
+valley | valley_wolves | 2 | naive | 100% | 5.28 | 5.0-6.0 | 41% | 0.34 | 0.00 | 0.00
+valley | valley_wolves | 3 | competent | 100% | 2.84 | 2.3-3.3 | 14% | 0.00 | 0.01 | 0.00
+valley | valley_wolves | 3 | naive | 100% | 4.89 | 4.3-5.3 | 31% | 0.09 | 0.00 | 0.00
+valley | valley_wolves (elite) | 3 | competent | 100% | 4.28 | 3.0-6.0 | 18% | 0.00 | 0.28 | 0.00
+valley | valley_slimes | 2 | competent | 100% | 4.04 | 3.3-4.7 | 24% | 0.00 | 0.07 | 0.00
+valley | valley_slimes | 2 | naive | 100% | 6.18 | 5.3-7.0 | 44% | 0.11 | 0.00 | 0.00
+valley | valley_slimes | 3 | competent | 100% | 3.58 | 3.0-4.3 | 18% | 0.00 | 0.01 | 0.00
+valley | valley_slimes | 3 | naive | 100% | 5.49 | 5.0-6.3 | 30% | 0.01 | 0.00 | 0.00
+valley | valley_slimes (elite) | 3 | competent | 100% | 4.32 | 3.3-5.7 | 25% | 0.00 | 0.07 | 0.00
+valley | valley_scarab | 2 | competent | 100% | 3.93 | 3.0-4.7 | 12% | 0.00 | 0.00 | 0.00
+valley | valley_scarab | 2 | naive | 100% | 7.05 | 6.0-8.0 | 50% | 0.28 | 0.00 | 0.00
+valley | valley_scarab | 3 | competent | 100% | 3.56 | 3.0-4.0 | 9% | 0.00 | 0.00 | 0.00
+valley | valley_scarab | 3 | naive | 100% | 6.40 | 5.7-7.3 | 36% | 0.07 | 0.00 | 0.00
+valley | valley_scarab (elite) | 3 | competent | 100% | 4.84 | 3.7-6.7 | 14% | 0.00 | 0.01 | 0.00
+valley | valley_mixed | 2 | competent | 100% | 4.47 | 3.7-5.7 | 16% | 0.00 | 0.04 | 0.00
+valley | valley_mixed | 2 | naive | 100% | 7.58 | 7.0-8.3 | 49% | 0.35 | 0.00 | 0.00
+valley | valley_mixed | 3 | competent | 100% | 3.88 | 3.0-4.7 | 13% | 0.00 | 0.01 | 0.00
+valley | valley_mixed | 3 | naive | 100% | 6.98 | 6.3-7.7 | 36% | 0.10 | 0.00 | 0.00
+valley | valley_mixed (elite) | 3 | competent | 100% | 5.79 | 4.0-8.0 | 19% | 0.00 | 0.12 | 0.00
+valley | valley_pack | 2 | competent | 100% | 5.20 | 4.3-6.3 | 25% | 0.01 | 0.34 | 0.00
+valley | valley_pack | 2 | naive | 80% | 7.02 | 6.0-8.0 | 78% | 1.39 | 0.00 | 0.00
+valley | valley_pack | 3 | competent | 100% | 4.42 | 3.7-5.3 | 23% | 0.00 | 0.12 | 0.00
+valley | valley_pack | 3 | naive | 99% | 6.73 | 6.0-7.7 | 57% | 0.60 | 0.00 | 0.00
+valley | valley_pack (elite) | 3 | competent | 100% | 5.85 | 4.7-7.7 | 25% | 0.01 | 0.55 | 0.00
+archive_f1 | f1_slimes | 4 | competent | 100% | 3.28 | 2.7-4.0 | 15% | 0.00 | 0.00 | 0.00
+archive_f1 | f1_slimes | 4 | naive | 100% | 4.90 | 4.3-5.7 | 29% | 0.01 | 0.00 | 0.00
+archive_f1 | f1_slimes (elite) | 4 | competent | 100% | 4.04 | 3.0-5.3 | 19% | 0.00 | 0.01 | 0.00
+archive_f1 | f1_mites | 4 | competent | 100% | 3.29 | 2.7-4.0 | 16% | 0.00 | 0.01 | 0.00
+archive_f1 | f1_mites | 4 | naive | 100% | 4.86 | 4.3-5.3 | 31% | 0.08 | 0.00 | 0.00
+archive_f1 | f1_mites (elite) | 4 | competent | 100% | 4.72 | 3.3-6.0 | 21% | 0.00 | 0.07 | 0.00
+archive_f1 | f1_wraith | 4 | competent | 100% | 4.34 | 3.3-5.3 | 21% | 0.00 | 0.31 | 0.00
+archive_f1 | f1_wraith | 4 | naive | 99% | 6.42 | 5.7-7.0 | 53% | 0.53 | 0.00 | 0.00
+archive_f1 | f1_wraith (elite) | 4 | competent | 100% | 5.99 | 4.3-8.3 | 24% | 0.00 | 0.56 | 0.00
+archive_f1 | f1_mixed | 4 | competent | 100% | 3.11 | 2.3-4.0 | 14% | 0.00 | 0.16 | 0.00
+archive_f1 | f1_mixed | 4 | naive | 100% | 5.03 | 4.3-6.0 | 29% | 0.00 | 0.00 | 0.00
+archive_f1 | f1_mixed (elite) | 4 | competent | 100% | 4.57 | 3.0-6.3 | 22% | 0.00 | 0.35 | 0.00
+archive_f2 | f2_golem | 5 | competent | 100% | 3.58 | 3.0-4.0 | 12% | 0.00 | 0.00 | 0.00
+archive_f2 | f2_golem | 5 | naive | 100% | 8.01 | 7.3-8.7 | 59% | 0.51 | 0.00 | 0.00
+archive_f2 | f2_golem | 6 | competent | 100% | 3.29 | 3.0-3.7 | 10% | 0.00 | 0.00 | 0.00
+archive_f2 | f2_golem | 6 | naive | 100% | 7.57 | 7.0-8.3 | 48% | 0.18 | 0.00 | 0.00
+archive_f2 | f2_golem (elite) | 6 | competent | 100% | 4.71 | 3.7-6.3 | 15% | 0.00 | 0.00 | 0.00
+archive_f2 | f2_wraiths | 5 | competent | 100% | 4.03 | 3.0-5.3 | 20% | 0.00 | 0.59 | 0.00
+archive_f2 | f2_wraiths | 5 | naive | 100% | 6.79 | 6.0-8.0 | 51% | 0.28 | 0.00 | 0.00
+archive_f2 | f2_wraiths | 6 | competent | 100% | 3.67 | 2.7-4.7 | 16% | 0.00 | 0.49 | 0.00
+archive_f2 | f2_wraiths | 6 | naive | 100% | 6.40 | 5.7-7.3 | 41% | 0.04 | 0.00 | 0.00
+archive_f2 | f2_wraiths (elite) | 6 | competent | 100% | 4.86 | 3.7-6.3 | 20% | 0.00 | 0.80 | 0.00
+archive_f2 | f2_mites | 5 | competent | 100% | 3.72 | 2.7-5.0 | 18% | 0.00 | 0.32 | 0.00
+archive_f2 | f2_mites | 5 | naive | 100% | 6.86 | 6.0-8.0 | 49% | 0.22 | 0.00 | 0.00
+archive_f2 | f2_mites | 6 | competent | 100% | 3.30 | 2.3-4.3 | 14% | 0.00 | 0.27 | 0.00
+archive_f2 | f2_mites | 6 | naive | 100% | 6.50 | 5.7-7.3 | 40% | 0.03 | 0.00 | 0.00
+archive_f2 | f2_mites (elite) | 6 | competent | 100% | 4.50 | 3.0-6.3 | 18% | 0.00 | 0.49 | 0.00
+archive_f2 | f2_mixed | 5 | competent | 100% | 4.52 | 3.7-5.3 | 18% | 0.00 | 0.32 | 0.00
+archive_f2 | f2_mixed | 5 | naive | 97% | 9.21 | 8.3-10.3 | 81% | 1.02 | 0.00 | 0.00
+archive_f2 | f2_mixed | 6 | competent | 100% | 4.15 | 3.3-4.7 | 14% | 0.00 | 0.22 | 0.00
+archive_f2 | f2_mixed | 6 | naive | 100% | 8.81 | 8.0-9.7 | 63% | 0.34 | 0.00 | 0.00
+archive_f2 | f2_mixed (elite) | 6 | competent | 100% | 5.97 | 4.7-8.0 | 21% | 0.00 | 0.38 | 0.00
+archive_f2 | echo_warden | 5 | competent | 100% | 8.18 | 6.3-10.3 | 23% | 0.01 | 0.23 | 0.00
+archive_f2 | echo_warden | 5 | naive | 0% | 5.26 | 4.7-6.0 | 100% | 3.00 | 0.00 | 0.00
+archive_f2 | echo_warden | 6 | competent | 100% | 7.17 | 6.0-8.7 | 20% | 0.01 | 0.06 | 0.00
+archive_f2 | echo_warden | 6 | naive | 0% | 6.48 | 5.7-7.3 | 100% | 3.00 | 0.00 | 0.00
+archive_f3 | f3_ink | 7 | competent | 100% | 3.07 | 2.3-4.0 | 22% | 0.00 | 0.10 | 0.00
+archive_f3 | f3_ink | 7 | naive | 100% | 6.62 | 5.3-8.0 | 54% | 0.02 | 0.00 | 0.00
+archive_f3 | f3_ink (elite) | 7 | competent | 100% | 4.96 | 3.3-7.0 | 25% | 0.00 | 0.44 | 0.00
+archive_f3 | f3_golem | 7 | competent | 100% | 4.33 | 3.7-5.3 | 23% | 0.00 | 0.01 | 0.00
+archive_f3 | f3_golem | 7 | naive | 48% | 9.17 | 8.3-10.0 | 94% | 2.12 | 0.00 | 0.00
+archive_f3 | f3_golem (elite) | 7 | competent | 100% | 6.59 | 4.7-8.7 | 25% | 0.00 | 0.13 | 0.00
+archive_f3 | f3_wraiths | 7 | competent | 100% | 4.30 | 3.3-6.0 | 27% | 0.00 | 0.01 | 0.00
+archive_f3 | f3_wraiths | 7 | naive | 34% | 7.76 | 6.3-9.0 | 95% | 2.29 | 0.00 | 0.00
+archive_f3 | f3_wraiths (elite) | 7 | competent | 100% | 7.96 | 5.3-13.0 | 28% | 0.00 | 0.34 | 0.00
+archive_f3 | f3_mixed | 7 | competent | 100% | 5.19 | 4.0-6.3 | 24% | 0.00 | 0.57 | 0.00
+archive_f3 | f3_mixed | 7 | naive | 100% | 9.29 | 8.3-10.3 | 66% | 0.14 | 0.00 | 0.00
+archive_f3 | f3_mixed (elite) | 7 | competent | 100% | 6.96 | 5.3-9.0 | 25% | 0.00 | 0.82 | 0.00
+archive_boss | archivore | 8 | competent | 100% | 10.41 | 7.7-13.7 | 23% | 0.23 | 1.30 | 0.00
+archive_boss | archivore | 8 | naive | 0% | 8.38 | 6.7-10.3 | 100% | 3.00 | 0.00 | 0.00
+archive_boss | archivore | 8 | reckless | 80% | 11.38 | 8.3-15.0 | 41% | 1.42 | 3.38 | 0.00
+whisperwood_hollow | hollow_wolves | 6 | competent | 100% | 3.20 | 2.7-3.7 | 17% | 0.00 | 0.01 | 0.00
+whisperwood_hollow | hollow_wolves | 6 | naive | 100% | 6.28 | 5.7-7.0 | 43% | 0.22 | 0.00 | 0.00
+whisperwood_hollow | hollow_wolves | 7 | competent | 100% | 2.95 | 2.3-3.7 | 16% | 0.00 | 0.00 | 0.00
+whisperwood_hollow | hollow_wolves | 7 | naive | 100% | 6.00 | 5.3-6.7 | 38% | 0.11 | 0.00 | 0.00
+whisperwood_hollow | hollow_wolves (elite) | 7 | competent | 100% | 4.54 | 3.3-6.3 | 20% | 0.00 | 0.05 | 0.00
+whisperwood_hollow | hollow_blot | 6 | competent | 100% | 4.64 | 4.0-5.7 | 25% | 0.00 | 0.01 | 0.00
+whisperwood_hollow | hollow_blot | 6 | naive | 100% | 10.04 | 9.0-11.3 | 57% | 0.13 | 0.00 | 0.00
+whisperwood_hollow | hollow_blot | 7 | competent | 100% | 4.51 | 4.0-5.3 | 21% | 0.00 | 0.00 | 0.00
+whisperwood_hollow | hollow_blot | 7 | naive | 100% | 9.41 | 8.3-11.0 | 47% | 0.01 | 0.00 | 0.00
+whisperwood_hollow | hollow_blot (elite) | 7 | competent | 100% | 4.51 | 4.0-5.3 | 21% | 0.00 | 0.00 | 0.00
+whisperwood_hollow | whisperwood_alpha | 6 | competent | 100% | 7.92 | 6.7-9.7 | 19% | 0.01 | 0.48 | 0.00
+whisperwood_hollow | whisperwood_alpha | 6 | naive | 10% | 8.43 | 7.0-10.3 | 99% | 2.87 | 0.00 | 0.00
+whisperwood_hollow | whisperwood_alpha | 7 | competent | 100% | 7.37 | 6.0-8.7 | 20% | 0.00 | 0.20 | 0.00
+whisperwood_hollow | whisperwood_alpha | 7 | naive | 52% | 9.68 | 7.7-11.0 | 91% | 2.17 | 0.00 | 0.00
+whisperwood_hollow | whisperwood_alpha_t1 | 8 | competent | 100% | 8.45 | 7.0-10.0 | 18% | 0.00 | 0.25 | 0.00
+whisperwood_hollow | whisperwood_alpha_t1 | 8 | naive | 5% | 10.27 | 9.0-12.3 | 100% | 2.92 | 0.00 | 0.00
+whisperwood_hollow | whisperwood_alpha_t2 | 9 | competent | 100% | 8.12 | 7.0-9.3 | 18% | 0.00 | 0.17 | 0.00
+whisperwood_hollow | whisperwood_alpha_t2 | 9 | naive | 17% | 10.59 | 9.0-12.7 | 98% | 2.75 | 0.00 | 0.00
+whisperwood_hollow | whisperwood_alpha_t2 | 10 | competent | 100% | 7.60 | 6.3-9.0 | 19% | 0.00 | 0.09 | 0.00
+whisperwood_hollow | whisperwood_alpha_t2 | 10 | naive | 56% | 11.38 | 9.7-13.0 | 91% | 2.11 | 0.00 | 0.00
+east_road | road_wolves | 9 | competent | 100% | 2.91 | 2.3-3.7 | 14% | 0.00 | 0.00 | 0.00
+east_road | road_wolves | 9 | naive | 100% | 6.09 | 5.0-7.3 | 26% | 0.02 | 0.00 | 0.00
+east_road | road_wolves | 10 | competent | 100% | 2.75 | 2.0-3.3 | 12% | 0.00 | 0.00 | 0.00
+east_road | road_wolves | 10 | naive | 100% | 5.79 | 5.0-7.0 | 23% | 0.01 | 0.00 | 0.00
+east_road | road_wolves (elite) | 10 | competent | 100% | 4.14 | 3.0-5.7 | 15% | 0.00 | 0.01 | 0.00
+east_road | road_beetles | 9 | competent | 100% | 4.12 | 3.7-4.7 | 15% | 0.00 | 0.00 | 0.00
+east_road | road_beetles | 9 | naive | 100% | 6.53 | 6.0-7.0 | 36% | 0.04 | 0.00 | 0.00
+east_road | road_beetles | 10 | competent | 100% | 3.95 | 3.3-4.7 | 13% | 0.00 | 0.00 | 0.00
+east_road | road_beetles | 10 | naive | 100% | 6.15 | 6.0-6.7 | 31% | 0.02 | 0.00 | 0.00
+east_road | road_beetles (elite) | 10 | competent | 100% | 4.93 | 4.0-6.7 | 16% | 0.00 | 0.00 | 0.00
+east_road | road_quick | 9 | competent | 100% | 4.33 | 3.0-5.7 | 25% | 0.00 | 0.03 | 0.00
+east_road | road_quick | 9 | naive | 93% | 6.85 | 6.0-7.7 | 71% | 0.71 | 0.00 | 0.00
+east_road | road_quick | 10 | competent | 100% | 4.11 | 3.0-5.0 | 23% | 0.00 | 0.00 | 0.00
+east_road | road_quick | 10 | naive | 100% | 6.35 | 6.0-7.0 | 57% | 0.27 | 0.00 | 0.00
+east_road | road_quick (elite) | 10 | competent | 100% | 5.03 | 4.0-6.3 | 25% | 0.00 | 0.02 | 0.00
+east_road | road_mixed | 9 | competent | 100% | 4.23 | 3.7-5.0 | 12% | 0.00 | 0.00 | 0.00
+east_road | road_mixed | 9 | naive | 100% | 6.70 | 6.0-7.7 | 25% | 0.00 | 0.00 | 0.00
+east_road | road_mixed | 10 | competent | 100% | 4.06 | 3.7-4.7 | 10% | 0.00 | 0.00 | 0.00
+east_road | road_mixed | 10 | naive | 100% | 6.37 | 5.7-7.3 | 21% | 0.00 | 0.00 | 0.00
+east_road | road_mixed (elite) | 10 | competent | 100% | 5.40 | 4.0-7.7 | 12% | 0.00 | 0.00 | 0.00
+east_road | road_pack | 9 | competent | 100% | 4.96 | 4.0-6.0 | 16% | 0.00 | 0.05 | 0.00
+east_road | road_pack | 9 | naive | 100% | 8.79 | 7.7-10.0 | 50% | 0.75 | 0.00 | 0.00
+east_road | road_pack | 10 | competent | 100% | 4.59 | 3.7-5.7 | 16% | 0.00 | 0.02 | 0.00
+east_road | road_pack | 10 | naive | 100% | 8.57 | 7.3-10.0 | 42% | 0.45 | 0.00 | 0.00
+east_road | road_pack (elite) | 10 | competent | 100% | 6.33 | 5.0-8.3 | 18% | 0.00 | 0.04 | 0.00
+court_f1 | c1_quick | 10 | competent | 100% | 4.36 | 3.0-5.7 | 26% | 0.00 | 0.02 | 0.00
+court_f1 | c1_quick | 10 | naive | 64% | 6.72 | 5.7-7.7 | 89% | 1.69 | 0.00 | 0.00
+court_f1 | c1_quick | 11 | competent | 100% | 3.70 | 2.7-4.7 | 22% | 0.00 | 0.01 | 0.00
+court_f1 | c1_quick | 11 | naive | 93% | 7.19 | 6.0-8.3 | 76% | 0.76 | 0.00 | 0.00
+court_f1 | c1_quick (elite) | 11 | competent | 100% | 5.05 | 3.7-7.0 | 26% | 0.00 | 0.04 | 0.00
+court_f1 | c1_wisps | 10 | competent | 100% | 3.38 | 2.7-4.3 | 21% | 0.00 | 0.00 | 0.00
+court_f1 | c1_wisps | 10 | naive | 96% | 6.84 | 5.3-8.7 | 64% | 0.29 | 0.00 | 0.00
+court_f1 | c1_wisps | 11 | competent | 100% | 3.21 | 2.7-4.0 | 17% | 0.00 | 0.00 | 0.00
+court_f1 | c1_wisps | 11 | naive | 100% | 6.51 | 5.3-8.0 | 53% | 0.04 | 0.00 | 0.00
+court_f1 | c1_wisps (elite) | 11 | competent | 100% | 4.60 | 3.3-6.3 | 24% | 0.00 | 0.00 | 0.00
+court_f1 | c1_sentinel | 10 | competent | 100% | 3.79 | 3.0-4.7 | 17% | 0.00 | 0.00 | 0.00
+court_f1 | c1_sentinel | 10 | naive | 100% | 8.64 | 7.7-9.7 | 57% | 0.20 | 0.00 | 0.00
+court_f1 | c1_sentinel | 11 | competent | 100% | 3.44 | 2.7-4.0 | 14% | 0.00 | 0.00 | 0.00
+court_f1 | c1_sentinel | 11 | naive | 100% | 8.33 | 7.3-9.3 | 49% | 0.15 | 0.00 | 0.00
+court_f1 | c1_sentinel (elite) | 11 | competent | 100% | 4.63 | 3.7-6.3 | 17% | 0.00 | 0.01 | 0.00
+court_f1 | c1_mixed | 10 | competent | 100% | 3.92 | 3.0-5.0 | 21% | 0.00 | 0.01 | 0.00
+court_f1 | c1_mixed | 10 | naive | 45% | 9.26 | 8.0-10.7 | 95% | 2.23 | 0.00 | 0.00
+court_f1 | c1_mixed | 11 | competent | 100% | 3.74 | 3.0-4.7 | 17% | 0.00 | 0.00 | 0.00
+court_f1 | c1_mixed | 11 | naive | 91% | 9.76 | 8.7-11.0 | 82% | 0.85 | 0.00 | 0.00
+court_f1 | c1_mixed (elite) | 11 | competent | 100% | 5.37 | 3.7-7.3 | 23% | 0.00 | 0.01 | 0.00
+court_f2 | c2_knight | 11 | competent | 100% | 3.13 | 2.3-4.0 | 14% | 0.00 | 0.00 | 0.00
+court_f2 | c2_knight | 11 | naive | 100% | 6.83 | 5.7-8.0 | 53% | 0.12 | 0.00 | 0.00
+court_f2 | c2_knight | 12 | competent | 100% | 3.01 | 2.0-4.0 | 13% | 0.00 | 0.00 | 0.00
+court_f2 | c2_knight | 12 | naive | 100% | 6.57 | 5.3-8.0 | 44% | 0.02 | 0.00 | 0.00
+court_f2 | c2_knight (elite) | 12 | competent | 100% | 4.36 | 3.0-6.0 | 15% | 0.00 | 0.00 | 0.00
+court_f2 | c2_sentinel | 11 | competent | 100% | 3.98 | 3.7-4.7 | 13% | 0.00 | 0.00 | 0.00
+court_f2 | c2_sentinel | 11 | naive | 100% | 9.60 | 8.3-11.0 | 61% | 0.29 | 0.00 | 0.00
+court_f2 | c2_sentinel | 12 | competent | 100% | 3.82 | 3.3-4.3 | 11% | 0.00 | 0.00 | 0.00
+court_f2 | c2_sentinel | 12 | naive | 100% | 9.27 | 8.0-10.7 | 52% | 0.05 | 0.00 | 0.00
+court_f2 | c2_sentinel (elite) | 12 | competent | 100% | 5.57 | 4.0-7.3 | 16% | 0.00 | 0.00 | 0.00
+court_f2 | c2_mixed | 11 | competent | 100% | 3.47 | 3.0-4.0 | 12% | 0.00 | 0.00 | 0.00
+court_f2 | c2_mixed | 11 | naive | 100% | 6.57 | 6.0-7.7 | 38% | 0.06 | 0.00 | 0.00
+court_f2 | c2_mixed | 12 | competent | 100% | 3.29 | 2.7-4.0 | 11% | 0.00 | 0.00 | 0.00
+court_f2 | c2_mixed | 12 | naive | 100% | 6.33 | 5.7-7.3 | 32% | 0.03 | 0.00 | 0.00
+court_f2 | c2_mixed (elite) | 12 | competent | 100% | 4.87 | 3.7-7.0 | 16% | 0.00 | 0.01 | 0.00
+court_f2 | other_selves | 11 | competent | 96% | 8.04 | 6.3-10.0 | 22% | 0.65 | 1.54 | 0.00
+court_f2 | other_selves | 11 | naive | 0% | 3.53 | 2.3-4.7 | 100% | 3.00 | 0.00 | 0.00
+court_f2 | other_selves | 11 | reckless | 84% | 7.82 | 6.0-10.0 | 35% | 1.80 | 2.92 | 0.00
+court_f2 | other_selves | 10 | competent | 88% | 8.26 | 6.3-10.7 | 30% | 1.25 | 2.10 | 0.00
+court_f2 | other_selves | 10 | naive | 0% | 3.07 | 2.0-4.0 | 100% | 3.00 | 0.00 | 0.00
+court_f2 | other_selves | 12 | competent | 100% | 7.62 | 6.0-9.7 | 19% | 0.39 | 1.17 | 0.00
+court_f2 | other_selves | 12 | naive | 0% | 4.06 | 3.0-5.3 | 100% | 3.00 | 0.00 | 0.00
+court_f3 | c3_shards | 12 | competent | 100% | 3.01 | 2.3-4.0 | 19% | 0.00 | 0.01 | 0.00
+court_f3 | c3_shards | 12 | naive | 88% | 6.46 | 5.0-8.0 | 65% | 0.69 | 0.00 | 0.00
+court_f3 | c3_shards | 13 | competent | 100% | 2.83 | 2.0-3.7 | 16% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shards | 13 | naive | 95% | 6.38 | 5.0-8.0 | 57% | 0.37 | 0.00 | 0.00
+court_f3 | c3_shards (elite) | 13 | competent | 100% | 4.12 | 2.7-5.3 | 20% | 0.00 | 0.01 | 0.00
+court_f3 | c3_knights | 12 | competent | 100% | 3.30 | 3.0-3.7 | 17% | 0.00 | 0.08 | 0.00
+court_f3 | c3_knights | 12 | naive | 88% | 6.05 | 5.3-7.0 | 69% | 1.00 | 0.00 | 0.00
+court_f3 | c3_knights | 13 | competent | 100% | 3.20 | 2.7-3.7 | 14% | 0.00 | 0.06 | 0.00
+court_f3 | c3_knights | 13 | naive | 97% | 5.80 | 5.0-6.7 | 58% | 0.63 | 0.00 | 0.00
+court_f3 | c3_knights (elite) | 13 | competent | 100% | 4.30 | 3.3-6.0 | 16% | 0.04 | 0.13 | 0.00
+court_f3 | c3_shadow | 12 | competent | 100% | 3.03 | 2.3-3.7 | 19% | 0.00 | 0.01 | 0.00
+court_f3 | c3_shadow | 12 | naive | 98% | 6.02 | 5.0-7.3 | 59% | 0.40 | 0.00 | 0.00
+court_f3 | c3_shadow | 13 | competent | 100% | 2.89 | 2.3-3.7 | 16% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shadow | 13 | naive | 100% | 5.74 | 4.7-7.0 | 52% | 0.24 | 0.00 | 0.00
+court_f3 | c3_shadow (elite) | 13 | competent | 100% | 4.33 | 3.0-6.0 | 20% | 0.00 | 0.03 | 0.00
+court_f3 | c3_mixed | 12 | competent | 100% | 5.35 | 4.3-6.7 | 18% | 0.00 | 0.04 | 0.00
+court_f3 | c3_mixed | 12 | naive | 40% | 10.51 | 8.7-12.3 | 94% | 2.18 | 0.00 | 0.00
+court_f3 | c3_mixed | 13 | competent | 100% | 5.07 | 4.0-6.3 | 16% | 0.00 | 0.01 | 0.00
+court_f3 | c3_mixed | 13 | naive | 78% | 11.15 | 9.7-12.7 | 82% | 1.28 | 0.00 | 0.00
+court_f3 | c3_mixed (elite) | 13 | competent | 100% | 6.39 | 4.7-8.3 | 18% | 0.00 | 0.05 | 0.00
+court_throne | nameless_king | 13 | competent | 99% | 11.37 | 8.0-15.3 | 22% | 0.65 | 1.83 | 0.34
+court_throne | nameless_king | 13 | naive | 0% | 6.81 | 6.0-7.7 | 100% | 3.00 | 0.00 | 1.00
+court_throne | nameless_king | 13 | reckless | 84% | 10.93 | 8.0-14.7 | 36% | 1.75 | 3.52 | 1.38
+court_throne | nameless_king | 12 | competent | 96% | 12.24 | 8.3-16.0 | 25% | 1.09 | 2.65 | 0.36
+court_throne | nameless_king | 12 | naive | 0% | 6.64 | 6.0-7.7 | 100% | 2.99 | 0.00 | 1.01
+
+Progression (fight each zone plan once, then 80% of it; Episode 2 continues from Episode 1):
+  100% valley           7 fights  Lv 1 -> 3  (total EXP 141)
+  100% archive_f1       8 fights  Lv 3 -> 5  (total EXP 335)
+  100% archive_f2       8 fights  Lv 5 -> 6  (total EXP 621)
+  100% archive_f3       8 fights  Lv 6 -> 8  (total EXP 1033)
+  100% archive_boss     1 fights  Lv 8 -> 9  (total EXP 1433)
+   80% valley         5.6 fights  Lv 1 -> 3  (total EXP 113)
+   80% archive_f1     6.4 fights  Lv 3 -> 5  (total EXP 268)
+   80% archive_f2     6.6 fights  Lv 5 -> 6  (total EXP 509)
+   80% archive_f3     6.4 fights  Lv 6 -> 7  (total EXP 839)
+   80% archive_boss     1 fights  Lv 7 -> 9  (total EXP 1239)
+  100% east_road        6 fights  Lv 9 -> 10  (total EXP 1595)
+  100% court_f1         7 fights  Lv 10 -> 11  (total EXP 1901)
+  100% court_f2         7 fights  Lv 11 -> 12  (total EXP 2327)
+  100% court_f3         8 fights  Lv 12 -> 13  (total EXP 2835)
+  100% court_throne     1 fights  Lv 13 -> 13  (total EXP 3335)
+   80% east_road      4.8 fights  Lv 9 -> 9  (total EXP 1369)
+   80% court_f1       5.6 fights  Lv 9 -> 10  (total EXP 1614)
+   80% court_f2       5.8 fights  Lv 10 -> 11  (total EXP 1979)
+   80% court_f3       6.4 fights  Lv 11 -> 12  (total EXP 2385)
+   80% court_throne     1 fights  Lv 12 -> 13  (total EXP 2885)
+
+Route (100 runs, HP/MP carried): careful 4.16 rounds per ordinary fight (valley 4.31, archive_f1 3.86, archive_f2 4.24, archive_f3 4.23); autoplay-like 4.66 (valley 4.32, archive_f1 3.98, archive_f2 4.99, archive_f3 5.33)
+Economy: 2516 battle gold on the route, 1486 at Rook's salvage, tier-3 stock 5210
+Economy (Episode 2): east_road arrive 1346 +597, court_f1 arrive 1943 +978, court_f2 arrive 2921 +1508, court_f3 arrive 4429 +1776, court_throne arrive 6205 +800; at the Hollow 1943 (two tier 3: 1380), before F3 4429 (two tier 4: 3000), end 7005 (the whole smithy: 15970)
+
+All targets met.
+(64700 battles in 118.2 s)
+exit 0

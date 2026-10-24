@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { scenes, lines, SCENE_CONDITIONS } from '../../src/data/story/ep2.js';
 import { scenes as EP1_SCENES, lines as EP1_LINES } from '../../src/data/story/ep1.js';
+import { scenes as EP3_SCENES } from '../../src/data/story/ep3.js';
 import { NPCS, SPEAKER_NAMES, talkTo, isPresent } from '../../src/data/npcs.js';
 import { FLAGS, EP2_FLAGS, REWARDS_EP2, MAIN_QUEST_EP2, SIDE_QUESTS_EP2, BANTER, partyChat, currentStep, journal,
   pickChat, mainQuestFor, MAIN_QUEST } from '../../src/data/quests.js';
@@ -355,7 +356,7 @@ test('Episode 2 NPCs: placed on Episode 2 maps, change at the restoration, no re
     if (!flagsOf(n.show).includes('nh_restored'))
       assert.ok(n.talk.some((e) => e.lines && [e.if].flat().some((f) => ['nh_restored', 'ep2_complete'].includes(f))), `${id}: no restored lines`);
     if (n.map !== 'east_road' && id !== 'aurel') assert.equal(n.noReflection, true, `${id}: noReflection`);
-    for (const e of n.talk) if (e.scene) assert.ok(scenes[e.scene] || EP1_SCENES[e.scene], `${id}: scene ${e.scene}`);
+    for (const e of n.talk) if (e.scene) assert.ok(scenes[e.scene] || EP1_SCENES[e.scene] || EP3_SCENES[e.scene], `${id}: scene ${e.scene}`);
   }
 });
 

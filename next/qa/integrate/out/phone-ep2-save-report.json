@@ -1,0 +1,475 @@
+{
+  "device": "phone-ep2",
+  "status": "ok",
+  "detail": "",
+  "speed": 2,
+  "keys": false,
+  "timing": [
+    {
+      "step": "boot",
+      "map": null,
+      "game_s": 0,
+      "wall_s": 0.5,
+      "level": null,
+      "gold": null
+    },
+    {
+      "step": "resume",
+      "map": "hero_home",
+      "game_s": 1480.7,
+      "wall_s": 6.9,
+      "level": 10,
+      "gold": 3095
+    },
+    {
+      "step": "ep2_mael",
+      "map": "willowmere",
+      "game_s": 1487.3,
+      "wall_s": 10.4,
+      "level": 10,
+      "gold": 3095
+    },
+    {
+      "step": "crossing",
+      "map": "valley",
+      "game_s": 1532.9,
+      "wall_s": 34.6,
+      "level": 10,
+      "gold": 3095
+    },
+    {
+      "step": "fading_road",
+      "map": "east_road",
+      "game_s": 1574.8,
+      "wall_s": 56.0,
+      "level": 10,
+      "gold": 3177
+    },
+    {
+      "step": "waystation",
+      "map": "east_road",
+      "game_s": 1696.9,
+      "wall_s": 121.2,
+      "level": 10,
+      "gold": 3552
+    },
+    {
+      "step": "nameless_hollow",
+      "map": "nameless_hollow",
+      "game_s": 1835.0,
+      "wall_s": 200.4,
+      "level": 11,
+      "gold": 3917
+    },
+    {
+      "step": "outfit_hollow",
+      "map": "nameless_hollow",
+      "game_s": 1920.6,
+      "wall_s": 247.1,
+      "level": 11,
+      "gold": 3917
+    },
+    {
+      "step": "court_f1",
+      "map": "court_f1",
+      "game_s": 1996.7,
+      "wall_s": 291.1,
+      "level": 11,
+      "gold": 67
+    },
+    {
+      "step": "court_f2",
+      "map": "court_f2",
+      "game_s": 2227.0,
+      "wall_s": 430.2,
+      "level": 11,
+      "gold": 1322
+    },
+    {
+      "step": "other_selves",
+      "map": "court_f2",
+      "game_s": 2492.9,
+      "wall_s": 590.3,
+      "level": 12,
+      "gold": 3086
+    },
+    {
+      "step": "court_f3",
+      "map": "court_f2",
+      "game_s": 2531.7,
+      "wall_s": 610.1,
+      "level": 12,
+      "gold": 3486
+    },
+    {
+      "step": "hollow_trip",
+      "map": "nameless_hollow",
+      "game_s": 2537.7,
+      "wall_s": 613.8,
+      "level": 12,
+      "gold": 3486
+    },
+    {
+      "step": "antechamber",
+      "map": "court_f3",
+      "game_s": 2784.5,
+      "wall_s": 760.8,
+      "level": 13,
+      "gold": 1528
+    },
+    {
+      "step": "nameless_king",
+      "map": "court_throne",
+      "game_s": 2821.0,
+      "wall_s": 787.7,
+      "level": 13,
+      "gold": 1528
+    },
+    {
+      "step": "hollowmere",
+      "map": "court_throne",
+      "game_s": 2902.3,
+      "wall_s": 828.9,
+      "level": 14,
+      "gold": 2328
+    },
+    {
+      "step": "ep2_credits_done",
+      "map": "nh_inn",
+      "game_s": 2936.0,
+      "wall_s": 852.2,
+      "level": 14,
+      "gold": 2328
+    },
+    {
+      "step": "ep2_epilogue",
+      "map": "willowmere",
+      "game_s": 3008.0,
+      "wall_s": 895.3,
+      "level": 14,
+      "gold": 2288
+    }
+  ],
+  "battles": [
+    {
+      "map": "valley",
+      "rounds": 2,
+      "wall_s": 5.3,
+      "enc": "valley_pack",
+      "elite": true,
+      "level": 10
+    },
+    {
+      "map": "valley",
+      "rounds": 2,
+      "wall_s": 2.9,
+      "enc": "valley_mixed",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 6,
+      "wall_s": 7.1,
+      "enc": "road_mixed",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 4,
+      "wall_s": 5.7,
+      "enc": "road_wolves",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 5,
+      "wall_s": 6.3,
+      "enc": "road_beetles",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 4,
+      "wall_s": 7.5,
+      "enc": "road_quick",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 4,
+      "wall_s": 4.6,
+      "enc": "road_wolves",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 3,
+      "wall_s": 4.9,
+      "enc": "road_pack",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 3,
+      "wall_s": 4.4,
+      "enc": "road_beetles",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 5,
+      "wall_s": 6.7,
+      "enc": "road_beetles",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "east_road",
+      "rounds": 4,
+      "wall_s": 4.8,
+      "enc": "road_wolves",
+      "elite": false,
+      "level": 10
+    },
+    {
+      "map": "court_f1",
+      "rounds": 5,
+      "wall_s": 8.8,
+      "enc": "c1_quick",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 3,
+      "wall_s": 4.2,
+      "enc": "c1_wisps",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 5,
+      "wall_s": 6.3,
+      "enc": "c1_sentinel",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 4,
+      "wall_s": 7.3,
+      "enc": "c1_quick",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 3,
+      "wall_s": 4.4,
+      "enc": "c1_wisps",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 4,
+      "wall_s": 5.0,
+      "enc": "c1_mixed",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 3,
+      "wall_s": 4.5,
+      "enc": "c1_sentinel",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f1",
+      "rounds": 4,
+      "wall_s": 6.3,
+      "enc": "c1_mixed",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f2",
+      "rounds": 7,
+      "wall_s": 9.7,
+      "enc": "c2_shadows",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f2",
+      "rounds": 5,
+      "wall_s": 6.3,
+      "enc": "c2_knight",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f2",
+      "rounds": 6,
+      "wall_s": 7.6,
+      "enc": "c2_sentinel",
+      "elite": false,
+      "level": 11
+    },
+    {
+      "map": "court_f2",
+      "rounds": 6,
+      "wall_s": 7.7,
+      "enc": "c2_mixed",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 6,
+      "wall_s": 7.9,
+      "enc": "c2_shadows",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 6,
+      "wall_s": 7.5,
+      "enc": "c2_mixed",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 5,
+      "wall_s": 6.7,
+      "enc": "c2_knight",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 4,
+      "wall_s": 5.1,
+      "enc": "c2_sentinel",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 5,
+      "wall_s": 7.0,
+      "enc": "c2_sentinel",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f2",
+      "rounds": 10,
+      "wall_s": 15.5,
+      "enc": "other_selves",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f3",
+      "rounds": 3,
+      "wall_s": 3.7,
+      "enc": "c3_shards",
+      "elite": false,
+      "level": 12
+    },
+    {
+      "map": "court_f3",
+      "rounds": 4,
+      "wall_s": 7.0,
+      "enc": "c3_shards",
+      "elite": true,
+      "level": 12
+    },
+    {
+      "map": "court_f3",
+      "rounds": 4,
+      "wall_s": 6.1,
+      "enc": "c3_mixed",
+      "elite": false,
+      "level": 13
+    },
+    {
+      "map": "court_f3",
+      "rounds": 4,
+      "wall_s": 5.1,
+      "enc": "c3_knights",
+      "elite": false,
+      "level": 13
+    },
+    {
+      "map": "court_f3",
+      "rounds": 3,
+      "wall_s": 4.5,
+      "enc": "c3_shadow",
+      "elite": false,
+      "level": 13
+    },
+    {
+      "map": "court_f3",
+      "rounds": 6,
+      "wall_s": 7.6,
+      "enc": "c3_mixed",
+      "elite": false,
+      "level": 13
+    },
+    {
+      "map": "court_throne",
+      "rounds": 14,
+      "wall_s": 19.6,
+      "enc": "nameless_king",
+      "elite": false,
+      "level": 13
+    }
+  ],
+  "gameovers": 0,
+  "notes": [
+    "resumed from D:\\LexiconQuest\\next\\qa\\out\\autoplay\\phone-ep1-credits-save.json",
+    "ethers used on ['mira'] (east_road)",
+    "shove heavy_shore left from (58, 12) did not move it",
+    "round trip ok: slot 1 at the Hollow chapel (nh_chapel 12,10)",
+    "beam rec_b on court_f1: 2 turns",
+    "ethers used on ['bram', 'hero'] (court_f1)",
+    "beam rec_lock on court_f1: 3 turns",
+    "ethers used on ['mira'] (court_f1)",
+    "font font_f1 unreachable: cannot reach font_f1 on court_f1 (rest font_f1) from (15, 8); spots [((15, 26), 'down'), ((14, 27), 'right'), ((16, 26), 'down'), ((17, 27), 'left')]; actors nearby []",
+    "beam bridge 25,5 on court_f2: 1 turns",
+    "beam bridge 28,12 on court_f2: 1 turns",
+    "beam bridge 21,15 on court_f2: 1 turns",
+    "ethers used on ['mira', 'mira', 'hero', 'bram'] (court_f2)",
+    "rested at font_f2 on court_f2",
+    "round trip ok: slot 2 at F2 west wing (court_f2 4,16)",
+    "beam rec_belonging on court_f3: 3 turns",
+    "beam rec_mercy on court_f3: 2 turns",
+    "ethers used on ['mira'] (court_f3)",
+    "font font_f3 unreachable: cannot reach font_f3 on court_f3 (rest font_f3) from (41, 7); spots [((18, 10), 'up'), ((18, 8), 'down'), ((17, 9), 'right'), ((19, 10), 'up'), ((19, 8), 'down'), ((20, 9), 'left')]; actors nearby []",
+    "beam rec_courage on court_f3: 1 turns",
+    "font font_f3 unreachable: cannot reach font_f3 on court_f3 (rest font_f3) from (17, 23); spots [((18, 10), 'up'), ((18, 8), 'down'), ((17, 9), 'right'), ((19, 10), 'up'), ((19, 8), 'down'), ((20, 9), 'left')]; actors nearby []",
+    "rested at font_f3 on court_f3",
+    "round trip ok: slot 3 at before the King (court_f3 19,8)",
+    "reload at the antechamber: three latched receptors lit, the vow door open"
+  ],
+  "errors": [],
+  "warnings": [],
+  "wrongOrder": [],
+  "dialogLines": 430,
+  "wall_s": 895.3
+}

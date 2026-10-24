@@ -2,8 +2,10 @@
 // JSON for qa/content/preview_dialogue.py. Usage: node qa/content/_boxes.mjs scene1 scene2 ...
 import { scenes as EP1 } from '../../src/data/story/ep1.js';
 import { scenes as EP2 } from '../../src/data/story/ep2.js';
+import { scenes as EP3, GATE } from '../../src/data/story/ep3.js';
 
-const scenes = { ...EP1, ...EP2 };
+const scenes = { ...EP1, ...EP2, ...EP3 };
+GATE.live = true; // preview Episode 3 scenes even though the switch ships off
 import { speakerName, NPCS } from '../../src/data/npcs.js';
 import { runOnce } from './_harness.mjs';
 
@@ -31,6 +33,15 @@ const STATE = {
     nameless_king: ['vow_door_open'], hollowmere_restored: ['aurel_named'], tess_last_route: [],
   }).map(([k, v]) => [k, ['intro_done', 'mira_joined', 'bram_joined', 'archivore_defeated', 'ep1_complete', ...v]])),
 };
+// Episode 3 (E3-story): a finished Episode 2 plus the beats each scene needs.
+const EP2_DONE = ['intro_done', 'mira_joined', 'bram_joined', 'archivore_defeated', 'ep1_complete', 'ep2_complete', 'nh_restored'];
+Object.assign(STATE, Object.fromEntries(Object.entries({
+  ep3_morning: [], sand_gate: ['ep3_started'], sand_first_fight: ['sand_road_arrived'], pk_arrival: ['sand_gate_open'],
+  veyra_square: ['pk_arrived'], ilya_bellhouse: ['met_veyra'], bram_memory_1: ['foundry_f1_arrived'],
+  bram_memory_2: ['foundry_f2_arrived'], bellows_specter: ['foundry_f2_arrived'], vex_furnace: ['foundry_f3_arrived'],
+  bram_memory_3: ['oath_hand', 'oath_heart', 'oath_home'], cinder_warden: ['bell_gate_open'],
+  warden_after: ['cinder_warden_defeated'], first_bell: ['garrick_named'], ep3_ending: ['pk_restored'],
+}).map(([k, v]) => [k, [...EP2_DONE, ...v]])));
 const PORTRAITS = {};
 const out = [];
 for (const id of process.argv.slice(2)) {

@@ -1,4 +1,4 @@
-// Episode 1 and Episode 2 quests: every story flag, the main quest with journal text, Chrono Trigger style party chat
+// Episode 1, 2 and 3 quests: every story flag, the main quest with journal text, Chrono Trigger style party chat
 // ("Talk" in the field menu: a companion says, in character, what to do next), side quests and rewards.
 // Pure data + pure helpers. No DOM, no engine.
 //
@@ -7,6 +7,7 @@
 // Before Mira joins, the hero "talks" to themself: who 'hero', text in parentheses.
 
 import { matches } from './story/dialogue.js';
+import { EP3_LIVE } from '../game/episodes.js';
 
 // ------------------------------------------------------------------------------------------------
 // Every flag the story uses. COMMON.md main flags first. Value = what setting it means.
@@ -578,6 +579,34 @@ const VOWS = ['vow_belonging', 'vow_mercy', 'vow_courage'];
 const m = (text) => ({ who: 'mira', text });
 const b = (text) => ({ who: 'bram', text });
 
+const EPILOGUE2_WAIT = {
+  journal: 'Hollowmere has its name. Yours is in the Book twice. Emberpeak is burning, but the road there is not open yet.',
+  chat: [
+    { map: NH_MAPS, lines: [
+      b("The road to Emberpeak isn't open yet, {hero}. When it is, we go."),
+      m('The mirror in the chapel opens onto Willowmere now. Mael will want to hear all of it.'),
+    ] },
+    { lines: [
+      m('Hollowmere has its name. Yours is in the Book twice. I want to know why.'),
+      b("Emberpeak is burning. That's my mountain. The road there isn't open yet."),
+    ] },
+  ],
+};
+/** What the epilogue says once the episode switch is on: the old sand road gate, east of Hollowmere. */
+export const EPILOGUE2_LIVE = {
+  journal: 'Hollowmere has its name. Yours is in the Book twice. Emberpeak is burning: at dawn, take the old sand road from the east gate.',
+  chat: [
+    { map: NH_MAPS, lines: [
+      b('Emberpeak, at first light. The old sand road, through the east gate. I want to be there before the glow is out.'),
+      m('Sleep first. The inn has beds that remember you.'),
+    ] },
+    { lines: [
+      m('Hollowmere has its name. Yours is in the Book twice. I want to know why.'),
+      b("Emberpeak is burning. That's my mountain. The road starts at Hollowmere's east gate."),
+    ] },
+  ],
+};
+
 export const MAIN_QUEST_EP2 = {
   id: 'main_ep2',
   title: 'The Town Without a Name',
@@ -728,19 +757,11 @@ export const MAIN_QUEST_EP2 = {
     },
     {
       id: 'epilogue2', title: 'Toward Emberpeak', done: null,
-      // W15 (PLAYTEST_REVIEW_4 fix 3): Episode 3 is not in the game, so the journal and Talk say the road is not open
-      // yet and point at what is (placeholder wording, Scott chooses the final words).
-      journal: 'Hollowmere has its name. Yours is in the Book twice. Emberpeak is burning, but the road there is not open yet.',
-      chat: [
-        { map: NH_MAPS, lines: [
-          b("The road to Emberpeak isn't open yet, {hero}. When it is, we go."),
-          m('The mirror in the chapel opens onto Willowmere now. Mael will want to hear all of it.'),
-        ] },
-        { lines: [
-          m('Hollowmere has its name. Yours is in the Book twice. I want to know why.'),
-          b("Emberpeak is burning. That's my mountain. The road there isn't open yet."),
-        ] },
-      ],
+      // W15 (PLAYTEST_REVIEW_4 fix 3): while Episode 3 is not in the game, the journal and Talk say the road is not open
+      // yet and point at what is (placeholder wording, Scott chooses the final words). E3-story: when EP3_LIVE the
+      // same step points at the old sand road gate instead (EPILOGUE2_LIVE).
+      journal: EP3_LIVE ? EPILOGUE2_LIVE.journal : EPILOGUE2_WAIT.journal,
+      chat: EP3_LIVE ? EPILOGUE2_LIVE.chat : EPILOGUE2_WAIT.chat,
     },
   ],
 };
@@ -895,6 +916,381 @@ BANTER.willowmere.unshift({ if: [...BOTH, 'ep2_complete'], lines: [
   b('You look the same, Mira.'),
 ] });
 
+// ================================================================================================
+// Episode 3: flags, rewards, the main quest, side quests and banter. The Episode 3 quest takes over the journal and
+// Talk once ep3_started is set (mainQuestFor); only ep3_morning sets it, and ep3_morning needs EP3_LIVE. Until a
+// name is read (mara_read) or spoken (garrick_named), no Talk line, journal line or box says it: Bram's father is
+// "your father", "Dad" or "the Smith", the founder is "the founder". qa/content/ep3.test.mjs scans for both.
+// Prefixes: road sand_ / sr_, town pk_, dungeon foundry_ and fo1_ / fo2_ / fo3_; never ember_ (the Ember skill owns it).
+// ================================================================================================
+export const EP3_FLAGS = {
+  // Main story
+  ep3_started: 'Episode 3 is underway: the Smith lost his name and went east (ep3_morning). The Episode 3 quest takes over the journal.',
+  sand_gate_open: "Vessa unchained the old sand road at Hollowmere's east gate (sand_gate). The east exit opens.",
+  sand_road_arrived: 'First arrival on the Old Sand Road (sand_road_arrival).',
+  sand_first_fight_done: 'The Cinder Hound and Cinder Beetle teaching fight was won (sand_first_fight).',
+  pk_arrived: 'First arrival in Emberpeak (pk_arrival).',
+  met_veyra: 'Foreman Veyra laid out the crisis at the coolant station (veyra_square).',
+  met_ilya: "Ilya gave the party the founder's lift key in the Bell House (ilya_bellhouse). Side errands open.",
+  foundry_open: 'The foundry gate answers to the lift key (ilya_bellhouse).',
+  foundry_entered: 'The party took the ore lift into the Ashen Foundry (foundry_gate).',
+  foundry_f1_done: 'Took the lift down from the Cinder Liftworks (foundry_f1_lift).',
+  bellows_specter_defeated: 'The Bellows Specter is beaten (encounter flag; bellows_specter also sets it). The fans stop.',
+  foundry_f2_done: 'Took the shaft stair under the great fan (foundry_f2_shaft).',
+  vex_furnace_met: 'Vex Quill spoke from the hottest furnace and tore a corner off the list (vex_furnace).',
+  bell_gate_open: 'The Bell Gate is open and Bram read the stamp on it (bram_memory_3).',
+  cinder_warden_defeated: 'The Cinder Warden is beaten (encounter flag; warden_after also sets it).',
+  garrick_named: "Bram said his father's name over the Steel Leaf and the Smith became Garrick (warden_after).",
+  mara_named: "The reforged leaf raised the founder's name (warden_after).",
+  first_bell_rung: 'Bram rang the First Bell (first_bell).',
+  pk_restored: 'Emberpeak is restored: the ash stopped, the plates are lettered, the tint lifts (first_bell).',
+  ep3_complete: 'The Episode 3 ending played (ep3_ending). Roll CREDITS_EP3, then wake at pk_inn inn_bed.',
+
+  // Story beats and world state
+  ep3_morning_done: 'The Smith at the Signless Inn, one name short (ep3_morning).',
+  saw_slag: 'The slag tongue and the sluice paddle were introduced on the road (slag_crossing).',
+  carters_rested: "The party sat at the carters' shelter fire once (carters_rest).",
+  saw_emberpeak: 'Saw Emberpeak from the last rise (ash_view).',
+  saw_memorial: 'Saw the memorial wall, one plate flat and one going soft (memorial_wall).',
+  forge_relit: 'The Smith asked Sella for the family forge (garrick_forge). Tier 6 stock and the chimney smoke wait on it.',
+  foundry_f1_arrived: 'Foundry F1 arrival scene played (foundry_f1_arrival).',
+  foundry_f2_arrived: 'Foundry F2 arrival scene played (foundry_f2_arrival).',
+  foundry_f3_arrived: 'Foundry F3 arrival scene played (foundry_f3_arrival). Opens the F3 lift shortcut.',
+  lift_wheel_lit: 'Latch flag of basin bs_wheel (map); liftworks_lift also sets it. Opens the ore lift gate.',
+  lift_wheel_seen: 'The waterwheel pan played once (liftworks_lift).',
+  bram_memory_1: "Bram's first memory, the collapsed mine (bram_memory_1).",
+  bram_memory_2: "Bram's second memory, the unstruck bell (bram_memory_2).",
+  bram_memory_3: "Bram's third memory, the name under the ash (bram_memory_3). Tempered Oath is learned.",
+  mara_read: "Bram read his mother's stamp on the Bell Gate (bram_memory_3). A Voice may now be called Mara.",
+  oath_hand: 'The Anvil of the Hand was struck (oath_hand, west wing).',
+  oath_heart: 'The Anvil of the Heart was struck (oath_heart, east wing).',
+  oath_home: 'The Anvil of the Home was struck (oath_home, south wing).',
+  clapper_get: "The Warden's hammer-head fell: it is the First Bell's clapper (warden_after).",
+  leaf_get: "The Steel Leaf was found in the Warden's chest and read (warden_after).",
+  crucible_hook_found: 'Set by the F1 north balcony chest that holds the Crucible Hook (map chest flag). Talk points at the Heartforge door.',
+  bellows_specter_tried: "The Bellows Specter fight has started once; a retry plays only the fans, Mira's tip and the card.",
+  cinder_warden_tried: "The Cinder Warden fight has started once; a retry plays only its stirring, Mira's tip and the card.",
+  ash_key_f1: 'Set by the F1 chest that holds an ash_key (map chest flag). Talk points at the locked door.',
+  ash_key_f2: 'Set by the F2 chest that holds an ash_key (map chest flag). Talk points at the Fan Hall door.',
+
+  // Side quest: The Coolant Station (Veyra)
+  coolant_started: 'Veyra asked the party to hear three witnesses and check the station (coolant_start).',
+  testimony_ilya: "Heard Ilya's testimony (testimony_ilya).",
+  testimony_harl: "Heard Harl's testimony (testimony_harl).",
+  testimony_sella: "Heard Sella's testimony (testimony_sella).",
+  coolant_done: 'The station is open and the reward paid (coolant_check). +25 Fury when the Warden fight starts.',
+
+  // Side quest: What the Ash Kept (a Lantern secret on F2)
+  ledger_found: "Raised the Lantern over the burned ledger pages (ledger_ash). The apprentice's cache chest appears.",
+
+  // Side quest: Vessa's Sand
+  sand_started: 'Vessa asked for a sack of Emberpeak glass sand (vessa_sand). The sand hopper chest appears on F1.',
+  glass_sand_found: 'Set by the F1 sand hopper chest (map chest flag, present only once sand_started).',
+  sand_done: 'Gave Vessa the sand; she gave the Emberglass Charm (vessa_sand).',
+};
+Object.assign(FLAGS, EP3_FLAGS);
+// The two name reveals the tests scan for: no box, line or journal entry may say the name before one of these flags.
+export const NAME_REVEALS = {
+  mara: ['mara_read', 'mara_named', 'pk_restored', 'ep3_complete', 'first_bell_rung', 'bram_memory_3', 'garrick_named', 'clapper_get'],
+  garrick: ['garrick_named', 'pk_restored', 'ep3_complete', 'first_bell_rung'],
+};
+
+export const REWARDS_EP3 = {
+  vessa: { item: 'quench_flask', qty: 3, why: "Vessa's three Quench Flasks at the sand gate (sand_gate)" },
+  coolant: { item: 'ashwalker_mantle', qty: 1, why: 'The Coolant Station (set piece; the boots are the F1 Dash secret)' },
+  coolant_extra: { item: 'quench_flask', qty: 3, why: 'The Coolant Station' },
+  ledger: { item: 'hi_ether', qty: 2, gold: 160, why: "What the Ash Kept (the apprentice's cache chest: 160 gold, 2 Hi-Ethers, book foundry_ledger)" },
+  sand: { item: 'emberglass_charm', qty: 1, why: "Vessa's Sand (rare unique charm)" },
+  hammer: { item: 'first_bell_hammer', qty: 1, why: 'Garrick gives Bram the First Bell Hammer (warden_after)' },
+};
+
+const EMBER_MAPS = ['emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse'];
+const FOUNDRY_MAPS = ['foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart'];
+const OATH_FLAGS = ['oath_hand', 'oath_heart', 'oath_home'];
+
+export const MAIN_QUEST_EP3 = {
+  id: 'main_ep3',
+  title: 'The Forge of Ash',
+  steps: [
+    {
+      id: 'sand_road', title: 'The Old Sand Road', done: 'pk_arrived',
+      journal: "Bram's father has lost his name and ridden for Emberpeak, up the old sand road east of Hollowmere. Follow him.",
+      chat: [
+        { map: NH_MAPS, ifNot: 'sand_gate_open', lines: [
+          b('The east gate, past the mere. Vessa has the key to the old chain.'),
+          m("Penny's cart is waiting there. Your father is riding with her."),
+        ] },
+        { map: NH_MAPS, lines: [b('Out the east gate and up the sand road. My mountain is at the top of it.')] },
+        { map: TOWN_MAPS, lines: [
+          m('Mael will want to hear it all, but the road to Emberpeak starts in Hollowmere.'),
+          b('The chapel mirror gets us there. Then the east gate.'),
+        ] },
+        { map: 'sand_road', ifNot: 'saw_slag', lines: [
+          m('Slag ahead, across the road, and a stream running beside it with a paddle in it. Turn the paddle.'),
+          b("Water takes the heat. Sand carters' trick."),
+        ] },
+        { map: 'sand_road', ifNot: 'saw_emberpeak', lines: [
+          b("Past the carters' shelter, then up the rise. Emberpeak is at the top."),
+          m('There is a fire at the shelter, if anyone needs it. It is a good fire.'),
+        ] },
+        { map: 'sand_road', lines: [b("North-east, up to the town gate. He'll be waiting. Pretending not to.")] },
+        { lines: [b('Emberpeak. My mountain. East of Hollowmere, up the old sand road.')] },
+      ],
+    },
+    {
+      id: 'emberpeak', title: 'Emberpeak', done: 'foundry_entered',
+      journal: 'Emberpeak is buried in ash. Hear Foreman Veyra in the square, then Ilya in the Bell House. She keeps the foundry key.',
+      chat: [
+        { map: 'emberpeak', ifNot: 'met_veyra', lines: [
+          m('Veyra, the foreman, is at the coolant station in the middle of the square.'),
+          b("She'll ask if we can carry something. The answer is yes."),
+        ] },
+        { map: 'emberpeak', ifNot: 'met_ilya', lines: [
+          m('Ilya, in the Bell House on the west side of the square. Veyra said she keeps the foundry key.'),
+        ] },
+        { map: 'pk_bellhouse', ifNot: 'met_ilya', lines: [m("Ilya's workbench is at the back. Walk in a few steps, she will speak first.")] },
+        { map: 'pk_smithy', ifNot: 'forge_relit', lines: [
+          b('That is my father at the forge. Talk to him. He asked to sit by the fire.'),
+          m('Let him have it. It is the only thing he has asked for.'),
+        ] },
+        { map: 'emberpeak', ifNot: 'forge_relit', lines: [
+          b('The gate in the mountain face is north, past the ramp. The key fits it.'),
+          m("Your father is at Sella's forge, south-west. Maybe see him before we go down."),
+        ] },
+        { map: 'emberpeak', lines: [b('North, up the ramp. The foundry gate. The key fits it.')] },
+        { map: EMBER_MAPS, lines: [m('Ilya has the key. The foundry gate is north of the square, in the mountain face.')] },
+        { lines: [m('Emberpeak, up the old sand road. Start with Veyra, in the square.')] },
+      ],
+    },
+    {
+      id: 'foundry_f1', title: 'The Cinder Liftworks', done: 'foundry_f1_done',
+      journal: 'Water cools slag. Turn the sluice paddles, send the water down the troughs, and wake the wheel that works the ore lift.',
+      chat: [
+        { map: EMBER_MAPS, lines: [
+          b("Through the gate in the mountain face and down the lift. My mother's cooling lines are down there."),
+          m('Water and fire, built to balance. Let us see if they still do.'),
+        ] },
+        { map: 'foundry_f1', if: 'lift_wheel_lit', lines: [m('The wheel is turning. The ore lift is awake in the Wheelhouse, south-east. Down.')] },
+        { map: 'foundry_f1', if: 'crucible_hook_found', lines: [
+          m('We have the Crucible Hook. It opens the Heartforge, far below. First the wheel.'),
+          b('Send the water from the spout in the Ore Lines down the long trough to the wheel.'),
+        ] },
+        { map: 'foundry_f1', if: 'ash_key_f1', lines: [
+          m('We have an Ash Key. The locked door is on the west side, down the old shaft.'),
+          b('Behind it, the balcony. I would bet on a chest.'),
+        ] },
+        { map: 'foundry_f1', lines: [
+          m('The wheel is in the Wheelhouse, south-east. Water from the spout in the Ore Lines has to reach it.'),
+          b('If a crate dams a trough, stand aside. I will shove it.'),
+        ] },
+        { lines: [m('The Ashen Foundry, through the gate in the mountain face. The first floor, the Cinder Liftworks.')] },
+      ],
+    },
+    {
+      id: 'foundry_f2', title: 'The Ventilation Galleries', done: 'foundry_f2_done',
+      journal: 'The Ventilation Galleries are choked with soot. Cool the hot gates with water and find what is feeding the fans.',
+      chat: [
+        { map: 'foundry_f1', lines: [b('The lift is in the Wheelhouse, south-east. Down to the galleries.')] },
+        { map: 'foundry_f2', if: 'bellows_specter_defeated', lines: [m('The fans have stopped. The stair under the great fan goes down.')] },
+        { map: 'foundry_f2', if: 'ash_key_f2', lines: [
+          m('We have an Ash Key. The locked door is on the Fan Hall approach.'),
+          b('Whatever is feeding those fans is behind it.'),
+        ] },
+        { map: 'foundry_f2', lines: [
+          m('A full basin cools a hot grate. Cool the gates, one at a time. Wet stone is safe to walk on.'),
+          b('Wrong outlets only splash. Nothing is lost. Try the next one.'),
+        ] },
+        { lines: [m('The second floor, the Ventilation Galleries. Down the lift from the Wheelhouse.')] },
+      ],
+    },
+    {
+      id: 'foundry_f3', title: 'The Heartforge Crucible', done: 'bell_gate_open',
+      journal: 'Three wings, three anvils, one gate. Strike the Hand, the Heart and the Home, and the Bell Gate will open.',
+      chat: [
+        { map: ['foundry_f2', 'foundry_f1'], lines: [b('The stair under the great fan goes down to the Crucible.')] },
+        { map: 'foundry_f3', if: OATH_FLAGS, lines: [m('All three anvils have rung. The Bell Gate is open, north of the hub.')] },
+        { map: 'foundry_f3', if: ['oath_hand', 'oath_heart'], lines: [
+          b('Two rung. The south wing is left, the Home. A block there wants to be a dam.'),
+          m('Shove it into the short branch, so the water takes the long way round.'),
+        ] },
+        { map: 'foundry_f3', if: ['oath_hand', 'oath_home'], lines: [
+          m('Two rung. The east wing is left, the Heart. It is dark. The slag is the only light.'),
+          b('Basins open the hot gates. Keep to the lit paths.'),
+        ] },
+        { map: 'foundry_f3', if: ['oath_heart', 'oath_home'], lines: [
+          m('Two rung. The west wing is left, the Hand. A slag lake. Cool the pools in turn.'),
+          b('Each crust reaches the next paddle. Crust stays cooled.'),
+        ] },
+        { map: 'foundry_f3', lines: [
+          m('Three wings: west, east and south. Each has an anvil. Strike all three and the gate opens.'),
+          b('The south wing has a crate on the wrong side. That one is mine to shove.'),
+        ] },
+        { lines: [m('The Heartforge Crucible, the third floor. Three wings, three anvils, one gate.')] },
+      ],
+    },
+    {
+      id: 'warden', title: 'The Cinder Warden', done: 'cinder_warden_defeated',
+      journal: 'Behind the Bell Gate, the Crucible Hook opens the Heartforge. The Cinder Warden is waiting.',
+      chat: [
+        { map: 'foundry_f3', ifNot: 'crucible_hook_found', lines: [
+          m('The Heartforge door needs the Crucible Hook. It is on the first floor, in the north balcony.'),
+          b('The lift in the south-east of the hub goes straight up. We will be back.'),
+        ] },
+        { map: ['foundry_f3', 'foundry_heart'], if: 'coolant_done', lines: [
+          m('When it glows white, cool it. When the hammer goes up, put Bram in front.'),
+          b('Tempered Oath. I stand in front, you do the rest. And the coolant water is with us.'),
+        ] },
+        { map: ['foundry_f3', 'foundry_heart'], lines: [
+          m('When it glows white, cool it. When the hammer goes up, put Bram in front.'),
+          b('Tempered Oath. I stand in front, you do the rest.'),
+        ] },
+        { lines: [m('Beyond the Bell Gate, the Heartforge. The Warden keeps it.')] },
+      ],
+    },
+    {
+      id: 'first_bell', title: 'The First Bell', done: 'pk_restored',
+      journal: 'The Warden is down and the clapper is yours. Take the lift up to Emberpeak, where Ilya waits to hang the First Bell.',
+      chat: [
+        { map: FOUNDRY_MAPS, lines: [
+          b('The lift up is in the Heartforge, by the furnace. Ilya is waiting with the bell.'),
+          m('Take the clapper. The bell has been waiting for it long enough.'),
+        ] },
+        { lines: [m('Ilya is at the bell tower with the First Bell. Bram, it should be you.')] },
+      ],
+    },
+    {
+      id: 'epilogue3', title: 'Toward Valewyn', done: null,
+      journal: 'Emberpeak has its bell, and its names. A courier says the east road is flooded and a decree will not stay sealed.',
+      chat: [
+        { map: 'emberpeak', lines: [
+          m('Sella has new steel at the forge, and Bess is cooking three stews. East is flooded. Nothing stops us from supper.'),
+          b('I am going to the forge. My father wants to teach Sella a grip.'),
+        ] },
+        { map: EMBER_MAPS, lines: [
+          b('Say it with me. Mara. Garrick. Then we can go anywhere.'),
+          m('Stock up here, rest, and read the records in the Bell House. The east road is not open yet.'),
+        ] },
+        { map: NH_MAPS, lines: [
+          m('Elian will want the news. The Keeper mirror in the Bell House lets us come and go.'),
+          b('And Vessa wants to talk glass. She always does.'),
+        ] },
+        { map: TOWN_MAPS, lines: [
+          m('The chapel mirror still runs to Hollowmere. And from there, the Bell House, if we want it.'),
+          b("Mael will want to hear it. So will Hazel. And somebody should tell Holt it's Garrick."),
+        ] },
+        { lines: [
+          m('The courier said the east road is flooded. A decree that will not stay sealed. Valewyn is losing its ink.'),
+          b('East, then. After a good supper, and a night at the Coal Lantern.'),
+        ] },
+      ],
+    },
+  ],
+};
+
+export const SIDE_QUESTS_EP3 = [
+  {
+    id: 'coolant', title: 'The Coolant Station', giver: 'veyra', start: 'coolant_started', done: 'coolant_done',
+    reward: REWARDS_EP3.coolant.item,
+    counter: { label: 'Witnesses heard', flags: ['testimony_ilya', 'testimony_harl', 'testimony_sella'] },
+    steps: [
+      {
+        id: 'witnesses', done: ['testimony_ilya', 'testimony_harl', 'testimony_sella'],
+        journal: 'Veyra wants the Coolant Station checked. Hear three witnesses first: Ilya, Harl the Surveyor and Sella.',
+        chat: [
+          { ifNot: 'testimony_ilya', map: EMBER_MAPS, lines: [m('Ilya, in the Bell House. She knew the founder.')] },
+          { ifNot: 'testimony_harl', map: EMBER_MAPS, lines: [m('Harl the Surveyor is out in the square, reading the ground.')] },
+          { ifNot: 'testimony_sella', map: EMBER_MAPS, lines: [b("Sella, at the forge. She was in the mine that night. I'd like to hear it.")] },
+          { lines: [m('Veyra wants three witnesses before we touch the valve: Ilya, Harl and Sella.')] },
+        ],
+      },
+      {
+        id: 'station', done: 'coolant_done',
+        journal: 'All three witnesses have spoken. Check the Emergency Coolant Station in Bellows Square.',
+        chat: [{ lines: [m('All three witnesses have spoken. The station is in the square. The valve wheel is the red one.')] }],
+      },
+    ],
+  },
+  {
+    id: 'ash_kept', title: 'What the Ash Kept', giver: 'ilya', start: 'foundry_f2_arrived', done: 'ledger_found',
+    reward: REWARDS_EP3.ledger.item,
+    steps: [
+      {
+        id: 'ink', done: 'ledger_found',
+        journal: 'Paper burns, but ink remembers. In the records cage on the second floor, raise the Lantern over what is left.',
+        chat: [
+          { map: 'foundry_f2', lines: [m('The records cage is in the north gallery. Ink remembers. Raise the Lantern over the ledger.')] },
+          { lines: [m("The second floor's records cage may still hold something. The Lantern will tell.")] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'vessa_sand', title: "Vessa's Sand", giver: 'vessa', start: 'sand_started', done: 'sand_done',
+    reward: REWARDS_EP3.sand.item,
+    steps: [
+      {
+        id: 'find', done: 'glass_sand_found',
+        journal: "Vessa wants a sack of Emberpeak glass sand. Look for the foundry's sand hopper, in a dead end of the first floor.",
+        chat: [
+          { map: 'foundry_f1', lines: [m('The sand hopper is in a dead end off the Ore Lines, east side. A pale heap in a chest.')] },
+          { lines: [m("Vessa's sand is in the foundry's first floor, in a hopper at a dead end.")] },
+        ],
+      },
+      {
+        id: 'deliver', done: 'sand_done',
+        journal: 'You have a sack of glass sand. Take it to Vessa at the Silverglass Smithy in Hollowmere.',
+        chat: [
+          { if: 'mirror_sigil_get', map: EMBER_MAPS, lines: [m('The mirror in the Bell House goes straight to Hollowmere. Vessa is at her furnace.')] },
+          { lines: [b("Vessa's sand. Hollowmere, the Silverglass Smithy. The east road, or the mirror.")] },
+        ],
+      },
+    ],
+  },
+];
+
+const EP3_BANTER = {
+  sand_road: [{ if: BOTH, lines: [
+    m('Eleven steps from the water to the first ash. I counted for your father.'),
+    b("He's riding. He doesn't need counting. Count anyway."),
+  ] }],
+  emberpeak: [
+    { if: [...BOTH, 'pk_restored'], lines: [
+      m('Listen. The whole town is humming. Is it the bell, or is it us?'),
+      b("It's the bell. We're just standing close to it."),
+    ] },
+    { if: BOTH, lines: [
+      b('Ash on everything. I used to think it looked like snow. It looks like tired.'),
+      m("It will look like snow again. Soon. I'd put money on it."),
+    ] },
+  ],
+  pk_inn: [{ if: BOTH, lines: [b('Hot, hotter, safe. I used to pick the middle one. It was always the wrong middle.')] }],
+  pk_shop: [{ if: BOTH, lines: [m('Taro keeps a gauge on every shelf. Even the jam. I asked. It is for the jam.')] }],
+  pk_smithy: [{ if: BOTH, lines: [
+    b("Dad's sitting by the forge like it owes him an apology."),
+    m('Maybe he owes it one.'),
+  ] }],
+  pk_bellhouse: [{ if: BOTH, lines: [m('Every mold has a name chalked on it. Every name is the same name, rubbed out.')] }],
+  foundry_f1: [{ if: BOTH, lines: [
+    b('Troughs, sluices, spouts. My mother built a whole machine out of waiting for water.'),
+    m('And a lot of patience for the people who would use it.'),
+  ] }],
+  foundry_f2: [{ if: BOTH, lines: [
+    m('The soot is warm. Everything here is warm, except the answers.'),
+    b("I'd settle for warm answers."),
+  ] }],
+  foundry_f3: [{ if: BOTH, lines: [
+    b('Slag for light. I have fought worse lighting.'),
+    m('In the Archive. Where I held the lantern.'),
+    b('Right. Thanks again for that.'),
+  ] }],
+  foundry_heart: [{ if: BOTH, lines: [b('Quiet furnace. Louder than a loud one.')] }],
+};
+Object.assign(BANTER, EP3_BANTER);
+BANTER.nameless_hollow.unshift({ if: [...BOTH, 'ep3_complete'], lines: [
+  b('Hollowmere looks the same. Smaller, maybe. I think I just grew.'),
+  m('You grew a name for your father.'),
+] });
+
 // ------------------------------------------------------------------------------------------------
 // Helpers
 // ------------------------------------------------------------------------------------------------
@@ -902,10 +1298,14 @@ const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const allSet = (flags, hasFlag) => toList(flags).every((f) => hasFlag(f));
 
 /** Every side quest of both episodes, in journal order. */
-export const ALL_SIDE_QUESTS = [...SIDE_QUESTS, ...SIDE_QUESTS_EP2];
+export const ALL_SIDE_QUESTS = [...SIDE_QUESTS, ...SIDE_QUESTS_EP2, ...SIDE_QUESTS_EP3];
 
-/** The main quest the journal and Talk follow: Episode 2's once Episode 1 is complete. */
+/**
+ * The main quest the journal and Talk follow: Episode 2's once Episode 1 is complete, Episode 3's once ep3_started is
+ * set (only ep3_morning sets it, and that scene needs the episode switch).
+ */
 export function mainQuestFor(hasFlag) {
+  if (hasFlag('ep3_started')) return MAIN_QUEST_EP3;
   return hasFlag('ep1_complete') ? MAIN_QUEST_EP2 : MAIN_QUEST;
 }
 
@@ -976,4 +1376,5 @@ export function journal(hasFlag) {
 }
 
 export default { FLAGS, FLAG_IDS, REWARDS, MAIN_QUEST, SIDE_QUESTS, BANTER, partyChat, currentStep, journal,
-  EP2_FLAGS, REWARDS_EP2, MAIN_QUEST_EP2, SIDE_QUESTS_EP2, ALL_SIDE_QUESTS, mainQuestFor };
+  EP2_FLAGS, REWARDS_EP2, MAIN_QUEST_EP2, SIDE_QUESTS_EP2, EP3_FLAGS, REWARDS_EP3, MAIN_QUEST_EP3, SIDE_QUESTS_EP3,
+  ALL_SIDE_QUESTS, mainQuestFor };

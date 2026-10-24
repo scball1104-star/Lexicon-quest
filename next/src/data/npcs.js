@@ -1,4 +1,5 @@
-// NPCs for Episode 1 and Episode 2 (Episode 2 records are at the end of NPCS). Pure data + tiny pure helpers.
+// NPCs for Episodes 1, 2 and 3 (Episode 2 records follow Episode 1's; Episode 3's Emberpeak cast is at the end of NPCS).
+// Pure data + tiny pure helpers.
 //
 // Record shape:
 //   id: {
@@ -27,6 +28,9 @@ const END = 'ep1_complete';
 const E2 = 'ep2_started';
 const NHR = 'nh_restored';
 const E2END = 'ep2_complete';
+// Episode 3 stages: ep3_started (the Smith has lost his name), the restoration (pk_restored), the end.
+const E3 = 'ep3_started';
+const E3END = 'ep3_complete';
 
 export const NPCS = {
   // ----------------------------------------------------------------------------------------------
@@ -38,11 +42,19 @@ export const NPCS = {
     about: 'Town elder and keeper of the Town Register. Gentle, wry, hiding a fear about the hero\'s name.',
     talk: [
       // Episode 2
+      { if: 'letter_answer_started', ifNot: 'letter_answer_done', scene: 'letter_answer' },
+      { if: E3END, lines: [
+        'GARRICK. It came back to the page at noon, in ink, and it stayed. I have checked it eleven times since.',
+        'Emberpeak has its bell again. I have written that down too, in my best hand. The best I have.',
+      ] },
+      { if: E3, lines: [
+        "A smith's line in the Register went blank in the night. I know the forge. I know the trade. I cannot find the man.",
+        'Go gently, {hero}. Whatever is taking names has started on the old ones.',
+      ] },
       { if: 'letter_answer_done', lines: [
         'HOLLOWMERE, in my best hand. I keep turning back to that page. Two towns remember it now.',
         'Yours is still faint, {hero}. But I have learned that faint is not the same as gone.',
       ] },
-      { if: 'letter_answer_started', scene: 'letter_answer' },
       { if: E2END, lines: [
         'Hollowmere. So that is the name my books kept forgetting. Say it again for me. Slowly.',
         'Your name, written twice. I do not know what that means, {hero}. I intend to find out.',
@@ -191,6 +203,13 @@ export const NPCS = {
     spot: 'South gate, right-hand post (Bram stands at the left post until he joins)', move: 'stand',
     about: 'The old gate sergeant. Steady, kind, keeps his promises. Holds Garrick\'s name for Bram.',
     talk: [
+      { if: E3END, lines: [
+        'GARRICK. Came back at noon. Said it fifty times since. My wife says I have a problem. My wife is right.',
+      ] },
+      { if: E3, lines: [
+        "I've been saying a name every hour. I can't remember whose.",
+        'It was a good name. It had weight. Keep an eye out for it, will you?',
+      ] },
       { if: E2END, lines: [
         'Hollowmere, is it? I walked the east road once, years back. Never could say where it went. Now I can.',
       ] },
@@ -337,6 +356,14 @@ export const NPCS = {
     spot: 'By the hearth (mark hazel_start), two or more open tiles from the bed', move: 'turn',
     about: 'The hero\'s guardian. Brisk, loving, teasing; hides worry inside chores. Took the hero in as a baby.',
     talk: [
+      { if: E3END, lines: [
+        'Garrick! It came to me at noon while I was kneading. I said it to the dough. The dough took it well.',
+        'Eat. Then tell me about the bell. In order. With nothing left out.',
+      ] },
+      { if: E3, lines: [
+        'A man came to the door at dawn asking after Bram. I fed him bread. He could not say who he was, and neither could I.',
+        'I keep thinking about his hands. Bring him back, {hero}. Bring all of them back.',
+      ] },
       { if: E2END, lines: [
         "Hollowmere. Mira's from Hollowmere. I said it to the kettle until it boiled.",
         "Your name. Is it any brighter? No, don't answer. Eat first. Then answer.",
@@ -411,6 +438,12 @@ export const NPCS = {
     about: 'Oren\'s brother, the miller. Lived at the mill for a month, forgotten by everyone, including himself.',
     talk: [
       { ifNot: 'hal_returned', scene: 'hal_returns' },
+      { if: E3END, lines: [
+        'Garrick! There. I said it before Oren did. Do not tell Oren.',
+      ] },
+      { if: E3, lines: [
+        'The forge is cold. I keep walking past to check on it. I do not know who I am checking on.',
+      ] },
       { if: E2END, lines: [
         "Garrick's Crossing. I carried the light end, and I am telling everyone it was the heavy end.",
       ] },
@@ -428,7 +461,7 @@ export const NPCS = {
   // smithy
   // ----------------------------------------------------------------------------------------------
   garrick: {
-    name: 'Garrick', sprite: 'npc_smith', portrait: 'garrick', map: 'smithy', show: { ifNot: 'garrick_at_ford' },
+    name: 'Garrick', sprite: 'npc_smith', portrait: 'garrick', map: 'smithy', show: { ifNot: ['garrick_at_ford', E3] },
     spot: 'At the anvil, beside the forge', move: 'turn', service: { type: 'shop', id: 'willowmere_smithy' },
     about: 'Bram\'s father, the smith. Few words, all of them load-bearing. "Do not rush a forge."',
     talk: [
@@ -693,7 +726,7 @@ export const NPCS = {
   // The Fading Road
   penny_e: {
     name: 'Penny', sprite: 'npc_shopkeeper', map: 'east_road', spot: 'The Waystation, beside her cart (mark penny_cart)',
-    move: 'stand', service: { type: 'shop', id: 'east_peddler' },
+    move: 'stand', show: { ifNot: 'sand_gate_open' }, service: { type: 'shop', id: 'east_peddler' },
     about: 'Penny the valley peddler, on the road now. Same person as `penny` (valley); a second record for the east road.',
     talk: [
       { if: E2END, lines: [
@@ -845,6 +878,14 @@ export const NPCS = {
     spot: 'Beside the Fountain of Faces, on a bench (mark restored_aurel)', move: 'turn',
     about: 'The Nameless King, unmasked: a tired, grey-bearded man who looks like Elian grown old. Has a reflection.',
     talk: [
+      { if: E3END, lines: [
+        'A bell rang across the water at noon. Not a toll. A real bell. Elian dropped his pen.',
+        'Emberpeak. I knew a Keeper from there once. She tuned everything she touched. Sorry, {hero}. That is all I have.',
+      ] },
+      { if: E3, lines: [
+        'A father walks all night for his son. I know that road.',
+        'Tell him it is shorter on the way back. It is a lie, but it is a useful one.',
+      ] },
       { if: 'letter_answer_done', lines: [
         'Mael wrote HOLLOWMERE in his Register? Then it is in two books. Three, with the page you carry.',
         'There was a list, {hero}. Someone in the First Library writes them. When you go looking, go carefully.',
@@ -863,6 +904,14 @@ export const NPCS = {
     about: 'Mayor, about twenty, coat far too big, ledger under his arm. Raised by Anwen. Hidden: Aurel\'s son, the boy Mira promised to come back for.',
     talk: [
       { if: NHR, ifNot: 'letter_answer_started', scene: 'elian_letter' },
+      { if: E3END, lines: [
+        'Garrick, at last. Back in the ledger, in ink, third line down. I wrote it four times to be sure.',
+        'Father says the bell sounded like a man clearing his throat before a long speech. He approves.',
+      ] },
+      { if: E3, lines: [
+        "I wrote him in my ledger as Bram's father. It's a start.",
+        'A name that will not come is still a person. I find that if I keep the page open, it comes back quicker.',
+      ] },
       { if: E2END, lines: [
         'Father sits in the hall every morning and lets me read him the ledger. He says he likes the names.',
         'I think he likes being in it. I wrote him in first. Aurel, at the top, in my best hand.',
@@ -884,6 +933,14 @@ export const NPCS = {
     about: 'Keeper of the chapel register and forty-one candles. Raised the town\'s foundlings, Elian among them. Fountain witness.',
     talk: [
       { if: 'fountain_started', ifNot: 'testimony_anwen', scene: 'anwen_testimony' },
+      { if: E3END, lines: [
+        'I lit a candle at noon when the bell rang. Forty-five now. Mira will want to count them.',
+        'A town that can ring its bell is a town that can be forgiven anything. Remember that, {hero}.',
+      ] },
+      { if: E3, lines: [
+        'Say his name anyway. Even without it. The shape helps.',
+        'Names are held in more than the mouth. Hold it in the hands. A man like that will let you.',
+      ] },
       { if: E2END, lines: [
         'AUREL. I read it every morning now, before the candles. Forty-one candles, and one name.',
         'Elian brings his father to evensong. Aurel sings badly and with great conviction. I adore him for it.',
@@ -904,6 +961,12 @@ export const NPCS = {
     service: { type: 'inn', price: 40 }, noReflection: true,
     about: 'Innkeeper of the Signless Inn. Cheerful. Keeps the lost-property shelf (The Last Route).',
     talk: [
+      { if: E3END, lines: [
+        'Back from the mountain! A man called Garrick sent me a coin, signed with a G and a small bell. It is on the wall.',
+      ] },
+      { if: E3, lines: [
+        "Old fellow didn't touch his eggs. I put one in his coat pocket. If it hatches on the sand road, that's on the road.",
+      ] },
       { if: E2END, lines: [
         'Signless Inn. I am keeping the name. It has grown on me, and the sign painter is booked for a year.',
       ] },
@@ -940,6 +1003,17 @@ export const NPCS = {
     service: { type: 'shop', id: 'hollow_smithy' }, noReflection: true,
     about: 'Glassblower and smith of the Silverglass Smithy. Blunt, burn scars, goggles up. Seeds Emberpeak.',
     talk: [
+      { if: 'sand_gate_open', ifNot: 'sand_done', scene: 'vessa_sand' },
+      { if: 'sand_done', lines: [
+        'Glass that remembers fire. Finally. I am making a cup nobody is allowed to drink from.',
+        'The carts come down on Tuesday. I have ordered a ton. I have also ordered a quiet week to enjoy it in.',
+      ] },
+      { if: E3END, lines: [
+        'The sand road is open, and the carts will come. I am going to be insufferable about glass for a year.',
+      ] },
+      { if: E3, lines: [
+        'The east arch is past the mere. I will meet you there with the key. Tell the old man the road is waiting.',
+      ] },
       { if: E2END, lines: [
         'Emberpeak sand made the best silverglass. Made. Nobody has had a cart down from the mountain since summer.',
         'Mind how you go up there. Glass remembers heat. So do mountains.',
@@ -956,6 +1030,212 @@ export const NPCS = {
       ] },
     ],
   },
+
+  // ==============================================================================================
+  // Episode 3: the Old Sand Road and Emberpeak. Stages: ep3_started, the sand gate (sand_gate_open), arrival
+  // (pk_arrived), the Bell House (met_ilya), the foundry (foundry_entered, foundry_f2_done), the restoration
+  // (pk_restored) and the end (ep3_complete). Nobody here says Mara or Garrick before garrick_named / pk_restored.
+  // The Smith is two records: garrick_e (tag "The Smith") until garrick_named, then garrick_n (tag "Garrick"),
+  // both at the forge in pk_smithy.
+  // ==============================================================================================
+
+  penny_s: {
+    name: 'Penny', sprite: 'npc_shopkeeper', map: 'sand_road', spot: "The carters' shelter, beside her cart (mark penny_cart)",
+    move: 'stand', service: { type: 'shop', id: 'sand_peddler' },
+    about: 'Penny the peddler, on the sand road now. Same person as penny and penny_e.',
+    talk: [
+      { if: E3END, lines: [
+        'Emberpeak buys sand again! Well. Sells it. I have never been so confused about which way the cart goes.',
+      ] },
+      { if: 'pk_arrived', lines: [
+        "Emberpeak's gate is open, ash or no ash. Business! I could kiss the sand.",
+      ] },
+      { lines: [
+        'Supplies for the road! Potions, ethers, Quench Flasks and a very good tent. The directions are still free.',
+        "I go where the roads still go. This one's coming back.",
+      ] },
+    ],
+  },
+
+  rusk: {
+    name: 'Rusk', sprite: 'npc_rusk', map: 'emberpeak', spot: 'The south gate (mark gate_in), at the Watch post', move: 'turn',
+    about: 'The gate Watch. Dry, loyal, the first to shout the Smith\'s name.',
+    talk: [
+      { if: E3END, lines: [
+        'Garrick comes through the gate every morning. I say his name. He says he heard me the first time. I say it again.',
+      ] },
+      { if: 'pk_restored', lines: [
+        'The ash stopped. I checked my hands, my hat, the sky. Nothing falling. I am not sure what a Watch does in clean air.',
+      ] },
+      { if: 'met_ilya', lines: [
+        'The foundry gate is up the ramp, north. Frost cools hot metal. It can cool a guardian too. Just saying.',
+      ] },
+      { lines: [
+        'Watch of Emberpeak. The gate is open, the ash is falling, and nobody is in a hurry. State your business.',
+      ] },
+    ],
+  },
+
+  veyra: {
+    name: 'Foreman Veyra', sprite: 'npc_veyra', map: 'emberpeak', spot: 'Beside the coolant station in Bellows Square (mark coolant)',
+    move: 'turn',
+    about: 'Foreman of what is left of the shifts. Soot-streaked, whistle on a cord, orders given as questions. Coolant Station.',
+    talk: [
+      { if: 'met_ilya', ifNot: 'coolant_started', scene: 'coolant_start' },
+      { if: E3END, lines: [
+        'Quiet week. Furnaces banked, shifts three hours shorter, nothing left to be angry at.',
+        "I don't know what to do with my hands. Can you carry a crate? Please say yes.",
+      ] },
+      { if: 'pk_restored', lines: [
+        'The ash stopped at the first stroke. I stood in the square with my mouth open.',
+        'First time in a month nobody called me Foreman. They called me Veyra. I may cry later.',
+      ] },
+      { if: 'foundry_f2_done', lines: [
+        'The fans stopped. I felt it in my teeth. Whatever you did down there, do the next floor too.',
+      ] },
+      { if: 'coolant_done', lines: [
+        'The gauge is steady. Steady! I have waited twenty-five years to say that word.',
+      ] },
+      { if: 'coolant_started', ifNot: 'coolant_done', lines: [
+        'Ilya, Harl and Sella. Then the station. Can you manage that before supper?',
+      ] },
+      { if: 'met_veyra', lines: [
+        'The foundry gate answers to one key. Ilya, in the Bell House, west side of the square.',
+      ] },
+      { lines: ['Pressure is up again. Who let you in? Can you carry a crate?'] },
+    ],
+  },
+
+  harl: {
+    name: 'Harl', sprite: 'npc_harl', map: 'emberpeak', spot: 'By the memorial wall with a slate and a pencil (mark memorial)', move: 'turn',
+    about: 'The Surveyor. Writes pressure readings before the soot erases them. Coolant Station witness.',
+    talk: [
+      { if: 'coolant_started', ifNot: 'testimony_harl', scene: 'testimony_harl' },
+      { if: E3END, lines: [
+        'The ground has stopped breathing. I keep taking readings anyway. All zeros. I have never been so happy with a zero.',
+      ] },
+      { if: 'pk_restored', lines: [
+        'Pressure is down to nothing. I wrote it before the soot could erase it. The first reading in a month the soot did not touch.',
+      ] },
+      { if: 'foundry_f2_done', lines: [
+        "The pipes went quiet at noon. Don't trust it. Quiet pipes are just pipes holding their breath.",
+      ] },
+      { lines: [
+        'The ground shifts when the furnace exhales. I write the readings down before the soot erases them.',
+      ] },
+    ],
+  },
+
+  ilya: {
+    name: 'Ilya', sprite: 'npc_ilya', portrait: 'ilya', map: 'pk_bellhouse', spot: "At the founder's workbench (mark ilya_spot)", move: 'turn',
+    about: "The Bell Founder, the founder's apprentice. Copper beard, brass goggles, ear always cocked for a tone. Keeps the lift key oiled.",
+    talk: [
+      { if: 'coolant_started', ifNot: 'testimony_ilya', scene: 'testimony_ilya' },
+      { if: E3END, lines: [
+        'The tone is flat by a hair. I will never tune it. It sounds like her.',
+        'It sounds like somebody getting home late, and not minding who hears.',
+      ] },
+      { if: 'pk_restored', lines: ['I hung the clapper with my own hands. I kept waiting for it to be heavier.'] },
+      { if: 'foundry_entered', lines: [
+        'You went down. Come back up. Whatever you find, come back with yourselves in it.',
+      ] },
+      { if: 'met_ilya', lines: [
+        "The key is yours. Mind the troughs. She drew them to carry water, not to be stepped around.",
+      ] },
+      { lines: [
+        'The Bell House. Knock twice. The bells do not mind.',
+        'Veyra sent you? She sends everyone she cannot use herself.',
+      ] },
+    ],
+  },
+
+  sella: {
+    name: 'Sella', sprite: 'npc_sella', map: 'pk_smithy', spot: 'At the anvil (mark anvil)', move: 'turn',
+    service: { type: 'shop', id: 'pk_smithy' },
+    about: 'Runs the Emberpeak Weaponsmith, the old family forge. Mid-thirties; Bram carried her out of the collapse. Coolant witness.',
+    talk: [
+      { if: 'coolant_started', ifNot: 'testimony_sella', scene: 'testimony_sella' },
+      { if: E3END, lines: [
+        'Garrick says my grip is a disgrace. He is right. He is teaching me the old one.',
+        'Hot work, and a stubborn old man. I am going to be very good at this.',
+      ] },
+      { if: 'pk_restored', lines: [
+        'The bell rang while I was mid-strike. I dropped the hammer and nothing broke. That never happens.',
+      ] },
+      { if: 'forge_relit', lines: [
+        'He sits by the fire and hardly speaks. But he corrected my quench. Once. Without looking.',
+      ] },
+      { if: 'met_ilya', lines: [
+        'A smithy with a customer in the corner who will not buy anything. I have decided to let him.',
+      ] },
+      { lines: [
+        "Emberpeak Weaponsmith. I run it. My master's master ran it. Do not touch the anvil. It is moody.",
+      ] },
+    ],
+  },
+
+  bess: {
+    name: 'Bess', sprite: 'npc_bess', map: 'pk_inn', spot: 'Behind the counter of the Coal Lantern', move: 'stand',
+    service: { type: 'inn', price: 60 },
+    about: 'The Cook and innkeeper of the Coal Lantern Inn. Cheerful, practical, humor like a ladle.',
+    talk: [
+      { if: E3END, lines: [
+        "Three stews tonight. Hot, hotter, and Mara's.",
+        'The third is the oldest recipe on the mountain. I never had a name for it.',
+      ] },
+      { if: 'pk_restored', lines: [
+        "I put the bell on a tray when it rang. Don't ask. The soup was fine.",
+      ] },
+      { lines: [
+        'Ash gets into everything, except a pot with a good lid.',
+        'The Coal Lantern serves three stews: hot, hotter, and safe. Sixty gold a bed.',
+      ] },
+    ],
+  },
+
+  taro: {
+    name: 'Taro', sprite: 'npc_taro', map: 'pk_shop', spot: 'Behind the counter of Ventworks Supplies', move: 'turn',
+    service: { type: 'shop', id: 'ventworks' },
+    about: 'The Riveter. Keeps Ventworks Supplies. Talks pressure, keeps a gauge on every shelf.',
+    talk: [
+      { if: E3END, lines: [
+        'The rail is quiet. First time in a month I could hear my own tools. Buy something. They have missed the attention.',
+      ] },
+      { lines: [
+        'If the pressure runs high, the whole rail will sing.',
+        'Gauges, pipes, flasks. Everything I sell has a number on it. The number is the point.',
+      ] },
+    ],
+  },
+
+  garrick_e: {
+    name: 'The Smith', sprite: 'npc_smith', portrait: 'garrick', map: 'pk_smithy', spot: 'In the corner by the old forge (mark forge)',
+    show: { if: 'met_ilya', ifNot: 'garrick_named' }, move: 'turn',
+    about: "Bram's father with his name gone, speaker tag \"The Smith\" until garrick_named; then the garrick_n record. Asks Sella for the forge.",
+    talk: [
+      { if: 'met_ilya', ifNot: 'forge_relit', scene: 'garrick_forge' },
+      { if: 'foundry_f2_done', lines: ['The fans stopped. I felt it through the floor. Go on down.'] },
+      { if: 'forge_relit', lines: ['The fire is lit. The right kind. Low and patient. Go on. It will keep.'] },
+      { lines: ['...'] },
+    ],
+  },
+
+  garrick_n: {
+    name: 'Garrick', sprite: 'npc_smith', portrait: 'garrick', map: 'pk_smithy', spot: 'In the corner by the old forge (mark forge)',
+    show: { if: 'garrick_named' }, move: 'turn',
+    about: 'Garrick, named. Same spot as garrick_e; takes over when garrick_named is set. Teaches Sella the old grip.',
+    talk: [
+      { if: E3END, lines: [
+        'Come home after, I said. Then I was home. Do not read into it.',
+        'Sella has a grip like a vise. The wrong vise. I am fixing it.',
+      ] },
+      { if: 'pk_restored', lines: [
+        'Heard the bell from the forge. Stopped working. Stood there like a post.',
+        'Flat by a hair. She would have said so.',
+      ] },
+      { lines: ['Garrick. Say it again. I like the weight of it.'] },
+    ],
+  },
 };
 
 // Display names for scene speakers that are not NPC records (map-placed actors and party members).
@@ -965,6 +1245,8 @@ export const SPEAKER_NAMES = {
   // Episode 2: map actors and the vow-mirror memory voices (speakers with no actor)
   nameless_king: 'The Nameless King', tovin_c: 'Tovin', elian_t: 'Elian', aurel_t: 'Aurel',
   king_memory: 'The King', boy_memory: 'Small Boy', tovin_memory: 'Tovin',
+  // Episode 3: a voice in the bells (tagged "A Voice" until mara_read) and the Warden, a map actor in the Heartforge
+  voice: 'A Voice', mara_voice: 'Mara', cinder_warden: 'The Cinder Warden', bellows_specter: 'The Bellows Specter',
 };
 
 /** Display name for any speaker id used in scenes or talk. */

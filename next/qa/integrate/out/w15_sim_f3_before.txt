@@ -1,0 +1,47 @@
+zone | encounter | Lv | policy | win | rounds | p10-p90 | hp lost | KOs | items | kept
+--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+court_f3 | c3_shards | 12 | competent | 100% | 2.99 | 2.3-4.0 | 12% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shards | 12 | naive | 100% | 6.83 | 5.3-8.7 | 37% | 0.04 | 0.00 | 0.00
+court_f3 | c3_shards | 13 | competent | 100% | 2.82 | 2.0-3.7 | 10% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shards | 13 | naive | 100% | 6.50 | 5.0-8.0 | 32% | 0.01 | 0.00 | 0.00
+court_f3 | c3_shards (elite) | 13 | competent | 100% | 4.09 | 2.7-5.3 | 13% | 0.00 | 0.00 | 0.00
+court_f3 | c3_knights | 12 | competent | 100% | 3.26 | 2.7-3.7 | 9% | 0.00 | 0.00 | 0.00
+court_f3 | c3_knights | 12 | naive | 100% | 6.07 | 5.3-6.7 | 35% | 0.10 | 0.00 | 0.00
+court_f3 | c3_knights | 13 | competent | 100% | 3.17 | 2.7-3.7 | 8% | 0.00 | 0.00 | 0.00
+court_f3 | c3_knights | 13 | naive | 100% | 5.83 | 5.0-6.3 | 30% | 0.04 | 0.00 | 0.00
+court_f3 | c3_knights (elite) | 13 | competent | 100% | 4.10 | 3.3-5.3 | 12% | 0.00 | 0.01 | 0.00
+court_f3 | c3_shadow | 12 | competent | 100% | 3.01 | 2.3-3.7 | 13% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shadow | 12 | naive | 100% | 6.14 | 5.0-7.3 | 34% | 0.01 | 0.00 | 0.00
+court_f3 | c3_shadow | 13 | competent | 100% | 2.88 | 2.3-3.7 | 10% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shadow | 13 | naive | 100% | 5.81 | 4.7-7.0 | 29% | 0.00 | 0.00 | 0.00
+court_f3 | c3_shadow (elite) | 13 | competent | 100% | 4.26 | 3.0-5.7 | 15% | 0.00 | 0.00 | 0.00
+court_f3 | c3_mixed | 12 | competent | 100% | 5.33 | 4.3-6.7 | 17% | 0.00 | 0.02 | 0.00
+court_f3 | c3_mixed | 12 | naive | 61% | 11.24 | 9.7-12.7 | 87% | 1.67 | 0.00 | 0.00
+court_f3 | c3_mixed | 13 | competent | 100% | 5.07 | 4.0-6.3 | 15% | 0.00 | 0.01 | 0.00
+court_f3 | c3_mixed | 13 | naive | 89% | 11.51 | 10.0-13.3 | 75% | 0.90 | 0.00 | 0.00
+court_f3 | c3_mixed (elite) | 13 | competent | 100% | 6.36 | 4.7-8.3 | 18% | 0.00 | 0.04 | 0.00
+
+Progression (fight each zone plan once, then 80% of it; Episode 2 continues from Episode 1):
+  100% valley           7 fights  Lv 1 -> 3  (total EXP 141)
+  100% archive_f1       8 fights  Lv 3 -> 5  (total EXP 335)
+  100% archive_f2       8 fights  Lv 5 -> 6  (total EXP 621)
+  100% archive_f3       8 fights  Lv 6 -> 8  (total EXP 1033)
+  100% archive_boss     1 fights  Lv 8 -> 9  (total EXP 1433)
+   80% valley         5.6 fights  Lv 1 -> 3  (total EXP 113)
+   80% archive_f1     6.4 fights  Lv 3 -> 5  (total EXP 268)
+   80% archive_f2     6.6 fights  Lv 5 -> 6  (total EXP 509)
+   80% archive_f3     6.4 fights  Lv 6 -> 7  (total EXP 839)
+   80% archive_boss     1 fights  Lv 7 -> 9  (total EXP 1239)
+  100% east_road        6 fights  Lv 9 -> 10  (total EXP 1595)
+  100% court_f1         7 fights  Lv 10 -> 11  (total EXP 1901)
+  100% court_f2         7 fights  Lv 11 -> 12  (total EXP 2327)
+  100% court_f3         8 fights  Lv 12 -> 13  (total EXP 2835)
+  100% court_throne     1 fights  Lv 13 -> 13  (total EXP 3335)
+   80% east_road      4.8 fights  Lv 9 -> 9  (total EXP 1369)
+   80% court_f1       5.6 fights  Lv 9 -> 10  (total EXP 1614)
+   80% court_f2       5.8 fights  Lv 10 -> 11  (total EXP 1979)
+   80% court_f3       6.4 fights  Lv 11 -> 12  (total EXP 2385)
+   80% court_throne     1 fights  Lv 12 -> 13  (total EXP 2885)
+
+All targets met.
+(6800 battles in 10.1 s)

@@ -70,6 +70,27 @@ export const EP2_ITEMS = ['mael_letter', 'glass_key', 'name_fragment_2', 'mirror
   'twinfold_charm', 'hollowcrown', 'merewarden_helm'];
 export const EP2_SHOPS = ['east_peddler', 'hollow_items', 'hollow_smithy'];
 
+// ------------------------------------------------------------------------------------------------
+// Episode 3 ids (docs/EPISODE3_PLAN.md sections 2, 8 and 9). Built by other wave-17 agents; the content tests accept
+// them by these planned ids and use the real data files whenever those already define them.
+// ------------------------------------------------------------------------------------------------
+export const EP3_MAP_IDS = ['sand_road', 'emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse', 'foundry_f1', 'foundry_f2',
+  'foundry_f3', 'foundry_heart'];
+export const EP3_NPC_SPRITES = ['npc_veyra', 'npc_ilya', 'npc_sella', 'npc_harl', 'npc_bess', 'npc_taro', 'npc_rusk', 'npc_mara',
+  'npc_courier_v'];
+export const EP3_PORTRAITS = ['ilya', 'cinder_warden', 'veyra'];
+export const EP3_MUSIC = ['ash_road', 'emberpeak', 'foundry', 'boss_warden', 'first_bell'];
+export const EP3_SFX = ['quench_hiss', 'sluice_turn', 'water_flow', 'wheel_turn', 'anvil_strike', 'bell_first', 'furnace_roar',
+  'hammer_charge', 'oath_ring', 'lift_rumble'];
+export const EP3_ENEMY_IDS = ['cinder_hound', 'cinder_beetle', 'slag_slime', 'ashbound_miner', 'furnace_construct', 'soot_phantom',
+  'forge_defender', 'bellows_specter', 'cinder_warden', 'bellows_coil', 'smelter_coil'];
+export const EP3_ENCOUNTERS = ['sr_first', 'sr_hounds', 'sr_beetles', 'sr_mixed', 'fo1_beetles', 'fo1_slimes', 'fo1_miners',
+  'fo1_mixed', 'fo2_phantoms', 'fo2_constructs', 'fo2_mixed', 'bellows_specter', 'fo3_defenders', 'fo3_mixed', 'fo3_furnace',
+  'cinder_warden'];
+export const EP3_ITEMS = ['quench_flask', 'lift_key', 'ash_key', 'crucible_hook', 'struck_list', 'name_fragment_3', 'glass_sand',
+  'first_bell_hammer', 'tempered_blade', 'warden_heart', 'updraft_charm', 'emberglass_charm', 'ashwalker_boots', 'ashwalker_mantle'];
+export const EP3_SHOPS = ['sand_peddler', 'ventworks', 'pk_smithy'];
+
 /** Walk a directory tree and return file paths matching a predicate. */
 export function listFiles(dir, pred = () => true) {
   const out = [];

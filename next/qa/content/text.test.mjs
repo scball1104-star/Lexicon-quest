@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS } from '../../src/data/text.js';
 import { FLAGS } from '../../src/data/quests.js';
 import { fits, boxLines } from '../../src/data/story/dialogue.js';
-import { MAP_IDS, EP2_MAP_IDS, EP2_ENEMY_IDS } from './_harness.mjs';
+import { MAP_IDS, EP2_MAP_IDS, EP2_ENEMY_IDS, EP3_MAP_IDS, EP3_ENEMY_IDS } from './_harness.mjs';
 
 let ENEMIES = null;
 try { ({ ENEMIES } = await import('../../src/data/enemies.js')); } catch { ENEMIES = null; }
@@ -12,7 +12,8 @@ try { ({ ENEMIES } = await import('../../src/data/enemies.js')); } catch { ENEMI
 const ENEMY_IDS = ['ink_slime', 'page_wraith', 'briar_wolf', 'moss_scarab', 'bookmite', 'tome_golem', 'ink_wraith',
   'echo_warden', 'lost_page', 'archivore',
   'thornback_wolf', 'ink_blot', 'briar_alpha',     // W6-content: Whisperwood Hollow
-  ...EP2_ENEMY_IDS];                                 // E2-story: Episode 2
+  ...EP2_ENEMY_IDS,                                  // E2-story: Episode 2
+  ...EP3_ENEMY_IDS.filter((id) => ENEMIES && ENEMIES[id])]; // E3-story: Episode 3 (merged as enemies.js defines them)
 
 const boxes = (where, arr) => {
   assert.ok(Array.isArray(arr) && arr.length, `${where}: empty`);
@@ -32,7 +33,7 @@ test('bestiary covers every COMMON.md enemy and agrees with enemies.js', () => {
 });
 
 test('every map has a location banner', () => {
-  assert.deepEqual(Object.keys(BANNERS).sort(), [...MAP_IDS, ...EP2_MAP_IDS].sort());
+  assert.deepEqual(Object.keys(BANNERS).sort(), [...MAP_IDS, ...EP2_MAP_IDS, ...EP3_MAP_IDS].sort());
   for (const [id, b] of Object.entries(BANNERS)) {
     assert.ok(b.title && b.title.length <= 28, `${id}: banner title`);
     if (b.sub) assert.ok(b.sub.length <= 32, `${id}: banner sub`);
@@ -43,7 +44,7 @@ test('every map has a location banner', () => {
 test('books have titles and pages that fit', () => {
   for (const [id, b] of Object.entries(BOOKS)) {
     assert.ok(b.title && b.title.length <= 42, `${id}: title`);
-    assert.ok(MAP_IDS.includes(b.where) || EP2_MAP_IDS.includes(b.where), `${id}: where`);
+    assert.ok(MAP_IDS.includes(b.where) || EP2_MAP_IDS.includes(b.where) || EP3_MAP_IDS.includes(b.where), `${id}: where`);
     boxes(`book.${id}`, b.pages);
   }
   // The library carries real lore and the Archive tells the Keeper's story on every floor.

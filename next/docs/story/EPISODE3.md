@@ -542,3 +542,45 @@ brief; the tempering trial's "heat, then a water quench" as the field mechanic's
 `black_feather*`, `testimony_*` for the Hollow witnesses, `vow_*` and `rook`. Episode 3 uses `garrick_e` for the
 Emberpeak NPC record, `vex_furnace`, `oath_*` for the anvils, `testimony_ilya`, `testimony_harl`, `testimony_sella`,
 and the map prefix `pk_` for Emberpeak interiors (never `ember_`, which the Ember skill and combos own).
+
+---
+
+## 9. Build notes (E3-story, wave 17a)
+
+What the script, NPC, quest and text files do beyond the beat sheet. The beat sheet stands; these are the deltas.
+
+**Scenes.** 38 built scenes in `src/data/story/ep3.js` (the plan's cap was 42): the beats and side scenes of sections 1
+and 2, plus `foundry_f1_lift` and `foundry_f2_shaft` (silent step-trigger scenes that set `foundry_f1_done` and
+`foundry_f2_done`, as Episode 2's `court_f1_stairs` did) and the `oath_*` trio. The main path is 204 boxes (the plan said about 230; Episode 2 ran long, so the shorter script is the safer side)
+(`qa/content/ep3.test.mjs` counts it: 190 to 260). Budgets hold: every main scene is at or under 12 boxes except
+`ep3_morning` (14), `first_bell` (13, then `ep3_ending` 11) and `warden_after` (22 of 24).
+
+**Changes to the beat sheet, and why.**
+- The key item reads "the founder's lift key" everywhere in text. The plan's item table calls it "Mara's Lift Key", which
+  would leak the name before `bram_memory_3`. E3-battle (items.js) must name it `The Founder's Lift Key`; the test refuses
+  "Mara" in `ITEMS.lift_key.name` as soon as the item exists.
+- Garrick's Emberpeak record is two records, `garrick_e` (tag "The Smith", present from `met_ilya` until `garrick_named`)
+  and `garrick_n` (tag "Garrick", from `garrick_named`), both at the forge mark in `pk_smithy`. This puts the speaker-tag
+  swap in data, not in the engine. Willowmere's Garrick stays hidden for the whole of Episode 3 (his forge is in Emberpeak).
+- Penny on the east road (`penny_e`) is hidden from `sand_gate_open`; `penny_s` takes her place on the sand road.
+- Mara speaks once with her name tag: "Good hands." (`mara_voice`) as the leaf's first letters rise in `warden_after`.
+  Every other voice line is tagged "A Voice".
+- Bram's memories use the existing `dawn` tint for their warm cast. A dedicated sepia `memory` tint would replace the one
+  word `dawn` in `bram_memory_1` when E3-world adds it.
+- `ep3_morning` also needs counter `credits2_rolled` (the field launches it); the scene guard sees only flags.
+- Ten banners (the nine in the plan text, plus `foundry_heart`); `pk_records` sits in `pk_bellhouse`.
+- `mainQuestFor` switches to the Episode 3 quest on `ep3_started`, which only `ep3_morning` sets.
+- `EPILOGUE2_LIVE` (quests.js) is what `epilogue2` says when `EP3_LIVE` is true: the old sand road, from the east gate.
+  `END_CARD_EP2_LIVE` (text.js) is the matching end card sub; `story.js` `CREDITS_HANDOFF[2].endCard` must pick it when
+  `EP3_LIVE`. `story.js` must merge `ep3.js` scenes, lines and `SCENE_CONDITIONS` (it is not in this agent's owned paths).
+
+**Contracts for the next agents.**
+- Maps: every mark in `docs/story/STAGING_EP3.md` section 4 (the new ones: `smith_seat`, `wren_wake`, `inn_door`,
+  `smith_crate`, `rise_smith`, `gate_smith`, `memorial_smith`, `gather_garrick`, `bellhouse_in`, `shaft_bram`,
+  `shaft_foreman`), the triggers and objects named there, NPC events whose id equals the record id (two at the forge),
+  and sign events that read the `lines` ids.
+- Battle: encounters `sr_first` (the beetle opens with Stoke), `bellows_specter`, `cinder_warden`; flag `coolant_done`
+  gives +25 Fury at the start of the Warden fight; `bellows_specter_defeated` and `cinder_warden_defeated` are the
+  encounter flags; Tempered Oath is learned by flag `bram_memory_3` (the scene prints "Bram learned Tempered Oath.").
+- Bestiary names (`The Bellows Specter`, `The Cinder Warden`, ...) and `lore[0]` are proposals; E3-battle aligns
+  `enemies.js` names and flavor to them, or the other way round (`qa/content/text.test.mjs` fails on a mismatch).
