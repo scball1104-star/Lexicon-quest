@@ -507,7 +507,7 @@ the region-3 Suno brief (low strings, brass, hammered dulcimer, measured forge p
 brief; the tempering trial's "heat, then a water quench" as the field mechanic's root.
 
 **Changed, with reasons.**
-- The Smelter-Word Crossword is gone (DESIGN hard rule 2). Its gate is now a quench puzzle.
+- The old Smelter-Word word grid is gone (DESIGN hard rule 2). Its gate is now a quench puzzle.
 - The valve and fan inscriptions that printed their answers ("WEST EXHAUST to EAST (1)...") are gone: water you can
   see running is the readout (DESIGN 5.3). The valve-and-fan floors become the quench channels.
 - The hammer vows are no longer an order puzzle with a reset ("a mistake resets progress"); each anvil sits at the end

@@ -36,9 +36,13 @@ export function createGame(heroName = 'Hero', opts = {}) {
     seed: (opts.seed ?? (Date.now() & 0x7fffffff)) >>> 0,
     chapter: 1,
     settingsSnapshot: null,
+    autosaveSlot: normSlot(opts.autosaveSlot),   // the slot field.js autosaves this run to (E3-saves; absent in old saves = 0)
   };
   return g;
 }
+
+/** A save slot number 0..3, else 0. */
+export function normSlot(n) { return Number.isInteger(n) && n >= 0 && n <= 3 ? n : 0; }
 
 // ---- Episode 2 quick start (E2-world, EPISODE2_PLAN 5.6) ------------------------------------------
 /** Episode 1 flags a save that saw the Episode 1 credits has: the main line plus the beats on the critical path. */
@@ -89,6 +93,63 @@ export function newGameEp2(heroName = 'Hero', o = {}) {
   for (const f of EP1_DONE_FLAGS) g.flags[f] = true;
   g.counters.credits_rolled = 1;
   g.chapter = 2;
+  g.lastSafe = { map: g.map, pos: { ...g.pos } };
+  return g;
+}
+
+// ---- Episode 3 quick start (E3-saves, EPISODE3_PLAN section 10.4) ----------------------------------
+/** Episode 2 flags a save that saw the Episode 2 credits has: the main line plus the beats on its critical path. */
+export const EP2_DONE_FLAGS = ['ep2_started', 'crossing_done', 'east_road_arrived', 'east_first_fight_done', 'nh_arrived', 'met_elian',
+  'heard_crisis', 'met_anwen', 'court_ferry_open', 'court_entered', 'court_f1_done', 'vex_met', 'other_selves_defeated',
+  'court_f2_done', 'vow_door_open', 'nameless_king_defeated', 'aurel_named', 'nh_restored', 'ep2_complete',
+  'ep2_morning_done', 'iris_farewell_done', 'saw_old_milestone', 'saw_cairns', 'waystation_rested', 'saw_court',
+  'court_f1_arrived', 'court_f2_arrived', 'court_f3_arrived', 'mira_memory_1', 'mira_memory_2', 'mira_memory_3',
+  'vow_belonging', 'vow_mercy', 'vow_courage', 'mirror_sigil_get'];
+/**
+ * The party Episode 3 expects at Lv 13: the simulator's `court_throne` loadout (tools/sim/loadouts.mjs). The simulator
+ * has no `sand_road` loadout yet, so this is the last Episode 2 row, as the plan allows; E3-battle's `sand_road` row
+ * should replace these values when it lands (the test in qa/core/e3_saves.test.mjs only checks that every id exists).
+ * `exp` 2900 is the plan's figure (Lv 13 floor 2800, Episode 2 finishers 2850 to 3100). The run starts awake in the
+ * Hollowmere inn so `ep3_morning` runs, with the Episode 2 key items.
+ */
+export const EP3_START = {
+  level: 13, exp: 2900, gold: 1500, map: 'nh_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
+  items: { potion: 6, hi_potion: 4, hi_ether: 3, phoenix_feather: 2, silver_salve: 2,
+    name_fragment_1: 1, name_fragment_2: 1, lantern_of_recall: 1, mirror_sigil: 1 },
+  members: {
+    hero: { weapon: 'sword', equip: { sword: 'lanternheart', axe: 'bearded_axe', body: 'silver_mail', head: 'steel_helm', boots: 'traveler_boots', charm: 'twinfold_charm' }, mastery: { sword: 420, axe: 150 } },
+    mira: { weapon: 'staff', equip: { staff: 'mirror_rod', bow: 'hunters_bow', body: 'mirrorguard_mail', head: 'moon_circlet', charm: 'owl_charm' }, mastery: { staff: 320, bow: 130 } },
+    bram: { weapon: 'spear', equip: { spear: 'mere_pike', axe: 'hatchet', body: 'bronze_plate', head: 'iron_helm', boots: 'leather_boots' }, mastery: { spear: 420, axe: 150 } },
+  },
+};
+
+/**
+ * A fresh game standing where Episode 3 begins: a Lv 13 party, every Episode 1 and Episode 2 main flag plus
+ * ep2_complete, the counters credits_rolled and credits2_rolled, the Episode 2 key items, 1500 gold, awake in the
+ * Hollowmere inn. `o.slot` is the run's own autosave slot (episodes.js `pickRunSlot` chooses it; default 0). Pure.
+ */
+export function newGameEp3(heroName = 'Hero', o = {}) {
+  const S = EP3_START;
+  const g = createGame(heroName, { map: S.map, pos: o.pos || S.pos, seed: o.seed, autosaveSlot: o.slot });
+  for (const id of ['mira', 'bram']) addMember(g, id);
+  for (const m of g.party) {
+    const spec = S.members[m.id];
+    m.level = S.level;
+    const fresh = newMember(m.id, { level: S.level, name: m.name });
+    m.exp = Math.max(fresh.exp, S.exp);
+    if (spec) { m.weapon = spec.weapon; m.equip = { ...m.equip, ...spec.equip }; m.mastery = { ...m.mastery, ...spec.mastery }; }
+    m.hp = fresh.hp; m.mp = fresh.mp;
+    const s = memberMax(m);
+    m.hp = s.hp; m.mp = s.mp; m.fury = 0;
+  }
+  g.items = {};
+  for (const [id, q] of Object.entries(S.items)) give(g, id, q);
+  g.gold = S.gold;
+  for (const f of EP1_DONE_FLAGS) g.flags[f] = true;
+  for (const f of EP2_DONE_FLAGS) g.flags[f] = true;
+  g.counters.credits_rolled = 1;
+  g.counters.credits2_rolled = 1;
+  g.chapter = 3;
   g.lastSafe = { map: g.map, pos: { ...g.pos } };
   return g;
 }
@@ -180,6 +241,7 @@ export function deserialize(data) {
   if (!g.v || g.v < 1) g.v = 1;
   const base = createGame(g.heroName || 'Hero');
   for (const k of Object.keys(base)) if (g[k] === undefined) g[k] = base[k];
+  g.autosaveSlot = normSlot(g.autosaveSlot);
   return g;
 }
 export function saveMeta(g) {

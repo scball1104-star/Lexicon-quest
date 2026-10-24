@@ -18,7 +18,8 @@ import { KeyArt, DARK } from '../ui/keyart.js';
 import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
 import { animFrameAt } from '../core/assets.js';
-import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, cleanName, EP2_START } from '../game/state.js';
+import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, newGameEp3, cleanName, EP2_START, EP3_START } from '../game/state.js';
+import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP } from '../game/episodes.js';
 import { NameEntryScene } from './nameEntry.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
@@ -41,11 +42,14 @@ export class TitleScene {
     this.nextSparkle = 0.6;
     this.points = null;
     this.hasSaves = this.anySave();
-    this.ep2 = ep2Offer(e.save, typeof location !== 'undefined' ? location.search : '');
+    this.offers = episodeOffers(e.save, typeof location !== 'undefined' ? location.search : '');
+    this.ep2 = this.offers.ep2;
+    this.ep3 = this.offers.ep3;
     const items = [
       { id: 'new', label: 'New Game' },
       { id: 'continue', label: 'Continue', disabled: !this.hasSaves },
       ...(this.ep2.show ? [{ id: 'ep2', label: EP2_ROW_LABEL }] : []),
+      ...(this.ep3.show ? [{ id: 'ep3', label: EP3_ROW_LABEL }] : []),
       { id: 'config', label: 'Config' },
     ];
     // Menu window: anchored at the bottom (y 196; 210 for four touch rows, clear of the subtitle), centred, as wide
@@ -114,6 +118,7 @@ export class TitleScene {
         const auto = autosaveGuard(e.save);
         if (auto) this.openGuard(id, auto); else this.startFresh(id);
       }
+      else if (id === 'ep3') this.openSlotPicker();
       else if (id === 'continue') { this.busy = true; e.pushAwait('loadGame', { mode: 'load' }).then(() => { this.busy = false; }); }
       else if (id === 'config') { this.busy = true; e.pushAwait('config').then(() => { this.busy = false; }); }
       return;
@@ -143,7 +148,27 @@ export class TitleScene {
     const e = this.engine;
     this.busy = true;
     if (id === 'ep2') e.fadeTo(() => e.replace('nameEntryEp2', { name: this.ep2.name || undefined, artT: this.art.t }), { duration: 0.7 });
+    else if (id === 'ep3') e.fadeTo(() => e.replace('nameEntryEp3', { name: this.ep3.name || undefined, slot: this.pickedSlot, artT: this.art.t }), { duration: 0.7 });
     else e.fadeTo(() => e.replace('nameEntry'), { duration: 0.7 });
+  }
+
+  /**
+   * The Episode 3 quick start never replaces anything (plan 10.3): slot 0 if empty (starts at once), else the first empty
+   * record with a one-line notice (Start / Back, Back is the default), else a refusal with only Back.
+   */
+  openSlotPicker() {
+    const e = this.engine;
+    const pick = pickRunSlot(e.save);
+    if (pick.ok && pick.notice == null) { this.pickedSlot = pick.slot; this.startFresh('ep3'); return; }
+    const options = pick.ok ? [{ id: 'back', label: 'Back' }, { id: 'start', label: 'Start' }] : [{ id: 'back', label: 'Back' }];
+    const lines = pick.notice.split(/(?<=\.) /).map((text) => ({ text, color: pick.ok ? 'white' : 'gold' }));   // one sentence a line
+    const msgH = lines.length * 11 + 12;
+    const rowH = tapRowHeight(e, 11);
+    const boxH = options.length * rowH + 12;
+    const top = Math.max(4, Math.round((216 - (msgH + 4 + boxH)) / 2));
+    const box = new ChoiceBox(e, options.map((o) => o.label), { x: 192, y: top + msgH + 4 + Math.floor(boxH / 2), anchor: 'center', minWidth: 150, index: 0, cancel: 0, tapMode: 'double' });
+    this.guard = { kind: 'slot', id: 'ep3', slot: pick.slot, pick, options, lines, msg: { x: 52, y: top, w: 280, h: msgH }, box };
+    e.audio.sfx('menu_open');
   }
 
   /** The save guard: what the autosave holds, and Keep my save (default, cancel) / Copy it, then start / Replace it. */
@@ -176,6 +201,10 @@ export class TitleScene {
     if (res == null) return;
     const pick = (g.options[res] || g.options[0]).id;
     this.guard = null;
+    if (g.kind === 'slot') {
+      if (pick === 'start') { this.pickedSlot = g.slot; this.startFresh('ep3'); }
+      return;
+    }
     if (pick === 'keep') return;
     if (pick === 'copy') {
       let ok = false;
@@ -215,7 +244,8 @@ export class TitleScene {
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
     }
     r.text(VERSION, 4, 205, { color: 'gray' });
-    const note = this.menu.item && this.menu.item.id === 'ep2' && !this.guard ? this.ep2Note() : null;
+    const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
+    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : null;
     if (note) {
       const lines = r.wrap(note, 108);
       const nh = lines.length * 11 + 10, nx = this.win.x + this.win.w + 6;
@@ -244,7 +274,7 @@ export class TitleScene {
 
   debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
     items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2,
-    guard: this.guard ? { id: this.guard.id, line: this.guard.auto.line, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
+    guard: this.guard ? { id: this.guard.id, line: this.guard.auto ? this.guard.auto.line : this.guard.lines[0].text, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
 }
 
 /** The upright-phone card is wanted: the touch layout in portrait (game above the controls) and not yet read. */
@@ -303,21 +333,29 @@ export function freeRecord(save) {
   return 0;
 }
 
-/** { show, url, name, slot }: Episode 2 is offered; the newest `ep1_complete` save names the hero. Pure. */
-export function ep2Offer(save, search = '') {
-  let url = false;
-  try { url = new URLSearchParams(search || '').get('ep') === '2'; } catch (err) { url = false; }
-  let best = null;
-  const last = save && Number.isFinite(save.slots) ? save.slots : 3;
-  for (let n = 0; save && n <= last; n++) {
-    let env = null;
-    try { env = save.loadEnvelope(n); } catch (err) { env = null; }
-    const d = env && env.data;
-    if (!d || !d.flags || !d.flags.ep1_complete) continue;
-    const at = Date.parse(env.savedAt || '') || 0;
-    if (!best || at > best.at) best = { slot: n, at, name: (env.meta && env.meta.name) || d.heroName || null };
+// ep2Offer lives in game/episodes.js now (with episodeOffers); re-exported so existing imports keep working.
+export { ep2Offer };
+
+/** newGameEp3(name, { slot }), the field awake in the Hollowmere inn. The run saves only to its own slot. */
+export function startEpisode3(engine, name, slot = 0) {
+  const e = engine;
+  const g = newGameEp3(cleanName(name), { slot });
+  e.game = g;
+  return e.fadeTo(() => {
+    if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP3_START.mark, dir: 'down' });
+    else e.reset('_uiStage', {});
+  }, { duration: 0.8 });
+}
+
+export class NameEntryEp3Scene extends NameEntryScene {
+  constructor(engine) { super(engine); this.name = 'nameEntryEp3'; }
+  enter(data = {}) { super.enter(data); this.slot = data.slot || 0; }
+  done() {
+    const e = this.engine;
+    e.audio.sfx('confirm');
+    this.busy = true;
+    startEpisode3(e, this.value, this.slot);
   }
-  return { show: url || !!best, url, name: best ? best.name : null, slot: best ? best.slot : null };
 }
 
 /** newGameEp2(name), the field at home in bed, and the Episode 2 card on top (the field waits under it). */
@@ -349,6 +387,7 @@ export async function install(engine) {
   if (!engine.hasScene('choice')) engine.registerScene('choice', ChoiceScene);
   if (!engine.hasScene('_uiStage')) engine.registerScene('_uiStage', UiStageScene);
   if (!engine.hasScene('nameEntryEp2')) engine.registerScene('nameEntryEp2', NameEntryEp2Scene);
+  if (!engine.hasScene('nameEntryEp3')) engine.registerScene('nameEntryEp3', NameEntryEp3Scene);
   setStatsProvider((m) => { const s = memberStats(m); return { hp: s.maxHp, mp: s.maxMp }; });
   engine.audio.preload(['jingle:item_get', 'jingle:level_up', 'jingle:save', 'jingle:inn_rest']);
 
@@ -377,6 +416,23 @@ export async function install(engine) {
     if (scene === 'field' && engine.hasScene('field')) { engine.reset('field', { map: g.map, x: g.pos.x, y: g.pos.y, dir: g.pos.dir }); return 'field'; }
     engine.reset('_uiStage', { music: o.music, banner: o.banner });
     return '_uiStage';
+  });
+  /**
+   * LQ_DEBUG.newGameEp3(name, { slot, scene: 'field' | 'none' }): the Episode 3 quick start (state.js newGameEp3). Without
+   * `slot` it picks the run's own slot like the title does (episodes.js pickRunSlot) and returns null if every slot is full.
+   */
+  D.register('newGameEp3', (name = 'Hero', o = {}) => {
+    let slot = o.slot;
+    if (slot == null) {
+      const pick = pickRunSlot(engine.save);
+      if (!pick.ok) return null;
+      slot = pick.slot;
+    }
+    const g = newGameEp3(name, { ...o, slot });
+    engine.game = g;
+    if (o.scene === 'none' || !engine.hasScene('field')) return { map: g.map, slot };
+    engine.reset('field', { map: g.map, mark: EP3_START.mark, dir: 'down' });
+    return { map: g.map, slot };
   });
   D.register('give', (id, qty = 1) => {
     const g = engine.game;

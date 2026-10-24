@@ -15,7 +15,7 @@
 // doors, flag-gated overlays, conditional music / tint / banners, mist, the Episode 2 credits handoff, and
 // LQ_DEBUG.newGameEp2(name), beams(), turnMirror(id), reflections().
 
-import { createGame, newGameEp2, hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
+import { createGame, normSlot, newGameEp2,hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
 import { grant, equipOffers, equipGear, deltaLine, gearName, isWeaponKey, baseOf } from '../game/inventory.js';
 import { memberName } from '../ui/party.js';
 import { touchUi } from '../ui/list.js';
@@ -43,7 +43,7 @@ import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
 import { installFieldArt } from '../world/fieldart.js';
 
 const FOLLOW_DEPTH = 2;
-const AUTOSAVE_SLOT = 0;
+// the autosave goes to `game.autosaveSlot` (0 unless the run owns another slot; E3-saves)
 const FIELD_RESPAWN_SEC = 60;
 const LANTERN_FRAMES = 120;
 const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
@@ -288,7 +288,7 @@ export class FieldScene {
   }
 
   autosave() {
-    try { this.engine.save.save(AUTOSAVE_SLOT, serialize(this.game), saveMeta(this.game)); } catch (err) { this.warnOnce('autosave', `autosave failed: ${err && err.message}`); }
+    try { this.engine.save.save(normSlot(this.game && this.game.autosaveSlot), serialize(this.game), saveMeta(this.game)); } catch (err) { this.warnOnce('autosave', `autosave failed: ${err && err.message}`); }
   }
 
   async runEnterTriggers() {
