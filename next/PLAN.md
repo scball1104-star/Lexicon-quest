@@ -147,3 +147,18 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
 - 2026-10-21 fixes: Load/Save page finger and highlight (Scott's report; hotfix published alone to main 8a1084a,
   merged back); Appraise window latches its closing press each logic step (abilities_walks was timing out).
+
+## Episode 3: The Forge of Ash (status: designed, awaiting orchestrator launch)
+Scott approved building Episode 3 on 2026-10-24. Design by ep3-designer (W16): `docs/story/EPISODE3.md` (story bible:
+Bram's episode, Garrick's name taken by the thirteenth toll, Mara of the First Bell, the Cinder Warden, the hero's
+third fragment) and `docs/EPISODE3_PLAN.md` (the contract). New field mechanic: quench channels (sluice-routed water
+permanently crusts slag; reuses the beam tracer). One battle rule: Heat. Lv 13 to 17, planned at 75 minutes.
+Run ONE agent at a time, in order, checking usage before each launch; each step leaves the game publishable
+(everything stays behind `EP3_LIVE = false` until E3-integrate).
+- [ ] Wave 17a: E3-saves (per-run autosave, `newGameEp3`, the switch) -> E3-story -> E3-battle
+- [ ] Wave 17b: E3-tiles -> E3-sprites -> E3-audio
+- [ ] Wave 17c: E3-world -> E3-maps
+- [ ] Wave 17d: E3-scene-ui -> E3-integrate (flips `EP3_LIVE`; publish after the full gate list)
+- [ ] Wave 17e: critic-5 -> play-critic-5 (`docs/briefs/E3-review.md`, read-only) -> E3-fixes
+- Decisions for Scott (defaults in EPISODE3_PLAN 13): Garrick as the toll [yes]; grey Bram sprites [yes, shown first];
+  quick-start free-slot rule for Episode 3 only [yes]; Episode 4 card wording [placeholder].
