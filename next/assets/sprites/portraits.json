@@ -276,6 +276,18 @@
    320,
    32,
    32
+  ],
+  "cinder_warden_48": [
+   128,
+   320,
+   48,
+   48
+  ],
+  "cinder_warden_32": [
+   176,
+   320,
+   32,
+   32
   ]
  },
  "portraits": {
@@ -371,9 +383,17 @@
    "48": "nameless_king_unmasked_48",
    "32": "nameless_king_unmasked_32"
   },
+  "cinder_warden": {
+   "48": "cinder_warden_48",
+   "32": "cinder_warden_32"
+  },
   "vex": {
    "48": "silver_rogue_48",
    "32": "silver_rogue_32"
+  },
+  "ilya": {
+   "48": "goggles_smith_48",
+   "32": "goggles_smith_32"
   }
  },
  "sources": {
@@ -400,15 +420,17 @@
   "aurel": "SDF render (chars/portraits_w12.py, W12)",
   "nameless_king": "battle frame nameless_king (1x crop, W11)",
   "nameless_king_unmasked": "battle frame nameless_king_unmasked (1x crop, W11)",
-  "vex": "alias of silver_rogue"
+  "vex": "alias of silver_rogue",
+  "ilya": "alias of goggles_smith",
+  "cinder_warden": "battle frame cinder_warden_molten (1x crop, E3)"
  },
  "aliases": {
-  "vex": "silver_rogue"
+  "vex": "silver_rogue",
+  "ilya": "goggles_smith"
  },
  "unassigned": [
   "noble_lady",
-  "goggles_smith",
   "hooded_sage"
  ],
- "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. E2-sprites: elian, anwen, tovin, lena, aurel (W12: SDF renders, chars/portraits_w12.py), nameless_king (the veiled King), and vex (Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops of the battle frames."
+ "notes": "48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. E2-sprites: elian, anwen, tovin, lena, aurel (W12: SDF renders, chars/portraits_w12.py), nameless_king (the veiled King), and vex (Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops of the battle frames. E3-sprites: ilya is the goggles_smith frames (alias); cinder_warden is a 1x crop of the Molten Shell battle frame (head, halo and lit furnace grate). There is no veyra portrait: the SDF renderer reaches only the Episode 2 tier, which does not match the Episode 1 painted set side by side."
 }

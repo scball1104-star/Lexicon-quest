@@ -50,6 +50,9 @@ def build():
                 frames.append((n, f))
             anims[f'{c}_walk_{d}'] = {'frames': [f'{c}_{d}_1', f'{c}_{d}_0', f'{c}_{d}_2', f'{c}_{d}_0'], 'fps': 8, 'loop': True}
             anims[f'{c}_idle_{d}'] = {'frames': [f'{c}_{d}_0'] * 22 + [f'{c}_{d}_blink'] + [f'{c}_{d}_0'], 'fps': 8, 'loop': True}
+    import bram_grey as BG
+    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default OFF, Scott's decision pending)
+        frames = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in frames]
     sheet, rects = pack_rows(frames, CELL, 4)
     save_png(sheet, os.path.join(DST, 'party_field.png'))
     meta = {'image': 'party_field.png', 'cell': list(CELL), 'origin': [12, 31],

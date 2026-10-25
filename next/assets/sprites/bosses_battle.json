@@ -300,6 +300,150 @@
    1693,
    142,
    96
+  ],
+  "cinder_warden": [
+   276,
+   2356,
+   137,
+   133
+  ],
+  "cinder_warden_idle_1": [
+   133,
+   2219,
+   137,
+   134
+  ],
+  "cinder_warden_attack": [
+   0,
+   2492,
+   142,
+   133
+  ],
+  "cinder_warden_hurt": [
+   279,
+   2492,
+   139,
+   131
+  ],
+  "cinder_warden_cast": [
+   0,
+   1791,
+   147,
+   147
+  ],
+  "cinder_warden_die_0": [
+   0,
+   2081,
+   137,
+   136
+  ],
+  "cinder_warden_die_1": [
+   145,
+   2627,
+   137,
+   125
+  ],
+  "cinder_warden_die_2": [
+   145,
+   2755,
+   137,
+   95
+  ],
+  "cinder_warden_molten": [
+   139,
+   2081,
+   143,
+   136
+  ],
+  "cinder_warden_molten_idle_1": [
+   145,
+   1940,
+   143,
+   137
+  ],
+  "cinder_warden_molten_attack": [
+   284,
+   2081,
+   149,
+   136
+  ],
+  "cinder_warden_molten_hurt": [
+   272,
+   2219,
+   145,
+   134
+  ],
+  "cinder_warden_molten_cast": [
+   149,
+   1791,
+   154,
+   147
+  ],
+  "cinder_warden_molten_die_0": [
+   0,
+   1940,
+   143,
+   139
+  ],
+  "cinder_warden_molten_die_1": [
+   0,
+   2627,
+   143,
+   126
+  ],
+  "cinder_warden_molten_die_2": [
+   0,
+   2755,
+   143,
+   96
+  ],
+  "cinder_warden_quenched": [
+   0,
+   2356,
+   131,
+   134
+  ],
+  "cinder_warden_quenched_idle_1": [
+   0,
+   2219,
+   131,
+   135
+  ],
+  "cinder_warden_quenched_attack": [
+   133,
+   2356,
+   141,
+   134
+  ],
+  "cinder_warden_quenched_hurt": [
+   144,
+   2492,
+   133,
+   132
+  ],
+  "cinder_warden_quenched_cast": [
+   305,
+   1791,
+   143,
+   147
+  ],
+  "cinder_warden_quenched_die_0": [
+   290,
+   1940,
+   131,
+   137
+  ],
+  "cinder_warden_quenched_die_1": [
+   284,
+   2627,
+   131,
+   125
+  ],
+  "cinder_warden_quenched_die_2": [
+   284,
+   2755,
+   131,
+   92
   ]
  },
  "origin": {
@@ -502,6 +646,102 @@
   "nameless_king_unmasked_die_2": [
    72,
    95
+  ],
+  "cinder_warden": [
+   68,
+   132
+  ],
+  "cinder_warden_idle_1": [
+   68,
+   133
+  ],
+  "cinder_warden_attack": [
+   68,
+   132
+  ],
+  "cinder_warden_hurt": [
+   69,
+   130
+  ],
+  "cinder_warden_cast": [
+   68,
+   146
+  ],
+  "cinder_warden_die_0": [
+   68,
+   135
+  ],
+  "cinder_warden_die_1": [
+   68,
+   124
+  ],
+  "cinder_warden_die_2": [
+   68,
+   94
+  ],
+  "cinder_warden_molten": [
+   71,
+   135
+  ],
+  "cinder_warden_molten_idle_1": [
+   71,
+   136
+  ],
+  "cinder_warden_molten_attack": [
+   71,
+   135
+  ],
+  "cinder_warden_molten_hurt": [
+   72,
+   133
+  ],
+  "cinder_warden_molten_cast": [
+   71,
+   146
+  ],
+  "cinder_warden_molten_die_0": [
+   71,
+   138
+  ],
+  "cinder_warden_molten_die_1": [
+   71,
+   125
+  ],
+  "cinder_warden_molten_die_2": [
+   71,
+   95
+  ],
+  "cinder_warden_quenched": [
+   69,
+   133
+  ],
+  "cinder_warden_quenched_idle_1": [
+   69,
+   134
+  ],
+  "cinder_warden_quenched_attack": [
+   69,
+   133
+  ],
+  "cinder_warden_quenched_hurt": [
+   70,
+   131
+  ],
+  "cinder_warden_quenched_cast": [
+   69,
+   146
+  ],
+  "cinder_warden_quenched_die_0": [
+   69,
+   136
+  ],
+  "cinder_warden_quenched_die_1": [
+   69,
+   124
+  ],
+  "cinder_warden_quenched_die_2": [
+   69,
+   91
   ]
  },
  "aliases": {
@@ -610,7 +850,58 @@
    ],
    "fps": 15,
    "loop": false
+  },
+  "cinder_warden_idle": {
+   "frames": [
+    "cinder_warden",
+    "cinder_warden_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "cinder_warden_die": {
+   "frames": [
+    "cinder_warden_die_0",
+    "cinder_warden_die_1",
+    "cinder_warden_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "cinder_warden_molten_idle": {
+   "frames": [
+    "cinder_warden_molten",
+    "cinder_warden_molten_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "cinder_warden_molten_die": {
+   "frames": [
+    "cinder_warden_molten_die_0",
+    "cinder_warden_molten_die_1",
+    "cinder_warden_molten_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "cinder_warden_quenched_idle": {
+   "frames": [
+    "cinder_warden_quenched",
+    "cinder_warden_quenched_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "cinder_warden_quenched_die": {
+   "frames": [
+    "cinder_warden_quenched_die_0",
+    "cinder_warden_quenched_die_1",
+    "cinder_warden_quenched_die_2"
+   ],
+   "fps": 15,
+   "loop": false
   }
  },
- "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin. E2-sprites: nameless_king (veiled: a glass veil in the hood) and nameless_king_unmasked (phase 3: the tired grey-bearded face), each with _idle_1, _attack (the glass sword raised), _hurt, _cast (crown and shards glow: Keeping, Mirror Rain, Cold Mirror), _die_0..2; 1x inside the 160x144 boss cell."
+ "notes": "Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin. E2-sprites: nameless_king (veiled: a glass veil in the hood) and nameless_king_unmasked (phase 3: the tired grey-bearded face), each with _idle_1, _attack (the glass sword raised), _hurt, _cast (crown and shards glow: Keeping, Mirror Rain, Cold Mirror), _die_0..2; 1x inside the 160x144 boss cell. E3-sprites: the Cinder Warden in three looks, cinder_warden (Tempered Iron), cinder_warden_molten (Molten Shell, with its heat halo) and cinder_warden_quenched (Quenched Core, the hammer-head a bell clapper), each with _idle_1, _attack (the hammer raised), _hurt, _cast (Stoke / Strike the Name / Last Hammer: seams and sparks), _die_0..2 (ember dissolve); ep3_warden.py, 1x, untinted, about 153 x 141 including the halo room (origin per frame)."
 }

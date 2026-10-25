@@ -366,6 +366,114 @@
    220,
    40,
    50
+  ],
+  "cinder_hound_0": [
+   123,
+   220,
+   24,
+   24
+  ],
+  "cinder_hound_1": [
+   148,
+   220,
+   24,
+   24
+  ],
+  "cinder_beetle_0": [
+   173,
+   220,
+   16,
+   16
+  ],
+  "cinder_beetle_1": [
+   190,
+   220,
+   16,
+   16
+  ],
+  "slag_slime_0": [
+   207,
+   220,
+   16,
+   16
+  ],
+  "slag_slime_1": [
+   224,
+   220,
+   16,
+   16
+  ],
+  "ashbound_miner_0": [
+   0,
+   271,
+   24,
+   24
+  ],
+  "ashbound_miner_1": [
+   25,
+   271,
+   24,
+   24
+  ],
+  "furnace_construct_0": [
+   50,
+   271,
+   24,
+   24
+  ],
+  "furnace_construct_1": [
+   75,
+   271,
+   24,
+   24
+  ],
+  "soot_phantom_0": [
+   100,
+   271,
+   24,
+   24
+  ],
+  "soot_phantom_1": [
+   125,
+   271,
+   24,
+   24
+  ],
+  "forge_defender_0": [
+   150,
+   271,
+   24,
+   32
+  ],
+  "forge_defender_1": [
+   175,
+   271,
+   24,
+   32
+  ],
+  "cinder_warden_avatar_0": [
+   200,
+   271,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_1": [
+   0,
+   326,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_back_0": [
+   45,
+   326,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_back_1": [
+   90,
+   326,
+   44,
+   54
   ]
  },
  "anims": {
@@ -607,6 +715,78 @@
    "frames": [
     "nameless_king_avatar_back_0",
     "nameless_king_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "cinder_hound_idle": {
+   "frames": [
+    "cinder_hound_0",
+    "cinder_hound_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "cinder_beetle_idle": {
+   "frames": [
+    "cinder_beetle_0",
+    "cinder_beetle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "slag_slime_idle": {
+   "frames": [
+    "slag_slime_0",
+    "slag_slime_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ashbound_miner_idle": {
+   "frames": [
+    "ashbound_miner_0",
+    "ashbound_miner_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "furnace_construct_idle": {
+   "frames": [
+    "furnace_construct_0",
+    "furnace_construct_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "soot_phantom_idle": {
+   "frames": [
+    "soot_phantom_0",
+    "soot_phantom_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "forge_defender_idle": {
+   "frames": [
+    "forge_defender_0",
+    "forge_defender_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "cinder_warden_avatar_idle": {
+   "frames": [
+    "cinder_warden_avatar_0",
+    "cinder_warden_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "cinder_warden_avatar_back_idle": {
+   "frames": [
+    "cinder_warden_avatar_back_0",
+    "cinder_warden_avatar_back_1"
    ],
    "fps": 2,
    "loop": true
@@ -912,6 +1092,96 @@
    "origin": [
     20,
     49
+   ]
+  },
+  "cinder_hound": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "cinder_beetle": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "slag_slime": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "ashbound_miner": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "furnace_construct": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "soot_phantom": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "forge_defender": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "cinder_warden_avatar": {
+   "size": [
+    44,
+    54
+   ],
+   "origin": [
+    22,
+    53
+   ]
+  },
+  "cinder_warden_avatar_back": {
+   "size": [
+    44,
+    54
+   ],
+   "origin": [
+    22,
+    53
    ]
   }
  },

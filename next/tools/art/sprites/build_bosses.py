@@ -104,16 +104,23 @@ def build():
     sheet, rects, origin = AA.append(sheet, rects, origin, K.atlas_frames())
     for bid in ('nameless_king', 'nameless_king_unmasked'):
         anims.update(AA.enemy_anims(bid, rects))
+    # E3-sprites: the Cinder Warden's three looks (ep3_warden.py), base + derived, in a block under the rest
+    import ep3_warden as WD
+    sheet, rects, origin = AA.append(sheet, rects, origin, WD.atlas_frames())
+    for bid in WD.IDS:
+        anims.update(AA.enemy_anims(bid, rects))
     AA.save_indexed(sheet, os.path.join(DST, 'bosses_battle.png'))
     meta = {'image': 'bosses_battle.png',
             'frames': rects,
             'origin': origin,
             'aliases': {'lost_page': 'lost_page_1'},
             'anims': anims,
-            'notes': 'Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin. E2-sprites: nameless_king (veiled: a glass veil in the hood) and nameless_king_unmasked (phase 3: the tired grey-bearded face), each with _idle_1, _attack (the glass sword raised), _hurt, _cast (crown and shards glow: Keeping, Mirror Rain, Cold Mirror), _die_0..2; 1x inside the 160x144 boss cell.'}
+            'notes': 'Battle sprites face RIGHT (toward the party). origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim): archivore_{idle_1,attack,hurt,cast,devour,die_0..2}; echo_warden_{idle_1,attack,hurt,cast,die_0..2} plus the stance frames echo_warden_mirror / echo_warden_bulwark, each with _idle_1, _attack, _hurt, _cast (echo_warden_mirror_attack ...); lost_page_die_0..2. Draw every frame by its own origin. E2-sprites: nameless_king (veiled: a glass veil in the hood) and nameless_king_unmasked (phase 3: the tired grey-bearded face), each with _idle_1, _attack (the glass sword raised), _hurt, _cast (crown and shards glow: Keeping, Mirror Rain, Cold Mirror), _die_0..2; 1x inside the 160x144 boss cell. E3-sprites: the Cinder Warden in three looks, cinder_warden (Tempered Iron), cinder_warden_molten (Molten Shell, with its heat halo) and cinder_warden_quenched (Quenched Core, the hammer-head a bell clapper), each with _idle_1, _attack (the hammer raised), _hurt, _cast (Stoke / Strike the Name / Last Hammer: seams and sparks), _die_0..2 (ember dissolve); ep3_warden.py, 1x, untinted, about 153 x 141 including the halo room (origin per frame).'}
     write_json(os.path.join(DST, 'bosses_battle.json'), meta)
     contact(frames, os.path.join(OUT, 'bosses_battle_4x.png'), scale=4, cols=5, title='bosses_battle at 4x')
     contact([(n, f) for n, f in frames if n.startswith('lost')], os.path.join(OUT, 'lost_page_8x.png'), scale=8, cols=3)
+    wb = WD.base()
+    contact([('echo_warden', w)] + list(wb.items()), os.path.join(OUT, 'bosses_battle_ep3_3x.png'), scale=3, cols=4, bg=(34, 28, 30), title='Episode 3 boss looks at 3x, with the Echo Warden')
     kb = K.build()
     contact([('echo_warden', w)] + [(k, kb[k]) for k in ('nameless_king', 'nameless_king_unmasked')],
             os.path.join(OUT, 'bosses_battle_ep2_4x.png'), scale=4, cols=3, title='Episode 2 boss at 4x, with the Echo Warden')

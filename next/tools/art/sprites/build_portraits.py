@@ -274,6 +274,49 @@ def build_ep2():
     return out
 
 
+# E3-sprites (CRITIQUE_4 item 5: the King's crop was a blob): the Warden's portrait is a 1x crop of its Molten Shell
+# battle frame on the head and chest, so the ember eyes, the halo ring and the lit furnace grate all sit inside the
+# 46 px window and the grate is the one bright place. Crop centre (x, y) in the battle frame.
+WARDEN_CROP = {48: (74, 36), 32: (74, 33)}
+
+
+def build_ep3():
+    """[(pid, img48, img32)]: the Cinder Warden's crops (Episode 3)"""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chars'))
+    import ep3_warden as WD
+    f = WD.base()['cinder_warden_molten']
+    return [('cinder_warden', warden_eyes(make_from_frame(f, *WARDEN_CROP[48], 48)),
+             warden_eyes(make_from_frame(f, *WARDEN_CROP[32], 32)))]
+
+
+def warden_eyes(img):
+    """the hood's dark void gets two ember eyes (hand-placed on its upper third, found as the largest dark
+    component in the upper 65 percent), each a hot pixel pair over a red glow, so the face is the second focal point"""
+    from scipy import ndimage as ndi
+    n = img.shape[0]
+    L = img[..., :3].max(-1)
+    dark = (L < 0.2) & (img[..., 3] > 0.5)
+    dark[int(n * 0.65):] = False
+    dark[:2] = False; dark[:, :2] = False; dark[:, -2:] = False
+    lab, k = ndi.label(dark)
+    if not k:
+        return img
+    sizes = ndi.sum(dark, lab, range(1, k + 1))
+    ys, xs = np.nonzero(lab == int(np.argmax(sizes)) + 1)
+    cx, y0, h, w = int(round(xs.mean())), ys.min(), ys.max() - ys.min(), xs.max() - xs.min()
+    ey = int(y0 + h * 0.38)
+    dx = max(2, int(round(w * 0.22)))
+    out = img.copy()
+    hot = np.array(hex2rgb(P.color('fire:5')), np.float32) / 255
+    red = np.array(hex2rgb(P.color('fire:3')), np.float32) / 255
+    for sx in (-1, 1):
+        x = cx + sx * dx
+        out[ey, x - 1:x + 1, :3] = hot
+        out[ey + 1, x - 1:x + 1, :3] = red
+    return out
+
+
 def build_atlas():
     big, small = build()
     sh = Shelf(256, pad=0)
@@ -287,26 +330,40 @@ def build_atlas():
         sh.add(pid + '_48', b48)
     for pid, b48, s32 in ep2:
         sh.add(pid + '_32', s32)
+    # E3-sprites: the Warden's crops after every earlier frame on the same shelf, so no existing rect moves
+    ep3 = build_ep3()
+    for pid, b48, s32 in ep3:
+        sh.add(pid + '_48', b48)
+    for pid, b48, s32 in ep3:
+        sh.add(pid + '_32', s32)
     sheet, rects = sh.render()
     save_png(sheet, os.path.join(DST, 'portraits.png'))
     ids = [p for p, _ in big]
     e2ids = [p for p, _, _ in ep2]
     portraits = {p: {'48': p + '_48', '32': p + '_32'} for p in ids + e2ids}
+    e3ids = [p for p, _, _ in ep3]
+    for p in e3ids:
+        portraits[p] = {'48': p + '_48', '32': p + '_32'}
     portraits['vex'] = dict(portraits['silver_rogue'])          # Vex Quill (an alias: the same frames)
+    portraits['ilya'] = dict(portraits['goggles_smith'])        # Ilya the Bell Founder (E3: the unused painted cell 6)
     sources = {p: ('portraits.webp cell %d' % CROPS[p][0]) if p in CROPS else ('interior-sprites.png cell %d' % EXTRA[p][0]) for p in ids}
     for p in e2ids:
         sources[p] = 'battle frame %s (1x crop, W11)' % p if p.startswith('nameless_king') else 'SDF render (chars/portraits_w12.py, W12)'
     sources['vex'] = 'alias of silver_rogue'
+    sources['ilya'] = 'alias of goggles_smith'
+    for p in e3ids:
+        sources[p] = 'battle frame cinder_warden_molten (1x crop, E3)'
     meta = {'image': 'portraits.png', 'frames': rects,
             'portraits': portraits,
             'sources': sources,
-            'aliases': {'vex': 'silver_rogue'},
-            'unassigned': ['noble_lady', 'goggles_smith', 'hooded_sage'],
+            'aliases': {'vex': 'silver_rogue', 'ilya': 'goggles_smith'},
+            'unassigned': ['noble_lady', 'hooded_sage'],
             'notes': '48x48 for dialogue, 32x32 for menus; both include a 1 px bevel frame and their own dark backdrop. '
                      'E2-sprites: elian, anwen, tovin, lena, aurel (W12: SDF renders, chars/portraits_w12.py), nameless_king (the veiled King), and vex '
                      '(Vex Quill: the silver_rogue frames). W11: nameless_king and nameless_king_unmasked are 1x crops '
-                     'of the battle frames.'}
+                     'of the battle frames. E3-sprites: ilya is the goggles_smith frames (alias); cinder_warden is a 1x crop of the Molten Shell battle frame (head, halo and lit furnace grate). There is no veyra portrait: the SDF renderer reaches only the Episode 2 tier, which does not match the Episode 1 painted set side by side.'}
     write_json(os.path.join(DST, 'portraits.json'), meta)
+    contact([(p, b) for p, b, _ in ep3] + [('goggles_smith (ilya)', dict(big)['goggles_smith']), ('mael', dict(big)['mael']), ('garrick', dict(big)['garrick'])], os.path.join(OUT, 'portraits_ep3_48_4x.png'), scale=6, cols=4, title='Episode 3 portraits 48x48 at 6x (with Episode 1 references)')
     contact(big, os.path.join(OUT, 'portraits_48_4x.png'), scale=4, cols=4, title='portraits 48x48 at 4x')
     contact(small, os.path.join(OUT, 'portraits_32_4x.png'), scale=4, cols=8, title='portraits 32x32 at 4x')
     contact([(p, b) for p, b, _ in ep2] + [('silver_rogue (vex)', dict(big)['silver_rogue']), ('mael', dict(big)['mael']),

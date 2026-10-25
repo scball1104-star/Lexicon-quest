@@ -123,6 +123,11 @@ def colourize(cv, spec, who):
 
 # accessories: name -> {dir: (grid, dx, dy)}
 ACC = NB.ACC
+# E3-sprites: Foreman Veyra's whistle on a cord (a V of cord on the chest ending in a brass whistle)
+ACC['whistle'] = {
+    'down': ("\nG.....G\n.G...G.\n..G.G..\n...mM..\n", 8, 15),
+    'left': ("\nG..\n.G.\n.mM\n", 8, 15),
+}
 
 
 def npc_frames(nid, spec):
@@ -242,6 +247,8 @@ def build():
         e2_blocks.append((nid, fr))
     for rid, blk in RF.field_blocks().items():
         e2_blocks.append((rid, blk))
+    for nid, spec in S.NPCS_EP3.items():
+        e2_blocks.append((nid, npc_frames(nid, spec)))
     e2_list = []
     for nid, fr in e2_blocks:
         blk = []
@@ -281,7 +288,7 @@ def build():
     anims['npc_dough_wobble'] = {'frames': ['npc_dough_0', 'npc_dough_1'], 'fps': 4, 'loop': True}
     save_png(sheet, os.path.join(DST, 'npcs.png'))
     sprites = {nid: {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid, sp in S.NPCS.items()}
-    for nid, sp in S.NPCS_EP2.items():
+    for nid, sp in list(S.NPCS_EP2.items()) + list(S.NPCS_EP3.items()):
         sprites[nid] = {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS}
     for rid in RF.IDS:
         sprites[rid] = {'name': {'refl_hero': 'Nameless Reflection', 'refl_mira': "Mira's Reflection",
@@ -290,7 +297,7 @@ def build():
         sprites[f'animal_{a}'] = {'cell': [16, 16], 'origin': [8, 15], 'faces': 'left', 'flipForRight': True}
     sprites['npc_dough'] = {'name': "Oren's runaway starter", 'cell': [16, 16], 'origin': [8, 15], 'faces': 'front'}
     meta = {'image': 'npcs.png', 'cell': [24, 32], 'origin': [12, 31],
-            'layout': 'humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the band under the Episode 1 blocks; the Episode 2 townsfolk and the Other Selves (refl_hero, refl_mira, refl_bram) in their own bands under the animals (E2-sprites).',
+            'layout': 'humanoids: 3 NPC blocks per band; each block rows down,left,right,up x cols stand,stepA,stepB,blink. Animals and npc_dough (16x16) in the band under the Episode 1 blocks; the Episode 2 townsfolk and the Other Selves (refl_hero, refl_mira, refl_bram) in their own bands under the animals (E2-sprites); the Episode 3 townsfolk (Emberpeak and the Foundry: veyra, ilya, sella, harl, bess, taro, rusk, mara, courier_v) follow in the same band, after the Other Selves (E3-sprites).',
             'sprites': sprites, 'frames': rects, 'anims': anims}
     write_json(os.path.join(DST, 'npcs.json'), meta)
     # previews
@@ -306,6 +313,8 @@ def build():
         for dd in DIRS:
             e2i.append((f'{nid[4:] if nid.startswith("npc_") else nid} {dd}', d[f'{nid}_{dd}_0']))
     contact(e2i, os.path.join(OUT, 'npcs_ep2_stand_4x.png'), scale=4, cols=8, title='Episode 2 NPCs and the Other Selves: down, left, right, up (stand) at 4x')
+    e3i = [it for it in e2i if any(it[0].startswith(n[4:]) for n in S.NPCS_EP3)]
+    contact(e3i, os.path.join(OUT, 'npcs_ep3_stand_4x.png'), scale=4, cols=8, title='Episode 3 NPCs: down, left, right, up (stand) at 4x', bg=(86, 76, 70))
     e2w = []
     for nid, blk in e2_list:
         d = dict(blk)

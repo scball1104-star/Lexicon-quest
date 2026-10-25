@@ -275,6 +275,10 @@ def build():
                 alias[f'{c}_{n}'] = f'{c}_{WEAPONS_OF[c][0]}_{n}'
             else:
                 extra.append((f'{c}_{n}', f))
+    import bram_grey as BG
+    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default OFF, Scott's decision pending)
+        allf = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in allf]
+        extra = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in extra]
     sheet, rects = pack_rows(allf + extra, CELL, cols)
     for k, v in alias.items():
         rects[k] = list(rects[v])

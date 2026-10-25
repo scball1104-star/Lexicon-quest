@@ -1056,6 +1056,444 @@
    1766,
    22,
    20
+  ],
+  "cinder_hound": [
+   411,
+   2345,
+   63,
+   59
+  ],
+  "cinder_hound_idle_1": [
+   346,
+   2345,
+   63,
+   60
+  ],
+  "cinder_hound_attack": [
+   0,
+   2418,
+   64,
+   59
+  ],
+  "cinder_hound_hurt": [
+   250,
+   2418,
+   67,
+   57
+  ],
+  "cinder_hound_die_0": [
+   185,
+   2418,
+   63,
+   58
+  ],
+  "cinder_hound_die_1": [
+   129,
+   2479,
+   63,
+   53
+  ],
+  "cinder_hound_die_2": [
+   0,
+   2588,
+   62,
+   40
+  ],
+  "cinder_beetle": [
+   435,
+   2479,
+   57,
+   51
+  ],
+  "cinder_beetle_idle_1": [
+   229,
+   2479,
+   57,
+   52
+  ],
+  "cinder_beetle_attack": [
+   0,
+   2536,
+   63,
+   50
+  ],
+  "cinder_beetle_hurt": [
+   100,
+   2536,
+   59,
+   49
+  ],
+  "cinder_beetle_die_0": [
+   35,
+   2479,
+   57,
+   54
+  ],
+  "cinder_beetle_die_1": [
+   161,
+   2536,
+   57,
+   49
+  ],
+  "cinder_beetle_die_2": [
+   116,
+   2588,
+   57,
+   37
+  ],
+  "slag_slime": [
+   270,
+   2536,
+   50,
+   47
+  ],
+  "slag_slime_idle_1": [
+   220,
+   2536,
+   48,
+   49
+  ],
+  "slag_slime_attack": [
+   427,
+   2536,
+   55,
+   42
+  ],
+  "slag_slime_hurt": [
+   322,
+   2536,
+   51,
+   47
+  ],
+  "slag_slime_die_0": [
+   375,
+   2536,
+   50,
+   46
+  ],
+  "slag_slime_die_1": [
+   64,
+   2588,
+   50,
+   40
+  ],
+  "slag_slime_die_2": [
+   245,
+   2588,
+   50,
+   33
+  ],
+  "ashbound_miner": [
+   157,
+   2266,
+   70,
+   74
+  ],
+  "ashbound_miner_idle_1": [
+   229,
+   2266,
+   70,
+   74
+  ],
+  "ashbound_miner_attack": [
+   301,
+   2266,
+   75,
+   73
+  ],
+  "ashbound_miner_hurt": [
+   378,
+   2266,
+   71,
+   72
+  ],
+  "ashbound_miner_cast": [
+   256,
+   2179,
+   67,
+   82
+  ],
+  "ashbound_miner_die_0": [
+   0,
+   2266,
+   70,
+   77
+  ],
+  "ashbound_miner_die_1": [
+   0,
+   2345,
+   70,
+   71
+  ],
+  "ashbound_miner_die_2": [
+   389,
+   2418,
+   67,
+   55
+  ],
+  "furnace_construct": [
+   0,
+   2087,
+   90,
+   90
+  ],
+  "furnace_construct_idle_1": [
+   389,
+   1992,
+   90,
+   91
+  ],
+  "furnace_construct_attack": [
+   97,
+   1992,
+   102,
+   92
+  ],
+  "furnace_construct_hurt": [
+   187,
+   2087,
+   93,
+   88
+  ],
+  "furnace_construct_die_0": [
+   375,
+   1894,
+   90,
+   93
+  ],
+  "furnace_construct_die_1": [
+   369,
+   2087,
+   90,
+   86
+  ],
+  "furnace_construct_die_2": [
+   254,
+   2345,
+   90,
+   63
+  ],
+  "soot_phantom": [
+   85,
+   2179,
+   83,
+   83
+  ],
+  "soot_phantom_idle_1": [
+   170,
+   2179,
+   84,
+   83
+  ],
+  "soot_phantom_attack": [
+   325,
+   2179,
+   91,
+   82
+  ],
+  "soot_phantom_hurt": [
+   418,
+   2179,
+   84,
+   82
+  ],
+  "soot_phantom_cast": [
+   194,
+   1894,
+   87,
+   95
+  ],
+  "soot_phantom_die_0": [
+   0,
+   2179,
+   83,
+   85
+  ],
+  "soot_phantom_die_1": [
+   72,
+   2266,
+   83,
+   77
+  ],
+  "soot_phantom_die_2": [
+   66,
+   2418,
+   82,
+   59
+  ],
+  "forge_defender": [
+   194,
+   1792,
+   95,
+   98
+  ],
+  "forge_defender_idle_1": [
+   97,
+   1792,
+   95,
+   99
+  ],
+  "forge_defender_attack": [
+   291,
+   1792,
+   112,
+   98
+  ],
+  "forge_defender_hurt": [
+   405,
+   1792,
+   97,
+   96
+  ],
+  "forge_defender_die_0": [
+   0,
+   1792,
+   95,
+   100
+  ],
+  "forge_defender_die_1": [
+   0,
+   1992,
+   95,
+   93
+  ],
+  "forge_defender_die_2": [
+   72,
+   2345,
+   95,
+   71
+  ],
+  "bellows_specter": [
+   201,
+   1992,
+   91,
+   92
+  ],
+  "bellows_specter_idle_1": [
+   294,
+   1992,
+   93,
+   92
+  ],
+  "bellows_specter_attack": [
+   0,
+   1894,
+   95,
+   96
+  ],
+  "bellows_specter_hurt": [
+   92,
+   2087,
+   93,
+   90
+  ],
+  "bellows_specter_cast": [
+   97,
+   1894,
+   95,
+   96
+  ],
+  "bellows_specter_die_0": [
+   283,
+   1894,
+   90,
+   95
+  ],
+  "bellows_specter_die_1": [
+   282,
+   2087,
+   85,
+   88
+  ],
+  "bellows_specter_die_2": [
+   169,
+   2345,
+   83,
+   64
+  ],
+  "bellows_coil": [
+   458,
+   2418,
+   33,
+   55
+  ],
+  "bellows_coil_idle_1": [
+   354,
+   2418,
+   33,
+   56
+  ],
+  "bellows_coil_attack": [
+   94,
+   2479,
+   33,
+   54
+  ],
+  "bellows_coil_hurt": [
+   0,
+   2479,
+   33,
+   55
+  ],
+  "bellows_coil_die_0": [
+   150,
+   2418,
+   33,
+   59
+  ],
+  "bellows_coil_die_1": [
+   194,
+   2479,
+   33,
+   53
+  ],
+  "bellows_coil_die_2": [
+   175,
+   2588,
+   33,
+   37
+  ],
+  "smelter_coil": [
+   288,
+   2479,
+   33,
+   52
+  ],
+  "smelter_coil_idle_1": [
+   323,
+   2479,
+   33,
+   52
+  ],
+  "smelter_coil_attack": [
+   358,
+   2479,
+   40,
+   52
+  ],
+  "smelter_coil_hurt": [
+   400,
+   2479,
+   33,
+   52
+  ],
+  "smelter_coil_die_0": [
+   319,
+   2418,
+   33,
+   57
+  ],
+  "smelter_coil_die_1": [
+   65,
+   2536,
+   33,
+   50
+  ],
+  "smelter_coil_die_2": [
+   210,
+   2588,
+   33,
+   37
   ]
  },
  "origin": {
@@ -1762,6 +2200,298 @@
   "refl_bram_die_2": [
    11,
    19
+  ],
+  "cinder_hound": [
+   31,
+   58
+  ],
+  "cinder_hound_idle_1": [
+   31,
+   59
+  ],
+  "cinder_hound_attack": [
+   30,
+   58
+  ],
+  "cinder_hound_hurt": [
+   34,
+   56
+  ],
+  "cinder_hound_die_0": [
+   31,
+   57
+  ],
+  "cinder_hound_die_1": [
+   31,
+   52
+  ],
+  "cinder_hound_die_2": [
+   30,
+   39
+  ],
+  "cinder_beetle": [
+   28,
+   50
+  ],
+  "cinder_beetle_idle_1": [
+   28,
+   51
+  ],
+  "cinder_beetle_attack": [
+   28,
+   49
+  ],
+  "cinder_beetle_hurt": [
+   29,
+   48
+  ],
+  "cinder_beetle_die_0": [
+   28,
+   53
+  ],
+  "cinder_beetle_die_1": [
+   28,
+   48
+  ],
+  "cinder_beetle_die_2": [
+   28,
+   36
+  ],
+  "slag_slime": [
+   25,
+   46
+  ],
+  "slag_slime_idle_1": [
+   24,
+   48
+  ],
+  "slag_slime_attack": [
+   26,
+   41
+  ],
+  "slag_slime_hurt": [
+   26,
+   46
+  ],
+  "slag_slime_die_0": [
+   25,
+   45
+  ],
+  "slag_slime_die_1": [
+   25,
+   39
+  ],
+  "slag_slime_die_2": [
+   25,
+   32
+  ],
+  "ashbound_miner": [
+   35,
+   73
+  ],
+  "ashbound_miner_idle_1": [
+   35,
+   73
+  ],
+  "ashbound_miner_attack": [
+   31,
+   72
+  ],
+  "ashbound_miner_hurt": [
+   40,
+   71
+  ],
+  "ashbound_miner_cast": [
+   35,
+   81
+  ],
+  "ashbound_miner_die_0": [
+   35,
+   76
+  ],
+  "ashbound_miner_die_1": [
+   35,
+   70
+  ],
+  "ashbound_miner_die_2": [
+   35,
+   54
+  ],
+  "furnace_construct": [
+   44,
+   89
+  ],
+  "furnace_construct_idle_1": [
+   44,
+   90
+  ],
+  "furnace_construct_attack": [
+   44,
+   91
+  ],
+  "furnace_construct_hurt": [
+   48,
+   87
+  ],
+  "furnace_construct_die_0": [
+   44,
+   92
+  ],
+  "furnace_construct_die_1": [
+   44,
+   85
+  ],
+  "furnace_construct_die_2": [
+   44,
+   62
+  ],
+  "soot_phantom": [
+   41,
+   82
+  ],
+  "soot_phantom_idle_1": [
+   42,
+   82
+  ],
+  "soot_phantom_attack": [
+   39,
+   81
+  ],
+  "soot_phantom_hurt": [
+   45,
+   81
+  ],
+  "soot_phantom_cast": [
+   43,
+   94
+  ],
+  "soot_phantom_die_0": [
+   41,
+   84
+  ],
+  "soot_phantom_die_1": [
+   41,
+   76
+  ],
+  "soot_phantom_die_2": [
+   41,
+   58
+  ],
+  "forge_defender": [
+   48,
+   97
+  ],
+  "forge_defender_idle_1": [
+   48,
+   98
+  ],
+  "forge_defender_attack": [
+   48,
+   97
+  ],
+  "forge_defender_hurt": [
+   49,
+   95
+  ],
+  "forge_defender_die_0": [
+   48,
+   99
+  ],
+  "forge_defender_die_1": [
+   48,
+   92
+  ],
+  "forge_defender_die_2": [
+   48,
+   70
+  ],
+  "bellows_specter": [
+   45,
+   91
+  ],
+  "bellows_specter_idle_1": [
+   47,
+   91
+  ],
+  "bellows_specter_attack": [
+   45,
+   95
+  ],
+  "bellows_specter_hurt": [
+   49,
+   89
+  ],
+  "bellows_specter_cast": [
+   49,
+   95
+  ],
+  "bellows_specter_die_0": [
+   45,
+   94
+  ],
+  "bellows_specter_die_1": [
+   43,
+   87
+  ],
+  "bellows_specter_die_2": [
+   42,
+   63
+  ],
+  "bellows_coil": [
+   17,
+   54
+  ],
+  "bellows_coil_idle_1": [
+   17,
+   55
+  ],
+  "bellows_coil_attack": [
+   17,
+   53
+  ],
+  "bellows_coil_hurt": [
+   17,
+   54
+  ],
+  "bellows_coil_die_0": [
+   17,
+   58
+  ],
+  "bellows_coil_die_1": [
+   17,
+   52
+  ],
+  "bellows_coil_die_2": [
+   17,
+   36
+  ],
+  "smelter_coil": [
+   17,
+   51
+  ],
+  "smelter_coil_idle_1": [
+   17,
+   51
+  ],
+  "smelter_coil_attack": [
+   17,
+   51
+  ],
+  "smelter_coil_hurt": [
+   17,
+   51
+  ],
+  "smelter_coil_die_0": [
+   17,
+   56
+  ],
+  "smelter_coil_die_1": [
+   17,
+   49
+  ],
+  "smelter_coil_die_2": [
+   17,
+   36
   ]
  },
  "anims": {
@@ -2172,6 +2902,176 @@
    ],
    "fps": 15,
    "loop": false
+  },
+  "cinder_hound_idle": {
+   "frames": [
+    "cinder_hound",
+    "cinder_hound_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "cinder_hound_die": {
+   "frames": [
+    "cinder_hound_die_0",
+    "cinder_hound_die_1",
+    "cinder_hound_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "cinder_beetle_idle": {
+   "frames": [
+    "cinder_beetle",
+    "cinder_beetle_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "cinder_beetle_die": {
+   "frames": [
+    "cinder_beetle_die_0",
+    "cinder_beetle_die_1",
+    "cinder_beetle_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "slag_slime_idle": {
+   "frames": [
+    "slag_slime",
+    "slag_slime_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "slag_slime_die": {
+   "frames": [
+    "slag_slime_die_0",
+    "slag_slime_die_1",
+    "slag_slime_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "ashbound_miner_idle": {
+   "frames": [
+    "ashbound_miner",
+    "ashbound_miner_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ashbound_miner_die": {
+   "frames": [
+    "ashbound_miner_die_0",
+    "ashbound_miner_die_1",
+    "ashbound_miner_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "furnace_construct_idle": {
+   "frames": [
+    "furnace_construct",
+    "furnace_construct_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "furnace_construct_die": {
+   "frames": [
+    "furnace_construct_die_0",
+    "furnace_construct_die_1",
+    "furnace_construct_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "soot_phantom_idle": {
+   "frames": [
+    "soot_phantom",
+    "soot_phantom_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "soot_phantom_die": {
+   "frames": [
+    "soot_phantom_die_0",
+    "soot_phantom_die_1",
+    "soot_phantom_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "forge_defender_idle": {
+   "frames": [
+    "forge_defender",
+    "forge_defender_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "forge_defender_die": {
+   "frames": [
+    "forge_defender_die_0",
+    "forge_defender_die_1",
+    "forge_defender_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "bellows_specter_idle": {
+   "frames": [
+    "bellows_specter",
+    "bellows_specter_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "bellows_specter_die": {
+   "frames": [
+    "bellows_specter_die_0",
+    "bellows_specter_die_1",
+    "bellows_specter_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "bellows_coil_idle": {
+   "frames": [
+    "bellows_coil",
+    "bellows_coil_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "bellows_coil_die": {
+   "frames": [
+    "bellows_coil_die_0",
+    "bellows_coil_die_1",
+    "bellows_coil_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "smelter_coil_idle": {
+   "frames": [
+    "smelter_coil",
+    "smelter_coil_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "smelter_coil_die": {
+   "frames": [
+    "smelter_coil_die_0",
+    "smelter_coil_die_1",
+    "smelter_coil_die_2"
+   ],
+   "fps": 15,
+   "loop": false
   }
  },
  "facing": "right",
@@ -2180,7 +3080,10 @@
   "archivore": "bosses_battle",
   "lost_page": "bosses_battle",
   "nameless_king": "bosses_battle",
-  "nameless_king_unmasked": "bosses_battle"
+  "nameless_king_unmasked": "bosses_battle",
+  "cinder_warden": "bosses_battle",
+  "cinder_warden_molten": "bosses_battle",
+  "cinder_warden_quenched": "bosses_battle"
  },
- "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted. E2-sprites: the Episode 2 foes (mist_wolf, glassback, quicksilver, quicksilver_bead, glint_wisp, glass_sentinel, borrowed_shadow, faceless_knight, false_sorrow, false_pride, shard_swarm; ep2_enemies.py) and the Other Selves (refl_hero, refl_mira, refl_bram; ep2_reflections.py) have base + idle_1, attack, hurt, die_0..2, and cast for glint_wisp, borrowed_shadow, false_sorrow and the reflections; 1x, untinted. nameless_king and nameless_king_unmasked live in bosses_battle.json."
+ "notes": "Base frame <id> per enemy, facing RIGHT toward the party; origin = bottom-centre, per frame in `origin`. Derived frames (W6-anim, tools/art/sprites/anim_frames.py): <id>_idle_1 (breathe, alternates with <id> every 36 frames), <id>_attack (lunge), <id>_hurt (squash + recoil), <id>_cast (page_wraith, ink_wraith), <id>_die_0..2 (crumble from the top, played before the white flash). Draw every frame by its own origin. echo_warden, archivore and lost_page live in bosses_battle.json. W8-art: thornback_wolf, ink_blot and briar_alpha (Whisperwood Hollow) have their own base and derived frames at 1x (tools/art/sprites/hollow_enemies.py); draw them unscaled and untinted. E2-sprites: the Episode 2 foes (mist_wolf, glassback, quicksilver, quicksilver_bead, glint_wisp, glass_sentinel, borrowed_shadow, faceless_knight, false_sorrow, false_pride, shard_swarm; ep2_enemies.py) and the Other Selves (refl_hero, refl_mira, refl_bram; ep2_reflections.py) have base + idle_1, attack, hurt, die_0..2, and cast for glint_wisp, borrowed_shadow, false_sorrow and the reflections; 1x, untinted. nameless_king and nameless_king_unmasked live in bosses_battle.json. E3-sprites: cinder_hound, cinder_beetle, slag_slime, ashbound_miner, furnace_construct, soot_phantom, forge_defender, bellows_specter (mini-boss, 96 px cell), bellows_coil and smelter_coil (ep3_enemies.py, ep3_coils.py) have base + idle_1, attack, hurt, die_0..2 (cast for ashbound_miner, soot_phantom, bellows_specter); 1x, untinted; ember death dissolve. The three Cinder Warden looks live in bosses_battle.json."
 }

@@ -955,3 +955,68 @@ def icons12():
     I['sigil'] = _i(SIGIL, A=_GLASS_A, B=P.METAL)
     I['feather'] = _i(FEATHER, B=BLACK_FEATHER_B)
     return I
+
+
+# ----------------------------------------------------------------------------------------------- Episode 3 (E3-sprites)
+# icon_heat (the Heat pips' mark: a flame with a white core), icon_oath (Tempered Oath: a shield bearing Mara's bell),
+# icon_leaf (the Steel Leaf, where the Warden strikes names). Packed by build_all.py in a strip UNDER the Episode 2
+# strip (E3_IDS), so no existing rect moves. Fill letters here are literal colours (draw's `extra`).
+E3_IDS = ('icon_heat', 'icon_oath', 'icon_leaf')
+
+HEAT = """
+.....k......
+....kok.....
+...kofok..k.
+...kofyokkok
+..kkofyyofok
+..kofyyywyok
+..kofyywwyok
+..kofyyywyok
+...kofyyyok.
+....kkoook..
+............
+............
+"""
+OATH = """
+.kkkkkkkkkk.
+.kmMMMMMMmk.
+.kmMMgGMMmk.
+.kmMgGGgMmk.
+.kmgGGGGgmk.
+.kmgGGGGgmk.
+..kmGGGGmk..
+..kmMhhMmk..
+...kmMMmk...
+....kmmk....
+.....kk.....
+............
+"""
+LEAF = """
+............
+.......kkk..
+.....kkmMMk.
+....kmMMMMMk
+...kmMMvMMMk
+..kmMMvMMMMk
+..kmMvMMMMk.
+.kmMvMMMMk..
+.kMvMMMkk...
+kvkkkkk.....
+kk..........
+............
+"""
+
+
+def _x(**refs):
+    return {k: P.R[v.split(':')[0]][int(v.split(':')[1])] for k, v in refs.items()}
+
+
+_icons12_e2 = icons12
+
+
+def icons12():
+    I = _icons12_e2()
+    I['heat'] = draw(HEAT, outline=False, extra=_x(k='roof_red:0', o='roof_red:3', f='fire:2', y='fire:3', w='fire:5', r='roof_red:2'))
+    I['oath'] = draw(OATH, outline=False, extra=_x(k='shadow:0', m='stone_cool:5', M='stone_cool:3', g='gold:2', G='gold:3', h='gold:5'))
+    I['leaf'] = draw(LEAF, outline=False, extra=_x(k='shadow:0', m='stone_cool:5', M='stone_cool:3', v='gold:3'))
+    return I

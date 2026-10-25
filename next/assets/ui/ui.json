@@ -793,6 +793,12 @@
    12,
    12
   ],
+  "icon_heat": [
+   1,
+   257,
+   12,
+   12
+  ],
   "icon_helm": [
    469,
    190,
@@ -823,6 +829,12 @@
    12,
    12
   ],
+  "icon_leaf": [
+   14,
+   257,
+   12,
+   12
+  ],
   "icon_letter": [
    14,
    205,
@@ -850,6 +862,12 @@
   "icon_nameless": [
    66,
    205,
+   12,
+   12
+  ],
+  "icon_oath": [
+   27,
+   257,
    12,
    12
   ],
@@ -2382,6 +2400,9 @@
    "icon_reflect",
    "icon_sigil",
    "icon_feather",
+   "icon_heat",
+   "icon_oath",
+   "icon_leaf",
    "st8_poison",
    "st8_burn",
    "st8_chill",

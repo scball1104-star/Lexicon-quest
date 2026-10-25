@@ -54,6 +54,15 @@ Townsfolk ids (cast names from W1-content):
 | `npc_fitch` | Fitch | stout, mustache, plum shirt, leather apron |
 | `npc_vex` | Vex Quill | silver hair, long dark leather coat, crimson scarf |
 | `npc_aurel` | Aurel | balding, long grey beard, silver robe, no crown |
+| `npc_veyra` | Foreman Veyra |  |
+| `npc_ilya` | Ilya |  |
+| `npc_sella` | Sella |  |
+| `npc_harl` | Harl |  |
+| `npc_bess` | Bess |  |
+| `npc_taro` | Taro |  |
+| `npc_rusk` | Rusk |  |
+| `npc_mara` | Mara |  |
+| `npc_courier_v` | Valewyn courier |  |
 | `npc_dough` | Oren's runaway starter |  |
 
 Animals (16x16, face LEFT, flip for right): `animal_cat`, `animal_dog`, `animal_chicken`, `animal_duck` with frames `<id>_{sit_0,sit_1,walk_0}` (cat, dog) or `<id>_{stand_0,peck_0|stand_1,walk_0}`
@@ -79,8 +88,8 @@ Chests: `chest_wood|iron|gold` with frames [closed, open]. `lamp_post` frames [u
 additive glow disc. `prop_letter` frames [plain, glint]. `pot` breaks to `pot_broken`.
 
 ## enemies_battle.png / .json, bosses_battle.png / .json  (face RIGHT, origin = bottom-centre)
-enemies_battle: `ink_slime`, `page_wraith`, `briar_wolf`, `moss_scarab`, `bookmite`, `tome_golem`, `ink_wraith`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `glass_sentinel`, `borrowed_shadow`, `faceless_knight`, `false_sorrow`, `false_pride`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`.
-bosses_battle: `archivore`, `echo_warden`, `lost_page_0`, `lost_page_1`, `lost_page_2`, `lost_page`, `nameless_king`, `nameless_king_unmasked` (anim `lost_page_flutter`).
+enemies_battle: `ink_slime`, `page_wraith`, `briar_wolf`, `moss_scarab`, `bookmite`, `tome_golem`, `ink_wraith`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `glass_sentinel`, `borrowed_shadow`, `faceless_knight`, `false_sorrow`, `false_pride`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`, `cinder_hound`, `cinder_beetle`, `slag_slime`, `ashbound_miner`, `furnace_construct`, `soot_phantom`, `forge_defender`, `bellows_specter`, `bellows_coil`, `smelter_coil`.
+bosses_battle: `archivore`, `echo_warden`, `lost_page_0`, `lost_page_1`, `lost_page_2`, `lost_page`, `nameless_king`, `nameless_king_unmasked`, `cinder_warden`, `cinder_warden_molten`, `cinder_warden_quenched` (anim `lost_page_flutter`).
 Derived frames (W6-anim, `anim_frames.py`): `<id>_idle_1`, `_attack`, `_hurt`, `_cast` (casters), `_devour`
 (Archivore), `_die_0..2`, Echo Warden stance sets; anims `<id>_idle` and `<id>_die`. Every frame has its own origin.
 Whisperwood Hollow (W8-art, `hollow_enemies.py`): `thornback_wolf` (old silver-violet fur, black-green bramble, bone
@@ -114,7 +123,7 @@ inside the 160x144 boss cell, flipped so the glass sword is on the party side) i
 `_attack` (the sword raised), `_hurt`, `_cast` (crown and shards glow), `_die_0..2`; `external` maps both.
 
 ## enemies_field.png / .json  (visible map enemies, face LEFT)
-`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: `ink_slime`, `bookmite`, `moss_scarab`, `lost_page`, `page_wraith`, `ink_wraith`, `briar_wolf`, `tome_golem`, `echo_warden`, `archivore`, `archivore_avatar`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `borrowed_shadow`, `glass_sentinel`, `faceless_knight`, `false_pride`, `false_sorrow`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`, `nameless_king_avatar`, `nameless_king_avatar_back`.
+`sprites.<id>.size/origin`; frames `<id>_0`, `<id>_1`; anim `<id>_idle`. Ids: `ink_slime`, `bookmite`, `moss_scarab`, `lost_page`, `page_wraith`, `ink_wraith`, `briar_wolf`, `tome_golem`, `echo_warden`, `archivore`, `archivore_avatar`, `thornback_wolf`, `ink_blot`, `briar_alpha`, `mist_wolf`, `glassback`, `quicksilver`, `quicksilver_bead`, `glint_wisp`, `borrowed_shadow`, `glass_sentinel`, `faceless_knight`, `false_pride`, `false_sorrow`, `shard_swarm`, `refl_hero`, `refl_mira`, `refl_bram`, `nameless_king_avatar`, `nameless_king_avatar_back`, `cinder_hound`, `cinder_beetle`, `slag_slime`, `ashbound_miner`, `furnace_construct`, `soot_phantom`, `forge_defender`, `cinder_warden_avatar`, `cinder_warden_avatar_back`.
 `archivore_avatar` (W8-art, CRITIQUE_3 #10, `chars/archivore_avatar.py`): the boss on the field, the battle
 Archivore at map scale (winged eye, plum horns and tendrils, gold blade), 55x52, frontal, hovering
 `sprites.archivore_avatar.hover` (5) px above its feet so the shadow shows; frames `_0` wings up, `_1` wings down,
@@ -136,7 +145,7 @@ of glass tines, the veil, blue cape, glass sword, four floating shards; `_0`/`_1
 | `mael` | portraits.webp cell 3 |
 | `noble_lady` | portraits.webp cell 4 (unassigned, for later episodes) |
 | `silver_rogue` | portraits.webp cell 5 |
-| `goggles_smith` | portraits.webp cell 6 (unassigned, for later episodes) |
+| `goggles_smith` | portraits.webp cell 6 |
 | `hooded_sage` | portraits.webp cell 7 (unassigned, for later episodes) |
 | `tess` | interior-sprites.png cell 4 |
 | `iris` | interior-sprites.png cell 3 |
@@ -154,6 +163,8 @@ of glass tines, the veil, blue cape, glass sword, four floating shards; `_0`/`_1
 | `nameless_king` | battle frame nameless_king (1x crop, W11) |
 | `nameless_king_unmasked` | battle frame nameless_king_unmasked (1x crop, W11) |
 | `vex` | alias of silver_rogue |
+| `ilya` | alias of goggles_smith |
+| `cinder_warden` | battle frame cinder_warden_molten (1x crop, E3) |
 
 Garrick and Pip are recoloured from the NPC paintings (iron-grey hair, chapel purple). No sources exist yet for
 Oren, Edda, Holt, Cobb, Quill, Penny: the UI should fall back to no portrait for them.

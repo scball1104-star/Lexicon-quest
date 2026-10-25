@@ -135,3 +135,54 @@ NPCS_EP2 = {
     'npc_aurel': dict(name='Aurel', body='robe', head='elder', beard='long',
                       pal={'hair': HAIR['gray'], 'top': SILVER, 'sec': R('water', 2, 3, 4, 5), 'accent': R('water', 3, 4, 5)}),
 }
+
+# ------------------------------------------------------------------ Episode 3 (E3-sprites): Emberpeak and the
+# Foundry. Packed at the END of the Episode 2 band (build_npcs.py), so no earlier rect moves. Looks from
+# docs/story/EPISODE3.md section 3 and EPISODE3_PLAN.md 9.2.
+HAIR.update({
+    'copper': ['roof_red:2', 'roof_red:3', 'roof_red:4', 'fire:2'],
+    'ash_grey': ['shadow:3', 'stone_warm:1', 'stone_warm:2', 'stone_warm:3'],
+})
+BRASS = R('gold', 1, 2, 3, 4)
+IRON = ['shadow:2', 'stone_cool:2', 'stone_cool:3', 'stone_cool:4']
+SOOT_COAT = ['shadow:2', 'roof_red:1', 'roof_red:2', 'roof_red:3']
+
+NPCS_EP3 = {
+    # Foreman Veyra: fifties, soot-streaked (a smoky dark coat, ash-grey hair), sleeves rolled, a whistle on a cord
+    'npc_veyra': dict(name='Foreman Veyra', body='tunic', head='bun', over=['whistle'],
+                      pal={'hair': HAIR['ash_grey'], 'top': SOOT_COAT, 'bottom': R('shadow', 1, 2, 3),
+                           'skin': R('skin_med', 0, 1, 2, 3), 'accent': R('gold', 2, 3, 4)}),
+    # Ilya the Bell Founder: copper beard, brass goggles, leather apron (matches the goggles_smith portrait)
+    'npc_ilya': dict(name='Ilya', body='stout', head='short', beard='full', hat='goggles', over=['apron_wide'],
+                     pal={'hair': HAIR['copper'], 'top': CREAM, 'sec': LEATHER, 'bottom': R('shadow', 1, 2, 3),
+                          'hat': BRASS, 'metal': BRASS, 'skin': R('skin_light', 0, 1, 2, 3)}),
+    # Sella: the Emberpeak weaponsmith, mid-thirties, quick, a dark ponytail, a leather apron and her tongs/hammer
+    'npc_sella': dict(name='Sella', body='tunic', head='pony', over=['apron', 'hammer'], no_arms=True,
+                      pal={'hair': HAIR['dark'], 'top': R('roof_red', 1, 2, 3, 4), 'sec': LEATHER,
+                           'bottom': R('shadow', 1, 2, 3), 'skin': R('skin_med', 0, 1, 2, 3)}),
+    # Harl the Surveyor: writes pressure readings (a notebook), a khaki coat, grey at the temples
+    'npc_harl': dict(name='Harl', body='tunic', head='short', over=['book'],
+                     pal={'hair': HAIR['greying'], 'top': R('sand', 0, 1, 2, 3), 'bottom': R('earth', 1, 2, 3),
+                          'wood': R('roof_red', 1, 2, 3)}),
+    # Bess the Cook: the Coal Lantern Inn, a white cook's cap, a deep green dress, a wide apron
+    'npc_bess': dict(name='Bess', body='dress', head='bun', hat='baker_cap', over=['apron_wide'],
+                     pal={'hair': HAIR['black'], 'top': R('roof_green', 1, 2, 3, 4), 'hat': WHITE, 'sec': WHITE,
+                          'bottom': R('roof_green', 1, 2, 3), 'skin': R('skin_med', 0, 1, 2, 3)}),
+    # Taro the Riveter: Ventworks Supplies, a brass hard hat, a mustache, a rivet hammer
+    'npc_taro': dict(name='Taro', body='tunic', head='short', beard='mustache', hat='helmet', over=['hammer'],
+                     no_arms=True,
+                     pal={'hair': HAIR['dark'], 'top': R('cloth_blue', 1, 2, 3, 4), 'hat': BRASS,
+                          'bottom': R('shadow', 1, 2, 3), 'accent': BRASS, 'metal': BRASS, 'skin': R('skin_med', 0, 1, 2, 3)}),
+    # Rusk the Watch: the gate watch in iron grey with an ember trim, a spear
+    'npc_rusk': dict(name='Rusk', body='tunic', head='short', hat='helmet', over=['spear'], no_arms=True,
+                     pal={'hair': HAIR['brown'], 'top': IRON, 'bottom': R('shadow', 1, 2, 3), 'hat': IRON,
+                          'accent': R('roof_red', 2, 3, 4)}),
+    # Mara of the First Bell (memory actor): auburn hair tied back, a founder's apron, a bell hammer
+    'npc_mara': dict(name='Mara', body='tunic', head='pony', over=['apron_wide', 'hammer'], no_arms=True,
+                     pal={'hair': HAIR['auburn'], 'top': CREAM, 'sec': LEATHER, 'bottom': R('earth', 1, 2, 3),
+                          'skin': R('skin_light', 0, 1, 2, 3)}),
+    # the Valewyn courier: a soaked royal cloak (dark wet blue hood), gold sash, a dispatch satchel
+    'npc_courier_v': dict(name='Valewyn courier', body='tunic', head='short', hat='hood', over=['satchel'],
+                          pal={'hair': HAIR['dark'], 'top': R('cloth_blue', 0, 1, 2, 3), 'hat': R('cloth_blue', 0, 1, 2, 3),
+                               'bottom': R('shadow', 1, 2, 3), 'accent': R('gold', 2, 3, 4), 'wood': R('wood', 1, 2, 3)}),
+}
