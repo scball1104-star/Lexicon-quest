@@ -32,6 +32,7 @@ export const ROWS = [
     help: (e) => (touchUi(e) ? 'How fast battle plays. In battle: tap Speed.' : `How fast battle plays. In battle: ${btn('pageR')} toggles.`) },
   { key: 'autoBattle', label: 'Auto battle', kind: 'choice', values: [false, true], names: ONOFF,
     help: (e) => (touchUi(e) ? 'The party fights on its own. In battle: tap Auto.' : `The party fights on its own. In battle: ${btn('start')}.`) },
+  { key: 'battleCursor', label: 'Battle cursor', kind: 'choice', values: ['last', 'attack'], names: ['Last used', 'Attack'], help: 'Menu opens on last command used, or Attack.' },
   { key: 'equipPrompts', label: 'Equip prompts', kind: 'choice', values: [false, true], names: ONOFF, help: 'Offer to wear better gear as it is found.' },
   { key: 'windowColor', label: 'Window color', kind: 'choice', values: SCHEMES, names: SCHEMES.map((s) => SCHEME_NAMES[s]), help: HELP.config.windowColor },
   { key: 'alwaysRun', label: 'Always run', kind: 'choice', values: [false, true], names: ONOFF, help: 'Walk by holding the run button instead.' },

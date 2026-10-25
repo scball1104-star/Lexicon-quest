@@ -42,7 +42,7 @@ export class CommandMenu {
     this.preview = null;
     this.helpText = '';
     this.helpColor = null;
-    this.lastRootIndex = 0;
+    this.lastCmd = new Map();   // unit uid -> last root command id this menu confirmed
     this.tapArmed = null;
     this.touch = false;
     this.fleeCmd = null;     // the Flee command while the touch layout keeps it out of the grid
@@ -87,7 +87,10 @@ export class CommandMenu {
     const win = this.cmdRect;
     this.root = new List({ x: win.x + 18, y: win.y + (this.touch ? 4 : 6), w: CMD_COLS * CMD_COL_W, colW: CMD_COL_W, columns: CMD_COLS, columnMajor: true,
       rows, rowH, items, bar: false, textX: 2, icons: false, confirmSfx: false, cancelSfx: false });
-    this.root.moveTo(Math.min(this.lastRootIndex, items.length - 1));
+    // Cursor start (Config "Battle cursor"): Attack, or the command this character used last (Attack the first time).
+    const lastId = this.scene.engine.settings.battleCursor === 'attack' ? 'attack' : (this.lastCmd.get(unit.uid) || 'attack');
+    const at = items.findIndex((x) => x.id === lastId && !x.disabled);
+    this.root.moveTo(at >= 0 ? at : 0);
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
     this.syncHelp();
   }
@@ -220,7 +223,7 @@ export class CommandMenu {
       if (this.root.changed) { this.showHelp = true; this.fleeArmed = 0; this.syncHelp(); }
       if (act === 'confirm') {
         const it = this.root.item;
-        this.lastRootIndex = this.root.index;
+        this.lastCmd.set(this.unit.uid, it.id);
         const c = it.cmd;
         audio.sfx('confirm');
         if (c.id === 'attack') { if (!this.startTarget({ type: 'attack' })) audio.sfx('buzzer'); }

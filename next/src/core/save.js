@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   battleSpeed: 1,             // 1 or 2
   autoBattle: false,
   equipPrompts: true,         // offer to equip better gear when it is found (W5)
+  battleCursor: 'last',       // battle menu starts on: last (each character's last command) | attack
   alwaysRun: false,           // when true, holding run walks instead
   reduceMotion: false,        // no screen shake, softer flashes (defaults to the OS preference)
   scaleMode: 'integer',       // integer | fit | sharp
