@@ -44,7 +44,8 @@ import { installFieldArt } from '../world/fieldart.js';
 
 const FOLLOW_DEPTH = 2;
 // the autosave goes to `game.autosaveSlot` (0 unless the run owns another slot; E3-saves)
-const FIELD_RESPAWN_SEC = 60;
+const FIELD_RESPAWN_SEC = 150;       // was 60: beaten foes stay away longer
+const POST_BATTLE_QUIET = 360;       // frames every foe on the map stands down after any battle (6 s)
 const LANTERN_FRAMES = 120;
 const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
 /**
@@ -678,6 +679,7 @@ export class FieldScene {
     const enc = EV.encounterFor(ent);
     const result = await this.startBattle(enc.id, { boss: enc.boss, canFlee: enc.canFlee, start });
     enemy.data.fighting = false;
+    for (const o of this.actors) if (o !== enemy && o.brain && !(o.brain.stun > POST_BATTLE_QUIET)) o.brain.stun = POST_BATTLE_QUIET;
     if (result === 'win') {
       this.removeActor(enemy);
       ent.actor = null; ent.present = false;

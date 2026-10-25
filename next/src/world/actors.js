@@ -93,6 +93,11 @@ export function lookFrame(atlas, name, look) {
 
 let nextSerial = 1;
 
+// Field foes notice you from CHASE_RANGE tiles and close in a little slower than you walk (a pause of CHASE_PACE
+// frames between steps), so a fight is something you can walk away from. (Was 5 tiles and a 2 frame pause.)
+// Dungeon foes (step rule 'player') keep their 5 tile sight: they are puzzle pieces, not roamers.
+const CHASE_RANGE = 3, CHASE_PACE = 10;
+
 export class Actor {
   constructor(field, o = {}) {
     this.field = field;
@@ -344,8 +349,8 @@ export class EnemyBrain {
       this.act(field, field.leader.dur || WALK_FRAMES);
     } else {
       if (--this.timer > 0) return;
-      const chasing = this.mode === 'chase' && this.nearLeader(field, 5);
-      this.timer = chasing ? 2 : this.mode === 'patrol' ? 10 : 36 + ((a.serial * 13 + a.steps * 7) % 50);
+      const chasing = this.mode === 'chase' && this.nearLeader(field, CHASE_RANGE);
+      this.timer = chasing ? CHASE_PACE : this.mode === 'patrol' ? 10 : 36 + ((a.serial * 13 + a.steps * 7) % 50);
       this.act(field, chasing ? WALK_FRAMES : WALK_FRAMES + 2);
     }
   }
@@ -364,7 +369,7 @@ export class EnemyBrain {
     if (this.mode === 'guard') {
       if (dist <= 3) a.faceToward(L);
       if (dist === 1) dir = dirBetween([a.tx, a.ty], [L.tx, L.ty]);
-    } else if (this.mode === 'chase' && dist <= 5) {
+    } else if (this.mode === 'chase' && dist <= (this.stepRule === 'player' ? 5 : CHASE_RANGE)) {
       this.aggro = true;
       dir = this.stepToward(field, L);
     } else if (this.mode === 'patrol' && this.path) {
