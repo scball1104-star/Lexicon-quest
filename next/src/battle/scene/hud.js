@@ -234,11 +234,17 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     if (i >= 3) return;
     const L = statusRow(i);
     const active = a.uid === activeUid;
-    if (active) drawSelBar(r, L.bar[0], L.bar[1], L.bar[2], { alpha: 0.6 });
+    if (active) {
+      // Whose turn: a bright pulsing bar, a gold frame and a pointer in the left margin, and a gold name.
+      const pulse = Math.floor(frame / 20) % 2;
+      drawSelBar(r, L.bar[0], L.bar[1], L.bar[2], { alpha: pulse ? 0.9 : 1 });
+      r.strokeRect(L.bar[0] - 1, L.bar[1] - 1, L.bar[2] + 2, 14, pulse ? '#fff7d6' : '#f9d77a');
+      r.text('▶', L.bar[0] - 9, L.name[1], { color: 'gold' });
+    }
     const pct = a.maxHp ? a.hp / a.maxHp : 0;
     const ko = a.ko || a.hp <= 0;
     const kept = !!a.statuses.kept;
-    const nameCol = ko ? 'dim' : kept ? 'cyan' : pct <= 0.25 ? 'red' : 'white';
+    const nameCol = ko ? 'dim' : active ? 'gold' : kept ? 'cyan' : pct <= 0.25 ? 'red' : 'white';
     r.text(a.name, L.name[0], L.name[1], { color: nameCol });
     const hpText = String(Math.max(0, Math.round(a.shownHp)));
     r.text(hpText, L.hp[0], L.hp[1], { align: 'right', color: nameCol });
@@ -397,6 +403,9 @@ export function drawTargetArrow(r, actor, frame) {
 }
 export function drawTurnMarker(r, actor, frame) {
   const ui = uiAtlas(r);
+  // A pulsing gold ring on the floor under the active character's feet, beside the arrow over the head.
+  const rw = 9 + (Math.floor(frame / 20) % 2);
+  r.withAlpha(0.8, () => { r.rect(actor.cx - rw, Math.round(actor.y) - 1, rw * 2, 1, '#f9d77a'); r.rect(actor.cx - rw + 2, Math.round(actor.y), rw * 2 - 4, 1, '#f9d77a'); });
   const name = ui && animFrameAt(ui.anims.turn_marker, frame / 60);
   const f = name && ui.frames[name];
   if (f) r.sprite(ui, f, actor.cx, actor.top - 6);

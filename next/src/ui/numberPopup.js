@@ -26,8 +26,8 @@ const WORD_ABOVE = 12;    // px between a number's bottom and its word's bottom 
 const ATTACH_WINDOW = 12; // a word attaches to a number spawned at most this many frames earlier
 const NUM_H = { num: 11, num_big: 15 };
 const WORD_H = { BREAK: 16 };
-const KIND_FONT = { crit: 'num_big', big: 'num_big' };
-const KIND_COLOR = { damage: 'white', white: 'white', crit: 'crit', heal: 'heal', mp: 'mp', poison: 'poison', gray: 'gray' };
+const KIND_FONT = { crit: 'num_big', big: 'num_big', partyhit: 'num_big' };
+const KIND_COLOR = { partyhit: 'white', damage: 'white', white: 'white', crit: 'crit', heal: 'heal', mp: 'mp', poison: 'poison', gray: 'gray' };
 
 export class NumberPopups {
   constructor() { this.list = []; this.groups = []; }

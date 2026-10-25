@@ -524,7 +524,7 @@ export class BattleScene {
       case 'help': this.setHelp(op.text, op.color); return false;
       case 'pose': if (a && !a.ko) a.setPose(op.pose); return false;
       case 'flash': if (a) a.flash = { color: op.color || '#fff', frames: Math.max(1, Math.round(op.frames / this.speed)), total: op.frames, hold: !!op.hold, soft: !!op.soft }; return false;
-      case 'number': if (a && !this.fast) this.pops.spawn(a.cx, a.cy - (op.small ? 16 : 0), 0, { text: op.text, kind: op.big ? 'crit' : op.variant === 'white' ? 'damage' : op.variant, delay: op.small ? 6 : 0 }); return false;
+      case 'number': if (a && !this.fast) this.pops.spawn(a.cx, a.cy - (op.small ? 16 : 0), 0, { text: op.text, kind: op.big ? 'crit' : op.variant === 'white' ? (a.side === 'party' && !op.small ? 'partyhit' : 'damage') : op.variant, delay: op.small ? 6 : 0 }); return false;
       case 'word': if (a && !this.fast) this.pops.word(a.cx, a.cy - 10, op.word); return false;
       case 'fx': {
         if (this.fast) { if (op.kind === 'reveal' || op.kind === 'hit_spark') this.rowShow.set(op.uid, 90); return false; }
