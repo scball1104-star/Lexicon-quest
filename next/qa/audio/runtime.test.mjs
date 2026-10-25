@@ -252,3 +252,42 @@ test('volumes clamp and apply to the buses', async () => {
   h.a.setMuted(false);
   h.a.stopAll();
 });
+
+// ------------------------------------------------------------------ per-episode sfx packs
+test('sfx packs: boot loads core only; a pack loads on demand; a missing id or pack never throws or logs an error', async () => {
+  const fetched = [];
+  const savedFetch = globalThis.fetch;
+  const errs = [];
+  const savedErr = console.error;
+  console.error = (...a) => errs.push(a);
+  DUR['pk.wav'] = 0.3; DUR['pk2.wav'] = 0.4;
+  globalThis.fetch = async (url) => { fetched.push(String(url).split('/').pop()); return savedFetch(url); };
+  const man = JSON.parse(JSON.stringify(MANIFEST));
+  man.sfx.big = { src: 'pk.wav', volume: 1, pack: 'ep3', fallback: 'cursor' };
+  man.sfx.gone = { src: 'missing_pack_file.wav', volume: 1, pack: 'ep2' };
+  man.sfx.cursor.pack = 'core';
+  man.packs = { ep3: { sfx: ['big'] }, ep2: { sfx: ['gone'] } };
+  let ctx;
+  const a = createAudio({ autoUnlock: false, contextFactory: () => (ctx = new FakeContext()), log: () => {} });
+  await a.init(man);
+  await tick();
+  assert.ok(!fetched.includes('pk.wav'), 'an ep3 sfx is NOT fetched at boot');
+  await a.unlock();
+  await tick();
+  assert.ok(fetched.includes('cursor.wav'), 'core sfx are decoded at unlock');
+  assert.ok(!fetched.includes('pk.wav'), 'an ep3 sfx is not fetched at unlock either');
+  // before the pack arrives: no throw, no handle, the fallback plays instead
+  assert.doesNotThrow(() => a.sfx('big'));
+  await tick();
+  assert.ok(fetched.includes('pk.wav'), 'the first sound from an unknown pack requests the whole pack');
+  assert.ok(a.sfx('big'), 'once loaded it plays');
+  // an explicit pack load, a pack that fails to load, an unknown pack and an unknown id
+  await a.preload(['pack:ep2', 'pack:nope']);
+  assert.doesNotThrow(() => a.sfx('gone'));
+  assert.equal(a.sfx('gone'), null, 'a pack file that 404s is skipped quietly');
+  assert.equal(await a.loadPack('core'), undefined);
+  assert.equal(a.sfx('not_in_the_manifest'), null);
+  assert.equal(errs.length, 0, 'nothing is logged with console.error');
+  console.error = savedErr;
+  globalThis.fetch = savedFetch;
+});

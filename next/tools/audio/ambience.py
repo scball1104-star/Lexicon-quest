@@ -295,3 +295,68 @@ def court_hush(n, g):
     d = np.abs(np.diff(np.concatenate([y, y[:1]])))
     smooth = np.convolve(d, np.ones(64) / 64, mode="same")
     return np.roll(y, -int(np.argmin(smooth[: n // 2])))
+
+
+# ----------------------------------------------------------------------------- Episode 3 (E3-audio)
+@amb("forge_rumble", "The Ashen Foundry: a low furnace drone (a whole-cycle 55 Hz and fifth), a bed of distant "
+     "hammering on an anvil far down a stone hall (two strikes then a pause, softened by a big room), and slow "
+     "steam venting as a breathy hiss. Heavy, warm, never loud.", 10.0, out_sr=16000)
+def forge_rumble(n, g):
+    idx = np.arange(n)
+
+    def tone(f, amp):
+        return amp * np.sin(2 * np.pi * idx * round(f * n / SR) / n)
+
+    sw = 0.7 + 0.3 * periodic_lfo(n, g, 0.18)
+    drone = (tone(55.0, 0.09) + tone(82.5, 0.04) + tone(110.0, 0.03)) * sw
+    furnace = circ_noise(n, g, -6.0, 30, 220, 3) * (0.8 + 0.2 * periodic_lfo(n, g, 0.25))
+    furnace = furnace / (np.std(furnace) + 1e-12)
+    # steam vents: two slow breaths of band noise
+    steam = np.zeros(n)
+    for at, dur in ((2.3, 1.6), (7.1, 1.9)):
+        k = ns(dur)
+        x = circ_noise(k, g, -1.0, 1800, 6500)[:k] * np.sin(np.linspace(0, np.pi, k)) ** 2
+        place(steam, x, ns(at), 0.5)
+    # distant hammering: pairs of strikes
+    ham = np.zeros(n)
+    for at in (0.8, 1.35, 4.4, 4.95, 5.5, 8.3, 8.85):
+        k = ns(0.5)
+        tt = np.arange(k) / SR
+        f = g.uniform(640, 760)
+        hit = (np.sin(2 * np.pi * f * tt) + 0.5 * np.sin(2 * np.pi * f * 2.76 * tt) + 0.25 * np.sin(2 * np.pi * f * 5.4 * tt)) * np.exp(-tt / 0.09)
+        place(ham, hit, ns(at + g.uniform(-0.03, 0.03)), g.uniform(0.7, 1.0))
+    ham = fft_band(ham, None, 3200, 2)
+    wet = circ_reverb(ham, 3.4, 0.07, 0.3, seed=31)
+    ham_ev = (ham * 0.15 + wet * 1.3) * 3.0
+    hum = drone / (np.std(drone) + 1e-12) * 0.5
+    steam_n = steam / (np.std(steam) + 1e-12) * 0.18
+    STEMS["forge_rumble"] = dict(furnace=furnace, drone=hum, steam=steam_n, hammer=ham_ev)
+    y = furnace + hum + steam_n + ham_ev
+    d = np.abs(np.diff(np.concatenate([y, y[:1]])))
+    smooth = np.convolve(d, np.ones(64) / 64, mode="same")
+    return np.roll(y, -int(np.argmin(smooth[: n // 2])))
+
+
+@amb("ash_wind", "Ash wind over Emberpeak and the old sand road: dry, thin and low, a hollow breath with slow gusts, "
+     "a faint hiss of grit, and a very sparse crackle of embers far away. No events, so it never sounds repeated.",
+     10.0, out_sr=16000)
+def ash_wind(n, g):
+    gust = np.clip(0.5 + 0.5 * periodic_lfo(n, g, 0.3), 0, 1)
+    src = circ_noise(n, g, -2.0)
+    center = 300 + 420 * gust + 50 * periodic_lfo(n, g, 1.0)
+    body = tv_filter_periodic(src, "bp", center, 1.1) * (0.3 + 0.7 * gust)
+    grit = circ_noise(n, g, 0.0, 3000, 7000) * (0.15 + 0.85 * gust ** 2) * 0.5
+    low = circ_noise(n, g, -6.0, 30, 150) * (0.5 + 0.5 * gust) * 0.5
+    emb = np.zeros(n)
+    for at in (1.7, 3.1, 3.25, 5.9, 8.2, 8.6):
+        k = ns(0.03)
+        tt = np.arange(k) / SR
+        emb_hit = np.sin(2 * np.pi * g.uniform(2200, 4200) * tt) * np.exp(-tt / 0.004) * g.uniform(0.4, 1.0)
+        place(emb, emb_hit, ns(at), 0.4)
+    parts = dict(body=body / (np.std(body) + 1e-12), grit=grit / (np.std(grit) + 1e-12) * 0.1,
+                 low=low / (np.std(low) + 1e-12) * 0.3, embers=emb * 0.35)
+    STEMS["ash_wind"] = parts
+    y = sum(parts.values())
+    d = np.abs(np.diff(np.concatenate([y, y[:1]])))
+    smooth = np.convolve(d, np.ones(64) / 64, mode="same")
+    return np.roll(y, -int(np.argmin(smooth[: n // 2])))

@@ -21,9 +21,11 @@ const DESIGN_SFX = `cursor confirm cancel buzzer text_blip door_open door_close 
 const STORY_SFX = 'bell_toll bell_peal sign_fade name_restore door_rumble ink_gurgle page_flutter'.split(' ');
 // Episode 2 (EPISODE2_PLAN.md 2.7 / 8.4)
 const EP2_SFX = 'mirror_turn beam_hit glass_bridge glass_break mirror_step ferry_oars clock_chime reflection_out kept kept_break'.split(' ');
+// Episode 3 (EPISODE3_PLAN.md 8.4): the ep3 pack. Each has a core fallback for the moment before the pack arrives.
+const EP3_SFX = 'quench_hiss sluice_turn water_flow wheel_turn anvil_strike bell_first furnace_roar hammer_charge oath_ring lift_rumble'.split(' ');
 const JINGLES = 'item_get key_item level_up inn_rest save quest_done party_join victory_fanfare gameover_sting'.split(' ');
-const AMBIENCE = 'river_birds archive_hush wind_valley mere_still court_hush'.split(' ');
-const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover hollow hollowmere fading_road court boss_king'.split(' ');
+const AMBIENCE = 'river_birds archive_hush wind_valley mere_still court_hush forge_rumble ash_wind'.split(' ');
+const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover hollow hollowmere fading_road court boss_king emberpeak first_bell ash_road foundry boss_warden'.split(' ');
 
 function parseWav(path) {
   const b = readFileSync(path);
@@ -72,7 +74,7 @@ test('manifest has the four sections and version', () => {
 });
 
 test('every id the design and the story need is present', () => {
-  for (const id of [...DESIGN_SFX, ...STORY_SFX, ...EP2_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
+  for (const id of [...DESIGN_SFX, ...STORY_SFX, ...EP2_SFX, ...EP3_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
   for (const id of JINGLES) assert.ok(man.jingles[id], `jingle ${id}`);
   for (const id of AMBIENCE) assert.ok(man.ambience[id], `ambience ${id}`);
   for (const id of MUSIC) assert.ok(man.music[id], `music ${id}`);
@@ -166,13 +168,14 @@ test('music: files exist, fallbacks valid, loop points sane, new music files are
 test('total synthesized audio stays small', () => {
   // Episode 1 set ~4.7 MB; Episode 2 adds ~0.36 MB of sfx and two 16 kHz ambience loops (~0.64 MB, runtime-cached,
   // not precached), so the cap moved from 5.5 to 6.0 MB. The precached share (sfx + jingles) has its own budget in
-  // qa/pwa/precache.test.mjs.
+  // qa/pwa/precache.test.mjs. Episode 3 adds ~0.8 MB of sfx (pack ep3, fetched on first entry, never precached) and
+  // two 16 kHz ambience loops (~0.6 MB, runtime-cached), so the cap moved from 6.0 to 7.5 MB.
   let total = 0;
   for (const sub of ['sfx', 'jingles', 'ambience']) {
     const d = join(NEXT, 'assets/audio', sub);
     for (const f of readdirSync(d)) total += statSync(join(d, f)).size;
   }
-  assert.ok(total < 6.0e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  assert.ok(total < 7.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
 test('Episode 2 music: the five composed tracks have fallbacks and sidecar loop points', () => {
@@ -186,4 +189,39 @@ test('Episode 2 music: the five composed tracks have fallbacks and sidecar loop 
     assert.ok(e.loopEnd > 60 && e.loopEnd <= e.duration, `${id}: loopEnd`);
     assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.3, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
   }
+});
+
+test('Episode 3 sfx: the ten ids are in pack ep3 with a core fallback; the pack list matches the entries', () => {
+  for (const id of EP3_SFX) {
+    const e = man.sfx[id];
+    assert.ok(e, `sfx ${id}`);
+    assert.equal(e.pack, 'ep3', `${id} is in pack ep3`);
+    const fb = man.sfx[e.fallback];
+    assert.ok(fb && (fb.pack || 'core') === 'core', `${id} falls back to a core sfx (got ${e.fallback})`);
+  }
+  assert.deepEqual([...man.packs.ep3.sfx].sort(), [...EP3_SFX].sort(), 'manifest.packs.ep3 lists exactly the ep3 sfx');
+  for (const [id, e] of Object.entries(man.sfx)) {
+    if (e.alias) continue;
+    if (e.pack && e.pack !== 'core') assert.ok(man.packs[e.pack].sfx.includes(id), `${id} is listed in manifest.packs.${e.pack}`);
+  }
+});
+
+test('bell_first: long decay, low, and slightly flat of D3 (Ilya says it is flat)', () => {
+  const e = man.sfx.bell_first;
+  assert.ok(e.duration >= 4.5, `long decay, got ${e.duration}s`);
+  const w = parseWav(abs(srcs(e)[0]));
+  // find the strongest spectral peak between 120 and 170 Hz with a brute-force DFT over 1.4 s
+  const n = Math.min(w.samples.length - 2205, Math.floor(w.rate * 1.4)), off = Math.floor(w.rate * 0.1);
+  let best = 0, bf = 0;
+  for (let f = 130; f <= 160; f += 0.25) {
+    let re = 0, im = 0;
+    for (let i = 0; i < n; i += 2) {
+      const win = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n), x = w.samples[off + i] * win, ph = (2 * Math.PI * f * i) / w.rate;
+      re += x * Math.cos(ph); im += x * Math.sin(ph);
+    }
+    const m = re * re + im * im;
+    if (m > best) { best = m; bf = f; }
+  }
+  const cents = 1200 * Math.log2(bf / 146.83);
+  assert.ok(cents < -15 && cents > -60, `prime ${bf} Hz is ${cents.toFixed(0)} cents from D3, expected 15 to 60 flat`);
 });

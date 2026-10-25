@@ -18,7 +18,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '80da5cb9e64d';
+const SHELL_VERSION = 'bfde85a9a3f1';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -254,7 +254,6 @@ const PRECACHE = [
   'assets/backdrops/title.png',
   'assets/audio/sfx/axe_chop_1.wav',
   'assets/audio/sfx/axe_chop_2.wav',
-  'assets/audio/sfx/beam_hit.wav',
   'assets/audio/sfx/bell_peal.wav',
   'assets/audio/sfx/bell_toll.wav',
   'assets/audio/sfx/block_push.wav',
@@ -269,7 +268,6 @@ const PRECACHE = [
   'assets/audio/sfx/buzzer.wav',
   'assets/audio/sfx/cancel.wav',
   'assets/audio/sfx/chest_open.wav',
-  'assets/audio/sfx/clock_chime.wav',
   'assets/audio/sfx/coin.wav',
   'assets/audio/sfx/combo_start.wav',
   'assets/audio/sfx/confirm.wav',
@@ -292,7 +290,6 @@ const PRECACHE = [
   'assets/audio/sfx/enemy_die.wav',
   'assets/audio/sfx/equip.wav',
   'assets/audio/sfx/fall.wav',
-  'assets/audio/sfx/ferry_oars.wav',
   'assets/audio/sfx/fire.wav',
   'assets/audio/sfx/flee.wav',
   'assets/audio/sfx/footstep_grass_1.wav',
@@ -308,7 +305,6 @@ const PRECACHE = [
   'assets/audio/sfx/fury_ready.wav',
   'assets/audio/sfx/gate_open.wav',
   'assets/audio/sfx/glass_break.wav',
-  'assets/audio/sfx/glass_bridge.wav',
   'assets/audio/sfx/heal.wav',
   'assets/audio/sfx/hit_heavy_1.wav',
   'assets/audio/sfx/hit_heavy_2.wav',
@@ -326,15 +322,12 @@ const PRECACHE = [
   'assets/audio/sfx/level_up_sparkle.wav',
   'assets/audio/sfx/menu_close.wav',
   'assets/audio/sfx/menu_open.wav',
-  'assets/audio/sfx/mirror_step.wav',
-  'assets/audio/sfx/mirror_turn.wav',
   'assets/audio/sfx/miss.wav',
   'assets/audio/sfx/name_devour.wav',
   'assets/audio/sfx/name_restore.wav',
   'assets/audio/sfx/page_flutter.wav',
   'assets/audio/sfx/poison.wav',
   'assets/audio/sfx/pot_break.wav',
-  'assets/audio/sfx/reflection_out.wav',
   'assets/audio/sfx/revive.wav',
   'assets/audio/sfx/save_chime.wav',
   'assets/audio/sfx/shelf_move.wav',

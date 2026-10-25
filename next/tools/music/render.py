@@ -23,7 +23,8 @@ NEXT = os.path.dirname(os.path.dirname(HERE))
 MUSIC_DIR = os.path.join(NEXT, 'assets', 'audio', 'music')
 OUT_DIR = os.path.join(HERE, 'out')
 ALL = ['archive', 'mystery', 'sorrow', 'triumph',
-       'hollow', 'hollowmere', 'fading_road', 'court', 'boss_king']   # Episode 2: the last five
+       'hollow', 'hollowmere', 'fading_road', 'court', 'boss_king',   # Episode 2
+       'emberpeak', 'first_bell', 'ash_road', 'foundry', 'boss_warden']   # Episode 3: the last five
 
 
 def main(argv):

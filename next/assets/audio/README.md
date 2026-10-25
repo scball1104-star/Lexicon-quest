@@ -41,6 +41,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Doors and stairs | `door_open` when entering, `door_close` after the fade, `stairs` on stair exits, `door_locked` without a key, `door_unlock` with one |
 | Dungeon toolkit | `block_push` per tile, `switch_on` / `switch_off`, `gate_open`, `crystal_hit`, `bridge_appear`, `lantern_reveal`, `brazier_light`, `shelf_move`, `jump` + `land` on ledges, `fall` into pits, `splash`, `pot_break` |
 | Silverglass (Episode 2) | `mirror_turn` when a mirror rotates, `beam_hit` when a receptor first lights, `glass_bridge` as bridge cells light, `glass_break` for a Dash through a pane or the great mirror cracking, `mirror_step` through a mirror door, `ferry_oars` on Tovin's ferry, `clock_chime` for Lena's clocktower |
+| Foundry and Emberpeak (Episode 3, pack `ep3`) | `quench_hiss` slag cools or a foe is quenched, `sluice_turn` / `water_flow` / `wheel_turn` the water puzzle, `anvil_strike` an oath anvil, `bell_first` the First Bell (slightly flat of D), `furnace_roar` the Heartforge, `hammer_charge` the Last Hammer telegraph, `oath_ring` Tempered Oath, `lift_rumble` ore lifts; ambience `forge_rumble` (foundry), `ash_wind` (the road and Emberpeak) |
+| Packs | Every sfx has a `pack` in the manifest: `core` (precached, loaded at boot), `ep2` and `ep3` (fetched by `audio.preload(['pack:ep3'])` when that episode is first entered: a title Episode pick, a save in that episode, or its first map; runtime-cached by the service worker). A pack id that has not arrived is skipped quietly or plays its `fallback` (a core sfx) |
 | Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`, the Nameless King: `pushMusic('boss_king')`) |
 | Attacks | swing (`sword_slash`, `spear_thrust`, `staff_hit`, `axe_chop`, `bow_shot`) at the wind-up, then `hit_light` / `hit_heavy` / `crit` / `miss` on contact; `defend` for guards and blocked hits |
 | Spells and states | `fire`, `ice`, `thunder`, `heal`, `revive`, `item_use`, `buff`, `debuff`, `poison`, `stun`; `break` when shields hit 0; `fury_ready` when the gauge fills, `fury_art` on use; `combo_start`; `telegraph` when a big move is announced |
@@ -116,6 +118,11 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `glass_break` | 591 ms | 1 | A pane shatters (Dash through a glass pane; the great mirror cracking): a sharp crack, a dense spray of glass shards and a tinkling tail of falling slivers. |
 | `mirror_step` | 425 ms | 1 | Stepping through a mirror door: a quick whoosh through a shimmering comb of glassy resonances, a soft swish in and out. |
 | `ferry_oars` | 968 ms | 1 | Tovin's ferry: two slow oar strokes (a wooden oarlock knock, the blade pulling through water with a swirl and small bubbles), the second a little softer. |
+| `quench_hiss` | 709 ms | 1 | Slag cools / a foe is quenched: a sharp hiss of steam with a crackle of cooling metal, about 0.7 s. |
+| `sluice_turn` | 623 ms | 1 | A sluice paddle turns: a wooden clunk of the crank and a water slosh as the gate lifts. |
+| `water_flow` | 1.29 s | 1 | Water starts running in a trough: a short rush that settles to a gentle trickle, about 1.3 s. |
+| `wheel_turn` | 1.20 s | 1 | The waterwheel starts: a long wooden creak, then two slow clacks of the paddles. |
+| `lift_rumble` | 1.62 s | 1 | Ore lifts: a chain rattle (links running over a drum) over a low rumble, about 1.6 s. |
 
 ### Story moments
 
@@ -166,6 +173,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `fury_ready` | 1.22 s | 1 | Fury gauge full: a charging PWM sweep rising 200 Hz to 1.6 kHz with quickening tremolo, then a bright C7 ding. |
 | `combo_start` | 1.02 s | 1 | Combo tech begins (two or three heroes act together): two bright 'ching' pings (E6, B6) that then ring together over a rising swirl. |
 | `level_up_sparkle` | 1.05 s | 1 | Sparkles over a hero who levels up (under the level_up jingle): glitter of random 2 to 8 kHz pings thinning out, after a small upward swish. |
+| `hammer_charge` | 1.67 s | 1 | The Last Hammer telegraph: a rising metallic whine that tightens to a ringing point, about 1.4 s. |
+| `oath_ring` | 1.75 s | 1 | Tempered Oath turns the hammer: a bell-like clang with a shimmer of high partials over a warm low ring. |
 
 ### Battle: status effects
 
@@ -189,6 +198,9 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `telegraph` | 1.33 s | 1 | Danger telegraph (an enemy readies a big move one turn ahead): an ominous low tritone swell (detuned saws), a reversed-cymbal rush and a heartbeat double-thump. |
 | `break` | 632 ms | 1 | Shield BREAK (weakness hits removed every shield): glass-shatter noise with dozens of shards, a falling metallic 'pshing' and a deep thump. Must feel like a reward. |
 | `fury_art` | 1.23 s | 1 | Fury art unleashed: sub boom and rising rush into a bright brass-like C major chord stab with a crash and a long room. |
+| `anvil_strike` | 1.52 s | 1 | A clean ringing anvil hit: a hard hammer click, the steel ring of the face and a long ring of the horn. |
+| `bell_first` | 5.93 s | 1 | The First Bell: a very large bronze bell, struck once, long decay, about 35 cents flat of D so Ilya's line is true. Hum an octave below, minor-third tierce, slow beating. |
+| `furnace_roar` | 2.00 s | 1 | The Heartforge, the hottest furnace: a low roar that swells and holds, about 2 s, a rasp of flame on top. |
 
 ### Loot drops (rarity)
 
@@ -222,6 +234,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `wind_valley` | 10.00 s | Open valley wind: a broad breathy bed with slow gusts, a faint whistling resonance that rises with each gust, and dry grass rustling on the strongest gusts. No events, so it never sounds repetitive. |
 | `mere_still` | 10.00 s | The Hollow by the still mere: slow water lapping at the stones (soft swells with small wet slaps and plops), a distant cluster of wind chimes once per loop, a faint high air, and one far-off bird. Hushed and a little lonely; nothing moves fast. |
 | `court_hush` | 10.00 s | The Court of Mirrors: a cold, still palace of glass. A faint glass hum (a wet-finger-on-a-rim tone around A5 with a slowly beating partner and a fifth), a low room tone, and slow drips falling into a very large space, each one a small glassy ping. Beautiful and uneasy, never loud. |
+| `forge_rumble` | 10.00 s | The Ashen Foundry: a low furnace drone (a whole-cycle 55 Hz and fifth), a bed of distant hammering on an anvil far down a stone hall (two strikes then a pause, softened by a big room), and slow steam venting as a breathy hiss. Heavy, warm, never loud. |
+| `ash_wind` | 10.00 s | Ash wind over Emberpeak and the old sand road: dry, thin and low, a hollow breath with slow gusts, a faint hiss of grit, and a very sparse crackle of embers far away. No events, so it never sounds repeated. |
 
 ## Music ids
 
@@ -243,6 +257,11 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `fading_road` | assets/audio/music/fading_road.mp3 | valley |
 | `court` | assets/audio/music/court.mp3 | archive |
 | `boss_king` | assets/audio/music/boss_king.mp3 | boss_archivore |
+| `emberpeak` | assets/audio/music/emberpeak.mp3 | hollow |
+| `first_bell` | assets/audio/music/first_bell.mp3 | hollowmere |
+| `ash_road` | assets/audio/music/ash_road.mp3 | fading_road |
+| `foundry` | assets/audio/music/foundry.mp3 | court |
+| `boss_warden` | assets/audio/music/boss_warden.mp3 | boss_king |
 
 ## Regenerate and check
 

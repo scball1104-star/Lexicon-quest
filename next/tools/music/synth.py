@@ -768,6 +768,107 @@ class Snare(Instrument):
         return normalize(v, 0.5 * (0.35 + 0.65 * vel))
 
 
+# --------------------------------------------------------------------------------------
+# Episode 3 additions (E3-audio)
+# --------------------------------------------------------------------------------------
+
+class Dulcimer(Instrument):
+    """Hammered dulcimer: each note is a pair of slightly detuned struck strings (a choir of two), bright hammer
+    click, a short ring. Close-miked and dry: it is the measured, plain voice of the town before the bell."""
+    name = 'dulcimer'
+    release = 1.0
+
+    def __init__(self, decay=1.5, brightness=0.8):
+        self.decay = decay
+        self.brightness = brightness
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(min(self.max_len, max(gate_s, 0.5) + self.release) * sr)
+        a = karplus_strong(f0 * 0.9993, n, sr, rng, decay_t=self.decay * (0.7 + 0.3 * vel), brightness=self.brightness,
+                           vel=vel, pick_pos=0.14)
+        b = karplus_strong(f0 * 1.0011, n, sr, rng, decay_t=self.decay * (0.7 + 0.3 * vel), brightness=self.brightness,
+                           vel=vel, pick_pos=0.19)
+        v = a + b
+        t = np.arange(n) / sr
+        v = v + filt(noise(n, rng), 'hp', 4000, sr) * np.exp(-t / 0.003) * 0.12
+        v = filt(v, 'peak', 2600, sr, q=0.9, gain_db=2.5)
+        return normalize(v, 0.5 * (0.45 + 0.55 * vel))
+
+
+class Anvil(Instrument):
+    """An anvil strike: hard hammer transient and a ringing steel face with inharmonic partials. The pitch of the
+    note tunes the ring (c6 is about 1 kHz); duration is ignored, it rings by itself."""
+    name = 'anvil'
+    release = 1.2
+    max_len = 2.6
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(1.8 * sr)
+        t = np.arange(n) / sr
+        v = np.zeros(n)
+        for r, a, tau in ((1.0, 1.0, 0.45), (2.76, 0.6, 0.3), (5.40, 0.38, 0.18), (8.93, 0.2, 0.1), (13.3, 0.1, 0.05)):
+            f = f0 * r
+            if f < sr * 0.45:
+                v += a * np.sin(TWO_PI * f * t + rng.uniform(0, TWO_PI)) * np.exp(-t / tau)
+        click = filt(noise(n, rng), 'hp', 2200, sr) * np.exp(-t / 0.004)
+        thump = np.sin(TWO_PI * 150 * t) * np.exp(-t / 0.025) * 0.6
+        v = v * 0.6 + click * 0.8 + thump
+        v *= (1 - np.exp(-t / 0.0005))
+        v = filt(v, 'lp', 9000, sr, 0.7)
+        v = fade_edges(v, sr, 0.2, 50.0)
+        return normalize(v, 0.5 * (0.4 + 0.6 * vel))
+
+
+class Fiddle(Instrument):
+    """Bowed fiddle lead: two detuned saws, a body formant around 1.1 kHz and 2.4 kHz, bow noise on the attack,
+    delayed vibrato. Rougher than the oboe, warmer than the strings."""
+    name = 'fiddle'
+    release = 0.14
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.035, 0.1, 0.92, self.release)
+        n = env.shape[0]
+        f = vibrato(n, sr, f0, rate=5.8, depth_semi=0.16 * (0.6 + 0.4 * vel), delay=0.2, ramp=0.35)
+        v = osc('saw', f, sr) + 0.8 * osc('saw', f * 1.0035, sr, phase0=0.37)
+        v = filt(v, 'lp', 2600 + 1400 * vel + f0, sr, 0.75)
+        v = v + 0.55 * filt(v, 'bp', 1100, sr, q=2.5) + 0.35 * filt(v, 'bp', 2450, sr, q=3.0)
+        t = np.arange(n) / sr
+        bow = filt(noise(n, rng), 'bp', 3200, sr, q=1.0) * (0.06 + 0.1 * np.exp(-t / 0.05))
+        v = (v + bow) * env
+        return normalize(v, 0.5 * (0.5 + 0.5 * vel))
+
+
+class Whistle(Instrument):
+    """Low whistle (Irish style): a nearly pure sine with a husky breath band and a late, shallow vibrato."""
+    name = 'whistle'
+    release = 0.2
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.09, 0.15, 0.9, self.release)
+        n = env.shape[0]
+        f = vibrato(n, sr, f0, rate=4.6, depth_semi=0.08, delay=0.45, ramp=0.5)
+        v = osc('sine', f, sr) + 0.12 * osc('sine', f * 2, sr, phase0=0.3) + 0.04 * osc('sine', f * 3, sr)
+        breath = filt(noise(n, rng), 'bp', f0 * 2.2, sr, q=1.8) * (0.1 + 0.12 * vel)
+        return normalize((v + breath) * env, 0.5 * (0.5 + 0.5 * vel))
+
+
+class Steam(Instrument):
+    """A valve hiss: shaped band noise. The gate is the length of the hiss; the pitch moves the band."""
+    name = 'steam'
+    release = 0.25
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.04, 0.2, 0.55, self.release)
+        n = env.shape[0]
+        v = filt(noise(n, rng), 'bp', min(9000.0, f0 * 6.0), sr, q=0.7)
+        v = v + 0.5 * filt(noise(n, rng), 'hp', 5000, sr)
+        return normalize(v * env, 0.5 * (0.3 + 0.7 * vel))
+
+
+
 def make(name, **kw):
     """Instrument factory by short name used in song files."""
     table = {
@@ -798,5 +899,11 @@ def make(name, **kw):
         'harpsichord': lambda: Harpsichord(),
         'brass': lambda: Brass(**kw),
         'snare': lambda: Snare(),
+        # Episode 3
+        'dulcimer': lambda: Dulcimer(**kw),
+        'anvil': lambda: Anvil(),
+        'fiddle': lambda: Fiddle(),
+        'whistle': lambda: Whistle(),
+        'steam': lambda: Steam(),
     }
     return table[name]()

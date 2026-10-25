@@ -1,4 +1,4 @@
-# Suno prompts for Episodes 1 and 2 (optional upgrade)
+# Suno prompts for Episodes 1 to 3 (optional upgrade)
 
 Suno cannot be driven from the Claude app's built-in browser (Cloudflare's human check fails there), so the
 game ships with code-composed music for these cues. If you get a few minutes with Suno on your phone or laptop,
@@ -32,6 +32,22 @@ hollowmere and boss_king cues are one tune in three guises), and remember a Suno
 | `fading_road.mp3` | The Fading Road | pastoral travel theme turning misty, flute and pizzicato, glass bells, 96 BPM |
 | `court.mp3` | The Court of Mirrors | mysterious palace of mirrors, celesta and harp in canon, low string pedal, 76 BPM, cold and beautiful |
 | `boss_king.mp3` | The Nameless King | tragic boss battle in 6/8, harpsichord ostinato, brass and choir, a lullaby turned into a march, 132 BPM |
+
+## Episode 3 (same shared style line)
+
+All five ship as code-composed tracks (`docs/MUSIC.md`, Episode 3). A Suno file dropped at the same name replaces the
+composed one after `python tools/audio/build.py --manifest`. The cues share the First Bell theme (the name motif, the
+fourth note on a bell in `first_bell`, a rest in `emberpeak`), so if you generate them keep that bell in
+`first_bell` and the rest where the bell belongs in `emberpeak`. `emberpeak.mp3` uses the root region-3 prompt
+(`SUNO_TRACKS.json`, id `region-3`).
+
+| File | Title | Styles (after the shared line) |
+|---|---|---|
+| `emberpeak.mp3` | Bellows Square | the root region-3 prompt, muted: low strings, hammered dulcimer, measured anvil percussion, brass held back, a toll on the downbeat that never comes, D minor, 104 BPM |
+| `first_bell.mp3` | The First Bell | triumphant town theme, brass and choir with a great bell on every downbeat, 104 BPM |
+| `ash_road.mp3` | The Old Sand Road | travel theme, fiddle and low whistle over a cart-wheel rhythm, ash-grey harmony warming to amber, A minor to C major, 100 BPM |
+| `foundry.mp3` | The Ashen Foundry | industrial fantasy dungeon, anvil and steam percussion, low brass, cold flute, 88 BPM |
+| `boss_warden.mp3` | The Cinder Warden | boss battle in 7/8, anvil strikes, brass, timpani, choir, a bell motif in minor, 144 BPM |
 
 Already in place and fine to keep: `title.mp3` (The Dawn of Aethelgard), `town.mp3`, `battle.mp3`, `boss.mp3`,
 `region-1.mp3` in the root `assets/audio/` folder.

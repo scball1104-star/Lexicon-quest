@@ -42,14 +42,56 @@ test('precache: every file the game manifest loads is precached, or is a runtime
   }
 });
 
-test('audio manifest: sfx and jingle files are precached, music outside next/ is runtime-cached', () => {
+test('audio manifest: core sfx and jingles are precached, pack sfx and music are runtime-cached', () => {
   const a = readJson('assets/audio/manifest.json');
-  const srcs = (section) => Object.values(a[section] || {}).flatMap((e) => [].concat(e.src || e.srcs || e.variants || []).map((v) => (typeof v === 'string' ? v : v && v.src)).filter(Boolean));
-  for (const s of [...srcs('sfx'), ...srcs('jingles')]) {
+  const srcs = (entries) => entries.flatMap((e) => [].concat(e.src || e.srcs || e.variants || []).map((v) => (typeof v === 'string' ? v : v && v.src)).filter(Boolean));
+  const sfx = Object.values(a.sfx || {});
+  for (const s of [...srcs(sfx.filter((e) => (e.pack || 'core') === 'core')), ...srcs(Object.values(a.jingles || {}))]) {
     if (s.startsWith('..')) continue;
     assert.ok(sw.entries.includes(path.posix.normalize(s)), `audio file not precached: ${s}`);
   }
-  for (const s of srcs('music')) assert.ok(s.startsWith('..') || !sw.entries.includes(s), `music must not be precached: ${s}`);
+  for (const s of srcs(sfx.filter((e) => (e.pack || 'core') !== 'core'))) {
+    assert.ok(exists(s), `pack sfx file exists: ${s}`);
+    assert.ok(!sw.entries.includes(s), `episode pack sfx must not be precached (lazy, runtime-cached): ${s}`);
+  }
+  for (const s of srcs(Object.values(a.music || {}))) assert.ok(s.startsWith('..') || !sw.entries.includes(s), `music must not be precached: ${s}`);
+});
+
+test('sfx packs: every pack is declared, loadable by the engine, and every sfx id the code references resolves', () => {
+  const a = readJson('assets/audio/manifest.json');
+  const audioSrc = read('src/core/audio.js');
+  assert.match(audioSrc, /function loadPack\(/, 'the audio engine can load a pack');
+  const declared = a.packs || {};
+  const packsUsed = new Set(Object.values(a.sfx).map((e) => e.pack).filter((p) => p && p !== 'core'));
+  for (const p of packsUsed) {
+    assert.ok(declared[p], `pack ${p} is listed in manifest.packs`);
+    for (const id of declared[p].sfx) assert.equal(a.sfx[id] && a.sfx[id].pack, p, `${id} belongs to pack ${p}`);
+  }
+  assert.ok(read('src/main.js').includes('pack:'), 'src/main.js asks for the packs when an episode is entered');
+  // Every sfx id named in src/ must exist and sit in core or in a declared pack (a missing one would be silent).
+  const ids = new Set();
+  const walk = (dir) => { for (const f of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
+    const rel = path.posix.join(dir, f.name);
+    if (f.isDirectory()) walk(rel);
+    else if (f.name.endsWith('.js')) {
+      const t = read(rel);
+      for (const m of t.matchAll(/sfx\(\s*['"]([a-z0-9_]+)['"]/g)) ids.add(m[1]);
+      for (const m of t.matchAll(/op:\s*'sfx',\s*id:\s*'([a-z0-9_]+)'/g)) ids.add(m[1]);
+      for (const m of t.matchAll(/sfx:\s*'([a-z0-9_]+)'/g)) ids.add(m[1]);
+    }
+  } };
+  walk('src');
+  assert.ok(ids.size > 40, `found ${ids.size} referenced sfx ids`);
+  const missing = [];
+  for (const id of ids) {
+    if (id === 'sfx' || id.endsWith('_')) continue;   // a template prefix or a property name, not an id
+    let e = a.sfx[id];
+    if (e && e.alias) e = a.sfx[e.alias];
+    if (!e) { missing.push(id); continue; }
+    const pack = e.pack || 'core';
+    if (pack !== 'core' && !declared[pack]) missing.push(`${id} (pack ${pack} unknown)`);
+  }
+  assert.deepEqual(missing, [], `sfx ids referenced in src/ with no manifest entry: ${missing.join(', ')}`);
 });
 
 test('lazy groups: valid ids, boot-critical art stays eager', () => {
@@ -77,7 +119,9 @@ test('load budget: before the tap prompt (wire bytes) and the whole initial down
   assert.ok(beforePrompt < 2.5 * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, budget 2.5 MB (about 2 s at 10 Mbps)`);
   // 6.5 MB since 2026-10-21 (was 6): Episode 2 added 0.3 MB of SFX (22 kHz mono WAV, already lean; MP3 would add
   // encoder-delay latency to UI clicks). Everything past the tap prompt downloads in the background after the title,
-  // so the felt budget above stays at 2.5 MB. Episode 3 must not raise this again: split audio into per-episode packs.
+  // so the felt budget above stays at 2.5 MB. Episode 3 may not raise this: sfx are split into per-episode packs
+  // (manifest sfx[].pack). Only 'core' is precached and loaded at boot; ep2/ep3 packs are fetched when that episode
+  // is entered and runtime-cached by the service worker, so they are not part of this initial download.
   assert.ok(initial < 6.5 * 1048576, `initial download ${mb(initial)} MB, budget 6.5 MB`);
 });
 

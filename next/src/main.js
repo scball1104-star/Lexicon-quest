@@ -80,6 +80,35 @@ function registerWorker() {
   navigator.serviceWorker.register(url, { scope }).then(watch, (e) => console.warn('[pwa] service worker not registered', e));
 }
 
+// ---------------------------------------------------------------- per-episode sfx packs
+// Only the 'core' sfx are precached and loaded at boot. The Episode 2 and 3 packs (manifest sfx[].pack) are fetched
+// the first time that episode's content is entered: a title Episode pick or a save in that episode (its flags or
+// map), or the first Episode 2/3 map or battle. Anything missing meanwhile is skipped quietly by the audio engine.
+const EP_MAPS = {
+  ep2: /^(east_road|nameless_hollow|nh_|whisperwood|court_)/,
+  ep3: /^(foundry|emberpeak|pk_|sand_road|carters_rest|ash_)/,
+};
+function watchEpisodePacks() {
+  const asked = new Set();
+  const want = (pack) => {
+    if (asked.has(pack)) return;
+    asked.add(pack);
+    try { engine.audio.preload([`pack:${pack}`]); } catch { /* audio is optional */ }
+  };
+  const check = () => {
+    const g = engine.game;
+    const map = (g && g.map) || '';
+    const flags = (g && g.flags) || {};
+    const q = params.get('ep');
+    if (q === '2' || q === '3') want(q === '3' ? 'ep3' : 'ep2');
+    if (flags.ep2_started || flags.ep2_complete || EP_MAPS.ep2.test(map)) want('ep2');
+    if (flags.ep3_started || flags.ep3_morning_done || EP_MAPS.ep3.test(map)) want('ep3');
+    // Episode 3 reuses Episode 2 sounds (glass, ferry) rarely; its pack is its own, so nothing else to chain.
+  };
+  engine.on('scene', check);
+  check();
+}
+
 async function main() {
   if (params.get('touch') === 'on' || params.get('touch') === 'off') {
     engine.settings.touchControls = params.get('touch');
@@ -93,6 +122,7 @@ async function main() {
   await engine.boot({ scenes: loadRegistry, gate: !debug && params.get('gate') !== '0' });
   if (debug && engine.lazyLoad) await engine.lazyLoad;   // deterministic QA: every lazy group is in before ready()
   engine.registryLoaded = true;
+  watchEpisodePacks();
   if (boot) boot.remove();
   if (!debug) setTimeout(registerWorker, 2500);
   if (params.has('speed')) engine.timeScale = Number(params.get('speed')) || 1;

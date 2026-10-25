@@ -1,4 +1,4 @@
-# MUSIC.md: the composed score (Episode 1 and Episode 2)
+# MUSIC.md: the composed score (Episodes 1 to 3)
 
 Four tracks were composed and rendered in code (SNES tracker style: sequenced notes played by
 synthesized instruments) because Suno cannot be driven from this machine. They live in
@@ -184,6 +184,89 @@ beats gently), piano_muted (the Piano through a felt lowpass with a shorter ring
 Episode 2 songs) trims the whole mix by the excess when inter-sample peaks of the delivered pass exceed -1 dBFS
 after the sample limiter; it is opt-in so Episode 1 renders keep their bytes (archive would trigger it by 0.01 dB).
 
+## Episode 3: five more tracks (E3-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated, true peak at or under -1 dBFS, 60 ms
+guard loops). Cue sheet: `docs/EPISODE3_PLAN.md` 8.1 to 8.3. Music stays lazy: it is runtime-cached, never precached.
+`tools/audio/build.py --manifest` wires the files, sidecar loop points and fallbacks into `assets/audio/manifest.json`.
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `emberpeak` | Bellows Square | D Dorian | 104, 4/4 | 32 | 0.060 s to 73.906 s | 74.01 s | `hollow` |
+| `first_bell` | The First Bell | D major | 104, 4/4 | 32 | 0.060 s to 73.906 s | 74.01 s | `hollowmere` |
+| `ash_road` | The Old Sand Road | A minor to C major | 100, 4/4 | 38 | 0.060 s to 91.260 s | 91.36 s | `fading_road` |
+| `foundry` | The Ashen Foundry | E Phrygian | 88, 4/4 | 32 | 0.060 s to 87.333 s | 87.43 s | `court` |
+| `boss_warden` | The Cinder Warden | C minor | 7/8, quarter = 144 (bar = 3.5 beats, grouped 2+2+3) | 80 | 0.060 s to 116.727 s | 116.83 s | `boss_king` |
+
+### The First Bell theme (`tools/music/songs/e3_theme.py`)
+`emberpeak`, `first_bell` and the bell section of `boss_warden` share one eight-bar tune, written once in scale
+degrees. Its first bar is the complete name motif (degrees 0 4 5 3, D A B G in D); the fourth note is where each
+track makes its point. The helper module also holds the chord parser used by the Episode 3 songs (`tones`,
+`root_note`, `fifth_note`).
+
+### How Episode 3 wears the name motif
+- **emberpeak**: the dulcimer plays the theme with the fourth note always missing (D A B, then a rest, in bars 1 and
+  5 of each statement), and on the downbeat of every fourth bar (1, 5, 9 ...) where a toll would fall the bass,
+  anvil and timpani all rest. In bars 29 and 30 the motif stops on its third note and the pad hangs open. The town
+  has lost its bell.
+- **first_bell**: the same tune in D major on horn and high strings. The fourth note (G) is never played by a melodic
+  instrument: it is struck on a real bell (G3, loud) while everything else rests, in bars 1 and 5 of each A section
+  (and in bars 9, 13, 25 and 29). A bell also tolls on every downbeat of the A sections (bars 1 to 8 and 25 to 32).
+- **ash_road**: the low whistle opens the road with the complete motif (A E F# D, scale degrees 1 5 6 4 in A Dorian) and
+  again, quiet, at the start of A'; at the start of B it is the same four degrees in C major (C G A F), warmer.
+- **foundry**: the cold flute plays the motif augmented, four beats a note (E B C# A), over the heat. The C# is a
+  major third against the F chord (the Phrygian second), so it rings icy. It returns high in the C section and once
+  more, quiet, in A'.
+- **boss_warden**: the brass states the motif in C minor (C G A F, the A natural a hot Dorian note) every four bars of A
+  and A2, with a brass stab and a timpani hit where the fourth note belongs. In the B section the First Bell theme is
+  quoted in minor (C G Ab F ...): bell and anvil strike together on every accent, the bell has the fourth note
+  (F), and the last two statements go to brass. The last bar before the loop is C major.
+
+### emberpeak: Bellows Square (the town before the bell; loops)
+104 BPM, 32 bars. Low strings, hammered dulcimer, measured anvil strikes on beat 3 (and beat 1 of even bars that are not
+toll bars), brass held back to a soft horn pedal. A (1-8) Dm, Dm, C, G, Dm, Am, G, Dm: dulcimer theme, no fourth note.
+A' (9-16): high strings carry the theme, the dulcimer turns to an arpeggio. B (17-24) Bb, F, Gm, Dm, Bb, F, Gm, A:
+the dulcimer's own tune climbs, a horn pedal and faint choir. A'' (25-32): thin again, A as the last chord so the loop
+falls back into Dm. Instruments: dulcimer (two tracks), strings_high, strings_low, strings, bass, anvil, lowdrum, horn, choir.
+
+### first_bell: The First Bell (the town after `pk_restored`, the end of `warden_after`, the credits; loops)
+104 BPM, 32 bars. A (1-8) D, D, G, Em7, D, Bm, G, A7sus4: horn (an octave under) and high strings, choir from bar 5,
+a bell on every downbeat. A' (9-16): glockenspiel and harp, the bell every other bar, softer. B (17-24) Bm, G, D/F#, A,
+Bm, G, Em7, A: the family of the theme climbs to a high E (bar 20) over brass stabs and timpani. A'' (25-32): tutti,
+a bell on every downbeat again. Instruments: horn, strings_high, brass, glock, harp, bell, strings, strings_low,
+choir, bass, lowdrum.
+
+### ash_road: The Old Sand Road (sand_road; loops)
+100 BPM, 38 bars. A fiddle and a low whistle over a cart-wheel rhythm: a soft drum on beat 1 and the "and" of 2, a
+shaker in eighths, a brush on 2 and 4, plucked root and fifth. Ash-grey first (thin low strings, no harp), warming to
+amber: harp arpeggios from B, horn and glockenspiel in B', the key turning to C major. A (1-8) Am, Am, F, C, Am, G, F,
+E7. A' (9-16) Am, F, C, G, Am, F, G, Am. B (17-24) C, G/B, Am, F, C, G, F, C. B' (25-32) C, Em, F, C/E, Dm7, G, C,
+G. T (33-38) Am, F, G, Am, F, E7 (back to Am). Instruments: whistle, fiddle, strings_low, strings, pizz, bass,
+lowdrum, shaker, brush, harp, horn, glock.
+
+### foundry: The Ashen Foundry (foundry_f1, foundry_f2; loops)
+88 BPM, 32 bars. A sixteenth-note figure on two tuned anvils (slots 0 3 6 8 10 14) and a low drum, a steam valve
+hissing every four bars (bars 3, 7, ...), a low brass pedal on E that never moves, a bass doubling it. A (1-8) Em, Em,
+F, Em, Em, F, G, F; the flute enters in bar 5. B (9-16) Am, F, Em, F, Dm, C, F, E: low strings, a glass pad. C (17-24)
+F, G, F, Em, F, G, Am, E: brass stabs on the anvil accents, choir, the motif high. A' (25-32): the foundry cools.
+Instruments: flute, anvil (two), lowdrum, steam, brass (pedal and stabs), strings_low, glasspad, bass, choir.
+
+### boss_warden: The Cinder Warden (the Warden's battle; loops)
+7/8 at quarter = 144 (a bar is 3.5 beats, grouped 2+2+3 eighths, so accents fall on beats 0, 1 and 2 of the bar).
+80 bars. I (1-4) a C minor pedal, timpani and anvil on the accents, the choir enters in bar 3. A (5-20) Cm, Ab, Fm, G7,
+Cm, Ab, Bb, G7 (two bars each): spiccato strings drive, the motif in the brass every four bars. A2 (21-36): choir and
+horns, the motif an octave higher. B (37-52): the First Bell quote in C minor, four statements of a four-bar phrase
+(Cm Fm Cm Fm, then Cm Ab Cm Bb), bell and anvil together. C (53-68): the motif climbs Cm, Db, Eb, Fm, a G7 hemiola of
+three stabs per bar, then Ab, Bb, G7sus4. R (69-79): the ostinato creeps back and a timpani roll builds. Bar 80: C
+major. Instruments: spiccato strings (strings_low with a fast attack), brass (melody, stabs, pedal), horn, strings_high,
+choir, lowdrum, anvil, bell, bass.
+
+### New instruments (`tools/music/synth.py`, Episode 3)
+dulcimer (a pair of slightly detuned Karplus-Strong strings, hammer click, a mid peak), anvil (hammer click, a thump and
+five inharmonic partials of a steel face, tuned by the note), fiddle (two detuned saws, body formants at 1.1 and
+2.4 kHz, bow noise, delayed vibrato), whistle (near-pure sine with husky breath and a late shallow vibrato), steam
+(band-limited noise hiss shaped by the gate).
+
 ## Instruments (tools/music/synth.py)
 All oscillators are band-limited wavetables (additive, Lanczos-smoothed), so nothing aliases.
 strings (five unevenly detuned saws with independent vibrato, dark-to-bright filter morph, slow attack;
@@ -212,8 +295,8 @@ file with an HTMLAudio element also works, with a 0.1 s dip at the file edges.
 
 ## Regenerate and review
 ```
-python tools/music/render.py                 # all nine: MP3 + JSON + review images in tools/music/out/
-python tools/music/render.py hollow court    # a subset (Episode 2: hollow hollowmere fading_road court boss_king)
+python tools/music/render.py                 # all fourteen: MP3 + JSON + review images in tools/music/out/
+python tools/music/render.py hollow court    # a subset (Episode 2: hollow hollowmere fading_road court boss_king; Episode 3: emberpeak first_bell ash_road foundry boss_warden)
 python tools/music/render.py sorrow --wav    # one track, plus a WAV copy in tools/music/out/
 python tools/music/verify_decode.py sorrow   # decode in headless Chromium, check the loop offset
 python tools/music/preview_instruments.py    # one note per instrument: tuning, level, spectrogram sheet

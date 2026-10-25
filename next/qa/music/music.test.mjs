@@ -1,4 +1,4 @@
-// Music asset checks: the composed tracks (Episode 1 and 2) exist, are sane MP3s with a gapless LAME tag, sizes are
+// Music asset checks: the composed tracks (Episodes 1 to 3) exist, are sane MP3s with a gapless LAME tag, sizes are
 // within bounds, and the <id>.json loop metadata is valid and consistent with the MP3's decoded length.
 // Runs under any runner that imports or executes this file: failures throw (non-zero exit).
 import fs from 'node:fs';
@@ -20,6 +20,12 @@ const TRACKS = {
   fading_road: { minSec: 85, maxSec: 95, loops: true },
   court: { minSec: 85, maxSec: 95, loops: true },
   boss_king: { minSec: 115, maxSec: 125, loops: true },
+  // Episode 3 (EPISODE3_PLAN.md 8.1)
+  emberpeak: { minSec: 70, maxSec: 90, loops: true },
+  first_bell: { minSec: 70, maxSec: 90, loops: true },
+  ash_road: { minSec: 85, maxSec: 95, loops: true },
+  foundry: { minSec: 85, maxSec: 95, loops: true },
+  boss_warden: { minSec: 110, maxSec: 120, loops: true },
 };
 const KBPS = 160;
 const SR = 44100;

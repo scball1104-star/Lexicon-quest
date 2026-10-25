@@ -11,8 +11,8 @@ new shell next to the old one and show "Update ready, restart to apply". Forget 
 keep the old shell: `node next/qa/run.mjs` prints a warning, and `LQ_RELEASE=1 node next/qa/run.mjs pwa` fails.
 
 What is precached: index.html, manifest.webmanifest, every src/**/*.js, assets/manifest.json, palette.json, the
-sprites, tiles, ui, backdrops and icons folders (png and json), and the sfx and jingle audio. NOT precached
-(stale-while-revalidate at runtime instead): music (../assets/audio/*.mp3, assets/audio/music), ambience and the
+sprites, tiles, ui, backdrops and icons folders (png and json), and the core sfx and the jingles. NOT precached
+(stale-while-revalidate at runtime instead): the episode sfx packs (manifest sfx[].pack != core), music (../assets/audio/*.mp3, assets/audio/music), ambience and the
 painted sheets (../assets/art/*.webp).
 """
 import argparse
@@ -44,13 +44,27 @@ HTML_END = '<!-- modulepreload:end -->'
 LITERAL = re.compile(r"""['"](\.{1,2}/[^'"\n]+?\.js)['"]""")
 
 
+def pack_files():
+    """Sfx files the audio manifest puts in an episode pack (pack != 'core'). They are runtime-cached by the service
+    worker when the engine first loads the pack, not precached, so the initial download stays inside its budget."""
+    m = NEXT / 'assets' / 'audio' / 'manifest.json'
+    if not m.is_file():
+        return set()
+    out = set()
+    for e in json.loads(m.read_text(encoding='utf-8')).get('sfx', {}).values():
+        if e.get('pack', 'core') != 'core':
+            out.update(e['src'] if isinstance(e.get('src'), list) else [e.get('src')])
+    return {p for p in out if p}
+
+
 def shell_files():
+    skip = pack_files()
     out = [p for p in FIXED if (NEXT / p).is_file()]
     out += sorted(p.relative_to(NEXT).as_posix() for p in (NEXT / 'src').rglob('*.js'))
     for folder, exts in FOLDERS.items():
         d = NEXT / folder
         if d.is_dir():
-            out += sorted(p.relative_to(NEXT).as_posix() for p in d.iterdir() if p.is_file() and p.suffix.lower() in exts)
+            out += sorted(p.relative_to(NEXT).as_posix() for p in d.iterdir() if p.is_file() and p.suffix.lower() in exts and p.relative_to(NEXT).as_posix() not in skip)
     return list(dict.fromkeys(out))
 
 

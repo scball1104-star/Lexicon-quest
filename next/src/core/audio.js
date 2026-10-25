@@ -19,6 +19,8 @@
 //   audio.setVolumes({ master: 0.8, music: 0.7, sfx: 0.8, ambience: 0.6 });   // linear 0..1 slider values
 //   audio.getVolumes();
 //   await audio.preload(['battle', 'sfx:sword_slash', 'jingle:victory_fanfare']);
+//   await audio.loadPack('ep3');                       // fetch (and decode once unlocked) an episode's sfx pack; 'core' is a no-op
+//   audio.preload(['pack:ep2']);                       // the same, through the preload door every wrapper already has
 //   audio.meter();                                     // {rms, peak} dBFS of the output (debug overlay / QA)
 //
 // Design notes
@@ -57,6 +59,7 @@ export function normalizeManifest(m) {
   if (m && typeof m === 'object') {
     for (const k of KINDS) if (m[k] && typeof m[k] === 'object') out[k] = m[k];
     if (m.defaults) out.defaults = m.defaults;
+    if (m.packs && typeof m.packs === 'object') out.packs = m.packs;
   }
   return out;
 }
@@ -176,6 +179,8 @@ export function createAudio(options = {}) {
   const decoding = new Map();   // url -> Promise<AudioBuffer|null>
   const musicLRU = [];          // urls of decoded music, most recent last
   const failed = new Set();     // urls that failed to load
+  const packWanted = new Set(['core']);   // sfx packs whose files are fetched/decoded ('core' is the boot set)
+  const packLoads = new Map();            // pack -> promise of its fetch
 
   // Playback state
   let cur = null;               // current music track
@@ -337,7 +342,7 @@ export function createAudio(options = {}) {
     // Decode everything small that was prefetched.
     for (const [kind, sec] of [['sfx', manifest.sfx], ['ambience', manifest.ambience]]) {
       if (kind === 'ambience') continue; // ambience decodes on demand
-      for (const id of Object.keys(sec)) for (const u of entryUrls(sec[id])) decode(u).catch(() => {});
+      for (const id of Object.keys(sec)) if (packWanted.has(packOf(sec[id]))) for (const u of entryUrls(sec[id])) decode(u).catch(() => {});
     }
     // Realize requests made while locked.
     if (wantStack.length) {
@@ -376,6 +381,28 @@ export function createAudio(options = {}) {
   }
 
   // ---------------------------------------------------------------- loading
+  /** The sfx pack an entry belongs to ('core' when the manifest does not say). */
+  function packOf(e) { return (e && typeof e.pack === 'string' && e.pack) || 'core'; }
+
+  /**
+   * Fetch an episode's sfx pack (every sfx whose manifest `pack` is `name`), and decode it once the context runs.
+   * 'core' and unknown names resolve at once. Never rejects and never logs an error; a failed fetch (offline) is
+   * forgotten so the next episode entry tries again. Until it arrives the engine skips those ids quietly (or plays
+   * the entry's `fallback`).
+   */
+  function loadPack(name) {
+    if (!name || name === 'core') return Promise.resolve();
+    if (packLoads.has(name)) return packLoads.get(name);
+    packWanted.add(name);
+    const urls = [];
+    for (const id of Object.keys(manifest.sfx)) if (packOf(manifest.sfx[id]) === name) urls.push(...entryUrls(manifest.sfx[id]));
+    if (!urls.length || typeof fetch !== 'function') return Promise.resolve();
+    const jobs = urls.map((u) => (unlocked ? decode(u) : fetchRaw(u)).then(() => true, () => { failed.delete(u); return false; }));
+    const p = Promise.all(jobs).then((r) => { if (!r.every(Boolean)) packLoads.delete(name); });
+    packLoads.set(name, p);
+    return p;
+  }
+
   function entryUrls(e) {
     if (!e || !e.src) return [];
     return (Array.isArray(e.src) ? e.src : [e.src]).filter(Boolean).map(urlOf);
@@ -711,7 +738,8 @@ export function createAudio(options = {}) {
     } catch { /* */ }
   }
 
-  function sfx(id, { volume = 1, pitch = 1, pan = 0, vary } = {}) {
+  function sfx(id, opts = {}) {
+    const { volume = 1, pitch = 1, pan = 0, vary } = opts || {};
     if (!running() || muted) return null;
     const r = resolveEntry(manifest, 'sfx', id);
     if (!r) { warnOnce('sfx:' + id, 'unknown sfx id', id); return null; }
@@ -722,7 +750,13 @@ export function createAudio(options = {}) {
     if (last !== undefined && t - last < cd) return null;
     const url = pickUrl(id, e);
     const buf = url && buffers.get(url);
-    if (!buf) { if (url && !failed.has(url)) decode(url).catch(() => {}); return null; }
+    if (!buf) {
+      const pk = packOf(e);
+      if (!packWanted.has(pk)) loadPack(pk);   // first sound of an episode we were not told about: fetch its pack now
+      else if (url && !failed.has(url)) decode(url).catch(() => {});
+      // Not here yet (pack in flight, or never arrives): play the entry's fallback if it has one, else skip quietly.
+      return e.fallback && e.fallback !== id && !(opts && opts.noFallback) ? sfx(e.fallback, { volume, pitch, pan, vary, noFallback: true }) : null;
+    }
     lastPlay.set(id, t);
 
     const cap = num(e.maxVoices, 0);
@@ -885,6 +919,7 @@ export function createAudio(options = {}) {
     // Prefetch every sfx file now (they are small) so they decode instantly on unlock.
     if (typeof fetch === 'function' && hasWindow()) {
       for (const id of Object.keys(manifest.sfx)) {
+        if (packOf(manifest.sfx[id]) !== 'core') continue;   // episode packs wait for their episode (loadPack)
         for (const u of entryUrls(manifest.sfx[id])) fetchRaw(u).catch(() => {});
       }
     }
@@ -895,6 +930,7 @@ export function createAudio(options = {}) {
     const list = Array.isArray(ids) ? ids : [ids];
     const jobs = [];
     for (const ref of list) {
+      if (typeof ref === 'string' && ref.startsWith('pack:')) { jobs.push(loadPack(ref.slice(5))); continue; }
       const f = findKind(manifest, ref);
       if (!f) { warnOnce('pre:' + ref, 'preload: unknown id', ref); continue; }
       let urls = [];
@@ -996,6 +1032,7 @@ export function createAudio(options = {}) {
     setVolumes,
     getVolumes,
     preload,
+    loadPack,
     // extras
     setMuted,
     stopAll,

@@ -22,10 +22,10 @@ from dsp import RENDER_SR as SR, ns, note_hz as hz
 REG: dict = {}
 
 
-def sfx(id_, group, intent, variants=1, vary=0.0, max_voices=0, cooldown=None, target=None, tail_db=-54.0):
+def sfx(id_, group, intent, variants=1, vary=0.0, max_voices=0, cooldown=None, target=None, tail_db=-54.0, pack="core", fallback=None):
     def deco(fn):
         REG[id_] = dict(id=id_, fn=fn, group=group, intent=intent, variants=variants, vary=vary,
-                        max_voices=max_voices, cooldown=cooldown, target=target, tail_db=tail_db)
+                        max_voices=max_voices, cooldown=cooldown, target=target, tail_db=tail_db, pack=pack, fallback=fallback)
         return fn
     return deco
 
@@ -1119,3 +1119,15 @@ def kept_break(g, v):
     m.add(kit.fm_bell(hz("E6"), 0.4, 3.0, 1.2, decay=0.13, idx_decay=0.04), 0.2, 0.3)
     m.add(kit.fm_bell(hz("A6"), 0.36, 3.0, 1.2, decay=0.13, idx_decay=0.04), 0.28, 0.3)
     return verb(m.out, 0.4, 0.15, bright=0.8)
+
+
+# ============================================================================ PACKS
+# Per-episode sfx packs (precache budget). Everything not listed is 'core': Episode 1, UI, battle and field basics.
+# Membership is by grep of the ids referenced by Episode 2 only data and scenes (the Silverglass world, Tovin's
+# ferry, Lena's clocktower, the Other Selves). glass_break, kept and kept_break are referenced by shared battle and
+# skill code, so they stay core. A pack that has not arrived is never an error: the runtime skips quietly.
+EP2_PACK = ("mirror_turn", "beam_hit", "glass_bridge", "mirror_step", "ferry_oars", "clock_chime", "reflection_out")
+for _id in EP2_PACK:
+    REG[_id]["pack"] = "ep2"
+
+import sfx_defs_e3  # noqa: E402,F401  (Episode 3 sfx, pack "ep3"; registers into REG)

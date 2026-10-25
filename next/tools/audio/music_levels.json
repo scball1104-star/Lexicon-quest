@@ -157,5 +157,35 @@
   "duration": 120.16,
   "sampleRate": 44100,
   "loopKind": "sidecar"
+ },
+ "assets/audio/music/emberpeak.mp3": {
+  "lufs": -16.57,
+  "duration": 74.006,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/first_bell.mp3": {
+  "lufs": -16.44,
+  "duration": 74.006,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/ash_road.mp3": {
+  "lufs": -16.48,
+  "duration": 91.36,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/foundry.mp3": {
+  "lufs": -16.45,
+  "duration": 87.433,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/boss_warden.mp3": {
+  "lufs": -16.52,
+  "duration": 116.827,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
  }
 }

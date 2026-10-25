@@ -54,7 +54,9 @@ MUSIC_TARGET = -16.0      # integrated; manifest volume brings each track here
 MUSIC_IDS = ["title", "willowmere", "valley", "archive", "battle", "boss_archivore", "mystery", "sorrow",
              "triumph", "victory", "gameover",
              # Episode 2 (composed in tools/music/songs/)
-             "hollow", "hollowmere", "fading_road", "court", "boss_king"]
+             "hollow", "hollowmere", "fading_road", "court", "boss_king",
+             # Episode 3 (composed in tools/music/songs/)
+             "emberpeak", "first_bell", "ash_road", "foundry", "boss_warden"]
 LEGACY_MUSIC = {
     "title": "../assets/audio/title.mp3",
     "willowmere": "../assets/audio/town.mp3",
@@ -69,6 +71,8 @@ MUSIC_FALLBACK = {
     "gameover": None,
     "hollow": "willowmere", "hollowmere": "hollow", "fading_road": "valley", "court": "archive",
     "boss_king": "boss_archivore",
+    "emberpeak": "hollow", "first_bell": "hollowmere", "ash_road": "fading_road", "foundry": "court",
+    "boss_warden": "boss_king",
 }
 
 
@@ -290,14 +294,20 @@ def write_manifest(results: dict):
         if not all((NEXT / f).exists() for f in files):
             continue
         dur = max(wav_info(NEXT / f)[0] for f in files)
-        e = {"src": files if len(files) > 1 else files[0], "volume": 1.0, "duration": round(dur, 3), "group": r["group"]}
+        e = {"src": files if len(files) > 1 else files[0], "volume": 1.0, "duration": round(dur, 3), "group": r["group"], "pack": r.get("pack", "core")}
         if r["vary"]:
             e["vary"] = r["vary"]
         if r["max_voices"]:
             e["maxVoices"] = r["max_voices"]
         if r["cooldown"] is not None:
             e["cooldown"] = r["cooldown"]
+        if r.get("fallback"):
+            e["fallback"] = r["fallback"]
         man["sfx"][id_] = e
+    packs = {}
+    for id_, e in man["sfx"].items():
+        packs.setdefault(e["pack"], []).append(id_)
+    man["packs"] = {k: {"sfx": sorted(v)} for k, v in sorted(packs.items()) if k != "core"}
     if "text_blip_mid" in man["sfx"]:
         man["sfx"]["text_blip"] = {"alias": "text_blip_mid"}
     for id_, r in JREG.items():
