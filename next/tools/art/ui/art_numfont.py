@@ -68,6 +68,7 @@ VARIANTS = {
     'heal': [P.ICE[3], P.GREEN[5], P.GREEN[5], P.GREEN[4], P.GREEN[3]],
     'mp': [P.ICE[3], P.WATER[5], P.WATER[4], P.WATER[4], P.WATER[3]],
     'poison': [P.VIOLET[4], P.VIOLET[3], P.VIOLET[3], P.VIOLET[2], P.VIOLET[1]],
+    'red': [P.RED[5], P.RED[4], P.RED[4], P.RED[3], P.RED[2]],
     'gray': [P.METAL[3], P.METAL[2], P.METAL[2], P.STEEL[3], P.STEEL[3]],
 }
 WORD_GRAD = {
@@ -181,9 +182,9 @@ def build():
             x += g.shape[1] + 1
         variants[vname] = y - 1
         y += row_h
-    # big digits: white and crit
+    # big digits: white, crit and red (party damage)
     big_row = 17
-    for vi, vname in enumerate(('white', 'crit')):
+    for vi, vname in enumerate(('white', 'crit', 'red')):
         x = 1
         for ch in chars:
             g = colorize(big[ch], VARIANTS[vname], shadow=True)
