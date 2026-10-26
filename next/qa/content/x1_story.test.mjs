@@ -20,10 +20,10 @@ GATE.on = () => true;   // the playthrough tests run with the switch on; the gua
 // Plan 2.6: the boxes of each scene DESIGN (stray_found, star_read and crate_delivered are listed once and run per id).
 const PLAN_BOXES = {
   downs_arrival: 3, thornfold_arrival: 4, brindle_strays: 5, stray_found_1: 1, stray_found_2: 1, stray_found_3: 1, stray_found_4: 1, stray_found_5: 1,
-  strays_done: 5, stones_arrival: 3, rollcall_start: 5, iris_roll: 4, quill_copy: 3, rollcall_stones: 11, barrow_entry: 3, reeve_intro: 3, reeve_after: 5,
+  strays_done: 5, stones_arrival: 3, rollcall_start: 5, iris_roll: 4, quill_copy: 3, rollcall_stones: 11, barrow_entry: 3, reeve_intro: 4, reeve_after: 5,
   rollcall_done: 3, cleft_hint: 2, terrace_arrival: 3, hesper_meet: 6, star_read_1: 2, star_read_2: 2, star_read_3: 2, orrery_align: 8,
   cellar_entry: 3, cellar_note: 6, crates_start: 4, crate_delivered_1: 2, crate_delivered_2: 2, crate_delivered_3: 2, crates_done: 4,
-  mill_start: 6, millrace_arrival: 3, ferrick_meet: 6, culvert_entry: 2, golem_intro: 3, golem_after: 4, pin_place: 4, mill_done: 10,
+  mill_start: 6, millrace_arrival: 3, ferrick_meet: 6, culvert_entry: 2, golem_intro: 4, golem_after: 4, pin_place: 4, mill_done: 10,
   list_start: 4, list_rhyme: 2, list_ledger: 2, list_song: 2, list_done: 4, moor_arrival: 3, odo_meet: 5, larchhill_arrival: 3,
   yarrow_meet: 4, windmill_view: 3,
 };
@@ -98,7 +98,7 @@ test('box budgets: each scene as the plan lists it, none over 12, the whole expa
   // The chains are the plan's own figures: reeve 3 + 5, golem 3 + 4, pin 4 + 10 (14 together, the plan says so in 5.4).
   assert.equal(maxBoxes(RUNS.pin_place), 14);
   for (const [from, to] of Object.entries(CHAINS)) assert.ok(maxBoxes(RUNS[from]) >= maxBoxes(OWN[from]) + 1 && to in rawScenes, `${from} chains into ${to}`);
-  assert.equal(total, 180 + 0, `total ${total}: the plan counts 180 boxes`);
+  assert.equal(total, 180 + 2, `total ${total}: the plan's 180 boxes plus the two W7 weakness lines (Reeve, Golem)`);
 });
 
 test('every id a scene references exists: speakers, spawns, portraits, music, sfx, items, encounters', () => {
@@ -308,7 +308,7 @@ test('the Reeve and the Golem: intro, name card, battle that cannot be fled, aft
   const lost = RUNS.reeve_intro.find((r) => ops(r.log, 'battle').some((e) => e.args[2] === 'lose'));
   assert.ok(lost && !lost.log.some((e) => e.op === 'setFlag' && e.args[0] === 'reeve_after_done'));
   const retry = await runOnce(rawScenes.reeve_intro, { flags: [...FLAGS_JOINED, 'reeve_met'], branchFlags: false });
-  assert.ok(boxes(retry.log) <= 1 + 5, 'a retry is the one-line intro, then the aftermath');
+  assert.ok(boxes(retry.log) <= 1 + 1 + 5, 'a retry is the one-line intro, the weakness line, then the aftermath');
   // The two variants of the aftermath differ on stones_lettered; only the lettered one names the Reeve.
   const lettered = await runOnce(rawScenes.reeve_after, { flags: [...FLAGS_JOINED, 'stones_lettered'], branchFlags: false });
   const blank = await runOnce(rawScenes.reeve_after, { flags: FLAGS_JOINED, branchFlags: false });

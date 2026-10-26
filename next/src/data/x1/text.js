@@ -116,8 +116,15 @@ export const X1_BOOKS = {
 // Barks: the first-time remark when Appraise meets an object instead of a foe (plan 6.2).
 // ------------------------------------------------------------------------------------------------
 export const X1_BARKS = {
+  // W7 (PLAYTEST_REVIEW_X1 M2): once, when the party first walks near either west gate after the first fight (map triggers carrying `bark`)
+  first_west_gate: [
+    { if: ['mira_joined', 'first_fight_done'], lines: [{ who: 'mira', text: 'The west fence has a gate in it now.' }] },
+  ],
   first_appraise_object: [
-    { if: 'mira_joined', lines: [{ who: 'mira', text: "There is something wrong with that scarecrow's pockets." }] },
+    { if: 'mira_joined', lines: [
+      { who: 'mira', text: "There is something wrong with that scarecrow's pockets." },
+      { who: 'mira', text: 'Let me have a proper look.' },     // W7: names the act; the pill already shows the button
+    ] },
   ],
 };
 
@@ -163,6 +170,8 @@ const chime = (i) => [
 export const X1_LINES = {
   // ---- valley and Willowmere (edits by X1-maps-hub)
   x1_drovers_gate: "A drovers' gate, tied shut with a shepherd's knot. Not yet.",
+  x1_downs_post: "A new-painted arrow. THE DOWNS. DROVERS' ROAD. The gate beside it stands open.",
+  x1_west_post: 'A fresh arrow nailed to the orchard post. THE DOWNS, it says, and the gate behind it is open.',
   x1_cleft_sign: 'A black cleft before an old stair. No bridge.',
   x1_fallen_oak: 'A fallen oak across the track. Somebody has been meaning to move it for a month.',
   x1_orchard_gate: 'ORCHARD GATE SHUT TILL THE LAMBING. USE THE SOUTH GATE. - HOLT',

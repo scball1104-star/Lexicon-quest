@@ -24,6 +24,7 @@ export const X1_FLAGS = {
   odo_met: 'Odo the chime keeper was met on the High Moor (odo_meet).',
   yarrow_met: 'Yarrow the beekeeper was met on Larchhill (yarrow_meet). Opens the hay chute.',
   windmill_seen: 'The party climbed the Larchhill windmill ladder and saw the valley from above (windmill_view).',
+  x1_gate_drain_open: 'The Weir Culvert drain gate has been opened once by its two plates (set by the gate itself, W7).',
 
   // Strays of Thornfold
   strays_started: 'Brindle asked for his five strays (brindle_strays). The stray sheep appear on their maps.',

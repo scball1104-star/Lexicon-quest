@@ -122,7 +122,7 @@ test('items: the Honey Roll, the key items, nine placed pieces and the set exist
     assert.ok(u.ilvl <= 8, `${id} stays under Episode 2's ilvl 9`);
   }
   assert.equal(UNIQUES.reeves_crook.type, 'spear'); assert.equal(UNIQUES.drovers_bow.type, 'bow'); assert.equal(UNIQUES.chime_staff.type, 'staff'); assert.equal(UNIQUES.orchard_axe.type, 'axe');
-  assert.deepEqual(UNIQUES.reeves_crook.stats, { atk: 17, def: 2, crit: 4, furyGain: 10 });
+  assert.deepEqual(UNIQUES.reeves_crook.stats, { atk: 24, def: 2, crit: 4, furyGain: 10 });
   assert.deepEqual(UNIQUES.millwright_apron.stats, { def: 11, spr: 3, hp: 30, resPoison: 50 });
 });
 
@@ -154,8 +154,24 @@ test('item budgets: no new piece beats its named peers by more than a tier step 
     assert.ok(u.ilvl <= 8, `${id} ilvl`);
   }
   assert.deepEqual(Object.keys(PEERS), Object.keys(X1_UNIQUES));
-  assert.ok(UNIQUES.reeves_crook.stats.atk < EQUIPMENT.winged_lance.stats.atk);
+  assert.ok(UNIQUES.reeves_crook.stats.atk > EQUIPMENT.winged_lance.stats.atk, 'W7: the Reeve (a boss behind a puzzle gate) beats the Winged Lance');
+  assert.ok(UNIQUES.reeves_crook.stats.atk < EQUIPMENT.mere_pike.stats.atk, 'and stays under the Episode 2 spear');
   assert.ok(UNIQUES.millwright_apron.stats.def < EQUIPMENT.steel_cuirass.stats.def);
+});
+
+// W7 (CRITIQUE_X1 4): the four puzzle-gated weapons are prizes, not shop stock. Each beats its slot's tier 2 shop weapon by at least a
+// quarter on ATK + MAG and stays under the tier 3 shop weapon, except the Reeve's Crook, which beats the Winged Lance (a boss behind a puzzle).
+test('the puzzle-gated weapons pay like prizes: a clear step over the tier 2 shop weapon, under Episode 2', () => {
+  const main = (s) => (s.atk || 0) + (s.mag || 0);
+  const T2 = { orchard_axe: 'battle_axe', drovers_bow: 'hunters_bow', chime_staff: 'crystal_rod', reeves_crook: 'iron_pike' };
+  const T3 = { orchard_axe: 'bearded_axe', drovers_bow: 'yew_longbow', chime_staff: 'archivist_staff', reeves_crook: 'winged_lance' };
+  for (const id of Object.keys(T2)) {
+    const u = UNIQUES[id].stats, t2 = EQUIPMENT[T2[id]].stats, t3 = EQUIPMENT[T3[id]].stats;
+    assert.ok(main(u) >= main(t2) * 1.25, `${id}: ${main(u)} is not a quarter over ${T2[id]} (${main(t2)})`);
+    if (id === 'reeves_crook') assert.ok(main(u) > main(t3), 'the Crook beats the Lance');
+    else assert.ok(main(u) < main(t3), `${id}: stays under ${T3[id]}`);
+  }
+  assert.equal(UNIQUES.orchard_axe.stats.spd, undefined, 'no SPD penalty, its edge');
 });
 
 test('the set drovers_road: +25 HP and +2 DEF, and it stays below Wayfarer\'s Promise', () => {

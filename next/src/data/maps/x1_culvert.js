@@ -77,7 +77,7 @@ const events = [
   { id: 'block_b2', type: 'block', x: 17, y: 17, sprite: 'push_block', heavy: true },
   plate('plate_b1', 21, 15, 'gate_drain'),
   plate('plate_b2', 22, 17, 'gate_drain'),
-  gate('gate_drain', 11, 13, 'x1_gate_culvert', { to: ['x1_culvert', 11, 11, 'up'] }),
+  gate('gate_drain', 11, 13, 'x1_gate_culvert', { to: ['x1_culvert', 11, 11, 'up'], flag: 'x1_gate_drain_open' }),   // W7: once both plates have been held the gate stays open (blocks reset on a reload; the hearth saves behind it)
   door('notch_pump', 11, 11, ['x1_culvert', 11, 14, 'down']),
   object('x1_crack_drain', 17, 12, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2 }),
   chest('chest_cv_drain', 17, 13, 'wood', { behind: 'x1_crack_drain' }),

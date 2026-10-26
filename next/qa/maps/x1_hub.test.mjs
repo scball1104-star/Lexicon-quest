@@ -66,17 +66,17 @@ const E = (id) => `ev:${id}`, O = (t, x, y) => `ov:${t}@${x},${y}`, D = (t, x, y
 const REG = {
   valley: {
     any: [E('x1_roots_valley'), E('x1_chest_roots'), O('wall_broken', 13, 4)],
-    west: [E('x1_downs_door'), E('x1_drovers_gate'), E('x1_drovers_gate_b'), E('stray_4'), M('downs_gate')],
+    west: [E('x1_downs_door'), E('x1_drovers_gate'), E('x1_drovers_gate_b'), E('stray_4'), E('x1_downs_post'), E('x1_west_hint'), M('downs_gate')],
     south: [E('x1_millrace_door'), E('x1_fallen_oak'), E('x1_driftlog'), E('x1_chest_sandbar'), M('south_track'),
       D('bush', 25, 38), D('bush', 26, 39), D('x1_boulder_a', 27, 38), X('tree_pine', 23, 37)],
     north: [E('x1_terrace_stair'), E('x1_cleft_fall'), E('x1_cleft_sign'), E('x1_cleft_trig'), E('x1_star_mark_milestone'),
       E('x1_star_mark_door'), M('cleft'), M('stair_foot'), O('ink_bridge_v_faint', 21, 7), O('ink_bridge_v_faint', 21, 8), D('signboard', 23, 9),
-      X('tree_pine', 19, 2), X('tree_pine', 20, 0), X('tree_pine', 22, 2), X('tree_pine', 23, 1), X('tree_pine', 19, 7)],
+      X('tree_pine', 19, 2), X('tree_pine', 20, 0), X('tree_pine', 22, 2), X('tree_pine', 23, 1), X('tree_pine', 19, 7), X('tree_pine', 21, 11)],
     wild: [H('x1_far_tower', 9, -2)],
   },
   willowmere: {
     any: [],
-    west: [E('x1_west_gate'), E('x1_orchard_gate'), E('x1_orchard_gate_b'), E('x1_wall_crack'), E('x1_chest_wall'), M('west_gate'),
+    west: [E('x1_west_gate'), E('x1_orchard_gate'), E('x1_orchard_gate_b'), E('x1_west_post'), E('x1_west_hint_w'), E('x1_wall_crack'), E('x1_chest_wall'), M('west_gate'),
       O('wall_broken', 6, 30), D('lamp_post', 1, 15), X('tree_pine', 6, 31)],
   },
   archive_f1: { any: [E('x1_f1_roots'), E('x1_chest_f1'), D('candelabra', 17, 5)] },
@@ -90,8 +90,8 @@ const REG = {
 // the ground cells each map may change, as [region, x0, y0, x1, y1] (valley) or a rectangle only (the archive floors, where the
 // carved alcove re-flows depth() around itself); everything else must be the baseline character
 const GROUND = {
-  valley: [['north', 19, 3, 23, 8], ['south', 22, 36, 24, 39]],
-  willowmere: [],
+  valley: [['north', 19, 3, 23, 8], ['south', 22, 36, 24, 39], ['west', 0, 28, 5, 31]],
+  willowmere: [['west', 0, 16, 1, 17]],
   archive_f1: [['any', 10, 1, 19, 9]],
   archive_f2: [['any', 3, 2, 16, 11]],
   archive_f3: [],
@@ -169,13 +169,15 @@ test('the ground cells that change are exactly the cleft, the stair, the south t
   for (const y of [3, 4, 5]) want.add(key(21, y));
   for (let y = 6; y <= 8; y++) for (let x = 19; x <= 23; x++) if (!(x === 21 && y === 6)) want.add(key(x, y));
   for (let y = 36; y <= 39; y++) for (const x of [22, 23, 24]) want.add(key(x, y));
+  for (let x = 0; x <= 4; x++) for (const y of [28, 29]) want.add(key(x, y));          // W7: the worn lane from the Downs gate
+  for (let x = 4; x <= 5; x++) for (const y of [30, 31]) want.add(key(x, y));
   const got = new Set(cells('valley'));
   for (const c of want) { const [x, y] = c.split(',').map(Number); assert.ok(got.has(c) || v.ground[y][x] === o.ground[y][x], `valley cell ${c}`); }
   for (const c of got) assert.ok(want.has(c), `valley unexpected ground change at ${c}`);
   assert.deepEqual([o.ground[3][21], o.ground[4][21], o.ground[5][21]], ['S', 't', 'z']);
   for (let y = 6; y <= 8; y++) for (let x = 19; x <= 23; x++) assert.equal(o.ground[y][x], x === 21 && y === 6 ? '.' : 'i', `cleft ${x},${y}`);
   for (let y = 35; y <= 39; y++) for (const x of [22, 23, 24]) assert.equal(o.ground[y][x], '=', `track ${x},${y}`);
-  assert.deepEqual(cells('willowmere'), []);
+  assert.deepEqual(cells('willowmere').sort(), ['0,16', '0,17', '1,16'], 'W7: the lane runs out to the Orchard Lane gate');
   assert.deepEqual(cells('archive_f3'), []);
   for (const id of ['archive_f1', 'archive_f2']) {
     const list = cells(id).map((c) => c.split(',').map(Number));
@@ -192,9 +194,9 @@ test('the pine filters: nothing lands on the notch, the track or the west lane, 
     assert.ok(!(p.x <= 3 && p.y >= 27 && p.y <= 30), `a pine at ${p.x},${p.y} stands at the west lane`);
   }
   const dropped = BASE.valley.decor.filter((d) => !ON.valley.decor.some((o) => J(o) === J(d)));
-  assert.deepEqual(dropped.map((d) => `${d.t}@${d.x},${d.y}`).sort(), ['tree_pine@19,2', 'tree_pine@19,7', 'tree_pine@20,0', 'tree_pine@22,2', 'tree_pine@23,1', 'tree_pine@23,37']);
+  assert.deepEqual(dropped.map((d) => `${d.t}@${d.x},${d.y}`).sort(), ['tree_pine@19,2', 'tree_pine@19,7', 'tree_pine@20,0', 'tree_pine@21,11', 'tree_pine@22,2', 'tree_pine@23,1', 'tree_pine@23,37']);
   // and nothing else of the valley's decor moved
-  assert.equal(ON.valley.decor.filter((d) => d.t === 'tree_pine').length, BASE.valley.decor.filter((d) => d.t === 'tree_pine').length - 6);
+  assert.equal(ON.valley.decor.filter((d) => d.t === 'tree_pine').length, BASE.valley.decor.filter((d) => d.t === 'tree_pine').length - 7);
 });
 
 // ================================================================================================ each region switch removes exactly its additions
@@ -233,8 +235,8 @@ const parseEvents = (list) => Object.fromEntries(list.map((s) => { const i = s.l
 /** Cells that may be newly closed: the new solid things (gates, oak, the log and its pocket, the cleft's water) and nothing else. */
 const NEWLY_CLOSED = {
   valley: new Set(['19,6', '20,6', '22,6', '23,6', '19,7', '20,7', '22,7', '23,7', '19,8', '20,8', '22,8', '23,8', '23,9', '0,28', '0,29', '7,20', '38,6', '38,20',
-    '21,37', '22,37', '23,37', '24,37', '26,37', '25,38', '26,38', '27,38', '26,39', '27,39', '21,7', '21,8', '21,6']),
-  willowmere: new Set(['1,15', '0,16', '0,17']),
+    '21,37', '22,37', '23,37', '24,37', '26,37', '25,38', '26,38', '27,38', '26,39', '27,39', '21,7', '21,8', '21,6', '1,27']),
+  willowmere: new Set(['1,15', '0,16', '0,17', '1,18']),   // W7: 1,18 is the open-gate signpost
   archive_f1: new Set(), archive_f2: new Set(), archive_f3: new Set(['9,11']),
 };
 
@@ -652,4 +654,29 @@ test('after the x1 pack registers late, the next load of each edited map shows t
   } finally {
     if (keep == null) delete process.env.LQ_X1_ON; else process.env.LQ_X1_ON = keep;
   }
+});
+
+// ================================================================================================ W7: the open west gates are marked
+test('W7: once first_fight_done the two west gates carry an arrow post (art that exists) and a one-time bark zone; the arrival cells stay open', () => {
+  for (const [id, post, bark, arrival] of [['valley', 'x1_downs_post', 'x1_west_hint', [1, 28]], ['willowmere', 'x1_west_post', 'x1_west_hint_w', [1, 16]]]) {
+    const m = ON[id];
+    for (const flags of [[], ['intro_done', 'left_town']]) {
+      assert.equal(present(m, post, flags), undefined, `${id}: no open-gate post before the fight`);
+      assert.equal(present(m, bark, flags), undefined, `${id}: no bark zone before the fight`);
+    }
+    const open = ['first_fight_done'];
+    const p = present(m, post, open), t = present(m, bark, open);
+    assert.ok(p && p.sprite === 'signpost_arrow' && p.text, `${id}: the arrow post stands`);
+    assert.ok(isObjectId(db, p.sprite), `${id}: the post sprite exists`);
+    assert.ok(t && t.bark === 'first_west_gate' && !t.script, `${id}: a bark-only trigger`);
+    assert.ok(eventCells(p).every(([x, y]) => !(x === arrival[0] && y === arrival[1])), `${id}: the post is not on the arrival cell`);
+    const g = buildGrid(withFlags(m, open), db);
+    assert.equal(g.code[arrival[1]][arrival[0]], 'none', `${id}: the arrival cell is open`);
+    assert.ok(walk(m, db, { flags: open }).reachable.includes(key(...arrival)), `${id}: and reachable`);
+  }
+  // the dirt lane: the valley's runs from the gate to the pilgrim road, willowmere's to the edge
+  for (let x = 0; x <= 4; x++) for (const y of [28, 29]) assert.equal(ON.valley.ground[y][x], '=', `valley lane ${x},${y}`);
+  assert.equal(ON.willowmere.ground[16][0], '='); assert.equal(ON.willowmere.ground[17][0], '=');
+  // the first-fight column is untouched
+  assert.deepEqual(ev(ON.valley, 'first_fight_trig'), ev(BASE.valley, 'first_fight_trig'));
 });

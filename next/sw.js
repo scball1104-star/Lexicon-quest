@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '3449d694abb0';
+const SHELL_VERSION = 'a62c3648c0db';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -97,6 +97,7 @@ const PRECACHE = [
   'src/data/x2/live.js',
   'src/game/episodes.js',
   'src/game/inventory.js',
+  'src/game/packFallback.js',
   'src/game/packs.js',
   'src/game/state.js',
   'src/game/story.js',

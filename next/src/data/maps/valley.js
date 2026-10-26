@@ -113,6 +113,8 @@ for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   if (near) put(g, x, y, '.');
 }
 
+// X1 W7: a worn lane from the Downs gate to the pilgrim road
+if (X1_W) { box(g, 0, 28, 4, 29, '='); box(g, 4, 30, 5, 31, '='); }
 // X1: the south track; the Keepers' stair and cleft (ink on three rows, one cell of ground at the stair foot)
 if (X1_S) for (let y = 36; y <= 39; y++) box(g, 22, y, 24, y, '=');
 if (X1_N) { put(g, 21, 3, 'S'); put(g, 21, 4, 't'); put(g, 21, 5, 'z'); box(g, 19, 6, 23, 8, 'i'); put(g, 21, 6, '.'); }
@@ -144,6 +146,7 @@ const pines = [];
 function pine(x, y) {
   // X1: keep the notch, the track and the west lane clear
   if (X1_N && x >= 19 && x <= 23 && y <= 8) return;
+  if (X1_N && x >= 20 && x <= 22 && y >= 9 && y <= 11) return;   // W7: a crown hid the first bridge cell
   if (X1_S && x >= 21 && x <= 25 && y >= 35) return;
   if (X1_W && x <= 3 && y >= 27 && y <= 30) return;
   // Episode 2: no pines in the washout gully, on the crossing's approach or on the bank road
@@ -253,6 +256,9 @@ const events = [
     object('x1_drovers_gate', 0, 28, 'signpost', { text: 'x1_drovers_gate', ifNot: 'first_fight_done' }),
     object('x1_drovers_gate_b', 0, 29, 'signpost', { text: 'x1_drovers_gate', ifNot: 'first_fight_done' }),
     npc('stray_4', 7, 20, 'down', { if: 'strays_started' }),
+    // W7: an arrow post beside the arrival cell (1, 28), and one bark
+    object('x1_downs_post', 1, 27, 'signpost_arrow', { text: 'x1_downs_post', if: 'first_fight_done' }),
+    trigger('x1_west_hint', 0, 24, 9, 10, null, { bark: 'first_west_gate', if: 'first_fight_done' }),
   ] : []),
   // X1: south track (the oak lies across it until the bell has tolled)
   ...(X1_S ? [

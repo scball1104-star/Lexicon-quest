@@ -143,7 +143,7 @@ Each entry: map and trigger, who stands where, marks, camera, music, boxes, flag
 ### `reeve_intro`
 - Map: `x1_barrow`, the trigger row `reeve_trig`. The Reeve (`barrow_reeve`, map actor) stands at `reeve_spot` before the niches.
 - Marks: `reeve_spot`. Camera: pan to `reeve_spot` 40 frames. Music: silence, then `boss_reeve` for the battle.
-- Boxes: 3 (1 on a retry; the variant differs on `stones_lettered`). Then name card THE BARROW REEVE, the battle `barrow_reeve`, and `reeve_after` on a win. 8 boxes with the chain. Sets `reeve_met`.
+- Boxes: 4 (2 on a retry; the variant differs on `stones_lettered`; the last is always Mira naming the weakness, bows and light, W7). Then name card THE BARROW REEVE, the battle `barrow_reeve`, and `reeve_after` on a win. 9 boxes with the chain. Sets `reeve_met`.
 
 ### `reeve_after`
 - Map: `x1_barrow`, chained from `reeve_intro` (also a scene of its own for a reload). The Reeve is despawned.
@@ -230,7 +230,7 @@ Each entry: map and trigger, who stands where, marks, camera, music, boxes, flag
 ### `golem_intro`
 - Map: `x1_culvert`, the trigger row `golem_trig`. The Golem (`millstone_golem`, map actor) stands at `golem_spot`.
 - Marks: `golem_spot`. Camera: pan to `golem_spot` 40 frames. Music: silence, then `boss_millstone` for the battle.
-- Boxes: 3 (1 on a retry). Then name card MILLSTONE GOLEM, the battle `millstone_golem`, and `golem_after` on a win. 7 boxes with the chain. Sets `golem_met`.
+- Boxes: 4 (2 on a retry; the last is always Mira naming the weakness, thunder and axe, W7). Then name card MILLSTONE GOLEM, the battle `millstone_golem`, and `golem_after` on a win. 8 boxes with the chain. Sets `golem_met`.
 
 ### `golem_after`
 - Map: `x1_culvert`, chained (also a scene of its own for a reload). The Golem is despawned.

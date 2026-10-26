@@ -82,7 +82,7 @@ export async function loadDb() {
     NPCS: npcs.NPCS, npcsOnMap: npcs.npcsOnMap,
     ENCOUNTERS: enc.ENCOUNTERS, ZONES: enc.ZONES,
     // Episode 1 + 2 scenes and inspect lines (ids never collide; qa/content tests it), plus whatever a registered pack added
-    scenes: gstory.SCENES, lines: gstory.LINES, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
+    scenes: gstory.SCENES, barks: text.BARKS, lines: gstory.LINES, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
     ITEMS: items.ITEMS, FLAGS: quests.FLAGS,
   };
   return _db;
@@ -926,7 +926,7 @@ export function validate(map, db, maps, { staging = null, links = loadPendingLin
         if (!e.script && !e.text && !e.appraise) Wn(`object ${e.id} has neither script nor text`);
         break;
       }
-      case 'trigger': if (!db.scenes[e.script]) E(`trigger ${e.id}: scene ${e.script} missing`); break;
+      case 'trigger': if (e.bark && !e.script) { if (db.barks && !db.barks[e.bark]) E(`trigger ${e.id}: bark ${e.bark} missing`); } else if (!db.scenes[e.script]) E(`trigger ${e.id}: scene ${e.script} missing`); break;
       case 'switch': case 'plate': case 'receptor': {
         for (const t of toList(e.target)) if (!(map.events || []).some((x) => x.id === t && ['gate', 'shelf', 'locked_door'].includes(x.type))) E(`${e.type} ${e.id}: target ${t} is not a gate/shelf`);
         if (e.type === 'receptor') {

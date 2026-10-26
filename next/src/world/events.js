@@ -1,31 +1,10 @@
-// Map events on the field (W2-world): every `events[]` entry of a map module becomes an entity with a
-// prop (drawn, y-sorted) and/or an actor, a tile footprint, and handlers. docs/WORLD.md lists the vocabulary.
-//
-//   buildEntities(field)                   after the map loads: creates every present entity
-//   refreshEntities(field)                 after a flag changes: shows/hides entities with if/ifNot
-//   interactables(field, x, y)             entities on a tile the player can talk to / inspect
-//   await interact(field, ent)             confirm while facing the entity
-//   stepOn(field, ent, actor)              an actor arrived on one of the entity's tiles
-//   stepOff(field, ent, actor)             an actor left one of its tiles
-//   fireTarget(field, id, on)              a switch / plate changed: open gates, slide shelves
-//   pushBlock(field, ent, dir)             the leader walked into a push block
-//   revealInk(field, cx, cy, radius)       the Lantern of Recall: *_faint -> *_revealed, persisted
-//   breakWall(field, ent)                  W9: Dash Strike breaks an `object` with `breakable` (persisted)
-//   moveBlock(field, ent, dir, o)          slide a push block one tile (the leader's push, Bram's Shove)
-//
-// W9-abilities fields: `block` + `heavy: true` (only Bram's Shove moves it), `object` + `breakable: 'roots' |
-// 'rock' | 'glass' (E2)` (+ `opens: [[x, y], ...]` wall cells carved to floor once it breaks), any event + `behind: '<id>'`
-// (concealed, no prompt, no glint, until that breakable is broken).
-//
-// X1-world: `object` + `appraise: true` (+ `appraiseText`) is an Appraise target (appraiseObject: saved as opened, and
-// whatever has `behind: 'appraise:<object id>'` appears with the same sparkle).
-//
-// Persistence: one-shot things (chests, unlocked doors, lit braziers with `flag`, ink reveals) live in
-// engine.game.opened as "<map>:<id>" or "<map>:ink:<x>,<y>"; puzzles reset on re-entry (Lufia II).
-//
-// E2-world (EPISODE2_PLAN 5.1): silverglass `beam` sources, `mirror`s (confirm turns them; `push` / `heavy` ones
-// slide like blocks) and crystal `receptor`s (gate sources while lit; `latch`, `flag`, `script`). The tracing and
-// the bridges live in world/silverglass.js (field.glass); this file owns their props, confirm and pushing.
+// Map events on the field (W2-world): every `events[]` entry of a map module becomes an entity (prop, actor, tile footprint, handlers).
+// docs/WORLD.md lists the vocabulary. API: buildEntities, refreshEntities (flag changes), interactables, interact, stepOn / stepOff,
+// fireTarget (a switch or plate changed), pushBlock / moveBlock, revealInk (the Lantern), breakWall (Dash Strike), appraiseObject.
+// `block` + `heavy` is Shove-only; `object` + `breakable` ('roots' | 'rock' | 'glass') is Dash-only; any event + `behind: '<id>'` is
+// concealed until that breakable breaks; `object` + `appraise` is an Appraise target; E2 adds `beam`, `mirror` and `receptor`
+// (tracing lives in world/silverglass.js). One-shot state lives in engine.game.opened as "<map>:<id>"; puzzles reset on re-entry,
+// except a `gate` with `flag` and a `switch` with `stateFlag`, which keep their state in a flag.
 
 import { matches } from '../data/story/dialogue.js';
 import { talkTo, NPCS } from '../data/npcs.js';
@@ -86,6 +65,8 @@ export function buildEntities(field) {
     }
   }
   for (const ent of field.entities.values()) setPresent(field, ent, present(field, ent.ev));
+  // W7: a switch with `stateFlag` keeps its place in a save; its targets snap to the on state
+  for (const e of field.entities.values()) if (e.present && e.state === 'on' && e.ev.stateFlag) for (const t of targetsOf(e.ev)) fireTarget(field, t, { quiet: true });
 }
 
 export function refreshEntities(field) {
@@ -194,12 +175,7 @@ function revealBehind(field, match) {
   return out;
 }
 
-/**
- * X1 (EXPANSION1_PLAN 11.1): an `object` with `appraise: true` is a target for Mira's Appraise, like a visible enemy.
- *   { type: 'object', appraise: true, appraiseText: '<lines id>', text?: '<lines id>', ... }
- * Reading it (abilities.js appraise) calls appraiseObject(): the object is saved as opened and every event with
- * `behind: 'appraise:<object id>'` appears with the sparkle. A confirm press still reads `text` when it has one.
- */
+/** X1: an `object` with `appraise: true` (+ `appraiseText`) is an Appraise target; reading it saves it as opened and shows its `behind: 'appraise:<id>'` events. */
 export function isAppraiseObject(ent) {
   return !!(ent && ent.type === 'object' && ent.ev && ent.ev.appraise && ent.present && !(ent.data && ent.data.concealed));
 }
@@ -301,7 +277,7 @@ function create(field, ent) {
       break;
     }
     case 'switch': {
-      ent.state = ev.state === 'on' ? 'on' : 'off';
+      ent.state = ev.state === 'on' || (ev.stateFlag && g.flags[ev.stateFlag]) ? 'on' : 'off';
       if (ev.kind === 'crystal') {
         ent.data.color = ev.color || (ev.sprite === 'crystal_switch_gold' ? 'gold' : 'blue');
         addProp(field, ent, crystalSprite(ent), 0);
@@ -506,6 +482,7 @@ export async function interact(field, ent) {
       }
       ent.state = ent.state === 'on' ? 'off' : 'on';
       const on = ent.state === 'on';
+      if (ev.stateFlag) field.setFlag(ev.stateFlag, on);
       if (ev.kind === 'crystal') {
         engine.audio.sfx('crystal_hit');
         if (ent.prop) map.setPropSprite(ent.prop, crystalSprite(ent), 0);
@@ -560,13 +537,7 @@ export async function interact(field, ent) {
   }
 }
 
-/**
- * The rest flow every landmark shares (fonts, the chapel bell, `rest: true` objects such as the campfire):
- * "Rest here?" first; on Rest a full HP and MP heal (state.heal with the stats provider restores both),
- * the game over return point, sparkles and the `heal` sfx (or a jingle), an optional one-time bark, then
- * "Record your journey here?" which opens the menu's save page. Declining either choice costs nothing.
- * Returns true when the party rested.
- */
+/** The rest flow of every landmark (fonts, the bell, campfire): "Rest here?" (full heal, return point, sparkle, optional bark), then "Record your journey here?". True when rested. */
 export async function restFlow(field, o = {}) {
   const { engine, game: g } = field;
   const c = await field.dialog({ who: null, text: 'Rest here?', choices: ['Rest', 'Not now'], cancel: 1 });
@@ -745,7 +716,8 @@ export function fireTarget(field, id, o = {}) {
     if (ent.state === want || !ent.prop) return;
     ent.state = want;
     const pos = (ent.ev.positions && ent.ev.positions[want]) || [ent.x, ent.y];
-    field.slideProp(ent.prop, pos[0], pos[1], 30, ent.ev.sfx || 'shelf_move');
+    if (o.quiet) field.map.moveProp(ent.prop, pos[0], pos[1]);      // map load: snap, no slide
+    else field.slideProp(ent.prop, pos[0], pos[1], 30, ent.ev.sfx || 'shelf_move');
   } else if (ent.type === 'gate_tiles') {
     // reserved
   } else if (ent.type === 'brazier') {

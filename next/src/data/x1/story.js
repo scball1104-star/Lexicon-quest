@@ -57,7 +57,7 @@ async function downs_arrival(s) {
   await s.camera.panTo('thornfold', 50);
   await narrate(s, 'West of the valley the land lifts and rolls. Wind combs the grass. Far off, one thread of smoke.');
   await s.camera.follow('hero');
-  await say(s, 'mira', "Four roads leave that signpost, and not one is on the library's map. I find that rude.");
+  await say(s, 'mira', "Five roads leave that signpost, and not one is on the library's map. I find that rude.");
   await say(s, 'bram', 'Maps forget the quiet places first. Smoke means a hearth. A hearth means a name on a door. Come on.');
   await s.setFlag('downs_arrived');
 }
@@ -239,6 +239,8 @@ async function reeve_intro(s) {
     await say(s, 'mira', 'He is not angry. He is adding.');
     await say(s, 'bram', 'Does not matter why. He will not let us past the sum. Ready?');
   }
+  // W7 (PLAYTEST_REVIEW_X1 m7): the weakness is told in the intro every time, so a retry after a loss teaches it
+  await say(s, 'mira', 'Bows and light trouble him. Keep the count steady and let me do the rest.');
   await s.setFlag('reeve_met');
   await s.title('THE BARROW REEVE', { sub: 'Keeper of the Count', frames: 100 });
   await s.shake(2, 20);
@@ -324,7 +326,9 @@ async function hesper_meet(s) {
   await say(s, 'hesper', 'Oh. Visitors. The stars do not bring visitors. They bring weather.');
   await say(s, 'mira', 'Nine stars. Why are three of them dark?');
   await say(s, 'hesper', 'Nine Keepers, nine names. Three went dark, and I have lost whose. They signed where they worked, in hidden ink.');
-  await say(s, 'hesper', 'You carry a Lantern. It is rude of it to glow from there. Read them for me, and I will light what I am owed.');
+  // W7: the moor's stile lets a party reach the Orrery before the Lantern; Hesper only mentions it when it is there
+  if (await s.hasFlag('lantern_get')) await say(s, 'hesper', 'You carry a Lantern. It is rude of it to glow from there. Read them for me, and I will light what I am owed.');
+  else await say(s, 'hesper', 'You have no true light with you yet. Find one, and read them for me, and I will light what I am owed.');
   await s.setFlag('stars_started');
 }
 
@@ -502,6 +506,8 @@ async function golem_intro(s) {
     await say(s, 'mira', 'A millstone with legs. It is grinding the gate to flour. Slowly. Patiently.');
     await say(s, 'bram', 'Running alone for a month. I know that feeling. Let us end its shift.');
   }
+  // W7 (PLAYTEST_REVIEW_X1 m7): told every time, so a retry after a loss teaches it
+  await say(s, 'mira', 'Thunder shakes it and an axe finds the crack. Swords and arrows only skid.');
   await s.setFlag('golem_met');
   await s.title('MILLSTONE GOLEM', { sub: 'The Wheel That Ran Alone', frames: 100 });
   await s.shake(3, 24);
@@ -534,7 +540,9 @@ async function golem_after(s) {
 async function pin_place(s) {
   const ready = (await s.hasFlag('pin_found')) && (await s.hasFlag('mill_started'));
   if (!ready) {
-    await narrate(s, 'The wheel\'s hub has an empty socket, a forearm wide. Whatever fits it is not in your pack yet.');
+    // W7: the Culvert may come first. With the pin in the pack and Hal not yet asked, the wheel must not say the pin is missing.
+    if (await s.hasFlag('pin_found')) await narrate(s, "The wheel's hub has an empty socket, a forearm wide. The pin would fit. Hal ought to be here for this.");
+    else await narrate(s, 'The wheel\'s hub has an empty socket, a forearm wide. Whatever fits it is not in your pack yet.');
     return;
   }
   await s.camera.panTo('wheel', 40);
@@ -796,10 +804,10 @@ export const BOX_BUDGET = {
   default: 12,
   downs_arrival: 3, thornfold_arrival: 4, brindle_strays: 5, stray_found_1: 1, stray_found_2: 1, stray_found_3: 1, stray_found_4: 1, stray_found_5: 1,
   strays_done: 5, stones_arrival: 3, rollcall_start: 5, iris_roll: 4, quill_copy: 3, rollcall_stones: 11, barrow_entry: 3,
-  reeve_intro: 8, reeve_after: 5, rollcall_done: 3, cleft_hint: 2, terrace_arrival: 3, hesper_meet: 6,
+  reeve_intro: 9, reeve_after: 5, rollcall_done: 3, cleft_hint: 2, terrace_arrival: 3, hesper_meet: 6,
   star_read_1: 2, star_read_2: 2, star_read_3: 2, orrery_align: 8, cellar_entry: 3, cellar_note: 6,
   crates_start: 4, crate_delivered_1: 2, crate_delivered_2: 2, crate_delivered_3: 2, crates_done: 4,
-  mill_start: 6, millrace_arrival: 3, ferrick_meet: 6, culvert_entry: 2, golem_intro: 7, golem_after: 4, pin_place: 14, mill_done: 10,
+  mill_start: 6, millrace_arrival: 3, ferrick_meet: 6, culvert_entry: 2, golem_intro: 8, golem_after: 4, pin_place: 14, mill_done: 10,
   list_start: 4, list_rhyme: 2, list_ledger: 2, list_song: 2, list_done: 4,
   moor_arrival: 3, odo_meet: 5, larchhill_arrival: 3, yarrow_meet: 4, windmill_view: 3,
 };

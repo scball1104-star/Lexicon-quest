@@ -12,7 +12,8 @@
 // Every step's Talk names the next step. Order is free wherever the plan says so; the journal shows the first step whose flags
 // are not all set.
 
-import { ALL_SIDE_QUESTS, BANTER } from '../quests.js';
+import { ALL_SIDE_QUESTS, BANTER, TALK_PREPEND } from '../quests.js';
+import { X1_MAP_REGION } from './flags.js';
 import { X1_REGIONS } from './live.js';
 
 export const REWARDS_X1 = {
@@ -90,7 +91,7 @@ export const X1_SIDE_QUESTS = [
         journal: 'Something counts in the Wethers\' Barrow under the stones. Face the Barrow Reeve. Recommended Lv 5.',
         chat: [
           { map: 'x1_barrow', if: BOTH, lines: [m('He counts, and comes up short. There is a font past the counting room. Rest there first.'), b('Right.')] },
-          { if: 'mira_joined', lines: [m('The barrow door is in the turf mound north of the ring. The Reeve is at the far end. Bows and light, Bram.')] },
+          { map: 'x1_downs', if: 'mira_joined', lines: [m('The barrow door is in the turf mound north of the ring. The Reeve is at the far end. Bows and light, Bram.')] },
           { lines: [h('(The barrow door is in the mound north of the stones. Something counts inside.)')] },
         ],
       },
@@ -297,10 +298,17 @@ export const BANTER_X1 = {
     m('Thirty years of flour in the rafters.'),
     b('I could sleep in this flour. I would be a bun by morning.'),
   ] }],
-  x1_culvert: [{ if: BOTH, lines: [
-    b('Drains. It is always drains.'),
-    m('You asked to come.'),
-  ] }],
+  x1_culvert: [
+    // W7 (PLAYTEST_REVIEW_X1 m1): the plates and the gate are named until the gate has opened once (its flag, set by events.js)
+    { if: BOTH, ifNot: 'x1_gate_drain_open', lines: [
+      m('Two plates in the floor, and a gate that wants both.'),
+      b('One block is light. The other is heavy, and that is a Shove. I like a Shove.'),
+    ] },
+    { if: BOTH, lines: [
+      b('Drains. It is always drains.'),
+      m('You asked to come.'),
+    ] },
+  ],
   x1_highmoor: [{ if: BOTH, lines: [
     m('Fifty paces between the posts. I am counting.'),
     b('Of course you are.'),
@@ -317,8 +325,12 @@ export function activeBanter(regionOn = (r) => X1_REGIONS[r] !== false) {
   return Object.fromEntries(Object.entries(BANTER_X1).map(([map, list]) => [map, list.filter((e) => !e.region || regionOn(e.region) !== false)]));
 }
 
+/** W7: on the Wider Valley's maps Talk does not send a finished-Episode-1 party back to Mael's well (the opener of the Episode 2 road). */
+export const TALK_OPENER_X1 = { map: Object.keys(X1_MAP_REGION), if: 'ep1_complete', ifNot: 'ep2_started', lines: [m('Willowmere has the next errand. The Downs will still be here.')] };
+
 export function register({ regionOn = (r) => X1_REGIONS[r] !== false } = {}) {
-  for (const q of X1_SIDE_QUESTS) if (!ALL_SIDE_QUESTS.includes(q)) ALL_SIDE_QUESTS.push(q);
+  if (Object.values(X1_MAP_REGION).some((r) => regionOn(r) !== false) && !TALK_PREPEND.includes(TALK_OPENER_X1)) TALK_PREPEND.push(TALK_OPENER_X1);
+  for (const q of X1_SIDE_QUESTS) { q.pinFirst = true; if (!ALL_SIDE_QUESTS.includes(q)) ALL_SIDE_QUESTS.push(q); }   // W7: partyChat lets a map-pinned line of these speak first
   for (const [map, entries] of Object.entries(activeBanter(regionOn))) {
     if (map === 'valley' || map === 'willowmere') {
       const cur = BANTER[map] || (BANTER[map] = []);

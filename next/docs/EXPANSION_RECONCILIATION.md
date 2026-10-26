@@ -26,7 +26,7 @@ disagrees with this file, this file wins, and the other file is stale. The order
 |---|---|---|
 | `EP1_EXP_SCALE`, `EP2_EXP_SCALE`, `EP3_EXP_SCALE` | 1 | every episode pays today's EXP |
 | `OPTIONAL_FOE_EXP_MUL` | 1 | the default `expMul` of every optional zone that sets none (Whisperwood Hollow keeps today's pay) |
-| `EXPANSION_FOE_EXP_MUL` | 0.1 | the `expMul` each NEW optional group and optional boss of either expansion carries (first pass; 0.05 to 0.15) |
+| `EXPANSION_FOE_EXP_MUL` | 0.1 (**1.0 in the code since W2**, Scott; see `docs/BATTLE_X1.md`) | the `expMul` each NEW optional group and optional boss of either expansion carries (first pass; 0.05 to 0.15) |
 
 `rules.js` `makeEnemyUnit` multiplies a unit's EXP by `expScale(options.zone) x expMul` once, after the elite multiplier, rounded per unit; `encounterExp()` sums the same values; `give('exp', n)` (cutscene) is never scaled. Because every scale is 1.0 and no existing encounter sets `expMul`,
 **every existing reward is byte-identical** (a test pins it), so no `X1_LIVE` conditional is needed: the first draft's `EP1_EXP_SCALE = X1_LIVE ? 0.6 : 1` is dropped because the scale no longer exists. X1-battle is the only agent that edits `rules.js` or the EXP block of `encounters.js`; X2-battle edits **none** of

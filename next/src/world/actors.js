@@ -335,6 +335,7 @@ export class EnemyBrain {
     this.pending = 0;           // player steps not yet answered (dungeon rule)
     this.stun = 0;              // frames to sit still (after a flee)
     this.encounter = ev.encounter;
+    this.sideDir = null;
   }
 
   onPlayerStep() { if (this.stepRule === 'player') this.pending++; }
@@ -404,11 +405,18 @@ export class EnemyBrain {
     const dx = L.tx - a.tx, dy = L.ty - a.ty;
     const first = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
     const second = Math.abs(dx) >= Math.abs(dy) ? (dy > 0 ? 'down' : dy < 0 ? 'up' : null) : (dx > 0 ? 'right' : dx < 0 ? 'left' : null);
-    for (const d of [first, second]) {
-      if (!d) continue;
+    const open = (d) => {
       const nx = a.tx + DIRS[d][0], ny = a.ty + DIRS[d][1];
-      if (this.leaderAt(field, nx, ny) || field.canStep(a, a.tx, a.ty, nx, ny, d) === true) return d;
+      return this.leaderAt(field, nx, ny) || field.canStep(a, a.tx, a.ty, nx, ny, d) === true;
+    };
+    for (const d of [first, second]) {
+      if (!d || (this.sideDir && d === OPPOSITE[this.sideDir])) continue;
+      if (open(d)) { if (d === first) this.sideDir = null; return d; }
     }
+    // W7: boxed in by a prop, side-step round it (sticky side, never straight back) instead of freezing
+    const sides = Math.abs(dx) >= Math.abs(dy) ? ['up', 'down'] : ['left', 'right'];
+    const s0 = this.sideDir && sides.includes(this.sideDir) ? this.sideDir : sides[a.serial % 2];
+    for (const d of [s0, OPPOSITE[s0]]) if (open(d)) { this.sideDir = d; return d; }
     return first;
   }
 }

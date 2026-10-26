@@ -91,3 +91,11 @@ Each module has a default `register()` (idempotent). The pack index (`src/data/x
 
 `qa/battle/x1_rewards.test.mjs` (7: constants; every one of the 59 existing encounters byte-identical in units, elites, `encounterExp` and three played-out fights against `qa/battle/x1_baseline_rewards.json`; the main route and EXP table; new groups pay `raw x expMul x elite`, rounded per unit; boss calls inherit; the Hollow unchanged; the per-fight override), `x1_data.test.mjs` (10: ids resolve, enemies, zones unlisted, encounters, items, budgets, set, shops and the price card, the W15 one-action rule for the new foes at their levels, no em dashes), `x1_levels.test.mjs` (5: registry, sim targets for the new zones and bosses, the ledger, no pushover and the check can fire, Episode 2 plug-in). `qa/battle/fuzz.test.mjs` now also plays every x1 encounter. Whole battle area: 170 tests pass (`node qa/run.mjs battle`).
 The baseline file is regenerated only by `tools/sim/out/x1_gen_baseline.mjs` against code that predates the mechanism; do not regenerate it from current code.
+
+## W7 fix pass (2026-10-26): the four puzzle-gated weapons
+
+Orchard Axe ATK 21 crit 5 (was 14 / 4), Drover's Bow ATK 17 SPD 1 crit 4 (was 14 / 1 / 3), Chime Staff ATK 5 MAG 15 SPR 4 MP 6 (was 4 / 13 / 3 / 6),
+Reeve's Crook ATK 24 DEF 2 crit 4 Fury gain 10 (was 17): the Crook now beats the Winged Lance (22) because the Reeve is a boss behind a puzzle gate.
+Each is a quarter or more over its tier 2 shop weapon, under the tier 3 shop weapon (except the Crook), and under Episode 2's ilvl 11 base of its type;
+`qa/battle/x1_data.test.mjs` pins all of it. The sim equips none of them, so `simulate --check` and the main route do not move.
+

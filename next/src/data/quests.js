@@ -620,7 +620,7 @@ export const MAIN_QUEST_EP2 = {
           b("I'll carry your pack. I packed it, so I know what's in it."),
         ] },
         { map: TOWN_MAPS, ifNot: 'ep2_started', lines: [m('Mael wants us at the well in Lantern Square first. He has something for us.')] },
-        { ifNot: 'ep2_started', lines: [m('Mael wanted us at the well in Willowmere before we go anywhere.')] },
+              { ifNot: 'ep2_started', lines: [m('Mael wanted us at the well in Willowmere before we go anywhere.')] },
         { map: TOWN_MAPS, lines: [
           b('South gate, then the valley. At the fork, the east branch, down to the ford. My father is there.'),
           m('Say goodbye to anyone you would miss. Iris made me a list.'),
@@ -1342,21 +1342,20 @@ export function activeSideQuests(hasFlag) {
  * then up to `maxSide` side quest reminders, then one optional exchange about the current map.
  * Speakers are 'hero' (thoughts), 'mira' or 'bram'.
  */
+/** Pack hook: main-hint entries tried before the step's own (the step objects stay untouched). */
+export const TALK_PREPEND = [];
 export function partyChat(hasFlag, mapId, { maxSide = 1 } = {}) {
   const step = currentStep(hasFlag, mainQuestFor(hasFlag));
-  const main = pickChat(step.chat, hasFlag, mapId);
+  const main = pickChat(TALK_PREPEND.length ? [...TALK_PREPEND, ...step.chat] : step.chat, hasFlag, mapId);
   const side = [];
-  // A side entry marked `nudge` (fresh news, e.g. the Lantern for the lost bridge) goes before older reminders.
+  // `nudge` (fresh news) goes first; W7: a pinFirst (Wider Valley) quest's entry pinned to THIS map goes before it
   const picks = [];
-  for (const { step: st } of activeSideQuests(hasFlag)) {
+  for (const { quest: q, step: st } of activeSideQuests(hasFlag)) {
     const e = pickChat(st.chat, hasFlag, mapId);
-    if (e) picks.push(e);
+    if (e) picks.push({ e, local: q.pinFirst && e.map != null && mapId != null ? 1 : 0 });
   }
-  picks.sort((a, b) => (b.nudge ? 1 : 0) - (a.nudge ? 1 : 0));
-  for (const e of picks) {
-    if (side.length >= maxSide) break;
-    side.push(...e.lines);
-  }
+  picks.sort((a, b) => (b.local - a.local) || ((b.e.nudge ? 1 : 0) - (a.e.nudge ? 1 : 0)));
+  for (const { e } of picks) if (side.length < maxSide) side.push(...e.lines);
   const b = mapId != null ? pickChat(BANTER[mapId], hasFlag, mapId) : null;
   return { step, lines: main ? main.lines : [], side, banter: b ? b.lines : [] };
 }

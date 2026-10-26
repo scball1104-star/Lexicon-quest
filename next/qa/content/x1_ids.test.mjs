@@ -66,7 +66,7 @@ test('the flags of plan 2.2 are all declared, each with a one-line meaning', () 
     'list_started', 'list_rhyme', 'list_ledger', 'list_song', 'list_done'];
   for (const f of PLAN) assert.ok(f in X1_FLAGS, `plan flag ${f} not declared`);
   const extra = Object.keys(X1_FLAGS).filter((f) => !PLAN.includes(f));
-  assert.deepEqual(extra.sort(), ['golem_after_done', 'golem_met', 'reeve_after_done', 'reeve_met'], 'the only additions are the four one-shot guards');
+  assert.deepEqual(extra.sort(), ['golem_after_done', 'golem_met', 'reeve_after_done', 'reeve_met', 'x1_gate_drain_open'], 'the only additions are the four one-shot guards and the Culvert gate flag (W7)');
   for (const [f, d] of Object.entries(X1_FLAGS)) assert.ok(typeof d === 'string' && d.length > 10 && d.length < 140 && !d.includes('\n'), `${f}: meaning`);
 });
 

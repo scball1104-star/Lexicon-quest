@@ -72,6 +72,9 @@ for (let x = 1; x <= 17; x++) put(g, x, 30, 'W');
 for (let x = 24; x <= 42; x++) put(g, x, 30, 'W');
 put(g, 2, 31, ',,'); put(g, 30, 31, ',,,'); put(g, 40, 31, ',,');
 
+// X1 W7: the lane runs out to the gate
+if (X1_W) box(g, 0, 16, 1, 17, '=');
+
 const ground = rows(g);
 
 // ------------------------------------------------------------------ overlays
@@ -197,6 +200,9 @@ const events = [
     door('x1_west_gate', 0, 16, ['x1_downs', 54, 25, 'left'], { w: 1, h: 2, if: 'first_fight_done' }),
     object('x1_orchard_gate', 0, 16, 'signpost', { text: 'x1_orchard_gate', ifNot: 'first_fight_done' }),
     object('x1_orchard_gate_b', 0, 17, 'signpost', { text: 'x1_orchard_gate', ifNot: 'first_fight_done' }),
+    // W7: an arrow post beside the arrival cell (1, 16), and one bark
+    object('x1_west_post', 1, 18, 'signpost_arrow', { text: 'x1_west_post', if: 'first_fight_done' }),
+    trigger('x1_west_hint_w', 0, 13, 6, 7, null, { bark: 'first_west_gate', if: 'first_fight_done' }),
     object('x1_wall_crack', 6, 30, 'wall_cracked', { breakable: 'rock', text: 'x1_wall_crack', h: 2 }),
     chest('x1_chest_wall', 6, 31, 'wood', { item: 'echo_herb', qty: 2, behind: 'x1_wall_crack' }),
   ] : []),

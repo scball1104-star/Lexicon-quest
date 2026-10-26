@@ -29,13 +29,13 @@ export const X1_KEY_ITEMS = {
 
 // Placed gear. `source` says where it is found (shown in the item window). Peers in the comment are what the budget test compares to.
 export const X1_UNIQUES = {
-  // Iron Pike T2 ATK 14 DEF 1; Winged Lance T3 ATK 22 DEF 2; Thornwake (the Alpha) ATK 18 crit 4.
+  // Iron Pike T2 ATK 14 DEF 1; Winged Lance T3 ATK 22 DEF 2; Thornwake (the Alpha) ATK 18 crit 4. W7: a boss behind a puzzle gate beats the Lance (24 against 22).
   reeves_crook: { id: 'reeves_crook', name: "Reeve's Crook", rarity: 'legendary', slot: 'weapon', type: 'spear',
-    ilvl: 6, price: 1500, icon: 'spear', stats: { atk: 17, def: 2, crit: 4, furyGain: 10 },
+    ilvl: 6, price: 1500, icon: 'spear', stats: { atk: 24, def: 2, crit: 4, furyGain: 10 },
     source: 'Barrow Reeve (guaranteed)', desc: 'A shepherd\'s crook, iron-shod. It always counts one more.' },
   // Hunter's Bow T2 ATK 12 SPD 1; Yew Longbow T3 ATK 19 crit 5.
   drovers_bow: { id: 'drovers_bow', name: "Drover's Bow", rarity: 'rare', slot: 'weapon', type: 'bow',
-    ilvl: 5, price: 600, icon: 'bow', stats: { atk: 14, spd: 1, crit: 3 },
+    ilvl: 5, price: 700, icon: 'bow', stats: { atk: 17, spd: 1, crit: 4 },
     source: "Barrow, the Ewe Chamber's niche chest", desc: 'A drover\'s bow, strung for wolves on the road.' },
   // set drovers_road. Wayfarer Mantle DEF 2 SPR 3 LUK 3 (ilvl 4).
   fold_mantle: { id: 'fold_mantle', name: 'Fold Mantle', rarity: 'set', set: 'drovers_road', slot: 'mantle',
@@ -59,11 +59,11 @@ export const X1_UNIQUES = {
     source: 'Millstone Golem (guaranteed)', desc: 'Leather and flour-dust. It has stood in front of a wheel.' },
   // Crystal Rod T2 ATK 5 MAG 11 MP 4; Archivist's Staff T3 ATK 7 MAG 18 SPR 4 MP 6.
   chime_staff: { id: 'chime_staff', name: 'Chime Staff', rarity: 'rare', slot: 'weapon', type: 'staff',
-    ilvl: 6, price: 520, icon: 'staff', stats: { atk: 4, mag: 13, spr: 3, mp: 6 },
+    ilvl: 6, price: 650, icon: 'staff', stats: { atk: 5, mag: 15, spr: 4, mp: 6 },
     source: "High Moor, the tarn islet's chest (Lantern)", desc: 'A moor-chime on a staff. It rings when something is near.' },
   // Battle Axe T2 ATK 16 SPD -1; Bearded Axe T3 ATK 25 SPD -1.
   orchard_axe: { id: 'orchard_axe', name: 'Orchard Axe', rarity: 'rare', slot: 'weapon', type: 'axe',
-    ilvl: 5, price: 480, icon: 'axe', stats: { atk: 14, crit: 4 },
+    ilvl: 5, price: 650, icon: 'axe', stats: { atk: 21, crit: 5 },
     source: "Larchhill, the aqueduct's far chest", desc: 'A pruning axe, long in the handle and quick in the swing.' },
 };
 

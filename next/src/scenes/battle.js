@@ -408,7 +408,7 @@ export class BattleScene {
         // Touch: Flee lives in the help window (tap to arm, tap again to run).
         if (tb && input.tapIn(tb.flee.x, tb.flee.y, tb.flee.w, tb.flee.h)) {
           const run = this.menu.fleeTap(audio);
-          if (run) { this.performParty(run); return; }
+          if (run) { this.menu.close(); this.performParty(run); return; }
         }
         const action = this.menu.update(input, audio);
         if (action) this.performParty(action);

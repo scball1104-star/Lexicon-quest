@@ -1,19 +1,8 @@
-// The field scene (W2-world): exploration from the moment the player can walk.
-//
-//   engine.push('field', { map, x, y, dir })      or   engine.push('field')  (reads engine.game.map / pos)
-//   engine.push('field', { map: 'hero_home', mark: 'bed', lighting: 'day' })
-//
-// Owns: the TileMap, the party (leader + caterpillar followers), NPCs, visible enemies, events, the
-// cutscene runner, camera, lighting, particles, banner, transitions, autosave on map change.
-// Field HUD: none (DESIGN 5.1). Input: directions walk, run modifier (or cancel on keyboard), confirm
-// interacts, menu opens the menu, pageR uses a field ability (W9: Dash Strike, Appraise, the Lantern of Recall,
-// Shove; src/world/abilities.js), pageL switches it. Under a dialog (updateBelow) the field keeps animating but
-// reads no input.
-//
-// LQ_DEBUG: warp(mapId, x, y, dir), setFlag(flag, value), give(itemId, qty), call('scene', id), lantern(), state().
-// E2-world: silverglass beams (field.glass, world/silverglass.js), reflections (field.reflections), mirror and fog
-// doors, flag-gated overlays, conditional music / tint / banners, mist, the Episode 2 credits handoff, and
-// LQ_DEBUG.newGameEp2(name), beams(), turnMirror(id), reflections().
+// The field scene (W2-world): exploration. engine.push('field', { map, x, y, dir, mark, lighting }) or engine.push('field') (reads
+// engine.game.map / pos). Owns the TileMap, party, NPCs, enemies, events, cutscene runner, camera, lighting, particles, banner,
+// transitions, autosave on map change, and the E2 silverglass / reflections / fog / flag-gated overlays. No HUD (DESIGN 5.1).
+// Input: walk, run, confirm, menu, pageR uses a field ability (src/world/abilities.js), pageL switches it.
+// LQ_DEBUG: warp, setFlag, give, call('scene', id), lantern(), state(), newGameEp2(name), beams(), turnMirror(id), reflections().
 
 import { createGame, normSlot, newGameEp2,hasFlag as stateHasFlag, setFlag as stateSetFlag, give as stateGive, take as stateTake, setPosition, setSafePoint, serialize, saveMeta, partyMembers, isKeyItem, heal, addMember as stateAddMemberDebug, findGear, addGear } from '../game/state.js';
 import { grant, equipOffers, equipGear, deltaLine, gearName, isWeaponKey, baseOf } from '../game/inventory.js';
@@ -30,6 +19,8 @@ import { buildingFeatures, chimneyTops, drawLitWindows } from '../world/townlife
 import { Banner, transitionOpts } from '../world/transitions.js';
 import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
+import { packForMap, packEnabled, packReady, awaitPacks } from '../game/packs.js';
+import { landing } from '../game/packFallback.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF, sceneAllowed } from '../game/story.js';
@@ -89,6 +80,7 @@ export class FieldScene {
     this.prompt = null;
     this.stepCount = 0;
     this.pendingBarks = [];
+    this.packReturn = null;
     this.lastMapIsInterior = false;
     this.transparentLetterbox = '#06050c';
     this.features = [];                // windows and chimneys of the buildings on this map (townlife.js)
@@ -143,6 +135,14 @@ export class FieldScene {
     const e = this.engine, g = this.game;
     this.loading = true;
     let mod = await loadMap(mapId);
+    // W7: a pack map that did not come up is never the test town: wait (bounded), else land on a real map and return once the pack is up
+    const hit = !mod && packForMap(mapId);
+    if (hit && hit.prefixed && packEnabled(hit.id)) {
+      await awaitPacks([hit.id], 8000);
+      mod = await loadMap(mapId);
+      const l = !mod && landing(mapId), back = l && await loadMap(l[0]);
+      if (back) { if (!packReady(hit.id)) this.packReturn = { pack: hit.id, map: mapId, x, y, dir, via: l[0] }; mod = back; [mapId, x, y, dir] = l; o = { ...o, mark: undefined }; }
+    }
     if (!mod) {
       this.warnOnce('map:' + mapId, `map "${mapId}" not found; using the test town`);
       mod = await loadMap('_testtown');
@@ -523,7 +523,7 @@ export class FieldScene {
    * remark never stacks under an arrival scene's dialogue).
    */
   async bark(key) {
-    if (this.inputLocked || this.pendingWarp || (this.cutscene && this.cutscene.running) || this.engine.scene !== this) {
+    if (this.inputLocked || this.pendingWarp || (this.cutscene && this.cutscene.running) || this.engine.scene !== this || this.actors.some((a) => a.kind === 'enemy' && a.brain && a.brain.mode === 'chase' && Math.abs(a.tx - this.leader.tx) + Math.abs(a.ty - this.leader.ty) <= 5)) {
       if (!this.pendingBarks.includes(key)) this.pendingBarks.push(key);
       return;
     }
@@ -741,6 +741,10 @@ export class FieldScene {
     if (canControl && !L.moving && e.scene === this && !this.cutscene.running && this.glass.queue.length) this.runScene(this.glass.takeScript());
     // a companion remark that had to wait (a scene, a battle, a chest) speaks now that the field is quiet
     if (canControl && !L.moving && this.pendingBarks.length && e.scene === this && !this.banner.active) this.bark(this.pendingBarks.shift());
+    // W7: after a fallback landing, go back to the saved place once the pack is up
+    const r = this.packReturn;
+    if (r && this.mapId !== r.via) this.packReturn = null;
+    else if (r && packReady(r.pack) && canControl && !L.moving && e.scene === this && !this.cutscene.running) { this.packReturn = null; this.warpTo(r.map, r.x, r.y, r.dir, 'door'); }
 
     // player input
     if (canControl && !L.moving && !this.pendingWarp) {
@@ -829,6 +833,7 @@ export class FieldScene {
     const code = this.map.codeAt(L.tx, L.ty);
     // only pit TILES swallow the party; a `pit` area event just says where those tiles drop to (docs/MAPS.md)
     if (code === 'pit') { this.fallInPit(EV.pitDropAt(this, L.tx, L.ty)); return; }
+    EV.entitiesAt(this, L.tx, L.ty).forEach((t) => { if (t.present && t.ev.bark) this.bark(t.ev.bark); });   // W7: bark-only triggers
     // doors, exits, triggers on this tile
     for (const ent of EV.entitiesAt(this, L.tx, L.ty)) {
       if (!ent.present) continue;

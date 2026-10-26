@@ -1,5 +1,7 @@
 # Episode 1 expansion plan: The Wider Valley
 
+> **Updated 2026-10-26 (W7 fix pass), and it wins over every older line in this file about EXP and the puzzle weapons.** The code pays **full EXP**: `EXPANSION_FOE_EXP_MUL` is **1** in `src/data/expcurve.js` (Scott's decision, recorded in `docs/BATTLE_X1.md`), so the new optional foes and bosses pay regular EXP and a completionist is about **three levels over** today's plan at the two main bosses (Lv 9 at the Echo Warden and Lv 11 at the Archivore in the sim's "Optional EXP" table; accepted). Every "0.1", "a tenth" and "at most one level over" below about fight EXP is the old design, kept for history. Section 8.2's four puzzle-gated weapons carry the W7 numbers in the table there. The main route is unchanged.
+
 Owner: ep1-expander (designer), 2026-10-25. Status: **designed and reconciled with the Episode 2 plan, awaiting orchestrator launch**.
 **Where this file disagrees with `docs/EXPANSION_RECONCILIATION.md` (the decision log) or `docs/EXPANSION_SCHEDULE.md` (the build order), those win.** The pack
 mechanism that carries every map, scene and art file of this plan is `docs/briefs/XP-packs.md`. Scott played Episodes 1
@@ -185,7 +187,7 @@ Equipment (stat budgets in section 8): `reeves_crook`, `drovers_bow`, `fold_mant
 Enemies: `barrow_shade` (ordinary), `barrow_reeve` (boss), `millstone_golem` (boss). Encounters: `dn_wolves`,
 `dn_scarab`, `dn_pack`; `mo_wolves`, `mo_scarabs`, `mo_wraiths`; `bw_shades`, `bw_mixed`, `barrow_reeve`; `lh_beetles`, `lh_wolves`,
 `lh_mixed`; `tr_wolves`, `tr_golem`; `cl_wraiths`; `mr_weevils`, `mr_wolves`; `cv_blots`, `cv_wraith`, `millstone_golem`.
-Exp ids (one file, `src/data/expcurve.js`): `EP1_EXP_SCALE`, `EP2_EXP_SCALE`, `EP3_EXP_SCALE` (all 1.0), `OPTIONAL_FOE_EXP_MUL` (1.0), `EXPANSION_FOE_EXP_MUL` (0.1), `scaleForEpisode()`, `scaleExp()`, `expScale(zoneId)` (in `encounters.js`), the encounter option `expMul`, the cutscene call `give('exp', n)`.
+Exp ids (one file, `src/data/expcurve.js`): `EP1_EXP_SCALE`, `EP2_EXP_SCALE`, `EP3_EXP_SCALE` (all 1.0), `OPTIONAL_FOE_EXP_MUL` (1.0), `EXPANSION_FOE_EXP_MUL` (1 in the code since W2; 0.1 in the first design), `scaleForEpisode()`, `scaleExp()`, `expScale(zoneId)` (in `encounters.js`), the encounter option `expMul`, the cutscene call `give('exp', n)`.
 
 ### 2.5 NPC ids (`src/data/x1/npcs.js`) and sprites
 
@@ -815,7 +817,7 @@ export const EP1_EXP_SCALE = 1;   // Episode 1 zones (main path, Whisperwood Hol
 export const EP2_EXP_SCALE = 1;   // Episode 2 zones
 export const EP3_EXP_SCALE = 1;   // Episode 3 zones (E3-battle may revise; this build never does)
 export const OPTIONAL_FOE_EXP_MUL = 1;     // the default per-encounter expMul of every optional zone that sets none (the Hollow keeps today's pay)
-export const EXPANSION_FOE_EXP_MUL = 0.1;  // the expMul every NEW optional group and optional boss of either expansion carries (first pass; allowed 0.05 to 0.15; 7.2 shows why it cannot be 1)
+export const EXPANSION_FOE_EXP_MUL = 1;  // (first design 0.1; the code pays full EXP, W7) the expMul every NEW optional group and optional boss of either expansion carries (first pass; allowed 0.05 to 0.15; 7.2 shows why it cannot be 1)
 export function scaleForEpisode(episode) { /* 1 -> EP1, 2 -> EP2, 3 -> EP3, anything else 1 */ }
 export function scaleExp(raw, episode, expMul = 1) { return Math.round(raw * scaleForEpisode(episode) * expMul); }
 ```
@@ -976,15 +978,15 @@ Potion, a small thank-you. Key items (section 2.3) have no stats.
 
 | id | Name | Rarity | Slot, who | Stats | Source | Peers (the check) |
 |---|---|---|---|---|---|---|
-| `reeves_crook` | Reeve's Crook | legendary | spear, Bram; ilvl 6, price 1500 | ATK +17, DEF +2, crit +4, Fury gain +10% | Barrow Reeve (guaranteed) | Iron Pike T2 ATK 14 DEF 1; Winged Lance T3 ATK 22 DEF 2; Thornwake (the Alpha) ATK 18 crit 4 |
-| `drovers_bow` | Drover's Bow | rare (unique) | bow, Mira; ilvl 5, price 600 | ATK +14, SPD +1, crit +3 | Barrow niche chest | Hunter's Bow T2 ATK 12 SPD 1; Yew Longbow T3 ATK 19 crit 5 |
+| `reeves_crook` | Reeve's Crook | legendary | spear, Bram; ilvl 6, price 1500 | ATK +24, DEF +2, crit +4, Fury gain +10% (W7: was 17; a boss behind a puzzle beats the Winged Lance's 22) | Barrow Reeve (guaranteed) | Iron Pike T2 ATK 14 DEF 1; Winged Lance T3 ATK 22 DEF 2; Thornwake (the Alpha) ATK 18 crit 4 |
+| `drovers_bow` | Drover's Bow | rare (unique) | bow, Mira; ilvl 5, price 700 | ATK +17, SPD +1, crit +4 (W7: was 14, 600 gold) | Barrow niche chest | Hunter's Bow T2 ATK 12 SPD 1; Yew Longbow T3 ATK 19 crit 5 |
 | `fold_mantle` | Fold Mantle | set `drovers_road` | mantle, all; ilvl 3, price 500 | DEF +2, SPR +2, LUK +2 | Strays of Thornfold | Wayfarer Mantle DEF 2 SPR 3 LUK 3 (ilvl 4) |
 | `drover_boots` | Drover Boots | set `drovers_road` | boots, all; ilvl 5, price 600 | SPD +1, DEF +2, HP +12 | Pell's Crates | Wayfarer Boots SPD 2 DEF 1 HP 10 (ilvl 6) |
 | `rollcall_charm` | Rollcall Charm | rare (unique) | charm, all; ilvl 5, price 450 | SPR +2, LUK +4, Silence resist 30% | The Thirteenth Stone | Courier's Knot SPD 1 LUK 4 Blind resist 30 |
 | `star_chart` | Keeper's Star Chart | rare (unique) | charm, all; ilvl 7, price 600 | MAG +2, SPR +3, ink resist 20% | Cellar dais chest | Lantern Charm T3 SPR 3 ink 15 (ilvl 9) |
 | `millwright_apron` | Millwright's Apron | legendary | body, all; ilvl 7, price 1500 | DEF +11, SPR +3, HP +30, Poison resist 50% | Millstone Golem (guaranteed) | Steel Cuirass T3 DEF 13; Mirrorguard Mail DEF 11 SPR 9 HP 20 ink 20 (ilvl 6) |
-| `chime_staff` | Chime Staff | rare (unique) | staff, Mira; ilvl 6, price 520 | ATK +4, MAG +13, SPR +3, MP +6 | Moor tarn islet chest | Crystal Rod T2 ATK 5 MAG 11 MP 4; Archivist's Staff T3 ATK 7 MAG 18 SPR 4 MP 6 |
-| `orchard_axe` | Orchard Axe | rare (unique) | axe, hero and Bram; ilvl 5, price 480 | ATK +14, crit +4 (no SPD penalty) | Larchhill aqueduct chest | Battle Axe T2 ATK 16 SPD -1; Bearded Axe T3 ATK 25 SPD -1 |
+| `chime_staff` | Chime Staff | rare (unique) | staff, Mira; ilvl 6, price 650 | ATK +5, MAG +15, SPR +4, MP +6 (W7: was ATK 4, MAG 13, SPR 3) | Moor tarn islet chest | Crystal Rod T2 ATK 5 MAG 11 MP 4; Archivist's Staff T3 ATK 7 MAG 18 SPR 4 MP 6 |
+| `orchard_axe` | Orchard Axe | rare (unique) | axe, hero and Bram; ilvl 5, price 650 | ATK +21, crit +5, no SPD penalty (W7: was ATK 14, crit 4) | Larchhill aqueduct chest | Battle Axe T2 ATK 16 SPD -1; Bearded Axe T3 ATK 25 SPD -1 |
 
 Set `drovers_road` (2 pieces): +25 max HP and +2 DEF ("Both pieces: +25 HP and +2 DEF"). It must stay below Wayfarer's
 Promise (SPD +1 and a start of Haste); a unit test pins both. Rule for every row: **no new unique beats the best Episode 1
@@ -1192,7 +1194,7 @@ no second one: its N1 is retired). **Fallback if cut:** the Appraise chests beco
 
 ### 11.2 The constants file and `expMul` per encounter (X1-battle, wave 1; size S; the one mechanism for both episodes)
 
-Section 7.1 is the contract: the one file `src/data/expcurve.js` (every scale 1.0, `EXPANSION_FOE_EXP_MUL` 0.1), `expScale(zoneId)` and `encounterExp()` in `encounters.js`, the single application point in
+Section 7.1 is the contract: the one file `src/data/expcurve.js` (every scale 1.0, `EXPANSION_FOE_EXP_MUL` 1 in the code, 0.1 in the first design), `expScale(zoneId)` and `encounterExp()` in `encounters.js`, the single application point in
 `src/battle/rules.js` `makeEnemyUnit`, and the per-encounter option `expMul` (default 1; `rollEncounter()` copies it onto each enemy spec as it copies `power` and `speed`). Tests pin that every existing reward is unchanged
 and that the new groups pay as 7.2 says. The Episode 2 expansion edits none of these files.
 
@@ -1290,7 +1292,7 @@ that exists today is renamed, removed, moved or reinterpreted. New ones only.
 
 ### 12.3 Mechanisms
 
-- **EXP**: every scale in `expcurve.js` is 1.0 and no existing encounter sets `expMul`, so no existing reward changes and nothing needs a conditional (7.1). Only the new optional groups pay at `expMul` 0.1.
+- **EXP**: every scale in `expcurve.js` is 1.0 and no existing encounter sets `expMul`, so no existing reward changes and nothing needs a conditional (7.1). Only the new optional groups carry `expMul`, which is 1 in the code (full pay; first design 0.1).
 - **`X1_LIVE`** (`src/data/x1/live.js`, created by XP-packs) is false until X1-integrate flips it; every new door, NPC, scene entry, shop line
   and talk entry in existing files checks `x1On(region)`, which is true only when the switch is on, the region is on (`X1_REGIONS` lets a region ship off) and the `x1` pack has loaded.
 - **The pack** (`XP-packs.md`): the eleven maps, the data modules, the scenes and the art load on first need; a failed load leaves Episode 1 exactly as it was (the edits to the five existing maps are gated by `x1On`).
@@ -1403,7 +1405,7 @@ or with the Episode 2 art agents; **even so the Episode 2 art and audio agents w
 **Risks.**
 - **Volume.** About 97 typical minutes is a lot of optional content; it is built in region slices (sections 13, 14) and the cut
   lines below stay available until the story timer has spoken.
-- **Optional EXP is tiny.** The new fights pay about a tenth of their raw EXP and quests a few points, so a player may feel the optional world "does not level me". That is the instruction (rewards are gold, gear, items); the
+- **Optional EXP (superseded: full pay).** The code pays the new fights in full, so the optional world does level the party (about +3 levels for a completionist). The first design paid a tenth, and a player might have felt the optional world "does not level me". That is the instruction (rewards are gold, gear, items); the
   alternative of paying more breaks the cap of 7.2 at the Archivore.
 - **Gold.** More chests and quests; the autoplay column decides (8.5); the cap is 1,900 more than today.
 - **Shared files.** Two expansions touch the same registries, two town maps and the audio manifest. Mitigation: one pack mechanism (`XP-packs.md`), registration by mutation instead of edits, one writer per file in a fixed run order (11.6).

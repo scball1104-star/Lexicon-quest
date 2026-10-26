@@ -86,7 +86,8 @@ const events = [
   sign('barrow_slab_a', 5, 9, 'barrow_slab_a', { solid: false }),
   chest('chest_bw_landing', 5, 14, 'wood', { item: 'antidote', qty: 2 }),
   // the hall: one floor switch, two slabs on rails (start: the Ossuary open, the Ewe Chamber shut)
-  floorSwitch('sw_slab', 15, 11, ['slab_n', 'slab_s']),
+  // `stateFlag`: the switch keeps its place in a save (a save made in the Ewe Chamber reloads with its slab open, not sealed in)
+  { ...floorSwitch('sw_slab', 15, 11, ['slab_n', 'slab_s']), stateFlag: 'x1_barrow_slab_thrown' },
   shelf('slab_n', [[12, 14], [14, 14]], { sprite: 'x1_slab', sfx: 'slab_slide' }),
   shelf('slab_s', [[21, 14], [19, 14]], { sprite: 'x1_slab', sfx: 'slab_slide' }),
   // the Ewe Chamber: a heavy block before the niche; the gold chest holds the Drover's Bow

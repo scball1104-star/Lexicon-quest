@@ -1,27 +1,10 @@
-// Field abilities (W9-abilities): Lufia II gave every hero a field tool that opened the map. Here each party
-// member has one, used with the field's tool button.
-//
-//   Hero  Dash Strike  a short forward dash (3 tiles). Plows through pots, breaks thin root walls and cracked
-//                      rock, and a visible enemy struck from behind starts the fight `preemptive` (free first turn).
-//   Mira  Appraise     face a visible enemy (5 tiles, one tile either side of the line): its weaknesses and
-//                      resistances go straight into the Bestiary, so the battle shows them instead of "?".
-//                      X1: an `object` event with `appraise: true` is read the same way (same range, same line of sight):
-//                      its `appraiseText` lines replace the bestiary entry and `behind: 'appraise:<id>'` events appear.
-//         Lantern      the Lantern of Recall (FieldScene.useLantern), once it is carried.
-//   Bram  Shove        pushes a heavy block (`block` + `heavy`) one tile; the hero alone only makes it rock.
-//
-// Controls: pageR (keyboard E, pad RB) uses, pageL (Q, LB) switches the selected ability and shows the wheel over
-// the leader. Touch: the on-canvas ability button (ABILITY_BTN, where the old Lantern button sat) uses, the swap
-// tab beside it (CYCLE_BTN) switches; both show whenever there is something to use an ability on.
-//
-// What pageR does (resolve): an object that needs one particular ability wins (a heavy block in front -> Shove;
-// a root wall or cracked rock in the dash lane -> Dash Strike); then the selected ability when it has a target;
-// then the Lantern when unrevealed ink lies within its reach (so "raise the Lantern with pageR" stays true
-// whatever is selected); then the selected ability on its own (a free dash, a raised Lantern, "nothing here").
-// The selection is saved in engine.game.fieldAbility.
-//
-// Pure helpers (node tests): abilitiesFor, selectedAbility, cycleAbility, scanLane, appraiseTarget,
-// appraisalRows, writeAppraisal. The FieldAbilities class is the field glue (input, actions, effects, drawing).
+// Field abilities (W9-abilities), used with pageR (touch: ABILITY_BTN; pageL / CYCLE_BTN switches; saved in engine.game.fieldAbility).
+// Hero Dash Strike: a 3 tile dash through pots, root walls and cracked rock; a foe struck from behind starts the fight preemptive.
+// Mira Appraise: a visible foe (5 tiles) or an `object` with `appraise: true` is read (its `appraiseText`; `behind: 'appraise:<id>'`
+// events appear); Lantern: the Lantern of Recall (FieldScene.useLantern). Bram Shove: pushes a `block` + `heavy` one tile.
+// pageR (resolve): an object that needs one ability wins, then the selected ability with a target, then the Lantern near unrevealed
+// ink, then the selected ability alone. Pure helpers for tests: abilitiesFor, selectedAbility, cycleAbility, scanLane,
+// appraiseTarget, appraisalRows, writeAppraisal.
 
 import { DIRS, OPPOSITE } from './pathfind.js';
 import { TILE, WALK_FRAMES } from './actors.js';
