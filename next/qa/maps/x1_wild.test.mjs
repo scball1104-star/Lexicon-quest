@@ -283,7 +283,7 @@ test('every chest by its ability (tier, contents, what it needs)', () => {
     assert.equal(need(m, id, from), ability, `${id} needs`);
   };
   t(MO, 'chest_moor_cairn', 'wood', 'antidote', 'none', MOOR.start);
-  t(MO, 'chest_moor_view', 'iron', null, 'none', MOOR.start);
+  t(MO, 'chest_moor_view', 'wood', null, 'none', MOOR.start);
   t(MO, 'chest_moor_islet', 'gold', 'chime_staff', 'lantern', MOOR.start);
   t(MO, 'chest_moor_gorse', 'iron', null, 'dash', MOOR.start);
   t(LH, 'chest_lh_hive', 'wood', 'honey_roll', 'none', HILL.start);

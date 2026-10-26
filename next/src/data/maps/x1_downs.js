@@ -181,7 +181,7 @@ const events = [
   // doors
   door('door_loom', 36, 20, ['x1_loomhouse', 7, 9, 'up']),
   door('door_barrow', 14, 5, ['x1_barrow', 3, 10, 'down']),
-  door('drovers_door', 39, 33, ['x1_millrace', 4, 1, 'down'], { w: 3, if: 'archive_f1_done' }),
+  door('drovers_door', 39, 33, ['x1_millrace', 4, 1, 'down'], { w: 3 }),   // integrate: not gated (the chain is the gate): a party that came up from the Millrace before the bell can walk back down
   // story triggers (each scene guards itself and runs once)
   trigger('thornfold_trig_e', 44, 21, 1, 2, 'thornfold_arrival'),
   trigger('thornfold_trig_n', 28, 15, 2, 1, 'thornfold_arrival'),
@@ -197,7 +197,7 @@ const events = [
   object('x1_drovers_chain_open', 39, 29, 'x1_chain_gate_open', { text: 'x1_drovers_chain', if: 'archive_f1_done' }),
   // the Ridge: Patch the scarecrow (Appraise) and the hatch chest at his feet
   object('x1_old_scarecrow', 31, 6, 'x1_old_scarecrow', { text: 'x1_old_scarecrow', appraise: true, appraiseText: 'appraise_scarecrow' }),
-  chest('chest_ridge', 32, 6, 'iron', { behind: 'appraise:x1_old_scarecrow' }),
+  chest('chest_ridge', 32, 6, 'wood', { behind: 'appraise:x1_old_scarecrow' }),
   // the Old Fold's cracked knoll (Dash): the iron chest and the fifth stray
   object('x1_crack_fold', 17, 21, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2, opens: [[17, 21], [17, 22], [17, 20]] }),
   chest('chest_fold', 18, 19, 'iron', { behind: 'x1_crack_fold' }),

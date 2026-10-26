@@ -217,7 +217,7 @@ const events = [
   // ---- the culvert arch and the cracked river wall
   door('culvert_door', 43, 22, ['x1_culvert', 3, 14, 'down']),
   object('x1_crack_bank', 46, 27, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2 }),
-  chest('chest_mr_bank', 46, 28, 'iron', { behind: 'x1_crack_bank' }),
+  chest('chest_mr_bank', 46, 28, 'wood', { behind: 'x1_crack_bank' }),
   // ---- visible groups: 2 per ZONES.x1_millrace.plan (respawn: 'reentry' below)
   enemy('e_mr_weevils', 22, 24, 'moss_scarab', 'mr_weevils', 'wander', { radius: 1 }),
   enemy('e_mr_wolves', 34, 28, 'thornback_wolf', 'mr_wolves', 'patrol', { path: steps('right', 6, 'left', 6) }),

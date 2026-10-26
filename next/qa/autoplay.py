@@ -45,6 +45,7 @@ crash, or softlock (no progress for 90 s).
 import argparse
 import collections
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -114,8 +115,10 @@ class Softlock(Fail):
 
 # ================================================================================================ driver
 class Bot:
-    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag='', query=''):
+    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag='', query='', x1=False):
         from playwright.sync_api import sync_playwright
+        self.x1 = x1                        # X1 (The Wider Valley) switched on in a local copy: live.js served with X1_LIVE true, grids built in the ON state
+        os.environ['LQ_X1_LIVE'] = '1' if x1 else '0'      # the page is served live.js forced on or off, whatever the file on disk says
         self.device = device + tag          # output prefix (the wrong-order sweep and Episode 2 keep their own files)
         self.query = query                  # extra URL params (Episode 2's title entry: &ep=2)
         self.speed = speed
@@ -446,7 +449,12 @@ class Bot:
         key = (map_id, tuple(sorted(f for f in gated if f in have))) if gated is not None else None
         if key is None or key not in self.grids:
             args = ['node', str(HERE / 'autoplay_grid.mjs'), map_id, '--flags=' + ','.join(sorted(have))]
-            r = subprocess.run(args, capture_output=True, text=True, timeout=60, cwd=str(NEXT))
+            env = dict(os.environ)
+            if self.x1:
+                # the five hub maps are gated by x1On() at module level: show them in the ON state (qa/maps/x1_baseline/force_on.mjs)
+                args[1:1] = ['--import', (NEXT / 'qa' / 'maps' / 'x1_baseline' / 'force_on.mjs').as_uri()]
+                env['LQ_X1_ON'] = 'all'
+            r = subprocess.run(args, capture_output=True, text=True, timeout=60, cwd=str(NEXT), env=env)
             if r.returncode != 0:
                 raise Fail(f'grid {map_id}: {r.stderr[-400:]}')
             g = json.loads(r.stdout)
@@ -652,6 +660,13 @@ class Bot:
         o = OPP[d]
         sx, sy = f['leader']['x'], f['leader']['y']
         ox, oy = sx + DIRS[o][0], sy + DIRS[o][1]
+        for _ in range(3):
+            if passable(ox, oy, o):
+                break
+            # a wanderer (an enemy, an NPC) can stand on the cell behind for a moment: give it time to move on
+            self.frames(40)
+            f = self.field()
+            passable, _ = self.model(f)
         if passable(ox, oy, o):
             self.hold_dir(o, 1, run=False)
             self.frames(WALK + 2)
@@ -663,7 +678,7 @@ class Bot:
         else:
             raise Fail(f'face {d}: the faced tile is walkable and nothing is behind us to step back to (at {sx},{sy} on {f["map"]}; {getattr(self, "last_interact", None)})')
 
-    def interact(self, ent_id=None, actor_id=None, prefer=None, safe=False, label=''):
+    def interact(self, ent_id=None, actor_id=None, prefer=None, safe=False, label='', _retry=True):
         """Walk next to an entity or actor, face it, press confirm, and settle through whatever follows."""
         f = self.settle()
         target = None
@@ -703,6 +718,10 @@ class Bot:
             ranked.append((len(p) + turn, spot, d))
         if not ranked:
             near = [(a['id'], a['x'], a['y']) for a in f['actors'] if a['kind'] != 'party' and abs(a['x'] - L[0]) + abs(a['y'] - L[1]) <= 3]
+            if _retry:
+                # an enemy standing in the one corridor that leads to it: fight it, then look again
+                self.hunt(limit=4, label='clear the way')
+                return self.interact(ent_id=ent_id, actor_id=actor_id, prefer=prefer, safe=safe, label=label, _retry=False)
             raise Fail(f'cannot reach {ent_id or actor_id} on {f["map"]} ({label}) from {L}; spots {spots}; actors nearby {near}')
         ranked.sort(key=lambda t: t[0])
         # Try the spots best first: a walkable target (a letter on the floor) can only be faced from a tile that
@@ -728,6 +747,9 @@ class Bot:
             self.tap('confirm', 3)
             self.settle(prefer=prefer, safe=safe)
             return before
+        if _retry:
+            self.hunt(limit=4, label='clear the way')
+            return self.interact(ent_id=ent_id, actor_id=actor_id, prefer=prefer, safe=safe, label=label, _retry=False)
         raise Fail(f'could not face {ent_id or actor_id} on {f["map"]} ({label}): {last_err}')
 
     @staticmethod
@@ -751,6 +773,7 @@ class Bot:
             if e['state'] != 'open':
                 raise Fail(f'{ent_id} stayed locked (key {e.get("key")}, carried {self.items().get(e.get("key") or "", 0)})')
         cell = tuple(e['doorAt']) if e.get('doorAt') else tuple(e['cells'][0])
+        spare = [tuple(c) for c in e['cells'][1:]]        # a door more than one cell wide (a 2 x 2 stair foot): any cell fires it
         to = e['to']
         f = self.settle()
         if (f['leader']['x'], f['leader']['y']) == cell:
@@ -761,7 +784,17 @@ class Bot:
                     self.hold_dir(d, 1, run=False)
                     self.frames(WALK + 4)
                     break
-        self.walk_to([cell], label=label or ent_id)
+        try:
+            self.walk_to([cell], label=label or ent_id)
+        except Fail:
+            for alt in spare:
+                try:
+                    self.walk_to([alt], label=label or ent_id)
+                    break
+                except Fail:
+                    continue
+            else:
+                raise
         if to and not exact and to[0] != f['map']:
             # walk_to may already have settled through the arrival scene (and anything it chains): any other map will do
             self.page.wait_for_function(f"(() => {{ const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id !== {json.dumps(f['map'])} && !f.loading; }})()", timeout=30000, polling=20)
@@ -1784,7 +1817,7 @@ class Episode:
         # reveal the bridge back into the hub (beside the pedestal), read the wall, cross
         g = b.grid('archive_f2')
         faint = [(x, y) for y in range(g['H']) for x in range(g['W']) if g['faint'][y][x] and 'bridge' in g['faint'][y][x]]
-        west = [c for c in faint if c[0] < 12]
+        west = [c for c in faint if c[0] < 12 and c[1] >= 10]      # X1: the Reader's Alcove bridge (10..12, 7) is not the route; the regular route skips it
         east = [c for c in faint if c[0] > 25]
         b.reveal_near(west, label='west bridge')
         self.sign('hidden_ink_1')
@@ -2795,11 +2828,21 @@ def main(argv):
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
     ap.add_argument('--episode', type=int, default=1, choices=[1, 2])
+    ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
+    ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
+    ap.add_argument('--route', default='regular', choices=['regular', 'complete'],
+                    help='Episode 1: regular = the main path (unchanged bot); complete = the completionist route through the expansion (implies --x1)')
     ap.add_argument('--start', default='save', choices=['save', 'new'],
                     help='Episode 2: load the Episode 1 credits save (save) or use the title\'s Episode 2 entry (new)')
     a = ap.parse_args(argv)
-    shots.watchdog(3 * 3600)
+    shots.watchdog(5 * 3600 if a.route == 'complete' else 3 * 3600)
+    if a.route == 'complete':
+        a.x1 = True
     tag, query, resume = ('-wo' if a.wrong_order else '-hollow' if a.hollow and a.episode == 1 else ''), '', a.resume
+    if a.episode == 1 and a.route == 'complete':
+        tag = '-complete'
+    elif a.x1:
+        tag += '-x1'
     if a.episode == 2:
         tag = '-ep2' + ('-new' if a.start == 'new' and not a.resume else '')
         if a.start == 'new' and not a.resume:
@@ -2809,7 +2852,7 @@ def main(argv):
             if not pathlib.Path(resume).exists():
                 print(f'no Episode 1 credits save at {resume}: run the Episode 1 autoplay first, or use --start new')
                 return 2
-    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=resume, tag=tag, query=query)
+    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=resume, tag=tag, query=query, x1=a.x1)
     status, detail, wrong = 'ok', '', []
     try:
         bot.open()
@@ -2817,6 +2860,11 @@ def main(argv):
             wrong = wrong_order(bot)
         elif a.episode == 2:
             Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
+        elif a.route == 'complete':
+            sys.path.insert(0, str(HERE / 'integrate'))
+            import autoplay_x1
+            Route = autoplay_x1.build(sys.modules[__name__])
+            Route(bot, side=not a.no_side, until=a.until, hollow=a.hollow, phases=a.phases.split(',') if a.phases else None, resumed=bool(resume)).run()
         else:
             Episode(bot, side=not a.no_side, until=a.until, hollow=a.hollow).run()
         bot.check_errors()
@@ -2828,6 +2876,8 @@ def main(argv):
             pass
     except Exception as e:  # crash: still write the report
         status, detail = 'CRASH', f'{type(e).__name__}: {e}'
+        import traceback
+        traceback.print_exc()
         try:
             bot.shot('crash')
         except Exception:

@@ -343,8 +343,9 @@ export class TileMap {
     if (m) {
       const [ax, ay] = m.anchor;
       // E2: tiles.json objects may list `frames` by state (mirrors, receptors, the vow door, the great mirror)
-      const [rx, ry, rw, rh] = (m.frames && m.frames[p.state]) || m.rect;
-      p.draw = { img: this.sheet(m.sheet), sx: rx, sy: ry, w: rw, h: rh, dx: (p.x - ax) * TILE, dy: (p.y - ay) * TILE, anim: m.anim || null, blend: null };
+      const turning = !!m.turnAnim && p.state > 0;
+      const [rx, ry, rw, rh] = (!turning && m.frames && m.frames[p.state]) || m.rect;
+      p.draw = { img: this.sheet(m.sheet), sx: rx, sy: ry, w: rw, h: rh, dx: (p.x - ax) * TILE, dy: (p.y - ay) * TILE, anim: turning ? m.turnAnim : (m.anim || null), blend: null };
       p.sortY = (p.y + 1) * TILE - 1;
       p.footH = 1;
       for (const [dx, dy] of m.footprint || []) p.cells.push([p.x + dx, p.y + dy]);

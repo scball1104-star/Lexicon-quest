@@ -12,7 +12,7 @@
 // the other inside a function, so evaluation order does not matter.
 import { packReady } from '../../game/packs.js';
 
-export const X1_LIVE = false;
+export const X1_LIVE = true;
 
 export const X1_REGIONS = { west: true, south: true, north: true, wild: true };
 

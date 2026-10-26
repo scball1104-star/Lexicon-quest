@@ -160,7 +160,7 @@ const events = [
   enemy('e_eg_mixed', 28, 23, 'tome_golem', 'f2_mixed', 'chase'),
   ...(X1 ? [
     pit('x1_f2_bridge', 10, 7, 3, 1, ['archive_f2', 13, 7, 'left']),
-    chest('x1_chest_f2', 7, 6, 'gold'),
+    chest('x1_chest_f2', 7, 6, 'iron'),
   ] : []),
   ...(X1_N ? [book('x1_keeper_note_f2', 9, 6, 'x1_keeper_note_f2', { solid: false, lantern: true })] : []),
 ];

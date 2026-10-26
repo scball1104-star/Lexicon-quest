@@ -240,7 +240,7 @@ const events = [
   object('x1_roots_stile', 69, 13, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2 }),
   // the chests of the visible ways
   chest('chest_moor_cairn', 12, 17, 'wood', { item: 'antidote', qty: 2 }),
-  chest('chest_moor_view', 50, 21, 'iron'),
+  chest('chest_moor_view', 50, 21, 'wood'),
   // visible groups: 3 per ZONES.x1_highmoor.plan (respawn: 'reentry' below)
   enemy('e_mo_wolves', 22, 25, 'thornback_wolf', 'mo_wolves', 'guard'),
   enemy('e_mo_scarabs', 50, 23, 'moss_scarab', 'mo_scarabs', 'patrol', { path: steps('right', 3, 'left', 3) }),

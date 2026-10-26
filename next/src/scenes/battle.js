@@ -83,6 +83,11 @@ const BACKDROPS = {
   court: { asset: 'battle_court', cell: 1, bright: 1.0, tint: null },
   court_deep: { asset: 'battle_court_deep', cell: 1, bright: 1.0, tint: null },
   throne: { asset: 'battle_throne', cell: 1, bright: 1.0, tint: null },
+  x1_downs: { asset: 'x1_battle_downs', cell: 0, bright: 1.0, tint: null },
+  x1_moor: { asset: 'x1_battle_moor', cell: 0, bright: 1.0, tint: null },
+  x1_larchhill: { asset: 'x1_battle_larchhill', cell: 0, bright: 1.0, tint: null },
+  x1_barrow: { asset: 'x1_battle_barrow', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
+  x1_culvert: { asset: 'x1_battle_culvert', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
 };
 const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
   'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne'];

@@ -1,14 +1,6 @@
-// Expansion packs: the ONE mechanism that keeps the two expansions (x1 "The Wider Valley", x2 "The Mere Country") out of the
-// initial download. Full API and the rules for later agents: docs/PWA_PACKS.md. Written by XP-packs.
-//
-// A pack is a set of files that carry a prefix (src/data/<id>/**, src/data/maps/<id>_*.js, assets/{tiles,sprites,ui,backdrops}/
-// <id>_* and <id>.png, assets/<id>_manifest.json). None of them is precached or preloaded; ensurePack(id) fetches them on
-// first need, the service worker keeps them in its runtime cache, and registration into the shared data tables is by mutation
-// (src/data/<id>/index.js register()). This module is pure enough for Node: it touches an engine only when one is bound
-// (bindPacks) or passed in (opts.engine), so tools and tests run it with a stubbed `opts.importer`.
-//
-// ensurePack NEVER rejects and NEVER blocks boot: every call site either ignores the promise or races it against a short
-// timeout (awaitPacks). While X1_LIVE / X2_LIVE (src/data/<id>/live.js) are false nothing here fetches anything.
+// Expansion packs (x1, x2): files with a prefix that are kept out of the initial download and loaded by ensurePack(id) on first need;
+// their data registers by mutation (src/data/<id>/index.js). API and rules: docs/PWA_PACKS.md. Pure enough for Node (opts.importer).
+// ensurePack never rejects and never blocks boot; while X1_LIVE / X2_LIVE are false nothing here fetches anything.
 
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
@@ -174,6 +166,15 @@ async function attempt(id, def, opts) {
   const filesP = loadFileLists(engine, opts);
   let reg = null;
   try {
+    // a failed import() is cached for the page's life: fetch the code first so a network failure leaves the retry possible
+    if (!opts.importer) {
+      const lists0 = await filesP;
+      const code = lists0 && Array.isArray(lists0[id]) ? lists0[id].filter((f) => f.startsWith(`src/data/${id}/`) && f.endsWith('.js')) : [];
+      const base = engine && engine.assets ? engine.assets.base : new URL('../../', import.meta.url).href;
+      if (code.length && /^https?:/.test(base)) {
+        await Promise.all(code.map(async (f) => { const r = await fetch(new URL(f, base).href); if (!r.ok) throw new Error(`${f}: ${r.status}`); }));
+      }
+    }
     const mod = await importer(def.entry);
     if (mod && typeof mod.register === 'function') reg = await mod.register();
   } catch (e) {

@@ -87,8 +87,8 @@ const events = [
   chest('chest_bw_landing', 5, 14, 'wood', { item: 'antidote', qty: 2 }),
   // the hall: one floor switch, two slabs on rails (start: the Ossuary open, the Ewe Chamber shut)
   floorSwitch('sw_slab', 15, 11, ['slab_n', 'slab_s']),
-  shelf('slab_n', [[12, 14], [14, 14]], { sprite: 'x1_slab' }),
-  shelf('slab_s', [[21, 14], [19, 14]], { sprite: 'x1_slab' }),
+  shelf('slab_n', [[12, 14], [14, 14]], { sprite: 'x1_slab', sfx: 'slab_slide' }),
+  shelf('slab_s', [[21, 14], [19, 14]], { sprite: 'x1_slab', sfx: 'slab_slide' }),
   // the Ewe Chamber: a heavy block before the niche; the gold chest holds the Drover's Bow
   { id: 'block_niche', type: 'block', x: 10, y: 16, sprite: 'push_block', heavy: true },
   chest('chest_bw_bow', 10, 15, 'gold', { item: 'drovers_bow' }),
@@ -101,13 +101,14 @@ const events = [
   // the Counting Room: block -> plate -> the barred gate to the hearth
   block('block_c', 20, 4),
   plate('plate_c', 25, 6, 'gate_reeve'),
-  gate('gate_reeve', 17, 4, GATE_SPRITE),
+  light('plate_glow', 25, 6, 30, '#e0b860'),   // integrate: the plate is grey on grey, a small warm glow marks it
+  gate('gate_reeve', 17, 4, GATE_SPRITE, { flag: 'x1_gate_reeve_open' }),   // integrate: once the block has been on the plate the gate stays open (blocks reset on a reload, and the hearth saves behind this gate)
   // the Shepherds' Hearth (a font: rest, full heal, save) before the trigger row
   { id: 'barrow_hearth', type: 'font', x: 13, y: 6, w: 3, h: 2, text: 'barrow_hearth', sprite: 'rune_shrine', safe: true },
   trigger('reeve_trig', 11, 4, 1, 2, 'reeve_intro'),
   // the Reeve's Hall: the Reeve himself, then (after the battle) the chest, and the names that only the Lantern reads
   actor('barrow_reeve', 4, 5, 'barrow_reeve', 'down', { ifNot: 'barrow_reeve_defeated' }),
-  chest('chest_bw_reeve', 2, 6, 'gold', { if: 'barrow_reeve_defeated' }),
+  chest('chest_bw_reeve', 2, 6, 'iron', { if: 'barrow_reeve_defeated' }),   // integrate: gold tier -> iron (plan 8.5: the completionist's gold stayed over 5,300)
   book('barrow_names', 8, 2, 'barrow_names', { solid: false, lantern: true, if: 'barrow_reeve_defeated' }),
   // light: the dungeon is dark (0.45); the braziers and the hearth carry it
   light('light_a1', 1, 10, 5, '#ffb070'), light('light_a2', 6, 10, 5, '#ffb070'), light('light_h1', 26, 10, 5, '#ffb070'),

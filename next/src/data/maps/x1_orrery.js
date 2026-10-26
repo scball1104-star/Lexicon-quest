@@ -45,7 +45,7 @@ const events = [
   npc('hesper', 11, 6, 'right'),
   book('keeper_star_ledger', 3, 3, 'keeper_star_ledger', { solid: false }),
   // the star plate in the north face (an Appraise object; the drawer behind it holds the chest)
-  object('x1_star_plate', 5, 2, 'x1_star_plate', { text: 'x1_star_plate', appraise: true, appraiseText: 'appraise_star_plate' }),
+  object('x1_star_plate', 5, 2, 'x1_star_plate', { text: 'x1_star_plate', appraise: true, appraiseText: 'appraise_star_plate', appraiseBark: false }),
   chest('chest_orrery', 6, 3, 'wood', { item: 'ether', qty: 3, behind: 'appraise:x1_star_plate' }),
   // the hatch: sealed until the stars are aligned, then a stair to the Cellar (its landing is (3,14) in x1_cellar)
   object('x1_hatch', 12, 4, 'x1_hatch_closed', { text: 'x1_hatch', ifNot: 'orrery_aligned' }),

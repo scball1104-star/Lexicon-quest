@@ -21,6 +21,7 @@ import { PACKS, packForMap, packEnabled, packReady, ensurePack, onPackReady, GUA
 const cache = new Map();
 const extra = new Map();
 const stale = new Set();        // touched maps cached before their pack was ready
+const fails = new Map();        // id -> failed imports (the browser caches a failed import: a retry needs a new URL)
 const versions = new Map();     // map id -> re-import counter (the ?v= query)
 let hooked = false;
 
@@ -58,17 +59,19 @@ export async function loadMap(id) {
   let mod = null;
   if (/^[a-z0-9_]+$/i.test(id) && !id.startsWith('_')) {
     try {
-      const v = stale.has(id) ? (versions.get(id) || 0) + 1 : (versions.get(id) || 0);
+      const v = (stale.has(id) ? (versions.get(id) || 0) + 1 : (versions.get(id) || 0)) + 1000 * (fails.get(id) || 0);
       const m = await import(v ? `../data/maps/${id}.js?v=${v}` : `../data/maps/${id}.js`);
       if (stale.has(id)) { stale.delete(id); versions.set(id, v); }
       mod = m.default || m.map || null;
       if (mod && !mod.id) mod.id = id;
     } catch (e) {
       mod = null;
+      fails.set(id, (fails.get(id) || 0) + 1);
       if (stale.has(id) && cache.get(id)) { stale.delete(id); return cache.get(id); }   // the rebuild failed: keep what we had
     }
   }
   if (!mod) mod = TEST_MAPS[id] || null;
+  if (!mod && hit && hit.prefixed) return null;   // not cached: the next visit tries again
   cache.set(id, mod);
   return mod;
 }

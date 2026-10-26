@@ -117,7 +117,7 @@ const events = [
   // chests: the beacon's (rolled), the nook behind thin roots (Dash; rolled)
   chest('chest_beacon', 18, 12, 'wood'),
   object('x1_roots_terrace', 47, 8, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2 }),
-  chest('chest_terrace', 47, 9, 'iron', { behind: 'x1_roots_terrace' }),
+  chest('chest_terrace', 47, 9, 'wood', { behind: 'x1_roots_terrace' }),
   // visible enemies: 2 per ZONES.x1_terrace.plan. The wolves guard beside the lane (T2), the golem walks the court's east wing
   enemy('e_tr_wolves', 22, 14, 'thornback_wolf', 'tr_wolves', 'guard'),
   enemy('e_tr_golem', 38, 6, 'tome_golem', 'tr_golem', 'patrol', { path: steps('down', 6, 'up', 6) }),

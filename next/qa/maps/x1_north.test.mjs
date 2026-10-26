@@ -96,7 +96,7 @@ test('terrace: every event is reachable; Dash breaks the roots for the nook ches
   assert.deepEqual(r.unreached, []);
   assert.ok(r.log.includes('broke x1_roots_terrace'));
   const chest = ev(T, 'chest_terrace');
-  assert.equal(chest.behind, 'x1_roots_terrace'); assert.equal(chest.tier, 'iron');
+  assert.equal(chest.behind, 'x1_roots_terrace'); assert.equal(chest.tier, 'wood');
   assert.equal(ev(T, 'chest_beacon').tier, 'wood');
   const roots = ev(T, 'x1_roots_terrace');
   assert.equal(roots.breakable, 'roots');

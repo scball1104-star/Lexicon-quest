@@ -486,7 +486,7 @@ test('the F2 Reader\'s Alcove: only after the Lantern, across a three-cell ink b
   assert.ok(alc.every((c) => !dark.reachable.includes(c)), 'no alcove cell without the Lantern');
   assert.ok(['7,5', '7,7', '8,8', '9,8', '9,5', '6,8'].every((c) => lit.reachable.includes(c)), 'the alcove with the Lantern');
   assert.equal(lit.events.find((e) => e.id === 'x1_chest_f2').reached, true);
-  assert.equal(ev(m, 'x1_chest_f2').tier, 'gold'); assert.equal(ev(m, 'x1_chest_f2').item, undefined, 'rolled');
+  assert.equal(ev(m, 'x1_chest_f2').tier, 'iron'); assert.equal(ev(m, 'x1_chest_f2').item, undefined, 'rolled');
   const note = ev(m, 'x1_keeper_note_f2');
   assert.deepEqual([note.type, note.book, note.lantern], ['book', 'x1_keeper_note_f2', true]);
   const fall = ev(m, 'x1_f2_bridge');

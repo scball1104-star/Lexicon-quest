@@ -19,13 +19,13 @@ function mod() {
   return m;
 }
 
-test('the real table: x1 and x2, the prefix rule, wanted(), and both switches are off', () => {
+test('the real table: x1 and x2, the prefix rule, wanted(), the x1 switch is on and the x2 switch is off', () => {
   assert.deepEqual(Object.keys(PACKS), ['x1', 'x2']);
   assert.equal(PACKS.x1.prefix, 'x1_');
   assert.equal(PACKS.x2.audioPack, 'ep2');
   assert.deepEqual(PACKS.x1.touches, ['valley', 'willowmere', 'archive_f1', 'archive_f2', 'archive_f3']);
   assert.deepEqual(PACKS.x2.touches, ['east_road', 'nameless_hollow', 'nh_chapel', 'court_f1', 'court_f2', 'court_f3']);
-  assert.equal(PACKS.x1.enabled(), false, 'X1_LIVE is false until X1-integrate flips it');
+  assert.equal(PACKS.x1.enabled(), true, 'X1_LIVE is on since X1-integrate flipped it');
   assert.equal(PACKS.x2.enabled(), false, 'X2_LIVE is false until X2-integrate flips it');
 });
 
@@ -43,11 +43,11 @@ test('packWanted per flag set', () => {
 test('enabled() false never fetches and never imports', async () => {
   resetPacks();
   let imports = 0;
-  const r = await ensurePack('x1', { importer: () => { imports++; return {}; }, quiet: true });
+  const r = await ensurePack('x1', { enabled: false, importer: () => { imports++; return {}; }, quiet: true });
   assert.deepEqual({ id: r.id, ok: r.ok, skipped: r.skipped }, { id: 'x1', ok: true, skipped: true });
   assert.equal(imports, 0);
   assert.equal(packReady('x1'), false, 'skipped is not ready');
-  assert.deepEqual(packsToAwait({ first_fight_done: true, ep1_complete: true }), [], 'a switched-off pack is never awaited');
+  assert.deepEqual(packsToAwait({ first_fight_done: true, ep1_complete: true }, { enabled: false }), [], 'a switched-off pack is never awaited');
   const sw = await ensurePack('x2');
   assert.equal(sw.skipped, true);
 });
@@ -134,7 +134,7 @@ test('boot timing: a hung import never blocks the caller, and awaitPacks gives u
   assert.equal(r, 'timeout');
   assert.ok(Date.now() - t0 >= 55 && Date.now() - t0 < 1000);
   assert.deepEqual(await awaitPacks([], 60), [], 'nothing to wait for resolves at once');
-  assert.deepEqual(await awaitPacks(['x1'], 60), [], 'a switched-off pack is not waited for');
+  assert.deepEqual(await awaitPacks(['x1'], 60, { enabled: false }), [], 'a switched-off pack is not waited for');
   resetPacks();
   // main.js must never await a pack on the boot path (static check)
   const main = fs.readFileSync(path.join(NEXT, 'src/main.js'), 'utf8');
@@ -223,5 +223,5 @@ test('setPackDefaults reaches calls that pass no options (maps.js and the call s
   assert.equal(r.ok, true);
   assert.deepEqual(packsToAwait({ go: 1 }), [], 'ready packs are not awaited');
   resetPacks();
-  assert.equal(packEnabled('x1'), false);
+  assert.equal(packEnabled('x1'), PACKS.x1.enabled(), 'back to the real switch');
 });

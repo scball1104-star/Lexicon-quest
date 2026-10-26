@@ -92,7 +92,7 @@ const allowSolid = new Set(['stones_center', 'blank_stone']);          // marks 
 test('x1_downs: everything is reachable; every mark is walkable and reached (the drovers marks once the bell has tolled)', () => {
   for (const flags of [FIGHT, BELL]) {
     const w = walk(D, db, { flags });
-    assert.deepEqual(w.unreached, [], `unreached under ${flags}`);
+    assert.deepEqual(w.unreached, flags === FIGHT ? ['drovers_door'] : [], `unreached under ${flags}`);   // the door waits behind the chain until the bell
     for (const m of w.marks) {
       if (allowSolid.has(m.name)) { assert.ok(!m.walkable); continue; }
       if (flags === FIGHT && (m.name === 'drovers' || m.name === 'drovers_exit')) { assert.ok(!m.reached, 'the chain shuts the road before the bell'); continue; }
@@ -100,7 +100,7 @@ test('x1_downs: everything is reachable; every mark is walkable and reached (the
     }
   }
   const before = walk(D, db, { flags: FIGHT }), after = walk(D, db, { flags: BELL });
-  assert.ok(!before.events.some((e) => e.id === 'drovers_door'), 'no door to the Millrace before the bell');
+  assert.ok(!before.events.find((e) => e.id === 'drovers_door').reached, 'the door to the Millrace is behind the chain before the bell');
   assert.ok(after.events.find((e) => e.id === 'drovers_door').reached, 'the door to the Millrace after the bell');
   const closed = ev(D, 'x1_drovers_chain'), open = ev(D, 'x1_drovers_chain_open');
   assert.equal(closed.ifNot, 'archive_f1_done'); assert.equal(closed.w, 3); assert.equal(open.if, 'archive_f1_done');
@@ -170,12 +170,12 @@ test('plan counts: three groups on the Downs; two groups and the Reeve on the ba
   assert.equal(db.ZONES.x1_downs.plan.length, 3); assert.equal(db.ZONES.x1_barrow.plan.length, 3);
   const c = (m, id) => ev(m, id);
   assert.equal(c(D, 'chest_well').tier, 'wood'); assert.equal(c(D, 'chest_well').item, 'potion'); assert.equal(c(D, 'chest_well').qty, 3);
-  assert.equal(c(D, 'chest_ridge').tier, 'iron'); assert.equal(c(D, 'chest_ridge').item, undefined);
+  assert.equal(c(D, 'chest_ridge').tier, 'wood'); assert.equal(c(D, 'chest_ridge').item, undefined);
   assert.equal(c(D, 'chest_fold').tier, 'iron'); assert.equal(c(D, 'chest_fold').item, undefined);
   assert.equal(c(B, 'chest_bw_landing').tier, 'wood'); assert.equal(c(B, 'chest_bw_landing').item, 'antidote');
   assert.equal(c(B, 'chest_bw_bow').tier, 'gold'); assert.equal(c(B, 'chest_bw_bow').item, 'drovers_bow');
   assert.equal(c(B, 'chest_bw_oss').tier, 'iron'); assert.equal(c(B, 'chest_bw_oss').item, 'phoenix_feather');
-  assert.equal(c(B, 'chest_bw_reeve').tier, 'gold'); assert.equal(c(B, 'chest_bw_reeve').item, undefined);
+  assert.equal(c(B, 'chest_bw_reeve').tier, 'iron'); assert.equal(c(B, 'chest_bw_reeve').item, undefined);
   assert.equal(c(B, 'chest_bw_reeve').if, 'barrow_reeve_defeated');
   assert.ok(db.ITEMS.drovers_bow, 'the bow the chest holds is a registered item');
 });

@@ -130,10 +130,10 @@ test('plan counts: 2 groups (millrace), 2 groups + the boss actor (culvert); fix
   const pin = ev(M.x1_culvert, 'chest_cv_pin');
   assert.equal(pin.tier, 'wood'); assert.equal(pin.item, 'millstone_pin'); assert.equal(pin.flag, 'pin_found');
   assert.equal(ev(M.x1_millrace, 'chest_mr_orchard').tier, 'wood'); assert.equal(ev(M.x1_millrace, 'chest_mr_orchard').item, undefined);
-  assert.equal(ev(M.x1_millrace, 'chest_mr_bank').tier, 'iron');
+  assert.equal(ev(M.x1_millrace, 'chest_mr_bank').tier, 'wood');
   assert.equal(ev(M.x1_millrace, 'chest_mr_stone').tier, 'iron'); assert.equal(ev(M.x1_millrace, 'chest_mr_stone').item, 'phoenix_feather');
   assert.equal(ev(M.x1_millrace, 'chest_mr_stone_b').item, 'honey_roll'); assert.equal(ev(M.x1_millrace, 'chest_mr_stone_b').qty, 3);
-  assert.equal(ev(M.x1_culvert, 'chest_cv_drain').tier, 'iron'); assert.equal(ev(M.x1_culvert, 'chest_cv_golem').tier, 'gold');
+  assert.equal(ev(M.x1_culvert, 'chest_cv_drain').tier, 'wood'); assert.equal(ev(M.x1_culvert, 'chest_cv_golem').tier, 'iron');
 });
 
 test('the wheel, the barred door, the ledger and the sill: ids, scripts and flag gates', () => {

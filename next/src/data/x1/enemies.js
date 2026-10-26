@@ -42,7 +42,7 @@ export const X1_ENEMY_ROWS = {
     name: 'The Barrow Reeve', family: 'spirit', level: 6, size: 'large', boss: true, ai: 'phased',
     hp: 430, atk: 38, def: 13, mag: 14, spr: 12, spd: 12, luk: 7,
     shields: 3, weak: ['bow', 'light'], statusImmune: ['silence', 'poison', 'blind'],
-    exp: 60, gold: 160, masteryPts: 12,
+    exp: 60, gold: 110, masteryPts: 12,
     moves: [{ skill: 'e_strike', weight: 55 }, { skill: 'shield_bash', weight: 45 }],
     charge: { skill: 'burrow_charge', first: 2, cooldown: 3 },
     phases: [
@@ -60,7 +60,7 @@ export const X1_ENEMY_ROWS = {
     name: 'The Millstone Golem', family: 'construct', level: 7, size: 'large', boss: true, ai: 'phased',
     hp: 545, atk: 44, def: 22, mag: 8, spr: 10, spd: 8, luk: 5,
     shields: 4, weak: ['thunder', 'axe'], resist: ['sword', 'bow'], statusImmune: ['poison', 'stun', 'blind'],
-    exp: 80, gold: 220, masteryPts: 14,
+    exp: 80, gold: 150, masteryPts: 14,
     moves: [{ skill: 'stone_slam', weight: 65 }, { skill: 'shield_bash', weight: 35 }],
     charge: { skill: 'burrow_charge', first: 2, cooldown: 3 },
     phases: [

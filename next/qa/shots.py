@@ -74,6 +74,20 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
+    def do_GET(self):
+        # LQ_X1_LIVE=1 / 0: serve src/data/x1/live.js with the switch forced on / off (a local copy, in memory; the file on disk is untouched)
+        if os.environ.get('LQ_X1_LIVE') and self.path.split('?')[0].endswith('/next/src/data/x1/live.js'):
+            on = os.environ['LQ_X1_LIVE'] != '0'
+            src = (NEXT / 'src' / 'data' / 'x1' / 'live.js').read_text(encoding='utf-8')
+            body = src.replace('X1_LIVE = ' + ('false' if on else 'true') + ';', 'X1_LIVE = ' + ('true' if on else 'false') + ';').encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/javascript')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        super().do_GET()
+
     def handle(self):
         try:
             super().handle()

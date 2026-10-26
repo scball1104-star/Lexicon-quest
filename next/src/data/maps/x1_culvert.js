@@ -80,7 +80,7 @@ const events = [
   gate('gate_drain', 11, 13, 'x1_gate_culvert', { to: ['x1_culvert', 11, 11, 'up'] }),
   door('notch_pump', 11, 11, ['x1_culvert', 11, 14, 'down']),
   object('x1_crack_drain', 17, 12, 'wall_cracked', { breakable: 'rock', text: 'cliff_crack', h: 2 }),
-  chest('chest_cv_drain', 17, 13, 'iron', { behind: 'x1_crack_drain' }),
+  chest('chest_cv_drain', 17, 13, 'wood', { behind: 'x1_crack_drain' }),
   // ---- C: the pin
   chest('chest_cv_pin', 6, 5, 'wood', { item: 'millstone_pin', flag: 'pin_found' }),
   // ---- D: the hearth landing's font, a safe point before the boss
@@ -89,7 +89,7 @@ const events = [
   // ---- E: the Golem and what is behind it
   trigger('golem_trig', 18, 4, 1, 6, 'golem_intro'),
   actor('millstone_golem', 22, 6, 'millstone_golem', 'down', { ifNot: 'millstone_golem_defeated' }),
-  chest('chest_cv_golem', 25, 4, 'gold'),
+  chest('chest_cv_golem', 25, 4, 'iron'),   // integrate: gold tier -> iron (plan 8.5)
   // ---- light: the braziers' own glow, so the hall reads on a phone (the map is dark 0.4)
   light('light_a', 3, 15, 5, '#ffb070'), light('light_b1', 8, 14, 6, '#ffb070'), light('light_b2', 25, 14, 6, '#ffb070'),
   light('light_b3', 16, 15, 5), light('light_c1', 13, 4, 6, '#ffb070'), light('light_c2', 4, 10, 5, '#ffb070'), light('light_c3', 8, 7, 4),

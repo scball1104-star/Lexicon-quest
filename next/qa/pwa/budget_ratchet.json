@@ -1,7 +1,7 @@
 {
   "$comment": "The load-budget ratchet (docs/briefs/XP-packs.md, docs/PWA_PACKS.md). qa/pwa/precache.test.mjs asserts the measured initial download and the before-the-tap-prompt load against 'initialMB' and 'tapPromptMB'. Only the agent named in 'stages' may raise 'initialMB' to that stage's value, and only at that stage; 'capMB' (6.5) and 'tapCapMB' (2.5) are Scott's and never move; 'tapPromptMB' never grows after XP-packs. Measures are the test's wire-size measure (text gzipped, png and audio as is), in MiB.",
-  "stage": "after-XP-packs",
-  "initialMB": 6.33,
+  "stage": "after-X1-integrate",
+  "initialMB": 6.38,
   "tapPromptMB": 2.32,
   "capMB": 6.5,
   "tapCapMB": 2.5,

@@ -78,3 +78,8 @@ Seams (everything else was already exported): `registerStory({ scenes, lines, co
 ## Tests
 
 `qa/core/pack_ensure.test.mjs`, `pack_register.test.mjs`, `pack_assets.test.mjs`, `pack_maps.test.mjs`, `pack_maps_fail.test.mjs`; `qa/pwa/packs.test.mjs`, `precache.test.mjs`; headless offline: `python qa/pwa/pwa.py --only packoffline` (visit with `?pack=x1,x2`, runtime cache holds every pack file, offline reload brings both packs up).
+
+## X1-integrate additions (2026-10-26)
+
+- **A failed import is not retried by the browser.** Chromium caches a failed dynamic `import()` for the life of the page (checked: the second import of the same URL does not hit the network), so `ensurePack`'s retry could never succeed after a network failure. `attempt()` now fetches the pack's own code (`src/data/<id>/*.js` from `assets/pack_files.json`) with `fetch` before importing the entry; a failure there leaves the module map clean and the retry (after 5 s, and on the next call) is real. `loadMap` counts failed imports per map and imports with a new `?v=` the next time, and does not cache a missing pack map as null. Tests: `qa/saves/x1_saves.py` (the entry refused once; the pack comes up on the retry), `qa/core/pack_maps_fail.test.mjs`.
+- The x1 switch is on (`src/data/x1/live.js`), the ratchet is at the `after-X1-integrate` stage (6.38 MB), the tap prompt has 306 bytes of headroom (`node qa/integrate/x1_budget.mjs` prints the numbers).

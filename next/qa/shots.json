@@ -4234,6 +4234,702 @@
      "message": "the King has grown"
     }
    ]
+  },
+  {
+   "name": "field_downs_thornfold",
+   "note": "X1: Thornfold from the town lane: cottages, the Loom House, the well, the sheep fold, a drystone wall, the Stones' rise on the horizon",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"downs_arrived\", \"thornfold_arrived\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_downs",
+      36,
+      23,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_downs\"; })()",
+     "message": "the party is on x1_downs"
+    }
+   ]
+  },
+  {
+   "name": "field_downs_stones",
+   "note": "X1: the ring of twelve standing stones lettered again (stones_lettered), the cairn at the middle, the thirteenth slab apart",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"downs_arrived\", \"thornfold_arrived\", \"stones_seen\", \"rollcall_started\", \"stones_lettered\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_downs",
+      14,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_downs\"; })()",
+     "message": "the party is on x1_downs"
+    }
+   ]
+  },
+  {
+   "name": "interior_loomhouse",
+   "note": "X1: Tamsin's Loom House: the great loom, the spinning wheel, the hearth font, the sampler",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"downs_arrived\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_loomhouse",
+      7,
+      8,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_loomhouse\"; })()",
+     "message": "the party is on x1_loomhouse"
+    }
+   ]
+  },
+  {
+   "name": "dungeon_barrow_slabs",
+   "note": "X1: the Barrow's Long Hall after the floor switch: the Ossuary slab closed, the Ewe Chamber's slab drawn back",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"barrow_entered\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_barrow",
+      15,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_barrow\"; })()",
+     "message": "the party is on x1_barrow"
+    },
+    {
+     "press": "confirm",
+     "frames": 2
+    },
+    {
+     "frames": 70
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); const e = f.entities.get('sw_slab'); return e && e.state === 'on'; })()",
+     "message": "the slab switch is on"
+    }
+   ]
+  },
+  {
+   "name": "story_rollcall_stones",
+   "note": "X1: rollcall_stones, the hero says the last name and the stone takes its letters",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"downs_arrived\", \"thornfold_arrived\", \"stones_seen\", \"rollcall_started\", \"roll_found\", \"copy_found\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_downs",
+      14,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_downs\"; })()",
+     "message": "the party is on x1_downs"
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"rollcall_stones\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Say it and be kept\"); for (let i = 0; i < 2500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 90000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "the line is up"
+    }
+   ]
+  },
+  {
+   "name": "battle_barrow_reeve",
+   "note": "X1: the Barrow Reeve, a counting boss before the Barrow's niches",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1') || (LQ_PACKS && LQ_PACKS.ensurePack('x1').then(() => true))",
+     "timeout": 40000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "barrow_reeve",
+      {
+       "fresh": true,
+       "seed": 1
+      }
+     ],
+     "timeout": 40000
+    },
+    {
+     "advance": 150
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'battle'",
+     "message": "the Reeve fight is on"
+    }
+   ]
+  },
+  {
+   "name": "field_terrace_orrery",
+   "note": "X1: the Keepers' Terrace in front of the Orrery: the dome, the court, the lawns, the broken beacon behind",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"terrace_arrived\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_terrace",
+      32,
+      11,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_terrace\"; })()",
+     "message": "the party is on x1_terrace"
+    }
+   ]
+  },
+  {
+   "name": "dungeon_cellar_route",
+   "note": "X1: the Cellar's Constellation Floor from the entry platform with the Lantern raised: the faint ink route to the dais",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"stars_started\", \"star_1_read\", \"star_2_read\", \"star_3_read\", \"orrery_aligned\", \"cellar_entered\", \"terrace_arrived\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_cellar",
+      12,
+      9,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_cellar\"; })()",
+     "message": "the party is on x1_cellar"
+    },
+    {
+     "call": "lantern"
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return f.map.idsAt(12, 7).some(id => /_revealed$/.test(id)); })()",
+     "message": "the route is lit"
+    }
+   ]
+  },
+  {
+   "name": "field_millrace_mill",
+   "note": "X1: Hal's mill and its wheel, the mill door open, the pond bed and the weir behind (the wheel is turning: mill_turning)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"millrace_arrived\", \"mill_started\", \"mill_turning\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_millrace",
+      29,
+      16,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_millrace\"; })()",
+     "message": "the party is on x1_millrace"
+    }
+   ]
+  },
+  {
+   "name": "dungeon_culvert_plates",
+   "note": "X1: the Weir Culvert's Drain Hall: the light block pushed onto its plate (the plate is down), the heavy block waiting at the second",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"culvert_entered\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_culvert",
+      8,
+      15,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_culvert\"; })()",
+     "message": "the party is on x1_culvert"
+    },
+    {
+     "eval": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); for (const a of f.actors.slice()) if (a.kind === 'enemy') f.removeActor(a); return true; })()"
+    },
+    {
+     "press": "right",
+     "frames": 420
+    },
+    {
+     "frames": 450
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); const e = f.entities.get('plate_b1'); return e && e.state === 'down'; })()",
+     "message": "the first plate is down"
+    }
+   ]
+  },
+  {
+   "name": "story_mill_done",
+   "note": "X1: mill_done, Hal and Oren at the mill door, the wheel turning",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"millrace_arrived\", \"mill_started\", \"pin_found\", \"mill_turning\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_millrace",
+      28,
+      16,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_millrace\"; })()",
+     "message": "the party is on x1_millrace"
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"mill_done\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"It is turning\"); for (let i = 0; i < 2500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 90000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "the line is up"
+    }
+   ]
+  },
+  {
+   "name": "battle_millstone_golem",
+   "note": "X1: the Millstone Golem in the Sluice Chamber",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1') || (LQ_PACKS && LQ_PACKS.ensurePack('x1').then(() => true))",
+     "timeout": 40000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "millstone_golem",
+      {
+       "fresh": true,
+       "seed": 1
+      }
+     ],
+     "timeout": 40000
+    },
+    {
+     "advance": 150
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'battle'",
+     "message": "the Golem fight is on"
+    }
+   ]
+  },
+  {
+   "name": "field_valley_cleft",
+   "note": "X1: the valley's north cleft with the Lantern raised: the ink bridge across to the Keepers' stair",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"cleft_seen\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "valley",
+      21,
+      9,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"valley\"; })()",
+     "message": "the party is on valley"
+    },
+    {
+     "call": "lantern"
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return f.map.idsAt(21, 7).some(id => /_revealed$/.test(id)); })()",
+     "message": "the bridge is revealed"
+    }
+   ]
+  },
+  {
+   "name": "field_highmoor_tower",
+   "note": "X1: the High Moor's Watchtower and Odo's turf hut in the crag, the tower yard and the star mark at its foot",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"moor_arrived\", \"odo_met\", \"stars_started\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_highmoor",
+      48,
+      14,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_highmoor\"; })()",
+     "message": "the party is on x1_highmoor"
+    }
+   ]
+  },
+  {
+   "name": "field_larchhill_windmill",
+   "note": "X1: Larchhill's Windmill on its mound, the ladder, the cider press and the hives of Yarrow's apiary",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('x1')",
+     "timeout": 40000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"first_fight_done\", \"archive_f1_done\", \"lantern_get\", \"archivore_defeated\", \"ep1_complete\", \"hal_returned\", \"larchhill_arrived\", \"yarrow_met\"]) g.flags[f] = true; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "x1_larchhill",
+      53,
+      32,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_larchhill\"; })()",
+     "message": "the party is on x1_larchhill"
+    }
+   ]
   }
  ]
 }

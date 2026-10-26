@@ -41,20 +41,20 @@ export const X1_GROUP_IDS = GROUPS.map((g) => g[0]);
 /** The two boss encounters. */
 export const X1_BOSS_IDS = ['barrow_reeve', 'millstone_golem'];
 
-// The plan's battle backdrops. scenes/battle.js (not this agent's) only knows the keys in its BACKDROPS table, so each zone names
-// the FALLBACK key the plan lists (valley, archive, archive_deep) until the art keys are wired there. X1_BACKDROP_ART is the
-// wish list for whoever wires them: zone -> the plan's art key (assets/backdrops/<key>.png, X1-tiles).
+// The plan's battle backdrops. Each zone's `backdrop` is a key of scenes/battle.js BACKDROPS: the five x1_* keys draw the pack art
+// (assets/backdrops/x1_battle_*, atlas ids x1_battle_*) and fall back to the old valley / archive look if the art is missing.
+// X1_BACKDROP_ART: zone -> the plan's art key (documentation; wired by X1-integrate).
 export const X1_BACKDROP_ART = { x1_downs: 'battle_downs', x1_highmoor: 'battle_moor', x1_barrow: 'battle_barrow',
   x1_larchhill: 'battle_larchhill', x1_culvert: 'battle_culvert' };
 
 export const X1_ZONES = {
-  x1_downs: { id: 'x1_downs', name: "Shepherd's Downs", level: [3, 4], backdrop: 'valley', music: 'battle', optional: true,
+  x1_downs: { id: 'x1_downs', name: "Shepherd's Downs", level: [3, 4], backdrop: 'x1_downs', music: 'battle', optional: true,
     plan: [['dn_wolves', 1], ['dn_scarab', 1], ['dn_pack', 1]] },
-  x1_highmoor: { id: 'x1_highmoor', name: 'The High Moor', level: [4, 5], backdrop: 'valley', music: 'battle', optional: true,
+  x1_highmoor: { id: 'x1_highmoor', name: 'The High Moor', level: [4, 5], backdrop: 'x1_moor', music: 'battle', optional: true,
     plan: [['mo_wolves', 1], ['mo_scarabs', 1], ['mo_wraiths', 1]] },
-  x1_barrow: { id: 'x1_barrow', name: "The Wethers' Barrow", level: [5, 6], backdrop: 'archive_deep', music: 'battle', optional: true,
+  x1_barrow: { id: 'x1_barrow', name: "The Wethers' Barrow", level: [5, 6], backdrop: 'x1_barrow', music: 'battle', optional: true,
     plan: [['bw_shades', 1], ['bw_mixed', 1], ['barrow_reeve', 1]] },
-  x1_larchhill: { id: 'x1_larchhill', name: 'Larchhill', level: [5, 6], backdrop: 'valley', music: 'battle', optional: true,
+  x1_larchhill: { id: 'x1_larchhill', name: 'Larchhill', level: [5, 6], backdrop: 'x1_larchhill', music: 'battle', optional: true,
     plan: [['lh_beetles', 1], ['lh_wolves', 1], ['lh_mixed', 1]] },
   x1_millrace: { id: 'x1_millrace', name: 'The Lower Millrace', level: [5, 6], backdrop: 'valley', music: 'battle', optional: true,
     plan: [['mr_weevils', 1], ['mr_wolves', 1]] },
@@ -62,7 +62,7 @@ export const X1_ZONES = {
     plan: [['tr_wolves', 1], ['tr_golem', 1]] },
   x1_cellar: { id: 'x1_cellar', name: "The Keepers' Cellar", level: [6, 7], backdrop: 'archive', music: 'battle', optional: true,
     plan: [['cl_wraiths', 1]] },
-  x1_culvert: { id: 'x1_culvert', name: 'The Weir Culvert', level: [6, 7], backdrop: 'archive_deep', music: 'battle', optional: true,
+  x1_culvert: { id: 'x1_culvert', name: 'The Weir Culvert', level: [6, 7], backdrop: 'x1_culvert', music: 'battle', optional: true,
     plan: [['cv_blots', 1], ['cv_wraith', 1], ['millstone_golem', 1]] },
 };
 

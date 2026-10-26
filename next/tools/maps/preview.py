@@ -90,6 +90,10 @@ class Atlases:
         self.party = self._load('party_field.json')
         self.npcs_data = None
         self.props = None
+        self.npc_extra = []     # pack atlases (x1_npcs.json ...): Hesper, Odo, Yarrow, the sheep
+        for extra in ('x1_npcs.json',):
+            if os.path.exists(os.path.join(SPRITES, extra)):
+                self.npc_extra.append(self._load(extra))
 
     def _load(self, name):
         with open(os.path.join(SPRITES, name)) as f:
@@ -98,7 +102,13 @@ class Atlases:
         return meta, img
 
     def npc_frame(self, sprite, d='down'):
-        meta, img = self.npc
+        for meta, img in [self.npc] + self.npc_extra:
+            got = self._npc_frame_in(meta, img, sprite, d)
+            if got:
+                return got
+        return None
+
+    def _npc_frame_in(self, meta, img, sprite, d):
         info = meta['sprites'].get(sprite)
         if not info:
             return None
@@ -133,7 +143,7 @@ class Atlases:
 
 def npc_sprites():
     """id -> sprite id from src/data/npcs.js (via node, pure module)."""
-    r = subprocess.run(['node', '-e', "import('./src/data/npcs.js').then(m=>console.log(JSON.stringify(Object.fromEntries(Object.entries(m.NPCS).map(([k,v])=>[k,[v.sprite,v.name]])))))"],
+    r = subprocess.run(['node', '-e', "import('./src/data/x1/index.js').then(x=>x.register()).catch(()=>0).then(()=>import('./src/data/npcs.js')).then(m=>console.log(JSON.stringify(Object.fromEntries(Object.entries(m.NPCS).map(([k,v])=>[k,[v.sprite,v.name]])))))"],
                        cwd=NEXT, capture_output=True, text=True, timeout=30)
     return json.loads(r.stdout) if r.returncode == 0 else {}
 

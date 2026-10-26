@@ -43,7 +43,8 @@ import { TILE } from './tilemap.js';
 const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'],
   // Episode 2 (the Court of Mirrors): receptor gates, glass-key doors, the three-crystal vow door, the throne door
   door_glass: ['door_glass_closed', 'door_glass_open'], door_glass_key: ['door_glass_key_closed', 'door_glass_key_open'],
-  door_vow: ['door_vow_closed', 'door_vow_open'], door_throne: ['door_throne_closed', 'door_throne_open'] };
+  door_vow: ['door_vow_closed', 'door_vow_open'], door_throne: ['door_throne_closed', 'door_throne_open'],
+  x1_gate_culvert: ['x1_gate_culvert_closed', 'x1_gate_culvert_open'], x1_gate_barrow: ['x1_gate_barrow_closed', 'x1_gate_barrow_open'] };
 /** Gates whose closed frame shows how many of their sources are on (the vow door's three crystals). */
 const COUNTING_GATES = new Set(['door_vow']);
 const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor', 'mirror', 'receptor', 'beam']);
@@ -315,7 +316,8 @@ function create(field, ent) {
     case 'plate': { ent.state = 'up'; map.setTile(ent.x, ent.y, 'plate_up'); break; }
     case 'block': {
       const heavy = !!ev.heavy && !!(map.db.objects && map.db.objects.heavy_block);
-      addProp(field, ent, heavy ? 'heavy_block' : (ev.sprite || 'push_block'), 0, { solid: true });
+      const skin = heavy && ev.sprite && ev.sprite !== 'push_block' && map.db.objects[ev.sprite] ? ev.sprite : null;
+      addProp(field, ent, skin || (heavy ? 'heavy_block' : (ev.sprite || 'push_block')), 0, { solid: true });
       if (ev.heavy && !heavy && ent.prop) ent.prop.tint = { color: '#2e2b4c', amount: 0.45 };   // no art: a darker push block
       break;
     }
@@ -743,7 +745,7 @@ export function fireTarget(field, id, o = {}) {
     if (ent.state === want || !ent.prop) return;
     ent.state = want;
     const pos = (ent.ev.positions && ent.ev.positions[want]) || [ent.x, ent.y];
-    field.slideProp(ent.prop, pos[0], pos[1], 30, 'shelf_move');
+    field.slideProp(ent.prop, pos[0], pos[1], 30, ent.ev.sfx || 'shelf_move');
   } else if (ent.type === 'gate_tiles') {
     // reserved
   } else if (ent.type === 'brazier') {

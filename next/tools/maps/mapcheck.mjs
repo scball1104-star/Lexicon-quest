@@ -67,7 +67,7 @@ export async function loadDb() {
     if (frag) for (const k of ['terrains', 'walls', 'tiles', 'objects', 'overlays']) tiles[k] = { ...(tiles[k] || {}), ...Object.fromEntries(Object.entries(frag[k] || {}).filter(([id]) => !(id in (tiles[k] || {})))) };
     for (const [base, atlas] of [['npcs', npcAtlas], ['enemies_field', enemiesField]]) {
       const f = maybe(`sprites/${px}_${base}.json`);
-      if (f) for (const k of ['frames', 'anims']) if (f[k]) atlas[k] = { ...(atlas[k] || {}), ...f[k], ...(atlas[k] || {}) };
+      if (f) for (const k of ['frames', 'anims', 'sprites']) if (f[k]) atlas[k] = { ...(atlas[k] || {}), ...f[k], ...(atlas[k] || {}) };
     }
   }
   const src = (p) => import(pathToFileURL(path.join(NEXT, 'src', 'data', p)).href);
@@ -842,7 +842,7 @@ export const MAP_IDS_EP2 = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chape
   'court_f1', 'court_f2', 'court_f3', 'court_throne'];
 const EVENT_TYPES = new Set(['npc', 'actor', 'door', 'chest', 'sign', 'book', 'object', 'trigger', 'enemy', 'switch', 'plate',
   'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor']);
-const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne'];
+const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne', 'x1_gate_culvert', 'x1_gate_barrow'];
 const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog']);
 const CHEST_TIERS = new Set(['wood', 'iron', 'gold']);
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);

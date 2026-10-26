@@ -22,7 +22,7 @@ export const RUN_FRAMES = 8;
 export const SLOW_FRAMES = 18;
 export const SPEEDS = { walk: WALK_FRAMES, run: RUN_FRAMES, slow: SLOW_FRAMES, fast: 6 };
 export const PARTY_IDS = new Set(['hero', 'mira', 'bram']);
-const ANIMALS = { animal_cat: 'catdog', animal_dog: 'catdog', animal_chicken: 'chicken', animal_duck: 'duck' };
+const ANIMALS = { animal_cat: 'catdog', animal_dog: 'catdog', animal_chicken: 'chicken', animal_duck: 'duck', animal_sheep: 'sheep' };
 const EMOTE_KINDS = { '!': 'exclaim', '?': 'question', '...': 'dots', heart: 'heart', sweat: 'sweat', anger: 'anger', music: 'music', zzz: 'zzz', idea: 'idea' };
 export const EMOTE_FRAMES = 54;
 
