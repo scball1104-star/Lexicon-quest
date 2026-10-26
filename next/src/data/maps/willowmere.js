@@ -3,7 +3,11 @@
 // north of it, the library east (chicken run behind it), the hero's home and Oren's bakery on the west lane,
 // the Lantern Inn and ferry landing in the north-east, Edda's twelve beds along the river road, the main
 // road south to the south square (notice board, Tess) and the gate (Bram left, Holt right).
-import { grid, box, put, rows, scatter, bridgeH, npc, door, sign, object, trigger } from './_kit.js';
+import { grid, box, put, rows, scatter, bridgeH, npc, door, sign, object, trigger, chest } from './_kit.js';
+import { x1On } from '../x1/live.js';
+
+// X1 (docs/maps/X1_HUB.md): the west gate and Wick's hole, all behind x1On('west'); switched off the module is exactly the baseline.
+const X1_W = x1On('west');
 
 const W = 48, H = 32;
 const g = grid(W, H, '.');
@@ -93,6 +97,7 @@ const overlays = [
   { t: 'pebbles_1', x: 39, y: 10 }, { t: 'tuft_0', x: 40, y: 11 },
   ...scatter(ground, ['.'], ['tuft_0', 'tuft_1', 'pebbles_0', 'leaves'], 0.05, 3),
   ...scatter(ground, [','], ['flowers_white', 'flowers_yellow'], 0.2, 5),
+  ...(X1_W ? [{ t: 'wall_broken', x: 6, y: 30 }] : []),
 ];
 
 // ------------------------------------------------------------------ decor
@@ -131,12 +136,13 @@ const decor = [
   { t: 'tree_willow', x: 8, y: 22 },
   { t: 'tree_pine', x: 9, y: 31 }, { t: 'tree_pine', x: 12, y: 31 }, { t: 'tree_pine', x: 28, y: 31 },
   { t: 'tree_pine', x: 33, y: 31 }, { t: 'tree_pine', x: 15, y: 11 }, { t: 'tree_pine', x: 6, y: 6 },
-  { t: 'tree_pine', x: 25, y: 9 }, { t: 'tree_pine', x: 14, y: 7 }, { t: 'tree_pine', x: 6, y: 31 },
+  { t: 'tree_pine', x: 25, y: 9 }, { t: 'tree_pine', x: 14, y: 7 }, ...(X1_W ? [] : [{ t: 'tree_pine', x: 6, y: 31 }]),   // X1: it stood on Wick's chest
   { t: 'tree_pine', x: 11, y: 29 }, { t: 'tree_pine', x: 3, y: 28 }, { t: 'tree_pine', x: 38, y: 31 },
   { t: 'hedge_flowers', x: 16, y: 6 }, { t: 'bush', x: 19, y: 6 }, { t: 'bush', x: 20, y: 6 },
   { t: 'bush', x: 10, y: 20 }, { t: 'bush', x: 35, y: 15 }, { t: 'bush', x: 24, y: 21 },
   { t: 'bush', x: 38, y: 7 }, { t: 'bush', x: 41, y: 3 }, { t: 'bush', x: 36, y: 26 },
   { t: 'bush', x: 13, y: 10 }, { t: 'bush', x: 5, y: 28 }, { t: 'bush', x: 1, y: 22 },
+  ...(X1_W ? [{ t: 'lamp_post', x: 1, y: 15, state: 1 }] : []),
 ];
 
 // ------------------------------------------------------------------ events
@@ -186,6 +192,14 @@ const events = [
   // Episode 2 (E2-maps): GONE TO THE FORD. G. nailed on the smithy door while Garrick is at the ford (the door still opens)
   sign('smithy_ford_note', 29, 25, 'smithy_ford_note', { if: 'garrick_at_ford', solid: false }),
   { id: 'ferry_landing', type: 'ferry', x: 45, y: 4, text: 'ferry_landing', to: ['valley', 34, 9, 'left'], rideIf: 'nella_bell_done', solid: false },
+  ...(X1_W ? [
+    // X1: Orchard Lane gate (a door once first_fight_done, two posts and Holt's notice before); Wick's hole
+    door('x1_west_gate', 0, 16, ['x1_downs', 54, 25, 'left'], { w: 1, h: 2, if: 'first_fight_done' }),
+    object('x1_orchard_gate', 0, 16, 'signpost', { text: 'x1_orchard_gate', ifNot: 'first_fight_done' }),
+    object('x1_orchard_gate_b', 0, 17, 'signpost', { text: 'x1_orchard_gate', ifNot: 'first_fight_done' }),
+    object('x1_wall_crack', 6, 30, 'wall_cracked', { breakable: 'rock', text: 'x1_wall_crack', h: 2 }),
+    chest('x1_chest_wall', 6, 31, 'wood', { item: 'echo_herb', qty: 2, behind: 'x1_wall_crack' }),
+  ] : []),
 ];
 
 export default {
@@ -211,6 +225,7 @@ export default {
     gather_oren: [11, 16], meet_oren: [20, 20],
     gather_hazel: [4, 16], meet_hazel: [20, 18],
     gather_mael: [18, 13], meet_mael: [22, 16],
+    ...(X1_W ? { west_gate: [1, 16] } : {}),
   },
   start: { x: 20, y: 24, dir: 'up' },
 };

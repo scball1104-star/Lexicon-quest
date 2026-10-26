@@ -10,7 +10,7 @@ import { enc, ENCOUNTERS, ZONES, OPTIONAL_ZONES } from '../encounters.js';
 import { EXPANSION_FOE_EXP_MUL } from '../expcurve.js';
 
 /** X1-maps-hub: set to true once the maps exist (lists the eight zones in ZONES for qa/maps). Mirrored by x1/index.js X1_MAPS_LISTED. */
-export const X1_MAPS_LISTED = false;
+export const X1_MAPS_LISTED = true;
 
 const M = EXPANSION_FOE_EXP_MUL;
 

@@ -411,3 +411,18 @@ and Elian by the dais while `aurel_named` and not `nh_restored`.
 - The chest `chest_remembrance` carries `gold: 140` besides its item (2 Ethers); the chest code must pay it.
 - `feather_obj` draws `prop_letter` until a feather prop exists.
 - Push blocks and movable mirrors must never enter door cells (the map tools assume it).
+
+---
+
+## 7. Episode 1 expansion, "The Wider Valley" (X1)
+
+Eleven new maps and edits to five existing ones, all `x1` pack content (`docs/PWA_PACKS.md`): the new maps are `src/data/maps/x1_*.js`, the edits to `valley`, `willowmere` and `archive_f1..f3` are behind `x1On()`
+(`src/data/x1/live.js`) and resolve to exactly the old modules while the switch is off or the pack is not loaded. Exact cells, previews and test commands:
+
+- [`docs/maps/X1_WEST.md`](maps/X1_WEST.md): `x1_downs`, `x1_loomhouse`, `x1_barrow`
+- [`docs/maps/X1_SOUTH.md`](maps/X1_SOUTH.md): `x1_millrace`, `x1_mill`, `x1_culvert`
+- [`docs/maps/X1_NORTH.md`](maps/X1_NORTH.md): `x1_terrace`, `x1_orrery`, `x1_cellar`
+- [`docs/maps/X1_WILD.md`](maps/X1_WILD.md): `x1_highmoor`, `x1_larchhill`
+- [`docs/maps/X1_HUB.md`](maps/X1_HUB.md): the edits to the five existing maps, the frozen baseline in `qa/maps/x1_baseline/` and the ON-state tooling (`force_on.mjs`)
+
+Tests: `qa/maps/x1_west.test.mjs`, `x1_south.test.mjs`, `x1_north.test.mjs`, `x1_wild.test.mjs`, `x1_hub.test.mjs`. `ZONES` lists the eight x1 zones (`X1_MAPS_LISTED = true`).

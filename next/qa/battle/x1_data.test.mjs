@@ -57,8 +57,8 @@ test('enemies: stats, skills, weaknesses and loot zones are valid; the bosses us
   for (const [id, row] of Object.entries(X1_ENEMY_ROWS)) assert.equal(ENEMIES[id].hp, row.hp);
 });
 
-test('zones: eight optional zones, never on the route, unlisted until X1-maps-hub flips the switch', () => {
-  assert.equal(X1_MAPS_LISTED, false, 'X1-maps-hub flips this, not X1-battle');
+test('zones: eight optional zones, never on the route, listed once X1-maps-hub flipped the switch', () => {
+  assert.equal(X1_MAPS_LISTED, true, 'X1-maps-hub flipped this');
   assert.deepEqual(Object.keys(X1_ZONES), ZONE_IDS);
   for (const id of ZONE_IDS) {
     const z = ZONES[id];

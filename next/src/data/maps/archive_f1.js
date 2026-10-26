@@ -13,11 +13,12 @@
 // Doors set into wall faces are same-map transfers that land on a one-cell notch in the far room's south wall.
 import { grid, box, put, rows, room, wallShelf, npc, door, sign, book, object, trigger, enemy, chest, pot,
   block, plate, gate, lockedDoor, steps, enter } from './_kit.js';
+import { x1On } from '../x1/live.js';
 
-// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
-// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
-// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
-// three are wall.
+// X1 (docs/maps/X1_HUB.md): a root-wall alcove east of the key alcove, behind x1On(); switched off the module is exactly the baseline.
+const X1 = x1On();
+
+// W8-archive (CRITIQUE_3 #3): wall depth: band '#' touching a room, deep 'v' beyond, outer face 'o' under a band (all wall).
 function depth(g) {
   const H = g.length, W = g[0].length;
   const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
@@ -56,6 +57,8 @@ box(g, 13, 25, 13, 26, '.');
 box(g, 25, 24, 26, 25, '.');
 // notches: entrance (valley), D from C, J from I, I from H, F from E
 put(g, 20, 28, '.'); put(g, 8, 7, '.'); put(g, 31, 7, '.'); put(g, 31, 18, '.'); put(g, 15, 14, '.');
+// X1: the alcove (doorway (12, 5..6) under the roots)
+if (X1) { room(g, 13, 5, 17, 6, '.', '|'); box(g, 12, 5, 12, 6, '.'); }
 // floor dressing: carpets in the hall and the landing, ink puddles, stone flags in the wing
 box(g, 19, 22, 20, 27, 'c');
 box(g, 30, 4, 33, 6, 'b');
@@ -115,6 +118,7 @@ const decor = [
   { t: 'card_cabinet', x: 26, y: 11 }, { t: 'card_cabinet', x: 11, y: 27 },
   // J: the landing's book piles
   { t: 'book_stack', x: 29, y: 6 },
+  ...(X1 ? [{ t: 'candelabra', x: 17, y: 5 }] : []),
 ];
 
 const events = [
@@ -172,6 +176,10 @@ const events = [
   enemy('e_i_wraith', 27, 13, 'page_wraith', 'f1_wraith', 'chase'),
   enemy('e_i_mixed_a', 35, 16, 'page_wraith', 'f1_mixed', 'chase'),
   enemy('e_i_mixed_b', 31, 12, 'page_wraith', 'f1_mixed', 'guard'),
+  ...(X1 ? [
+    object('x1_f1_roots', 12, 5, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2 }),
+    chest('x1_chest_f1', 15, 5, 'iron', { behind: 'x1_f1_roots' }),
+  ] : []),
 ];
 
 export default {

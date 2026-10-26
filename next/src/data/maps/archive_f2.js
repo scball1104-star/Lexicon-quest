@@ -10,12 +10,13 @@
 // past the east hidden-ink bridge, so it only opens with the Lantern. W10 (PLAYTEST_REVIEW_2 fix 1): a second font
 // stands in the entry hall beside the stairs up, the rest point before the Warden after the long F1 stretch.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, actor,
-  floorSwitch, shelf, font, light, steps, enter } from './_kit.js';
+  floorSwitch, shelf, font, light, pit, steps, enter } from './_kit.js';
+import { x1On } from '../x1/live.js';
 
-// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
-// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
-// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
-// three are wall.
+// X1 (docs/maps/X1_HUB.md): the Reader's Alcove behind x1On(), the note behind x1On('north'); switched off the module is the baseline.
+const X1 = x1On(), X1_N = x1On('north');
+
+// W8-archive (CRITIQUE_3 #3): wall depth: band '#' touching a room, deep 'v' beyond, outer face 'o' under a band (all wall).
 function depth(g) {
   const H = g.length, W = g[0].length;
   const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
@@ -56,6 +57,8 @@ box(g, 19, 12, 21, 17, 'c');
 box(g, 19, 4, 21, 8, 'c');
 box(g, 3, 13, 6, 16, 'b');
 put(g, 33, 17, 'm'); put(g, 34, 17, 'm'); put(g, 2, 27, 'm'); put(g, 3, 27, 'm'); put(g, 38, 27, 'm');
+// X1: the Reader's Alcove: doorway (13..14, 7..8), ink moat (10..12, 7..8), alcove (6..9, 5..8)
+if (X1) { box(g, 13, 7, 14, 8, '.'); box(g, 10, 7, 12, 8, 'i'); room(g, 6, 5, 9, 8, '.', '|'); }
 const ground = rows(depth(g));
 
 const overlays = [
@@ -79,6 +82,7 @@ const overlays = [
   { t: 'roots_0', x: 2, y: 12 }, { t: 'roots_1', x: 38, y: 12 }, { t: 'roots_2', x: 14, y: 17 }, { t: 'roots_1', x: 27, y: 27 },
   { t: 'roots_0', x: 13, y: 27 }, { t: 'roots_2', x: 2, y: 26 }, { t: 'roots_1', x: 15, y: 8 }, { t: 'roots_0', x: 25, y: 8 },
   { t: 'ink_puddle_0', x: 11, y: 16 }, { t: 'ink_puddle_1', x: 28, y: 13 }, { t: 'ink_puddle_0', x: 35, y: 26 }, { t: 'ink_puddle_1', x: 6, y: 25 },
+  ...(X1 ? [{ t: 'ink_bridge_h_faint', x: 10, y: 7 }, { t: 'ink_bridge_h_faint', x: 11, y: 7 }, { t: 'ink_bridge_h_faint', x: 12, y: 7 }] : []),
 ];
 
 const decor = [
@@ -107,6 +111,7 @@ const decor = [
   { t: 'shelf_wide', x: 29, y: 24 }, { t: 'shelf_wide', x: 34, y: 24 },
   { t: 'reading_table', x: 36, y: 26 }, { t: 'reading_table', x: 30, y: 26 },
   { t: 'candelabra', x: 29, y: 22 }, { t: 'candelabra', x: 38, y: 22 },
+  ...(X1 ? [{ t: 'lectern', x: 9, y: 6 }] : []),
 ];
 
 const events = [
@@ -153,6 +158,11 @@ const events = [
   enemy('e_wg_mixed', 4, 19, 'tome_golem', 'f2_mixed', 'guard'),
   enemy('e_eg_wraiths', 32, 26, 'page_wraith', 'f2_wraiths', 'chase'),
   enemy('e_eg_mixed', 28, 23, 'tome_golem', 'f2_mixed', 'chase'),
+  ...(X1 ? [
+    pit('x1_f2_bridge', 10, 7, 3, 1, ['archive_f2', 13, 7, 'left']),
+    chest('x1_chest_f2', 7, 6, 'gold'),
+  ] : []),
+  ...(X1_N ? [book('x1_keeper_note_f2', 9, 6, 'x1_keeper_note_f2', { solid: false, lantern: true })] : []),
 ];
 
 export default {

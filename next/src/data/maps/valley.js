@@ -4,14 +4,14 @@
 // Archive grown into the north cliff. North landing with the empty bell post; Nella's bell in the shallows below
 // it. West: the meadow, the hollow tree cache and a cliff with a ledge shortcut; east: the Whisperwood edge.
 //
-// W9-abilities: the plateau's south face is cracked at (4,14): Dash Strike opens a grotto with an iron chest
-// (`chest_grotto`, hidden until the rock breaks). It sits west of the first-fight cut, so the hero can try the dash
-// before the first battle; the wall_broken overlay under it only tells the map tools the grotto floor is open.
-//
-// Shapes (CRITIQUE_2 item 6): the roads bend and widen, the tall grass and flower drifts are value-noise blobs,
-// the tributary and the ink pool have ragged banks and the cliff-top tree line is broken. Every mark, event and
-// the walk model are unchanged from the straight version (qa/maps asserts them).
-import { grid, box, put, rows, scatter, bridgeH, npc, door, sign, object, trigger, enemy, chest, hash01, steps } from './_kit.js';
+// W9-abilities: the plateau face is cracked at (4,14): Dash Strike opens a grotto with an iron chest (`chest_grotto`),
+// west of the first-fight cut so the dash can be tried first; the wall_broken overlay under it marks the floor open.
+// Shapes (CRITIQUE_2 item 6): bent roads, value-noise grass blobs, ragged banks, a broken tree line (qa/maps asserts them).
+import { grid, box, put, rows, scatter, bridgeH, npc, door, sign, object, trigger, enemy, chest, pit, hash01, steps } from './_kit.js';
+import { x1On } from '../x1/live.js';
+
+// X1 (docs/maps/X1_HUB.md): every edit tagged X1 is behind x1On(); switched off the module is exactly the baseline.
+const X1 = x1On(), X1_W = x1On('west'), X1_S = x1On('south'), X1_N = x1On('north'), X1_V = x1On('wild');
 
 const W = 60, H = 40;
 const g = grid(W, H, '.');
@@ -65,11 +65,9 @@ for (let x = 47; x < W; x++) {
 put(g, 46, 20, '-'); put(g, 46, 19, 's'); put(g, 46, 21, 's'); put(g, 45, 19, 's'); put(g, 45, 21, 's');
 // ink pool at the Whisperwood edge (the Lantern secret): a blot, with a tongue of land at the bridge's west end
 for (const [x0, x1, y] of [[53, 54, 28], [52, 55, 29], [52, 55, 30], [53, 55, 31], [52, 55, 32], [53, 55, 33]]) box(g, x0, y, x1, y, 'i');
-// Episode 2 (E2-maps, EPISODE2_PLAN 3): the washout. A stream falls from the north cliff at x 45..46 and runs down to the
-// tributary beside the old ford: the flood that cut it took the east road with it, so the fork's east branch ends in the
-// shallows and the north bank beyond is out of reach (it always was, behind the Whisperwood pines; now the water says
-// why). Garrick's Crossing (planks over the gully, only once ep2_started) is the one way east; the bank road runs along
-// the tributary's north bank to the east edge (exit to the Fading Road).
+// Episode 2 (E2-maps, EPISODE2_PLAN 3): the washout. A stream falls from the north cliff at x 45..46 to the tributary beside
+// the old ford, so the east branch ends in the shallows. Garrick's Crossing (planks, only once ep2_started) is the one way
+// east; the bank road runs along the tributary's north bank to the east edge (exit to the Fading Road).
 box(g, 45, 0, 46, 5, '~');
 for (let y = 6; y <= 19; y++) { put(g, 45, y, '~'); put(g, 46, y, '~'); }
 for (const y of [9, 10, 11]) put(g, 44, y, '~');          // the gully swells where the flood scoured it
@@ -115,6 +113,10 @@ for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   if (near) put(g, x, y, '.');
 }
 
+// X1: the south track; the Keepers' stair and cleft (ink on three rows, one cell of ground at the stair foot)
+if (X1_S) for (let y = 36; y <= 39; y++) box(g, 22, y, 24, y, '=');
+if (X1_N) { put(g, 21, 3, 'S'); put(g, 21, 4, 't'); put(g, 21, 5, 'z'); box(g, 19, 6, 23, 8, 'i'); put(g, 21, 6, '.'); }
+
 const ground = rows(g);
 
 // ---------------------------------------------------------------- overlays
@@ -132,11 +134,18 @@ const overlays = [
   { t: 'wall_broken', x: 4, y: 14 },                // W9: the grotto behind the cracked face (drawn over by the crack)
   // Episode 2: Garrick's Crossing, planks over the gully (only once ep2_started)
   ...bridgeH(44, 47, 16, 'wood', false).map((o) => ({ ...o, if: 'ep2_started' })),
+  // X1: the cleft's ink bridge; the hole behind the Dash roots
+  ...(X1_N ? [{ t: 'ink_bridge_v_faint', x: 21, y: 7 }, { t: 'ink_bridge_v_faint', x: 21, y: 8 }] : []),
+  ...(X1 ? [{ t: 'wall_broken', x: 13, y: 4 }] : []),
 ];
 
 // ---------------------------------------------------------------- decor
 const pines = [];
 function pine(x, y) {
+  // X1: keep the notch, the track and the west lane clear
+  if (X1_N && x >= 19 && x <= 23 && y <= 8) return;
+  if (X1_S && x >= 21 && x <= 25 && y >= 35) return;
+  if (X1_W && x <= 3 && y >= 27 && y <= 30) return;
   // Episode 2: no pines in the washout gully, on the crossing's approach or on the bank road
   if (x >= 43 && x <= 47 && y >= 6 && y <= 19) return;
   if (y >= 15 && y <= 17 && x >= 47) return;
@@ -184,6 +193,9 @@ const decor = [
   { t: 'arch_ruin', x: 50, y: 27 },                 // the root arch at the pool's edge: the mouth of Whisperwood Hollow
   { t: 'lamp_post', x: 37, y: 8, state: 1 }, { t: 'lamp_post', x: 34, y: 33, state: 1 },
   { t: 'crates_barrels', x: 40, y: 31 },
+  // X1: the cleft's sign; the sandbar pocket
+  ...(X1_N ? [{ t: 'signboard', x: 23, y: 9 }] : []),
+  ...(X1_S ? [{ t: 'bush', x: 25, y: 38 }, { t: 'bush', x: 26, y: 39 }, { t: 'x1_boulder_a', x: 27, y: 38 }] : []),
 ];
 
 // ---------------------------------------------------------------- events
@@ -235,6 +247,36 @@ const events = [
   enemy('e_scarab_b', 44, 13, 'moss_scarab', 'valley_scarab', 'wander', { radius: 3 }),
   enemy('e_mixed', 42, 10, 'briar_wolf', 'valley_mixed', 'chase'),
   enemy('e_pack', 39, 14, 'briar_wolf', 'valley_pack', 'chase'),
+  // X1: west lane (the door exists once first_fight_done; two gateposts close it before)
+  ...(X1_W ? [
+    door('x1_downs_door', 0, 28, ['x1_downs', 54, 11, 'left'], { w: 1, h: 2, if: 'first_fight_done' }),
+    object('x1_drovers_gate', 0, 28, 'signpost', { text: 'x1_drovers_gate', ifNot: 'first_fight_done' }),
+    object('x1_drovers_gate_b', 0, 29, 'signpost', { text: 'x1_drovers_gate', ifNot: 'first_fight_done' }),
+    npc('stray_4', 7, 20, 'down', { if: 'strays_started' }),
+  ] : []),
+  // X1: south track (the oak lies across it until the bell has tolled)
+  ...(X1_S ? [
+    door('x1_millrace_door', 22, 39, ['x1_millrace', 23, 1, 'down'], { w: 3, h: 1, if: 'archive_f1_done' }),
+    object('x1_fallen_oak', 21, 37, 'x1_fallen_oak', { text: 'x1_fallen_oak', ifNot: 'archive_f1_done' }),
+  ] : []),
+  // X1: north stair over the cleft, its sign and hint, the two star marks
+  ...(X1_N ? [
+    door('x1_terrace_stair', 21, 3, ['x1_terrace', 6, 19, 'up'], { kind: 'stairs' }),
+    pit('x1_cleft_fall', 21, 7, 1, 2, ['valley', 21, 9, 'down']),
+    sign('x1_cleft_sign', 23, 9, 'x1_cleft_sign', { solid: false }),
+    trigger('x1_cleft_trig', 19, 9, 5, 1, 'cleft_hint', { if: 'lantern_get' }),
+    object('x1_star_mark_milestone', 38, 20, 'x1_cairn_moor', { script: 'star_read_1', lantern: true, if: 'stars_started' }),
+    object('x1_star_mark_door', 38, 6, 'x1_cairn_moor', { script: 'star_read_2', lantern: true, if: 'stars_started' }),
+  ] : []),
+  // X1: the secrets (Dash roots; the Shove driftlog)
+  ...(X1 ? [
+    object('x1_roots_valley', 13, 4, 'root_drape', { breakable: 'roots', text: 'root_wall_thin', h: 2 }),
+    chest('x1_chest_roots', 13, 5, 'iron', { behind: 'x1_roots_valley' }),
+  ] : []),
+  ...(X1_S ? [
+    { id: 'x1_driftlog', type: 'block', x: 26, y: 37, sprite: 'x1_driftlog', heavy: true },
+    chest('x1_chest_sandbar', 26, 38, 'iron', { item: 'hi_potion', qty: 2 }),
+  ] : []),
 ];
 
 export default {
@@ -250,12 +292,16 @@ export default {
   ground,
   overlays,
   decor,
-  overhead: [],
+  // X1: the far Watchtower
+  overhead: X1_V ? [{ t: 'x1_far_tower', x: 9, y: -2 }] : [],
   events,
   exits: [{ x: 0, y: 33, w: 1, h: 2, to: ['willowmere', 20, 30, 'up'] },
     { x: 59, y: 16, w: 1, h: 2, to: ['east_road', 1, 16, 'right'] }],
   marks: { archive_door: [36, 6], door_step: [36, 7], root_exit: [39, 7], fork: [35, 20], north_landing: [34, 9], campfire: [39, 22],
     hollow_mouth: [51, 28],
-    ford: [46, 16], crossing_garrick: [45, 16], crossing_hal: [46, 17], east_exit: [58, 16] },
+    ford: [46, 16], crossing_garrick: [45, 16], crossing_hal: [46, 17], east_exit: [58, 16],
+    ...(X1_W ? { downs_gate: [1, 28] } : {}),
+    ...(X1_N ? { cleft: [21, 9], stair_foot: [21, 6] } : {}),
+    ...(X1_S ? { south_track: [23, 38] } : {}) },
   start: { x: 1, y: 33, dir: 'right' },
 };

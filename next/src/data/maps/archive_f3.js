@@ -11,11 +11,12 @@
 // for the trip to the key room and back. From the stacks side there is only wall until it is open.
 import { grid, box, put, rows, room, wallShelf, door, sign, book, object, trigger, enemy, chest, crystal, gate, npc,
   brazier, font, light, pit, steps, enter } from './_kit.js';
+import { x1On } from '../x1/live.js';
 
-// W8-archive (CRITIQUE_3 #3): wall depth. A wall cell that touches a room stays the wall band '#' (a full tile of
-// wall top: the walls have thickness); wall cells further out become the deep 'v'; under a band's south side the
-// structure shows its outer face 'o' (one or two rows) falling away into the dark. Collision is unchanged: all
-// three are wall.
+// X1 (docs/maps/X1_HUB.md): a heavy bookcase hides a niche chest, behind x1On(); switched off the module is exactly the baseline.
+const X1 = x1On();
+
+// W8-archive (CRITIQUE_3 #3): wall depth: band '#' touching a room, deep 'v' beyond, outer face 'o' under a band (all wall).
 function depth(g) {
   const H = g.length, W = g[0].length;
   const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : g[y][x]);
@@ -98,6 +99,7 @@ const overlays = [
   { t: 'roots_0', x: 2, y: 27 }, { t: 'roots_1', x: 13, y: 27 }, { t: 'roots_2', x: 26, y: 22 }, { t: 'roots_0', x: 26, y: 27 },
   { t: 'roots_1', x: 29, y: 23 }, { t: 'roots_2', x: 37, y: 27 }, { t: 'roots_0', x: 4, y: 23 }, { t: 'roots_1', x: 8, y: 23 },
   { t: 'ink_puddle_0', x: 7, y: 15 }, { t: 'ink_puddle_1', x: 22, y: 16 }, { t: 'ink_puddle_0', x: 30, y: 17 }, { t: 'ink_puddle_1', x: 16, y: 26 },
+  ...(X1 ? [{ t: 'wall_broken', x: 9, y: 9 }] : []),    // X1: the niche
 ];
 
 const decor = [
@@ -177,6 +179,11 @@ const events = [
   enemy('e_pr_mixed', 29, 16, 'tome_golem', 'f3_mixed', 'wander', { radius: 1 }),
   enemy('e_cor_ink', 5, 20, 'ink_wraith', 'f3_ink', 'patrol', { path: steps('down', 1, 'up', 1) }),
   enemy('e_gd_wraiths', 16, 24, 'ink_wraith', 'f3_wraiths', 'chase'),
+  // X1: the heavy bookcase before the niche (Shove)
+  ...(X1 ? [
+    { id: 'x1_f3_shelf', type: 'block', x: 9, y: 11, sprite: 'push_block', heavy: true },
+    chest('x1_chest_f3', 9, 10, 'iron', { item: 'ether', qty: 2 }),
+  ] : []),
 ];
 
 export default {
