@@ -15,7 +15,7 @@ test('switched off: loadMap behaves exactly as before and never touches a pack',
   const a = await loadMap('east_road');          // a touched map of x2, loaded while the pack is off
   assert.equal(a.id, 'east_road');
   assert.equal((await loadMap('inn')).id, 'inn');
-  assert.equal(await loadMap('x1_downs'), null, 'a prefixed map that has no file is simply absent');
+  assert.equal(await loadMap('x1_nowhere'), null, 'a prefixed map that has no file is simply absent');
   assert.deepEqual(imported, [], 'no pack was fetched');
   assert.deepEqual(staleMaps(), []);
   globalThis.__east_a = a;
@@ -29,7 +29,7 @@ test('the guard fires for a prefixed map and for a touched map, and a map with n
   assert.equal(v.id, 'valley');
   assert.deepEqual(imported, ['../data/x1/index.js'], 'a touched map asked for x1 first');
   assert.equal(packReady('x1'), true);
-  assert.equal(await loadMap('x1_downs'), null, 'a prefixed map waits for the (ready) pack, then finds no file');
+  assert.equal(await loadMap('x1_nowhere'), null, 'a prefixed map waits for the (ready) pack, then finds no file');
   assert.deepEqual(imported, ['../data/x1/index.js'], 'x1 loaded once');
   assert.deepEqual(staleMaps(), [], 'valley loaded after the pack was ready: nothing to rebuild');
 });

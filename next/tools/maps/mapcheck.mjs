@@ -60,6 +60,16 @@ export async function loadDb() {
   const npcAtlas = readJson(a('sprites/npcs.json'));
   const enemiesField = readJson(a('sprites/enemies_field.json'));
   const partyField = readJson(a('sprites/party_field.json'));
+  // Expansion packs ship tiles and sprites as fragments: merge them the way the pack loader does so x1_/x2_ ids resolve.
+  const maybe = (p) => { try { return readJson(a(p)); } catch (e) { return null; } };
+  for (const px of ['x1', 'x2']) {
+    const frag = maybe(`tiles/${px}_tiles.json`);
+    if (frag) for (const k of ['terrains', 'walls', 'tiles', 'objects', 'overlays']) tiles[k] = { ...(tiles[k] || {}), ...Object.fromEntries(Object.entries(frag[k] || {}).filter(([id]) => !(id in (tiles[k] || {})))) };
+    for (const [base, atlas] of [['npcs', npcAtlas], ['enemies_field', enemiesField]]) {
+      const f = maybe(`sprites/${px}_${base}.json`);
+      if (f) for (const k of ['frames', 'anims']) if (f[k]) atlas[k] = { ...(atlas[k] || {}), ...f[k], ...(atlas[k] || {}) };
+    }
+  }
   const src = (p) => import(pathToFileURL(path.join(NEXT, 'src', 'data', p)).href);
   const npcs = await src('npcs.js');
   const enc = await src('encounters.js');

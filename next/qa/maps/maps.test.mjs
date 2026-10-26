@@ -19,7 +19,7 @@ const staging = parseStagingChecklist(fs.readFileSync(path.join(NEXT, 'docs', 's
 const results = Object.fromEntries(Object.entries(maps).map(([id, m]) => [id, validate(m, db, maps, { staging: loadStaging() })]));
 
 test('every COMMON.md map id has a module and no module is unexpected', () => {
-  assert.deepEqual(listMapIds().sort(), [...ALL_IDS].sort());
+  assert.deepEqual(listMapIds().filter((id) => !/^x[12]_/.test(id)).sort(), [...ALL_IDS].sort());   // expansion maps are covered by qa/maps/x1_*.test.mjs
   for (const id of ALL_IDS) assert.equal(maps[id].id, id, `module ${id} exports id ${maps[id].id}`);
 });
 
