@@ -28,6 +28,8 @@
   "src/data/maps/x1_cellar.js",
   "src/data/maps/x1_culvert.js",
   "src/data/maps/x1_downs.js",
+  "src/data/maps/x1_highmoor.js",
+  "src/data/maps/x1_larchhill.js",
   "src/data/maps/x1_loomhouse.js",
   "src/data/maps/x1_mill.js",
   "src/data/maps/x1_millrace.js",

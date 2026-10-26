@@ -49,6 +49,9 @@ GROUP_TARGET = {
 }
 JINGLE_TARGET = -17.0     # integrated; music is normalized to -16, so jingles sit just under it
 AMBIENCE_TARGET = -22.0   # integrated; a bed about 11 dB under the music at default sliders
+# An ambience that has not arrived (runtime-cached, not precached) can fall back to an older bed: data only for now,
+# the engine reads `fallback` for music and sfx; maps may also name the older bed directly.
+AMBIENCE_FALLBACK = {"moor_wind": "wind_valley", "larchhill_hum": "river_birds"}
 MUSIC_TARGET = -16.0      # integrated; manifest volume brings each track here
 
 MUSIC_IDS = ["title", "willowmere", "valley", "archive", "battle", "boss_archivore", "mystery", "sorrow",
@@ -56,7 +59,9 @@ MUSIC_IDS = ["title", "willowmere", "valley", "archive", "battle", "boss_archivo
              # Episode 2 (composed in tools/music/songs/)
              "hollow", "hollowmere", "fading_road", "court", "boss_king",
              # Episode 3 (composed in tools/music/songs/)
-             "emberpeak", "first_bell", "ash_road", "foundry", "boss_warden"]
+             "emberpeak", "first_bell", "ash_road", "foundry", "boss_warden",
+             # Expansion 1 (composed in tools/music/songs/)
+             "the_downs", "high_moor", "wethers_barrow", "orrery", "larchhill", "millrace", "boss_reeve", "boss_millstone"]
 LEGACY_MUSIC = {
     "title": "../assets/audio/title.mp3",
     "willowmere": "../assets/audio/town.mp3",
@@ -73,6 +78,8 @@ MUSIC_FALLBACK = {
     "boss_king": "boss_archivore",
     "emberpeak": "hollow", "first_bell": "hollowmere", "ash_road": "fading_road", "foundry": "court",
     "boss_warden": "boss_king",
+    "the_downs": "valley", "high_moor": "valley", "wethers_barrow": "mystery", "orrery": "mystery",
+    "larchhill": "valley", "millrace": "willowmere", "boss_reeve": "battle", "boss_millstone": "battle",
 }
 
 
@@ -319,6 +326,8 @@ def write_manifest(results: dict):
         f = f"assets/audio/ambience/{id_}.wav"
         if (NEXT / f).exists():
             man["ambience"][id_] = {"src": f, "volume": 1.0, "duration": round(wav_info(NEXT / f)[0], 3), "widen": True}
+            if id_ in AMBIENCE_FALLBACK:
+                man["ambience"][id_]["fallback"] = AMBIENCE_FALLBACK[id_]
     path.write_text(json.dumps(man, indent=1) + "\n", encoding="utf-8")
     stats_path = HERE / "out" / "build_stats.json"
     stats_path.parent.mkdir(parents=True, exist_ok=True)

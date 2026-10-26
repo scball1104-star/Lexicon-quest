@@ -1131,3 +1131,4 @@ for _id in EP2_PACK:
     REG[_id]["pack"] = "ep2"
 
 import sfx_defs_e3  # noqa: E402,F401  (Episode 3 sfx, pack "ep3"; registers into REG)
+import sfx_defs_x1  # noqa: E402,F401  (Expansion 1 sfx, pack "x1"; registers into REG)

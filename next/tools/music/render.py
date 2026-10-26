@@ -1,5 +1,5 @@
 """Render the composed music tracks (Episode 1: archive, mystery, sorrow, triumph; Episode 2: hollow,
-hollowmere, fading_road, court, boss_king).
+hollowmere, fading_road, court, boss_king; Expansion 1: the_downs high_moor wethers_barrow orrery larchhill millrace boss_reeve boss_millstone).
 
     python tools/music/render.py                 # every track + review images
     python tools/music/render.py archive sorrow  # a subset
@@ -24,7 +24,9 @@ MUSIC_DIR = os.path.join(NEXT, 'assets', 'audio', 'music')
 OUT_DIR = os.path.join(HERE, 'out')
 ALL = ['archive', 'mystery', 'sorrow', 'triumph',
        'hollow', 'hollowmere', 'fading_road', 'court', 'boss_king',   # Episode 2
-       'emberpeak', 'first_bell', 'ash_road', 'foundry', 'boss_warden']   # Episode 3: the last five
+       'emberpeak', 'first_bell', 'ash_road', 'foundry', 'boss_warden',   # Episode 3: the last five
+       'the_downs', 'high_moor', 'wethers_barrow', 'orrery', 'larchhill', 'millrace',   # Expansion 1
+       'boss_reeve', 'boss_millstone']
 
 
 def main(argv):

@@ -187,5 +187,53 @@
   "duration": 116.827,
   "sampleRate": 44100,
   "loopKind": "sidecar"
+ },
+ "assets/audio/music/the_downs.mp3": {
+  "lufs": -16.45,
+  "duration": 78.421,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/high_moor.mp3": {
+  "lufs": -16.46,
+  "duration": 88.581,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/wethers_barrow.mp3": {
+  "lufs": -16.44,
+  "duration": 82.887,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/orrery.mp3": {
+  "lufs": -16.45,
+  "duration": 100.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/larchhill.mp3": {
+  "lufs": -16.55,
+  "duration": 90.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/millrace.mp3": {
+  "lufs": -16.59,
+  "duration": 79.36,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/boss_reeve.mp3": {
+  "lufs": -16.43,
+  "duration": 98.342,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/boss_millstone.mp3": {
+  "lufs": -16.44,
+  "duration": 100.16,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
  }
 }

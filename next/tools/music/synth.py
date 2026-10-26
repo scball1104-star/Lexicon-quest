@@ -869,6 +869,157 @@ class Steam(Instrument):
 
 
 
+# --------------------------------------------------------------------------------------
+# Expansion 1 additions (X1-audio)
+# --------------------------------------------------------------------------------------
+
+class TinWhistle(Instrument):
+    """Tin whistle: brighter and quicker than the low whistle, a little chiff on the attack, almost no vibrato."""
+    name = 'tinwhistle'
+    release = 0.16
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.04, 0.1, 0.9, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        f = vibrato(n, sr, f0, rate=5.0, depth_semi=0.05, delay=0.6, ramp=0.5)
+        f = f * (2.0 ** (0.35 * np.exp(-t / 0.03) / 12.0))      # a small breath scoop into the pitch
+        v = osc('sine', f, sr) + 0.28 * osc('sine', f * 2, sr, phase0=0.2) + 0.1 * osc('sine', f * 3, sr)
+        chiff = filt(noise(n, rng), 'bp', f0 * 3.0, sr, q=1.2) * (0.05 + 0.2 * np.exp(-t / 0.04))
+        breath = filt(noise(n, rng), 'bp', f0 * 2.0, sr, q=1.6) * 0.05
+        return normalize((v + chiff + breath) * env, 0.5 * (0.5 + 0.5 * vel))
+
+
+class BoneFlute(Instrument):
+    """Bone flute: hollow and breathy, a slow attack, a dull top, the pitch sagging a hair at the end of a note."""
+    name = 'boneflute'
+    release = 0.3
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.12, 0.2, 0.85, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        sag = 2.0 ** (-0.12 * np.clip((t - gate_s * 0.6) / max(0.3, gate_s * 0.4), 0, 1) / 12.0)
+        f = vibrato(n, sr, f0, rate=4.2, depth_semi=0.1, delay=0.5, ramp=0.6) * sag
+        v = osc('sine', f, sr) + 0.12 * osc('sine', f * 2, sr, phase0=0.4) + 0.05 * osc('triangle', f * 3, sr)
+        breath = filt(noise(n, rng), 'bp', f0 * 1.6, sr, q=1.0) * (0.14 + 0.1 * (1.0 - vel))
+        v = filt(v + breath, 'lp', 2600 + f0, sr, 0.7)
+        return normalize(v * env, 0.5 * (0.45 + 0.55 * vel))
+
+
+class FrameDrum(Instrument):
+    """Frame drum: a wide, dry skin. The pitch tunes the drum; a low note is a thud, a high one a slap."""
+    name = 'framedrum'
+    release = 0.4
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(0.55 * sr)
+        t = np.arange(n) / sr
+        f = f0 * (1.0 + 0.5 * np.exp(-t / 0.02))
+        body = np.sin(TWO_PI * np.cumsum(f) / sr) * np.exp(-t / (0.13 + 0.06 * vel))
+        skin = filt(noise(n, rng), 'bp', 1400 + 900 * vel, sr, q=0.8) * np.exp(-t / 0.018) * (0.25 + 0.5 * vel)
+        rim = np.sin(TWO_PI * f0 * 2.4 * t) * np.exp(-t / 0.05) * 0.18
+        v = (body + skin + rim) * (1 - np.exp(-t / 0.0008))
+        v = filt(v, 'lp', 4500, sr, 0.7)
+        return normalize(v, 0.5 * (0.35 + 0.65 * vel))
+
+
+class Clarinet(Instrument):
+    """Clarinet: odd harmonics only (a closed tube), a warm low register, a woody breath, light late vibrato."""
+    name = 'clarinet'
+    release = 0.12
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.04, 0.1, 0.92, self.release)
+        n = env.shape[0]
+        f = vibrato(n, sr, f0, rate=5.0, depth_semi=0.09, delay=0.4, ramp=0.5)
+        v = (osc('sine', f, sr) + 0.42 * osc('sine', f * 3, sr, phase0=0.1) + 0.2 * osc('sine', f * 5, sr, phase0=0.3)
+             + 0.1 * osc('sine', f * 7, sr) + 0.04 * osc('sine', f * 9, sr))
+        v = filt(v, 'lp', 2400 + 800 * vel + f0, sr, 0.8)
+        t = np.arange(n) / sr
+        breath = filt(noise(n, rng), 'bp', 2200, sr, q=1.0) * (0.02 + 0.05 * np.exp(-t / 0.06))
+        return normalize((v + breath) * env, 0.5 * (0.5 + 0.5 * vel))
+
+
+class Accordion(Instrument):
+    """Accordion / musette reed: two reeds a few cents apart plus one an octave down, a hollow formant, and a
+    bellows breath (a slow swell on each note, a faint air hiss). Sustains as long as the gate."""
+    name = 'accordion'
+    release = 0.1
+
+    def __init__(self, bellows=0.18, beat_cents=7.0):
+        self.bellows = bellows
+        self.beat_cents = beat_cents
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.05, 0.12, 0.92, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        sw = 0.82 + 0.18 * np.clip(t / max(0.05, self.bellows * 3), 0, 1)
+        c = self.beat_cents
+        fa = np.full(n, f0)
+        v = (osc('saw', fa * 2 ** (-c / 1200), sr) + osc('saw', fa * 2 ** (c / 1200), sr, phase0=0.41)
+             + 0.6 * osc('square', fa * 0.5, sr, phase0=0.2))
+        v = filt(v, 'lp', 2200 + 900 * vel + f0, sr, 0.8)
+        v = v + 0.4 * filt(v, 'bp', 1000, sr, q=2.2) + 0.2 * filt(v, 'bp', 2100, sr, q=2.5)
+        air = filt(noise(n, rng), 'bp', 3400, sr, q=0.8) * 0.018
+        return normalize((v + air) * env * sw, 0.5 * (0.5 + 0.5 * vel))
+
+
+class Woodblock(Instrument):
+    """A dry wooden clack (waterwheel paddle, loom beam): a short body at the pitch, a click, no ring."""
+    name = 'woodblock'
+    release = 0.1
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(0.16 * sr)
+        t = np.arange(n) / sr
+        v = (np.sin(TWO_PI * f0 * t) * np.exp(-t / 0.028) + 0.5 * np.sin(TWO_PI * f0 * 2.32 * t) * np.exp(-t / 0.015)
+             + 0.25 * np.sin(TWO_PI * f0 * 4.1 * t) * np.exp(-t / 0.008))
+        v = v + filt(noise(n, rng), 'bp', 3000, sr, q=1.0) * np.exp(-t / 0.004) * 0.5
+        v *= (1 - np.exp(-t / 0.0004))
+        return normalize(v, 0.5 * (0.35 + 0.65 * vel))
+
+
+class Grind(Instrument):
+    """A millstone grind: low band noise rubbed in pulses with a gritty top, a stone thud under it. Pitch moves the band."""
+    name = 'grind'
+    release = 0.3
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n = int(min(1.6, gate_s + self.release) * sr)
+        t = np.arange(n) / sr
+        scrape = filt(noise(n, rng), 'bp', f0 * 3.0, sr, q=0.9) + 0.5 * filt(noise(n, rng), 'bp', f0 * 9.0, sr, q=1.4)
+        rub = 0.55 + 0.45 * np.sin(TWO_PI * 11.0 * t + rng.uniform(0, 6.28))
+        env = np.clip(t / 0.015, 0, 1) * np.exp(-t / max(0.08, gate_s * 0.9))
+        thud = np.sin(TWO_PI * np.cumsum(f0 * (1 + 0.6 * np.exp(-t / 0.03))) / sr) * np.exp(-t / 0.12)
+        v = scrape * rub * env + 1.4 * thud
+        v = filt(v, 'lp', 5500, sr, 0.7)
+        return normalize(v, 0.5 * (0.4 + 0.6 * vel))
+
+
+class BowedBass(Instrument):
+    """A bowed double bass held down hard: a dark saw with a rough bow scrape and a slow bite."""
+    name = 'bowbass'
+    release = 0.25
+
+    def render(self, f0, gate_s, vel, sr, rng, **p):
+        n_gate = int(gate_s * sr)
+        env = adsr(n_gate, sr, 0.09, 0.15, 0.9, self.release)
+        n = env.shape[0]
+        t = np.arange(n) / sr
+        f = vibrato(n, sr, f0, rate=4.4, depth_semi=0.08, delay=0.5, ramp=0.5)
+        v = osc('saw', f, sr) + 0.7 * osc('saw', f * 1.004, sr, phase0=0.3) + 0.5 * osc('sine', f * 0.5, sr)
+        v = filt(v, 'lp', 700 + 700 * vel + f0 * 2, sr, 0.9)
+        scrape = (filt(noise(n, rng), 'bp', 900, sr, q=1.2) * (0.05 + 0.12 * np.exp(-t / 0.12))
+                  * (0.6 + 0.4 * np.sin(TWO_PI * 7.0 * t)))
+        return normalize((v + scrape) * env, 0.5 * (0.5 + 0.5 * vel))
+
+
 def make(name, **kw):
     """Instrument factory by short name used in song files."""
     table = {
@@ -905,5 +1056,13 @@ def make(name, **kw):
         'fiddle': lambda: Fiddle(),
         'whistle': lambda: Whistle(),
         'steam': lambda: Steam(),
+        'tinwhistle': lambda: TinWhistle(),
+        'boneflute': lambda: BoneFlute(),
+        'framedrum': lambda: FrameDrum(),
+        'clarinet': lambda: Clarinet(),
+        'accordion': lambda: Accordion(**kw),
+        'woodblock': lambda: Woodblock(),
+        'grind': lambda: Grind(),
+        'bowbass': lambda: BowedBass(),
     }
     return table[name]()

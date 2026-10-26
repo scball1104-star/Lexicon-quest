@@ -1,4 +1,4 @@
-# Suno prompts for Episodes 1 to 3 (optional upgrade)
+# Suno prompts for Episodes 1 to 3 and Expansion 1 (optional upgrade)
 
 Suno cannot be driven from the Claude app's built-in browser (Cloudflare's human check fails there), so the
 game ships with code-composed music for these cues. If you get a few minutes with Suno on your phone or laptop,
@@ -48,6 +48,25 @@ fourth note on a bell in `first_bell`, a rest in `emberpeak`), so if you generat
 | `ash_road.mp3` | The Old Sand Road | travel theme, fiddle and low whistle over a cart-wheel rhythm, ash-grey harmony warming to amber, A minor to C major, 100 BPM |
 | `foundry.mp3` | The Ashen Foundry | industrial fantasy dungeon, anvil and steam percussion, low brass, cold flute, 88 BPM |
 | `boss_warden.mp3` | The Cinder Warden | boss battle in 7/8, anvil strikes, brass, timpani, choir, a bell motif in minor, 144 BPM |
+
+## Expansion 1 (same shared style line)
+
+All eight ship as code-composed tracks (`docs/MUSIC.md`, Expansion 1). A Suno file dropped at the same name replaces the composed one after
+`python tools/audio/build.py --manifest` (and `python tools/audio/music_scan.py` for the level and loop). Keep the name motif (a rising fifth, a
+whole step, a falling third) and what each track does with it: a shepherd's call answered from far off in `the_downs`, the fourth note landed by
+a distant horn in `high_moor`, the fourth note missing in `wethers_barrow` and `boss_reeve`, the motif once, high and lit, in `orrery`, complete
+and plain in `millrace`, augmented in the brass in `boss_millstone`.
+
+| File | Title | Styles (after the shared line) |
+|---|---|---|
+| `the_downs.mp3` | The Shepherd's Road | pastoral lilting 6/8, tin whistle and fiddle over a low drone, light hand drum, open and unhurried, G major, 92 BPM, a second whistle answering from far away |
+| `high_moor.mp3` | The High Moor | wide windswept moor, low strings and hammered dulcimer in long notes over a pedal, one distant horn, D Dorian, 76 BPM, slow and spacious |
+| `wethers_barrow.mp3` | The Count | sparse and eerie, low choir hum, bone flute, muted frame drum counting twelve and missing the thirteenth, E minor, 66 BPM |
+| `orrery.mp3` | The Orrery | clear, cold, kind, glass and harp in a slow arpeggio (three against four), celesta melody, soft high strings, F# Lydian, 72 BPM |
+| `larchhill.mp3` | Larchhill | sunny, busy and a little drowsy waltz, clarinet and accordion over pizzicato bass and a humming hive-like drone, C Mixolydian, 84 BPM |
+| `millrace.mp3` | The Millrace | warm busy 6/8, a waterwheel ostinato of wooden clacks, accordion and strummed guitar, A major, 100 BPM, one loop |
+| `boss_reeve.mp3` | One Short | counting boss battle in 12/8, bone flutes, frame drums and choir, the last beat of every bar missing, E minor, 132 BPM, a major bar before the loop |
+| `boss_millstone.mp3` | The Wheel Runs | heavy boss battle in 5/4, grinding stone percussion, low brass, timpani, a scraping bowed bass, D minor, 120 BPM, faster at the end of each loop |
 
 Already in place and fine to keep: `title.mp3` (The Dawn of Aethelgard), `town.mp3`, `battle.mp3`, `boss.mp3`,
 `region-1.mp3` in the root `assets/audio/` folder.

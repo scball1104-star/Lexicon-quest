@@ -42,7 +42,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Dungeon toolkit | `block_push` per tile, `switch_on` / `switch_off`, `gate_open`, `crystal_hit`, `bridge_appear`, `lantern_reveal`, `brazier_light`, `shelf_move`, `jump` + `land` on ledges, `fall` into pits, `splash`, `pot_break` |
 | Silverglass (Episode 2) | `mirror_turn` when a mirror rotates, `beam_hit` when a receptor first lights, `glass_bridge` as bridge cells light, `glass_break` for a Dash through a pane or the great mirror cracking, `mirror_step` through a mirror door, `ferry_oars` on Tovin's ferry, `clock_chime` for Lena's clocktower |
 | Foundry and Emberpeak (Episode 3, pack `ep3`) | `quench_hiss` slag cools or a foe is quenched, `sluice_turn` / `water_flow` / `wheel_turn` the water puzzle, `anvil_strike` an oath anvil, `bell_first` the First Bell (slightly flat of D), `furnace_roar` the Heartforge, `hammer_charge` the Last Hammer telegraph, `oath_ring` Tempered Oath, `lift_rumble` ore lifts; ambience `forge_rumble` (foundry), `ash_wind` (the road and Emberpeak) |
-| Packs | Every sfx has a `pack` in the manifest: `core` (precached, loaded at boot), `ep2` and `ep3` (fetched by `audio.preload(['pack:ep3'])` when that episode is first entered: a title Episode pick, a save in that episode, or its first map; runtime-cached by the service worker). A pack id that has not arrived is skipped quietly or plays its `fallback` (a core sfx) |
+| The Wider Valley (Expansion 1, pack `x1`) | `slab_slide` the Barrow's slabs, `stone_name` a standing stone's letters return, `sheep_baa` (two variants) strays and ambient sheep, `loom_clack` Tamsin's loom, `wheel_groan` the millrace wheel (`mill_turning`), `star_chime` each dark star wakes, `orrery_hum` the Orrery aligned, `hive_buzz` Yarrow's hives, `windmill_creak` the Windmill's sails, `chime_post` (two variants) a chime post; ambience `moor_wind` (the High Moor), `larchhill_hum` (Larchhill); every one names a core `fallback` |
+| Packs | Every sfx has a `pack` in the manifest: `core` (precached, loaded at boot), `ep2`, `ep3` and `x1` (fetched by `audio.preload(['pack:ep3'])`, or `audio.loadPack('x1')` with the Wider Valley pack when that episode is first entered: a title Episode pick, a save in that episode, or its first map; runtime-cached by the service worker). A pack id that has not arrived is skipped quietly or plays its `fallback` (a core sfx) |
 | Battle start | `sfx('encounter')` with the swirl, then `pushMusic('battle')` (boss: `pushMusic('boss_archivore')`, the Nameless King: `pushMusic('boss_king')`) |
 | Attacks | swing (`sword_slash`, `spear_thrust`, `staff_hit`, `axe_chop`, `bow_shot`) at the wind-up, then `hit_light` / `hit_heavy` / `crit` / `miss` on contact; `defend` for guards and blocked hits |
 | Spells and states | `fire`, `ice`, `thunder`, `heal`, `revive`, `item_use`, `buff`, `debuff`, `poison`, `stun`; `break` when shields hit 0; `fury_ready` when the gauge fills, `fury_art` on use; `combo_start`; `telegraph` when a big move is announced |
@@ -123,6 +124,13 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `water_flow` | 1.29 s | 1 | Water starts running in a trough: a short rush that settles to a gentle trickle, about 1.3 s. |
 | `wheel_turn` | 1.20 s | 1 | The waterwheel starts: a long wooden creak, then two slow clacks of the paddles. |
 | `lift_rumble` | 1.62 s | 1 | Ore lifts: a chain rattle (links running over a drum) over a low rumble, about 1.6 s. |
+| `slab_slide` | 648 ms | 1 | A Barrow slab slides: a heavy stone scrape that swells, drags, and ends on a dull stone thud, about 0.55 s. |
+| `sheep_baa` | 436 ms | 2 (vary 0.04) | A mild baa from a sheep, two variants: a trembling nasal saw through two moving formants, about 0.4 s. |
+| `loom_clack` | 342 ms | 1 | Tamsin's loom: two wooden clacks of the beater and a whisper of thread, about 0.5 s. |
+| `wheel_groan` | 1.43 s | 1 | The millrace wheel turns again: a long wooden groan, a drip, then a steady wooden clack that settles into a rhythm, about 1.6 s. |
+| `hive_buzz` | 606 ms | 1 | Yarrow's hives: a warm low hum with a few bees passing close, about 0.6 s. |
+| `windmill_creak` | 730 ms | 1 | The Windmill's sails: a slow wooden creak with a sweep of air as a sail passes, about 0.8 s. |
+| `chime_post` | 351 ms | 2 (vary 0.03) | A soft wooden wind chime on a post, two variants: three hollow wooden tubes struck by the wind, ringing briefly, about 0.4 s. |
 
 ### Story moments
 
@@ -139,6 +147,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `summon` | 1.41 s | 1 | Something is summoned (the Archivore calls Lost Pages): a low swirling portal swell with chorus, rising glitter and a soft 'whoom'. |
 | `clock_chime` | 1.08 s | 1 | Lena's clocktower: a small tower chime striking two notes, E5 then C5 (a falling major third), warm and slightly distant. |
 | `reflection_out` | 791 ms | 1 | The Other Selves step out of their mirrors: a reversed glass shimmer swelling up into a low thud, with a cold glint on the impact. |
+| `stone_name` | 978 ms | 1 | A standing stone gets its letters back: a low bell-like chime over a soft carving rasp, about 0.9 s. |
 
 ### Battle: weapon swings
 
@@ -175,6 +184,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `level_up_sparkle` | 1.05 s | 1 | Sparkles over a hero who levels up (under the level_up jingle): glitter of random 2 to 8 kHz pings thinning out, after a small upward swish. |
 | `hammer_charge` | 1.67 s | 1 | The Last Hammer telegraph: a rising metallic whine that tightens to a ringing point, about 1.4 s. |
 | `oath_ring` | 1.75 s | 1 | Tempered Oath turns the hammer: a bell-like clang with a shimmer of high partials over a warm low ring. |
+| `star_chime` | 719 ms | 1 | A dark star wakes: a three-note glass chime, ascending (D6 F#6 A6), with a little sparkle, about 0.8 s. |
+| `orrery_hum` | 873 ms | 1 | The Orrery aligned: a soft sustained brass hum (D3 with its fifth) with a slow shimmer on top, about 0.9 s. |
 
 ### Battle: status effects
 
@@ -236,6 +247,8 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `court_hush` | 10.00 s | The Court of Mirrors: a cold, still palace of glass. A faint glass hum (a wet-finger-on-a-rim tone around A5 with a slowly beating partner and a fifth), a low room tone, and slow drips falling into a very large space, each one a small glassy ping. Beautiful and uneasy, never loud. |
 | `forge_rumble` | 10.00 s | The Ashen Foundry: a low furnace drone (a whole-cycle 55 Hz and fifth), a bed of distant hammering on an anvil far down a stone hall (two strikes then a pause, softened by a big room), and slow steam venting as a breathy hiss. Heavy, warm, never loud. |
 | `ash_wind` | 10.00 s | Ash wind over Emberpeak and the old sand road: dry, thin and low, a hollow breath with slow gusts, a faint hiss of grit, and a very sparse crackle of embers far away. No events, so it never sounds repeated. |
+| `moor_wind` | 10.00 s | The High Moor: wide dry wind, a broad low breath with slow gusts and a long swell, a faint hiss of grass that rises with each gust, a thin whistle over heather on the strongest ones. No events, so it never sounds repeated. |
+| `larchhill_hum` | 10.00 s | Larchhill: a warm hive hum (whole-cycle low tones), a few bees passing close, leaves stirring in a soft breeze, and one far windmill creak in the middle of the loop. |
 
 ## Music ids
 
@@ -262,6 +275,14 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `ash_road` | assets/audio/music/ash_road.mp3 | fading_road |
 | `foundry` | assets/audio/music/foundry.mp3 | court |
 | `boss_warden` | assets/audio/music/boss_warden.mp3 | boss_king |
+| `the_downs` | assets/audio/music/the_downs.mp3 | valley |
+| `high_moor` | assets/audio/music/high_moor.mp3 | valley |
+| `wethers_barrow` | assets/audio/music/wethers_barrow.mp3 | mystery |
+| `orrery` | assets/audio/music/orrery.mp3 | mystery |
+| `larchhill` | assets/audio/music/larchhill.mp3 | valley |
+| `millrace` | assets/audio/music/millrace.mp3 | willowmere |
+| `boss_reeve` | assets/audio/music/boss_reeve.mp3 | battle |
+| `boss_millstone` | assets/audio/music/boss_millstone.mp3 | battle |
 
 ## Regenerate and check
 

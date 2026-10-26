@@ -26,6 +26,15 @@ const TRACKS = {
   ash_road: { minSec: 85, maxSec: 95, loops: true },
   foundry: { minSec: 85, maxSec: 95, loops: true },
   boss_warden: { minSec: 110, maxSec: 120, loops: true },
+  // Expansion 1 (EXPANSION1_PLAN.md 10.4)
+  the_downs: { minSec: 70, maxSec: 90, loops: true },
+  high_moor: { minSec: 80, maxSec: 100, loops: true },
+  wethers_barrow: { minSec: 70, maxSec: 95, loops: true },
+  orrery: { minSec: 90, maxSec: 110, loops: true },
+  larchhill: { minSec: 80, maxSec: 100, loops: true },
+  millrace: { minSec: 70, maxSec: 90, loops: true },
+  boss_reeve: { minSec: 90, maxSec: 110, loops: true },
+  boss_millstone: { minSec: 90, maxSec: 110, loops: true },
 };
 const KBPS = 160;
 const SR = 44100;

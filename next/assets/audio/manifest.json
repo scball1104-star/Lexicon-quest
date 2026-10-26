@@ -215,6 +215,94 @@
    "measuredLufs": -16.52,
    "duration": 116.827
   },
+  "the_downs": {
+   "src": "assets/audio/music/the_downs.mp3",
+   "volume": 1.053,
+   "loopStart": 0.06,
+   "loopEnd": 78.320884,
+   "fallback": "valley",
+   "bpm": 92.0,
+   "key": "G major",
+   "measuredLufs": -16.45,
+   "duration": 78.421
+  },
+  "high_moor": {
+   "src": "assets/audio/music/high_moor.mp3",
+   "volume": 1.054,
+   "loopStart": 0.06,
+   "loopEnd": 88.481066,
+   "fallback": "valley",
+   "bpm": 76.0,
+   "key": "D dorian",
+   "measuredLufs": -16.46,
+   "duration": 88.581
+  },
+  "wethers_barrow": {
+   "src": "assets/audio/music/wethers_barrow.mp3",
+   "volume": 1.052,
+   "loopStart": 0.06,
+   "loopEnd": 82.787256,
+   "fallback": "mystery",
+   "bpm": 132.0,
+   "key": "E minor",
+   "measuredLufs": -16.44,
+   "duration": 82.887
+  },
+  "orrery": {
+   "src": "assets/audio/music/orrery.mp3",
+   "volume": 1.053,
+   "loopStart": 0.06,
+   "loopEnd": 100.06,
+   "fallback": "mystery",
+   "bpm": 72.0,
+   "key": "F# lydian",
+   "measuredLufs": -16.45,
+   "duration": 100.16
+  },
+  "larchhill": {
+   "src": "assets/audio/music/larchhill.mp3",
+   "volume": 1.065,
+   "loopStart": 0.06,
+   "loopEnd": 90.06,
+   "fallback": "valley",
+   "bpm": 84.0,
+   "key": "C mixolydian",
+   "measuredLufs": -16.55,
+   "duration": 90.16
+  },
+  "millrace": {
+   "src": "assets/audio/music/millrace.mp3",
+   "volume": 1.07,
+   "loopStart": 0.06,
+   "loopEnd": 79.26,
+   "fallback": "willowmere",
+   "bpm": 100.0,
+   "key": "A major",
+   "measuredLufs": -16.59,
+   "duration": 79.36
+  },
+  "boss_reeve": {
+   "src": "assets/audio/music/boss_reeve.mp3",
+   "volume": 1.051,
+   "loopStart": 0.06,
+   "loopEnd": 98.241814,
+   "fallback": "battle",
+   "bpm": 132.0,
+   "key": "E minor",
+   "measuredLufs": -16.43,
+   "duration": 98.342
+  },
+  "boss_millstone": {
+   "src": "assets/audio/music/boss_millstone.mp3",
+   "volume": 1.052,
+   "loopStart": 0.06,
+   "loopEnd": 100.06,
+   "fallback": "battle",
+   "bpm": 120.0,
+   "key": "D minor",
+   "measuredLufs": -16.44,
+   "duration": 100.16
+  },
   "_doc": "src null = no file yet; the runtime then plays `fallback` (another music id) or silence when fallback is null. volume brings the track to about -16 LUFS. loopStart/loopEnd in seconds (null = loop the whole file). Files dropped at assets/audio/music/<id>.mp3 (+ <id>.json with loopStart/loopEnd) win over the legacy root tracks after `python tools/audio/build.py --manifest`."
  },
  "sfx": {
@@ -994,6 +1082,94 @@
    "pack": "ep3",
    "fallback": "door_rumble"
   },
+  "slab_slide": {
+   "src": "assets/audio/sfx/slab_slide.wav",
+   "volume": 1.0,
+   "duration": 0.648,
+   "group": "field",
+   "pack": "x1",
+   "fallback": "door_rumble"
+  },
+  "stone_name": {
+   "src": "assets/audio/sfx/stone_name.wav",
+   "volume": 1.0,
+   "duration": 0.978,
+   "group": "story",
+   "pack": "x1",
+   "fallback": "name_restore"
+  },
+  "sheep_baa": {
+   "src": [
+    "assets/audio/sfx/sheep_baa_1.wav",
+    "assets/audio/sfx/sheep_baa_2.wav"
+   ],
+   "volume": 1.0,
+   "duration": 0.436,
+   "group": "field",
+   "pack": "x1",
+   "vary": 0.04,
+   "fallback": "emote_pop"
+  },
+  "loom_clack": {
+   "src": "assets/audio/sfx/loom_clack.wav",
+   "volume": 1.0,
+   "duration": 0.342,
+   "group": "field",
+   "pack": "x1",
+   "fallback": "shelf_move"
+  },
+  "wheel_groan": {
+   "src": "assets/audio/sfx/wheel_groan.wav",
+   "volume": 1.0,
+   "duration": 1.427,
+   "group": "field",
+   "pack": "x1",
+   "fallback": "block_push"
+  },
+  "star_chime": {
+   "src": "assets/audio/sfx/star_chime.wav",
+   "volume": 1.0,
+   "duration": 0.719,
+   "group": "magic",
+   "pack": "x1",
+   "fallback": "save_chime"
+  },
+  "orrery_hum": {
+   "src": "assets/audio/sfx/orrery_hum.wav",
+   "volume": 1.0,
+   "duration": 0.873,
+   "group": "magic",
+   "pack": "x1",
+   "fallback": "lantern_reveal"
+  },
+  "hive_buzz": {
+   "src": "assets/audio/sfx/hive_buzz.wav",
+   "volume": 1.0,
+   "duration": 0.606,
+   "group": "field",
+   "pack": "x1",
+   "fallback": "page_flutter"
+  },
+  "windmill_creak": {
+   "src": "assets/audio/sfx/windmill_creak.wav",
+   "volume": 1.0,
+   "duration": 0.73,
+   "group": "field",
+   "pack": "x1",
+   "fallback": "door_open"
+  },
+  "chime_post": {
+   "src": [
+    "assets/audio/sfx/chime_post_1.wav",
+    "assets/audio/sfx/chime_post_2.wav"
+   ],
+   "volume": 1.0,
+   "duration": 0.351,
+   "group": "field",
+   "pack": "x1",
+   "vary": 0.03,
+   "fallback": "crystal_hit"
+  },
   "text_blip": {
    "alias": "text_blip_mid"
   }
@@ -1087,6 +1263,20 @@
    "volume": 1.0,
    "duration": 10.0,
    "widen": true
+  },
+  "moor_wind": {
+   "src": "assets/audio/ambience/moor_wind.wav",
+   "volume": 1.0,
+   "duration": 10.0,
+   "widen": true,
+   "fallback": "wind_valley"
+  },
+  "larchhill_hum": {
+   "src": "assets/audio/ambience/larchhill_hum.wav",
+   "volume": 1.0,
+   "duration": 10.0,
+   "widen": true,
+   "fallback": "river_birds"
   }
  },
  "packs": {
@@ -1113,6 +1303,20 @@
     "sluice_turn",
     "water_flow",
     "wheel_turn"
+   ]
+  },
+  "x1": {
+   "sfx": [
+    "chime_post",
+    "hive_buzz",
+    "loom_clack",
+    "orrery_hum",
+    "sheep_baa",
+    "slab_slide",
+    "star_chime",
+    "stone_name",
+    "wheel_groan",
+    "windmill_creak"
    ]
   }
  }

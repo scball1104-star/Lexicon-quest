@@ -1,4 +1,4 @@
-# MUSIC.md: the composed score (Episodes 1 to 3)
+# MUSIC.md: the composed score (Episodes 1 to 3 and Expansion 1)
 
 Four tracks were composed and rendered in code (SNES tracker style: sequenced notes played by
 synthesized instruments) because Suno cannot be driven from this machine. They live in
@@ -267,6 +267,154 @@ five inharmonic partials of a steel face, tuned by the note), fiddle (two detune
 2.4 kHz, bow noise, delayed vibrato), whistle (near-pure sine with husky breath and a late shallow vibrato), steam
 (band-limited noise hiss shaped by the gate).
 
+## Expansion 1: eight more tracks (X1-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops, 0-sample decode lag in headless Chromium). Plan: `docs/EXPANSION1_PLAN.md` 10.4. Music stays lazy: runtime-cached,
+never precached; the ten new SFX are the pack `x1` and the two ambiences are runtime-cached (see "Cue sheet and sounds" below).
+`tools/audio/build.py --manifest` wires files, sidecar loop points and fallbacks into `assets/audio/manifest.json`.
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `the_downs` | The Shepherd's Road | G major | 92, 6/8 (quarter = 92) | 40 | 0.060 s to 78.321 s | 78.42 s | `valley` |
+| `high_moor` | The High Moor | D Dorian | 76, 4/4 | 28 | 0.060 s to 88.481 s | 88.58 s | `valley` |
+| `wethers_barrow` | The Count | E minor | 66 (quarter), 12 counted eighths + 1 silent | 14 | 0.060 s to 82.787 s | 82.89 s | `mystery` |
+| `orrery` | The Orrery | F# Lydian | 72, 4/4 with a 3-against-4 arpeggio | 30 | 0.060 s to 100.060 s | 100.16 s | `mystery` |
+| `larchhill` | Larchhill | C Mixolydian | 84, 3/4 | 42 | 0.060 s to 90.060 s | 90.16 s | `valley` |
+| `millrace` | The Millrace | A major | 100, 6/8 (quarter = 100) | 44 | 0.060 s to 79.260 s | 79.36 s | `willowmere` |
+| `boss_reeve` | One Short | E minor | 132 (quarter), 12/8 | 36 | 0.060 s to 98.242 s | 98.34 s | `battle` |
+| `boss_millstone` | The Wheel Runs | D minor | 120, 5/4 (3+2) | 40 | 0.060 s to 100.060 s | 100.16 s | `battle` |
+
+Sizes are 1.5 to 2.0 MB each (the cap is 3.5 MB). Measured after MP3 decode: -16.4 to -16.6 LUFS (the manifest `volume` brings each to
+-16). The loop seam is sample-continuous in every one (the loop is rendered twice and the second pass delivered); the review
+number "loop seam jump / typical sample step" runs 0.0 to 1.6, and 4.2 for `boss_reeve`, where the downbeat of bar 1 is a drum and bass
+onset (the step at the seam is the same size as the steps either side of it, about 0.02 against a loop-wide mean of 0.006).
+
+### How Expansion 1 wears the name motif
+- **the_downs**: the tin whistle plays it as a shepherd's call, G D E (bar 1) and C held (bar 2), and a second whistle far off
+  (quiet, wide, wet) answers the fourth note an octave up. The call returns in A'' (bars 25-26) and twice in the coda (33-36).
+- **high_moor**: the dulcimer states it in long notes, a bar a note (D4, A4, B4: the B the Dorian sixth over a minor chord), and
+  a distant horn lands the fourth note, G4, in bar 4. The same four bars open A'' (bars 21-24).
+- **wethers_barrow**: the bone flute keeps the first three notes and never plays the fourth. In E minor from the third it is
+  G D E and then a rest where the C belongs (bars 3, 5, 11, 12, 13), and from D it is D A B and a rest where the G belongs (bars 7, 9).
+  The drum counts twelve and the thirteenth eighth of every bar is silence.
+- **orrery**: the celesta plays it once, high and lit, in bar 17: C#6 G#6 A#6 F#6, from the dominant of F# Lydian, so the fourth
+  note is the key note itself, landing as the chord changes from C# to F#.
+- **larchhill**: the clarinet plays it complete, C5 G5 A5 F5 (degrees 1 5 6 4 of C Mixolydian), at the start of A (bars 3-4) and A'
+  (bars 19-20). The accordion answers the fourth note: its hive drone moves from C and G to F and C for a bar (bars 4, 22, 42) and
+  settles back. Quiet once more at bars 41-42.
+- **millrace**: the accordion plays it complete and plain, A4 E5 F#5 D5, as the first bar of the tune (bars 5-6), again in A''
+  (29-30) and the coda (41-42). Nothing interrupts it: this is the place where a name is kept.
+- **boss_reeve**: the choir sings it one note short, G D E, one note to each of the first three groups of the 12/8 bar, and the
+  fourth group (where the C belongs) is the beat that is missing from every instrument, every bar. Resolved once, at the loop: bar
+  36 is E major, the fourth group is present in every voice, and the choir sings E B C# A complete.
+- **boss_millstone**: the brass states it augmented and low, F3 C4 D4 Bb3, a bar a note (five beats a note), on the grind: bars 5-8,
+  9-12, 13-16, then with the horn above it in B (17-20, 21-24, 25-28).
+
+### the_downs: The Shepherd's Road (x1_downs, x1_loomhouse; loops)
+G major, 6/8 felt as two dotted-quarter pulses to a bar (tracker quarter = 92, so a dotted quarter is 61). 40 bars. Tin whistle and fiddle over an
+open G and D drone in low strings, a plucked bass on both pulses, a light hand drum (low on 1, slaps on the 3rd and 6th eighths).
+- A (1-8) G C C G Em C D G: the call (bars 1-2), the whistle's tune, the drum from bar 5.
+- A' (9-16) G C G Em C G D G: the fiddle takes the tune above, the whistle holds long notes under it.
+- B (17-24) C G Am Em C G D D7: the tune lifts an octave, harp arpeggios, a soft string pad.
+- A'' (25-32): the call and tune again, the fiddle a third below. C (33-40) G C G D G C D G: thin; the call twice with its far answer,
+  then a falling line home.
+Instruments: tinwhistle (two tracks, one far), fiddle, strings_low, strings, pizz, framedrum, harp.
+
+### high_moor: The High Moor (x1_highmoor; loops)
+D Dorian, 76 BPM, 28 bars. A D pedal in bowed bass and low strings that never moves, modal chords above it, wind (band noise, the
+pitch moves the band) in breaths of eight beats, a soft timpani at the start of each section.
+- A (1-4) Dm G/D Dm C/D: the motif, a bar a note, the horn lands G.
+- B (5-12) Dm C/D G/D Dm Am/D C/D G/D Dm: the long theme in the dulcimer, half notes, strings under it.
+- C (13-20) F C G Dm F Am Em G over the pedal: the horn takes the theme's opening, choir joins, the dulcimer doubles low.
+- A' (21-28): the motif again, then Dm G/D Dm C/D and a falling dulcimer line, the pedal alone at the end.
+Instruments: dulcimer, horn (low-passed, wet, far), strings_low, strings, bowbass, choir, steam (wind), lowdrum.
+
+### wethers_barrow: The Count (x1_barrow; loops)
+E minor, quarter = 66, so an eighth is 132 a minute. A bar is twelve counted eighths plus one silent: bars are 13 eighths long (5.9 s) and the
+tracker beat is one eighth. The drum counts twelve soft taps (accent on every third) and the thirteenth never sounds. 14 bars.
+- I (1-2) Em: choir hum and the count, nothing else.
+- A (3-6) Em Em C D: the flute, G D E and the missing fourth.
+- B (7-10) Am G D Em: the flute from D, D A B and the missing fourth; a timpani on the bar.
+- A' (11-14) Em C D Em: the same, the count dwindling (twelve taps, nine, six, three) until the flute is alone with the hum; then it comes round again.
+Instruments: boneflute, choir (hum), strings_low, framedrum (muted), lowdrum.
+
+### orrery: The Orrery (x1_terrace, x1_orrery, x1_cellar; loops)
+F# Lydian, 72 BPM, 4/4, 30 bars. The harp plays one slow arpeggio in groups of three eighths across bars of four (it comes back to the
+same place only every three bars) under a celesta that sings in half notes, struck-glass chimes on some downbeats, a glass pad and
+soft strings. Chords are the F# Lydian triads: F#, G#, C#, A#m, D#m.
+- I (1-4) F# G# C# F#: harp and pad alone. A (5-12): the celesta's tune, strings in the second four.
+- B (13-20) F# G# A#m D#m C# F# G# C#: chimes, the motif at bar 17. A' (21-28): the tune again, thinner. O (29-30): harp alone, F# then C#.
+The Cellar plays this track with the filter down if the engine has a flag for it; otherwise the same track.
+Instruments: harp, celesta, glass, glasspad, strings_high, strings_low.
+
+### larchhill: Larchhill (x1_larchhill; loops)
+C Mixolydian, 84 BPM, 3/4, 42 bars. Clarinet and accordion over a plucked bass and a hive drone (two reeds fourteen cents apart, so it beats);
+oom-pah-pah reed chords on beats 2 and 3 from bar 11, a shaker, a soft hand drum. The Bb stays a Bb.
+- I (1-2) C. A (3-10) C F C Bb F C Gm C. B (11-18) F C Bb F Dm Gm C C: busier clarinet runs, waltz chords, shaker.
+- A' (19-26): the motif, the accordion carrying the tune an octave down. B' (27-34): the accordion leads, the clarinet in thirds.
+- D (35-42) C F C G C F Gm C: drowsy, the clarinet low and slow, the chords drop away, the motif once more, quiet.
+Instruments: clarinet, accordion (three tracks: tune, chords, drone), pizz, framedrum, shaker.
+
+### millrace: The Millrace (x1_millrace, x1_mill; loops)
+A major, 100 BPM (quarter), 6/8, 44 bars. One loop only: there is no brighter second section for after `mill_turning`. The waterwheel is the
+ostinato: a wooden clack on the first pulse, the 2nd and the last eighth, a brush for the water, a deep drum on the first pulse.
+- I (1-4) A D A E: the wheel alone, then the strum (a harp played as a strummed guitar, 18 ms between strings).
+- A (5-12) A D A E A D E A: the accordion's tune. A' (13-20): the fiddle above it. B (21-28) F#m D A E F#m Bm E E: the bridge, the fiddle leads.
+- A'' (29-36): the tin whistle joins. C (37-44): the wheel and strum thin, the motif once more (41-42), the accordion alone at the end.
+Instruments: accordion, fiddle, tinwhistle, harp (strummed), pizz, strings, woodblock (paddle clack), brush, framedrum.
+
+### boss_reeve: One Short (the Barrow Reeve; loops)
+E minor, quarter = 132, 12/8 (four groups of three eighths, 1.5 beats each), 36 bars. In every bar the fourth group is silent in every instrument:
+two bone flutes run an eighth-note figure through groups one to three, two frame drums knock "bum ba ba", bass on root, root, fifth, and the
+count stops one short.
+- I (1-4) Em: drums and low pulse. A (5-12) Em Em C D Em G Am B7: flutes, the choir's three notes every four bars.
+- A' (13-20): flutes an octave up, a second flute, timpani on the first group, the choir in thirds.
+- B (21-28) C G D Em C G D B7: the climax, the choir's three notes every two bars. A'' (29-35): thinner.
+- R (36) E major: the fourth group is there in every voice, the choir sings E B C# A, then the loop.
+Instruments: boneflute (two), choir (melody and pad), framedrum (two), lowdrum, strings_low, bass.
+
+### boss_millstone: The Wheel Runs (the Millstone Golem; loops)
+D minor, 120 BPM (quarter), 5/4 grouped 3+2, 40 bars. A millstone grind (rubbed band noise over a stone thud) on the pulses, timpani on the 3+2
+accents, a bowed bass on a D pedal, low brass stabs on the second group.
+- I (1-4) Dm. A (5-16) Dm Dm Bb A / Dm Dm C A / Dm Bb C A: the brass motif, bars 5-8, 9-12, 13-16.
+- B (17-28) Gm Dm Bb A / Gm Dm C A / Bb C Dm A: a horn above the brass, a second grind an octave up, timpani on every beat.
+- C (29-40) Dm Bb C A, three times: the grind in eighths (29-36) and in sixteenths (37-40), the timpani rolling, stabs on every beat; the last
+  bar is the dominant, so the loop starts over faster than it ended slow.
+Instruments: grind (two), lowdrum, bowbass, brass (melody and stabs), horn, strings_low, strings_high.
+
+### Cue sheet and sounds (EXPANSION1_PLAN.md 10.4)
+Maps: x1_downs and x1_loomhouse `the_downs`; x1_highmoor `high_moor`; x1_barrow `wethers_barrow`; x1_terrace, x1_orrery, x1_cellar `orrery`;
+x1_larchhill `larchhill`; x1_millrace and x1_mill `millrace`; x1_culvert `mystery` with the `river_birds` ambience; the Reeve `boss_reeve`; the
+Golem `boss_millstone`; the Stones scene `sorrow` then back; `orrery_align` a held chord from `orrery`; `mill_done` stays `millrace`; ordinary
+fights `battle`. A scene that leaves its map's track puts it back before it ends.
+
+SFX, pack `x1` (22.05 kHz mono WAV, 346,204 bytes for all twelve files; each names a core fallback played until the pack arrives):
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `slab_slide` | 0.65 s | `door_rumble` | a heavy stone scrape and a dull thud |
+| `stone_name` | 0.98 s | `name_restore` | a low bell-like chime over a chisel rasp |
+| `sheep_baa` (2) | 0.44 s, 0.36 s | `emote_pop` | a trembling nasal baa through two moving formants |
+| `loom_clack` | 0.34 s | `shelf_move` | two wooden clacks and a thread whisper |
+| `wheel_groan` | 1.43 s | `block_push` | a groan, a drip, then wooden clacks settling to a rhythm |
+| `star_chime` | 0.72 s | `save_chime` | a three-note glass chime, D6 F#6 A6 |
+| `orrery_hum` | 0.87 s | `lantern_reveal` | a soft brass hum, D3 and its fifth, with shimmer |
+| `hive_buzz` | 0.61 s | `page_flutter` | a warm hum with three bees passing |
+| `windmill_creak` | 0.73 s | `door_open` | a slow wooden creak and a sweep of air |
+| `chime_post` (2) | 0.35 s each | `crystal_hit` | three hollow wooden tubes, two variants |
+
+Ambience (16 kHz mono, 10 s, 320 KB each, seamless, runtime-cached; the manifest `fallback` names an older bed): `moor_wind` (fallback
+`wind_valley`): wide dry wind, grass hiss on the gusts, a thin whistle on the strongest; `larchhill_hum` (fallback `river_birds`): a hive hum,
+three bees passing, leaves, one far windmill creak mid-loop.
+
+### New instruments (`tools/music/synth.py`, Expansion 1)
+tinwhistle (sine plus 2nd and 3rd, a chiff and a small scoop on the attack, almost no vibrato), boneflute (hollow, breathy, slow attack, a dull top, the
+pitch sagging a hair at the end), framedrum (a tuned skin: a pitch-dropping body, a band of skin noise and a rim partial), clarinet (odd harmonics, a woody
+breath), accordion (two reeds a few cents apart plus one an octave down, a hollow formant and a bellows swell; `beat_cents` widens the beat for the drone),
+woodblock (a dry clack, no ring), grind (rubbed band noise in pulses over a stone thud; the pitch moves the band), bowbass (a dark saw with bow scrape).
+`python tools/music/preview_instruments.py` includes them.
+
 ## Instruments (tools/music/synth.py)
 All oscillators are band-limited wavetables (additive, Lanczos-smoothed), so nothing aliases.
 strings (five unevenly detuned saws with independent vibrato, dark-to-bright filter morph, slow attack;
@@ -295,8 +443,8 @@ file with an HTMLAudio element also works, with a 0.1 s dip at the file edges.
 
 ## Regenerate and review
 ```
-python tools/music/render.py                 # all fourteen: MP3 + JSON + review images in tools/music/out/
-python tools/music/render.py hollow court    # a subset (Episode 2: hollow hollowmere fading_road court boss_king; Episode 3: emberpeak first_bell ash_road foundry boss_warden)
+python tools/music/render.py                 # all twenty-two: MP3 + JSON + review images in tools/music/out/
+python tools/music/render.py hollow court    # a subset (do NOT pass --help: any flag-only call renders everything. Episode 2: hollow hollowmere fading_road court boss_king; Episode 3: emberpeak first_bell ash_road foundry boss_warden)
 python tools/music/render.py sorrow --wav    # one track, plus a WAV copy in tools/music/out/
 python tools/music/verify_decode.py sorrow   # decode in headless Chromium, check the loop offset
 python tools/music/preview_instruments.py    # one note per instrument: tuning, level, spectrogram sheet

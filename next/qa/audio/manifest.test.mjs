@@ -23,9 +23,11 @@ const STORY_SFX = 'bell_toll bell_peal sign_fade name_restore door_rumble ink_gu
 const EP2_SFX = 'mirror_turn beam_hit glass_bridge glass_break mirror_step ferry_oars clock_chime reflection_out kept kept_break'.split(' ');
 // Episode 3 (EPISODE3_PLAN.md 8.4): the ep3 pack. Each has a core fallback for the moment before the pack arrives.
 const EP3_SFX = 'quench_hiss sluice_turn water_flow wheel_turn anvil_strike bell_first furnace_roar hammer_charge oath_ring lift_rumble'.split(' ');
+// Expansion 1 (EXPANSION1_PLAN.md 10.4): the x1 pack. Each has a core fallback for the moment before the pack arrives.
+const X1_SFX = 'slab_slide stone_name sheep_baa loom_clack wheel_groan star_chime orrery_hum hive_buzz windmill_creak chime_post'.split(' ');
 const JINGLES = 'item_get key_item level_up inn_rest save quest_done party_join victory_fanfare gameover_sting'.split(' ');
-const AMBIENCE = 'river_birds archive_hush wind_valley mere_still court_hush forge_rumble ash_wind'.split(' ');
-const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover hollow hollowmere fading_road court boss_king emberpeak first_bell ash_road foundry boss_warden'.split(' ');
+const AMBIENCE = 'river_birds archive_hush wind_valley mere_still court_hush forge_rumble ash_wind moor_wind larchhill_hum'.split(' ');
+const MUSIC = 'title willowmere valley archive battle boss_archivore mystery sorrow triumph victory gameover hollow hollowmere fading_road court boss_king emberpeak first_bell ash_road foundry boss_warden the_downs high_moor wethers_barrow orrery larchhill millrace boss_reeve boss_millstone'.split(' ');
 
 function parseWav(path) {
   const b = readFileSync(path);
@@ -74,7 +76,7 @@ test('manifest has the four sections and version', () => {
 });
 
 test('every id the design and the story need is present', () => {
-  for (const id of [...DESIGN_SFX, ...STORY_SFX, ...EP2_SFX, ...EP3_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
+  for (const id of [...DESIGN_SFX, ...STORY_SFX, ...EP2_SFX, ...EP3_SFX, ...X1_SFX]) assert.ok(man.sfx[id], `sfx ${id}`);
   for (const id of JINGLES) assert.ok(man.jingles[id], `jingle ${id}`);
   for (const id of AMBIENCE) assert.ok(man.ambience[id], `ambience ${id}`);
   for (const id of MUSIC) assert.ok(man.music[id], `music ${id}`);
@@ -169,13 +171,14 @@ test('total synthesized audio stays small', () => {
   // Episode 1 set ~4.7 MB; Episode 2 adds ~0.36 MB of sfx and two 16 kHz ambience loops (~0.64 MB, runtime-cached,
   // not precached), so the cap moved from 5.5 to 6.0 MB. The precached share (sfx + jingles) has its own budget in
   // qa/pwa/precache.test.mjs. Episode 3 adds ~0.8 MB of sfx (pack ep3, fetched on first entry, never precached) and
-  // two 16 kHz ambience loops (~0.6 MB, runtime-cached), so the cap moved from 6.0 to 7.5 MB.
+  // two 16 kHz ambience loops (~0.6 MB, runtime-cached), so the cap moved from 6.0 to 7.5 MB. Expansion 1 adds 0.35 MB of
+  // sfx (pack x1, lazy) and two more ambience loops (0.64 MB, runtime-cached), so it moves to 8.5 MB. None of it is precached.
   let total = 0;
   for (const sub of ['sfx', 'jingles', 'ambience']) {
     const d = join(NEXT, 'assets/audio', sub);
     for (const f of readdirSync(d)) total += statSync(join(d, f)).size;
   }
-  assert.ok(total < 7.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  assert.ok(total < 8.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
 test('Episode 2 music: the five composed tracks have fallbacks and sidecar loop points', () => {
@@ -203,6 +206,40 @@ test('Episode 3 sfx: the ten ids are in pack ep3 with a core fallback; the pack 
   for (const [id, e] of Object.entries(man.sfx)) {
     if (e.alias) continue;
     if (e.pack && e.pack !== 'core') assert.ok(man.packs[e.pack].sfx.includes(id), `${id} is listed in manifest.packs.${e.pack}`);
+  }
+});
+
+test('Expansion 1 sfx: the ten ids are in pack x1 (350 KB or less) with a core fallback; two variants where the plan says so', () => {
+  let bytes = 0;
+  for (const id of X1_SFX) {
+    const e = man.sfx[id];
+    assert.ok(e, `sfx ${id}`);
+    assert.equal(e.pack, 'x1', `${id} is in pack x1`);
+    const fb = man.sfx[e.fallback];
+    assert.ok(fb && (fb.pack || 'core') === 'core', `${id} falls back to a core sfx (got ${e.fallback})`);
+    for (const s of srcs(e)) bytes += statSync(abs(s)).size;
+  }
+  for (const id of ['sheep_baa', 'chime_post']) assert.equal(srcs(man.sfx[id]).length, 2, `${id}: two variants`);
+  assert.ok(bytes <= 350000, `pack x1 is ${bytes} bytes, cap 350000`);
+  assert.deepEqual([...man.packs.x1.sfx].sort(), [...X1_SFX].sort(), 'manifest.packs.x1 lists exactly the x1 sfx');
+  for (const id of ['moor_wind', 'larchhill_hum']) {
+    assert.ok(statSync(abs(man.ambience[id].src)).size <= 600000, `${id}: 600 KB or less`);
+    assert.ok(man.ambience[id].fallback && man.ambience[man.ambience[id].fallback], `${id}: fallback is a real ambience`);
+  }
+});
+
+test('Expansion 1 music: the eight composed tracks have fallbacks, sidecar loop points and sizes under 3.5 MB', () => {
+  const FALLBACK = { the_downs: 'valley', high_moor: 'valley', wethers_barrow: 'mystery', orrery: 'mystery', larchhill: 'valley',
+    millrace: 'willowmere', boss_reeve: 'battle', boss_millstone: 'battle' };
+  for (const [id, fb] of Object.entries(FALLBACK)) {
+    const e = man.music[id];
+    assert.ok(e, `music ${id}`);
+    assert.equal(e.src, `assets/audio/music/${id}.mp3`, `${id}: src`);
+    assert.equal(e.fallback, fb, `${id}: fallback`);
+    assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+    assert.ok(e.loopEnd > 60 && e.loopEnd <= e.duration, `${id}: loopEnd`);
+    assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.4, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
+    assert.ok(statSync(abs(e.src)).size < 3.5e6, `${id}: under 3.5 MB`);
   }
 });
 

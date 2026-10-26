@@ -360,3 +360,75 @@ def ash_wind(n, g):
     d = np.abs(np.diff(np.concatenate([y, y[:1]])))
     smooth = np.convolve(d, np.ones(64) / 64, mode="same")
     return np.roll(y, -int(np.argmin(smooth[: n // 2])))
+
+
+# ----------------------------------------------------------------------------- Expansion 1 (X1-audio)
+@amb("moor_wind", "The High Moor: wide dry wind, a broad low breath with slow gusts and a long swell, a faint hiss of "
+     "grass that rises with each gust, a thin whistle over heather on the strongest ones. No events, so it never "
+     "sounds repeated.", 10.0, out_sr=16000)
+def moor_wind(n, g):
+    gust = np.clip(0.5 + 0.5 * periodic_lfo(n, g, 0.22), 0, 1)
+    slow = np.clip(0.5 + 0.5 * periodic_lfo(n, g, 0.1), 0, 1)
+    src = circ_noise(n, g, -2.5)
+    center = 260 + 520 * gust + 90 * periodic_lfo(n, g, 0.8)
+    body = tv_filter_periodic(src, "bp", center, 0.7) * (0.35 + 0.65 * gust)
+    low = circ_noise(n, g, -6.0, 25, 140) * (0.45 + 0.55 * slow) * 0.7
+    grass = circ_noise(n, g, 0.0, 3500, 7800) * (0.12 + 0.88 * gust ** 1.6) * 0.5
+    src2 = circ_noise(n, g, -1.0)
+    wcenter = 820 + 380 * gust + 60 * periodic_lfo(n, g, 0.6)
+    whistle = tv_filter_periodic(src2, "bp", wcenter, 16.0) * np.clip(gust - 0.55, 0, 1) ** 1.2
+    parts = dict(body=body / (np.std(body) + 1e-12), low=low / (np.std(low) + 1e-12) * 0.45,
+                 grass=grass / (np.std(grass) + 1e-12) * 0.12, whistle=whistle / (np.std(whistle) + 1e-12) * 0.12)
+    STEMS["moor_wind"] = parts
+    y = sum(parts.values())
+    d = np.abs(np.diff(np.concatenate([y, y[:1]])))
+    smooth = np.convolve(d, np.ones(64) / 64, mode="same")
+    return np.roll(y, -int(np.argmin(smooth[: n // 2])))
+
+
+@amb("larchhill_hum", "Larchhill: a warm hive hum (whole-cycle low tones), a few bees passing close, leaves stirring "
+     "in a soft breeze, and one far windmill creak in the middle of the loop.", 10.0, out_sr=16000)
+def larchhill_hum(n, g):
+    idx = np.arange(n)
+
+    def tone(f, amp, ph=0.0):
+        return amp * np.sin(2 * np.pi * idx * round(f * n / SR) / n + ph)
+
+    sw = 0.8 + 0.2 * periodic_lfo(n, g, 0.3)
+    hum = (tone(110.0, 0.5) + tone(220.0, 0.3, 0.7) + tone(330.0, 0.12, 1.9) + tone(441.0, 0.08, 2.4)) * sw
+    hum = fft_band(hum, 60, 900, 2)
+    # bees: three passes of a buzzing, gliding saw-ish tone
+    bees = np.zeros(n)
+    for at, f0, f1, dur in ((1.2, 230, 330, 1.3), (4.6, 340, 240, 1.5), (7.7, 260, 300, 1.2)):
+        k = ns(dur)
+        tt = np.arange(k) / SR
+        f = f0 + (f1 - f0) * tt / dur
+        f = f * (1 + 0.05 * np.sin(2 * np.pi * 31 * tt))
+        ph = np.cumsum(f / SR)
+        b = (np.sin(2 * np.pi * ph) + 0.55 * np.sin(4 * np.pi * ph + 0.3) + 0.3 * np.sin(6 * np.pi * ph + 1.0))
+        b = b * np.sin(np.pi * tt / dur) ** 1.6
+        place(bees, b, ns(at), 0.5)
+    bees = fft_band(bees, 150, 2200, 2)
+    # leaves: soft band noise stirred by a slow breeze
+    breeze = np.clip(0.5 + 0.5 * periodic_lfo(n, g, 0.4), 0, 1)
+    leaves = circ_noise(n, g, -1.0, 2800, 7500) * (0.15 + 0.85 * breeze ** 1.5)
+    # the far windmill creak: a decelerating tick train through low resonances, softened by a big room
+    creak = np.zeros(n)
+    k = ns(1.6)
+    tick = np.zeros(k)
+    pos, rate = 0.0, 16.0
+    while pos < 1.5:
+        tick[int(pos * SR)] = g.uniform(0.5, 1.0)
+        pos += 1.0 / rate * g.uniform(0.8, 1.2)
+        rate += 1.5
+    cr = (dsp.resonator(tick, [140, 330, 720], [9, 10, 8], [1.0, 0.7, 0.4], SR)) * np.sin(np.pi * np.arange(k) / k) ** 0.7
+    place(creak, cr, ns(5.2), 1.0)
+    creak = fft_band(creak, 80, 1500, 2)
+    creak_w = circ_reverb(creak, 2.6, 0.06, 0.3, seed=47)
+    parts = dict(hum=hum / (np.std(hum) + 1e-12) * 0.55, bees=bees / (np.std(bees) + 1e-12) * 0.3,
+                 leaves=leaves / (np.std(leaves) + 1e-12) * 0.18, creak=(creak * 0.3 + creak_w) / (np.std(creak_w) + 1e-12) * 0.22)
+    STEMS["larchhill_hum"] = parts
+    y = sum(parts.values())
+    d = np.abs(np.diff(np.concatenate([y, y[:1]])))
+    smooth = np.convolve(d, np.ones(64) / 64, mode="same")
+    return np.roll(y, -int(np.argmin(smooth[: n // 2])))

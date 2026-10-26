@@ -46,6 +46,10 @@ def main():
         # Episode 2
         ('glass', 'e6', 0.5, 0.8), ('glasspad', 'a4', 2.5, 0.7), ('piano_muted', 'c4', 1.0, 0.7),
         ('harpsichord', 'c4', 0.4, 0.8), ('brass', 'c4', 0.6, 0.9), ('snare', 'c4', 0.1, 0.8),
+        # Expansion 1
+        ('tinwhistle', 'g5', 0.8, 0.7), ('boneflute', 'e4', 1.5, 0.6), ('framedrum', 'a2', 0.2, 0.8),
+        ('clarinet', 'g4', 0.8, 0.7), ('accordion', 'c4', 1.2, 0.7), ('woodblock', 'e5', 0.1, 0.8),
+        ('grind', 'd2', 0.8, 0.8), ('bowbass', 'd2', 1.5, 0.8),
     ]
     cols = 4
     rows = math.ceil(len(cases) / cols)
@@ -59,7 +63,7 @@ def main():
         mono = x.mean(axis=1) if x.ndim == 2 else x
         peak = float(np.abs(mono).max())
         rms = 20 * math.log10(max(1e-9, float(np.sqrt((mono ** 2).mean()))))
-        pitched = name not in ('lowdrum', 'creak', 'shaker', 'brush')
+        pitched = name not in ('lowdrum', 'creak', 'shaker', 'brush', 'framedrum', 'woodblock', 'grind', 'snare')
         f_meas = measured_pitch(mono, SR, f0) if pitched else float('nan')
         cents = 1200 * math.log2(f_meas / f0) if pitched and f_meas == f_meas else float('nan')
         print('%-13s %7.1f %9.1f %9.1f %7.2f %7.3f %7.1f' % (name, f0, f_meas, cents, len(mono) / SR, peak, rms))
