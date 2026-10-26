@@ -53,3 +53,9 @@ Scott is away for a week; nobody will answer questions. Use your judgment, write
 ```
 `yoff` is relative to the top of the line box; `advance` is the pen advance in pixels. Glyphs are drawn in
 white on transparent so code can tint them. Shadow is drawn by code (1 px down-right, dark ink).
+
+## Expansion agents (X1-*, X2-*, XP-packs)
+
+If your brief is named `X1-*`, `X2-*` or `XP-packs`, also read `docs/EXPANSION_RECONCILIATION.md` (the decision log) before your plan: where a plan or a brief disagrees with it, it wins. The build order, the wave tables and the launch prompts
+are in `docs/EXPANSION_SCHEDULE.md`. Your owned paths are disjoint from every other agent in your wave; never edit a single-writer file that is not in your brief, and never run beside an agent the schedule says must not run with you.
+
