@@ -11,6 +11,7 @@ import { drawHelpBar } from '../ui/help.js';
 import { fmtGold, fmtTime, roman } from '../ui/text.js';
 import { serialize, deserialize, saveMeta } from '../game/state.js';
 import { BANNERS, HELP } from '../data/text.js';
+import { packsToAwait, awaitPacks } from '../game/packs.js';
 
 export class LoadGameScene {
   constructor(engine) { this.engine = engine; this.name = 'loadGame'; this.transparent = true; }
@@ -75,9 +76,15 @@ export class LoadGameScene {
     this.busy = true;
     e.audio.sfx('confirm');
     e.fadeTo(() => {
-      e.game = g;
-      if (e.hasScene('field')) e.reset('field');
-      else e.reset('_uiStage', { music: 'willowmere' });
+      const enter = () => {
+        e.game = g;
+        if (e.hasScene('field')) e.reset('field');
+        else e.reset('_uiStage', { music: 'willowmere' });
+      };
+      // Expansion packs (docs/PWA_PACKS.md): a save that wants a pack gets it, behind the fade, for at most 1.5 s, then goes on.
+      // Synchronous when no pack is wanted, so nothing changes while the switches are off.
+      const ids = packsToAwait(g.flags);
+      return ids.length ? awaitPacks(ids).then(enter) : enter();
     }, { duration: 0.8 });
   }
   draw(r) {

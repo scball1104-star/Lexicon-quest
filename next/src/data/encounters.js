@@ -7,9 +7,13 @@
 // roughly that many (most visible enemies once). Keep the counts if you move enemies around.
 
 import { ENEMIES, ELITE_RATE, RANDOM_ELITE_MODS } from './enemies.js';
+import { scaleForEpisode, scaleExp, OPTIONAL_FOE_EXP_MUL } from './expcurve.js';
 
 export const ENCOUNTERS = {};
-function enc(id, o) { ENCOUNTERS[id] = { id, boss: false, noFlee: false, music: 'battle', ...o }; }
+// `export` is the registry seam: an expansion pack's register() adds its groups through enc() (src/data/x1/encounters.js).
+// Options beyond enemies/zone/leader: boss, noFlee, music, noElite, elite, flag, power, speed, startFury, bossLoot, backdrop and
+// `expMul` (the group pays that multiple of its foes' EXP; default 1; see expcurve.js).
+export function enc(id, o) { ENCOUNTERS[id] = { id, boss: false, noFlee: false, music: 'battle', ...o }; }
 
 // ---------------------------------------------------------------- Willowmere Valley
 enc('valley_wolves', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'briar_wolf'] });
@@ -153,7 +157,7 @@ export const ZONES = {
 };
 export const ZONE_ORDER = ['valley', 'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
 /** Side zones the story does not require (the simulator runs them, progression() does not count them). */
-export const OPTIONAL_ZONES = ['whisperwood_hollow'];
+export const OPTIONAL_ZONES = ['whisperwood_hollow'];   // a pack's register() pushes its optional zones here
 
 // ---------------------------------------------------------------- Episode 2 zones
 // W11 (PLAYTEST_REVIEW_3 fixes 1 to 4): 27 placed groups, not 31 (the Waystation wolves, one F1 quicksilver patrol
@@ -222,6 +226,8 @@ export function rollEncounter(id, rng, opts = {}) {
     const spec = { id: eid, elite: null };
     if (e.power) spec.power = e.power;
     if (e.speed) spec.speed = e.speed;
+    const mul = encounterExpMul(id);
+    if (mul !== 1) spec.expMul = mul;   // expcurve.js: only a group that pays differently carries it
     return spec;
   });
   const rate = opts.eliteRate ?? ELITE_RATE;
@@ -251,7 +257,25 @@ export function rollEncounter(id, rng, opts = {}) {
   return { id, zone: e.zone, boss: e.boss, noFlee: e.noFlee, music: e.music, enemies };
 }
 
-/** Average EXP of a group (no elites). */
+// ---------------------------------------------------------------- EXP (expcurve.js)
+/** The EXP scale of a zone: scaleForEpisode(the zone's episode). Every scale is 1 today. */
+export function expScale(zoneId) {
+  const z = ZONES[zoneId];
+  return scaleForEpisode(z && z.episode ? z.episode : 1);
+}
+/** The multiple an encounter's foes pay: its own `expMul`, else OPTIONAL_FOE_EXP_MUL in an optional zone, else 1. */
+export function encounterExpMul(id) {
+  const e = ENCOUNTERS[id];
+  if (!e) return 1;
+  if (e.expMul !== undefined && e.expMul !== null) return e.expMul;
+  const z = ZONES[e.zone];
+  return z && z.optional ? OPTIONAL_FOE_EXP_MUL : 1;
+}
+
+/** EXP of a group (no elites): the sum of each foe's EXP scaled and rounded per unit, exactly as makeEnemyUnit pays it. */
 export function encounterExp(id) {
-  return ENCOUNTERS[id].enemies.reduce((s, eid) => s + (ENEMIES[eid] ? ENEMIES[eid].exp : 0), 0);
+  const e = ENCOUNTERS[id];
+  const ep = ZONES[e.zone] && ZONES[e.zone].episode ? ZONES[e.zone].episode : 1;
+  const mul = encounterExpMul(id);
+  return e.enemies.reduce((s, eid) => s + (ENEMIES[eid] ? scaleExp(ENEMIES[eid].exp, ep, mul) : 0), 0);
 }

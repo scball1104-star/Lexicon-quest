@@ -123,6 +123,68 @@ export function countJobs(m) {
   return n;
 }
 
+/**
+ * Pack atlases (docs/PWA_PACKS.md): an atlas whose id is `<pack>_<base>` for one of these bases (x1_npcs, x2_portraits,
+ * x1_heads ...) is merged INTO the base atlas, so an NPC, enemy or portrait id is found by the code that has always looked
+ * it up in `npcs`, `enemies_field` and the rest. Nothing outside this file changes.
+ */
+export const MERGE_BASES = ['npcs', 'enemies_battle', 'enemies_field', 'bosses_battle', 'portraits', 'heads'];
+/** 'x1_npcs' -> 'npcs'; null when the id is not a pack atlas of a mergeable base. Pure. */
+export function mergeBaseOf(id) {
+  const s = String(id);
+  for (const b of MERGE_BASES) if (s.length > b.length + 1 && s.endsWith('_' + b) && /^[a-z]+\d*$/i.test(s.slice(0, s.length - b.length - 1))) return b;
+  return null;
+}
+
+/** Stack two images (b below a) on one canvas, or null without a DOM. */
+function composeImages(a, b, yoff) {
+  if (typeof document === 'undefined') return null;
+  const w = Math.max(a.naturalWidth || a.width, b.naturalWidth || b.width), h = yoff + (b.naturalHeight || b.height);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  g.drawImage(a, 0, 0);
+  g.drawImage(b, 0, yoff);
+  return c;
+}
+
+const META_SKIP = new Set(['image', 'frames', 'anims', 'origin', 'origins', 'anchors', 'cell']);
+/**
+ * Merge the frames of `extra` into `base` IN PLACE (holders of the base atlas see them at once). The images are stacked
+ * on one canvas (base on top, so every base frame keeps its coordinates; the extra frames move down by the base height).
+ * A frame name the base already has wins (reported as skipped). Idempotent per extra id. `compose` is injectable (tests).
+ * Returns { merged, skipped, already?, failed? }.
+ */
+export function mergeAtlasInto(base, extra, compose = composeImages) {
+  if (!base || !extra || base === extra || base.placeholder || extra.placeholder) return { merged: 0, skipped: 0 };
+  if (!base.mergedIds) base.mergedIds = new Set();
+  if (base.mergedIds.has(extra.id)) return { merged: 0, skipped: 0, already: true };
+  let yoff = 0;
+  const bi = base.image, ei = extra.image;
+  if (bi && ei) {
+    yoff = bi.naturalHeight || bi.height || 0;
+    const img = compose(bi, ei, yoff);
+    if (!img) return { merged: 0, skipped: 0, failed: true };
+    base.image = img;
+  } else if (ei && !bi) base.image = ei;
+  let merged = 0, skipped = 0;
+  for (const [name, f] of Object.entries(extra.frames || {})) {
+    if (base.frames[name]) { skipped++; continue; }
+    base.frames[name] = yoff ? { ...f, y: f.y + yoff } : { ...f };
+    merged++;
+  }
+  for (const [k, v] of Object.entries(extra.anims || {})) if (!(k in base.anims)) base.anims[k] = v;
+  const bm = base.meta || (base.meta = {}), em = extra.meta || {};
+  for (const [k, v] of Object.entries(em)) {
+    if (META_SKIP.has(k)) continue;
+    const plain = (x) => x && typeof x === 'object' && !Array.isArray(x);
+    if (plain(v) && plain(bm[k])) { for (const [kk, vv] of Object.entries(v)) if (!(kk in bm[k])) bm[k][kk] = vv; }
+    else if (!(k in bm)) bm[k] = v;
+  }
+  base.mergedIds.add(extra.id);
+  return { merged, skipped };
+}
+
 let placeholderImg = null;
 function placeholder() {
   if (placeholderImg) return placeholderImg;
@@ -174,6 +236,14 @@ export function createAssets(opts = {}) {
     const res = await fetch(href, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${href}`);
     return res.json();
+  }
+
+  // Pack atlases (x1_npcs ...) are merged into their base atlas whenever either side arrives (any order, retries included).
+  function afterAtlas(id) {
+    const base = mergeBaseOf(id);
+    if (base) { if (atlases.has(base)) mergeAtlasInto(atlases.get(base), atlases.get(id)); return; }
+    if (!MERGE_BASES.includes(id)) return;
+    for (const [xid, x] of atlases) if (mergeBaseOf(xid) === id) mergeAtlasInto(atlases.get(id), x);
   }
 
   const stores = { images, json: jsons, atlases, fonts };
@@ -233,6 +303,7 @@ export function createAssets(opts = {}) {
         let img = null;
         if (json.image) img = await loadImage(new URL(json.image, url(p)).href);
         atlases.set(id, normalizeAtlas(json, img, id));
+        afterAtlas(id);
       });
       for (const [id, e] of Object.entries(m.fonts || {})) add('fonts', id, e, async () => {
         const p = entryPath(e);
@@ -254,6 +325,20 @@ export function createAssets(opts = {}) {
         if (onProgress) onProgress(done, total);
       }));
       return { done, total };
+    },
+
+    /**
+     * Load a pack's own manifest fragment (assets/<id>_manifest.json, path relative to next/) WITHOUT touching the main
+     * manifest, its lazy groups or manifestReady (loadManifest would replace all three). Every entry is loaded (no lazy
+     * groups); entries already loaded are skipped, so a retry loads only what failed. Rejects when the JSON cannot be
+     * fetched. Resolves { done, total, failed: ['kind:id', ...], manifest }.
+     */
+    async loadPackManifest(path, onProgress) {
+      const m = await loadJson(url(path));
+      const r = await api.load(m, onProgress);
+      const failed = [];
+      for (const [kind, name] of Object.entries(KIND_NAME)) for (const id of Object.keys(m[kind] || {})) if (missing.has(`${name}:${id}`)) failed.push(`${name}:${id}`);
+      return { ...r, failed, manifest: m };
     },
 
     // ---------------------------------------------------------------- lazy groups
@@ -385,7 +470,7 @@ export function createAssets(opts = {}) {
     },
     /** Register an already-built image/canvas under an id (generated textures). */
     setImage(id, img) { images.set(id, img); },
-    setAtlas(id, json, img) { const a = normalizeAtlas(json, img, id); atlases.set(id, a); return a; },
+    setAtlas(id, json, img) { const a = normalizeAtlas(json, img, id); atlases.set(id, a); afterAtlas(id); return a; },
     setJson(id, data) { jsons.set(id, data); },
     /** Snapshot for LQ_DEBUG.state(): groups and their states, missing ids. */
     debugState() {

@@ -20,7 +20,7 @@ out.push('|---|---|---|---|---|---|---|---|---|');
 for (const s of Object.values(SKILLS)) {
   if (s.kind === 'enemy' || s.kind === 'attack') continue;
   const who = s.kind === 'combo' ? s.members.join('+') : s.user || s.weapon;
-  const learn = s.learn ? (s.learn.level ? `Lv ${s.learn.level}` : `M${s.learn.mastery}`) : '-';
+  const learn = s.learn ? (s.learn.flag ? `flag ${s.learn.flag}` : s.learn.level ? `Lv ${s.learn.level}` : `M${s.learn.mastery}`) : '-';
   const mp = s.kind === 'combo' ? Object.values(s.cost).join('/') : s.kind === 'fury' ? 'Fury' : s.mp;
   const power = s.kind === 'combo' ? s.parts.map((p) => p.power).join('+') || '-' : s.power ? `${s.power}${s.hits > 1 ? 'x' + s.hits : ''}` : '-';
   const types = s.kind === 'combo' ? [...new Set(s.parts.flatMap((p) => p.types))].join('/') : s.types.join('/');

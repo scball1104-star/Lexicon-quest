@@ -10,6 +10,9 @@
  *            copy is refreshed in the background. Range requests (the <audio> element) are answered with 206s
  *            cut from the cached file once it is complete; the first play streams from the network while the
  *            full file is cached behind it.
+ *   pack     expansion-pack files (src/data/x1/**, x1_ maps, x1_ art, assets/x1_manifest.json, assets/pack_files.json ...). Never
+ *            precached. Same strategy as runtime, into the same long-lived cache, which activation keeps, so a shell-only release
+ *            never evicts a pack. PACK_PATTERN is generated (docs/PWA_PACKS.md).
  *   debug    any page opened with ?debug=1, and everything that page loads, goes straight to the network.
  *
  * The block between the build_pwa markers is generated: run `python tools/pwa/build_pwa.py` after changing
@@ -18,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'bfde85a9a3f1';
+const SHELL_VERSION = 'fb57ecfdd2f3';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -51,6 +54,7 @@ const PRECACHE = [
   'src/core/tween.js',
   'src/data/encounters.js',
   'src/data/enemies.js',
+  'src/data/expcurve.js',
   'src/data/items.js',
   'src/data/loot-tables.js',
   'src/data/maps/_kit.js',
@@ -89,8 +93,11 @@ const PRECACHE = [
   'src/data/story/ep2.js',
   'src/data/story/ep3.js',
   'src/data/text.js',
+  'src/data/x1/live.js',
+  'src/data/x2/live.js',
   'src/game/episodes.js',
   'src/game/inventory.js',
+  'src/game/packs.js',
   'src/game/state.js',
   'src/game/story.js',
   'src/main.js',
@@ -359,6 +366,7 @@ const PRECACHE = [
   'assets/audio/jingles/save.mp3',
   'assets/audio/jingles/victory_fanfare.mp3',
 ];
+const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|assets/pack_files\\.json)";
 // build_pwa:end
 
 const SHELL_PREFIX = 'lq-next-shell-';
@@ -366,6 +374,7 @@ const SHELL_CACHE = SHELL_PREFIX + SHELL_VERSION;
 const RUNTIME_CACHE = 'lq-next-runtime-v1';
 const BASE = new URL('./', self.location.href);              // .../next/
 const INDEX = new URL('index.html', BASE).href;
+const PACK_RE = new RegExp(PACK_PATTERN);                  // generated with the precache list
 const SHELL_URLS = new Set(PRECACHE.map((p) => new URL(p, BASE).href));
 const CRITICAL = ['index.html', 'src/main.js', 'src/core/engine.js'];   // install fails if these do not arrive
 const BATCH = 16;
@@ -429,12 +438,13 @@ async function isDebugRequest(event) {
   return debug;
 }
 
-/** 'shell' | 'nav' | 'runtime' | 'other' */
+/** 'shell' | 'nav' | 'pack' | 'runtime' | 'other' */
 function classify(request, url) {
   if (request.mode === 'navigate') return url.href.startsWith(BASE.href) ? 'nav' : 'other';
   const bare = url.origin + url.pathname;
   if (SHELL_URLS.has(bare)) return 'shell';
   const p = url.pathname;
+  if (p.startsWith(BASE.pathname) && PACK_RE.test(p.slice(BASE.pathname.length))) return 'pack';   // a ?v= query is ignored
   if (/\/assets\/(audio|art)\//.test(p) && /\.(mp3|ogg|wav|webp|png|jpg)$/i.test(p)) return 'runtime';
   return 'other';
 }
@@ -530,7 +540,7 @@ async function handle(event) {
     if (hit) return request.headers.has('range') ? sliceResponse(hit.clone(), request.headers.get('range')) : hit;
     return fetch(request);
   }
-  if (kind === 'runtime') {
+  if (kind === 'runtime' || kind === 'pack') {
     try { return await runtime(event); } catch (e) { return new Response('Offline', { status: 503, statusText: 'Offline' }); }
   }
   return fetch(request);

@@ -116,7 +116,16 @@ test('load budget: before the tap prompt (wire bytes) and the whole initial down
   const mb = (n) => (n / 1048576).toFixed(2);
   console.log(`# load budget: modules ${mb(js)} MB + eager art/data ${mb(eager)} MB = ${mb(beforePrompt)} MB before the tap prompt; ` +
     `+ lazy art ${mb(lazy)} MB + sfx ${mb(sfx)} MB = ${mb(initial)} MB initial download (music streams after the title)`);
-  assert.ok(beforePrompt < 2.5 * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, budget 2.5 MB (about 2 s at 10 Mbps)`);
+  const ratchet = readJson('qa/pwa/budget_ratchet.json');
+  assert.equal(ratchet.capMB, 6.5, 'the 6.5 MB initial cap is not raised (Scott)');
+  assert.equal(ratchet.tapCapMB, 2.5, 'the 2.5 MB tap-prompt cap is not raised (Scott)');
+  assert.ok(beforePrompt < ratchet.tapCapMB * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, budget ${ratchet.tapCapMB} MB (about 2 s at 10 Mbps)`);
+  assert.ok(beforePrompt < ratchet.tapPromptMB * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, ratchet ${ratchet.tapPromptMB} MB (qa/pwa/budget_ratchet.json; it never grows after XP-packs)`);
+  assert.ok(ratchet.tapPromptMB <= 2.32, 'the tap-prompt ratchet may not be raised above 2.32 MB');
+  const stage = ratchet.stages[ratchet.stage];
+  assert.ok(stage && ratchet.initialMB <= stage.initialMB, `the ratchet (${ratchet.initialMB} MB) may not exceed its stage '${ratchet.stage}' (${stage && stage.initialMB} MB)`);
+  assert.ok(ratchet.initialMB <= ratchet.capMB, 'the ratchet is inside the cap');
+  assert.ok(initial < ratchet.initialMB * 1048576, `initial download ${mb(initial)} MB, ratchet ${ratchet.initialMB} MB (stage ${ratchet.stage}; the growth is the owning agent's alone)`);
   // 6.5 MB since 2026-10-21 (was 6): Episode 2 added 0.3 MB of SFX (22 kHz mono WAV, already lean; MP3 would add
   // encoder-delay latency to UI clicks). Everything past the tap prompt downloads in the background after the title,
   // so the felt budget above stays at 2.5 MB. Episode 3 may not raise this: sfx are split into per-episode packs

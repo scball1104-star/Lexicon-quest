@@ -129,8 +129,9 @@ export const KEY_ITEMS = {
 // ---------------------------------------------------------------------------------------------
 const ALL = ['hero', 'mira', 'bram'];
 export const EQUIPMENT = {};
-function eq(id, o) { EQUIPMENT[id] = { id, ...o, stats: o.stats || {} }; }
-function weapon(id, type, tier, name, price, stats, desc) {
+// `export` on eq() and weapon() is the registry seam for an expansion pack (src/data/x1/items.js adds to ITEMS itself).
+export function eq(id, o) { EQUIPMENT[id] = { id, ...o, stats: o.stats || {} }; }
+export function weapon(id, type, tier, name, price, stats, desc) {
   eq(id, { name, slot: 'weapon', type, tier, ilvl: [0, 2, 5, 8, 11, 14, 16][tier], price, stats, icon: type, desc });
 }
 

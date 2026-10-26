@@ -1290,4 +1290,20 @@ export function talkTo(id, hasFlag) {
   return { lines: resolve(e.lines, hasFlag, id), service: n.service || null };
 }
 
+const prepended = new WeakSet();
+/**
+ * Pack seam (XP-packs): put talk entries at the FRONT of an existing NPC's talk list (first match wins, so a pack's new
+ * stages answer before the old ones). Only prepends, never edits or removes; each entry object is added once, so register()
+ * may run twice. Entries must be guarded by flags only the pack sets, so every old save state reads exactly as before.
+ * Returns how many entries were added (0 when the NPC does not exist).
+ */
+export function prependTalk(npcId, entries) {
+  const n = NPCS[npcId];
+  if (!n || !Array.isArray(n.talk) || !Array.isArray(entries)) return 0;
+  const fresh = entries.filter((e) => e && typeof e === 'object' && !prepended.has(e));
+  for (const e of fresh) prepended.add(e);
+  n.talk.unshift(...fresh);
+  return fresh.length;
+}
+
 export default NPCS;

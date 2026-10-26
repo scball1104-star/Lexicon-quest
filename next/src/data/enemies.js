@@ -25,7 +25,8 @@
 //   flavor               one-line bestiary hook (full lore lives in data/text.js)
 
 export const ENEMIES = {};
-function enemy(id, o) {
+// `export` is the registry seam: an expansion pack's register() adds its foes through enemy() (src/data/x1/enemies.js).
+export function enemy(id, o) {
   ENEMIES[id] = {
     id, flying: false, size: 'medium', tags: [], weak: [], resist: [], immune: [], absorb: [], statusImmune: [],
     evade: 0, luk: 5, mp: 0, ai: 'basic', drops: [], boss: false, charge: null,

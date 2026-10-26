@@ -32,10 +32,14 @@ test('random play never breaks the rules engine', () => {
   const zoneOf = { valley: 'valley', archive_f1: 'archive_f1', archive_f2: 'archive_f2', archive_f3: 'archive_f3', archive_boss: 'archive_boss',
     whisperwood_hollow: 'whisperwood_hollow', east_road: 'east_road', court_f1: 'court_f1', court_f2: 'court_f2', court_f3: 'court_f3',
     court_throne: 'court_throne', sand_road: 'sand_road', foundry_f1: 'foundry_f1', foundry_f2: 'foundry_f2', foundry_f3: 'foundry_f3',
-    foundry_heart: 'foundry_heart' };
+    foundry_heart: 'foundry_heart',
+    // Episode 1 expansion (tools/sim/x1.mjs registers the loadouts)
+    x1_downs: 'x1_downs', x1_highmoor: 'x1_highmoor', x1_barrow: 'x1_barrow', x1_larchhill: 'x1_larchhill', x1_millrace: 'x1_millrace',
+    x1_terrace: 'x1_terrace', x1_cellar: 'x1_cellar', x1_culvert: 'x1_culvert' };
   const levels = { valley: 3, archive_f1: 4, archive_f2: 6, archive_f3: 7, archive_boss: 8, whisperwood_hollow: 7,
     east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13,
-    sand_road: 13, foundry_f1: 14, foundry_f2: 15, foundry_f3: 16, foundry_heart: 16 };
+    sand_road: 13, foundry_f1: 14, foundry_f2: 15, foundry_f3: 16, foundry_heart: 16,
+    x1_downs: 4, x1_highmoor: 5, x1_barrow: 6, x1_larchhill: 6, x1_millrace: 6, x1_terrace: 7, x1_cellar: 7, x1_culvert: 7 };
   let battles = 0;
   for (const enc of Object.values(ENCOUNTERS)) {
     for (let seed = 1; seed <= 14; seed++) {

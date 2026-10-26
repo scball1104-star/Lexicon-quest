@@ -16,11 +16,38 @@ export { CREDITS, CREDITS_EP2, BANNERS };
 export const SCENES = { ...EP1_SCENES, ...EP2_SCENES };
 /** Every inspect line id of both episodes. */
 export const LINES = { ...EP1_LINES, ...EP2_LINES };
-/** Ids defined by both episodes (should stay empty; a collision means Episode 2 shadows Episode 1). */
+// Pack scenes (XP-packs): a pack's story module calls registerStory({ scenes, lines, conditions }) from its register().
+const EXTRA_CONDITIONS = {};
+const registered = { scenes: [], lines: [] };   // ids a pack tried to register that already belonged to something else
+
+/**
+ * Add a pack's scenes, inspect lines and scene guards to the shared tables (SCENES, LINES and the condition lookup that
+ * sceneAllowed reads). An id that is already taken by a DIFFERENT value is never overwritten: it is reported in the result and
+ * by storyCollisions(). Registering the same value again is a no-op, so register() may run twice.
+ * Returns { scenes: [collided ids], lines: [collided ids], conditions: [collided ids] }.
+ */
+export function registerStory({ scenes = {}, lines = {}, conditions = {} } = {}) {
+  const out = { scenes: [], lines: [], conditions: [] };
+  const put = (table, id, v, bucket) => {
+    if (id in table) { if (table[id] !== v) { bucket.push(id); } return; }
+    table[id] = v;
+  };
+  for (const [id, v] of Object.entries(scenes)) put(SCENES, id, v, out.scenes);
+  for (const [id, v] of Object.entries(lines)) put(LINES, id, v, out.lines);
+  for (const [id, c] of Object.entries(conditions)) {
+    if (id in EP1_CONDITIONS || id in EP2_CONDITIONS) { out.conditions.push(id); continue; }
+    put(EXTRA_CONDITIONS, id, c, out.conditions);
+  }
+  for (const id of out.scenes) if (!registered.scenes.includes(id)) registered.scenes.push(id);
+  for (const id of out.lines) if (!registered.lines.includes(id)) registered.lines.push(id);
+  return out;
+}
+
+/** Ids defined by both episodes, or registered by a pack over an existing id (should stay empty; a collision means one shadows the other). */
 export function storyCollisions() {
   const sc = Object.keys(EP2_SCENES).filter((k) => k in EP1_SCENES);
   const li = Object.keys(EP2_LINES).filter((k) => k in EP1_LINES);
-  return { scenes: sc, lines: li };
+  return { scenes: [...sc, ...registered.scenes], lines: [...li, ...registered.lines] };
 }
 
 /**
@@ -28,7 +55,7 @@ export function storyCollisions() {
  * The field asks before it holds an arrival scene for the location banner (W15).
  */
 export function sceneAllowed(id, hasFlag) {
-  const c = EP1_CONDITIONS[id] || EP2_CONDITIONS[id];
+  const c = EP1_CONDITIONS[id] || EP2_CONDITIONS[id] || EXTRA_CONDITIONS[id];
   if (!c) return !!SCENES[id];
   const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
   return list(c.if).every((f) => hasFlag(f)) && !list(c.ifNot).some((f) => hasFlag(f));

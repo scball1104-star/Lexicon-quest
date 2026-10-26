@@ -7,6 +7,7 @@
 //   &seed=n         fixed RNG seed (deterministic runs)
 //   &speed=x        initial time scale
 //   &touch=on|off   force the touch controls on or off for this session
+//   &pack=x1,x2     QA: load these expansion packs now even while their switch is off (content stays gated by x1On()/x2On())
 //
 // Debug runs (?debug=1) skip the "Tap or press any key" gate and the service worker, wait for every lazy
 // asset group, and so behave exactly as before the loading screen existed (QA harnesses rely on that).
@@ -15,6 +16,7 @@
 
 import { Engine } from './core/engine.js';
 import { installDebug } from './core/debug.js';
+import { startPackWatch } from './game/packs.js';
 import { DevTitleScene } from './scenes/_devTitle.js';
 import { DevFieldScene } from './scenes/_devField.js';
 import { DevGalleryScene } from './scenes/_devGallery.js';
@@ -130,6 +132,10 @@ async function main() {
   const first = wanted && engine.hasScene(wanted) ? wanted : engine.hasScene('title') ? 'title' : '_devTitle';
   engine.push(first);
   canvas.focus({ preventScroll: true });
+  // Expansion packs (src/game/packs.js, docs/PWA_PACKS.md): warm a pack in the background once the title is up when a save wants
+  // it, and again when a running game first wants it. Never awaited here, so the first frame does not depend on a pack; with
+  // every pack switched off (src/data/x1/live.js, x2/live.js) this installs nothing.
+  startPackWatch(engine, params);
 }
 
 main().catch((e) => {

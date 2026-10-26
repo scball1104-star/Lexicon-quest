@@ -21,6 +21,7 @@ import { PARTY, statsAt, knownSkills, masteryLevel, MASTERY_DAMAGE_PER_LEVEL, MA
   grantExp, grantMastery } from '../data/party.js';
 import { CONSUMABLES, ITEM_RANK, ARMOR_SLOTS, UNIQUES } from '../data/items.js';
 import { ENEMIES, ELITE_BASE, ELITE_MODS, LOST_PAGE_VARIANTS, CURSE_STATUSES } from '../data/enemies.js';
+import { expScale } from '../data/encounters.js';
 import * as CTB from './ctb.js';
 import * as ST from './status.js';
 import * as AI from './ai.js';
@@ -253,6 +254,11 @@ export function createBattle(cfg = {}) {
       variant = LOST_PAGE_VARIANTS.find((v) => v.id === spec.variant) || null;
       if (variant) { weak = variant.weak.slice(); name = variant.name; weakKey = `${id}:${variant.id}`; }
     }
+    // EXP after the elite multiplier: x the zone's episode scale x the encounter's `expMul` (data/expcurve.js; both 1 for every
+    // group that existed before the expansions, so their pay is unchanged). A summoned add or a split child inherits its parent's.
+    const expMul = spec && spec.expMul > 0 ? spec.expMul : ((extra.by && extra.by.expMul) || (extra.after && extra.after.expMul) || 1);
+    exp *= expScale(state && state.options ? state.options.zone : options.zone);
+    exp *= expMul;
     if (spec && spec.power > 0) { atk *= spec.power; mag *= spec.power; }   // the encounter's `power` (encounters.js)
     if (spec && spec.speed > 0) spd *= spec.speed;                           // and its `speed` (Episode 3, Foundry F3)
     if (extra.hpScale) hp *= extra.hpScale;
@@ -272,6 +278,7 @@ export function createBattle(cfg = {}) {
       rewards: { exp: Math.round(exp * (extra.rewardScale ?? 1)), gold: Math.round(gold * (extra.rewardScale ?? 1)),
         masteryPts: Math.round(masteryPts * (extra.rewardScale ?? 1)) },
       lootZone: d.lootZone, ai: { turns: 0, used: {}, chargeAt: null },
+      ...(expMul !== 1 ? { expMul } : {}),
       // Episode 3 Heat: a counter on the foe (not a status). heatMax 0 = no Heat. heatStep is the ATK and MAG gain per level.
       heat: 0, heatMax: d.heat ? d.heat.max : 0, heatStep: d.heat ? d.heat.step : 0, heatFlare: d.heat ? d.heat.flare : null,
     };

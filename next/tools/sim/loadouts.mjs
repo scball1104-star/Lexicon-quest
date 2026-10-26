@@ -71,7 +71,7 @@ export const ALPHA_TIER_RUNS = [
 export function knownBestiary() {
   const out = {};
   // boss adds are met first inside their boss fight (the Archivore's pages, the Nameless King's Sorrow and Pride)
-  const adds = ['lost_page', 'false_sorrow', 'false_pride'];
+  const adds = ['lost_page', 'false_sorrow', 'false_pride', 'bellows_coil', 'smelter_coil'];
   for (const e of Object.values(ENEMIES)) if (!e.boss && !adds.includes(e.id)) out[e.id] = [...e.weak, ...e.resist, ...e.immune, ...e.absorb];
   return out;
 }
@@ -118,4 +118,48 @@ LOADOUTS.court_throne = {
   mira: { weapon: 'staff', equip: { ...C3.mira.equip }, mastery: { staff: 320, bow: 130 } },
   bram: { weapon: 'spear', equip: { ...C3.bram.equip }, mastery: { spear: 420, axe: 150 } },
   inventory: { potion: 5, hi_potion: 5, ether: 3, hi_ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 3, silver_salve: 2 },
+};
+
+// ------------------------------------------------------------------ Episode 3 (EPISODE3_PLAN.md 6.6)
+// sand_road: the court_throne row plus the Kept Promise (Mira's bow) and tier 4 gear (Moonsteel Axe, Glass Helm and Mere Boots
+// on the hero; Silver Mail, Glass Helm and Mere Boots on Bram; Mirror Circlet on Mira), mastery up a step, three Quench Flasks
+// (Vessa's gift at the sand gate). This is also the Episode 3 quick start's party (src/game/state.js EP3_START mirrors it).
+// foundry_f1: + two tier 5 pieces (Ashsteel Helm, Cinder Boots on the hero). foundry_f2: + Ashwalker Boots (Bram), Soot Hood
+// (Mira). foundry_f3: + two tier 6 pieces (Heartforge Pike, Founder's Rod). foundry_heart: + the Updraft Charm (Mira) and
+// mastery up one step; `flags` carries bram_memory_3, so Bram knows Tempered Oath (rules.js reads `options.flags`).
+const CT = LOADOUTS.court_throne;
+LOADOUTS.sand_road = {
+  hero: { weapon: 'sword', equip: { ...CT.hero.equip, axe: 'moonsteel_axe', head: 'glass_helm', boots: 'mere_boots' }, mastery: { sword: 460, axe: 170 } },
+  mira: { weapon: 'staff', equip: { ...CT.mira.equip, bow: 'kept_promise', head: 'mirror_circlet' }, mastery: { staff: 350, bow: 150 } },
+  bram: { weapon: 'spear', equip: { ...CT.bram.equip, body: 'silver_mail', head: 'glass_helm', boots: 'mere_boots' }, mastery: { spear: 460, axe: 170 } },
+  inventory: { potion: 6, hi_potion: 5, ether: 3, hi_ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 3, silver_salve: 2, quench_flask: 3 },
+};
+const SR = LOADOUTS.sand_road;
+LOADOUTS.foundry_f1 = {
+  hero: { weapon: 'sword', equip: { ...SR.hero.equip, head: 'ashsteel_helm', boots: 'cinder_boots' }, mastery: { sword: 500, axe: 190 } },
+  mira: { weapon: 'staff', equip: { ...SR.mira.equip }, mastery: { staff: 380, bow: 170 } },
+  bram: { weapon: 'spear', equip: { ...SR.bram.equip }, mastery: { spear: 500, axe: 190 } },
+  inventory: { ...SR.inventory, quench_flask: 4 },
+};
+const F1 = LOADOUTS.foundry_f1;
+LOADOUTS.foundry_f2 = {
+  hero: { weapon: 'sword', equip: { ...F1.hero.equip }, mastery: { sword: 540, axe: 210 } },
+  mira: { weapon: 'staff', equip: { ...F1.mira.equip, head: 'soot_hood' }, mastery: { staff: 410, bow: 190 } },
+  bram: { weapon: 'spear', equip: { ...F1.bram.equip, boots: 'ashwalker_boots' }, mastery: { spear: 540, axe: 210 } },
+  inventory: { ...F1.inventory, quench_flask: 5 },
+};
+const F2 = LOADOUTS.foundry_f2;
+LOADOUTS.foundry_f3 = {
+  hero: { weapon: 'sword', equip: { ...F2.hero.equip }, mastery: { sword: 580, axe: 230 } },
+  mira: { weapon: 'staff', equip: { ...F2.mira.equip, staff: 'founders_rod' }, mastery: { staff: 440, bow: 210 } },
+  bram: { weapon: 'spear', equip: { ...F2.bram.equip, spear: 'heartforge_pike' }, mastery: { spear: 580, axe: 230 } },
+  inventory: { ...F2.inventory, quench_flask: 5 },
+};
+const F3 = LOADOUTS.foundry_f3;
+LOADOUTS.foundry_heart = {
+  hero: { weapon: 'sword', equip: { ...F3.hero.equip }, mastery: { sword: 620, axe: 250 } },
+  mira: { weapon: 'staff', equip: { ...F3.mira.equip, charm: 'updraft_charm' }, mastery: { staff: 480, bow: 230 } },
+  bram: { weapon: 'spear', equip: { ...F3.bram.equip }, mastery: { spear: 620, axe: 250 } },
+  inventory: { ...F3.inventory, quench_flask: 4, hi_potion: 6 },
+  flags: ['bram_memory_3'],
 };

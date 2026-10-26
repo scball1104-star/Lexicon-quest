@@ -21,6 +21,7 @@ import { animFrameAt } from '../core/assets.js';
 import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, newGameEp3, cleanName, EP2_START, EP3_START } from '../game/state.js';
 import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP } from '../game/episodes.js';
 import { NameEntryScene } from './nameEntry.js';
+import { packsToAwait, awaitPacks } from '../game/packs.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
 import { BANNERS } from '../data/text.js';
@@ -342,8 +343,12 @@ export function startEpisode3(engine, name, slot = 0) {
   const g = newGameEp3(cleanName(name), { slot });
   e.game = g;
   return e.fadeTo(() => {
-    if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP3_START.mark, dir: 'down' });
-    else e.reset('_uiStage', {});
+    const enter = () => {
+      if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP3_START.mark, dir: 'down' });
+      else e.reset('_uiStage', {});
+    };
+    const ids = packsToAwait(g.flags);          // packs the party wants: at most 1.5 s behind the fade (docs/PWA_PACKS.md)
+    return ids.length ? awaitPacks(ids).then(enter) : enter();
   }, { duration: 0.8 });
 }
 
@@ -364,9 +369,13 @@ export function startEpisode2(engine, name) {
   const g = newGameEp2(cleanName(name));
   e.game = g;
   return e.fadeTo(() => {
-    if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP2_START.mark || 'bed', dir: 'down' });
-    else e.reset('_uiStage', {});
-    if (e.hasScene('titleCard')) e.push('titleCard', { text: 'Episode 2', sub: 'The Town Without a Name', frames: 180, backdrop: 'dialog_keyart_ep2' });
+    const enter = () => {
+      if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP2_START.mark || 'bed', dir: 'down' });
+      else e.reset('_uiStage', {});
+      if (e.hasScene('titleCard')) e.push('titleCard', { text: 'Episode 2', sub: 'The Town Without a Name', frames: 180, backdrop: 'dialog_keyart_ep2' });
+    };
+    const ids = packsToAwait(g.flags);          // packs the party wants: at most 1.5 s behind the fade (docs/PWA_PACKS.md)
+    return ids.length ? awaitPacks(ids).then(enter) : enter();
   }, { duration: 0.8 });
 }
 

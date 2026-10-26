@@ -1,0 +1,29 @@
+{
+  "x1": {
+    "entry": "../data/x1/index.js",
+    "prefix": "x1_",
+    "assets": "assets/x1_manifest.json",
+    "audioPack": "x1",
+    "touches": [
+      "valley",
+      "willowmere",
+      "archive_f1",
+      "archive_f2",
+      "archive_f3"
+    ]
+  },
+  "x2": {
+    "entry": "../data/x2/index.js",
+    "prefix": "x2_",
+    "assets": "assets/x2_manifest.json",
+    "audioPack": "ep2",
+    "touches": [
+      "east_road",
+      "nameless_hollow",
+      "nh_chapel",
+      "court_f1",
+      "court_f2",
+      "court_f3"
+    ]
+  }
+}

@@ -10,9 +10,12 @@ Serves the REPO ROOT (so ../assets/... resolves) on a free port and drives headl
   3. retry     a blocked critical asset shows the retry prompt (qa/pwa/out/desktop-loading-error.png); a press recovers.
   4. update    a changed sw.js installs beside the old one, waits, and the game shows the "Update ready" toast.
   5. debug     ?debug=1 runs must never install a worker (shots.py and every QA harness rely on this).
+  6. packoffline  XP-packs: a visit with ?pack=x1,x2 loads both expansion packs (forced on while their switches are off), the
+               worker's runtime cache ends up holding every file in assets/pack_files.json, and after going offline a
+               reload still brings both packs up (ready) from that cache. The pack files were never precached.
 
   python next/qa/pwa/pwa.py                  all three checks
-  python next/qa/pwa/pwa.py --only loading   or: retry, offline, update, debug (comma list)
+  python next/qa/pwa/pwa.py --only loading   or: retry, offline, update, debug, packoffline (comma list)
   python next/qa/pwa/pwa.py --mbps 10        throttle for check 1 (0 = unthrottled)
 
 Writes qa/pwa/out/pwa-report.json (timings and the bytes table). Exit code 1 on any failed check.
@@ -303,6 +306,51 @@ def check_offline(browser, base, report):
     return ok and not errors
 
 
+def check_packoffline(browser, base, report):
+    dev = DEVICES['desktop']
+    ctx = new_context(browser, dev)
+    page = ctx.new_page()
+    errors = []
+    page.on('pageerror', lambda e: errors.append(f'pageerror: {e}'))
+    url = base + '/next/index.html?pack=x1,x2'
+    lists = json.loads((NEXT / 'assets' / 'pack_files.json').read_text(encoding='utf-8'))
+    want = sorted({f for k, v in lists.items() if not k.startswith('$') for f in v})
+    page.goto(url, wait_until='load')
+    page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
+    page.keyboard.press('Enter')
+    page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
+    ready = poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('x1') && window.LQ_PACKS.packReady('x2'))", timeout=60)
+    online_state = page.evaluate("() => ({ x1: window.LQ_PACKS.packState('x1'), x2: window.LQ_PACKS.packState('x2') })")
+    # the worker installs, takes control, and the idle warm fetches every pack file through it into the runtime cache
+    js = ("async () => { const c = await caches.open('lq-next-runtime-v1'); const keys = (await c.keys()).map(r => new URL(r.url).pathname);"
+          " const want = %s; const have = want.filter(w => keys.some(k => k.endsWith('/next/' + w))); return have.length === want.length ? have.length : 0; }" % json.dumps(want))
+    try:
+        cached = poll(page, js, timeout=90)
+    except TimeoutError:
+        cached = 0
+    shell = page.evaluate(r"async () => { const names = await caches.keys(); const n = names.find(x => x.startsWith('lq-next-shell')); if (!n) return -1; const c = await caches.open(n); const keys = (await c.keys()).map(r => new URL(r.url).pathname); return keys.filter(k => /\/next\/src\/data\/x[12]\/(?!live)/.test(k) || /\/x[12]_manifest/.test(k)).length; }")
+    ctx.set_offline(True)
+    page.reload(wait_until='load')
+    ok = cached == len(want) and shell == 0
+    info = {}
+    try:
+        page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
+        page.keyboard.press('Enter')
+        page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
+        poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('x1') && window.LQ_PACKS.packReady('x2'))", timeout=30)
+        info = page.evaluate("() => ({ x1: window.LQ_PACKS.packState('x1'), x2: window.LQ_PACKS.packState('x2'), controlled: !!navigator.serviceWorker.controller })")
+        ok = ok and info['controlled'] and info['x1']['ready'] and info['x2']['ready']
+    except Exception as e:  # noqa: BLE001
+        ok = False
+        info = {'error': str(e)}
+    ctx.close()
+    report['packoffline'] = {'ok': ok and not errors, 'files': len(want), 'runtime_cached': cached, 'in_shell_cache': shell, 'online': online_state, 'offline': info, 'errors': errors}
+    print(f"[packoffline] {len(want)} pack files, {cached} in the runtime cache, {shell} in the shell cache; ready online {bool(ready)}; offline reload -> {info} {'ok' if ok and not errors else 'FAIL'}")
+    for e in errors:
+        print('   ', e)
+    return ok and not errors
+
+
 def check_retry(browser, base, report):
     """A critical asset that fails shows the retry prompt (not a blank canvas); a press retries and the game boots."""
     ctx = new_context(browser, DEVICES['desktop'])
@@ -387,7 +435,7 @@ def check_debug(browser, base, report):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--only', default='loading,retry,offline,update,debug')
+    ap.add_argument('--only', default='loading,retry,offline,update,debug,packoffline')
     ap.add_argument('--mbps', type=float, default=10.0)
     ap.add_argument('--devices', default='desktop,phone', help='devices for the loading check')
     ap.add_argument('--timeout', type=int, default=420)
@@ -409,6 +457,8 @@ def main():
                 results.append(check_loading(browser, base, d, args.mbps, report))
         if 'offline' in only:
             results.append(check_offline(browser, base, report))
+        if 'packoffline' in only:
+            results.append(check_packoffline(browser, base, report))
         if 'retry' in only:
             results.append(check_retry(browser, base, report))
         if 'update' in only:
