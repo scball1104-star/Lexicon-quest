@@ -1,0 +1,15 @@
+{
+ "image": "x1_battle_downs.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "Shepherd's Downs: wide sky, three swells of downland, a drystone wall, a hawthorn in may, sheep, the Stones on the far crest (composed)",
+ "extraColors": [],
+ "colors": 40,
+ "composed": "tools/art/backdrops/x1_compose.py (battle_downs)",
+ "bandY": 118,
+ "bandAlpha": 0.42,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "battle_downs",
+ "fallback": "valley"
+}

@@ -5,6 +5,8 @@
 //                      rock, and a visible enemy struck from behind starts the fight `preemptive` (free first turn).
 //   Mira  Appraise     face a visible enemy (5 tiles, one tile either side of the line): its weaknesses and
 //                      resistances go straight into the Bestiary, so the battle shows them instead of "?".
+//                      X1: an `object` event with `appraise: true` is read the same way (same range, same line of sight):
+//                      its `appraiseText` lines replace the bestiary entry and `behind: 'appraise:<id>'` events appear.
 //         Lantern      the Lantern of Recall (FieldScene.useLantern), once it is carried.
 //   Bram  Shove        pushes a heavy block (`block` + `heavy`) one tile; the hero alone only makes it rock.
 //
@@ -27,7 +29,8 @@ import * as EV from './events.js';
 import { ICONS, installFieldArt } from './fieldart.js';
 import { ENCOUNTERS } from '../data/encounters.js';
 import { ENEMIES } from '../data/enemies.js';
-import { FIELD_ABILITIES, HELP } from '../data/text.js';
+import { FIELD_ABILITIES, HELP, BARKS } from '../data/text.js';
+import { isOpened } from '../game/state.js';
 import { mergeBestiary } from '../battle/scene/rewards.js';
 import { drawWindow, drawIcon } from '../ui/window.js';
 import { touchUi } from '../ui/list.js';
@@ -108,8 +111,10 @@ export function scanLane(q, x, y, dir, max = DASH_TILES) {
 }
 
 /**
- * The visible enemy Appraise reads from (x, y) facing dir: the nearest one up to `range` tiles ahead, on the
- * line or one tile either side of it, with no wall on the line between. q as scanLane plus enemyAt(x, y).
+ * What Appraise reads from (x, y) facing dir: the nearest visible enemy (the actor) or, X1, the nearest `appraise`
+ * object (`{ kind: 'object', ent, tx, ty }`), up to `range` tiles ahead, on the line or one tile either side of it,
+ * with no wall on the line between. At one distance an enemy wins over an object. q as scanLane plus enemyAt(x, y)
+ * and (optional) objectAt(x, y) -> the Appraise object entity standing there, or null.
  */
 export function appraiseTarget(q, x, y, dir, range = APPRAISE_RANGE) {
   const [dx, dy] = DIRS[dir];
@@ -121,6 +126,8 @@ export function appraiseTarget(q, x, y, dir, range = APPRAISE_RANGE) {
       if (s && i < 2) continue;                  // beside the leader is not "ahead"
       const e = q.enemyAt(cx + px * s, cy + py * s);
       if (e) return e;
+      const o = q.objectAt ? q.objectAt(cx + px * s, cy + py * s) : null;
+      if (o) return { kind: 'object', ent: o, tx: o.x, ty: o.y };
     }
     const code = q.code(cx, cy);
     if (code === 'solid' || code === 'void') {
@@ -208,6 +215,7 @@ export class FieldAbilities {
       ents: (x, y) => EV.entitiesAt(f, x, y).filter((e) => e.present),
       actor: (x, y) => f.actorAt(x, y),
       enemyAt: (x, y) => f.actors.find((a) => a.kind === 'enemy' && a.visible && !(a.data && a.data.fighting) && a.tx === x && a.ty === y) || null,
+      objectAt: (x, y) => EV.appraiseObjectAt(f, x, y),
       stop: (x, y) => this.stopsDash(x, y),
     };
   }
@@ -257,7 +265,7 @@ export class FieldAbilities {
     if (sel === 'dash' && hit && hit.kind === 'enemy') return { id: 'dash', kind: 'enemy', target: hit.actor, at: hit.at, lane };
     if (sel === 'appraise') {
       const e = appraiseTarget(q, L.tx, L.ty, L.dir);
-      if (e) return { id: 'appraise', kind: 'enemy', target: e, at: [e.tx, e.ty] };
+      if (e) return { id: 'appraise', kind: e.kind === 'object' ? 'object' : 'enemy', target: e, at: [e.tx, e.ty] };
     }
     if (sel === 'shove' && hit && hit.kind === 'heavy' && lane.path.length === 0) return { id: 'shove', kind: 'heavy', target: hit.ent, at: hit.at };
     // 3. the Lantern near unrevealed ink
@@ -306,7 +314,17 @@ export class FieldAbilities {
       if (!this.game.counters['bark:first_appraise_target'] && this.has('appraise') && this.selected() !== 'appraise' && this.f.map.mod.area !== 'town') {
         const L = this.f.leader;
         const e = appraiseTarget(this.query(), L.tx, L.ty, L.dir, 4);
-        if (e && !encounterAppraised(this.game, this.encounterOf(e))) this.f.bark('first_appraise_target');
+        if (e && e.kind !== 'object' && !encounterAppraised(this.game, this.encounterOf(e))) this.f.bark('first_appraise_target');
+      }
+      // X1: Mira notices an unread Appraise object. The key is the event's `appraiseBark` (default
+      // 'first_appraise_object', false to stay silent); takeBark says nothing when no such bark text exists.
+      if (this.has('appraise') && this.f.frame % 6 === 0) {
+        const L = this.f.leader;
+        const e = appraiseTarget({ ...this.query(), enemyAt: () => null }, L.tx, L.ty, L.dir, 4);
+        if (e && e.kind === 'object' && !isOpened(this.game, this.f.map.id, e.ent.id)) {
+          const key = e.ent.ev.appraiseBark === undefined ? 'first_appraise_object' : e.ent.ev.appraiseBark;
+          if (key && BARKS[key] && !this.game.counters[`bark:${key}`]) this.f.bark(key);
+        }
       }
     }
   }
@@ -553,6 +571,7 @@ export class FieldAbilities {
     const f = this.f, L = f.leader, e = this.engine;
     this.showLabel('appraise');
     await this.tagIn('mira');
+    if (c.target && c.target.kind === 'object') { await this.appraiseObject(c.target.ent); await this.tagOut(); return; }
     const enemy = c.target;
     if (!enemy) {
       L.showEmote('?', 40);
@@ -587,6 +606,32 @@ export class FieldAbilities {
     L.face(dir0);
     await this.tagOut();
     if (e.toasts && keys.length) e.toasts.show({ text: HELP.field.recorded, icon: 'book', frames: 60 });
+  }
+
+  /**
+   * X1: Mira reads an `appraise` object. The same tag-in, lens beam and reticle as for a foe, then the object's
+   * `appraiseText` in the dialogue window (no bestiary entry), then it is saved as opened (events.appraiseObject)
+   * and whatever is `behind: 'appraise:<id>'` appears with the sparkle.
+   */
+  async appraiseObject(ent) {
+    const f = this.f, L = f.leader, e = this.engine;
+    const dir0 = L.dir;
+    const mark = { tx: ent.x, ty: ent.y, feetX: ent.x * TILE + 8, feetY: ent.y * TILE + 14 };
+    L.faceToward(mark);
+    e.audio.sfx('buff', { volume: 0.8 });
+    this.fx.push({ kind: 'beam', from: L, to: mark, t: 0, life: 34 });
+    this.fx.push({ kind: 'reticle', to: mark, t: 0, life: 34 });
+    await this.wait(26);
+    e.audio.sfx('crystal_hit');
+    if (ent.prop) ent.prop.tint = { color: '#8af0e8', amount: 0.6 };
+    await this.wait(8);
+    if (ent.prop) ent.prop.tint = null;
+    const res = EV.appraiseObject(f, ent);
+    this.lastHit = { kind: 'appraise', object: ent.id, encounter: null, keys: [], first: res.first, revealed: res.revealed };
+    if (res.revealed.length) { e.audio.sfx('crystal_hit', { volume: 0.7 }); await this.wait(10); }
+    const boxes = EV.appraiseBoxes(ent, f.hasFlag);
+    if (boxes.length) await f.showBoxes(boxes);
+    L.face(dir0);
   }
 
   // ------------------------------------------------------------------ drawing
@@ -699,6 +744,7 @@ export class FieldAbilities {
       let topY = ty * TILE - 4;
       if (c.kind === 'enemy' && c.target.spr) topY = c.target.feetY - c.target.spr.h - 2;
       if (c.kind === 'heavy') topY = c.target.y * TILE - 12;
+      if (c.kind === 'object') topY = c.target.ent.y * TILE - ((c.target.ent.prop && c.target.ent.prop.cells.length > 1) ? 12 : 2);
       if (BREAK_KINDS.has(c.kind)) topY = c.target.y * TILE;
       const glyphW = touch ? 0 : r.measure('{i:btn_pageR}');
       const w = 12 + (glyphW ? glyphW + 2 : 0);

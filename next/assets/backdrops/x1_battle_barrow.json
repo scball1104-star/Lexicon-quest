@@ -1,0 +1,15 @@
+{
+ "image": "x1_battle_barrow.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Wethers' Barrow: a turf-capped stone vault, five burial niches with two candles lit, cold flags, mist (composed)",
+ "extraColors": [],
+ "colors": 34,
+ "composed": "tools/art/backdrops/x1_compose.py (battle_barrow)",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "battle_barrow",
+ "fallback": "archive_deep"
+}

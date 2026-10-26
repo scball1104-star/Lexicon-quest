@@ -2,6 +2,7 @@
 
     python build_tiles.py          # all sheets + tiles.json
     python build_tiles.py terrain  # just one sheet (tiles.json is still rewritten from all metas)
+    python build_tiles.py x1       # the Episode 1 expansion pack sheet (assets/tiles/x1.png + x1_tiles.json), not part of tiles.json
 """
 import json, os, sys, importlib
 from pxlib import TILES_DIR, OUT_DIR, snap_to_palette
@@ -69,6 +70,7 @@ def main(argv):
         json.dump(db, f, indent=1, sort_keys=False)
     print('tiles.json: %d terrains, %d walls, %d tiles, %d objects' % (
         len(db['terrains']), len(db['walls']), len(db['tiles']), len(db['objects'])))
+    __import__('x1').write() if (not argv[1:] or 'x1' in argv[1:]) else None   # X1 pack sheet: x1.png + x1_tiles.json (never tiles.json)
 
 
 if __name__ == '__main__':

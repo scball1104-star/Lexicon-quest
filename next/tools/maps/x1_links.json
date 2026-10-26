@@ -1,0 +1,28 @@
+{
+  "_about": "Pending cross-links (EXPANSION1_PLAN 3.2, 4.10, 11.4): door, exit and pit links whose target map does not exist yet when the source map is built. mapcheck check reports a missing target listed here (same from and to) as a warning and any other missing target as an error. An entry whose target map now exists is ignored, so nobody edits this file after X1-world. 'cell' is the plan's agreed source cell [x, y] (first cell of a range), or null; it is documentation, not matched, because map authors fix the exact cells. X1-maps-hub's test asserts every 'to' below exists once the pack is whole.",
+  "links": [
+    { "from": "x1_downs", "to": "x1_highmoor", "cell": [29, 0] },
+    { "from": "x1_downs", "to": "x1_millrace", "cell": [38, 33] },
+    { "from": "x1_downs", "to": "x1_larchhill", "cell": [10, 33] },
+    { "from": "x1_downs", "to": "x1_loomhouse", "cell": [36, 20] },
+    { "from": "x1_downs", "to": "x1_barrow", "cell": [14, 5] },
+    { "from": "x1_loomhouse", "to": "x1_downs", "cell": null },
+    { "from": "x1_barrow", "to": "x1_downs", "cell": [3, 12] },
+    { "from": "x1_highmoor", "to": "x1_downs", "cell": [34, 35] },
+    { "from": "x1_highmoor", "to": "x1_terrace", "cell": [71, 13] },
+    { "from": "x1_terrace", "to": "x1_highmoor", "cell": [0, 13] },
+    { "from": "x1_terrace", "to": "x1_orrery", "cell": [32, 9] },
+    { "from": "x1_orrery", "to": "x1_terrace", "cell": null },
+    { "from": "x1_orrery", "to": "x1_cellar", "cell": [12, 4] },
+    { "from": "x1_cellar", "to": "x1_orrery", "cell": null },
+    { "from": "x1_millrace", "to": "x1_downs", "cell": [3, 0] },
+    { "from": "x1_millrace", "to": "x1_larchhill", "cell": [0, 12] },
+    { "from": "x1_millrace", "to": "x1_mill", "cell": [28, 14] },
+    { "from": "x1_millrace", "to": "x1_culvert", "cell": [43, 22] },
+    { "from": "x1_mill", "to": "x1_millrace", "cell": null },
+    { "from": "x1_culvert", "to": "x1_millrace", "cell": null },
+    { "from": "x1_larchhill", "to": "x1_downs", "cell": [30, 0] },
+    { "from": "x1_larchhill", "to": "x1_millrace", "cell": [67, 18] },
+    { "from": "x1_larchhill", "to": "x1_millrace", "cell": [60, 30] }
+  ]
+}

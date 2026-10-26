@@ -1,0 +1,4751 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/x1.py (python build_tiles.py x1)",
+ "note": "X1 pack tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each x1 terrain must be drawn below (see tools/art/tiles/x1.py).",
+ "terrainOrder": [
+  "x1_barrow_floor",
+  "x1_barrow_flag",
+  "x1_barrow_runner",
+  "x1_cellar_floor",
+  "x1_cellar_slate",
+  "x1_cellar_inlay",
+  "x1_culvert_floor",
+  "x1_culvert_flag",
+  "x1_culvert_wet",
+  "x1_moor_turf",
+  "x1_peat",
+  "x1_heath",
+  "x1_bracken",
+  "x1_orchard_turf",
+  "x1_pond_bed",
+  "x1_tarn"
+ ],
+ "terrainInsertBefore": {
+  "x1_barrow_floor": "stone_floor",
+  "x1_barrow_flag": "stone_floor",
+  "x1_barrow_runner": "stone_floor",
+  "x1_cellar_floor": "stone_floor",
+  "x1_cellar_slate": "stone_floor",
+  "x1_cellar_inlay": "stone_floor",
+  "x1_culvert_floor": "stone_floor",
+  "x1_culvert_flag": "stone_floor",
+  "x1_culvert_wet": "stone_floor",
+  "x1_moor_turf": "moss",
+  "x1_peat": "moss",
+  "x1_heath": "plaza",
+  "x1_bracken": "plaza",
+  "x1_orchard_turf": "moss",
+  "x1_pond_bed": "water"
+ },
+ "terrains": {
+  "x1_barrow_floor": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ],
+    [
+     128,
+     0
+    ]
+   ],
+   "variantWeights": [
+    26,
+    3,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "sheet": "x1.png",
+   "order": 10
+  },
+  "x1_barrow_flag": {
+   "x": 144,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ],
+    [
+     224,
+     0
+    ],
+    [
+     240,
+     0
+    ]
+   ],
+   "variantWeights": [
+    20,
+    2,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 11
+  },
+  "x1_barrow_runner": {
+   "x": 256,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [],
+   "sheet": "x1.png",
+   "order": 12
+  },
+  "x1_cellar_floor": {
+   "x": 288,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     320,
+     0
+    ],
+    [
+     336,
+     0
+    ],
+    [
+     352,
+     0
+    ],
+    [
+     368,
+     0
+    ],
+    [
+     384,
+     0
+    ],
+    [
+     400,
+     0
+    ],
+    [
+     416,
+     0
+    ]
+   ],
+   "variantWeights": [
+    40,
+    3,
+    2,
+    2,
+    1,
+    3,
+    1
+   ],
+   "sheet": "x1.png",
+   "order": 13
+  },
+  "x1_cellar_slate": {
+   "x": 432,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     464,
+     0
+    ],
+    [
+     480,
+     0
+    ],
+    [
+     496,
+     0
+    ],
+    [
+     0,
+     48
+    ],
+    [
+     16,
+     48
+    ]
+   ],
+   "variantWeights": [
+    20,
+    2,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 14
+  },
+  "x1_cellar_inlay": {
+   "x": 32,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [],
+   "sheet": "x1.png",
+   "order": 15
+  },
+  "x1_culvert_floor": {
+   "x": 64,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     96,
+     48
+    ],
+    [
+     112,
+     48
+    ],
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ],
+    [
+     192,
+     48
+    ]
+   ],
+   "variantWeights": [
+    22,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 16
+  },
+  "x1_culvert_flag": {
+   "x": 208,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     240,
+     48
+    ],
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ],
+    [
+     288,
+     48
+    ],
+    [
+     304,
+     48
+    ]
+   ],
+   "variantWeights": [
+    20,
+    2,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 17
+  },
+  "x1_culvert_wet": {
+   "x": 320,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     352,
+     48
+    ],
+    [
+     368,
+     48
+    ],
+    [
+     384,
+     48
+    ]
+   ],
+   "variantWeights": [
+    8,
+    3,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 18
+  },
+  "x1_moor_turf": {
+   "x": 0,
+   "y": 272,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     272
+    ],
+    [
+     48,
+     272
+    ],
+    [
+     64,
+     272
+    ],
+    [
+     80,
+     272
+    ],
+    [
+     96,
+     272
+    ],
+    [
+     112,
+     272
+    ]
+   ],
+   "variantWeights": [
+    4,
+    3,
+    1,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 26
+  },
+  "x1_peat": {
+   "x": 128,
+   "y": 272,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     160,
+     272
+    ],
+    [
+     176,
+     272
+    ],
+    [
+     192,
+     272
+    ],
+    [
+     208,
+     272
+    ],
+    [
+     224,
+     272
+    ],
+    [
+     240,
+     272
+    ]
+   ],
+   "variantWeights": [
+    4,
+    3,
+    1,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 27
+  },
+  "x1_heath": {
+   "x": 256,
+   "y": 272,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     288,
+     272
+    ],
+    [
+     304,
+     272
+    ]
+   ],
+   "variantWeights": [
+    4,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 32
+  },
+  "x1_bracken": {
+   "x": 320,
+   "y": 272,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     352,
+     272
+    ],
+    [
+     368,
+     272
+    ]
+   ],
+   "variantWeights": [
+    4,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 31
+  },
+  "x1_orchard_turf": {
+   "x": 384,
+   "y": 272,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     416,
+     272
+    ],
+    [
+     432,
+     272
+    ],
+    [
+     448,
+     272
+    ],
+    [
+     464,
+     272
+    ],
+    [
+     480,
+     272
+    ],
+    [
+     496,
+     272
+    ]
+   ],
+   "variantWeights": [
+    4,
+    3,
+    1,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 28
+  },
+  "x1_pond_bed": {
+   "x": 0,
+   "y": 320,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     320
+    ],
+    [
+     48,
+     320
+    ],
+    [
+     64,
+     320
+    ],
+    [
+     80,
+     320
+    ],
+    [
+     96,
+     320
+    ],
+    [
+     112,
+     320
+    ]
+   ],
+   "variantWeights": [
+    16,
+    3,
+    3,
+    2,
+    2,
+    2
+   ],
+   "sheet": "x1.png",
+   "order": 36
+  },
+  "x1_tarn": {
+   "x": 128,
+   "y": 320,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "reflect": true,
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 520
+   },
+   "variants": [],
+   "sheet": "x1.png",
+   "order": 43
+  }
+ },
+ "walls": {
+  "x1_barrow": {
+   "top": [
+    0,
+    96
+   ],
+   "face": [
+    32,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     96
+    ],
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "X1 wall band (x1_barrow_top) and inner face (x1_barrow_face); faceStyles per room (tools/art/tiles/x1_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      96
+     ]
+    ],
+    [
+     [
+      0,
+      240
+     ]
+    ],
+    [
+     [
+      32,
+      240
+     ]
+    ],
+    [
+     [
+      64,
+      240
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "x1_barrow": {
+     "cycle": [
+      0,
+      2,
+      1,
+      0,
+      3,
+      2,
+      1
+     ]
+    }
+   },
+   "sheet": "x1.png"
+  },
+  "x1_barrow_out": {
+   "top": [
+    64,
+    96
+   ],
+   "face": [
+    96,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ],
+    [
+     240,
+     96
+    ],
+    [
+     256,
+     96
+    ],
+    [
+     272,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (x1_barrow_out_top, no edges) and the outer face under a band's south lip (x1_barrow_out_face)",
+   "sheet": "x1.png"
+  },
+  "x1_cellar": {
+   "top": [
+    0,
+    144
+   ],
+   "face": [
+    32,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     144
+    ],
+    [
+     144,
+     144
+    ],
+    [
+     160,
+     144
+    ],
+    [
+     176,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "X1 wall band (x1_cellar_top) and inner face (x1_cellar_face); faceStyles per room (tools/art/tiles/x1_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      144
+     ]
+    ],
+    [
+     [
+      96,
+      240
+     ]
+    ],
+    [
+     [
+      128,
+      240
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "x1_cellar": {
+     "cycle": [
+      0,
+      1,
+      2,
+      0,
+      1
+     ]
+    }
+   },
+   "sheet": "x1.png"
+  },
+  "x1_cellar_out": {
+   "top": [
+    64,
+    144
+   ],
+   "face": [
+    96,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     144
+    ],
+    [
+     208,
+     144
+    ],
+    [
+     224,
+     144
+    ],
+    [
+     240,
+     144
+    ],
+    [
+     256,
+     144
+    ],
+    [
+     272,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (x1_cellar_out_top, no edges) and the outer face under a band's south lip (x1_cellar_out_face)",
+   "sheet": "x1.png"
+  },
+  "x1_culvert": {
+   "top": [
+    0,
+    192
+   ],
+   "face": [
+    32,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     192
+    ],
+    [
+     144,
+     192
+    ],
+    [
+     160,
+     192
+    ],
+    [
+     176,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "X1 wall band (x1_culvert_top) and inner face (x1_culvert_face); faceStyles per room (tools/art/tiles/x1_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      160,
+      240
+     ]
+    ],
+    [
+     [
+      192,
+      240
+     ]
+    ],
+    [
+     [
+      224,
+      240
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "x1_culvert": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      1,
+      3
+     ]
+    }
+   },
+   "sheet": "x1.png"
+  },
+  "x1_culvert_out": {
+   "top": [
+    64,
+    192
+   ],
+   "face": [
+    96,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     192
+    ],
+    [
+     208,
+     192
+    ],
+    [
+     224,
+     192
+    ],
+    [
+     240,
+     192
+    ],
+    [
+     256,
+     192
+    ],
+    [
+     272,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "the deep beyond the walls (x1_culvert_out_top, no edges) and the outer face under a band's south lip (x1_culvert_out_face)",
+   "sheet": "x1.png"
+  },
+  "x1_crag": {
+   "top": [
+    0,
+    368
+   ],
+   "face": [
+    32,
+    368
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     64,
+     368
+    ],
+    [
+     80,
+     368
+    ],
+    [
+     96,
+     368
+    ],
+    [
+     112,
+     368
+    ],
+    [
+     128,
+     368
+    ],
+    [
+     144,
+     368
+    ]
+   ],
+   "topVariantWeights": [
+    4,
+    3,
+    1,
+    2,
+    2,
+    2
+   ],
+   "note": "High Moor crags: grey granite under a moor-turf cap (legend ids x1_crag_top / x1_crag_face); faces sit directly below the top",
+   "sheet": "x1.png"
+  },
+  "x1_terrace": {
+   "top": [
+    0,
+    416
+   ],
+   "face": [
+    32,
+    416
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     64,
+     416
+    ],
+    [
+     80,
+     416
+    ],
+    [
+     96,
+     416
+    ],
+    [
+     112,
+     416
+    ],
+    [
+     128,
+     416
+    ],
+    [
+     144,
+     416
+    ]
+   ],
+   "topVariantWeights": [
+    4,
+    3,
+    1,
+    2,
+    2,
+    2
+   ],
+   "note": "Larchhill terrace walls: honey drystone under an orchard-turf cap (x1_terrace_top / x1_terrace_face); faces sit directly below the top",
+   "sheet": "x1.png"
+  }
+ },
+ "tiles": {
+  "x1_terrace_stairs_top": {
+   "x": 0,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_top_l": {
+   "x": 16,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_top_r": {
+   "x": 32,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs_mid": {
+   "x": 48,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_mid_l": {
+   "x": 64,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_mid_r": {
+   "x": 80,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs_bot": {
+   "x": 96,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_bot_l": {
+   "x": 112,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_terrace_stairs2_bot_r": {
+   "x": 128,
+   "y": 464,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_top_l": {
+   "x": 0,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_top_m": {
+   "x": 16,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_top_r": {
+   "x": 32,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_bot_l": {
+   "x": 48,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_bot_m": {
+   "x": 64,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_wall_honey_bot_r": {
+   "x": 80,
+   "y": 480,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_n_l": {
+   "x": 0,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_n_m": {
+   "x": 16,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_n_r": {
+   "x": 32,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_s_l": {
+   "x": 48,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_s_m": {
+   "x": 64,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_s_r": {
+   "x": 80,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_arch_l": {
+   "x": 96,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_arch_m": {
+   "x": 112,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_aqueduct_arch_r": {
+   "x": 128,
+   "y": 496,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_drystone": {
+   "x": 96,
+   "y": 592,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "drystone wall line (grey, mossy): line16 like wall_low",
+   "sheet": "x1.png"
+  },
+  "x1_drystone_honey": {
+   "x": 224,
+   "y": 592,
+   "w": 16,
+   "h": 16,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "drystone wall line (honey) for Larchhill: line16",
+   "sheet": "x1.png"
+  },
+  "x1_drain_grate": {
+   "x": 256,
+   "y": 672,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "grating over a drain, walkable (the Drain Hall row 16); _b is rusted with a broken bar",
+   "sheet": "x1.png"
+  },
+  "x1_drain_grate_b": {
+   "x": 272,
+   "y": 672,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "grating over a drain, walkable (the Drain Hall row 16); _b is rusted with a broken bar",
+   "sheet": "x1.png"
+  },
+  "x1_niche_lettered": {
+   "x": 144,
+   "y": 736,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "16 x 32 burial niche face overlay (the Reeve hall): lettered",
+   "sheet": "x1.png"
+  },
+  "x1_niche_blank": {
+   "x": 160,
+   "y": 736,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "16 x 32 burial niche face overlay (the Reeve hall): blank",
+   "sheet": "x1.png"
+  },
+  "x1_niche_lit": {
+   "x": 176,
+   "y": 736,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "16 x 32 burial niche face overlay (the Reeve hall): lit",
+   "sheet": "x1.png"
+  },
+  "x1_hay_chute": {
+   "x": 320,
+   "y": 864,
+   "w": 32,
+   "h": 32,
+   "collision": "none",
+   "note": "the hay chute (32 x 32 decor tile): the pit area event sits on it",
+   "sheet": "x1.png"
+  },
+  "x1_weir_cap_l": {
+   "x": 336,
+   "y": 1072,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the walkway along the top of the dry weir",
+   "sheet": "x1.png"
+  },
+  "x1_weir_cap_m": {
+   "x": 352,
+   "y": 1072,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the walkway along the top of the dry weir",
+   "sheet": "x1.png"
+  },
+  "x1_weir_cap_r": {
+   "x": 368,
+   "y": 1072,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the walkway along the top of the dry weir",
+   "sheet": "x1.png"
+  },
+  "x1_weir_face_l": {
+   "x": 384,
+   "y": 1072,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "the face of the dry weir (16 x 32, two rows); arch = a dark dry drain mouth",
+   "sheet": "x1.png"
+  },
+  "x1_weir_face_m": {
+   "x": 400,
+   "y": 1072,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "the face of the dry weir (16 x 32, two rows); arch = a dark dry drain mouth",
+   "sheet": "x1.png"
+  },
+  "x1_weir_face_r": {
+   "x": 416,
+   "y": 1072,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "the face of the dry weir (16 x 32, two rows); arch = a dark dry drain mouth",
+   "sheet": "x1.png"
+  },
+  "x1_weir_face_arch": {
+   "x": 432,
+   "y": 1072,
+   "w": 16,
+   "h": 32,
+   "collision": "solid",
+   "note": "the face of the dry weir (16 x 32, two rows); arch = a dark dry drain mouth",
+   "sheet": "x1.png"
+  },
+  "x1_far_tower": {
+   "x": 0,
+   "y": 1504,
+   "w": 64,
+   "h": 96,
+   "collision": "none",
+   "note": "96 high decal: the Watchtower seen from afar (overhead layer, horizon scale)",
+   "sheet": "x1.png"
+  },
+  "x1_far_windmill": {
+   "x": 64,
+   "y": 1504,
+   "w": 64,
+   "h": 64,
+   "collision": "none",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2
+    ],
+    "frameDx": 64,
+    "ms": 420
+   },
+   "note": "the Windmill on its hilltop, 64 x 64, sails in 3 frames (the overhead layer draws frame 0)",
+   "sheet": "x1.png"
+  },
+  "x1_far_dome": {
+   "x": 256,
+   "y": 1504,
+   "w": 64,
+   "h": 64,
+   "collision": "none",
+   "note": "64 x 64 decal: the Orrery's brass dome catching the light, far off",
+   "sheet": "x1.png"
+  }
+ },
+ "objects": {
+  "x1_menhir_a": {
+   "rect": [
+    0,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a standing stone of the ring of twelve (blank)",
+   "sheet": "x1.png"
+  },
+  "x1_menhir_b": {
+   "rect": [
+    16,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a shorter leaning stone of the ring (blank)",
+   "sheet": "x1.png"
+  },
+  "x1_menhir_lettered": {
+   "rect": [
+    32,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the tall stone with the names cut and glowing (after stones_lettered)",
+   "sheet": "x1.png"
+  },
+  "x1_menhir_lettered_b": {
+   "rect": [
+    48,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the leaning stone, lettered",
+   "sheet": "x1.png"
+  },
+  "x1_menhir": {
+   "rect": [
+    0,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "plan id: the ring stone (blank); same art as x1_menhir_a",
+   "sheet": "x1.png"
+  },
+  "x1_blank_slab": {
+   "rect": [
+    64,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the thirteenth stone: a pale blank slab apart from the ring",
+   "sheet": "x1.png"
+  },
+  "x1_barrow_door_closed": {
+   "rect": [
+    80,
+    528,
+    96,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "building",
+   "note": "the turf mound, doorway sealed by a blank slab (5 tiles wide + shadow column); the door cell (2,0) is solid",
+   "sheet": "x1.png"
+  },
+  "x1_barrow_door_open": {
+   "rect": [
+    176,
+    528,
+    96,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "kind": "building",
+   "note": "the same mound, doorway open (doorAt (2,0): put the door event there; arrival below it)",
+   "sheet": "x1.png"
+  },
+  "x1_haystack_a": {
+   "rect": [
+    272,
+    528,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a conical hay rick (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_haystack_b": {
+   "rect": [
+    304,
+    528,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a round hay rick under a thatch cap (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_haybale": {
+   "rect": [
+    336,
+    528,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a single hay bale",
+   "sheet": "x1.png"
+  },
+  "x1_scarecrow": {
+   "rect": [
+    352,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Patch the scarecrow (an Appraise target: eleven pockets)",
+   "sheet": "x1.png"
+  },
+  "x1_old_scarecrow": {
+   "rect": [
+    352,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "plan id for the same scarecrow",
+   "sheet": "x1.png"
+  },
+  "x1_fallen_oak": {
+   "rect": [
+    368,
+    528,
+    64,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a fallen oak across a track (4 tiles); the crown above the footprint is drawn over actors",
+   "sheet": "x1.png"
+  },
+  "x1_drift_log": {
+   "rect": [
+    432,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "heavy-block skin: a bleached drift log standing on end",
+   "sheet": "x1.png"
+  },
+  "x1_driftlog": {
+   "rect": [
+    432,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "plan id for the drift log",
+   "sheet": "x1.png"
+  },
+  "x1_millstone": {
+   "rect": [
+    448,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "heavy-block skin: a millstone lying like a block",
+   "sheet": "x1.png"
+  },
+  "x1_cider_barrel": {
+   "rect": [
+    464,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "heavy-block skin: an upright cider cask",
+   "sheet": "x1.png"
+  },
+  "x1_chain_gate": {
+   "rect": [
+    0,
+    592,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the drovers' chain across the road (closed: solid, 3 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_chain_gate_open": {
+   "rect": [
+    48,
+    592,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the same posts after the bell: the chain lies in the road, the middle tile is walkable",
+   "sheet": "x1.png"
+  },
+  "x1_drovers_chain": {
+   "rect": [
+    0,
+    592,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "plan id for the drovers chain gate (closed)",
+   "sheet": "x1.png"
+  },
+  "x1_trough": {
+   "rect": [
+    0,
+    624,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a stock trough with water (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_trough_dry": {
+   "rect": [
+    32,
+    624,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the same trough, dry and stained",
+   "sheet": "x1.png"
+  },
+  "x1_flour_sacks": {
+   "rect": [
+    64,
+    624,
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "three flour sacks, one split (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_sack_stack": {
+   "rect": [
+    96,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a stack of flour sacks",
+   "sheet": "x1.png"
+  },
+  "x1_flour_cart": {
+   "rect": [
+    112,
+    624,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a handcart of flour sacks (3 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_slab": {
+   "rect": [
+    0,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the sliding slab (a shelf skin): footprint the lower row; slides along its rail pockets between positions",
+   "sheet": "x1.png"
+  },
+  "x1_slab_doorway": {
+   "rect": [
+    32,
+    672,
+    96,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "96 x 32 doorway piece for x1_slab: put it with its dark doorway (tiles 2..3) over the corridor cells; pockets either side",
+   "sheet": "x1.png"
+  },
+  "x1_gate_culvert_closed": {
+   "rect": [
+    128,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "barred iron gate in the brick (32 x 32, set in a 2-tile wall face like door_locked_closed)",
+   "sheet": "x1.png"
+  },
+  "x1_gate_culvert_open": {
+   "rect": [
+    160,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the same gate raised: cells (0,0) and (1,0) are the doorway",
+   "sheet": "x1.png"
+  },
+  "x1_gate_barrow_closed": {
+   "rect": [
+    192,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "iron-bound oak hurdle gate in the barrow stone (32 x 32)",
+   "sheet": "x1.png"
+  },
+  "x1_gate_barrow_open": {
+   "rect": [
+    224,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the same gate raised",
+   "sheet": "x1.png"
+  },
+  "x1_star_plate": {
+   "rect": [
+    288,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "the brass star plate in the Orrery wall (32 x 32, an Appraise target); the drawer behind it holds chest_orrery",
+   "sheet": "x1.png"
+  },
+  "x1_hatch_closed": {
+   "rect": [
+    320,
+    672,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Orrery trapdoor, locked (16 x 16)",
+   "sheet": "x1.png"
+  },
+  "x1_hatch_open": {
+   "rect": [
+    336,
+    672,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the trapdoor open on its stair down; doorAt (0,0)",
+   "sheet": "x1.png"
+  },
+  "x1_armillary": {
+   "rect": [
+    352,
+    672,
+    48,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     352,
+     672,
+     48,
+     64
+    ],
+    [
+     400,
+     672,
+     48,
+     64
+    ]
+   ],
+   "note": "the great armillary: frames by state 0 = three stars dark, 1 = aligned",
+   "sheet": "x1.png"
+  },
+  "x1_hearth": {
+   "rect": [
+    0,
+    736,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 48,
+    "ms": 150
+   },
+   "note": "Thornfold's hearth font skin for thornfold_hearth (48 x 48, the top 2 rows overlap a 2-row wall face)",
+   "sheet": "x1.png"
+  },
+  "x1_sampler": {
+   "rect": [
+    192,
+    736,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     192,
+     736,
+     16,
+     16
+    ],
+    [
+     208,
+     736,
+     16,
+     16
+    ]
+   ],
+   "note": "the framed sampler: frames 0 = thread gone pale, 1 = names dark again (after stones_lettered)",
+   "sheet": "x1.png"
+  },
+  "x1_loom": {
+   "rect": [
+    224,
+    736,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the great loom (48 x 48)",
+   "sheet": "x1.png"
+  },
+  "x1_spinning_wheel": {
+   "rect": [
+    272,
+    736,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a spinning wheel",
+   "sheet": "x1.png"
+  },
+  "x1_wool_bales": {
+   "rect": [
+    288,
+    736,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "bales of fleece (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_wool_shelf": {
+   "rect": [
+    320,
+    736,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a shelf of dyed wool hanks (32 x 48)",
+   "sheet": "x1.png"
+  },
+  "x1_millstones": {
+   "rect": [
+    352,
+    736,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a pair of millstones, decor (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_hopper": {
+   "rect": [
+    384,
+    736,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the mill hopper on its trestle (32 x 48)",
+   "sheet": "x1.png"
+  },
+  "x1_flour_bin": {
+   "rect": [
+    416,
+    736,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a flour bin",
+   "sheet": "x1.png"
+  },
+  "x1_flour_table": {
+   "rect": [
+    432,
+    736,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Hal's table: four bowls, four sacks (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_drafting_desk": {
+   "rect": [
+    464,
+    736,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Hesper's drafting desk with a star chart (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_telescope": {
+   "rect": [
+    496,
+    736,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a brass telescope on a tripod",
+   "sheet": "x1.png"
+  },
+  "x1_loft_ladder": {
+   "rect": [
+    0,
+    784,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a ladder to a loft",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_1": {
+   "rect": [
+    0,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 1 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_2": {
+   "rect": [
+    32,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 2 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_3": {
+   "rect": [
+    64,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 3 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_4": {
+   "rect": [
+    96,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 4 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_5": {
+   "rect": [
+    128,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 5 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_6": {
+   "rect": [
+    160,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 6 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_7": {
+   "rect": [
+    192,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 7 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_8": {
+   "rect": [
+    224,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 8 of 9: a post with a hanging wooden chime, two sway frames",
+   "sheet": "x1.png"
+  },
+  "x1_chimepost_9": {
+   "rect": [
+    256,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 640
+   },
+   "note": "High Moor chime post 9 of 9: a post with a hanging wooden chime, two sway frames (the ninth reads KEPT: one great brass bell-tube, a red ribbon)",
+   "sheet": "x1.png"
+  },
+  "x1_gorse_a": {
+   "rect": [
+    288,
+    832,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a gorse bush in flower (16 x 16)",
+   "sheet": "x1.png"
+  },
+  "x1_gorse_b": {
+   "rect": [
+    304,
+    832,
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a gorse clump in flower (32 x 16, 2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_roots_gorse": {
+   "rect": [
+    336,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a gorse tunnel choked with thin roots (the stand-in for the Dash breakable x1_roots_gorse)",
+   "sheet": "x1.png"
+  },
+  "x1_boulder_a": {
+   "rect": [
+    352,
+    832,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a grey boulder with lichen (16 x 16)",
+   "sheet": "x1.png"
+  },
+  "x1_boulder_b": {
+   "rect": [
+    368,
+    832,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a cluster of crag boulders (32 x 32, 2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_cairn_moor": {
+   "rect": [
+    400,
+    832,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a plain waymark cairn for the moor",
+   "sheet": "x1.png"
+  },
+  "x1_stile": {
+   "rect": [
+    416,
+    832,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the Keepers' stone stile (3 tiles, the middle one is the way through)",
+   "sheet": "x1.png"
+  },
+  "x1_roots_stile": {
+   "rect": [
+    464,
+    832,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the same stile choked with thin roots (Dash breakable stand-in; solid across)",
+   "sheet": "x1.png"
+  },
+  "x1_tree_apple": {
+   "rect": [
+    0,
+    864,
+    48,
+    64
+   ],
+   "anchor": [
+    1,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "an apple tree in fruit (48 x 64; footprint the trunk tile)",
+   "sheet": "x1.png"
+  },
+  "x1_tree_apple_b": {
+   "rect": [
+    48,
+    864,
+    48,
+    64
+   ],
+   "anchor": [
+    1,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "an apple tree in late blossom",
+   "sheet": "x1.png"
+  },
+  "x1_tree_plum": {
+   "rect": [
+    96,
+    864,
+    48,
+    64
+   ],
+   "anchor": [
+    1,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a plum tree in fruit",
+   "sheet": "x1.png"
+  },
+  "x1_bush_berry": {
+   "rect": [
+    144,
+    864,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a currant bush with red berries (16 x 16)",
+   "sheet": "x1.png"
+  },
+  "x1_bush_plum": {
+   "rect": [
+    160,
+    864,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a damson bush (16 x 16)",
+   "sheet": "x1.png"
+  },
+  "x1_hive": {
+   "rect": [
+    176,
+    864,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 360
+   },
+   "note": "a white beehive with bees (16 x 32)",
+   "sheet": "x1.png"
+  },
+  "x1_hive_row": {
+   "rect": [
+    208,
+    864,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 360
+   },
+   "note": "two white hives side by side (2 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_cider_press": {
+   "rect": [
+    272,
+    864,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the cider press (48 x 48, 3 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_ladder": {
+   "rect": [
+    352,
+    864,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a ladder against a wall (16 x 32)",
+   "sheet": "x1.png"
+  },
+  "x1_mill_ladder": {
+   "rect": [
+    352,
+    864,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "plan id: the windmill ladder; same art as x1_ladder",
+   "sheet": "x1.png"
+  },
+  "x1_armillary_statue": {
+   "rect": [
+    368,
+    864,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the Keepers' armillary statue on the Terrace (32 x 48)",
+   "sheet": "x1.png"
+  },
+  "x1_cottage_a": {
+   "rect": [
+    0,
+    944,
+    80,
+    80
+   ],
+   "kind": "building",
+   "note": "a Thornfold cottage: grey fieldstone, thatch",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_cottage_b": {
+   "rect": [
+    80,
+    944,
+    96,
+    96
+   ],
+   "kind": "building",
+   "note": "a Thornfold cottage: cream plaster, moss-grey slate",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_loomhouse": {
+   "rect": [
+    176,
+    944,
+    128,
+    112
+   ],
+   "kind": "building",
+   "note": "the Loom House (the hamlet's wool-house, with a loom sign); door at doorAt",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_weir_shed": {
+   "rect": [
+    304,
+    944,
+    112,
+    96
+   ],
+   "kind": "building",
+   "note": "the weir-keeper's shed (the smithy's footprint and door cell)",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_mill_building": {
+   "rect": [
+    0,
+    1072,
+    128,
+    128
+   ],
+   "kind": "building",
+   "note": "Hal's Mill (7 tiles wide); wheelAt (7,0) is the tile for x1_mill_wheel's anchor",
+   "anchor": [
+    0,
+    7
+   ],
+   "footprint": [
+    [
+     0,
+     -6
+    ],
+    [
+     1,
+     -6
+    ],
+    [
+     2,
+     -6
+    ],
+    [
+     3,
+     -6
+    ],
+    [
+     4,
+     -6
+    ],
+    [
+     5,
+     -6
+    ],
+    [
+     6,
+     -6
+    ],
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "wheelAt": [
+    7,
+    0
+   ],
+   "sheet": "x1.png"
+  },
+  "x1_mill_wheel": {
+   "rect": [
+    128,
+    1072,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     1072,
+     32,
+     48
+    ],
+    [
+     160,
+     1072,
+     32,
+     48
+    ],
+    [
+     192,
+     1072,
+     32,
+     48
+    ],
+    [
+     224,
+     1072,
+     32,
+     48
+    ],
+    [
+     256,
+     1072,
+     32,
+     48
+    ]
+   ],
+   "turnAnim": {
+    "frames": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "frameDx": 32,
+    "ms": 120
+   },
+   "note": "the mill wheel: frames by state 0 = still and dry, 1..4 = turning (turnAnim); placed at the mill's wheelAt",
+   "sheet": "x1.png"
+  },
+  "x1_culvert_arch": {
+   "rect": [
+    288,
+    1072,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the brick arch under the weir (48 x 48): put the door event on doorAt (1,0)",
+   "sheet": "x1.png"
+  },
+  "x1_sluice_failed": {
+   "rect": [
+    448,
+    1072,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the failed sluice gate of the weir (48 x 48, 3 tiles)",
+   "sheet": "x1.png"
+  },
+  "x1_orrery_tower": {
+   "rect": [
+    0,
+    1200,
+    96,
+    112
+   ],
+   "kind": "building",
+   "note": "the Keepers' Orrery: a drum tower under a brass dome (doorAt (2,0))",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 5,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_watchtower": {
+   "rect": [
+    96,
+    1200,
+    80,
+    144
+   ],
+   "kind": "building",
+   "note": "the ruined Keepers' Watchtower on the High Moor (80 x 144, 4 tiles at the foot)",
+   "anchor": [
+    0,
+    8
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 7,
+   "doorAt": null,
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_turf_hut": {
+   "rect": [
+    176,
+    1200,
+    80,
+    64
+   ],
+   "kind": "building",
+   "note": "Odo's turf hut (doorAt (1,0))",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "x1.png"
+  },
+  "x1_windmill": {
+   "rect": [
+    0,
+    1344,
+    128,
+    144
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    8
+   ],
+   "footprint": [
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 7,
+   "doorAt": null,
+   "collision": "solid",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2
+    ],
+    "frameDx": 128,
+    "ms": 380
+   },
+   "note": "Larchhill's Windmill: the sails turn through three frames (anim); a ladder object stands at its foot",
+   "sheet": "x1.png"
+  }
+ },
+ "overlays": {}
+}

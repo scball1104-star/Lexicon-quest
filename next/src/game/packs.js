@@ -132,6 +132,16 @@ export function mergeTileFragment(db, frag) {
       }
     }
   }
+  // terrainInsertBefore: { id: existingId }: draw `id` below `existingId` (floors must sit under pit and ink rims).
+  if (frag.terrainInsertBefore && typeof frag.terrainInsertBefore === 'object' && db.terrainOrder) {
+    for (const [id, before] of Object.entries(frag.terrainInsertBefore)) {
+      const bi = db.terrainOrder.indexOf(before);
+      const ii = db.terrainOrder.indexOf(id);
+      if (bi < 0 || ii < 0) continue;
+      db.terrainOrder.splice(ii, 1);
+      db.terrainOrder.splice(db.terrainOrder.indexOf(before), 0, id);
+    }
+  }
   return out;
 }
 

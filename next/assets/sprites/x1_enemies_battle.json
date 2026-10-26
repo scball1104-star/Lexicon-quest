@@ -1,0 +1,112 @@
+{
+ "image": "x1_enemies_battle.png",
+ "frames": {
+  "barrow_shade_cast": [
+   0,
+   0,
+   71,
+   82
+  ],
+  "barrow_shade": [
+   73,
+   0,
+   71,
+   74
+  ],
+  "barrow_shade_idle_1": [
+   146,
+   0,
+   71,
+   74
+  ],
+  "barrow_shade_die_0": [
+   0,
+   84,
+   71,
+   74
+  ],
+  "barrow_shade_attack": [
+   73,
+   84,
+   87,
+   73
+  ],
+  "barrow_shade_hurt": [
+   162,
+   84,
+   81,
+   72
+  ],
+  "barrow_shade_die_1": [
+   0,
+   160,
+   71,
+   67
+  ],
+  "barrow_shade_die_2": [
+   73,
+   160,
+   71,
+   52
+  ]
+ },
+ "origin": {
+  "barrow_shade": [
+   35,
+   73
+  ],
+  "barrow_shade_idle_1": [
+   35,
+   73
+  ],
+  "barrow_shade_attack": [
+   43,
+   72
+  ],
+  "barrow_shade_hurt": [
+   40,
+   71
+  ],
+  "barrow_shade_cast": [
+   35,
+   81
+  ],
+  "barrow_shade_die_0": [
+   35,
+   73
+  ],
+  "barrow_shade_die_1": [
+   35,
+   66
+  ],
+  "barrow_shade_die_2": [
+   35,
+   51
+  ]
+ },
+ "anims": {
+  "barrow_shade_idle": {
+   "frames": [
+    "barrow_shade",
+    "barrow_shade_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "barrow_shade_die": {
+   "frames": [
+    "barrow_shade_die_0",
+    "barrow_shade_die_1",
+    "barrow_shade_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "barrow_reeve": "bosses_battle",
+  "millstone_golem": "bosses_battle"
+ },
+ "notes": "X1 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin = bottom-centre per frame (the default, bottom-centre, which is exact for every frame; the table `origin` agrees); derived frames <id>_idle_1 (breathe, alternates every 36 frames), _attack, _hurt, _cast, _die_0..2 as the Episode 1 foes (anim_frames.py); anims <id>_idle and <id>_die. Draw 1x, untinted. barrow_shade: pale green-white, rim-lit. Colours outside the master palette (no ramp carries a pale green-white), also used by its field sprite and head: #1f3b37, #31594c, #5a8c72, #90bf9f, #c2e2c8, #e3f4e2, #f5fcf0."
+}

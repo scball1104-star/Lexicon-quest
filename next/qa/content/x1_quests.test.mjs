@@ -116,7 +116,7 @@ test('the journal walks each quest step by step, counters count, and a finished 
   e = entry(at('strays_started', 'stray_1_found', 'stray_2_found', 'stray_3_found', 'stray_4_found', 'stray_5_found'), 'strays');
   assert.match(e.text, /Tell Brindle/);
   e = entry(at('strays_started', 'strays_done'), 'strays');
-  assert.equal(e.done, true); assert.equal(e.text, 'Complete.');
+  assert.equal(e.done, true); assert.match(e.text, /^Complete\.( \+\d+ EXP\.)?$/);
   // Rollcall's four steps in order; the Reeve before the stones leaves the stones step showing.
   const R = ['rollcall_started'];
   assert.match(entry(at(...R), 'rollcall').text, /roll and Quill|Iris/);

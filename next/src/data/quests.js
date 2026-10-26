@@ -1369,7 +1369,7 @@ export function journal(hasFlag) {
     const done = hasFlag(q.done);
     const st = done ? null : (q.steps.find((x) => !allSet(x.done, hasFlag)) || q.steps[q.steps.length - 1]);
     const count = q.counter ? q.counter.flags.filter((f) => hasFlag(f)).length : null;
-    return { id: q.id, title: q.title, done, text: done ? 'Complete.' : st.journal,
+    return { id: q.id, title: q.title, done, text: done ? (q.doneText || 'Complete.') : st.journal,
       counter: q.counter ? { label: q.counter.label, value: count, max: q.counter.flags.length } : null };
   });
   return { main: { title: quest.title, step: step.title, text: step.journal }, side };

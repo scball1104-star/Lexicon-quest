@@ -17,6 +17,9 @@
 // 'rock' | 'glass' (E2)` (+ `opens: [[x, y], ...]` wall cells carved to floor once it breaks), any event + `behind: '<id>'`
 // (concealed, no prompt, no glint, until that breakable is broken).
 //
+// X1-world: `object` + `appraise: true` (+ `appraiseText`) is an Appraise target (appraiseObject: saved as opened, and
+// whatever has `behind: 'appraise:<object id>'` appears with the same sparkle).
+//
 // Persistence: one-shot things (chests, unlocked doors, lit braziers with `flag`, ink reveals) live in
 // engine.game.opened as "<map>:<id>" or "<map>:ink:<x>,<y>"; puzzles reset on re-entry (Lufia II).
 //
@@ -107,9 +110,18 @@ function setPresent(field, ent, on) {
   if (field.glass && BEAM_RELEVANT.has(ent.type)) field.glass.markDirty();
 }
 
-/** W9: is the breakable that hides this entity (`behind`) still standing? Broken state is saved per map. */
+/**
+ * X1: what hides an entity. `behind: '<id>'` is a breakable (opened when Dash Strike breaks it); `behind:
+ * 'appraise:<object id>'` is an Appraise object (opened when Mira reads it). Both are saved per map in
+ * engine.game.opened under the target's own id. Pure.
+ */
+export function behindTarget(behind) {
+  if (!behind) return null;
+  return String(behind).startsWith('appraise:') ? String(behind).slice('appraise:'.length) : String(behind);
+}
+/** W9: is the breakable (or X1: the Appraise object) that hides this entity (`behind`) still unopened? Saved per map. */
 function concealedBy(field, ent) {
-  const id = ent.ev.behind;
+  const id = behindTarget(ent.ev.behind);
   if (!id) return false;
   return !isOpened(field.game, field.map.id, id);
 }
@@ -165,12 +177,48 @@ export function breakWall(field, ent) {
   if (!ent || ent.type !== 'object' || !ent.ev.breakable || ent.state === 'broken') return false;
   markOpened(field.game, field.map.id, ent.id);
   createBreakable(field, ent, true);
+  revealBehind(field, e => e.ev.behind === ent.id);
+  return true;
+}
+
+/** Everything `match`ed that was hiding now appears (applyConcealed) with the existing gold sparkle. Returns the ids. */
+function revealBehind(field, match) {
+  const out = [];
   for (const e of field.entities.values()) {
-    if (e.ev.behind !== ent.id || !e.present) continue;
+    if (!e.present || !e.ev.behind || !match(e) || !(e.data && e.data.concealed)) continue;
     applyConcealed(field, e);
+    out.push(e.id);
     if (field.particles) field.particles.sparkle(e.x * TILE + 8, e.y * TILE + 4, 6, '#ffd34d');
   }
-  return true;
+  return out;
+}
+
+/**
+ * X1 (EXPANSION1_PLAN 11.1): an `object` with `appraise: true` is a target for Mira's Appraise, like a visible enemy.
+ *   { type: 'object', appraise: true, appraiseText: '<lines id>', text?: '<lines id>', ... }
+ * Reading it (abilities.js appraise) calls appraiseObject(): the object is saved as opened and every event with
+ * `behind: 'appraise:<object id>'` appears with the sparkle. A confirm press still reads `text` when it has one.
+ */
+export function isAppraiseObject(ent) {
+  return !!(ent && ent.type === 'object' && ent.ev && ent.ev.appraise && ent.present && !(ent.data && ent.data.concealed));
+}
+/** The Appraise object standing on a cell, or null. */
+export function appraiseObjectAt(field, x, y) {
+  for (const ent of entitiesAt(field, x, y)) if (isAppraiseObject(ent)) return ent;
+  return null;
+}
+/** The window lines of an Appraise object: its `appraiseText`, else its `text`. */
+export function appraiseBoxes(ent, hasFlag) {
+  const id = ent.ev.appraiseText || ent.ev.text;
+  return id ? inspectBoxes(id, hasFlag) : [];
+}
+/** Mira read the object: saved per save (game.opened), the hidden things appear. Returns { first, revealed: [ids] }. */
+export function appraiseObject(field, ent) {
+  if (!isAppraiseObject(ent)) return { first: false, revealed: [] };
+  const first = !isOpened(field.game, field.map.id, ent.id);
+  markOpened(field.game, field.map.id, ent.id);
+  const revealed = revealBehind(field, (e) => e.ev.behind === `appraise:${ent.id}`);
+  return { first, revealed };
 }
 
 function addProp(field, ent, t, state, extra = {}) {

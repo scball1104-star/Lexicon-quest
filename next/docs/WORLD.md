@@ -213,6 +213,52 @@ bridges, grace, inlays, sliding mirrors, the vow door, gated overlays, reflectio
 plumbing] [--device phone]` (asserted walks; shots `qa/world/out/e2_*.png`). `walks.py` walks Episode 2 maps with the
 Episode 2 story flags set (no scene fires mid-walk).
 
+## 1e. Expansion 1 shared contracts (X1-world, `docs/EXPANSION1_PLAN.md` 11; the Episode 2 expansion adopts them as they stand)
+
+**Appraise on objects.** An `object` event with `appraise: true` is a target for Mira's Appraise, like a visible enemy.
+`{ id, type: 'object', x, y, sprite, appraise: true, appraiseText: '<lines id>', text?: '<lines id>', appraiseBark?: '<bark id>' | false }`.
+
+- **Range and sight: the existing ones.** `APPRAISE_RANGE` in `abilities.js` is **5** tiles (the two plans guessed 5 and 3; the
+  engine constant wins and `mapcheck` imports it): ahead on the line, or one tile either side of it from two tiles out, nearest
+  first, an enemy beating an object at the same distance, and never through a wall (`solid` or `void` on an earlier cell of the line).
+- `appraiseTarget(q, x, y, dir, range)` (pure) returns the enemy actor as before, or for an object
+  `{ kind: 'object', ent, tx, ty }`; `q.objectAt(x, y)` is optional (a query without it behaves exactly as before).
+  `resolve()` then answers `{ id: 'appraise', kind: 'object', target, at }`; the ability prompt (and the touch button) show over it.
+- **The read.** `appraise()` plays the existing tag-in, lens beam and reticle, then shows the object's `appraiseText` lines in the
+  dialogue window (no bestiary entry, no panel; the lines may name a speaker), then `appraiseObject()` (events.js): `markOpened(game,
+  mapId, objectId)` and every event with `behind: 'appraise:<object id>'` appears with the gold sparkle. Saved per save in
+  `game.opened` like a broken wall; reading it again replays the lines and does nothing else. `lastHit` is `{ kind: 'appraise',
+  object, encounter: null, keys: [], first, revealed: [ids] }` (the foe form is `{ kind: 'appraise', encounter, keys }` as before).
+- **`behind`.** `behind: '<id>'` still means a breakable; `behind: 'appraise:<object id>'` means an Appraise object (`behindTarget()`).
+  Both are hidden, prompt-less and glint-less until opened. `mapcheck` errors on `appraise:<id>` that is not an `appraise` object on the map.
+- **Confirm still reads `text`** when the object has one, whatever ability is selected; an object with only `appraiseText` gives no confirm prompt.
+- **Bark.** Near an unread Appraise object (4 tiles, Mira in the party) the first-time bark named by the event's `appraiseBark` fires once
+  (default `first_appraise_object`; `false` stays silent); it speaks only if the text exists in `BARKS`.
+- **mapcheck.** An `appraise` object is an unlocker like a breakable: it counts as read when a reachable cell has it in range and line
+  (`appraiseReach`, pure), and an event `behind` it is reached only then (`report.appraised`, in both the plain and the beam walk).
+
+**`give('exp', n)`.** `await s.give('exp', n)` in a scene (`cutscene.js`): `grantExp()` (`data/party.js`) to every party member with HP above
+0, floored `n`, never scaled (no `expcurve`, no `expMul`); the toast "The party gains n EXP." (`expToastText`), then, if anyone levels,
+the `level_up` jingle and one message box per member ("Mira reaches Lv 7.", plus "learns ..."). `n` of 0 or less does nothing.
+Idempotent only through the caller's own flag guard. Pure helpers `grantPartyExp(game, n)` and `levelUpBoxes(result)` are exported and
+node-tested. `give('gold', n)` and `give(itemId, qty)` are untouched.
+
+**The link allowlist.** `tools/maps/x1_links.json`: `{ links: [{ from, to, cell }] }`, cross-links whose target map does not exist yet
+when the source map is built. `mapcheck check` reports a missing target that is listed (same `from` and `to`) as a **warning** and any
+other missing target as an **error**; an entry whose target exists is never consulted. `cell` is the plan's agreed source cell and is
+documentation only. `node tools/maps/mapcheck.mjs check <ids> --pack x1` registers the pack first so its NPCs, flags, lines and scenes validate.
+
+**Gates the new maps rely on (checked, `qa/world/x1_checks.test.mjs`).** A `pit` area event with `to` on another map is just the target of
+`fallInPit`: a plain warp (kind `pit`), landing on the given cell facing the given direction, no damage; an `if` on the event gates
+**the destination only** (flag off: the map's own `pitTo`), the pit tiles themselves stay pits, so gate the tiles with flagged overlays.
+A `door` event with `if` does not exist (no prop, no arrival, no prompt) until its flag is set; a solid `object` with `ifNot` stops
+blocking in the frame its flag is set. **The map-level `exits` list takes no flags** (the field fires every entry): a gated way out is a
+`door` event, and `mapcheck` reports an `exits` entry with `if`/`ifNot` as an error. Ambient `motes` are capped at 26 particles,
+view-relative: no map-size term (0.01 ms a frame in node, about 52 one-pixel fills).
+
+Tests: `node qa/run.mjs world maps` (`qa/world/x1_*.test.mjs`); live: `python qa/world/x1_lab.py [appraise exp pit]` (shots
+`qa/world/out/x1_*.png`).
+
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 
 Top level: `id name area music ambience lighting{tint,dark,lights[]} under underMap legend ground overlays

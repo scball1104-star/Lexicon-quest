@@ -502,7 +502,11 @@ def main(argv):
     ids = list_maps() if opt.get('all') else args
     if not ids:
         raise SystemExit(__doc__)
-    db = TileDB()
+    try:   # expansion tiles live in pack fragments; X1DB merges x1_tiles.json the way the pack loader does
+        from x1_preview import X1DB
+        db = X1DB()
+    except Exception:  # noqa: BLE001
+        db = TileDB()
     spr = SpriteDB()
     atl = Atlases()
     npc_map = npc_sprites()

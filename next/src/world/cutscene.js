@@ -14,8 +14,40 @@ import { findPath, nearestAdjacent, dirBetween, DIRS } from './pathfind.js';
 import { TILE } from './tilemap.js';
 import { encounterFor } from './events.js';
 import { ENCOUNTERS } from '../data/encounters.js';
+import { grantExp } from '../data/party.js';
+import { SKILLS } from '../data/skills.js';
 
 const PORTRAITS = { hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael' };
+
+/**
+ * X1 (EXPANSION1_PLAN 11.3), pure: give every living party member `amount` EXP through grantExp() (party.js).
+ * Never scaled (no expcurve, no expMul). Returns { amount, members: [{ id, name, ups }] } where ups is grantExp's
+ * levelUps list (empty when the member did not level). amount is floored; 0 or less grants nothing.
+ */
+export function grantPartyExp(game, amount) {
+  const n = Math.max(0, Math.floor(Number(amount) || 0));
+  const members = [];
+  if (!n || !game || !game.party) return { amount: 0, members };
+  for (const m of game.party) {
+    if (!(m.hp > 0)) continue;
+    members.push({ id: m.id, name: m.name, ups: grantExp(m, n).levelUps });
+  }
+  return { amount: n, members };
+}
+/** Pure: the message-box lines for a grantPartyExp result: one box per member who leveled ("Mira reaches Lv 7."). */
+export function levelUpBoxes(result) {
+  const boxes = [];
+  for (const m of result.members) {
+    if (!m.ups.length) continue;
+    const learned = m.ups.flatMap((u) => u.learned || []).map((id) => (SKILLS[id] ? SKILLS[id].name : id));
+    let text = `{c:gold}${m.name}{/c} reaches Lv {c:gold}${m.ups[m.ups.length - 1].level}{/c}.`;
+    if (learned.length) text += ` ${m.name} learns {c:cyan}${learned.join(', ')}{/c}.`;
+    boxes.push({ who: null, text });
+  }
+  return boxes;
+}
+/** The toast text. */
+export const expToastText = (n) => `The party gains {c:gold}${n}{/c} EXP.`;
 
 export class Cutscene {
   constructor(field) {
@@ -194,10 +226,28 @@ export class Cutscene {
       },
       async setFlag(flag, value = true) { F.setFlag(flag, value); },
       async hasFlag(flag) { return stateHasFlag(F.game, flag); },
-      /** give(itemId, qty); give('gold', n) adds n gold with the coin sound and the "Received n gold." toast. */
+      /**
+       * give(itemId, qty); give('gold', n) adds n gold with the coin sound and the "Received n gold." toast;
+       * give('exp', n) (X1) grants n EXP to every living party member: the toast "The party gains n EXP.", then the
+       * level_up jingle and one box per member who leveled. Never scaled; idempotent only through the caller's flag guard.
+       */
       async give(itemId, qty = 1) {
         if (self.dead) return;
         if (itemId === 'gold') { await F.giveGold(qty); return; }
+        if (itemId === 'exp') {
+          const res = grantPartyExp(F.game, qty);
+          if (!res.amount) return;
+          const text = expToastText(res.amount);
+          if (E.toasts) await E.toasts.show({ text, icon: 'book', sfx: 'confirm', frames: 70 });
+          else await F.dialog({ who: null, text });
+          const boxes = levelUpBoxes(res);
+          if (boxes.length && !self.dead) {
+            E.audio.sfx('level_up_sparkle');
+            E.audio.jingle('level_up', { duckMusic: 0.3 });
+            await F.showBoxes(boxes);
+          }
+          return;
+        }
         await F.giveItem(itemId, qty);
       },
       async take(itemId, qty = 1) { if (!self.dead) await F.takeItem(itemId, qty); },

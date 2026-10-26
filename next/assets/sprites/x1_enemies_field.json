@@ -1,0 +1,191 @@
+{
+ "image": "x1_enemies_field.png",
+ "frames": {
+  "barrow_shade_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "barrow_shade_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "millstone_golem_0": [
+   50,
+   0,
+   24,
+   24
+  ],
+  "millstone_golem_1": [
+   75,
+   0,
+   24,
+   24
+  ],
+  "barrow_reeve_0": [
+   100,
+   0,
+   24,
+   36
+  ],
+  "barrow_reeve_1": [
+   125,
+   0,
+   24,
+   36
+  ],
+  "x1_thornback_wolf_0": [
+   150,
+   0,
+   24,
+   24
+  ],
+  "x1_thornback_wolf_1": [
+   175,
+   0,
+   24,
+   24
+  ],
+  "x1_ink_blot_0": [
+   200,
+   0,
+   16,
+   16
+  ],
+  "x1_ink_blot_1": [
+   217,
+   0,
+   16,
+   16
+  ],
+  "x1_ink_wraith_0": [
+   0,
+   37,
+   24,
+   24
+  ],
+  "x1_ink_wraith_1": [
+   25,
+   37,
+   24,
+   24
+  ]
+ },
+ "anims": {
+  "barrow_shade_idle": {
+   "frames": [
+    "barrow_shade_0",
+    "barrow_shade_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "millstone_golem_idle": {
+   "frames": [
+    "millstone_golem_0",
+    "millstone_golem_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "barrow_reeve_idle": {
+   "frames": [
+    "barrow_reeve_0",
+    "barrow_reeve_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "x1_thornback_wolf_idle": {
+   "frames": [
+    "x1_thornback_wolf_0",
+    "x1_thornback_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "x1_ink_blot_idle": {
+   "frames": [
+    "x1_ink_blot_0",
+    "x1_ink_blot_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "x1_ink_wraith_idle": {
+   "frames": [
+    "x1_ink_wraith_0",
+    "x1_ink_wraith_1"
+   ],
+   "fps": 4,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "barrow_shade": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "millstone_golem": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "barrow_reeve": {
+   "size": [
+    24,
+    36
+   ],
+   "origin": [
+    12,
+    35
+   ]
+  },
+  "x1_thornback_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "x1_ink_blot": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "x1_ink_wraith": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "X1 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin = bottom-centre (the default). barrow_shade 24x24, millstone_golem 24x24, barrow_reeve 24x36 (the map avatar of the optional boss: a bone knight with a crook taller than it). Each carries a 1 px rim light on the upper-left edge (CRITIQUE_4 item 8). x1_thornback_wolf, x1_ink_blot, x1_ink_wraith are the existing foes with the same rim for the dark floors of the Barrow, Cellar and Culvert (use them on those maps if the plain ones are too dim)."
+}

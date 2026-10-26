@@ -1,0 +1,15 @@
+{
+ "image": "x1_battle_culvert.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Weir Culvert: a wet brick vault with iron ribs, a drain mouth and a trickle, standing water, a light shaft (composed)",
+ "extraColors": [],
+ "colors": 37,
+ "composed": "tools/art/backdrops/x1_compose.py (battle_culvert)",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "battle_culvert",
+ "fallback": "archive_deep"
+}

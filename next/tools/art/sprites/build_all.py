@@ -31,6 +31,7 @@ def main():
         ('portraits', build_portraits.build_atlas),
         ('misc', build_misc.build),
         ('heads', build_heads.build),
+        ('x1', lambda: __import__('x1_build').build()),
     ]
     for name, fn in steps:
         t = time.time()

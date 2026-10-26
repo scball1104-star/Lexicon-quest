@@ -3,7 +3,7 @@
 //
 //   node tools/maps/mapcheck.mjs dump <mapId>          JSON of the resolved map module
 //   node tools/maps/mapcheck.mjs walk <mapId>          reachability report (JSON)
-//   node tools/maps/mapcheck.mjs check [mapId ...]     validation report for every map (exit 1 on errors)
+//   node tools/maps/mapcheck.mjs check [mapId ...] [--pack x1]   validation report for every map (exit 1 on errors)
 //   node tools/maps/mapcheck.mjs list                  map ids found in src/data/maps
 //   node tools/maps/mapcheck.mjs walk <mapId> [flags]  the walk under a comma list of story flags (gated events,
 //                                                      overlays and overhead tiles filtered; Episode 2)
@@ -15,6 +15,11 @@
 // configuration, cell) per beam system with src/world/beam.js tracing, receptors as gate sources, latches as an outer
 // fixpoint, bridges walkable only while lit, pushes and shoves of movable mirrors, and a softlock count. W9 breakables
 // (`opens`) are modeled in both walks.
+//
+// X1-world: an `object` with `appraise: true` is an unlocker like a breakable: it counts as read once a reachable cell
+// has it within the Appraise range (src/world/abilities.js APPRAISE_RANGE) on the line or one tile either side, with no
+// wall between (appraiseReach), and an event with `behind: 'appraise:<object id>'` is reached only after that. Missing door
+// / exit / pit target maps listed in tools/maps/x1_links.json (pendingLinks) are warnings, any other missing target is an error.
 //
 // Collision model (docs/MAPS.md section 3): a cell's code comes from its legend id (terrain collision,
 // wall systems solid, plain tiles their own code); an overlay replaces it with the overlay tile's code;
@@ -28,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { traceBeams } from '../../src/world/beam.js';
+import { APPRAISE_RANGE } from '../../src/world/abilities.js';
 
 export const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MAPS_DIR = path.join(NEXT, 'src', 'data', 'maps');
@@ -57,8 +63,7 @@ export async function loadDb() {
   const src = (p) => import(pathToFileURL(path.join(NEXT, 'src', 'data', p)).href);
   const npcs = await src('npcs.js');
   const enc = await src('encounters.js');
-  const story = await src('story/ep1.js');
-  const story2 = await src('story/ep2.js');
+  const gstory = await src('../game/story.js');          // X1: the live tables (a pack's register() adds to them)
   const text = await src('text.js');
   const items = await src('items.js');
   const quests = await src('quests.js');
@@ -66,8 +71,8 @@ export async function loadDb() {
     tiles, props, npcAtlas, enemiesField, partyField,
     NPCS: npcs.NPCS, npcsOnMap: npcs.npcsOnMap,
     ENCOUNTERS: enc.ENCOUNTERS, ZONES: enc.ZONES,
-    // Episode 2 scenes and inspect lines merge with Episode 1's (ids never collide; qa/content tests it)
-    scenes: { ...story.scenes, ...story2.scenes }, lines: { ...story.lines, ...story2.lines }, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
+    // Episode 1 + 2 scenes and inspect lines (ids never collide; qa/content tests it), plus whatever a registered pack added
+    scenes: gstory.SCENES, lines: gstory.LINES, BOOKS: text.BOOKS, BANNERS: text.BANNERS,
     ITEMS: items.ITEMS, FLAGS: quests.FLAGS,
   };
   return _db;
@@ -228,6 +233,38 @@ function eventIndex(map) {
   return byCell;
 }
 
+/**
+ * X1: can the party read the Appraise object `e` from some cell of `seen` (a Set of "x,y")? The same geometry as
+ * abilities.js appraiseTarget: facing one of four directions, the object is within `range` tiles ahead, on the line or
+ * (from 2 tiles out) one tile either side of it, and no wall ('solid' or 'void' by `codeAt`) stands on an earlier cell of
+ * the line. Returns the standing cell [x, y] and the facing, or null. Pure.
+ */
+export function appraiseReach(seen, e, codeAt, inb, range = APPRAISE_RANGE) {
+  const cells = new Set(eventCells(e).map(([x, y]) => `${x},${y}`));
+  for (const k of seen) {
+    const [x, y] = k.split(',').map(Number);
+    for (const [dir, [dx, dy]] of Object.entries(DIRS)) {
+      const px = -dy, py = dx;
+      for (let i = 1; i <= range; i++) {
+        const cx = x + dx * i, cy = y + dy * i;
+        if (!inb(cx, cy)) break;
+        let hit = false;
+        for (const s of [0, -1, 1]) {
+          if (s && i < 2) continue;
+          if (cells.has(`${cx + px * s},${cy + py * s}`)) hit = true;
+        }
+        if (hit) return { at: [x, y], dir };
+        const c = codeAt(cx, cy);
+        if (c === 'solid' || c === 'void') break;
+      }
+    }
+  }
+  return null;
+}
+
+/** Is this event hidden behind an Appraise object (`behind: 'appraise:<id>'`) that has not been read? */
+const hiddenByAppraise = (e, appraised) => typeof e.behind === 'string' && e.behind.startsWith('appraise:') && !appraised.has(e.behind.slice('appraise:'.length));
+
 export function walk(map, db, opts = {}) {
   if (opts.flags) map = withFlags(map, new Set(opts.flags));
   if (hasBeams(map)) return beamWalk(map, db, opts);
@@ -240,7 +277,7 @@ export function walk(map, db, opts = {}) {
   const start = opts.start || (map.start ? [map.start.x, map.start.y] : null);
   if (!start) return { ...grid, error: 'map has no start' };
 
-  const state = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), broken: new Set(), openCells: new Set(), log: [] };
+  const state = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), broken: new Set(), openCells: new Set(), appraised: new Set(), log: [] };
   const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
   const evAt = (x, y) => byCell.get(`${x},${y}`) || [];
 
@@ -260,6 +297,8 @@ export function walk(map, db, opts = {}) {
     }
     return c;
   };
+
+  const effective2 = (x, y) => effective(x, y);   // the code a line of sight meets (events and broken walls included)
 
   const pitTarget = (x, y) => {
     for (const e of evAt(x, y)) if (e.type === 'pit' && e.to) return e.to;
@@ -322,6 +361,10 @@ export function walk(map, db, opts = {}) {
         state.log.push(`broke ${e.id}`); changed = true;
       }
       if (e.type === 'locked_door' && !state.opened.has(e.id) && state.keys.has(e.key) && touchable(seen, e)) { state.opened.add(e.id); state.log.push(`unlocked ${e.id}`); changed = true; }
+      // X1 Appraise: a reachable cell with the object in range and line reads it (like a breakable, once, for good)
+      if (e.type === 'object' && e.appraise && !state.appraised.has(e.id) && appraiseReach(seen, e, effective2, inb)) {
+        state.appraised.add(e.id); state.log.push(`appraised ${e.id}`); changed = true;
+      }
       if ((e.type === 'gate' || e.type === 'shelf') && !state.opened.has(e.id) && !state.shelves.has(e.id)) {
         const sources = events.filter((s) => (s.type === 'switch' || s.type === 'plate') && toList(s.target).includes(e.id));
         if (!sources.length) continue;
@@ -335,10 +378,10 @@ export function walk(map, db, opts = {}) {
 
   const report = {
     id: map.id, W, H, start, errors: grid.errors, opened: [...state.opened, ...state.shelves], keys: [...state.keys], lantern: state.lantern, log: state.log,
-    reachable: [...seen], events: [], marks: [], unreached: [],
+    appraised: [...state.appraised], reachable: [...seen], events: [], marks: [], unreached: [],
   };
   for (const e of events) {
-    const reached = e.on === 'enter' ? true : touchable(seen, e);
+    const reached = e.on === 'enter' ? true : touchable(seen, e) && !hiddenByAppraise(e, state.appraised);
     report.events.push({ id: e.id, type: e.type, reached });
     if (!reached) report.unreached.push(e.id);
   }
@@ -417,7 +460,7 @@ function beamWalk(map, db, opts = {}) {
   const recSources = (gid) => receptors.filter((r) => toList(r.target).includes(gid));
 
   const g = { opened: new Set(), keys: new Set(opts.keys || []), lantern: !!opts.lantern, shelves: new Set(), latched: new Set(), pushed: new Set(),
-    broken: new Set(), openCells: new Set(), log: [] };
+    broken: new Set(), openCells: new Set(), appraised: new Set(), log: [] };
 
   // ---- beam systems: a source and every mirror its light can ever reach (both states of each turnable mirror, every
   // cell a movable mirror can be pushed to). Systems that share a mirror merge. The search runs per system with the
@@ -668,6 +711,9 @@ function beamWalk(map, db, opts = {}) {
       }
       if (e.type === 'object' && e.script === 'lantern_get' && !g.lantern && touchable(seenCells, e)) { g.lantern = true; g.log.push(`lantern from ${e.id}`); changed = true; }
       if (e.type === 'locked_door' && !g.opened.has(e.id) && g.keys.has(e.key) && touchable(seenCells, e)) { g.opened.add(e.id); g.log.push(`unlocked ${e.id}`); changed = true; }
+      if (e.type === 'object' && e.appraise && !g.appraised.has(e.id) && appraiseReach(seenCells, e, (x, y) => (g.openCells.has(idx(x, y)) ? 'none' : sg.code[y][x]), inb)) {
+        g.appraised.add(e.id); g.log.push(`appraised ${e.id}`); changed = true;
+      }
       if ((e.type === 'gate' || e.type === 'shelf') && !g.opened.has(e.id) && !g.shelves.has(e.id)) {
         const srcs = events.filter((s) => (s.type === 'switch' || s.type === 'plate') && toList(s.target).includes(e.id));
         const recs = recSources(e.id);
@@ -714,8 +760,9 @@ function beamWalk(map, db, opts = {}) {
   const everLitCells = new Set();
   for (const cid of cfgSeen) for (const k of info(cid).lit) everLitCells.add(k);
   report.everLitCells = [...everLitCells].map((k) => `${k % W},${Math.floor(k / W)}`);
+  report.appraised = [...g.appraised];
   for (const e of events) {
-    const reached = e.on === 'enter' ? true : touchable(seenCells, e);
+    const reached = e.on === 'enter' ? true : touchable(seenCells, e) && !hiddenByAppraise(e, g.appraised);
     report.events.push({ id: e.id, type: e.type, reached });
     if (!reached) report.unreached.push(e.id);
   }
@@ -794,10 +841,11 @@ const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
  * Validate one map. `maps` = { id: module } for door/exit targets (grids built lazily).
  * Returns { errors, warnings, walk }.
  */
-export function validate(map, db, maps, { staging = null } = {}) {
+export function validate(map, db, maps, { staging = null, links = loadPendingLinks() } = {}) {
   const errors = [], warnings = [];
   const E = (m) => errors.push(m);
   const Wn = (m) => warnings.push(m);
+  const T = (to, label) => checkTarget(to, label, map, maps, db, E, Wn, links);
   if (!map || typeof map !== 'object') return { errors: ['module has no default export object'], warnings };
   for (const k of ['id', 'name', 'area', 'legend', 'ground', 'events', 'marks', 'start']) if (map[k] == null) E(`missing field ${k}`);
   if (!['town', 'field', 'dungeon', 'interior', 'world'].includes(map.area)) E(`area ${map.area} is not town|field|dungeon|interior|world`);
@@ -840,7 +888,7 @@ export function validate(map, db, maps, { staging = null } = {}) {
       }
       case 'door': {
         if (!Array.isArray(e.to) || e.to.length < 3) E(`door ${e.id}: to must be [map,x,y,dir]`);
-        else checkTarget(e.to, `door ${e.id}`, map, maps, db, E);
+        else T(e.to, `door ${e.id}`);
         if (!DOOR_KINDS.has(e.kind || 'door')) E(`door ${e.id}: kind ${e.kind}`);
         if (e.kind === 'mirror' && e.sprite && e.sprite !== 'mirror_tall') E(`door ${e.id}: a mirror door draws sprite mirror_tall (or none: the throne room's great mirror)`);
         if (e.kind === 'fog' && (!e.to || e.to[0] !== map.id)) E(`door ${e.id}: a fog door is a same-map transfer`);
@@ -860,7 +908,12 @@ export function validate(map, db, maps, { staging = null } = {}) {
         if (!isObjectId(db, e.sprite) && !isTileId(db, e.sprite)) E(`object ${e.id}: sprite ${e.sprite} missing`);
         if (e.script && !db.scenes[e.script]) E(`object ${e.id}: scene ${e.script} missing`);
         if (e.text && !db.lines[e.text]) E(`object ${e.id}: lines id ${e.text} missing`);
-        if (!e.script && !e.text) Wn(`object ${e.id} has neither script nor text`);
+        if (e.appraise) {
+          // X1: an Appraise object shows its appraiseText in the window (events.appraiseBoxes)
+          if (!e.appraiseText && !e.text) E(`object ${e.id}: an appraise object needs appraiseText`);
+          else if (e.appraiseText && !db.lines[e.appraiseText]) E(`object ${e.id}: appraiseText ${e.appraiseText} missing`);
+        } else if (e.appraiseText) Wn(`object ${e.id}: appraiseText without appraise: true`);
+        if (!e.script && !e.text && !e.appraise) Wn(`object ${e.id} has neither script nor text`);
         break;
       }
       case 'trigger': if (!db.scenes[e.script]) E(`trigger ${e.id}: scene ${e.script} missing`); break;
@@ -886,22 +939,28 @@ export function validate(map, db, maps, { staging = null } = {}) {
         break;
       case 'gate': case 'locked_door': {
         if (!GATE_SPRITE_IDS.includes(e.sprite)) E(`${e.type} ${e.id}: sprite ${e.sprite}`);
-        if (e.to) checkTarget(e.to, `${e.type} ${e.id}`, map, maps, db, E);
+        if (e.to) T(e.to, `${e.type} ${e.id}`);
         if (e.type === 'locked_door' && !db.ITEMS[e.key]) E(`locked_door ${e.id}: key ${e.key} unknown`);
         break;
       }
       case 'shelf': if (!Array.isArray(e.positions) || e.positions.length < 2) E(`shelf ${e.id}: needs 2+ positions`); break;
-      case 'pit': if (e.to) checkTarget(e.to, `pit ${e.id}`, map, maps, db, E); break;
+      case 'pit': if (e.to) T(e.to, `pit ${e.id}`); break;
       default: break;
     }
     for (const f of [...toList(e.if), ...toList(e.ifNot)]) if (!db.FLAGS[f]) E(`event ${e.id}: flag ${f} not declared`);
+    if (typeof e.behind === 'string' && e.behind.startsWith('appraise:')) {
+      const tid = e.behind.slice('appraise:'.length);
+      if (!(map.events || []).some((o) => o.id === tid && o.type === 'object' && o.appraise)) E(`event ${e.id}: behind ${e.behind} is not an appraise object on this map`);
+    }
   }
   for (const o of [...(map.overlays || []), ...(map.overhead || [])]) for (const f of [...toList(o.if), ...toList(o.ifNot)]) if (!db.FLAGS[f]) E(`overlay ${o.t} at ${o.x},${o.y}: flag ${f} not declared`);
   for (const v of [map.music, map.lighting && map.lighting.tint]) if (Array.isArray(v)) for (const c of v) for (const f of [...toList(c.if), ...toList(c.ifNot)]) if (!db.FLAGS[f]) E(`conditional field: flag ${f} not declared`);
-  if (map.pitTo) checkTarget(map.pitTo, 'pitTo', map, maps, db, E);
+  if (map.pitTo) T(map.pitTo, 'pitTo');
   for (const x of map.exits || []) {
+    // the field fires every `exits` entry whatever the flags (scenes/field.js onLeaderArrived): a gated way out is a `door` event
+    if (x.if != null || x.ifNot != null) E(`exit at ${x.x},${x.y}: if/ifNot are ignored by the field on the exits list; gate it with a door event`);
     if (!Array.isArray(x.to)) E(`exit at ${x.x},${x.y} has no to`);
-    else checkTarget(x.to, `exit at ${x.x},${x.y}`, map, maps, db, E);
+    else T(x.to, `exit at ${x.x},${x.y}`);
     for (let j = 0; j < (x.h || 1); j++) for (let i = 0; i < (x.w || 1); i++) if (!inb(x.x + i, x.y + j)) E(`exit cell ${x.x + i},${x.y + j} off map`);
   }
   for (const [name, m] of Object.entries(map.marks || {})) {
@@ -952,14 +1011,35 @@ export function validate(map, db, maps, { staging = null } = {}) {
   return { errors, warnings, walk: w, grid };
 }
 
-function checkTarget(to, label, map, maps, db, E) {
+function checkTarget(to, label, map, maps, db, E, Wn, links = []) {
   const [mid, x, y, dir] = to;
   if (dir && !DIR_NAMES.has(dir)) E(`${label}: bad dir ${dir}`);
   const target = mid === map.id ? map : maps[mid];
-  if (!target) { E(`${label}: target map ${mid} not found`); return; }
+  if (!target) {
+    // X1: a link whose target map is built later (tools/maps/x1_links.json) is a warning; an entry whose target exists is never reached
+    if (links.some((l) => l.from === map.id && l.to === mid)) Wn(`${label}: target map ${mid} is not built yet (pending in x1_links.json)`);
+    else E(`${label}: target map ${mid} not found`);
+    return;
+  }
   const g = gridFor(target, db);
   if (!(x >= 0 && y >= 0 && x < g.W && y < g.H)) { E(`${label}: target ${mid} ${x},${y} is off the map`); return; }
   if (g.code[y][x] !== 'none') E(`${label}: target ${mid} ${x},${y} is ${g.code[y][x]} (${g.why[y][x]}), not walkable`);
+}
+
+/**
+ * X1 (EXPANSION1_PLAN 11.4): tools/maps/x1_links.json is `{ "links": [{ from, to, cell }] }`, the cross-links whose
+ * target map does not exist yet when the source map is built. `from` and `to` are map ids (they are what `check` matches);
+ * `cell` is the plan's agreed source cell [x, y] (or null) and is documentation only, because map authors fix the
+ * exact cells. Read once; a missing or broken file lists nothing.
+ */
+let _links = null;
+export function loadPendingLinks() {
+  if (_links) return _links;
+  try {
+    const j = readJson(path.join(NEXT, 'tools', 'maps', 'x1_links.json'));
+    _links = (Array.isArray(j) ? j : j.links || []).filter((l) => l && l.from && l.to);
+  } catch { _links = []; }
+  return _links;
 }
 /** STAGING.md section 5 (Episode 1) and STAGING_EP2.md section 4 (Episode 2), merged per map id (EP2 adds). */
 export function loadStaging() {
@@ -993,6 +1073,14 @@ async function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === 'list') { console.log(listMapIds().join('\n')); return; }
   if (cmd === 'dump') { const m = await loadMap(rest[0]); process.stdout.write(JSON.stringify(m)); return; }
+  // X1: `--pack x1` (or x2) registers that pack's data first, so its npcs, flags, lines, scenes and encounters validate
+  // (note: a pack's npcs for the existing hub maps then report as unplaced until X1-maps-hub places them)
+  const pi = rest.indexOf('--pack');
+  if (pi >= 0) {
+    const ids = String(rest[pi + 1] || '').split(',').filter(Boolean);
+    rest.splice(pi, 2);
+    for (const id of ids) await (await import(pathToFileURL(path.join(NEXT, 'src', 'data', id, 'index.js')).href)).register();
+  }
   const db = await loadDb();
   if (cmd === 'walk') {
     const m = await loadMap(rest[0]);

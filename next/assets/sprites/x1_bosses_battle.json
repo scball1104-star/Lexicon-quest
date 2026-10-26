@@ -1,0 +1,195 @@
+{
+ "image": "x1_bosses_battle.png",
+ "frames": {
+  "barrow_reeve_cast": [
+   0,
+   0,
+   97,
+   112
+  ],
+  "barrow_reeve": [
+   99,
+   0,
+   97,
+   109
+  ],
+  "barrow_reeve_idle_1": [
+   198,
+   0,
+   97,
+   109
+  ],
+  "barrow_reeve_die_0": [
+   297,
+   0,
+   97,
+   109
+  ],
+  "barrow_reeve_hurt": [
+   396,
+   0,
+   99,
+   107
+  ],
+  "barrow_reeve_attack": [
+   0,
+   114,
+   167,
+   98
+  ],
+  "barrow_reeve_die_1": [
+   169,
+   114,
+   97,
+   94
+  ],
+  "millstone_golem_die_0": [
+   268,
+   114,
+   91,
+   93
+  ],
+  "millstone_golem_attack": [
+   361,
+   114,
+   115,
+   92
+  ],
+  "millstone_golem_idle_1": [
+   0,
+   214,
+   91,
+   91
+  ],
+  "millstone_golem": [
+   93,
+   214,
+   91,
+   90
+  ],
+  "millstone_golem_hurt": [
+   186,
+   214,
+   97,
+   88
+  ],
+  "millstone_golem_die_1": [
+   285,
+   214,
+   91,
+   87
+  ],
+  "barrow_reeve_die_2": [
+   378,
+   214,
+   97,
+   75
+  ],
+  "millstone_golem_die_2": [
+   0,
+   307,
+   91,
+   64
+  ]
+ },
+ "origin": {
+  "barrow_reeve": [
+   48,
+   108
+  ],
+  "barrow_reeve_idle_1": [
+   48,
+   108
+  ],
+  "barrow_reeve_attack": [
+   83,
+   97
+  ],
+  "barrow_reeve_hurt": [
+   49,
+   106
+  ],
+  "barrow_reeve_cast": [
+   48,
+   111
+  ],
+  "barrow_reeve_die_0": [
+   48,
+   108
+  ],
+  "barrow_reeve_die_1": [
+   48,
+   93
+  ],
+  "barrow_reeve_die_2": [
+   48,
+   74
+  ],
+  "millstone_golem": [
+   45,
+   89
+  ],
+  "millstone_golem_idle_1": [
+   45,
+   90
+  ],
+  "millstone_golem_attack": [
+   57,
+   91
+  ],
+  "millstone_golem_hurt": [
+   48,
+   87
+  ],
+  "millstone_golem_die_0": [
+   45,
+   92
+  ],
+  "millstone_golem_die_1": [
+   45,
+   86
+  ],
+  "millstone_golem_die_2": [
+   45,
+   63
+  ]
+ },
+ "anims": {
+  "barrow_reeve_idle": {
+   "frames": [
+    "barrow_reeve",
+    "barrow_reeve_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "barrow_reeve_die": {
+   "frames": [
+    "barrow_reeve_die_0",
+    "barrow_reeve_die_1",
+    "barrow_reeve_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "millstone_golem_idle": {
+   "frames": [
+    "millstone_golem",
+    "millstone_golem_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "millstone_golem_die": {
+   "frames": [
+    "millstone_golem_die_0",
+    "millstone_golem_die_1",
+    "millstone_golem_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "notes": "X1 pack atlas, merged into bosses_battle (the battle code also finds these ids through enemies_battle.json `external`). barrow_reeve: bone plate, moss, a shepherd crook (frame 97x110 incl. the crook above the helm); _attack swings the crook forward, _cast is the count (the crook rises, the twelve tally notches and the visor lamps glow). millstone_golem: granite grey, a cracked grindstone torso that turns in _attack, flour dust. Both have _idle_1, _attack, _hurt, _cast (Reeve only; the Golem falls back to _attack), _die_0..2. 1x, untinted."
+}
