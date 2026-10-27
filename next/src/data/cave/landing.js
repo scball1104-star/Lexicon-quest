@@ -59,7 +59,7 @@ export const LANDINGS = {
       row(W.repeat(26)),
       row(W.repeat(26)),
     ],
-    decor: [['brazier_lit', 3, 5], ['brazier_lit', 14, 5], ['root_column', 3, 9], ['cairn', 14, 9], ['brazier_lit', 18, 6], ['brazier_lit', 23, 6], ['crate', 23, 9], ['barrel', 18, 9]],
+    decor: [['brazier_lit', 3, 5], ['brazier_lit', 14, 5], ['root_column', 3, 9], ['cairn', 14, 7], ['brazier_lit', 18, 6], ['brazier_lit', 23, 6], ['crate', 23, 9], ['barrel', 18, 9]],
     face: [['root_drape', 7, 3], ['wall_ink_seep', 8, 3], ['wall_glyph_revealed', 12, 3], ['wall_shelf_l', 13, 3], ['wall_shelf_r', 14, 3], ['root_drape', 22, 4], ['root_drape', 23, 4]],
     decals: [['reeds_0', 8, 7], ['reeds_1', 6, 9], ['roots_0', 11, 6], ['roots_2', 4, 10], ['tuft_0', 9, 9], ['ink_puddle_1', 20, 9]],
     overhead: [],

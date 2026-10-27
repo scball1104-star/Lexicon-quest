@@ -36,7 +36,7 @@ function walk(dir, out = []) {
 }
 
 test('pack table: both packs, and the mirror tools/pwa/packs.json equals it', () => {
-  assert.deepEqual(Object.keys(PACKS).sort(), ['x1', 'x2']);
+  assert.deepEqual(Object.keys(PACKS).sort(), ['cave', 'x1', 'x2']);   // cave: the Deep Stacks (2026-10-27)
   const mirror = readJson('tools/pwa/packs.json');
   for (const [id, d] of Object.entries(PACKS)) {
     assert.deepEqual(mirror[id], { entry: d.entry, prefix: d.prefix, assets: d.assets, audioPack: d.audioPack, touches: d.touches }, `mirror of ${id}`);
@@ -104,7 +104,7 @@ test('pack wire sizes are inside the caps (code, data and art; audio is budgeted
     lines.push(`${id} ${(total / MB).toFixed(3)} MB of ${cap}`);
     assert.ok(total < cap * MB, `pack ${id} is ${(total / MB).toFixed(2)} MB on the wire, cap ${cap} MB`);
   }
-  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8 }, 'the pack caps are fixed');
+  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8, cave: 0.8 }, 'the pack caps are fixed');
   console.log(`# pack sizes: ${lines.join('; ')}`);
 });
 
@@ -118,7 +118,7 @@ test('service worker: pack route into the runtime cache that activation keeps; p
     assert.ok(pattern.test(`assets/tiles/${id}.png`) && pattern.test(`assets/tiles/${id}_tiles.json`));
   }
   assert.ok(pattern.test('assets/pack_files.json'));
-  for (const e of sw.entries) if (!/^src\/data\/x[12]\/live\.js$/.test(e)) assert.ok(!pattern.test(e), `a precached shell file matches the pack pattern: ${e}`);
+  for (const e of sw.entries) if (!/^src\/data\/(x1|x2|cave)\/live\.js$/.test(e)) assert.ok(!pattern.test(e), `a precached shell file matches the pack pattern: ${e}`);
   assert.match(text, /kind === 'runtime' \|\| kind === 'pack'/, 'pack files take the stale-while-revalidate route');
   assert.match(text, /const RUNTIME_CACHE = 'lq-next-runtime-v1'/);
   const activate = text.slice(text.indexOf("addEventListener('activate'"), text.indexOf('// ---------------------------------------------------------------- helpers'));

@@ -25,5 +25,12 @@
       "court_f2",
       "court_f3"
     ]
+  },
+  "cave": {
+    "entry": "../data/cave/index.js",
+    "prefix": "cave_",
+    "assets": "assets/cave_manifest.json",
+    "audioPack": null,
+    "touches": []
   }
 }

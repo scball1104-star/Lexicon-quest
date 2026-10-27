@@ -14,11 +14,9 @@ export const SEEDS = [1, 2, 3, 7, 11, 42, 1234, 99999, ...Array.from({ length: 1
  * same at run time: ENCOUNTERS[id] = { zone: mapId, leader: sprite, ... }).
  */
 export function asHandMap(mod, db) {
-  for (const e of mod.events) {
-    if (e.type === 'enemy' && !db.ENCOUNTERS[e.encounter]) db.ENCOUNTERS[e.encounter] = { id: e.encounter, zone: mod.id, leader: e.sprite, enemies: [e.sprite], boss: false };
-    else if (e.type === 'enemy') db.ENCOUNTERS[e.encounter].zone = mod.id;
-  }
-  return { ...mod, events: mod.events.map((e) => (e.type === 'chest' ? { ...e, tier: e.tier === 'blue' ? 'gold' : 'wood' } : e)) };
+  const encId = (e) => `${e.encounter}__${mod.id}`;
+  for (const e of mod.events) if (e.type === 'enemy') db.ENCOUNTERS[encId(e)] = { id: encId(e), zone: mod.id, leader: e.sprite, enemies: [e.sprite], boss: false };
+  return { ...mod, events: mod.events.map((e) => (e.type === 'chest' ? { ...e, tier: e.tier === 'blue' ? 'gold' : 'wood' } : e.type === 'enemy' ? { ...e, encounter: encId(e) } : e)) };
 }
 
 /** Generate a floor and the one below it (the stairs target), both shaped for mapcheck. */
@@ -27,5 +25,7 @@ export function pairFor(seed, floor, db) {
   const b = floor < 99 ? generateFloor(seed, floor + 1) : null;
   const maps = { [a.id]: asHandMap(a, db) };
   if (b) maps[b.id] = asHandMap(b, db);
+  // B100 is a hand-made map (C2-sprites-boss); until it exists a stub keeps the B99 stairs target checkable
+  if (!b) maps.cave_b100 = { id: 'cave_b100', legend: { '.': 'stacks_wood' }, ground: Array.from({ length: 30 }, () => '.'.repeat(40)), overlays: [], decor: [], events: [], marks: {}, start: { x: 1, y: 1 } };
   return { a, b, maps };
 }

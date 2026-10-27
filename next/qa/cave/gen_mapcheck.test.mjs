@@ -28,7 +28,7 @@ test('the chest tier and encounter seams are the only things the validator needs
   const { a, maps } = pairFor(7, 3, db);
   const raw = { ...a };
   const r = validate(raw, db, maps, {});
-  // without the shim: only chest tier errors (red / blue are not wood / iron / gold)
-  for (const e of r.errors) assert.match(e, /^chest (chest_\d+|blue_chest): tier (red|blue)$/, `unexpected raw error: ${e}`);
+  // without the shim: only chest tier errors (red / blue are not wood / iron / gold) and the stub encounter ids
+  for (const e of r.errors) assert.match(e, /^(chest (chest_\d+|blue_chest): tier (red|blue)|enemy foe_\d+: encounter cave_\w+ missing)$/, `unexpected raw error: ${e}`);
   assert.ok(r.errors.length >= 2);
 });

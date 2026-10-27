@@ -4,6 +4,7 @@
 
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
+import { CAVE_LIVE } from '../data/cave/live.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -12,6 +13,11 @@ export const PACKS = {
   x2: { entry: '../data/x2/index.js', prefix: 'x2_', assets: 'assets/x2_manifest.json', audioPack: 'ep2',
         touches: ['east_road', 'nameless_hollow', 'nh_chapel', 'court_f1', 'court_f2', 'court_f3'],
         wanted: (flags) => !!flags.ep1_complete, enabled: () => X2_LIVE },
+  // The Deep Stacks (docs/DEEP_STACKS_PLAN.md): all cave code and data stay out of the first download; the generator registers
+  // floors at run time. No audio pack of its own (bands reuse existing tracks). C2-world wires the entrance; until CAVE_LIVE nothing loads.
+  cave: { entry: '../data/cave/index.js', prefix: 'cave_', assets: 'assets/cave_manifest.json', audioPack: null,
+          touches: [],
+          wanted: (flags) => !!flags.ep1_complete, enabled: () => CAVE_LIVE },
 };
 
 /** Where the generated list of every file of every pack lives (tools/pwa/build_pwa.py writes it). */

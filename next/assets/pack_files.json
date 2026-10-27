@@ -50,5 +50,15 @@
  "x2": [
   "assets/x2_manifest.json",
   "src/data/x2/index.js"
+ ],
+ "cave": [
+  "assets/cave_manifest.json",
+  "src/data/cave/foes.js",
+  "src/data/cave/gen.js",
+  "src/data/cave/index.js",
+  "src/data/cave/items.js",
+  "src/data/cave/landing.js",
+  "src/data/cave/loot.js",
+  "src/data/cave/prefabs.js"
  ]
 }

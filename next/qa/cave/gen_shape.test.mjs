@@ -54,16 +54,18 @@ test('chests: red 2 to 4 (dead ends first), at most one blue, ids and marks dete
     assert.ok(reds.length >= 2 && reds.length <= 4, `seed ${seed} B${floor}: ${reds.length} red chests`);
     assert.ok(blues.length <= 1);
     assert.equal(blues.length, floor % 10 === 5 ? 1 : 0, 'default stub: a blue chest on floors ending in 5');
-    reds.forEach((c, i) => { assert.equal(c.id, `chest_${i + 1}`); assert.deepEqual(m.marks[c.id], [c.x, c.y]); assert.equal(c.floor, floor); });
-    if (blues.length) { assert.equal(blues[0].id, 'blue_chest'); assert.deepEqual(m.marks.blue_chest, [blues[0].x, blues[0].y]); }
-    // the first red chest sits in a dead end when the floor has one with a chest spot the blue chest did not take
+    const w = walkModel(m);
+    const inFront = (c, mk) => Math.abs(mk[0] - c.x) + Math.abs(mk[1] - c.y) === 1 && w.reached(mk[0], mk[1]);
+    reds.forEach((c, i) => { assert.equal(c.id, `chest_${i + 1}`); assert.ok(inFront(c, m.marks[c.id]), `${c.id} mark is the walkable cell beside it`); assert.equal(c.floor, floor); });
+    if (blues.length) { assert.equal(blues[0].id, 'blue_chest'); assert.ok(inFront(blues[0], m.marks.blue_chest)); }
+    // dead ends are filled first: every dead-end room with a reachable chest spot holds a chest, as long as there are
+    // chests enough to go round (chestSpots counts the spots the walk can touch)
     const inRoom = (c, r) => c.x >= r.x && c.x < r.x + r.w && c.y >= r.y && c.y < r.y + r.h;
-    const dead = m.rooms.filter((r) => (r.role === 'dead_end' || r.role === 'stairs') && r.degree === 1 && r.chestSpots > 0 && !blues.some((b) => inRoom(b, r) && r.chestSpots === 1));
-    if (dead.length) assert.ok(dead.some((r) => inRoom(reds[0], r)), `seed ${seed} B${floor}: chest_1 is not in a dead end`);
-    if (blues.length) {
-      const deadAll = m.rooms.filter((r) => r.degree === 1 && r.role !== 'arrival' && r.chestSpots > 0);
-      if (deadAll.length) assert.ok(deadAll.some((r) => inRoom(blues[0], r)), `seed ${seed} B${floor}: the blue chest is not in a dead end`);
-    }
+    const chests = [...reds, ...blues];
+    const dead = m.rooms.filter((r) => r.degree === 1 && r.role !== 'arrival' && r.chestSpots > 0);
+    const filled = dead.filter((r) => chests.some((c) => inRoom(c, r))).length;
+    assert.equal(filled, Math.min(dead.length, chests.length), `seed ${seed} B${floor}: ${filled} of ${dead.length} dead ends hold a chest (${chests.length} chests)`);
+    if (blues.length && dead.length) assert.ok(dead.some((r) => inRoom(blues[0], r)), `seed ${seed} B${floor}: the blue chest is not in a dead end`);
   }
   const m3 = generateFloor(11, 7, { chests: { red: 3, blue: true } });
   assert.equal(m3.events.filter((e) => e.type === 'chest' && e.tier === 'red').length, 3);
@@ -90,7 +92,7 @@ test('foes: 4 + floor/10 (max 12), never in the arrival room, never within 3 of 
   assert.equal(foeCount(1), 4); assert.equal(foeCount(10), 5); assert.equal(foeCount(80), 12); assert.equal(foeCount(99), 12);
   // injected pools: strings with opts.sprites, or objects with a fixed move
   const pool = ['cave_test_a', { enc: 'cave_test_b', sprite: 'tome_golem', move: 'guard' }];
-  const m = generateFloor(5, 12, { foes: () => pool, sprites: { cave_test_a: 'ink_wraith' } });
+  const m = generateFloor(5, 88, { foes: () => pool, sprites: { cave_test_a: 'ink_wraith' } });   // twelve foes: both entries show up
   const foes = m.events.filter((e) => e.type === 'enemy');
   assert.ok(foes.every((f) => (f.encounter === 'cave_test_a' && f.sprite === 'ink_wraith') || (f.encounter === 'cave_test_b' && f.sprite === 'tome_golem' && f.move === 'guard')));
   assert.ok(foes.some((f) => f.encounter === 'cave_test_a') && foes.some((f) => f.encounter === 'cave_test_b'));

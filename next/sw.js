@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '69d1229a1e4e';
+const SHELL_VERSION = '1ed7ce950741';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -52,6 +52,7 @@ const PRECACHE = [
   'src/core/save.js',
   'src/core/touch.js',
   'src/core/tween.js',
+  'src/data/cave/live.js',
   'src/data/encounters.js',
   'src/data/enemies.js',
   'src/data/expcurve.js',
@@ -95,14 +96,17 @@ const PRECACHE = [
   'src/data/story/ep2.js',
   'src/data/story/ep3.js',
   'src/data/text.js',
+  'src/data/vows.js',
   'src/data/x1/live.js',
   'src/data/x2/live.js',
+  'src/game/cave.js',
   'src/game/episodes.js',
   'src/game/inventory.js',
   'src/game/packFallback.js',
   'src/game/packs.js',
   'src/game/state.js',
   'src/game/story.js',
+  'src/game/vows.js',
   'src/main.js',
   'src/scenes/battle.js',
   'src/scenes/config.js',
@@ -365,7 +369,7 @@ const PRECACHE = [
   'assets/audio/jingles/save.mp3',
   'assets/audio/jingles/victory_fanfare.mp3',
 ];
-const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|assets/pack_files\\.json)";
+const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|assets/pack_files\\.json)";
 // build_pwa:end
 
 const SHELL_PREFIX = 'lq-next-shell-';

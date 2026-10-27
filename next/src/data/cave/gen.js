@@ -194,31 +194,34 @@ function placeRooms(rng, prefabs, W, H) {
         if (fits(r)) got = r;
       }
     }
+    let anchor = null;
     for (let t = 0; t < 120 && !got; t++) {
       const R = placed[rng.int(0, placed.length - 1)];
-      const side = rng.int(0, 3);          // 0 n, 1 s, 2 w, 3 e
+      const side = rng.int(0, 3);          // 0 n, 1 s, 2 w, 3 e : where the new room goes, seen from R
       const gap = rng.pick(GAPS);
-      let r;
+      // the two facing sides share a door position: R's door and the new room's door sit on the same column (or row),
+      // so the pair always has a straight doorway whatever the gap
+      const [sideR, sideN] = side === 0 ? ['n', 's'] : side === 1 ? ['s', 'n'] : side === 2 ? ['w', 'e'] : ['e', 'w'];
+      const la = R.p.doors[sideR], lb = p.doors[sideN];
+      if (!la.length || !lb.length) continue;
+      const a = la[rng.int(0, la.length - 1)], b = lb[rng.int(0, lb.length - 1)];
+      let r, g;
       if (side <= 1) {
-        const lo = R.x - p.w + 3, hi = R.x + R.w - 3;
-        const x = rng.int(lo, hi);
+        g = R.x + a;
         // below: new.top - 2 (faces) - gap = R.bottom + 1 -> y = R.y + R.h + gap + 2; above: new.bottom + gap + 1 = R.y - 2
-        const y = side === 1 ? R.y + R.h + gap + 2 : R.y - 2 - gap - p.h;
-        r = { x, y, w: p.w, h: p.h };
+        r = { x: g - b, y: side === 1 ? R.y + R.h + gap + 2 : R.y - 2 - gap - p.h, w: p.w, h: p.h };
       } else {
-        const lo = R.y - p.h + 3, hi = R.y + R.h - 3;
-        const y = rng.int(lo, hi);
-        const x = side === 3 ? R.x + R.w + gap : R.x - gap - p.w;
-        r = { x, y, w: p.w, h: p.h };
+        g = R.y + a;
+        r = { x: side === 3 ? R.x + R.w + gap : R.x - gap - p.w, y: g - b, w: p.w, h: p.h };
       }
-      if (fits(r)) got = r;
+      if (fits(r)) { got = r; anchor = { to: R.id, sideR, sideN, g }; }
     }
     for (let t = 0; t < 120 && !got; t++) {
       const r = { x: rng.int(2, W - 2 - p.w), y: rng.int(4, H - 2 - p.h), w: p.w, h: p.h };
       if (fits(r)) got = r;
     }
     if (!got) return null;
-    placed.push({ ...got, p, id: placed.length });
+    placed.push({ ...got, p, id: placed.length, anchor });
   }
   return placed;
 }
@@ -343,6 +346,9 @@ function layout(seed, floor, bandId) {
     const rng = createRng(hashSeed(`${seed}:${floor}:${attempt}`));
     try {
       const L = layoutAttempt(rng, band, floor, pool, W, H, attempt);
+      L.attempt = attempt;
+      arrivalCell(seed, floor, L);          // the arrival room and column (its own seeded stream)
+      checkDressable(L, band, floor);       // a stair room, enough chest and foe spots: else the next attempt
       cacheSet(key, L);
       return L;
     } catch (e) {
@@ -369,13 +375,17 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
   const links = [];           // [a, b]
   const openings = [];        // { room, side, g } for the dressing pass (face overlays over a carved opening are dropped)
   const cx = (r) => r.x + r.w / 2, cy = (r) => r.y + r.h / 2;
-  const carveEdge = (e) => {
+  const carveEdge = (e, forced = null, maxLen = Infinity) => {
     const A = rooms[e.a], B = rooms[e.b];
     const dx = cx(B) - cx(A), dy = cy(B) - cy(A);
     const horiz = Math.abs(dx) >= Math.abs(dy);
     const plans = horiz
       ? [[dx > 0 ? 'e' : 'w', dx > 0 ? 'w' : 'e'], [dy > 0 ? 's' : 'n', dy > 0 ? 'n' : 's']]
       : [[dy > 0 ? 's' : 'n', dy > 0 ? 'n' : 's'], [dx > 0 ? 'e' : 'w', dx > 0 ? 'w' : 'e']];
+    // the accretion anchor (a shared door column or row) goes first; then the axis plans; then the mixed pairs
+    const mixed = [[plans[0][0], plans[1][1]], [plans[1][0], plans[0][1]]];
+    if (forced) plans.unshift([forced.sa, forced.sb]);
+    plans.push(...mixed);
     for (const [sa, sb] of plans) {
       const vert = sa === 'n' || sa === 's';
       // aligned openings first: a column (or row) both rooms can open on gives a straight corridor
@@ -384,6 +394,7 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
       if (!la.length || !lb.length) continue;
       const common = la.filter((v) => lb.includes(v));
       const cands = [];
+      if (forced && sa === forced.sa && sb === forced.sb && la.includes(forced.g) && lb.includes(forced.g)) cands.push([forced.g, forced.g]);
       const prevA = openings.find((o) => o.room === e.a && o.side === sa), prevB = openings.find((o) => o.room === e.b && o.side === sb);
       if (prevA && prevB) cands.push([prevA.g, prevB.g]);
       if (prevA) cands.push([prevA.g, lb.includes(prevA.g) ? prevA.g : doorOn(B, sb, vert ? cx(A) : cy(A))]);
@@ -407,7 +418,7 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
         const direct = touching(ea.cells, eb.cells);
         const path = direct ? [] : corridorPath(ea.out, eb.out, masks, W, H);
         for (const [x, y] of entryCells) entryM[y * W + x] = 0;
-        if (!path) continue;
+        if (!path || path.length > maxLen) continue;
         const carve = (x, y) => { carved.add(`${x},${y}`); carvedM[y * W + x] = 1; };
         for (const [x, y] of entryCells) carve(x, y);
         for (const [x, y] of path) for (const [i, j] of [[0, 0], [1, 0], [0, 1], [1, 1]]) carve(x + i, y + j);
@@ -418,16 +429,24 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
     }
     return false;
   };
-  // Kruskal with carving as the acceptance test: an edge that will not carve is skipped and a later edge may join the
-  // same two components through another room; then one or two short loops
+  // the accretion tree first (every anchor has a straight doorway by construction), then Kruskal with carving as the
+  // acceptance test: an edge that will not carve is skipped and a later edge may join the same two components through
+  // another room; then one or two short loops
   const parent = rooms.map((_, i) => i);
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
   let comps = rooms.length;
   const leftover = [];
+  for (const r of rooms) {
+    if (!r.anchor) continue;
+    const e = { a: r.anchor.to, b: r.id, d: 0 };
+    const ra = find(e.a), rb = find(e.b);
+    if (ra === rb) continue;
+    if (carveEdge(e, { sa: r.anchor.sideR, sb: r.anchor.sideN, g: r.anchor.g })) { parent[ra] = rb; comps--; }
+  }
   for (const e of edges) {
     const ra = find(e.a), rb = find(e.b);
     if (ra === rb) { leftover.push(e); continue; }
-    if (carveEdge(e)) { parent[ra] = rb; comps--; } else leftover.push(e);
+    if (carveEdge(e, null, 22)) { parent[ra] = rb; comps--; } else leftover.push(e);
     if (comps === 1) break;
   }
   if (comps > 1) throw new CaveGenError(`rooms could not all be joined (${comps} components)`);
@@ -435,7 +454,7 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
   let loops = 0;
   const shortLeft = leftover.filter((e) => e.d <= 20 && !links.some(([a, b]) => a === e.a && b === e.b)).slice(0, 5);
   rng.shuffle(shortLeft);
-  for (const e of shortLeft) { if (loops >= loopsWanted) break; if (carveEdge(e)) loops++; }
+  for (const e of shortLeft) { if (loops >= loopsWanted) break; if (carveEdge(e, null, 12)) loops++; }
   // the char grid: walls, then each room's faces and floor, then the corridors
   const g = [];
   for (let y = 0; y < H; y++) g.push(new Array(W).fill('#'));
@@ -451,6 +470,41 @@ function layoutAttempt(rng, band, floor, pool, W, H, attempt) {
 
 // ------------------------------------------------------------------------------------------------ dressing
 const key2 = (x, y) => `${x},${y}`;
+
+const faceFreeAt = (L, r, x) => L.grid[r.y - 1][x] === '|' && L.grid[r.y - 1][x + 1] === '|' && L.grid[r.y - 2][x] === '|' && L.grid[r.y - 2][x + 1] === '|';
+/** Global columns of room r where a 32 px stair object fits in the north face after the corridors were cut. */
+const stairColumns = (L, r) => r.p.cols.filter((c) => c + 1 < r.w && faceFreeAt(L, r, r.x + c)).map((c) => r.x + c);
+
+/** The undressed floor with the prefabs' props and decals in place: what the walk sees before chests and foes. */
+function bareModule(L, band) {
+  const decor = [], overlays = [];
+  for (const r of L.rooms) {
+    for (const [t, x, y] of r.p.decor) decor.push({ t, x: r.x + x, y: r.y + y });
+    for (const [t, x, y] of r.p.decals) overlays.push({ t, x: r.x + x, y: r.y + y });
+  }
+  return { ground: wallDepth(L.grid.map((row) => row.join(''))), legend: band.legend, decor, overlays, events: [], start: { x: L.arrival[0], y: L.arrival[1] } };
+}
+
+/**
+ * Can this layout be dressed? A room other than the arrival's (and not its graph neighbour when any other exists) can
+ * hold the stair; at least five chest spots and foeCount(floor) foe spots are reachable outside the arrival room.
+ * Throws CaveGenError so layout() rolls the next attempt.
+ */
+function checkDressable(L, band, floor) {
+  const w = walkModel(bareModule(L, band));
+  const [ax, ay] = L.arrival;
+  if (!w.reached(ax, ay)) throw new CaveGenError('arrival cell is not open');
+  const stairRooms = L.rooms.filter((r, i) => i !== L.arrivalRoom && stairColumns(L, r).some((x) => w.reached(x, r.y)));
+  if (!stairRooms.length) throw new CaveGenError('no room can hold the stair');
+  let chestSpots = 0, foeSpots = 0;
+  L.rooms.forEach((r, i) => {
+    if (i === L.arrivalRoom) return;
+    for (const [x, y] of r.p.marks.chest) if (w.touchable(r.x + x, r.y + y)) chestSpots++;
+    for (const [x, y] of r.p.marks.foe) if (w.reached(r.x + x, r.y + y) && Math.abs(r.x + x - ax) + Math.abs(r.y + y - ay) >= 4) foeSpots++;
+  });
+  if (chestSpots < 5) throw new CaveGenError(`only ${chestSpots} chest spots reachable`);
+  if (foeSpots < foeCount(floor)) throw new CaveGenError(`only ${foeSpots} foe spots reachable`);
+}
 
 function faceOverlayCells(t, x, y) {
   const [w, h] = OVERLAY_SIZE[t] || [1, 1];
@@ -488,9 +542,7 @@ export function arrivalOf(seed, floor, opts = {}) {
 function arrivalCell(seed, floor, L) {
   if (L.arrival) return L.arrival;
   const rng = createRng(hashSeed(`${seed}:${floor}:arrival`));
-  const faceFree = (r, x) => L.grid[r.y - 1][x] === '|' && L.grid[r.y - 1][x + 1] === '|' && L.grid[r.y - 2][x] === '|' && L.grid[r.y - 2][x + 1] === '|';
-  const roomCols = (r) => r.p.cols.filter((c) => c + 1 < r.w && faceFree(r, r.x + c)).map((c) => r.x + c);
-  const cands = L.rooms.map((r, i) => ({ i, cols: roomCols(r), set: r.p.tags.includes('set') })).filter((c) => c.cols.length);
+  const cands = L.rooms.map((r, i) => ({ i, cols: stairColumns(L, r), set: r.p.tags.includes('set') })).filter((c) => c.cols.length);
   if (!cands.length) throw new CaveGenError('no room can hold the arrival stair');
   const plain = cands.filter((c) => !c.set && L.degree[c.i] <= 2);
   const pick = rng.pick(plain.length ? plain : cands);
@@ -533,8 +585,7 @@ export function generateFloor(seed, floor, opts = {}) {
   const stairCells = new Set();   // the stairs objects are 2 cells wide in the face: overlays there are dropped too
   // the stair room: farthest by walk distance from the arrival over the undressed grid, never a graph neighbour when avoidable
   const preMod = { ground, legend, overlays: [], decor: [], events: [], start: { x: ax, y: ay } };
-  const faceFree = (r, x) => L.grid[r.y - 1][x] === '|' && L.grid[r.y - 1][x + 1] === '|' && L.grid[r.y - 2][x] === '|' && L.grid[r.y - 2][x + 1] === '|';
-  const roomCols = (r) => r.p.cols.filter((c) => c + 1 < r.w && faceFree(r, r.x + c)).map((c) => r.x + c);
+  const roomCols = (r) => stairColumns(L, r);
   // dress every room first (decor decides the walk), then choose the stair
   for (const r of L.rooms) {
     const top = r.y;
@@ -572,6 +623,22 @@ export function generateFloor(seed, floor, opts = {}) {
       overlays.push({ t, x: gx, y: gy });
     }
   }
+  // corridors get a few of the band's floor decals (the hand maps strew roots and puddles down theirs)
+  {
+    const pool = band.id === 'catalogue' ? ['index_cards', 'roots_1', 'ink_puddle_0', 'roots_0', 'index_cards', 'roots_2', 'ink_puddle_1']
+      : ['roots_0', 'pebbles_1', 'roots_2', 'tuft_0', 'ink_puddle_0', 'roots_1', 'pebbles_2', 'leaves'];
+    const doorCells = new Set(L.openings.flatMap((o) => { const r = L.rooms[o.room]; const top = r.y, bottom = r.y + r.h - 1, left = r.x, right = r.x + r.w - 1;
+      if (o.side === 'n') return [key2(o.g, top - 1), key2(o.g + 1, top - 1), key2(o.g, top - 2), key2(o.g + 1, top - 2), key2(o.g, top - 3), key2(o.g + 1, top - 3)];
+      if (o.side === 's') return [key2(o.g, bottom + 1), key2(o.g + 1, bottom + 1)];
+      if (o.side === 'w') return [key2(left - 1, o.g), key2(left - 1, o.g + 1)];
+      return [key2(right + 1, o.g), key2(right + 1, o.g + 1)]; }));
+    let i = 0;
+    for (const k of L.carved) {
+      i++;
+      if (doorCells.has(k)) continue;
+      if (rng.next() < 0.07) { const [x, y] = k.split(',').map(Number); overlays.push({ t: pool[i % pool.length], x, y }); }
+    }
+  }
   decor.push({ t: 'stairs_up', x: ax, y: ay - 1 });
   decor.push({ t: 'stairs_down', x: sx, y: sy - 1 });
   marks.arrival = [ax, ay];
@@ -599,8 +666,15 @@ export function generateFloor(seed, floor, opts = {}) {
   };
   let placedRed = 0;
   if (blueWanted) {
-    const c = roomsByPref.find((x) => x.i !== useCands[0].i && x.r.p.marks.blue.length && x.dead) || roomsByPref.find((x) => x.i !== useCands[0].i && x.dead) || roomsByPref[0];
-    const cell = c && takeSpot(c, true);
+    // the farthest dead end with a blue spot, then any dead end, then any room: the first with a free spot
+    const stairRoom = useCands[0].i;
+    const order = [
+      ...roomsByPref.filter((x) => x.i !== stairRoom && x.dead && x.r.p.marks.blue.length),
+      ...roomsByPref.filter((x) => x.i !== stairRoom && x.dead),
+      ...roomsByPref,
+    ];
+    let cell = null;
+    for (const c of order) { cell = takeSpot(c, true); if (cell) break; }
     if (!cell) throw new CaveGenError('no spot for the blue chest');
     events.push(chestEv('blue_chest', cell[0], cell[1], 'blue', { floor }));
     marks.blue_chest = cell;
@@ -617,6 +691,15 @@ export function generateFloor(seed, floor, opts = {}) {
     }
   }
   if (placedRed < Math.min(redWanted, 2)) throw new CaveGenError(`only ${placedRed} red chests fit`);
+  // a chest mark is the cell the party stands on to open it (south first, as whisperwood_hollow's gold_chest mark)
+  {
+    const w2 = walkModel({ ...preMod, decor, overlays, events }, [ax, ay]);
+    for (const e of events) {
+      if (e.type !== 'chest') continue;
+      const front = [[e.x, e.y + 1], [e.x - 1, e.y], [e.x + 1, e.y], [e.x, e.y - 1]].find(([x, y]) => w2.reached(x, y));
+      marks[e.id] = front || [e.x, e.y];
+    }
+  }
   // foes: from the pool, on prefab spots outside the arrival room, reachable, off the stair and the chests
   const poolRaw = (opts.foes ? opts.foes(floor, band.id) : null) || band.foes;
   const pool = poolRaw.map((e) => foeEntry(e, opts, band));
@@ -658,7 +741,7 @@ export function generateFloor(seed, floor, opts = {}) {
     start: { x: ax, y: ay, dir: 'down' },
     // rooms: for tools and tests (stairCols = free north-face columns a stair could use after the corridors were cut)
     rooms: L.rooms.map((r, i) => ({ id: i, prefab: r.p.id, x: r.x, y: r.y, w: r.w, h: r.h, degree: L.degree[i], stairCols: stairInfo[i].cols.length,
-      chestSpots: r.p.marks.chest.length,
+      chestSpots: r.p.marks.chest.filter(([x, y]) => walk.touchable(r.x + x, r.y + y)).length,
       role: i === arrivalRoom ? 'arrival' : i === useCands[0].i ? 'stairs' : L.degree[i] === 1 ? 'dead_end' : 'room' })),
     links: L.links.map(([a, b]) => [a, b]),
   };
@@ -703,5 +786,6 @@ function buildLanding(seed, floor, band, id, name, next, opts) {
   };
   const proof = walkModel(mod);
   if (!proof.reached(sx, sy - 1) || !proof.touchable(cx, cy) || !proof.reached(px, py)) throw new CaveGenError(`landing ${t.id} is not walkable`);
+  mod.marks.chest_1 = [[cx, cy + 1], [cx - 1, cy], [cx + 1, cy], [cx, cy - 1]].find(([x, y]) => proof.reached(x, y)) || [cx, cy];
   return mod;
 }
