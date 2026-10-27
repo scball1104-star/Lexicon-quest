@@ -12,6 +12,7 @@ import { BESTIARY, HELP } from '../../data/text.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { hasFlag } from '../../game/state.js';
 import { vowLine } from '../../game/vows.js';
+import { recordOf, vaultIds } from '../../game/cave.js';
 import { fillHero } from '../text.js';
 
 const TABS = ['Quests', 'Bestiary', 'Ledger'];
@@ -182,6 +183,9 @@ export class JournalScreen {
     if (seen(y)) r.text(j.main.step, 14, y, { color: 'cream' });
     y += 12;
     for (const line of r.wrap(fillHero(j.main.text, g), 356)) { if (seen(y)) r.text(line, 14, y); y += 11; }
+    // C2-story-ui (docs/DEEP_STACKS_PLAN.md 3): one line under the main quest once the Archivist has spoken
+    const ds = stacksLine(g);
+    if (ds) { y += 1; if (seen(y)) { drawIcon(r, 'book', 12, y - 1); r.text(ds, 27, y, { color: 'cream' }); } y += 11; }
     y += 4;
     if (j.side.length) { if (seen(y)) drawDivider(r, 10, y, 364); y += 6; if (seen(y)) r.text('Errands', 14, y, { color: 'gold' }); y += 12; }
     for (const q of j.side) {
@@ -279,6 +283,14 @@ export class JournalScreen {
     return { screen: 'journal', tab: this.tab, beast: this.beasts.item ? this.beasts.item.id : null,
       ledger: this.names ? { name: this.names.item ? this.names.item.id : null, ...this.count, rows: this.names.length, scroll: this.names.scroll } : null };
   }
+}
+
+/** The Deep Stacks line under the main quest (C2-story-ui): null until deep_stacks_open; the deepest floor and the vault count. */
+export function stacksLine(g) {
+  if (!hasFlag(g, 'deep_stacks_open')) return null;
+  const rec = recordOf(g), n = vaultIds(g).length;
+  if (!(rec.floor > 0)) return 'The Deep Stacks: no reading yet';
+  return `The Deep Stacks: deepest B${rec.floor}, ${n} ${n === 1 ? 'name' : 'names'} in the vault`;
 }
 
 /** A place header row of the Ledger list (gold, no glove: the item is disabled and skipped). */

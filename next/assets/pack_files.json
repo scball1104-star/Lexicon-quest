@@ -53,12 +53,27 @@
  ],
  "cave": [
   "assets/cave_manifest.json",
+  "assets/sprites/cave_bosses_battle.json",
+  "assets/sprites/cave_bosses_battle.png",
+  "assets/sprites/cave_enemies_field.json",
+  "assets/sprites/cave_enemies_field.png",
+  "assets/sprites/cave_props.json",
+  "assets/sprites/cave_props.png",
+  "src/data/cave/bands345.js",
   "src/data/cave/foes.js",
   "src/data/cave/gen.js",
   "src/data/cave/index.js",
   "src/data/cave/items.js",
   "src/data/cave/landing.js",
   "src/data/cave/loot.js",
-  "src/data/cave/prefabs.js"
+  "src/data/cave/maps/cave_b100.js",
+  "src/data/cave/maps/cave_landing0.js",
+  "src/data/cave/prefabs.js",
+  "src/data/cave/prefabs_b3.js",
+  "src/data/cave/prefabs_b4.js",
+  "src/data/cave/prefabs_b5.js",
+  "src/data/cave/story.js",
+  "src/data/cave/text.js",
+  "src/data/cave/world.js"
  ]
 }

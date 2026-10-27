@@ -5593,6 +5593,234 @@
      "message": "paid once and cleared"
     }
    ]
+  },
+  {
+   "name": "ui_stacks_plaque",
+   "note": "C2-story-ui: the Archivist's plaque screen: the record in the header, the vault in band order (bright when held, faded ink when not), the detail of a held unique, the Quill last",
+   "query": "&cave=1",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('cave') && LQ_DEBUG.commands().includes('caveStacks')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 12,
+       "gold": 300,
+       "flags": {
+        "cold_open_done": 1,
+        "intro_done": 1,
+        "met_mael": 1,
+        "mira_joined": 1,
+        "bram_joined": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "archive_f1_done": 1,
+        "echo_warden_defeated": 1,
+        "lantern_get": 1,
+        "archive_f2_done": 1,
+        "boss_door_open": 1,
+        "archivore_defeated": 1,
+        "ep1_complete": 1,
+        "deep_stacks_open": 1
+       },
+       "playtime": 5025,
+       "map": "library",
+       "banner": false
+      }
+     ]
+    },
+    {
+     "frames": 5
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.engine.game.cave = { vault: ['cave_catalogue_pen', 'cave_reading_hood', 'cave_cellar_key', 'cave_root_boots'], record: { floor: 23, readings: 4, clears: 0, time: 5025 }, run: null, snapshot: null }; return true; })()"
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.caveStacks(); return true; })()"
+    },
+    {
+     "frames": 8
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 12
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'stacks' && LQ_DEBUG.state().sceneState.id === 'cave_root_boots'",
+     "message": "the plaque screen is up on the fifth row (Rootbound Boots, held)"
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.held === 4 && LQ_DEBUG.state().sceneState.total === 17",
+     "message": "four of seventeen in the vault"
+    }
+   ]
+  },
+  {
+   "name": "ui_title_stacks",
+   "note": "C2-story-ui: the title with a suspend save: 'Resume the Deep Stacks (B23)' under Continue with its help beside the menu, and the B100 mark by the version line (a slot with deep_stacks_cleared)",
+   "query": "&cave=1",
+   "settings": {
+    "rotateHintSeen": true
+   },
+   "storage": {
+    "lq-next-slot-1": {
+     "v": 1,
+     "savedAt": "2026-10-27T03:00:00.000Z",
+     "meta": {
+      "name": "Arden",
+      "level": 14,
+      "map": "willowmere",
+      "playtime": 9000,
+      "chapter": 1,
+      "gold": 1800,
+      "party": [
+       "hero",
+       "mira",
+       "bram"
+      ]
+     },
+     "data": {
+      "flags": {
+       "ep1_complete": true,
+       "deep_stacks_cleared": true
+      }
+     }
+    },
+    "lq-next-slot-cave": {
+     "v": 1,
+     "savedAt": "2026-10-27T03:10:00.000Z",
+     "meta": {
+      "name": "Arden",
+      "level": 9,
+      "map": "cave_b23",
+      "playtime": 9400,
+      "chapter": 1,
+      "gold": 0,
+      "party": [
+       "hero",
+       "mira",
+       "bram"
+      ],
+      "cave": {
+       "floor": 23,
+       "seed": 7
+      }
+     },
+     "data": {}
+    }
+   },
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "reset",
+     "args": [
+      "title"
+     ]
+    },
+    {
+     "frames": 5
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 20
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.labels.includes('Resume the Deep Stacks (B23)')",
+     "message": "the resume row names the floor"
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.items[LQ_DEBUG.state().sceneState.index] === 'stacks' && LQ_DEBUG.state().sceneState.stacks.cleared === true",
+     "message": "the glove sits on the row; the mark is on"
+    }
+   ]
+  },
+  {
+   "name": "ui_stacks_hall",
+   "note": "C2-story-ui: the Entrance Hall under the library: Hollis behind the long desk, the party at party_stop, the first talk across the desk (the greeting box of stacks_intro)",
+   "query": "&cave=1",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+     "timeout": 20000
+    },
+    {
+     "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('cave') && LQ_DEBUG.commands().includes('caveHall')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp2",
+     "args": [
+      "Arden",
+      {
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "call": "warp",
+     "args": [
+      "cave_landing0",
+      10,
+      10,
+      "up"
+     ]
+    },
+    {
+     "frames": 150
+    },
+    {
+     "assert": "LQ_DEBUG.caveHall().events.length === 4 && !LQ_DEBUG.caveHall().fallback",
+     "message": "Hollis, the desk, the plaque and the lectern are in the hand-made hall"
+    },
+    {
+     "press": "confirm"
+    },
+    {
+     "frames": 170
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'dialog'",
+     "message": "Hollis answers across the desk"
+    }
+   ]
   }
  ]
 }

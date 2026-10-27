@@ -21,7 +21,7 @@ import { animFrameAt } from '../core/assets.js';
 import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, newGameEp3, cleanName, EP2_START, EP3_START } from '../game/state.js';
 import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP } from '../game/episodes.js';
 import { NameEntryScene } from './nameEntry.js';
-import { packsToAwait, awaitPacks } from '../game/packs.js';
+import { packsToAwait, awaitPacks, packEnabled, ensurePack } from '../game/packs.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
 import { BANNERS } from '../data/text.js';
@@ -31,6 +31,10 @@ export const VERSION = 'v0.2 NEXT';
 const ATTRACT_AFTER = 20;   // seconds idle
 /** The title row for the Episode 2 quick start: it starts a ready-made party, it does not continue a game. */
 export const EP2_ROW_LABEL = 'Episode 2: new party';
+/** The Deep Stacks row (C2-story-ui): also text.js TITLE_ROWS.resume, a pack file the title cannot wait for (a test holds them equal). */
+export const STACKS_RESUME_LABEL = 'Resume the Deep Stacks (B{n})';
+export const STACKS_RESUME_HELP = 'Back to your reading, at the floor you left.';
+export const STACKS_RESUME_FAILED = 'The Stacks could not be reopened.';
 const AUTO_SLOT = 0;
 
 export class TitleScene {
@@ -48,9 +52,11 @@ export class TitleScene {
     this.offers = episodeOffers(e.save, typeof location !== 'undefined' ? location.search : '');
     this.ep2 = this.offers.ep2;
     this.ep3 = this.offers.ep3;
+    this.stacks = stacksOffer(e.save);
     const items = [
       { id: 'new', label: 'New Game' },
       { id: 'continue', label: 'Continue', disabled: !this.hasSaves },
+      ...(this.stacks.resume ? [{ id: 'stacks', label: STACKS_RESUME_LABEL.replace('{n}', String(this.stacks.resume.floor)) }] : []),
       ...(this.ep2.show ? [{ id: 'ep2', label: EP2_ROW_LABEL }] : []),
       ...(this.ep3.show ? [{ id: 'ep3', label: EP3_ROW_LABEL }] : []),
       { id: 'config', label: 'Config' },
@@ -127,6 +133,7 @@ export class TitleScene {
         if (auto) this.openGuard(id, auto); else this.startFresh(id);
       }
       else if (id === 'ep3') this.openSlotPicker();
+      else if (id === 'stacks') this.resumeStacks();
       else if (id === 'continue') { this.busy = true; e.pushAwait('loadGame', { mode: 'load' }).then(() => { this.busy = false; }); }
       else if (id === 'config') { this.busy = true; e.pushAwait('config').then(() => { this.busy = false; }); }
       return;
@@ -158,6 +165,22 @@ export class TitleScene {
     if (id === 'ep2') e.fadeTo(() => e.replace('nameEntryEp2', { name: this.ep2.name || undefined, artT: this.art.t }), { duration: 0.7 });
     else if (id === 'ep3') e.fadeTo(() => e.replace('nameEntryEp3', { name: this.ep3.name || undefined, slot: this.pickedSlot, artT: this.art.t }), { duration: 0.7 });
     else e.fadeTo(() => e.replace('nameEntry'), { duration: 0.7 });
+  }
+
+  /** The Deep Stacks row: the pack, then world.js resumeReading (the suspend save, the floor rebuilt, the field at its arrival). */
+  async resumeStacks() {
+    const e = this.engine;
+    this.busy = true;
+    let ok = false;
+    try {
+      await ensurePack('cave');
+      const w = await import('../data/cave/world.js');
+      if (w && typeof w.resumeReading === 'function') ok = await e.fadeTo(() => w.resumeReading(e).then((r) => !!(r && r.ok)), { duration: 0.7 });
+    } catch (err) { ok = false; }
+    if (ok) return;
+    e.audio.sfx('buzzer');
+    if (e.toasts && e.toasts.flash) e.toasts.flash(STACKS_RESUME_FAILED, { frames: 120 });
+    this.busy = false;
   }
 
   /**
@@ -252,9 +275,10 @@ export class TitleScene {
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
     }
     r.text(VERSION, 4, 205, { color: 'gray' });
+    if (this.stacks && this.stacks.cleared) drawStacksMark(r, 4 + r.measure(VERSION) + 7, 205);
     this.drawLedgerCount(r);
     const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
-    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : null;
+    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP : null;
     if (note) {
       const lines = r.wrap(note, 108);
       const nh = lines.length * 11 + 10, nx = this.win.x + this.win.w + 6;
@@ -293,7 +317,7 @@ export class TitleScene {
   }
 
   debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, ledger: this.ledger, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
-    items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2,
+    items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2, stacks: this.stacks,
     guard: this.guard ? { id: this.guard.id, line: this.guard.auto ? this.guard.auto.line : this.guard.lines[0].text, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
 }
 
@@ -344,6 +368,35 @@ export function autosaveGuard(save) {
   const map = m.map || d.map || '';
   const place = (BANNERS[map] && BANNERS[map].title) || map || 'somewhere';
   return { name, level, place, line: `${name}, Lv ${level}, ${place}` };
+}
+
+/**
+ * The Deep Stacks offers: `resume` = { floor } from the suspend save's meta ('cave', world.js suspendMeta); `cleared` when any
+ * slot's flags hold deep_stacks_cleared. Both off while the cave pack is neither live nor forced. Pure.
+ */
+export function stacksOffer(save, enabled = packEnabled('cave')) {
+  const out = { resume: null, cleared: false };
+  if (!enabled || !save) return out;
+  try {
+    if (save.exists('cave')) {
+      const env = save.loadEnvelope('cave');
+      const floor = env && env.meta && env.meta.cave ? Number(env.meta.cave.floor) : 0;
+      if (floor > 0) out.resume = { floor };
+    }
+  } catch (err) { out.resume = null; }
+  const n = Number.isFinite(save.slots) ? save.slots : 3;
+  for (let i = 0; i <= n && !out.cleared; i++) {
+    try { const env = save.loadEnvelope(i); if (env && env.data && env.data.flags && env.data.flags.deep_stacks_cleared) out.cleared = true; }
+    catch (err) { /* an unreadable slot has no mark */ }
+  }
+  return out;
+}
+
+/** The B100 mark by the version line: a small gold bookmark ribbon and "B100". */
+export function drawStacksMark(r, x, y) {
+  r.rect(x, y + 1, 5, 9, '#f9d77a'); r.rect(x + 1, y + 2, 3, 6, '#c9962c');
+  r.rect(x, y + 8, 2, 2, '#14101e'); r.rect(x + 3, y + 8, 2, 2, '#14101e'); r.rect(x + 2, y + 9, 1, 1, '#f9d77a');
+  r.text('B100', x + 8, y, { color: 'gray' });
 }
 
 /** The first empty manual record (1..3), or 0 when all three are taken. */

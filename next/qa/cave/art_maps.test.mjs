@@ -91,8 +91,9 @@ test('the entrance hall: validates like a hand map with the stair down patched t
   const r = validate(patched, db, maps, {});
   assert.deepEqual(r.errors, [], `errors: ${r.errors.join('; ')}`);
   for (const w of r.warnings) assert.match(w, /^no banner for cave_landing0 in text\.js$/, `unexpected warning: ${w}`);
-  assert.deepEqual(r.walk.unreached, [], `unreached: ${r.walk.unreached.join(' ')}`);
-  for (const mk of r.walk.marks) assert.ok(mk.reached, `mark ${mk.name} not reached`);
+  // `archivist` is Hollis's own cell (a solid NPC placed by story.js install(); the player talks across the desk), so it is never walked.
+  assert.deepEqual(r.walk.unreached.filter((u) => !String(u).includes('archivist')), [], `unreached: ${r.walk.unreached.join(' ')}`);
+  for (const mk of r.walk.marks) if (mk.name !== 'archivist') assert.ok(mk.reached, `mark ${mk.name} not reached`);
   // the raw module carries the placeholder (fail loud if the integrator forgets): the validator rejects it
   const raw = validate(hall, db, { cave_landing0: hall, library, cave_b1: shaped(b1) }, {});
   assert.ok(raw.errors.some((e) => /stairs_down/.test(e)), 'the unpatched stair down is an error, never a silent wrong cell');
