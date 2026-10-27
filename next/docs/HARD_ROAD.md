@@ -76,3 +76,4 @@ So: the character is carried; one tier; the name is open. Status: APPROVED TO BU
 words: Second Edition, The Unabridged, Red Ink, Fine Print, The Second Toll, The Long Way. Until he picks, the strings
 say "Hard Road" in one place (`text.js` TIER).
 
+**Name, Scott 2026-10-27, verbatim:** "For the name question: I think I like Fine Print" The tier is **Fine Print**.

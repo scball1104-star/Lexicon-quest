@@ -107,5 +107,5 @@ What each one does to the build:
   until Scott picks one: Hard Road. Status: PROPOSAL ONLY, `docs/HARD_ROAD.md` (H3 writes it, no code); Scott
   reads it and says whether it works for us before anything is built. My earlier default (foes scaled, a vow
   always on, fewer rests, nothing else carried) was half of it and is superseded by this paragraph.
-  **Hard Road answers (Scott, 2026-10-27, verbatim):** "1. Default, carry the character into the tier.2. Default3. let's keeping trying to come up with a better name." One tier, the character carried, the name still open; build brief `docs/briefs/H7-hard-road.md`.
+  **Hard Road answers (Scott, 2026-10-27, verbatim):** "1. Default, carry the character into the tier.2. Default3. let's keeping trying to come up with a better name." One tier, the character carried; named **Fine Print** (Scott, later that morning: "For the name question: I think I like Fine Print"); build brief `docs/briefs/H7-hard-road.md`.
 - **D.** The true answer's cost stays small and honest; no locked routes, no morality meter.

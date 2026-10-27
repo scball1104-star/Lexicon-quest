@@ -170,7 +170,7 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
   - H2 polish for H6: the Aim line shows the main step's title ("The Apprentice"); it should read as the present aim ("Find Mira at the library"): give each main step a short `aim` string in quests.js and draw that; on tablet overlay layouts the title counter can sit under the Menu pill; expansion kept lines fall back to "Kept." until the x1 pack registers
 - [x] H3-vows: five Vows at rests, No vow default, seams, mastery reward, save fields; docs/VOWS.md; docs/HARD_ROAD.md emailed to Scott 10/27 (`docs/briefs/H3-vows.md`); 10/27 01:10
   - H3 gaps for H6: the Aim line carries no vow suffix; Auto battle can break a vow (consider pausing auto when a vow is active or warning once); the break toast overlaps the battle help bar for 1.5 s
-- [ ] H3b-hard-road: PROPOSAL emailed 10/27; Scott answered 10/27 (verbatim in docs/HARD_ROAD.md): carry the character, one tier, name still open; APPROVED TO BUILD as H7-hard-road (`docs/briefs/H7-hard-road.md`), queued below
+- [ ] H3b-hard-road: PROPOSAL emailed 10/27; Scott answered 10/27 (verbatim in docs/HARD_ROAD.md): carry the character, one tier, named Fine Print (Scott 10/27: "For the name question: I think I like Fine Print"); APPROVED TO BUILD as H7-hard-road (`docs/briefs/H7-hard-road.md`), queued below
 - [x] H4-story (H4 + H5 merged): 12 Name Truth choices (7 in Episode 1, 5 in Episode 2) with one remembered line and one small reward each, seven floor-ending questions, four boss card lines plus Mira's line for the Briar Alpha, aim strings on all 30 main steps; 11 tests; both bot routes clear (`docs/briefs/H4-story.md`); 10/27 04:00
   - H4 gaps for H6: no new ledger keeps (every scene id must be staged in STAGING.md and STAGING_EP2.md, which H4 did not own: one staging row each unlocks Hob, Cobb and Penny beats); the bot never opens Tess's quest, so her choice is proven by the test only; H4's one field.js line lands with C2-world's commit (same file in flight)
 - [x] H6: critic and fix pass done (below); C3-critic and C4-fixes next, then the publish gate list and Scott's explicit yes
@@ -179,8 +179,8 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 1. C3-critic (read-only, `docs/briefs/C3-critic.md`)
 2. C4-uniques (`docs/briefs/C4-uniques.md`, Scott's call E)
 3. C4-fixes (write the brief from the critic's table, DEEP_STACKS_BALANCE 7 items 4 to 10, the arc notes in Wave H)
-4. H7-hard-road (`docs/briefs/H7-hard-road.md`, Scott's three answers)
-5. Media (separate, waits for Scott's answers to reports/lexicon_quest_media_upgrade/assessment.md in the PKA repo): Runway stage paintings through tools/art/backdrops/quantize_still.py, music via Suno Pro or Eleven Music, a dozen SFX
+4. H7-hard-road (`docs/briefs/H7-hard-road.md`, Scott's three answers; the tier is named Fine Print)
+5. Media (orchestrator work, not an agent; APPROVED by Scott 10/27 9:40 AM, his words in `docs/MEDIA_BUILD.md`: "Stills approved.Suno Pro subscribed now.Story cards and title trailer in scope.If it would upgrade or improve the game to include video sequences from Runway, then let's do that too."): painted stages, story cards, Suno Pro music (20 downloads a month), a dozen SFX, one video test under the brief rule, the trailer. Paused 10/27 9:45 AM at 86% weekly usage (the guard); resumes after the reset, interleaved with the agents above.
 Then: flip CAVE_LIVE, the full publish gate list (EXPANSION_SCHEDULE 4) on a quiet machine, Scott's explicit yes.
 
 ## Wave C: the Deep Stacks, a 100-floor Ancient Cave (Scott 2026-10-26; `docs/DEEP_STACKS_PLAN.md`; up to 3 agents at once under the usage guard)

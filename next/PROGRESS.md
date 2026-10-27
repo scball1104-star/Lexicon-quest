@@ -402,3 +402,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   with no commercial rights and no downloads, so it needs Pro or Premier first, or we use the Eleven Music model inside
   your Runway plan instead. Nothing is built until you answer.
 
+## 2026-10-27 (Tue) 9:45 AM: your approvals recorded, work paused at the usage guard
+- Recorded word for word: the stills are approved, Suno Pro is subscribed, story cards and the title trailer are in
+  scope, and Runway video sequences go in if they improve the game. The whole media plan is written down
+  (docs/MEDIA_BUILD.md): twelve painted stages, five story cards, twenty Suno themes this month and nine next, a dozen
+  sound effects, one video test before any video is built, then the trailer.
+- On video, my honest read before testing: raw footage would look like a different product inside a pixel game, but a
+  painting that moves a little (mist, light shafts, clouds) run through the same quantizer, looped for a few seconds on
+  the title, the ending cards and the busiest battle stages, could be a real lift. The first thing Wednesday is one
+  five-second test you can watch before I spend more.
+- Paused: the account is at 86 percent of its weekly allowance, past the 85 you set to protect the scheduled tasks
+  and the schedule generators. Nothing more runs today. The reset is Wednesday 9 AM; the Stacks critic, the sixty
+  uniques, the fix pass, the Hard Road and the media build all start from there, one at a time.
+- Name settled: the post-credits tier is Fine Print.

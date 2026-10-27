@@ -2,10 +2,10 @@
 
 You are **H7-hard-road**. You build the difficulty tier proposed in `docs/HARD_ROAD.md` (H3-vows, 2026-10-27), which
 Scott approved on 2026-10-27 with these answers, verbatim: "1. Default, carry the character into the tier. 2. Default
-3. let's keeping trying to come up with a better name." So: the character is carried (levels, EXP, mastery, gear, bag,
+3. let's keeping trying to come up with a better name." Later the same morning, verbatim: "For the name question: I think I like Fine Print" So the tier is named **Fine Print**. So: the character is carried (levels, EXP, mastery, gear, bag,
 gold, the Ledger, the vows kept; story flags reset; Mira and Bram wait in `reserve` until their join scenes), ONE tier,
-and the name is not settled: build it under the working id `tier_1` with every player-facing string in one place
-(`src/data/text.js` TIER), so the name is one edit when Scott picks it. Scott's original words are in
+and the name is Fine Print: build it under the id `tier_1` with every player-facing string in one place
+(`src/data/text.js` TIER). Scott's original words are in
 `docs/RESPONSIBILITY_ARC.md` section 7 C.
 
 ## Read, in this order
@@ -46,8 +46,8 @@ player-facing rules). Every edit outside `tier.js` and `qa/tier` is one guarded 
    so put the tier's tables and strings behind a lazy import on the title row (the pack pattern), not in the shell.
 
 ## Name
-Working title in the strings: "Hard Road". Scott wants a better one; do not spend time on it, but if a name comes to
-you from the game's own words (bells, names, pages, readings, tolls), put it in the report under "names".
+**Fine Print** (Scott, 2026-10-27: "For the name question: I think I like Fine Print"). The title row reads "Fine Print"; the flag and id stay `tier_1`; every
+player-facing string sits in `text.js` TIER so a later change is one edit. The id `hard_road` appears nowhere.
 
 ## Verify before you report
 `node qa/run.mjs battle saves ui core pwa` green; both sims green; both bot runs clean; `qa/tier` proves the unlock row,
