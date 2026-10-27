@@ -11,6 +11,7 @@ import { ledgerRows } from '../../data/ledger.js';
 import { BESTIARY, HELP } from '../../data/text.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { hasFlag } from '../../game/state.js';
+import { vowLine } from '../../game/vows.js';
 import { fillHero } from '../text.js';
 
 const TABS = ['Quests', 'Bestiary', 'Ledger'];
@@ -174,6 +175,9 @@ export class JournalScreen {
     const seen = (yy) => { if (yy > end) end = yy; return yy >= 34 && yy <= 164; };
     let y = 38 - this.scroll * 11;
     if (seen(y)) { drawIcon(r, 'quest', 12, y - 1); r.text(j.main.title, 27, y, { font: 'large', color: 'gold' }); }
+    // H3 (docs/VOWS.md): the vow carried now, at the right of the quest title; "Vow ended" (dim) until the next rest.
+    const vow = vowLine(g);
+    if (vow && seen(y)) r.text(vow, 370, y + 2, { align: 'right', color: vow.startsWith('Vow:') ? 'cream' : 'dim' });
     y += 17;
     if (seen(y)) r.text(j.main.step, 14, y, { color: 'cream' });
     y += 12;

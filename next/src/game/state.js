@@ -39,6 +39,8 @@ export function createGame(heroName = 'Hero', opts = {}) {
     chapter: 1,
     settingsSnapshot: null,
     autosaveSlot: normSlot(opts.autosaveSlot),   // the slot field.js autosaves this run to (E3-saves; absent in old saves = 0)
+    vow: null,                                  // H3: the vow carried now { id, chapter, battles, state, brokenBy } (src/game/vows.js)
+    vowsKept: [],                               // H3: vows kept so far [{ id, chapter, paid }]; old saves load with [] via deserialize
   };
   return g;
 }

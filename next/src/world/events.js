@@ -12,8 +12,9 @@ import { ZONES, ENCOUNTERS } from '../data/encounters.js';
 import { give, take, count, isKeyItem, markOpened, isOpened, addGear, heal } from '../game/state.js';
 import { rollChest } from '../battle/loot.js';
 import { ITEMS } from '../data/items.js';
-import { HELP } from '../data/text.js';
+import { HELP, VOW_TEXT } from '../data/text.js';
 import { inspectBoxes, bookBoxes, takeBark } from '../game/story.js';
+import { settleVow, offerVows, takeVow } from '../game/vows.js';
 import { Actor, EnemyBrain, WALK_FRAMES } from './actors.js';
 import { makeNpcActor } from './npc.js';
 import { DIRS, OPPOSITE } from './pathfind.js';
@@ -550,9 +551,44 @@ export async function restFlow(field, o = {}) {
   else await engine.waitFrames(30);
   if (o.bark) await field.bark(o.bark);
   if (field.dead) return true;
+  await vowRow(field);
+  if (field.dead) return true;
   const s = await field.dialog({ who: null, text: HELP.save.prompt, choices: ['Save', 'Not now'], cancel: 1 });
   if (s === 0 && engine.hasScene('menu') && !field.dead) await engine.pushAwait('menu', { page: 'save' });
   return true;
+}
+
+/**
+ * H3 (docs/VOWS.md): the vow row between the heal and the save prompt. A kept vow pays first, a broken one says its line, an
+ * untested one rides on unoffered. Then "Take a vow?" with "No vow" first and selected (one confirm leaves the flow as it was).
+ */
+async function vowRow(field) {
+  const { engine, game: g } = field;
+  const settled = settleVow(g);
+  if (settled && settled.kind === 'carried') return;
+  if (settled && settled.kind === 'kept') {
+    engine.audio.sfx(settled.reward ? 'buff' : 'confirm');
+    await field.showBoxes([{ who: null, text: settled.text }, settled.line].filter(Boolean));
+  } else if (settled && settled.kind === 'broken' && settled.line) {
+    await field.showBoxes([settled.line]);
+  }
+  if (field.dead) return;
+  const ctx = { alwaysRun: !!(engine.settings && engine.settings.alwaysRun) };
+  const offered = offerVows(g, ctx);
+  if (!offered.length) return;
+  for (;;) {
+    const pick = await field.dialog({ who: null, text: VOW_TEXT.offer, choices: [VOW_TEXT.none, ...offered.map((v) => v.name)], cancel: 0 });
+    if (!pick || field.dead) return;
+    const v = offered[pick - 1];
+    const yes = await field.dialog({ who: null, text: `${v.line}\n${v.rule}`, choices: [VOW_TEXT.take, VOW_TEXT.back], cancel: 1 });
+    if (field.dead) return;
+    if (yes !== 0) continue;
+    if (!takeVow(g, v.id, ctx)) return;
+    engine.audio.sfx('confirm');
+    field.particles.sparkle(field.leader.feetX, field.leader.feetY - 20, 6, '#fff7d6');
+    if (engine.toasts) await engine.toasts.flash(VOW_TEXT.taken.replace('{name}', v.name), { frames: 70 });
+    return;
+  }
 }
 
 /**

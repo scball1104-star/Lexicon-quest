@@ -19,6 +19,7 @@ import { partyChat } from '../data/quests.js';
 import { knownSkills } from '../data/party.js';
 import { SKILLS } from '../data/skills.js';
 import { hasFlag } from '../game/state.js';
+import { vowStatus } from '../game/vows.js';
 import { ItemsScreen } from '../ui/screens/items.js';
 import { SkillsScreen } from '../ui/screens/skills.js';
 import { EquipScreen } from '../ui/screens/equip.js';
@@ -175,23 +176,32 @@ export class MenuScene {
     const quest = hasFlag(g, 'tess_quest_started');
     drawIcon(r, 'gold', x, I.y + 4);
     r.text(fmtGold(g.gold), rx, I.y + 5, { align: 'right', color: 'gold' });
-    const row = (i, k, v) => {
+    const row = (i, k, v, color) => {
       const y = I.y + 16 + i * 10;   // 10 px apart: the last baseline keeps 8 px under it (D6)
       r.text(k, x, y, { color: 'gray' });
-      r.text(v, rx, y, { align: 'right' });
+      r.text(v, rx, y, { align: 'right', color });
+    };
+    // H3 (docs/VOWS.md): the vow carried now takes one row: "Vow" and its name, or "ended" (dim) until the next rest.
+    // A name too wide for the key and the gap drops the key (the color still says what it is).
+    const vow = vowStatus(g);
+    const vowRow = (i) => {
+      const v = vow.active ? vow.name : 'ended', color = vow.active ? 'cream' : 'dim';
+      if (r.measure('Vow') + 6 + r.measure(v) <= I.w - 16) row(i, 'Vow', v, color);
+      else r.text(v, rx, I.y + 16 + i * 10, { align: 'right', color });
     };
     if (this.touch) {
       // The help bar's map title has no room on the touch layout: it takes the third line here (the Letters and
-      // Chapter lines stay on the desktop box and in the Journal).
-      row(0, 'Time', fmtTime(g.playtime));
+      // Chapter lines stay on the desktop box and in the Journal). A vow takes the Time row while it is carried.
+      if (vow) vowRow(0); else row(0, 'Time', fmtTime(g.playtime));
       r.text(this.mapTitle, x, I.y + 26, { color: 'gold' });
       void letters; void quest;
       return;
     }
     const lines = [['Time', fmtTime(g.playtime)]];
     lines.push(quest ? ['Letters', `${letters}/3`] : ['Party', String(g.party.length)]);
-    lines.push(['Chapter', roman(g.chapter || 1)]);
+    if (!vow) lines.push(['Chapter', roman(g.chapter || 1)]);
     lines.forEach(([k, v], i) => row(i, k, v));
+    if (vow) vowRow(2);
   }
 
   draw(r) {

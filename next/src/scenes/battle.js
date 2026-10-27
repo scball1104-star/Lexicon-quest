@@ -24,6 +24,7 @@ import { describeItem } from '../battle/loot.js';
 import { SKILLS } from '../data/skills.js';
 import { newMember } from '../data/party.js';
 import { createGame } from '../game/state.js';
+import { vowEvent, vowBattleEvents } from '../game/vows.js';
 import { BattleFx, SliceTransition, C } from '../battle/fx.js';
 import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
@@ -473,6 +474,7 @@ export class BattleScene {
       this.setHelp(`{c:red}${evs[0].reason}{/c}`);
       evs = this.b.perform({ type: 'defend' });
     }
+    vowBattleEvents(this.engine.game, evs, this.engine);   // H3: a healing item or a Fury art spent by the party (docs/VOWS.md)
     this.loadOps(this.plan(evs));
   }
   plan(events) { return planEvents(events, { units: this.info }); }
@@ -583,10 +585,11 @@ export class BattleScene {
         return false;
       }
       case 'split': return false;
-      case 'ko': if (a) { a.ko = true; a.telegraph = null; this.telegraphs.delete(op.uid); if (a.side === 'enemy') { a.statuses = {}; } } return false;
+      case 'ko': if (a && a.side === 'party') vowEvent(e.game, { type: 'fell', member: a.id }, e);   // H3: "Mira stands"
+        if (a) { a.ko = true; a.telegraph = null; this.telegraphs.delete(op.uid); if (a.side === 'enemy') { a.statuses = {}; } } return false;
       case 'revive': if (a) { a.ko = false; a.dead = false; a.koLabel = false; a.hp = op.hp; a.shownHp = 0; a.lagHp = 0; a.setPose('idle'); } return false;
       case 'start': return false;
-      case 'escape': if (op.success) { this.result = 'flee'; this.beginFlee(); } return false;
+      case 'escape': if (op.success) { vowEvent(e.game, { type: 'flee' }, e); this.result = 'flee'; this.beginFlee(); } return false;   // H3: "No fleeing"
       case 'victory': this.beginVictory(op); return false;
       case 'defeat': this.beginDefeat(); return false;
       case 'end': return false;

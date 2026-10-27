@@ -7,6 +7,7 @@ import { drawHelpBar } from '../help.js';
 import { MemberPicker, drawTabs } from './common.js';
 import { CONSUMABLES, KEY_ITEMS } from '../../data/items.js';
 import { useItemOnMember } from '../../game/inventory.js';
+import { vowEvent } from '../../game/vows.js';
 
 const TABS = ['Items', 'Key Items'];
 
@@ -63,6 +64,7 @@ export class ItemsScreen {
         if (!out.ok) { audio.sfx('buzzer'); this.say(out.reason); return null; }
         audio.sfx(out.revived ? 'revive' : out.mp && !out.hp ? 'item_use' : 'heal');
         this.picker.showNumber(res, out.hp ? String(out.hp) : `+${out.mp}`, out.hp ? 'heal' : 'mp');
+        vowEvent(this.g, { type: 'item', item: id }, this.engine);   // H3: "No healing items" (docs/VOWS.md)
         this.refresh(true);
         if (!this.list.item || this.list.item.id !== id) { this.picker = null; }
       }

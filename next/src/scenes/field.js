@@ -33,6 +33,7 @@ import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
 import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
 import { installFieldArt } from '../world/fieldart.js';
+import { vowEvent } from '../game/vows.js';
 
 const FOLLOW_DEPTH = 2;
 // the autosave goes to `game.autosaveSlot` (0 unless the run owns another slot; E3-saves)
@@ -821,6 +822,7 @@ export class FieldScene {
     if (v === false) return false;
     if (v === 'hop') { L.hop(dir); this.partyFollow(14); return true; }
     L.startStep(nx, ny, dur);
+    if (dur === RUN_FRAMES) vowEvent(this.game, { type: 'run' }, this.engine);   // H3: "Walk the road" (docs/VOWS.md)
     this.partyFollow(dur);
     this.stepCount++;
     if (L.stepSfx && this.stepCount % 2 === 0) this.engine.audio.sfx(`footstep_${this.map.surfaceAt(nx, ny)}`, { volume: 0.7 });

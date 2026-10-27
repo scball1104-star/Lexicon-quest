@@ -789,4 +789,23 @@ export const CREDITS_EP3 = [
 ];
 
 
-export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES, CREDITS_EP2, CREDITS_EP3 };
+// ------------------------------------------------------------------------------------------------
+// Vows (H3, docs/VOWS.md): the rest-flow window, the toast at a break, the kept-vow box, the menu and Journal line.
+// The vow table itself (names, offer lines, party lines) is src/data/vows.js. {name} = the vow, {member} = who is paid.
+// ------------------------------------------------------------------------------------------------
+export const VOW_TEXT = {
+  offer: 'Take a vow?',
+  none: 'No vow',
+  take: 'Take the vow',
+  back: 'Not this one',
+  taken: 'Vow taken: {name}.',
+  ended: 'Vow ended: {name}.',
+  endedShort: 'Vow ended',
+  active: 'Vow: {name}',
+  kept: 'Vow kept: {name}.',
+  paid: '{member}: {weapon} mastery +{n}.',
+  learned: '{skill} learned!',
+  capped: 'Five vows have paid this chapter. This one is its own reward.',
+};
+
+export default { BESTIARY, BOOKS, BANNERS, HELP, BARKS, GAMEOVER, CREDITS, FIELD_ABILITIES, CREDITS_EP2, CREDITS_EP3, VOW_TEXT };

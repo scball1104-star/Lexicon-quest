@@ -13,6 +13,7 @@ import { ITEMS, CONSUMABLES } from '../data/items.js';
 import { equipDelta } from '../battle/rules.js';
 import { count, hasFlag } from '../game/state.js';
 import { buyItem, sellables, sellConsumable, sellGear, fits, weaponTypes, baseOf, itemLine } from '../game/inventory.js';
+import { vowEvent } from '../game/vows.js';
 
 const CMDS = ['Buy', 'Sell', 'Leave'];
 const STOCK = { x: 4, y: 32, w: 220, h: 148 };
@@ -117,6 +118,7 @@ export class ShopScene {
     const out = buyItem(this.g, it.id, n, it.price);
     if (!out.ok) { audio.sfx('buzzer'); this.say(out.reason); return; }
     audio.sfx('buy');
+    vowEvent(this.g, { type: 'buy', item: it.id, qty: n }, this.engine);   // H3: the purchase seam (no Episode 1 vow uses it yet; docs/VOWS.md)
     this.say(`Bought ${it.label}${n > 1 ? ` x${n}` : ''} for ${out.cost} gold.`);
     this.refresh(true);
   }
