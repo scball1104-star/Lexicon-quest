@@ -24,6 +24,7 @@ import { landing } from '../game/packFallback.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF, sceneAllowed } from '../game/story.js';
+import { currentStep, mainQuestFor } from '../data/quests.js';
 import { Silverglass } from '../world/silverglass.js';
 import { Reflections, inGlass } from '../world/reflections.js';
 import { Closeup } from '../world/closeup.js';
@@ -39,6 +40,8 @@ const FIELD_RESPAWN_SEC = 150;       // was 60: beaten foes stay away longer
 const POST_BATTLE_QUIET = 360;       // frames every foe on the map stands down after any battle (6 s)
 const LANTERN_FRAMES = 120;
 const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
+const AIM_FRAMES = 240;                             // H2: the Aim line stays about four seconds
+const AIM_STILL_FRAMES = 600;                       // and comes back after ten seconds standing still
 /**
  * The touch layout's on-canvas ability button (game px, bottom right, above the dialog area's top edge). It was the
  * Lantern button; W9 made it the field ability button (abilities.js ABILITY_BTN), and a tap there while hidden ink
@@ -86,6 +89,7 @@ export class FieldScene {
     this.features = [];                // windows and chimneys of the buildings on this map (townlife.js)
     this.lastTint = null;
     this.lanternHint = false;          // hidden ink is near and the Lantern is carried: show its prompt
+    this.aim = { t: 0, step: null, title: '', still: 0 };   // H2: the Aim line (tickAim / drawAim)
     this.fxTriggers = [];              // one-shot particle tells from the map's ambientFx (the pit page)
     this.fxDone = new Set();
     this.abilities = new FieldAbilities(this);   // W9: Dash Strike, Appraise, the Lantern, Shove
@@ -760,6 +764,7 @@ export class FieldScene {
       else this.abilities.handleTouch(input, true);
     }
     this.abilities.update(canControl && !L.moving && e.scene === this);
+    this.tickAim(canControl && !L.moving);
 
     // prompt over the faced interactable
     this.prompt = null;
@@ -888,7 +893,45 @@ export class FieldScene {
     const e = this.engine;
     if (!e.hasScene('menu')) { this.warnOnce('nomenu', 'menu scene missing'); return; }
     const r = await e.pushAwait('menu');   // the menu plays menu_open / menu_close itself
-    if (r && r.quit) { this.dead = true; this.cutscene.cancel(); }
+    if (r && r.quit) { this.dead = true; this.cutscene.cancel(); return; }
+    this.showAim();
+  }
+
+  // ---------------------------------------------------------------- the Aim line (H2, docs/LEDGER.md)
+  /**
+   * The main quest's current step title, about four seconds at the top of the screen when it changes, when the menu
+   * closes and after ten seconds standing still. The timer only runs while the line can be drawn.
+   */
+  tickAim(still) {
+    const a = this.aim;
+    if (this.frame % 20 === 0) {
+      const step = currentStep(this.hasFlag, mainQuestFor(this.hasFlag));
+      const id = step ? step.id : null;
+      if (a.step !== null && id !== a.step) this.showAim();
+      a.step = id; a.title = step ? step.title : '';
+    }
+    a.still = still && this.engine.scene === this && !this.cutscene.running ? a.still + 1 : 0;
+    if (a.still === AIM_STILL_FRAMES) this.showAim();
+    if (a.t > 0 && this.aimDrawable()) a.t--;
+  }
+  showAim() { this.aim.t = AIM_FRAMES; }
+  /** Never over a dialogue box, never during a scene, never under another scene (the menu, a battle). */
+  aimDrawable() {
+    return !!this.map && this.engine.scene === this && !this.cutscene.running && !this.inputLocked && !this.pendingWarp && !this.loading
+      && !(this.banner && this.banner.active) && !this.closeup.isOpen && this.fadeAlpha < 0.5;
+  }
+  /** True while the Aim line is on screen (tests and LQ_DEBUG.state()). */
+  get aimShown() { return this.aim.t > 0 && !!this.aim.title && this.aimDrawable(); }
+  drawAim(r) {
+    if (!this.aimShown) return;
+    const a = this.aim;
+    const k = Math.min(1, (AIM_FRAMES - a.t + 1) / 8, a.t / 16);   // in over 8 frames, out over the last 16
+    const tw = r.measure(a.title);
+    const w = tw + 30, h = 17;
+    const x = Math.round((r.W - w) / 2), y = 3 - Math.round(3 * (1 - k));
+    drawWindow(r, x, y, w, h, { kind: 'thin', alpha: 0.9 * k });
+    drawIcon(r, 'quest', x + 5, y + 2, { alpha: k });
+    r.text(a.title, x + 20, y + 3, { color: 'cream', alpha: k });
   }
 
   useLantern() {
@@ -1049,6 +1092,7 @@ export class FieldScene {
     this.closeup.draw(r);              // W11: the fountain close-up (screen space, over the lighting)
     if (this.fadeAlpha > 0) r.fade('#000000', this.fadeAlpha);
     if (!this.closeup.isOpen) this.banner.draw(r);
+    this.drawAim(r);
   }
 
   /**
@@ -1276,7 +1320,7 @@ export class FieldScene {
       actors: this.actors.length, props: this.map ? this.map.props.length : 0, lantern: this.lantern,
       entities: [...this.entities.values()].filter((e) => e.present).map((e) => `${e.type}:${e.id}@${e.x},${e.y}${e.state ? ':' + e.state : ''}`),
       prompt: this.prompt ? { x: this.prompt.x, y: this.prompt.y, kind: this.prompt.kind } : null,
-      lanternHint: this.lanternHint, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
+      lanternHint: this.lanternHint, aim: this.aimShown ? this.aim.title : null, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
       glass: this.glass.debugState(), reflections: this.reflections.drawn,
       perf: this.engine.perfStats(),
     };

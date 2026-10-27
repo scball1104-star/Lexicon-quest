@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'e1a5ddfd07d0';
+const SHELL_VERSION = '69d1229a1e4e';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -56,6 +56,7 @@ const PRECACHE = [
   'src/data/enemies.js',
   'src/data/expcurve.js',
   'src/data/items.js',
+  'src/data/ledger.js',
   'src/data/loot-tables.js',
   'src/data/maps/_kit.js',
   'src/data/maps/archive_boss.js',

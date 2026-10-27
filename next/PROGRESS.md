@@ -306,3 +306,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   which keeps the first-load budget line where it was.
 - Next, now running: the Ledger of Names (every named person, faded or bright), the "Names kept" count on the
   title, and a quiet one-line Aim on the field.
+
+## 2026-10-26 (Mon) late: the Ledger of Names is in (not published)
+- The Journal has a third tab, Ledger: every named person in the game by place, bright when you have kept their
+  name and faded when you have not, with the count in the header. Pick a name to read what kept it. 37 names
+  count today (Episode 1, Episode 2 and the Wider Valley); the Episode 3 cast joins when that episode goes live.
+  A full Episode 1 run keeps 17.
+- The title screen shows "Names kept: N of M" under the menu, from your best save.
+- A quiet Aim line shows the current main step at the top of the field for four seconds when it changes, when
+  you close the menu, and when you stand still for ten seconds. Nothing else was added to the screen.
+- Your saves load unchanged; the count is read from what you have already done.
+- Next, now running: Vows at every rest (optional, one at a time, a small reward for keeping one, one honest line
+  for breaking one), and a one-page proposal for the post-game Hard Road mode for you to read before anything
+  is built.

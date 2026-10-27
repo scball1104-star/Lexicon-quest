@@ -25,6 +25,7 @@ import { packsToAwait, awaitPacks } from '../game/packs.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
 import { BANNERS } from '../data/text.js';
+import { namesKeptInSaves, counterLine } from '../data/ledger.js';
 
 export const VERSION = 'v0.2 NEXT';
 const ATTRACT_AFTER = 20;   // seconds idle
@@ -43,6 +44,7 @@ export class TitleScene {
     this.nextSparkle = 0.6;
     this.points = null;
     this.hasSaves = this.anySave();
+    this.ledger = this.ledgerCount();   // H2: "Names kept: N of M" from the slot with the most, computed once per entry
     this.offers = episodeOffers(e.save, typeof location !== 'undefined' ? location.search : '');
     this.ep2 = this.offers.ep2;
     this.ep3 = this.offers.ep3;
@@ -73,10 +75,15 @@ export class TitleScene {
   anySave() {
     try { return this.engine.save.list(true).some((s) => s.exists); } catch { return false; }
   }
+  /** { kept, total, slot } for the Ledger counter, or null (no save: the line is hidden). */
+  ledgerCount() {
+    try { return this.hasSaves ? namesKeptInSaves(this.engine.save) : null; } catch { return null; }
+  }
 
   onResume() {
     this.idle = 0; this.busy = false;
     this.hasSaves = this.anySave();
+    this.ledger = this.ledgerCount();
     const cont = this.menu.items.find((it) => it.id === 'continue');
     if (cont) cont.disabled = !this.hasSaves;
   }
@@ -245,6 +252,7 @@ export class TitleScene {
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
     }
     r.text(VERSION, 4, 205, { color: 'gray' });
+    this.drawLedgerCount(r);
     const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
     const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : null;
     if (note) {
@@ -256,6 +264,17 @@ export class TitleScene {
     }
     if (this.guard) this.drawGuard(r);
     if (rotateHintWanted(e)) drawRotateHint(r, this.frame);
+  }
+
+  /**
+   * H2: one small line, "Names kept: N of M", centred under the menu window (the touch layout with four rows reaches
+   * the screen's bottom edge: the line goes to the top right corner instead). Hidden with no save and under the guard.
+   */
+  drawLedgerCount(r) {
+    if (!this.ledger || this.guard) return;
+    const y = this.win.y + this.win.h + 3;
+    if (y + 11 <= r.H) r.text(counterLine(this.ledger), Math.round(r.W / 2), y, { align: 'center', color: 'gray' });
+    else r.text(counterLine(this.ledger), r.W - 4, 4, { align: 'right', color: 'gray' });
   }
 
   /** The help beside the Episode 2 row: what it starts, and where the player's own game is. */
@@ -273,7 +292,7 @@ export class TitleScene {
     g.box.draw(r);
   }
 
-  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
+  debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, ledger: this.ledger, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
     items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2,
     guard: this.guard ? { id: this.guard.id, line: this.guard.auto ? this.guard.auto.line : this.guard.lines[0].text, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
 }

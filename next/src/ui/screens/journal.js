@@ -2,17 +2,21 @@
 // and (W7) the creature's own battle sprite in a picture box: integer scale (2, 1, 1/2, 1/3, 1/4), nearest
 // neighbour, the biggest that fits; a black silhouette for an entry the player has not met yet.
 
-import { List, rowHeightFor, rowsThatFit } from '../list.js';
+import { List, rowHeightFor, rowsThatFit, touchUi } from '../list.js';
 import { drawWindow, drawIcon, drawDivider, drawScrollArrow } from '../window.js';
 import { drawHelpBar } from '../help.js';
 import { drawTabs } from './common.js';
 import { journal } from '../../data/quests.js';
+import { ledgerRows } from '../../data/ledger.js';
 import { BESTIARY, HELP } from '../../data/text.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { hasFlag } from '../../game/state.js';
 import { fillHero } from '../text.js';
 
-const TABS = ['Quests', 'Bestiary'];
+const TABS = ['Quests', 'Bestiary', 'Ledger'];
+/** Ledger tab (H2): the faded-ink treatment of a name not yet kept: cream at low alpha, no shadow. */
+const FADED = { color: 'cream', alpha: 0.42, shadow: false };
+const LIST_X = 24, LIST_W = 124;
 const WEAK_ICON = { sword: 'sword', spear: 'spear', staff: 'staff', axe: 'axe', bow: 'bow', fire: 'fire', ice: 'ice', thunder: 'thunder', light: 'light' };
 
 /** Normalize g.bestiary[id] into { seen, killed, weak[], resist[] }. */
@@ -96,14 +100,41 @@ export class JournalScreen {
     }) });
     this.scroll = 0;
     this.loreScroll = 0; this.loreMax = 0; this.loreRows = []; this.loreFor = null;
+    this.buildLedger();
+  }
+  /** The Ledger tab's list: a gold place header, then its names (the glove skips headers). */
+  buildLedger() {
+    const g = this.g;
+    const rows = ledgerRows(g.flags, { heroName: g.heroName });
+    const items = [];
+    let place = null;
+    for (const row of rows) {
+      if (row.place !== place) { place = row.place; items.push({ id: 'place:' + place, label: null, disabled: true, header: row.placeName, draw: drawPlaceRow }); }
+      items.push({ id: row.id, label: null, row, draw: drawNameRow });
+    }
+    const rowH = rowHeightFor(this.engine, 12);
+    this.names = new List({ x: LIST_X, y: 34, w: LIST_W, rowH, rows: Math.min(11, rowsThatFit(144, rowH)), items, index: 1, skipDisabled: true, confirmSfx: false });
+    this.count = { kept: rows.filter((r) => r.kept).length, total: rows.length };
   }
   switchTab(d) { this.tab = (this.tab + d + TABS.length) % TABS.length; this.engine.audio.sfx('cursor'); }
+  /** A tap on the header strip turns the page: left half back, right half forward (the arrows drawn there). */
+  tabTap(input) {
+    if (input.pointer.pressed && input.tapIn(0, 0, 384, 30)) this.switchTab(input.pointer.x < 192 ? -1 : 1);
+  }
   update() {
     const { input, audio } = this.engine;
+    if (this.tab === 2) {
+      const act = this.names.update(input, audio);
+      if (act === 'cancel') return 'back';
+      if (act === 'pageL' || act === 'pageR') this.switchTab(act === 'pageL' ? -1 : 1);
+      this.tabTap(input);
+      return null;
+    }
     if (this.tab === 1) {
       const act = this.beasts.update(input, audio);
       if (act === 'cancel') return 'back';
       if (act === 'pageL' || act === 'pageR') this.switchTab(act === 'pageL' ? -1 : 1);
+      this.tabTap(input);
       // Left / Right read a lore entry that is taller than its box; a different beast starts at the top again.
       const id = this.beasts.item ? this.beasts.item.id : null;
       if (id !== this.loreFor) { this.loreFor = id; this.loreScroll = 0; }
@@ -125,11 +156,12 @@ export class JournalScreen {
       return null;
     }
     if (input.pressed('cancel')) { audio.sfx('cancel'); return 'back'; }
-    if (input.pressed('pageL') || input.pressed('pageR') || input.pressed('confirm')) this.switchTab(1);
+    if (input.pressed('pageL')) this.switchTab(-1);
+    else if (input.pressed('pageR') || input.pressed('confirm')) this.switchTab(1);
     const d = input.repeatDir();
     if (d === 'down' && this.scroll < (this.maxScroll || 0)) { this.scroll++; audio.sfx('cursor'); }
     if (d === 'up' && this.scroll > 0) { this.scroll--; audio.sfx('cursor'); }
-    if (input.pointer.pressed && input.tapIn(0, 0, 384, 30)) this.switchTab(1);
+    this.tabTap(input);
     return null;
   }
   drawQuests(r) {
@@ -214,11 +246,43 @@ export class JournalScreen {
     if (this.loreScroll > 0) drawScrollArrow(r, 'up', 372, 118);
     if (!e.killed && this.loreMax === 0 && y + 4 <= 166) r.text('Defeat one to read more.', x, y + 4, { color: 'dim' });
   }
+  /** The Ledger of Names (H2, docs/LEDGER.md): names by place, bright or faded; the count and the kept line on the right. */
+  drawLedger(r) {
+    drawWindow(r, 4, 30, 150, 150);
+    this.names.draw(r, { frame: r.frame, bar: true });
+    drawWindow(r, 158, 30, 222, 150);
+    const x = 166, rx = 372, c = this.count;
+    r.text('Names kept', x, 36, { color: 'gold' });
+    r.text(`${c.kept} of ${c.total}`, rx, 36, { align: 'right', color: 'cream' });
+    drawDivider(r, 164, 50, 210);
+    const it = this.names.item, row = it && it.row;
+    if (!row) return;
+    r.text(row.name, x, 57, row.kept ? { font: 'large', color: 'cream' } : { ...FADED, font: 'large' });
+    if (row.kept) drawIcon(r, 'star', rx - 12, 58);
+    r.text(row.placeName, x, 76, { color: 'gray' });
+    drawDivider(r, 164, 90, 210);
+    if (!row.kept) { r.text('...', x, 96, { color: 'dim' }); return; }
+    r.wrap(row.why, 206).slice(0, 4).forEach((line, i) => r.text(line, x, 96 + i * 11, { color: 'white' }));
+  }
   draw(r) {
     drawWindow(r, 4, 4, 376, 24);
     drawTabs(r, TABS, this.tab, 4, 10, 376);
-    if (this.tab === 0) this.drawQuests(r); else this.drawBestiary(r);
-    drawHelpBar(r, this.tab === 0 ? HELP.menu.journal : HELP.menu.bestiary, { right: TABS[this.tab] });
+    if (this.tab === 0) this.drawQuests(r); else if (this.tab === 1) this.drawBestiary(r); else this.drawLedger(r);
+    const help = this.tab === 0 ? HELP.menu.journal : this.tab === 1 ? HELP.menu.bestiary : (touchUi(this.engine) ? HELP.menu.ledgerTouch : HELP.menu.ledger);
+    drawHelpBar(r, help, { right: TABS[this.tab] });
   }
-  debugState() { return { screen: 'journal', tab: this.tab, beast: this.beasts.item ? this.beasts.item.id : null }; }
+  debugState() {
+    return { screen: 'journal', tab: this.tab, beast: this.beasts.item ? this.beasts.item.id : null,
+      ledger: this.names ? { name: this.names.item ? this.names.item.id : null, ...this.count, rows: this.names.length, scroll: this.names.scroll } : null };
+  }
+}
+
+/** A place header row of the Ledger list (gold, no glove: the item is disabled and skipped). */
+function drawPlaceRow(r, rr) {
+  r.text(this.header, rr.x + 2, rr.y + 1 + Math.max(0, Math.floor((rr.h - 12) / 2)), { color: 'gold' });
+}
+/** A name row: bright cream when kept, faded ink when not. */
+function drawNameRow(r, rr) {
+  const row = this.row, y = rr.y + 1 + Math.max(0, Math.floor((rr.h - 12) / 2));
+  r.text(row.name, rr.x + 6, y, row.kept ? { color: 'cream' } : FADED);
 }

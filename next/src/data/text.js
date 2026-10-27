@@ -249,6 +249,8 @@ export const HELP = {
     talk: 'Ask your companions what comes next.',
     journal: 'Your story so far, and errands open.',
     bestiary: 'Creatures you have met and beaten.',
+    ledger: 'Read a name. {i:btn_pageR}: next page.',
+    ledgerTouch: 'Tap a name to read. Arrows: next page.',
     config: 'Sound, speed, text and window color.',
     save: 'Write your journey into the record.',
     quit: 'Return to the title screen.',

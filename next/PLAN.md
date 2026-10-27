@@ -166,8 +166,9 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 ## Wave H: Responsibility and adventure arc (decided by Scott 2026-10-26; `docs/RESPONSIBILITY_ARC.md`)
 - [x] H1-opening: cold open "The Thirteenth Toll", shorter wake-up, Oren choice remembered, yard slime fight, autoplay updated (`docs/briefs/H1-opening.md`); 10/26
   - H1 polish for H6: the "Willowmere. Last night." caption stays up for the whole climb (fade it after the first toll); the thirteenth bell plays `bell_toll` twice because `bell_first` lives in the ep3 sfx pack (a short core alarm bell, or move the id, inside the initial budget); the lantern pool is the party's cool light, a warm lantern would read better; the yard slime is 3 hits at 55% HP (encounter `hp`), check it feels right on a phone
-- [~] H2-ledger: Ledger of Names (Journal tab), title counter, Aim line (`docs/briefs/H2-ledger.md`)
-- [ ] H3-vows: Vow table, campfire row, battle and field hooks
+- [x] H2-ledger: Ledger of Names (Journal tab, 45 rows, 37 live), title counter, Aim line (`docs/briefs/H2-ledger.md`); 10/26
+  - H2 polish for H6: the Aim line shows the main step's title ("The Apprentice"); it should read as the present aim ("Find Mira at the library"): give each main step a short `aim` string in quests.js and draw that; on tablet overlay layouts the title counter can sit under the Menu pill; expansion kept lines fall back to "Kept." until the x1 pack registers
+- [~] H3-vows: Vow table, rest-flow row, battle and field hooks; writes the Hard Road proposal doc, no code (`docs/briefs/H3-vows.md`)
 - [ ] H3b-hard-road: post-game mode, shape to Scott first
 - [ ] H4-truth: six to eight Name Truth choices and remembered lines
 - [ ] H5-floor-hooks: floor-ending questions and boss intro lines

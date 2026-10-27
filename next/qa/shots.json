@@ -5076,6 +5076,231 @@
      "message": "no caption on the thirteenth"
     }
    ]
+  },
+  {
+   "name": "ui_ledger",
+   "note": "H2: the Journal's Ledger of Names tab, names by place, bright when kept and faded ink when not; the count and the kept line on the right",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 6,
+       "gold": 1240,
+       "items": {
+        "potion": 5,
+        "ether": 2,
+        "lantern_of_recall": 1
+       },
+       "gear": [
+        "longsword",
+        "iron_pike",
+        "crystal_rod",
+        "chain_shirt"
+       ],
+       "flags": {
+        "cold_open_done": 1,
+        "intro_done": 1,
+        "saw_fading_sign": 1,
+        "oren_truth": 1,
+        "yard_fight_done": 1,
+        "met_mael": 1,
+        "mira_joined": 1,
+        "bram_joined": 1,
+        "hazel_farewell_done": 1,
+        "left_town": 1,
+        "first_fight_done": 1,
+        "wick_quest_started": 1,
+        "wick_tag_found": 1,
+        "wick_tag_done": 1,
+        "tess_quest_started": 1,
+        "archive_entered": 1,
+        "archive_f1_done": 1
+       },
+       "hp": 0.8,
+       "playtime": 5025,
+       "map": "archive_f2",
+       "banner": false
+      }
+     ]
+    },
+    {
+     "frames": 5
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.engine.pushAwait('menu',{page:'journal',instant:true}); return true; })()"
+    },
+    {
+     "frames": 6
+    },
+    {
+     "press": "pageL"
+    },
+    {
+     "frames": 4
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 3
+    },
+    {
+     "press": "down"
+    },
+    {
+     "frames": 12
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.screen && LQ_DEBUG.state().sceneState.screen.tab === 2",
+     "message": "the Ledger tab is open"
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.screen.ledger.name === 'hazel'",
+     "message": "the glove skipped the place header and sits on Hazel"
+    }
+   ]
+  },
+  {
+   "name": "ui_title_ledger",
+   "note": "H2: the title screen with a save: 'Names kept: N of M' under the menu (computed once per entry from the slot with the most)",
+   "storage": {
+    "lq-next-slot-1": {
+     "v": 1,
+     "savedAt": "2026-10-26T12:00:00.000Z",
+     "meta": {
+      "name": "Arden",
+      "level": 6,
+      "map": "archive_f2",
+      "playtime": 5025,
+      "chapter": 1,
+      "gold": 1240,
+      "party": [
+       "hero",
+       "mira",
+       "bram"
+      ]
+     },
+     "data": {
+      "v": 1,
+      "heroName": "Arden",
+      "map": "archive_f2",
+      "flags": {
+       "cold_open_done": 1,
+       "intro_done": 1,
+       "saw_fading_sign": 1,
+       "oren_truth": 1,
+       "yard_fight_done": 1,
+       "met_mael": 1,
+       "mira_joined": 1,
+       "bram_joined": 1,
+       "hazel_farewell_done": 1,
+       "left_town": 1,
+       "first_fight_done": 1,
+       "wick_quest_started": 1,
+       "wick_tag_found": 1,
+       "wick_tag_done": 1,
+       "tess_quest_started": 1,
+       "archive_entered": 1,
+       "archive_f1_done": 1
+      }
+     }
+    }
+   },
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "reset",
+     "args": [
+      "title"
+     ]
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.ledger && LQ_DEBUG.state().sceneState.ledger.kept === 5",
+     "message": "the counter reads the seeded slot"
+    }
+   ]
+  },
+  {
+   "name": "field_aim",
+   "note": "H2: the Aim line at the top of the field for about four seconds after the menu closes (the Journal's current main step)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "field",
+       "party": [
+        "mira"
+       ],
+       "level": 4,
+       "map": "willowmere",
+       "pos": {
+        "x": 22,
+        "y": 12,
+        "dir": "down"
+       },
+       "flags": {
+        "cold_open_done": 1,
+        "intro_done": 1,
+        "saw_fading_sign": 1,
+        "yard_fight_done": 1,
+        "met_mael": 1
+       }
+      }
+     ]
+    },
+    {
+     "frames": 160
+    },
+    {
+     "press": "menu"
+    },
+    {
+     "frames": 20
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'menu'",
+     "message": "the menu opened"
+    },
+    {
+     "press": "cancel"
+    },
+    {
+     "frames": 30
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.aim === 'The Apprentice'",
+     "message": "the Aim line shows the current main step after the menu closes"
+    }
+   ]
   }
  ]
 }
