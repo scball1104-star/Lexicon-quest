@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LEDGER, ALIASES, EXCLUDED, PLACES, ledgerRows, namesKept, namesKeptInSaves, counterLine, keepLine, placeName } from '../../src/data/ledger.js';
+import { LEDGER, ALIASES, EXCLUDED, PLACES, REACHED, ledgerRows, namesKept, namesKeptInSaves, counterLine, keepLine, placeName } from '../../src/data/ledger.js';
 import { NPCS } from '../../src/data/npcs.js';
 import { X1_NPCS } from '../../src/data/x1/npcs.js';
 import { register as registerX1Flags } from '../../src/data/x1/flags.js';
@@ -23,11 +23,12 @@ const EM_DASH = String.fromCharCode(0x2014);
 registerX1Flags();
 
 const liveRows = (flags, o) => ledgerRows(flags, { x1: true, ep3: false, ...o });
+const on = (...ids) => Object.fromEntries(ids.flatMap((x) => (typeof x === 'object' && !Array.isArray(x) ? Object.keys(x) : x)).map((f) => [f, true]));
 
 /** Every Episode 1 flag a credits save can hold: the main line, H1's marks and every side story's flags. */
 function ep1CreditsFlags() {
   const f = {};
-  for (const k of [...EP1_DONE_FLAGS, 'cold_open_done', 'yard_fight_done', 'oren_truth',
+  for (const k of [...EP1_DONE_FLAGS, 'cold_open_done', 'yard_fight_done', 'saw_fading_sign', 'oren_truth',
     'tess_letter_1_delivered', 'tess_letter_2_delivered', 'tess_letter_3_delivered']) f[k] = true;
   for (const q of SIDE_QUESTS) {
     f[q.start] = true; f[q.done] = true;
@@ -78,14 +79,17 @@ test('every keep flag exists in FLAGS (H1 and expansion flags included) and ever
   assert.equal(keepLine('no_such_flag'), null);
 });
 
-test('a fresh game keeps nothing; the yard slime keeps Oren first; the counter string', () => {
+test('a fresh game keeps nothing; the sign keeps Oren first, by the word and not the punch; the counter string', () => {
   const g = createGame('Arden');
   assert.deepEqual(namesKept(g.flags), { kept: 0, total: namesKept(g.flags).total });
   assert.equal(namesKept({}).kept, 0);
-  const rows = liveRows({ yard_fight_done: true }, { heroName: 'Arden' });
+  assert.deepEqual(liveRows({ yard_fight_done: true }).filter((r) => r.kept).map((r) => r.id), [], 'the slime keeps nobody (H6, CRITIQUE_ARC 5)');
+  const rows = liveRows({ saw_fading_sign: true, oren_truth: true }, { heroName: 'Arden' });
   const kept = rows.filter((r) => r.kept).map((r) => r.id);
   assert.deepEqual(kept, ['oren']);
-  assert.equal(rows.find((r) => r.id === 'oren').why, 'The yard slime in the bakery lane is beaten.');
+  const truth = rows.find((r) => r.id === 'oren').why, lie = liveRows({ saw_fading_sign: true, oren_lie: true }).find((r) => r.id === 'oren').why;
+  assert.match(truth, /his own name from you/); assert.match(lie, /forgotten too/);
+  assert.notEqual(truth, lie, 'the line differs by the answer, the keep does not');
   assert.equal(rows[0].id, 'hero'); assert.equal(rows[0].name, 'Arden'); assert.equal(rows[0].kept, false);
   assert.equal(counterLine({ kept: 17, total: 63 }), 'Names kept: 17 of 63');
   assert.match(counterLine(namesKept({})), /^Names kept: 0 of \d+$/);
@@ -100,14 +104,15 @@ test('an Episode 1 credits save keeps every Episode 1 name that has a keep (the 
   for (const r of rows.filter((x) => x.place === 'hollowmere')) assert.equal(r.kept, false, `${r.id} waits for Episode 2`);
   const c = namesKept(ep1CreditsFlags(), { x1: true, ep3: false });
   assert.equal(c.kept, 17, 'two party members, fourteen Willowmere names and Quill');
+  assert.ok(!rows.some((x) => x.place === 'hollowmere'), 'the Hollow is not counted before the crossing (H6)');
 });
 
 test('names the story has not said yet show as ???, and the Hollow has no name until Episode 2 gives it back', () => {
-  const before = liveRows({});
+  const before = liveRows({ crossing_done: true });
   assert.equal(before.find((r) => r.id === 'aurel').name, '???');
   assert.equal(before.find((r) => r.id === 'aurel').placeName, 'The Nameless Hollow');
   assert.equal(placeName('hollowmere', { nh_restored: true }), 'Hollowmere');
-  const after = liveRows({ aurel_named: true, nh_restored: true });
+  const after = liveRows({ crossing_done: true, aurel_named: true, nh_restored: true });
   assert.equal(after.find((r) => r.id === 'aurel').name, 'Aurel');
   assert.equal(after.find((r) => r.id === 'aurel').kept, true);
   // Episode 3 opens with Garrick's name struck: his row goes dark and unreadable until Bram raises it
@@ -121,16 +126,41 @@ test('names the story has not said yet show as ???, and the Hollow has no name u
   assert.equal(raised.find((r) => r.id === 'mara').name, 'Mara');
   // the episode and expansion gates
   assert.ok(!liveRows({}).some((r) => r.ep === 3), 'no Emberpeak rows while EP3_LIVE is off');
-  assert.ok(ledgerRows({}, { ep3: true }).some((r) => r.ep === 3), 'Emberpeak rows once it is live');
+  assert.ok(ledgerRows({ ep3_started: true }, { ep3: true }).some((r) => r.ep === 3), 'Emberpeak rows once it is live and begun');
+  assert.ok(!ledgerRows({}, { ep3: true }).some((r) => r.ep === 3), 'and not before Episode 3 starts');
   assert.ok(!ledgerRows({}, { x1: false }).some((r) => r.place === 'wider' || r.id === 'pell'), 'no expansion rows when x1 is off');
-  assert.ok(!ledgerRows({}, { x1: true, regions: { north: false } }).some((r) => r.id === 'hesper'), 'a region switched off drops its names');
+  assert.ok(ledgerRows({ first_fight_done: true }, { x1: true }).some((r) => r.id === 'hesper'), 'the Wider Valley once its gate opens');
+  assert.ok(!ledgerRows({ first_fight_done: true }, { x1: true, regions: { north: false } }).some((r) => r.id === 'hesper'), 'a region switched off drops its names');
+});
+
+test('H6: a place shows and counts once reached; every Episode 1 and 2 row has its own line, in voice (CRITIQUE_ARC 3, 4)', () => {
+  assert.deepEqual(REACHED, { valley: 'left_town', wider: 'first_fight_done', hollowmere: 'crossing_done', emberpeak: 'ep3_started' });
+  const places = (flags) => [...new Set(liveRows(flags).map((r) => r.place))];
+  const afterMael = on('intro_done', 'saw_fading_sign', 'met_mael');
+  assert.deepEqual(places(afterMael), ['party', 'willowmere'], 'after Mael: the party and the town only');
+  assert.deepEqual(namesKept(afterMael, { x1: true, ep3: false }), { kept: 1, total: 18 }, 'after Mael: 1 of 18');
+  const door = on(afterMael, 'mira_joined', 'bram_joined', 'left_town', 'first_fight_done', 'archive_entered');
+  assert.deepEqual(places(door), ['party', 'willowmere', 'valley', 'wider'], 'at the Archive door: the valleys join');
+  assert.deepEqual(namesKept(door, { x1: true, ep3: false }), { kept: 3, total: 25 }, 'Oren, Bram, Holt: 3 of 25');
+  const credits = namesKept(ep1CreditsFlags(), { x1: true, ep3: false });
+  assert.deepEqual(credits, { kept: 17, total: 25 }, 'after the credits: 17 of 25, not 17 of 37');
+  assert.ok(liveRows(on(EP1_DONE_FLAGS, 'crossing_done')).some((r) => r.place === 'hollowmere'), 'the Hollow once the ford is crossed');
+  assert.equal(ledgerRows({}, { x1: true, ep3: false, all: true }).length, 37, 'every live row, reached or not (all)');
+  // every Episode 1 and 2 row with a keep says its own line (not the flag's note), verb first or a plain sentence
+  const all = {}; for (const f of Object.keys(FLAGS)) all[f] = true;
+  for (const r of LEDGER.filter((x) => x.ep <= 2 && x.flag)) {
+    assert.ok(r.why, `${r.id} has its own line`);
+    const line = typeof r.why === 'function' ? r.why((f) => !!all[f]) : r.why;
+    assert.notEqual(line, keepLine(r.flag), `${r.id}: not the flag's note`);
+    assert.ok(/^[A-Z][^]*\.$/.test(line) && line.length <= 70 && !line.includes(EM_DASH), `${r.id}: ${line}`);
+  }
 });
 
 test('the title reads the slot with the most names kept, autosave included, and shrugs off a corrupt slot', () => {
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), key: (i) => [...m.keys()][i] ?? null, get length() { return m.size; } }; };
   const save = createSave({ storage: mem(), log: () => {} });
   assert.equal(namesKeptInSaves(save), null, 'no save: hidden');
-  const a = createGame('Arden'); a.flags.yard_fight_done = true;
+  const a = createGame('Arden'); a.flags.saw_fading_sign = true;
   const b = createGame('Sol'); for (const f of Object.keys(ep1CreditsFlags())) b.flags[f] = true;
   save.save(0, serialize(a), {}); save.save(2, serialize(b), {});
   const best = namesKeptInSaves(save, { x1: true, ep3: false });

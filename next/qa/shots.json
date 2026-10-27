@@ -2310,6 +2310,10 @@
      "frames": 10
     },
     {
+     "waitFor": "LQ_DEBUG.commands().includes('party')",
+     "timeout": 20000
+    },
+    {
      "call": "party",
      "args": [
       "mira",
@@ -2529,7 +2533,7 @@
   },
   {
    "name": "story_wake",
-   "note": "wake_up: Hazel calls from the hearth, the hero still in bed (story)",
+   "note": "wake_up: Hazel calls from the hearth, the hero still in bed, under the blanket (story; H6)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
@@ -2842,6 +2846,10 @@
     },
     {
      "frames": 160
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -5020,7 +5028,7 @@
   },
   {
    "name": "cold_open_thirteenth",
-   "note": "H1 cold open: the thirteenth toll at the top, no name, the hero's ! and the bells hanging still in the silence",
+   "note": "H1 cold open: the thirteenth toll at the top, no name, the hero's ! and the twelve bells hanging still (H6) in the silence",
    "steps": [
     {
      "call": "newGame",
@@ -5304,7 +5312,7 @@
   },
   {
    "name": "ui_vow_offer",
-   "note": "H3 (docs/VOWS.md): the rest flow's vow window at the F3 Keeper's font after the heal: 'Take a vow?' with 'No vow' first and selected, the five vows under it",
+   "note": "H3 (docs/VOWS.md): the rest flow's vow window at the F3 Keeper's font after the heal: 'Take a vow?' with 'No vow' first and selected, the five vows under it (H6: the once-per-save intro box is marked said, so the window is the shot)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
@@ -5367,7 +5375,7 @@
      "timeout": 20000
     },
     {
-     "eval": "(async () => { const T = await import('/next/src/data/text.js'); for (const k of Object.keys(T.BARKS)) LQ_ENGINE.game.counters['bark:' + k] = 1; LQ_ENGINE.game.counters.battles = 2; return true; })()"
+     "eval": "(async () => { const T = await import('/next/src/data/text.js'); for (const k of Object.keys(T.BARKS)) LQ_ENGINE.game.counters['bark:' + k] = 1; LQ_ENGINE.game.counters.battles = 2; LQ_ENGINE.game.counters.vow_intro = 1; return true; })()"
     },
     {
      "advance": 170
@@ -5492,7 +5500,7 @@
   },
   {
    "name": "ui_vow_kept",
-   "note": "H3: the kept-vow payout at the next rest, before the offer: the reward box (sword mastery +4) for a vow carried through three battles",
+   "note": "H3: the kept-vow payout at the next rest, before the offer: the reward box (sword mastery +4) for a vow carried through three battles; H6: the member's card beside it, the mastery bar filling",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",

@@ -10,7 +10,8 @@ import { KeyArt, DARK } from '../ui/keyart.js';
 import { deviceOf } from '../ui/glyphs.js';
 import { START_MAP, START_POS, COLD_OPEN_START, createGame } from '../game/state.js';
 
-const FADE = 30, HOLD = 240, LINE_AT = 36, LINE_TOTAL = 210, CAPTION_Y = 44, LINE_Y = 170;
+// LINE_Y (H6): the opening line sits in the dark above the hero, under the toll captions.
+const FADE = 30, HOLD = 240, LINE_AT = 36, LINE_TOTAL = 210, CAPTION_Y = 44, LINE_Y = 74;
 
 /** A fresh Episode 1 game that has neither woken up nor climbed opens on the tower. */
 export function coldOpenWanted(game) {

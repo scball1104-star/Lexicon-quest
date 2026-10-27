@@ -1,20 +1,10 @@
 // Battle scene (W2-battle-scene): FF6 / Chrono Trigger staging over the pure rules in src/battle/rules.js.
-//
 //   const r = await engine.pushAwait('battle', { encounterId, start: 'normal'|'preemptive'|'ambush', canFlee, gameover });
 //   r === 'win' | 'lose' | 'flee'
-//
-// Flow: field snapshot -> encounter sfx + mosaic + slice transition -> stage (backdrop, indigo band, baseline)
-// -> party slides in -> CTB loop
-// (enemy turns and the player's commands become event arrays; battle/scene/animator.js turns them into
-// frame-timed ops this scene runs) -> victory (poses, fanfare, rewards + level-up windows) | defeat (fade
-// to the gameover scene unless { gameover: false }) | flee (dash out). Rewards are applied to engine.game
-// (battle/scene/rewards.js) the moment the rules say the battle is over.
-//
-// Debug (install): LQ_DEBUG.battle(encId, { start, level, seed, auto, fresh }) starts a battle and returns at
-// once; LQ_DEBUG.battleWait() -> Promise of the result; LQ_DEBUG.battleResult() -> last result;
-// LQ_DEBUG.battleAct(action) performs an action for the waiting party member; LQ_DEBUG.battleUntil(cond)
-// fast-forwards with Auto decisions until cond ('hero' | 'mira' | 'bram' = that member's command,
-// 'telegraph' = a party turn with a telegraph pending, 'kept', 'mirror' (Mirrored Combo), 'phase2' / 'phase3', 'over').
+// Flow: snapshot, transition, stage, CTB loop (event arrays -> battle/scene/animator.js ops), then victory (rewards.js
+// applies them when the rules end the battle) | defeat (gameover unless { gameover: false }) | flee.
+// Debug: LQ_DEBUG.battle(encId, { start, level, seed, auto, fresh }), battleWait(), battleResult(), battleAct(action),
+// battleUntil(cond: 'hero' | 'mira' | 'bram' | 'telegraph' | 'kept' | 'mirror' | 'phase2' | 'phase3' | 'over').
 
 import { createEncounterBattle, memberStats } from '../battle/rules.js';
 import { partyAction } from '../battle/ai.js';
@@ -24,7 +14,7 @@ import { describeItem } from '../battle/loot.js';
 import { SKILLS } from '../data/skills.js';
 import { newMember } from '../data/party.js';
 import { createGame } from '../game/state.js';
-import { vowEvent, vowBattleEvents } from '../game/vows.js';
+import { vowEvent, vowBattleEvents, vowForbids, activeVow } from '../game/vows.js';
 import { BattleFx, SliceTransition, C } from '../battle/fx.js';
 import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
@@ -46,9 +36,8 @@ const LOG_SHOW = 3;
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
   east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
-// In-battle boss name card (the W5 cutscene title style, laid on the battlefield): name + subtitle, keyed by the
-// encounter's leader id. The field cutscene still shows its own full-screen `s.title` card before the swirl; this
-// is the name settling onto the stage as the party enters (FF6 boss reveal), and the card the battle harness sees.
+// In-battle boss name card (name + epithet), keyed by the encounter's leader id: it settles onto the stage as the party
+// enters (the field scene shows its own `s.title` card before the swirl).
 const BOSS_CARD = {
   refl_hero: { name: 'THE OTHER SELVES', sub: 'Hall of Reflections' },
   nameless_king: { name: 'THE NAMELESS KING', sub: 'Keeper of the Court' },
@@ -89,6 +78,8 @@ const BACKDROPS = {
   x1_larchhill: { asset: 'x1_battle_larchhill', cell: 0, bright: 1.0, tint: null },
   x1_barrow: { asset: 'x1_battle_barrow', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
   x1_culvert: { asset: 'x1_battle_culvert', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
+  // H6: the town's key art, for the yard slime
+  willowmere: { asset: 'title', cell: 0, bright: 1.0, tint: null, darken: 0.22 },
 };
 const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
   'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne'];
@@ -145,7 +136,8 @@ function backdropAssetReady(engine, key) {
   const rec = BACKDROPS[key] || BACKDROPS.valley;
   return !!backdropArt(engine.assets, rec.asset);
 }
-export function backdropKey(zoneId, isBoss) {
+export function backdropKey(zoneId, isBoss, stage = null) {
+  if (stage && BACKDROPS[stage]) return stage;   // H6
   const zone = ZONES[zoneId];
   if (isBoss && zoneId === 'archive_boss') return 'boss';
   if (ZONE_BACKDROP[zoneId]) return ZONE_BACKDROP[zoneId];
@@ -156,11 +148,11 @@ export function backdropKey(zoneId, isBoss) {
  * Build the stage layer (CRITIQUE C3): the backdrop, then the indigo band from bandY down (2 px dithered top
  * edge) under everything that stands on it. Returns { ...layer, usedAsset, band: { y, alpha } }.
  */
-export function buildBackdrop(engine, zoneId, isBoss) {
+export function buildBackdrop(engine, zoneId, isBoss, stage = null) {
   const r = engine.renderer;
   const layer = r.createLayer(W, H);
   const g = layer.ctx;
-  const key = backdropKey(zoneId, isBoss);
+  const key = backdropKey(zoneId, isBoss, stage);
   const rec = BACKDROPS[key] || BACKDROPS.valley;
   const assets = engine.assets;
   let usedAsset = false;
@@ -262,9 +254,7 @@ export class BattleScene {
     const g = e.game;
     g.counters = g.counters || {};
     const n = (g.counters.battles = (g.counters.battles || 0) + 1);
-    // An explicit seed (debug battles, QA shots) gets its own stream so the fight replays the same whatever the
-    // engine was seeded with (shots.py boots without ?seed, so the engine seed is Date.now()); ordinary battles
-    // fork the engine rng per battle so no two playthroughs match.
+    // An explicit seed (debug, QA shots) gets its own stream, so the fight replays; ordinary battles fork the engine rng.
     const rng = data.seed != null ? createRng(hashSeed(`battle:${data.seed}`)) : e.rng.fork(`battle:${n}`);
     const { battle, encounter } = createEncounterBattle(data.encounterId, {
       party: g.party, rng, inventory: g.items, bestiary: bestiaryForBattle(g), start: data.start || 'normal', flags: data.flags || g.flags,
@@ -274,7 +264,8 @@ export class BattleScene {
     if (e.cave) e.cave.armBattle(battle, g);   // the Deep Stacks: the Rebound rise and First Line
     this.b = battle; this.encounter = encounter;
     this.zone = encounter.zone || (ENCOUNTERS[data.encounterId] && ENCOUNTERS[data.encounterId].zone) || 'valley';
-    this.backdropLayer = buildBackdrop(e, this.zone, !!encounter.boss);
+    this.stage = (ENCOUNTERS[data.encounterId] && ENCOUNTERS[data.encounterId].stage) || null;
+    this.backdropLayer = buildBackdrop(e, this.zone, !!encounter.boss, this.stage);
     e.renderer.setBackdrop(this.backdropLayer.canvas);
     const startEvents = battle.startEvents.length ? battle.startEvents : battle.begin();
     const startEv = startEvents.find((x) => x.type === 'battle_start');
@@ -366,7 +357,7 @@ export class BattleScene {
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
     if (this.kick.frames > 0 && --this.kick.frames <= 0) { this.kick.x = 0; this.kick.y = 0; }
     if (this.backdropLayer && !this.backdropLayer.usedAsset && backdropAssetReady(e, this.backdropLayer.key)) {
-      this.backdropLayer = buildBackdrop(e, this.zone, !!(this.encounter && this.encounter.boss));
+      this.backdropLayer = buildBackdrop(e, this.zone, !!(this.encounter && this.encounter.boss), this.stage);
       e.renderer.setBackdrop(this.backdropLayer.canvas);
     }
     if (this.hitstop > 0) { this.hitstop--; return; }
@@ -430,12 +421,12 @@ export class BattleScene {
     this.currentUid = u.uid;
     if (this.fast) {
       if (this.fastSatisfied(u)) { this.endFast(); }
-      else { this.performParty(partyAction(this.b) || { type: 'defend' }); return; }
+      else { this.performParty(this.autoAction()); return; }
     }
     if (this.auto) {
       // A short beat so the player can read the timeline, and a chance to cancel Auto.
       if (input.pressed('cancel')) { e.setSetting('autoBattle', false); audio.sfx('cancel'); input.consume('cancel'); }
-      else if (++this.autoHold >= this.scaled(12)) { this.autoHold = 0; this.performParty(partyAction(this.b) || { type: 'defend' }); }
+      else if (++this.autoHold >= this.scaled(12)) { this.autoHold = 0; this.performParty(this.autoAction()); }
       return;
     }
     if (this.menu.state === 'closed') {
@@ -445,6 +436,13 @@ export class BattleScene {
       const a = this.actor(u.uid);
       if (a) a.setPose('ready');
     }
+  }
+  /** Auto's pick. H6: never what the active vow forbids (else Defend). */
+  autoAction() {
+    const g = this.engine.game, no = (x) => vowForbids(g, x), off = (x) => ({ ...x, enabled: x.enabled && !no(x) });
+    const view = activeVow(g) ? Object.create(this.b, { commands: { value: (u) => this.b.commands(u).map((c) => ({ ...off(c), list: c.list && c.list.map(off) })) } }) : this.b;
+    const a = partyAction(view) || { type: 'defend' };
+    return no(a) ? { type: 'defend' } : a;
   }
   endFast() {
     this.fast = null;

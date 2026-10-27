@@ -611,6 +611,13 @@
    "group": "story",
    "pack": "core"
   },
+  "bell_thirteenth": {
+   "src": "assets/audio/sfx/bell_thirteenth.wav",
+   "volume": 1.0,
+   "duration": 0.787,
+   "group": "big",
+   "pack": "core"
+  },
   "bell_peal": {
    "src": "assets/audio/sfx/bell_peal.wav",
    "volume": 1.0,

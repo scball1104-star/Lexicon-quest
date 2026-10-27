@@ -52,7 +52,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Defeat | `stopMusic(0.5)`, `await jingle('gameover_sting', { duckMusic: false })`, `music('gameover')` |
 | Inn / save | `await jingle('inn_rest')` across the fade to black (music pauses and resumes); the chapel Bell: `jingle('save')` |
 | Party / quests | `party_join` when Mira or Bram joins, `quest_done` for side quests |
-| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
+| Story | `bell_toll` (a tower bell; the cold open's twelve tolls), `bell_thirteenth` (the Thirteenth Bell, core), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
 | Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors), `mere_still` (the Hollow and its interiors), `court_hush` (every Court floor) |
 
 ## Sound effects
@@ -202,6 +202,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 
 | id | length | files | intent |
 |---|---|---|---|
+| `bell_thirteenth` | 787 ms | 1 | The Thirteenth Bell, the cracked bell of the Stacks, as the town hears it (the cold open's thirteenth toll, F1, the Stacks, the credits): one hard strike of a great bronze bell a tritone below the town's twelve (nominal D-sharp 3 against their A3). The crack splits every partial so it beats sour and rattles, and it never sings on: the crack chokes it in under a second, then silence. Core set, under 40 KB (H6, CRITIQUE_ARC 10). |
 | `enemy_die` | 750 ms | 1 | Enemy defeated: the classic SNES dissolve. Noise crushed to a falling sample rate (8 kHz to 300 Hz), a short descending pulse arpeggio and a soft low poof. |
 | `boss_die` | 2.96 s | 1 | Boss defeated: a chain of growing explosions, then a long collapsing dissolve with phasing and a final deep boom into a big room tail. About 3.2 s. |
 | `encounter` | 1.14 s | 1 | Battle starts (screen swirl): a rising swirl (vibrato pulse 200 to 1200 Hz plus a resonant noise sweep) that bursts into a crash and low boom. Urgent, 1 s. |

@@ -40,8 +40,8 @@ export const SFX = [
   'drop_magic', 'drop_rare', 'drop_legendary', 'menu_open', 'menu_close', 'equip', 'buy', 'save_chime',
   // Added by W1-audio at W1-content's request
   'bell_toll', 'bell_peal', 'sign_fade', 'name_restore', 'door_rumble', 'ink_gurgle', 'page_flutter',
-  // H1: the alarm bell of the cold open's thirteenth toll (an Episode 3 id in the manifest, falls back to bell_toll)
-  'bell_first',
+  // H6 (CRITIQUE_ARC 10): the Thirteenth Bell, a core sfx of its own (the cold open, F1, the Stacks, the credits)
+  'bell_thirteenth',
   // Extra ids W1-audio ships
   'switch_off', 'door_locked', 'door_unlock', 'jump', 'land', 'fall', 'brazier_light', 'shelf_move', 'crystal_hit',
   'emote_pop', 'item_use', 'revive', 'defend', 'stun', 'telegraph', 'summon', 'name_devour', 'coin',

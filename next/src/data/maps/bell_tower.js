@@ -25,6 +25,8 @@ for (let y = 7; y <= 14; y++) steps.push([12, y]);
 for (let y = 17; y <= 24; y++) steps.push([8, y]);
 for (let y = 27; y <= 34; y++) steps.push([12, y]);
 const warm = '#ffb866';
+/** H6: the twelve bells, three by two on each belfry wall. */
+export const BELLS = [8, 9, 10, 14, 15, 16].flatMap((x) => [[x, 2], [x, 3]]);
 
 export default {
   id: 'bell_tower', name: 'The Bell Tower', area: 'interior',
@@ -36,13 +38,13 @@ export default {
   ground: rows(g),
   overlays: [
     ...steps.map(([x, y]) => ({ t: 'stairs_stone_m', x, y })), { t: 'step_stone', x: 12, y: 35 },
-    { t: 'window_round', x: 12, y: 2 }, { t: 'window_in_night', x: 9, y: 2 }, { t: 'window_in_night', x: 15, y: 2 },
+    { t: 'window_round', x: 12, y: 2 }, { t: 'window_in_night', x: 11, y: 2 }, { t: 'window_in_night', x: 13, y: 2 },
     { t: 'gallery_window', x: 10, y: 13 }, { t: 'gallery_window', x: 11, y: 23 },
     { t: 'window_in_night', x: 10, y: 33 }, { t: 'window_in_night', x: 14, y: 33 },
     { t: 'in_barrel', x: 15, y: 37 }, { t: 'in_crate', x: 9, y: 37 }, { t: 'in_sacks', x: 10, y: 37 },
   ],
   decor: [
-    { t: 'prop_thirteenth_bell', x: 8, y: 5 }, { t: 'prop_thirteenth_bell', x: 14, y: 5 },
+    ...BELLS.map(([x, y]) => ({ t: 'prop_ferry_bell', x, y })),
     { t: 'pillar', x: 8, y: 6 }, { t: 'pillar', x: 16, y: 6 },
     { t: 'candelabra', x: 12, y: 25 }, { t: 'candelabra', x: 8, y: 15 },
     { t: 'candelabra', x: 9, y: 35 }, { t: 'candelabra', x: 15, y: 35 },

@@ -2,7 +2,7 @@
 // is passed in only for the toast. Save shape: game.vow = null | { id, chapter, battles, state, brokenBy },
 // game.vowsKept = [{ id, chapter, paid }] (both default in state.js createGame).
 
-import { VOWS, VOW_BY_ID, VOW_REWARD, VOW_PAID_CAP } from '../data/vows.js';
+import { VOWS, VOW_BY_ID, VOW_REWARD, VOW_PAID_CAP, VOW_INTRO } from '../data/vows.js';
 import { CONSUMABLES } from '../data/items.js';
 import { grantMastery } from '../data/party.js';
 import { SKILLS } from '../data/skills.js';
@@ -47,10 +47,29 @@ export function vowEvent(g, evt, engine = null) {
   if (evt.type === 'fell' && def.member && evt.member !== def.member) return false;
   g.vow.state = 'broken';
   g.vow.brokenBy = evt.type;
-  if (engine && engine.toasts && typeof engine.toasts.flash === 'function') {
-    try { engine.toasts.flash(fill(VOW_TEXT.ended, { name: def.name }), { frames: 90 }); } catch (e) { /* the toast is optional */ }
+  const text = fill(VOW_TEXT.ended, { name: def.name });
+  const battle = engine && engine.scene && engine.scene.name === 'battle' && typeof engine.scene.logLine === 'function' ? engine.scene : null;
+  if (battle) battle.logLine(text, 'orange');   // H6: in battle, the log
+  else if (engine && engine.toasts && typeof engine.toasts.flash === 'function') {
+    try { engine.toasts.flash(text, { frames: 90 }); } catch (e) { /* the toast is optional */ }
   }
   return true;
+}
+
+/** H6: would this action (or command entry) end the active vow? Auto never takes one that would. */
+export function vowForbids(g, a) {
+  const def = activeVow(g), on = (t) => !!def && def.breaksOn.includes(t), k = a && (a.type || a.id);
+  if (!a) return false;
+  if (a.item) return on('item') && isHealingItem(a.item);
+  return k === 'flee' ? on('flee') : on('fury') && (k === 'fury' || !!(SKILLS[a.skill] && SKILLS[a.skill].kind === 'fury'));
+}
+
+/** H6: the box before the first vow offer, once per save. */
+export function takeVowIntro(g) {
+  const c = g && (g.counters = g.counters || {});
+  if (!c || c.vow_intro) return null;
+  c.vow_intro = 1;
+  return pickLine(g, VOW_INTRO);
 }
 
 /** Battle seam: one party action's events (rules.js perform): a healing item (action_start) or a spent Fury art (fury_gain). */
@@ -105,9 +124,9 @@ export function settleVow(g) {
   if (member && vowsPaid(g, chapter) < VOW_PAID_CAP) {
     const weapon = member.weapon || Object.keys(member.mastery || {})[0] || null;
     if (weapon) {
-      const points = rewardPoints(chapter);
+      const points = rewardPoints(chapter), before = (member.mastery || {})[weapon] || 0;
       const out = grantMastery(member, weapon, points);
-      reward = { to: member.id, name: member.name, weapon, points, level: { from: out.from, to: out.to }, unlocked: out.unlocked };
+      reward = { to: member.id, name: member.name, weapon, points, before, after: member.mastery[weapon], level: { from: out.from, to: out.to }, unlocked: out.unlocked };
     }
   }
   g.vowsKept.push({ id: def.id, chapter, paid: !!reward });
@@ -136,4 +155,4 @@ export function vowLine(g) {
   return s.active ? fill(VOW_TEXT.active, { name: s.name }) : VOW_TEXT.endedShort;
 }
 
-export default { offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem };
+export default { offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem, vowForbids, takeVowIntro };

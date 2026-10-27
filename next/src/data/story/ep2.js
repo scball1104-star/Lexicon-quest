@@ -1,9 +1,8 @@
 // Lexicon Quest NEXT, Episode 2: "The Town Without a Name".
 // Every scripted scene, plus inspect text for signs, plaques, mirrors and props.
 //
-// Scenes use ONLY the cutscene API (DESIGN 5.4; signatures in docs/story/STAGING.md section 1). Places and props
-// are map mark / event / actor names, never tile coordinates. Staging for every scene (who stands where, props,
-// camera, music, triggers) is in docs/story/STAGING_EP2.md. Beat sheet and canon: docs/story/EPISODE2.md.
+// Scenes use ONLY the cutscene API (DESIGN 5.4; docs/story/STAGING.md 1). Places and props are map mark / event / actor
+// names, never tile coordinates. Staging: docs/story/STAGING_EP2.md; canon: docs/story/EPISODE2.md.
 //
 // Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, {hero} = player name.
 // Scene ids and line ids never repeat an Episode 1 id (qa/content/ep2.test.mjs checks it).
@@ -55,8 +54,6 @@ async function ep2_morning(s) {
   await say(s, 'hazel', 'You heard it too. Thirteen.');
   await s.walk('hero', ['down']);
   await s.face('hero', 'hazel');
-  // W11 (PLAYTEST_REVIEW_3 fix 3): the opening is trimmed to a departure. Mira's "every map stops at the river" is
-  // gone (Mael says the same of his books a minute later), and the packing pair is one box.
   await say(s, 'hazel', "Mira has been at my table since before the birds. Bram packed twice: once for him, once for you.");
   await say(s, 'bram', "You didn't pack. I checked that too.");
   await say(s, 'hazel', 'Mael wants the three of you at the well. Take these, for the road.');
@@ -82,10 +79,9 @@ async function ep2_mael(s) {
   await say(s, 'mael', "If anyone in the Hollow can say {hero}'s name better than I can, bring me back how.");
   // H4: the one line that remembers the well on the first morning (mael_truth / mael_lie, ep1.js mael_intro).
   if (await s.hasFlag('mael_truth')) {
-    await say(s, 'mael', "'Maybe,' you said at the well, that first morning. Most would have said 'up early'. Take these. I collect honest answers.");
-    await s.give('ether', 2);
+    await say(s, 'mael', "'Not much,' you said at the well, that first morning. It was the first true thing anyone told me that day.");
   } else if (await s.hasFlag('mael_lie')) {
-    await say(s, 'mael', "'Up early,' you told me at the well, that first morning. I have been lied to by better. Never by kinder.");
+    await say(s, 'mael', "'Like a stone,' you told me at the well, that first morning. I have been lied to by better. Never by kinder.");
   }
   await say(s, 'bram', "My father left before dawn. There's a note on the forge. GONE TO THE FORD. That's the whole note.");
   await say(s, 'mira', "The list had a place scratched out. East. That's where we go.");
@@ -306,11 +302,11 @@ async function nh_arrival(s) {
   await say(s, 'corin', 'You came in from outside. Tell me straight, stranger. Does it look like a home, from out there?');
   const c = await s.choice(['It looks lost.', 'It looks like home.']);
   if (c === 0) {
-    await say(s, 'corin', '...Lost. I thought so. Nobody in here can say it. Take the watch rations. We never go anywhere to need them.');
-    await s.give('potion', 2);
+    await say(s, 'corin', '...Lost. I thought so. Nobody in here can say it.');
     await s.setFlag('corin_truth');
   } else {
-    await say(s, 'corin', "Like home. Then I'll keep saying it. Welcome home.");
+    await say(s, 'corin', "Like home. Then I'll keep saying it. Welcome home. Take the watch rations. We never go anywhere to need them.");
+    await s.give('potion', 2);
     await s.setFlag('corin_lie');
   }
   await say(s, 'corin', 'The mayor will want to see you. He is at the fountain, in the middle of the square. He usually is.');
@@ -382,7 +378,7 @@ async function elian_hall(s) {
   await s.emote('elian', '...');
   // H4 (RESPONSIBILITY_ARC 3.4): the mayor's ledger of true things. 'Only here' is the kind lie; the truth is the
   // hero's own fading, said out loud. Remembered when he signs his reply (elian_letter).
-  await say(s, 'elian', 'Does it do that everywhere you sign? ...I keep a ledger of true things. Tell me the true thing.');
+  await say(s, 'elian', 'Does it do that everywhere you sign?');
   const t = await s.choice(['Everywhere.', 'Only here.']);
   if (t === 0) {
     await say(s, 'elian', 'Everywhere. Then I write it every morning with the others, and I underline it.');
@@ -602,8 +598,7 @@ async function nico_crowns(s) {
   await say(s, 'nico', "No. I'm going to draw a better one. Mine will have more points.");
   // H4: the one line that remembers 'is the king coming back' (nico_truth / nico_lie).
   if (await s.hasFlag('nico_truth')) {
-    await say(s, 'nico', "You said you didn't know. Then you went and found out. That's better than knowing. Here. Ma's, for scrapes.");
-    await s.give('potion', 2);
+    await say(s, 'nico', "You said you didn't know. Then you went and found out. That's better than knowing.");
   } else if (await s.hasFlag('nico_lie')) {
     await say(s, 'nico', "You said he was coming back. You were right. ...Were you sure? You weren't sure. That's okay. I wasn't either.");
   }
@@ -622,8 +617,7 @@ async function elian_letter(s) {
   await say(s, 'elian', 'Good. The more places a name is written, the harder it is to lose.');
   // H4: the one line that remembers the ledger of true things (elian_truth / elian_lie, elian_hall).
   if (await s.hasFlag('elian_truth')) {
-    await say(s, 'elian', "You told a mayor the true thing. I underlined it every morning since. From Fitch's shelf, on the town's account.");
-    await s.give('silver_salve', 1);
+    await say(s, 'elian', 'You told a mayor the true thing. I underlined it every morning since.');
   } else if (await s.hasFlag('elian_lie')) {
     await say(s, 'elian', "'Only here,' you told me, that first day. It was not only here. I kept the page open anyway.");
   }
@@ -713,8 +707,7 @@ async function silverglass_lock(s) {
   await s.setFlag('silverglass_lock_seen');
 }
 
-// Step trigger on the stairs down to court_f2. Sets court_f1_done. W11 (PLAYTEST_REVIEW_3 section 4) left it silent;
-// H5 (RESPONSIBILITY_ARC 3.5) ends the floor on one question, a sound, that the Other Selves answer.
+// Step trigger on the stairs down to court_f2. Sets court_f1_done. H5: the floor ends on one question, a sound.
 async function court_f1_stairs(s) {
   await s.sfx('footstep_stone');
   await narrate(s, 'On the first step down, the dark sends up a sound: three sets of footsteps, going down ahead of you.');
@@ -795,7 +788,7 @@ async function vex_mirror(s) {
   await narrate(s, 'He is not in the corridor. He is only in the glass, silver-haired, leaning on nothing, smiling at you.');
   await s.face('vex', 'hero');
   await say(s, 'vex', 'Yours has no face. Do you know why?');
-  // W11 (PLAYTEST_REVIEW_3 section 4): the choice stays; his next line answers either one
+  // his next line answers either choice
   await s.choice(['Do you?', 'Get out of the mirror.']);
   await say(s, 'vex', 'If a name can be stolen, perhaps it never belonged to you.');
   await say(s, 'vex', "You're missing a page, {hero}. Not that one. The first one.");
@@ -836,7 +829,7 @@ async function other_selves(s) {
   // W11 (PLAYTEST_REVIEW_3 fix 8): the Mirrored Combo's answer, said once before the fight
   await say(s, 'mira', 'When two of them stand side by side on the timeline, push one back.');
   await s.setFlag('other_selves_tried');
-  await s.title('THE OTHER SELVES', { sub: 'Hall of Reflections. Nobody would look at the water.', frames: 100 });   // H5 (3.6): what the Hollow avoided
+  await s.title('THE OTHER SELVES', { sub: 'Hall of Reflections. The town turned from the water.', frames: 100 });   // H5 (3.6): what the Hollow avoided
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
   await s.music('battle');
@@ -854,7 +847,7 @@ async function other_selves(s) {
   await s.setFlag('other_selves_defeated');
 }
 
-// Step trigger on the stair the great mirror became. Sets court_f2_done (silently since W11, as court_f1_stairs).
+// Step trigger on the stair the great mirror became. Sets court_f2_done.
 async function court_f2_stairs(s) {
   // H5 (RESPONSIBILITY_ARC 3.5): one question for the floor; the throne room answers it.
   await say(s, 'mira', "Mine knew what I feared. Bram's knew his drill. Yours said nothing at all, {hero}. What does yours know?");
@@ -1161,7 +1154,7 @@ async function ep2_ending(s) {
   await narrate(s, 'Far to the north-east, a red glow lies along the mountains.');
   await s.wait(60);
   await narrate(s, 'And from far to the west, across the water, a single toll.');
-  await s.sfx('bell_toll');
+  await s.sfx('bell_thirteenth');
   await s.wait(180);
   await say(s, 'mira', '...Thirteen.');
   await s.music('mystery');

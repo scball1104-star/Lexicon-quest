@@ -19,7 +19,7 @@ test('the switch is on: every region on, the maps listed, the budget at the X1-i
   assert.equal(r.stage, 'after-X1-integrate');
   assert.equal(r.initialMB, 6.38, 'the ratchet is exactly the stage value');
   assert.equal(r.capMB, 6.5);
-  assert.equal(r.tapPromptMB, 2.32);
+  assert.equal(r.tapPromptMB, 2.34);   // moved 2.32 -> 2.34 for H2 (tapPromptHistory)
   assert.equal(r.tapCapMB, 2.5);
 });
 

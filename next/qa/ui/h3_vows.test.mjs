@@ -52,9 +52,9 @@ test('the screens read vowStatus / vowLine and nothing else about vows; the rows
   const journal = read('src/ui/screens/journal.js');
   assert.ok(journal.includes("import { vowLine } from '../../game/vows.js';"));
   assert.ok(/const vow = vowLine\(g\);\r?\n\s*if \(vow && seen\(y\)\) r\.text\(vow, 370, y \+ 2, \{ align: 'right'/.test(journal), 'Quests header: right of the quest title');
-  // the Aim line (H2) was not changed by H3: no vow text joins it
+  // H6 (CRITIQUE_ARC 25): the Aim line carries the vow, read through activeVow
   const field = read('src/scenes/field.js');
-  assert.ok(!/aim[^\n]*vow/i.test(field) && !/vow[^\n]*aim/i.test(field), 'the Aim line carries no vow suffix (not in H3 scope)');
+  assert.ok(/const vow = activeVow\(this\.game\);/.test(field) && /\(vow \? ` - Vow: \$\{vow\.name\}` : ''\)/.test(field), 'the Aim line carries " - Vow: name"');
 });
 
 test('the rest flow: one window, "No vow" first and the cancel option, a chosen vow asks once, nothing else added', () => {

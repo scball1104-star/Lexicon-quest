@@ -6,7 +6,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VOWS, VOW_BY_ID, VOW_REWARD, VOW_PAID_CAP } from '../../src/data/vows.js';
-import { offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem, rewardPoints, vowsPaid } from '../../src/game/vows.js';
+import { offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem, rewardPoints, vowsPaid, vowForbids, takeVowIntro } from '../../src/game/vows.js';
+import { BattleScene } from '../../src/scenes/battle.js';
+import { partyAction } from '../../src/battle/ai.js';
 import { VOW_TEXT } from '../../src/data/text.js';
 import { createGame, addMember, serialize } from '../../src/game/state.js';
 import { PARTY_IDS, MASTERY_XP, masteryLevel } from '../../src/data/party.js';
@@ -127,7 +129,8 @@ test('take and keep pays once, only at a rest, only after a battle: mastery poin
   fought(g);
   const k = settleVow(g);
   assert.equal(k.kind, 'kept'); assert.equal(k.vow.id, 'no_flee');
-  assert.deepEqual(k.reward, { to: 'hero', name: 'Arden', weapon: 'sword', points: 4, level: { from: 1, to: 1 }, unlocked: [] });
+  // H6: before / after points, so the kept box can show the bar filling
+  assert.deepEqual(k.reward, { to: 'hero', name: 'Arden', weapon: 'sword', points: 4, before: 0, after: 4, level: { from: 1, to: 1 }, unlocked: [] });
   assert.equal(hero.mastery.sword, 4);
   assert.equal(k.text, 'Vow kept: No fleeing.\nArden: sword mastery +4.');
   assert.ok(fits(k.text), 'the kept box fits');
@@ -313,4 +316,65 @@ test('the seams: one vow call each in battle (three), field, items and shop; rul
   assert.ok(iHeal > 0 && iRow > iHeal && iSave > iRow, 'heal, then the vow row, then the save prompt');
   assert.ok(/choices: \[VOW_TEXT\.none, \.\.\.offered\.map\(\(v\) => v\.name\)\], cancel: 0/.test(ev), '"No vow" is first and is the cancel option');
   assert.ok(ev.includes("if (settled && settled.kind === 'carried') return;"), 'an untested vow rides on and nothing is offered');
+});
+
+// ================================================================================================ H6 (docs/CRITIQUE_ARC.md 8, 9, 15, 16)
+test('H6: Auto never takes what the active vow forbids, and defends when nothing else is left', () => {
+  // a hurt party with potions, a feather and full Fury: the plain brain reaches for them, the vow-aware one must not
+  const mk = () => battle([{ id: 'tome_golem', level: 6 }], { level: 6, options: { inventory: { potion: 3, hi_potion: 1, phoenix_feather: 1, ether: 2 }, canFlee: true } });
+  const hurt = (b) => { for (const u of b.units().filter((x) => x.side === 'party')) { u.hp = Math.max(1, Math.round(u.maxHp * 0.15)); u.fury = 100; } };
+  const pick = (g, b) => BattleScene.prototype.autoAction.call({ engine: { game: g }, b });
+  let heals = 0, under = 0, furies = 0;
+  for (let seed = 1; seed <= 12; seed++) {
+    const b = mk(); hurt(b);
+    for (let i = 0; i < 6 && !b.isOver(); i++) {
+      const u = b.current();
+      if (u.side !== 'party') { b.runEnemyTurn(); continue; }
+      const plain = partyAction(b);
+      if (plain && plain.type === 'item') heals++;
+      const g = game({ battles: 1 }); takeVow(g, 'no_heal');
+      const a = pick(g, b);
+      assert.ok(!vowForbids(g, a), `no_heal: Auto picked ${JSON.stringify(a)}`);
+      if (a.type === 'item') assert.ok(!isHealingItem(a.item), 'only a non-healing item');
+      const gf = game({ battles: 1 }); takeVow(gf, 'no_fury');
+      const af = pick(gf, b);
+      assert.ok(!vowForbids(gf, af), `no_fury: Auto picked ${JSON.stringify(af)}`);
+      if (plain && plain.type === 'skill' && /fury|art/i.test(plain.skill)) furies++;
+      under++;
+      b.perform(a);
+    }
+  }
+  assert.ok(heals > 0 && under > 0, `the plain brain did reach for a potion (${heals} of ${under})`);
+  // the guard itself: items by kind, Fury arts by skill kind, Flee by the command; nothing without a vow
+  const g = game({ battles: 1 });
+  assert.equal(vowForbids(g, { type: 'item', item: 'potion' }), false, 'no vow, nothing forbidden');
+  takeVow(g, 'no_heal');
+  assert.equal(vowForbids(g, { type: 'item', item: 'potion' }), true);
+  assert.equal(vowForbids(g, { type: 'item', item: 'ether' }), false, 'an ether is not healing');
+  assert.equal(vowForbids(g, { type: 'attack' }), false);
+  const f = game({ battles: 1 }); takeVow(f, 'no_fury');
+  assert.equal(vowForbids(f, { id: 'fury' }), true, 'the Fury command');
+  assert.equal(vowForbids(f, { type: 'skill', skill: 'lunge' }), false, 'a tech is fine');
+  const n = game({ battles: 1 }); takeVow(n, 'no_flee');
+  assert.equal(vowForbids(n, { type: 'flee' }), true);
+  // with every command forbidden or useless the brain still answers, and the answer never breaks the vow
+  assert.deepEqual(BattleScene.prototype.autoAction.call({ engine: { game: n }, b: { commands: () => [], current: () => null } }), { type: 'defend' });
+});
+
+test('H6: the first offer is explained once per save; Walk the road names no lamp; the vow ends in the battle log', () => {
+  const g = game({ battles: 1 });
+  const first = takeVowIntro(g);
+  assert.equal(first.who, 'bram'); assert.ok(fits(first.text) && /next fire/.test(first.text) && !first.text.includes(EM_DASH));
+  assert.equal(takeVowIntro(g), null, 'once per save');
+  const solo = createGame('Arden'); g.counters.battles = 1;
+  const alone = takeVowIntro(solo);
+  assert.equal(alone.who, null, 'the narrator says it when Bram is not here'); assert.ok(fits(alone.text) && /mastery/.test(alone.text));
+  assert.equal(VOW_BY_ID.walk.line, 'Walk every step until you rest.');
+  assert.ok(![...VOW_BY_ID.walk.brokenLine, ...VOW_BY_ID.walk.keptLine].some((l) => /lamp|lantern/i.test(l.text)), 'no lamp before the Lantern');
+  const v = game({ battles: 1 }); takeVow(v, 'no_flee');
+  const log = [], toasts = [];
+  const engine = { scene: { name: 'battle', logLine: (t, c) => log.push([t, c]) }, toasts: { flash: (t) => toasts.push(t) } };
+  assert.equal(vowEvent(v, { type: 'flee' }, engine), true);
+  assert.deepEqual(log, [['Vow ended: No fleeing.', 'orange']], 'in battle: the log window');
+  assert.deepEqual(toasts, [], 'no toast over the help line and the timeline');
 });

@@ -10,25 +10,33 @@ this file against the table, so edit both).
 One screen in the Journal: every named person in the live game, grouped by place, bright when their name is kept and
 faded ink when it is not. Each name has exactly ONE keep condition, drawn from something the player does: a side story
 finished, a boss beaten (the names it took come home), a beat the story already gives them. The count is on the
-title screen ("Names kept: 17 of 37") and in the tab's header. No save field was added: everything reads flags.
+title screen ("Names kept: 17 of 25") and in the tab's header. No save field was added: everything reads flags.
 
 Rules the table follows:
 - One keep per name, from flags that exist in `FLAGS` (`quests.js`, H1's flags in `story/ep1.js`, the expansion's in
   `x1/flags.js`). Nothing invented.
-- The kept line a player reads is the flag's own meaning in `FLAGS`, cleaned by `keepLine()` (no scene ids, no dev
-  tails, "the hero" becomes "you"); a row gives its own `why` only where that text would read badly.
-- An unkept name shows "..." and its place only: never a spoiler. A name the story has not said yet shows as `???`
+- The kept line a player reads is the row's own `why` (H6, CRITIQUE_ARC 3): every Episode 1, expansion and Episode 2
+  row has one, written in the voice of Holt's and Mael's lines (what the person did or got back, verb first, under 70
+  characters). A `why` may be a function of the flags (Oren's differs by `oren_truth` / `oren_lie`). Rows without one
+  (Episode 3, off today) still read the flag's meaning through `keepLine()`.
+- An unkept name shows "..." and its place only: never a spoiler. The hero's own row says "Not yet kept." (H6). A name
+  the story has not said yet shows as `???`
   (Aurel before `aurel_named`, Mara before `mara_read`, Garrick while Episode 3 has his name struck). The Hollow's
   group is "The Nameless Hollow" until `nh_restored`.
-- Episode 1 and 2 rows always count. Expansion rows count when `X1_LIVE` and their region is on (the static
-  switches in `x1/live.js`, not pack readiness, so the title and the field agree). Episode 3 rows count only when
-  `EP3_LIVE`.
+- A place group shows, and its rows count, only once the party has reached it (H6, CRITIQUE_ARC 4; `REACHED` in
+  ledger.js): the party and Willowmere always; Willowmere Valley on `left_town`; the Wider Valley on `first_fight_done`
+  (the flag that opens the valley's west gate); the Hollow on `crossing_done`; Emberpeak on `ep3_started`. A finished
+  Episode 1 reads 17 of 25, not 17 of 37. `ledgerRows(flags, { all: true })` lists every row, reached or not.
+- Expansion rows count when `X1_LIVE` and their region is on (the static switches in `x1/live.js`, not pack readiness,
+  so the title and the field agree). Episode 3 rows count only when `EP3_LIVE` (and then on `ep3_started`).
 - The hero's own name is a row with no keep in Episodes 1 to 3 (EPISODE1 beat 21: "every name brightens but one").
   The Ledger cannot be finished until the story gives it back; that is the point of it.
 
 ## The table
 
-Rows in Ledger order. Episode: 1, 2, 3 or X1 (the Episode 1 expansion). Live today (X1 on, Episode 3 off): 37 names.
+Rows in Ledger order. Episode: 1, 2, 3 or X1 (the Episode 1 expansion). Live today (X1 on, Episode 3 off): 37 names,
+counted as their places are reached. Counts at three points (H6): after Mael 1 of 18 (Oren); at the Archive door 3 of 25
+(Oren, Bram, Holt; Hazel and Garrick too if their farewells were seen); after the Episode 1 credits 17 of 25.
 
 | id | Name | Place | Keep condition | Episode |
 |---|---|---|---|---|
@@ -37,7 +45,7 @@ Rows in Ledger order. Episode: 1, 2, 3 or X1 (the Episode 1 expansion). Live tod
 | `bram` | Bram | The Party | `archive_entered`: he spoke his name at the door (SPEAK, AND BE KEPT) and it lit | 1 |
 | `hazel` | Hazel | Willowmere | `hazel_farewell_done`: her farewell, the knitted mantle | 1 |
 | `mael` | Elder Mael | Willowmere | `returned_home`: he opens the Register in the square and confesses | 1 |
-| `oren` | Oren | Willowmere | `yard_fight_done`: the yard slime, the first mark (minute 5, every player) | 1 |
+| `oren` | Oren | Willowmere | `saw_fading_sign`: the sign scene, kept by the word, not the punch (H6); the line differs by `oren_truth` / `oren_lie` | 1 |
 | `hal` | Hal | Willowmere | `tess_letter_1_delivered`: his letter reaches Oren, who has a brother again | 1 |
 | `tess` | Tess | Willowmere | `tess_quest_done`: all three letters home, her father's among them | 1 |
 | `wick` | Wick | Willowmere | `wick_tag_done`: the name-tag back on his collar | 1 |
@@ -79,8 +87,9 @@ Rows in Ledger order. Episode: 1, 2, 3 or X1 (the Episode 1 expansion). Live tod
 | `mara` | Mara (`???` until `mara_read`) | Emberpeak | `mara_named`: the reforged leaf raises her name | 3 |
 
 Totals: 45 rows in the table. Per episode: Episode 1 core 19 (the hero without a keep), X1 7 (Pell included),
-Episode 2 12, Episode 3 8. Live today: 37 (Episode 3 off). An Episode 1 credits save with every side story done
-keeps 17 of 37 (every Episode 1 name but the hero's and Pell's, whose keep is an expansion quest).
+Episode 2 12, Episode 3 8. Live today: 37 (Episode 3 off), of which 25 are reached by the end of Episode 1. An Episode 1
+credits save with every side story done keeps 17 of 25 (every Episode 1 name but the hero's and Pell's, whose keep is an
+expansion quest; the Wider Valley's six wait for their own quests).
 
 Aliases (the same person under another record): `garrick_e` and `garrick_n` are `garrick`.
 
@@ -104,18 +113,19 @@ Valewyn courier (a role). H5 may decide the Reeve and the Keepers deserve rows; 
 
 A keep is one row in `LEDGER`: `r('id', 'place', episode, 'flag', { name?, why?, kept?, hide?, x1?, region? })`,
 plus its line in the table above. H4 (true answers) keeps names from the EXCLUDED list by giving them a beat, for
-example Hob kept by a true-answer flag at the inn; it does not change an existing row's keep (one per name). The
-Oren truth is already remembered (`oren_truth` / `oren_lie`) and is deliberately not his keep. H5 (floor hooks and
+example Hob kept by a true-answer flag at the inn; it does not change an existing row's keep (one per name). Oren's
+keep is the sign scene whichever answer is given (H6); `oren_truth` / `oren_lie` only change his line. H5 (floor hooks and
 boss lines) may add a boss's line naming what the town avoided, and may give the Reeve and the dark-star Keepers rows
 if their names are said in play (`reeve_named`, `star_1_read` to `star_3_read` exist). Any new flag must be in `FLAGS`
 first; the test refuses a keep it cannot find.
 
 ## The Aim line (section 3.3)
 
-One thin window at the top of the field: the current main step's `aim` (a present-tense line such as "Find Mira at the library", H4-story; the step's title when a step has no aim). It
+One thin window at the top of the field: the current main step's `aim` (a present-tense line such as "Find Mira at the library", H4-story; the step's title when a step has no aim; a step's `aimIf: { if, aim }` takes over once its flag holds, H6: "Open the great door" once the Stacks Key is found), followed by " - Vow: name" while a vow is carried (H6). It
 shows for about four seconds when the step changes, when the menu closes, and after ten seconds standing still,
 then the HUD is clean again. It never draws during a scene, under a dialogue box, under the menu or a battle, while
-the location banner is up, or during a fade; its timer waits while it cannot be drawn, so a step that changes inside
+the location banner is up, during a fade, or on the bell tower before `cold_open_done` (H6: the cold open has no Aim line,
+no menu and no banner); its timer waits while it cannot be drawn, so a step that changes inside
 a scene is shown once the scene lets go. On touch layouts it sits above the controls (the top of the game).
 `LQ_DEBUG.state().sceneState.aim` is the title while it is on screen, else null.
 

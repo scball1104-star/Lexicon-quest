@@ -361,20 +361,20 @@ Side quests open only once the town has been introduced (`met_anwen`), so the Ho
 
 Five (`docs/RESPONSIBILITY_ARC.md` 3.4; the rules are in `EPISODE1.md`, same subsection).
 
-| Who, where | The ask | True / kind lie | Remembered | Truth reward |
+| Who, where | The ask | True / kind lie | Remembered | What changes hands (H6) |
 |---|---|---|---|---|
-| Corin, `nh_arrival` | Does it look like a home, from out there? | "It looks lost." / "It looks like home." | his Hollowmere talk line | 2 Potions (the watch rations) |
-| Elian, `elian_hall` | Does your name go pale everywhere you sign? | "Everywhere." / "Only here." | `elian_letter`, when he signs his reply | 1 Silver Salve ("from Fitch's shelf, on the town's account") |
-| Anwen, `anwen_register` | Your name. Is it keeping? | "It's fading." / "It's keeping." | `anwen_testimony` | 1 Phoenix Feather ("it burns when nothing else will") |
-| Lena, `lena_testimony` | Say you would get used to it. | "I wouldn't." / "You'd get used to it." | her Hollowmere talk line | 2 Ethers |
-| Nico, `nico_crowns` (start) | Is the king coming back? Say he is. | "I don't know." / "He is." | `nico_crowns`, when the crown comes home | 2 Potions ("Ma's, for scrapes") |
+| Corin, `nh_arrival` | Does it look like a home, from out there? | "It looks lost." / "It looks like home." | his Hollowmere talk line | kind lie: 2 Potions (the watch rations, for a guest welcomed home) |
+| Elian, `elian_hall` | Does it do that everywhere you sign? | "Everywhere." / "Only here." | `elian_letter`, when he signs his reply | nothing: the memory line only |
+| Anwen, `anwen_register` | Your name. Is it keeping? | "It's fading." / "It's keeping." | `anwen_testimony` | truth: 1 Phoenix Feather ("it burns when nothing else will") |
+| Lena, `lena_testimony` | Say you would get used to it. | "I wouldn't." / "You'd get used to it." | her Hollowmere talk line | truth: 2 Ethers ("you have one coming") |
+| Nico, `nico_crowns` (start) | Is the king coming back? Say he is. | "I don't know." / "He is." | `nico_crowns`, when the crown comes home | nothing: the memory line only |
 
 ### Floor questions and boss lines (H5, 2026-10-27)
 
 Court F1 `court_f1_stairs`: three sets of footsteps going down ahead of the party (`footstep_stone`), where W11 had
 left the stairs silent; Court F2 `court_f2_stairs`: Mira, "Yours said nothing at all. What does yours know?"; Court
 F3 `vow_door`: glass cracking beyond the open door (`glass_break`). Cards: THE OTHER SELVES "Hall of Reflections.
-Nobody would look at the water."; THE NAMELESS KING "Keeper of the Court. Nobody rowed across to ask him."
+The town turned from the water." (H6); THE NAMELESS KING "Keeper of the Court. Nobody rowed across to ask him."
 
 ---
 

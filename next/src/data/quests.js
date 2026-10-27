@@ -83,8 +83,8 @@ export const FLAGS = {
   // (oren_truth / oren_lie) is declared with the opening in story/ep1.js. Never a route: one later line, one small reward.
   hazel_truth: 'Told Hazel you were frightened (hazel_farewell); her welcome-home line remembers it, and she packed a tent.',
   hazel_lie: 'Told Hazel you were not frightened (hazel_farewell); her welcome-home line remembers it.',
-  mael_truth: "Answered Mael's bell question with 'maybe' (mael_intro); he pays it back when he hands over the letter east.",
-  mael_lie: 'Told Mael you were up early (mael_intro); he remembers it when he hands over the letter east.',
+  mael_truth: "Told Mael you had not slept much (mael_intro); he remembers it when he hands over the letter east.",
+  mael_lie: 'Told Mael you slept like a stone (mael_intro); he remembers it when he hands over the letter east.',
   garrick_truth: 'Told Garrick that Bram lost his name at the gate (garrick_farewell); his post-Archive line remembers it.',
   garrick_lie: 'Told Garrick that Bram was fine at the gate (garrick_farewell); his post-Archive line remembers it.',
   tess_truth: "Told Tess her father's signature was eaten through (tess_letters); her post-Archive line remembers it.",
@@ -315,6 +315,7 @@ export const MAIN_QUEST = {
     },
     {
       id: 'stacks', title: 'The Rootbound Stacks', aim: 'Find the key to the great door', done: 'boss_door_open',
+      aimIf: { if: 'stacks_key_found', aim: 'Open the great door' },
       journal: 'Search the Rootbound Stacks for the Stacks Key and open the great door at the bottom.',
       chat: [
         { map: 'archive_f3', if: 'stacks_key_found', lines: [
@@ -786,9 +787,7 @@ export const MAIN_QUEST_EP2 = {
     },
     {
       id: 'epilogue2', title: 'Toward Emberpeak', aim: EP3_LIVE ? 'Take the old sand road east' : 'Rest in Hollowmere', done: null,
-      // W15 (PLAYTEST_REVIEW_4 fix 3): while Episode 3 is not in the game, the journal and Talk say the road is not open
-      // yet and point at what is (placeholder wording, Scott chooses the final words). E3-story: when EP3_LIVE the
-      // same step points at the old sand road gate instead (EPILOGUE2_LIVE).
+      // while Episode 3 is off, the road is not open yet (placeholder wording, Scott's to choose); EP3_LIVE points east
       journal: EP3_LIVE ? EPILOGUE2_LIVE.journal : EPILOGUE2_WAIT.journal,
       chat: EP3_LIVE ? EPILOGUE2_LIVE.chat : EPILOGUE2_WAIT.chat,
     },
@@ -1352,6 +1351,11 @@ export function pickChat(entries, hasFlag, mapId) {
 export function currentStep(hasFlag, quest = MAIN_QUEST) {
   for (const step of quest.steps) if (step.done == null || !allSet(step.done, hasFlag)) return step;
   return quest.steps[quest.steps.length - 1];
+}
+/** The step's aim now (H6: `aimIf: { if, aim }` once a flag holds). */
+export function aimFor(step, hasFlag) {
+  if (!step) return null;
+  return (step.aimIf && allSet(step.aimIf.if, hasFlag) ? step.aimIf.aim : step.aim) || null;
 }
 
 /** Active side quests with their current step: [{ quest, step }]. */

@@ -44,9 +44,9 @@ the third, a taste of a fight by the fifth.
    Mael without it). The hero alone, one soft, slow slime, no flee: a taste of a fight that teaches Attack and the
    weakness row and nothing else (the valley wolves still teach Lunge and Appraise). Reward: the slime's EXP and
    Oren's one line, "Not my starter, then. Mine's paler, and it only ever bit bread."
-4. **Meeting Mael** [`mael_intro`, sets `met_mael`]. By the well. "Did you sleep through the bell again?" Mael
-   explains the fading signs and the thirteenth toll, the old saying ("when a name is taken, a thirteenth bell
-   tolls for it"), and asks the hero to go to the Rootbound Archive, north of the valley, where the Keepers kept
+4. **Meeting Mael** [`mael_intro`, sets `met_mael`]. By the well. "Did you sleep at all?" (H6: the night the player
+   just climbed through.) Mael explains the fading signs and gives the thirteenth toll its meaning in one box (twelve
+   bells, sixty years of counting, "a thirteenth tolls for a name taken from the world"), and asks the hero to go to the Rootbound Archive, north of the valley, where the Keepers kept
    the first fragment of the Book of Names. Find Mira at the library; then the south gate. The camera lingers as
    Mael opens the Town Register: "Still there. Fainter than yesterday." The player sees his fear; the hero only
    half notices.
@@ -156,20 +156,22 @@ that each has a line that hints something is on their mind. Oren's starter opens
 
 Seven places (`docs/RESPONSIBILITY_ARC.md` 3.4; Scott's decision D: small and honest, never a locked route) where the
 true thing is harder than the kind lie. Both answers play; exactly one flag of the pair is set; one later line
-remembers it, and the truth side carries one small consumable. Nobody says "you should have".
+remembers it. Nobody says "you should have". H6 (CRITIQUE_ARC 6, 2026-10-27): a gift changes hands only where the
+fiction hands something over, so the truth is never the answer to a quiz: about half the truths carry one, two kind
+lies carry one of their own (the easy answer has its own small ease), and the rest pay in the line alone.
 
-| Who, where | The ask | True / kind lie | Remembered | Truth reward |
+| Who, where | The ask | True / kind lie | Remembered | What changes hands |
 |---|---|---|---|---|
-| Oren, `fading_sign` (H1) | What did my sign say? | "Oren's Ovens." / "I can't remember either." | `oren_starter`, one line | one more Hi-Potion with the starter reward |
-| Hazel, `hazel_farewell` | Are you frightened? | "Yes." / "No." | her welcome-home talk line after the Archive | a Tent ("the blanket stays home, so you come back for it") |
-| Mael, `mael_intro` | Did you sleep through the bell again? | "...Maybe." / "I was up early!" | `ep2_mael`, when he hands over the letter east | 2 Ethers |
-| Garrick, `garrick_farewell` | Holt says the boy was fine at the gate. Was he? | "He lost your name a moment." / "He was fine." | his smithy talk line after the Archive | 2 Echo Herbs ("for the day one of you cannot get a word out") |
-| Tess, `tess_letters` (letter 3) | Is his name there? I can't look. You look. | "The paper's eaten through." / "It's smudged. That's all." | her talk line after the quest and the Archive | 1 Hi-Potion ("he packed one for every run north") |
-| Quill, `quill_hint` (only once the milestone is read) | Is it going? | '"Forgotten" is going first.' / "It's sharp as ever." | his talk line after the Archive | 2 Eye Drops ("scribe's drops, for bad light") |
-| The Archive door, `archive_door` (Mira asks) | That's all it was. Wasn't it? | "It didn't hear me." / "Old door." | `archivore_after`, under the golden page (Bram or Mira) | 1 Potion from Bram ("your voice went thin") |
+| Oren, `fading_sign` (H1) | What did my sign say? | "Oren's Ovens." / "I can't remember either." | `oren_starter`, one line | nothing: the starter reward is the same either way |
+| Hazel, `hazel_farewell` | Are you frightened? | "Yes." / "No." | her welcome-home talk line after the Archive | truth: a Tent ("the blanket stays home, so you come back for it") |
+| Mael, `mael_intro` | Did you sleep at all? | "Not much." / "Like a stone." | `ep2_mael`, when he hands over the letter east | nothing: the memory line only |
+| Garrick, `garrick_farewell` | Holt says the boy was fine at the gate. Was he? | "He lost your name a moment." / "He was fine." | his smithy talk line after the Archive | truth: 2 Echo Herbs ("for the day one of you cannot get a word out") |
+| Tess, `tess_letters` (letter 3) | Is his name there? I can't look. You look. | "The paper's eaten through." / "It's smudged. That's all." | her talk line after the quest and the Archive | truth: 1 Hi-Potion ("he packed one for every run north") |
+| Quill, `quill_hint` (only once the milestone is read) | Is it going? | '"Forgotten" is going first.' / "It's sharp as ever." | his talk line after the Archive | kind lie: 2 Eye Drops ("then I won't need my drops tonight") |
+| The Archive door, `archive_door` (Mira asks) | That's all it was. Wasn't it? | "It didn't hear me." / "Old door." | `archivore_after`, under the golden page (Bram or Mira) | truth: 1 Potion from Bram ("your voice went thin") |
 
-Flags: `<who>_truth` / `<who>_lie` in `quests.js` FLAGS (Oren's in `ep1.js`). The autoplay bot answers every new choice
-with its first option, the truth; Mael's choice predates H4 and keeps the lie first. No new scene and no new Ledger
+Flags: `<who>_truth` / `<who>_lie` in `quests.js` FLAGS (Oren's in `ep1.js`). The autoplay bot answers every choice
+with its first option, the truth (H6 moved Mael's truth first with his new ask). No new scene and no new Ledger
 keep: every scene id must be staged in `STAGING.md`, which H4 did not own, so Hob, Cobb and Penny (the Ledger's
 candidates) still wait for a beat of their own. Test: `qa/content/h4_truth.test.mjs`.
 
@@ -178,7 +180,8 @@ candidates) still wait for a beat of their own. Test: `qa/content/h4_truth.test.
 Every floor's last scene ends on one new question (3.5): F1 `archive_f1_bell`, a page turning on the stair below with
 nobody to turn it; F2 `archive_f2_exit` already ended on "Or keep in." and was left alone; F3 `boss_door`, the chewing
 stops ("Why would it stop?"); Whisperwood Hollow `hollow_after`, "How did they know?". Boss cards name what the town
-avoided (3.6): ECHO WARDEN "Knight of the Last Order. Nobody came back to end it."; THE ARCHIVORE "Eater of Names.
+avoided (3.6): ECHO WARDEN "Knight of the Last Order. Its relief never came." (H6: two cards no longer open on
+"Nobody"); THE ARCHIVORE "Eater of Names.
 It was fed for a hundred years."; the BRIAR ALPHA's card is pinned by `hollow.test.mjs`, so Mira says its line in the
 last box before it rises.
 

@@ -1,0 +1,1 @@
+{"js":725997,"eager":1721256,"audioManifest":4055,"beforePrompt":2451308,"tapRoom":2360,"lazy":1341959,"sfx":2852028,"initial":6645295,"initialRoom":44620}

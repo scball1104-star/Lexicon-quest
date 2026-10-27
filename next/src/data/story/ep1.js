@@ -1,10 +1,8 @@
 // Lexicon Quest NEXT, Episode 1: "The Missing Name".
 // Every scripted scene, plus inspect text for signs, books, plaques and props.
 //
-// Scenes use ONLY the cutscene API (DESIGN 5.4). Exact signatures are in docs/story/STAGING.md
-// ("Cutscene API as used by ep1.js"). Places and props are referenced by map mark / event names
-// (strings) instead of tile coordinates, so map authors can move things without touching this file.
-// Staging for every scene (who stands where, props, camera, music) is in docs/story/STAGING.md.
+// Scenes use ONLY the cutscene API (DESIGN 5.4; signatures and staging in docs/story/STAGING.md). Places and props are
+// map mark / event names, never tile coordinates.
 //
 // Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, {hero} = player name.
 
@@ -40,10 +38,9 @@ const cut = (fn, cond) => async (s) => {
 };
 
 // ------------------------------------------------------------------------------------------------
-// The opening (H1, docs/RESPONSIBILITY_ARC.md 2, decision B: replaced, no flag). A New Game opens playable, at
-// night, on the bell tower stair (map bell_tower): twelve steps toll twelve names (captions drawn by
-// scenes/prologue.js, no press), a thirteenth toll with no name, black, the one card, then home. PROLOGUE is that
-// card; ATTRACT is the title's attract loop. The flags are declared here, as the x1 pack declares its own.
+// The opening (H1, RESPONSIBILITY_ARC 2, decision B): a New Game opens on the night bell tower stair. Twelve steps toll
+// twelve names (captions: scenes/prologue.js), a thirteenth tolls none; black, the card (PROLOGUE), home. ATTRACT is
+// the title's attract loop.
 // ------------------------------------------------------------------------------------------------
 export const PROLOGUE = ['In Aethelgard, every name is a promise.'];
 export const ATTRACT = [
@@ -84,10 +81,8 @@ const TOLL_SCENES = Object.fromEntries(TOLL_FLAGS.map((f, i) => [f, tollScene(i 
 async function thirteenth_toll(s) {
   await s.wait(24);
   await s.music(null);
-  // bell_first (the alarm bell) is in the ep3 sfx pack, which a New Game has not loaded, so it plays its fallback
-  // (bell_toll); a second toll in the same frame doubles it, so the thirteenth lands louder either way.
-  await s.sfx('bell_first');
-  await s.sfx('bell_toll');
+  // H6: the thirteenth is its own bell (the cracked one of the Stacks), and every later "thirteen" rings it
+  await s.sfx('bell_thirteenth');
   await s.shake(3, 30);
   await all(s.emote('hero', '!'), s.camera.panTo('bells', 60));
   await s.wait(THIRTEENTH_SILENCE);
@@ -101,8 +96,7 @@ async function prologue(s) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// 1. Waking up (hero_home). Runs on New Game after the cold open. Sets intro_done.
-// H1: half the boxes it had. Hazel's bell line confirms what the player just heard instead of reporting it.
+// 1. Waking up (hero_home). Runs on New Game after the cold open. Sets intro_done. Hazel confirms the bell, not reports it.
 // ------------------------------------------------------------------------------------------------
 async function wake_up(s) {
   await s.fade('in', 60);
@@ -132,7 +126,7 @@ async function hazel_farewell(s) {
   await say(s, 'hazel', 'So. The Archive.');
   await say(s, 'hazel', "Mael told me. Don't look at me like that. He tells me everything eventually, and usually first.");
   // H4 (RESPONSIBILITY_ARC 3.4): the true answer is the awkward one. Remembered once she has you home (npcs.js hazel).
-  await say(s, 'hazel', "Are you frightened? Don't say no to please me. I'll know.");
+  await say(s, 'hazel', 'Are you frightened?');
   const c = await s.choice(['Yes.', 'No.']);
   if (c === 0) {
     await say(s, 'hazel', "Good. Frightened people look where they're going. Here, a tent. The blanket stays home, so you come back for it.");
@@ -190,10 +184,8 @@ async function fading_sign(s) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// 2b. The yard slime (willowmere; H1). The step trigger is a one-column cut of the town (x 12), so nobody reaches
-// Mael without it: a runaway ink slime drops out of the bakery yard and attacks the hero alone, no flee. It teaches
-// Attack and the weakness row only (the valley wolves teach Lunge and Appraise). A loss is a Game Over; the
-// trigger fires again on reload.
+// 2b. The yard slime (willowmere; H1): a one-column cut of the town (x 12) before Mael. The hero alone, no flee; it
+// teaches Attack and the weakness row. A loss is a Game Over and the trigger fires again on reload.
 // ------------------------------------------------------------------------------------------------
 async function yard_slime(s) {
   await s.sfx('ink_gurgle');
@@ -221,17 +213,15 @@ async function yard_slime(s) {
 // ------------------------------------------------------------------------------------------------
 async function mael_intro(s) {
   await s.face('mael', 'hero');
-  await say(s, 'mael', 'Ah, there you are. Did you sleep through the bell again?');
-  const c = await s.choice(['I was up early!', '...Maybe.']);
-  // H4 (RESPONSIBILITY_ARC 3.4): the small lie and the honest 'maybe' are remembered; Mael pays the honest one back
-  // when he hands over the letter east (ep2_mael). Neither touches the route.
-  if (c === 0) { await say(s, 'mael', 'Up early, and still late. That is a rare gift. Treasure it.'); await s.setFlag('mael_lie'); }
-  else { await say(s, 'mael', 'Honest, at least. Honesty is in short supply this morning.'); await s.setFlag('mael_truth'); }
+  await say(s, 'mael', 'Ah, there you are. Did you sleep at all?');
+  const c = await s.choice(['Not much.', 'Like a stone.']);
+  // H4, H6: the ask is about the night just climbed through; remembered in ep2_mael, nothing paid.
+  if (c === 0) { await say(s, 'mael', 'Nor I. I doubt anyone in Willowmere did.'); await s.setFlag('mael_truth'); }
+  else { await say(s, 'mael', 'Then you are the only one in Willowmere who did.'); await s.setFlag('mael_lie'); }
   await say(s, 'mael', "You saw Oren's sign. It is not the only one. Names are slipping off Willowmere like rain off a roof.");
   await s.camera.panTo('bell_tower', 50);
-  await say(s, 'mael', 'And last night the tower rang thirteen times. It holds twelve bells. I have counted them every day for sixty years.');
+  await say(s, 'mael', 'Twelve bells up there. I have counted them for sixty years. They say a thirteenth tolls for a name taken from the world.');
   await s.camera.follow('hero');
-  await say(s, 'mael', 'There is an old saying. When a name is taken from the world, a thirteenth bell tolls for it.');
   await s.emote('mael', '...');
   await say(s, 'mael', 'I would very much like that to be only a saying.');
   await say(s, 'mael', 'If something is eating our names, it eats at the Rootbound Archive, north of the valley. I need someone to go and look.');
@@ -290,7 +280,7 @@ async function mira_joins(s) {
   await s.despawn('mira');
   await s.addMember('mira');
   await narrate(s, '{c:gold}Mira{/c} joined the party!');
-  // W15 (PLAYTEST_REVIEW_4 fix 4): the one place the game introduces Talk, its hint system ({i:btn_menu} is the
+  // The one place the game introduces Talk, its hint system ({i:btn_menu} is the
   // device's own button: a key cap, a pad button, or the MENU cap on a phone).
   await say(s, 'mira', 'If we ever lose the thread, ask me: {i:btn_menu}, then Talk. I keep notes.');
   await s.setFlag('mira_joined');
@@ -423,10 +413,8 @@ async function milestone(s) {
   await s.setFlag('saw_milestone');
 }
 
-// The first fight (valley road, just outside the gate). A step trigger on the road; the wolf pack
-// `e_wolves_a` (a chase enemy at the bend) cuts the party off. Unavoidable, four boxes, no signage: Bram's
-// box carries the valley's first-enemy line, Mira's the free Appraise. Sets first_fight_done on a win; a
-// loss is a Game Over and the trigger fires again on reload.
+// The first fight (valley road, a step trigger): the wolf pack `e_wolves_a` cuts the party off. Four boxes; Mira's
+// carries the free Appraise. Sets first_fight_done on a win; a loss fires the trigger again on reload.
 async function first_fight(s) {
   await s.camera.panTo('e_wolves_a', 40);
   await all(s.emote('bram', '!'), s.emote('mira', '!'));
@@ -442,9 +430,8 @@ async function first_fight(s) {
   await s.setFlag('first_fight_done');
 }
 
-// The Pilgrim's Rest campfire (valley fork). Object `campfire` with `rest: true`: the field runs the
-// rest flow (Rest here?, full heal, save prompt) after this scene returns, so the scene never heals.
-// First visit: the party sits, one choice, three boxes. Later visits: one box, then the rest offer.
+// The Pilgrim's Rest campfire (valley fork; `rest: true`, so the field's rest flow heals after the scene). First visit:
+// one choice, three boxes; later: one box.
 async function campfire_rest(s) {
   if (await s.hasFlag('campfire_rested')) {
     await say(s, 'bram', "Fire's still warm. Sit a minute, {hero}. The road isn't going anywhere.");
@@ -559,7 +546,7 @@ async function find_letter_1(s) {
 }
 
 async function archive_f1_bell(s) {
-  await s.sfx('bell_toll');
+  await s.sfx('bell_thirteenth');
   await s.shake(2, 40);
   await all(s.emote('mira', '!'), s.emote('bram', '!'));
   await say(s, 'mira', "That's it. That's the sound from last night.");
@@ -571,7 +558,6 @@ async function archive_f1_bell(s) {
   await s.sfx('door_rumble');
   await s.shake(1, 20);
   await narrate(s, 'The toll has shaken a panel loose beside the stairs: a narrow back-stair, running down to the antechamber by the entrance.');
-  await say(s, 'bram', "Good. Next time we come this way, it's the short way.");
   // H5 (RESPONSIBILITY_ARC 3.5): the floor ends on one question. F2's readers answer it.
   await s.sfx('page_flutter');
   await narrate(s, 'From the stair below, a page turns. Then another. Nobody is down there to turn them.');
@@ -617,7 +603,7 @@ async function echo_warden(s) {
   await say(s, 'echo_warden', '...RUN OUT... RUN OUT...');
   await say(s, 'mira', 'Watch its stance. One stance turns back magic, the other turns back steel. Read it before you swing.');
   // Boss intro: name card, a jolt, then the battle theme and the swirl.
-  await s.title('ECHO WARDEN', { sub: 'Knight of the Last Order. Nobody came back to end it.', frames: 100 });   // H5 (3.6): what the Keepers avoided
+  await s.title('ECHO WARDEN', { sub: 'Knight of the Last Order. Its relief never came.', frames: 100 });   // H5 (3.6): what the Keepers avoided
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
   await s.music('battle');
@@ -715,7 +701,7 @@ async function thirteenth_bell(s) {
   await say(s, 'mira', "Its voice runs down the roots, under the whole valley. Under our tower. That's what the town heard.");
   await say(s, 'bram', 'So every time it rings...');
   await s.music(null); // the Stacks go quiet for the toll, then the track comes back in under the question
-  await s.sfx('bell_toll');
+  await s.sfx('bell_thirteenth');
   await s.shake(2, 50);
   await s.wait(60);
   await s.music('mystery'); // F3's own track (archive_f3.music; story.test.mjs checks they match)
@@ -916,14 +902,14 @@ async function ending_hook(s) {
   await s.music(null);
   await s.camera.panTo('bell_tower', 0);
   await s.fade('in', 90);
-  // Timings follow W1-audio's files: bell_peal is 4.25 s, bell_toll 3.21 s.
+  // Timings follow W1-audio's files: bell_peal is 4.25 s, bell_thirteenth 0.8 s.
   await s.sfx('bell_peal');
   await s.wait(60);
   await narrate(s, "That night, Willowmere's twelve bells ring out, one for every family, and the whole valley hears them.");
   await s.wait(150);
   await narrate(s, 'The last note fades. And in the quiet after it...');
   await s.wait(60);
-  await s.sfx('bell_toll');
+  await s.sfx('bell_thirteenth');
   await s.wait(180);
   await s.camera.follow('hero');
   await say(s, 'mira', '...Thirteen.');
@@ -1040,7 +1026,7 @@ async function oren_starter(s) {
     await say(s, 'oren', "And {hero}. That morning, with the sign. You said you'd forgotten too. You hadn't. I could tell.");
   }
   await say(s, 'oren', "Here. For the road. Don't eat them all at once. They're medicine, not breakfast.");
-  await s.give(REWARDS.starter.item, REWARDS.starter.qty + ((await s.hasFlag('oren_truth')) ? 1 : 0));   // H4: one more for the true answer
+  await s.give(REWARDS.starter.item, REWARDS.starter.qty);
   await s.setFlag('starter_done');
 }
 
@@ -1157,11 +1143,11 @@ async function quill_hint(s) {
     await say(s, 'quill', "You read the milestone just now. I copy it every year, and this year I'm afraid to look. Is it going?");
     const c = await s.choice(['"Forgotten" is going first.', "It's sharp as ever."]);
     if (c === 0) {
-      await say(s, 'quill', "...The last word. Of course it would be. I'll copy that one first, from now on. Here: scribe's drops, for bad light.");
-      await s.give('eye_drops', 2);
+      await say(s, 'quill', "...The last word. Of course it would be. I'll copy that one first, from now on.");
       await s.setFlag('quill_truth');
     } else {
-      await say(s, 'quill', "Sharp as ever. Good. Good. ...I'll look tomorrow, when the light is better.");
+      await say(s, 'quill', "Sharp as ever. Good. ...Then I won't need my drops tonight. Take them. I'll look when the light is better.");
+      await s.give('eye_drops', 2);
       await s.setFlag('quill_lie');
     }
   }

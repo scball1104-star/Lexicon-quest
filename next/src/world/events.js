@@ -1,5 +1,5 @@
-// Map events on the field (W2-world): every `events[]` entry of a map module becomes an entity (prop, actor, tile footprint, handlers).
-// docs/WORLD.md lists the vocabulary. API: buildEntities, refreshEntities (flag changes), interactables, interact, stepOn / stepOff,
+// Map events on the field (W2-world): every map `events[]` entry becomes an entity (docs/WORLD.md has the vocabulary).
+// API: buildEntities, refreshEntities (flag changes), interactables, interact, stepOn / stepOff,
 // fireTarget (a switch or plate changed), pushBlock / moveBlock, revealInk (the Lantern), breakWall (Dash Strike), appraiseObject.
 // `block` + `heavy` is Shove-only; `object` + `breakable` ('roots' | 'rock' | 'glass') is Dash-only; any event + `behind: '<id>'` is
 // concealed until that breakable breaks; `object` + `appraise` is an Appraise target; E2 adds `beam`, `mirror` and `receptor`
@@ -14,7 +14,7 @@ import { rollChest } from '../battle/loot.js';
 import { ITEMS } from '../data/items.js';
 import { HELP, VOW_TEXT } from '../data/text.js';
 import { inspectBoxes, bookBoxes, takeBark } from '../game/story.js';
-import { settleVow, offerVows, takeVow } from '../game/vows.js';
+import { settleVow, offerVows, takeVow, takeVowIntro } from '../game/vows.js';
 import { Actor, EnemyBrain, WALK_FRAMES } from './actors.js';
 import { makeNpcActor } from './npc.js';
 import { DIRS, OPPOSITE } from './pathfind.js';
@@ -569,7 +569,8 @@ async function vowRow(field) {
   if (settled && settled.kind === 'carried') return;
   if (settled && settled.kind === 'kept') {
     engine.audio.sfx(settled.reward ? 'buff' : 'confirm');
-    await field.showBoxes([{ who: null, text: settled.text }, settled.line].filter(Boolean));
+    field.keptBar = settled.reward ? { ...settled.reward, t: 0 } : null;   // H6
+    try { await field.showBoxes([{ who: null, text: settled.text }, settled.line].filter(Boolean)); } finally { field.keptBar = null; }
   } else if (settled && settled.kind === 'broken' && settled.line) {
     await field.showBoxes([settled.line]);
   }
@@ -577,6 +578,8 @@ async function vowRow(field) {
   const ctx = { alwaysRun: !!(engine.settings && engine.settings.alwaysRun) };
   const offered = offerVows(g, ctx);
   if (!offered.length) return;
+  const intro = takeVowIntro(g);   // H6
+  if (intro) { await field.showBoxes([intro]); if (field.dead) return; }
   for (;;) {
     const pick = await field.dialog({ who: null, text: VOW_TEXT.offer, choices: [VOW_TEXT.none, ...offered.map((v) => v.name)], cancel: 0 });
     if (!pick || field.dead) return;

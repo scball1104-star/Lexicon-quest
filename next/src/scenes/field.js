@@ -24,7 +24,7 @@ import { landing } from '../game/packFallback.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF, sceneAllowed } from '../game/story.js';
-import { currentStep, mainQuestFor } from '../data/quests.js';
+import { currentStep, mainQuestFor, aimFor } from '../data/quests.js';
 import { Silverglass } from '../world/silverglass.js';
 import { Reflections, inGlass } from '../world/reflections.js';
 import { Closeup } from '../world/closeup.js';
@@ -33,7 +33,9 @@ import { ITEMS } from '../data/items.js';
 import { drawWindow } from '../ui/window.js';
 import { FieldAbilities, ABILITY_BTN } from '../world/abilities.js';
 import { installFieldArt } from '../world/fieldart.js';
-import { vowEvent } from '../game/vows.js';
+import { vowEvent, activeVow } from '../game/vows.js';
+import { drawMemberHeader } from '../ui/screens/common.js';
+import { masteryLevel, MASTERY_XP, MAX_MASTERY } from '../data/party.js';
 
 const FOLLOW_DEPTH = 2;
 // the autosave goes to `game.autosaveSlot` (0 unless the run owns another slot; E3-saves)
@@ -43,11 +45,7 @@ const LANTERN_FRAMES = 120;
 const LANTERN_HINT_TILES = 2;                       // hidden ink within this many tiles shows the Lantern prompt
 const AIM_FRAMES = 240;                             // H2: the Aim line stays about four seconds
 const AIM_STILL_FRAMES = 600;                       // and comes back after ten seconds standing still
-/**
- * The touch layout's on-canvas ability button (game px, bottom right, above the dialog area's top edge). It was the
- * Lantern button; W9 made it the field ability button (abilities.js ABILITY_BTN), and a tap there while hidden ink
- * is near still raises the Lantern.
- */
+/** The touch layout's on-canvas field ability button (abilities.js ABILITY_BTN); near hidden ink a tap raises the Lantern. */
 export const LANTERN_BTN = ABILITY_BTN;
 const respawnAt = new Map();     // "<map>:<enemyId>" -> engine.time when it comes back (field zones)
 
@@ -91,6 +89,7 @@ export class FieldScene {
     this.lastTint = null;
     this.lanternHint = false;          // hidden ink is near and the Lantern is carried: show its prompt
     this.aim = { t: 0, step: null, title: '', still: 0 };   // H2: the Aim line (tickAim / drawAim)
+    this.pendingDrops = []; this.keptBar = null; this.untucked = false;   // H6
     this.fxTriggers = [];              // one-shot particle tells from the map's ambientFx (the pit page)
     this.fxDone = new Set();
     this.abilities = new FieldAbilities(this);   // W9: Dash Strike, Appraise, the Lantern, Shove
@@ -158,8 +157,7 @@ export class FieldScene {
     this.actors = []; this.entities = new Map(); this.byTile = new Map();
     installFieldArt(e);                // W9: the ability art (heavy block, root wall, cracked rock) joins the tile db
     this.map = new TileMap(e, mod, { hasFlag: this.hasFlag });
-    // W11 (PLAYTEST_REVIEW_3 fix 2): a field map with `respawn: 'reentry'` (the Fading Road) brings its beaten groups
-    // back only when the party walks in from another map; a same-map warp (the fog doors) keeps them gone.
+    // `respawn: 'reentry'` maps bring beaten groups back only when entered from another map.
     if (mod.id !== this.mapId) this.reentryGone.delete(mod.id);
     this.mapId = mod.id;
     this.abilities.reset();
@@ -167,6 +165,7 @@ export class FieldScene {
     this.lantern = 0;
     this.prompt = null;
     this.lanternHint = false; this._inkKey = null;
+    this.untucked = false;
     this.fxTriggers = fxTriggersOf(mod); this.fxDone = new Set();
     // position
     let tx = x, ty = y;
@@ -174,9 +173,8 @@ export class FieldScene {
     if (tx == null || ty == null) { const s = mod.start || { x: 1, y: 1 }; tx = s.x; ty = s.y; dir = dir || s.dir; }
     dir = DIRS[dir] ? dir : 'down';
     setPosition(g, mod.id, tx, ty, dir);
-    // Game over returns the party to the last landmark, not the floor entrance (PLAYTEST 7.11): a map
-    // entered from another map or by stairs is one; a same-map notch door or a pit fall is not. Save bells,
-    // Keeper's fonts and `safe: true` events mark one when used (markSafe).
+    // Game over returns to the last landmark: a map entered from another map or by stairs (not a notch door or a pit),
+    // or a bell, font or `safe: true` event once used (markSafe).
     if (o.first || o.landmark) setSafePoint(g);
     // party
     this.rebuildParty(tx, ty, dir);
@@ -207,15 +205,13 @@ export class FieldScene {
     this.applyMusic(mod);
     e.audio.ambience(mod.ambience || null, { fade: 1.2 });
     const b = bannerFor(mod.id, mod, this.hasFlag);
-    if (b && !o.quiet) this.banner.show(b.title, b.sub);
+    if (b && !o.quiet && !this.coldOpen) this.banner.show(b.title, b.sub);
     if (!o.first) this.autosave();
     this.loading = false;
     this.frame = 0;
     // enter triggers after the fade-in, then any step trigger under the landing tile
     e.after(o.first ? 20 : 8, async () => {
-      // W15 (PLAYTEST_REVIEW_4 fix 7): an arrival scene waits until the location banner has been read (it starts as
-      // the banner slides out), with input held, so its first window never covers the floor's name. Not under a
-      // scene-owned fade (Episode 2's morning after the credits starts on a black screen).
+      // An arrival scene waits, input held, until the location banner slides out (not under a scene-owned fade).
       if (this.banner.active && this.fadeAlpha < 0.5 && !this.fadeTween
           && this.enterTriggers.some((ent) => ent.present && ent.ev.script && sceneAllowed(ent.ev.script, this.hasFlag))) {
         this.lockInput();
@@ -523,11 +519,7 @@ export class FieldScene {
     const r = await this.dialog({ who: null, text: '', choices: options, instant: true });
     return typeof r === 'number' ? r : options.length - 1;
   }
-  /**
-   * A first-time companion remark. It only speaks when the field is idle and on top; during a cutscene, an
-   * interaction or a battle it waits in `pendingBarks` and plays at the next quiet moment (so the dark-room
-   * remark never stacks under an arrival scene's dialogue).
-   */
+  /** A first-time companion remark: spoken when the field is idle and on top, else queued in `pendingBarks`. */
   async bark(key) {
     if (this.inputLocked || this.pendingWarp || (this.cutscene && this.cutscene.running) || this.engine.scene !== this || this.actors.some((a) => a.kind === 'enemy' && a.brain && a.brain.mode === 'chase' && Math.abs(a.tx - this.leader.tx) + Math.abs(a.ty - this.leader.ty) <= 5)) {
       if (!this.pendingBarks.includes(key)) this.pendingBarks.push(key);
@@ -538,11 +530,7 @@ export class FieldScene {
     this.lockInput();
     try { await this.showBoxes(boxes); } finally { this.unlockInput(); }
   }
-  /**
-   * A chest, pot or scene hands something over: gear goes to the bag as an instance (equippable), the rest
-   * counts. The toast plays the jingle or the rarity drop sound (legendaries get the beam); gear that beats
-   * what someone wears is then offered through the equip prompt.
-   */
+  /** A chest, pot or scene hands something over: gear as an instance (then the equip prompt), the rest as counts, with its toast. */
   async giveItem(itemId, qty = 1) {
     const e = this.engine;
     const got = grant(this.game, itemId, qty);
@@ -585,10 +573,8 @@ export class FieldScene {
   }
 
   /**
-   * The equip prompt (PLAYTEST 3, W5): gear just received that beats what a member wears is offered at once,
-   * "Equip the Iron Pike on Bram?" Yes / Later, or the members' names when more than one gains (best gain
-   * first). Yes equips through inventory.equipGear and shows the stat arrows in a toast. Off when the
-   * `equipPrompts` setting is false. Returns true when something was equipped.
+   * The equip prompt: gear that beats what a member wears, "Equip the Iron Pike on Bram?" Yes / Later (or the members'
+   * names, best gain first). Off when `equipPrompts` is false. True when something was equipped.
    */
   async maybeEquipPrompt(uid) {
     const e = this.engine;
@@ -612,6 +598,12 @@ export class FieldScene {
     const base = baseOf(offer.item);
     if (e.toasts) await e.toasts.show({ text: `${who}: ${deltaLine(chosen.delta)}`, icon: base ? base.icon : null, icon16: !!(base && base.slot === 'weapon'), frames: 80 });
     return true;
+  }
+  async offerPendingDrops() {
+    const drops = this.pendingDrops.splice(0);
+    this.lockInput();
+    try { for (const uid of drops) { if (this.dead) break; if (findGear(this.game, uid)) await this.maybeEquipPrompt(uid); } }
+    finally { this.unlockInput(); }
   }
   async takeItem(itemId, qty = 1) {
     stateTake(this.game, itemId, qty);
@@ -650,7 +642,9 @@ export class FieldScene {
     if (e.cave && !this.dead && await e.cave.afterBattle(this, encounterId, result)) return result;   // the Deep Stacks: kills, B100, a wipe
     // gear that dropped in the fight (battle.js leaves the uids on the engine): the equip prompt after the rewards
     const drops = e.lastBattleDrops; e.lastBattleDrops = null;
-    if (result === 'win' && drops && drops.length && !this.dead) {
+    // H6: a scene's battle offers its gear after the scene
+    if (result === 'win' && drops && drops.length && !this.dead && this.cutscene.running) this.pendingDrops.push(...drops);
+    else if (result === 'win' && drops && drops.length && !this.dead) {
       this.lockInput();
       try {
         while (e.transition && !this.dead) await e.waitFrames(1);
@@ -713,6 +707,7 @@ export class FieldScene {
     this.frame++;
     this.time += dt;
     this.game.playtime += dt;
+    if (this.keptBar) this.keptBar.t++;
     const L = this.leader;
     const canControl = !below && !this.inputLocked && !this.pendingWarp;
 
@@ -748,6 +743,7 @@ export class FieldScene {
     if (canControl && !L.moving && e.scene === this && !this.cutscene.running && this.glass.queue.length) this.runScene(this.glass.takeScript());
     // a companion remark that had to wait (a scene, a battle, a chest) speaks now that the field is quiet
     if (canControl && !L.moving && this.pendingBarks.length && e.scene === this && !this.banner.active) this.bark(this.pendingBarks.shift());
+    if (canControl && !L.moving && this.pendingDrops.length && e.scene === this && !this.cutscene.running && !this.banner.active) this.offerPendingDrops();
     // W7: after a fallback landing, go back to the saved place once the pack is up
     const r = this.packReturn;
     if (r && this.mapId !== r.via) this.packReturn = null;
@@ -898,6 +894,7 @@ export class FieldScene {
 
   async openMenu() {
     const e = this.engine;
+    if (this.coldOpen) return;
     if (!e.hasScene('menu')) { this.warnOnce('nomenu', 'menu scene missing'); return; }
     const r = await e.pushAwait('menu');   // the menu plays menu_open / menu_close itself
     if (r && r.quit) { this.dead = true; this.cutscene.cancel(); return; }
@@ -911,11 +908,12 @@ export class FieldScene {
    */
   tickAim(still) {
     const a = this.aim;
+    if (this.coldOpen) { a.t = 0; a.still = 0; return; }
     if (this.frame % 20 === 0) {
       const step = currentStep(this.hasFlag, mainQuestFor(this.hasFlag));
-      const id = step ? step.id : null;
-      if (a.step !== null && id !== a.step) this.showAim();
-      a.step = id; a.title = step ? step.title : '';
+      const id = step ? step.id : null, aim = aimFor(step, this.hasFlag);
+      if (a.step !== null && (id !== a.step || aim !== a.aim)) this.showAim();
+      a.step = id; a.aim = aim; a.title = step ? step.title : '';
     }
     a.still = still && this.engine.scene === this && !this.cutscene.running ? a.still + 1 : 0;
     if (a.still === AIM_STILL_FRAMES) this.showAim();
@@ -924,15 +922,19 @@ export class FieldScene {
   showAim() { this.aim.t = AIM_FRAMES; }
   /** Never over a dialogue box, never during a scene, never under another scene (the menu, a battle), never inside the Deep Stacks. */
   aimDrawable() {
-    return !!this.map && this.engine.scene === this && !this.cutscene.running && !this.inputLocked && !this.pendingWarp && !this.loading
+    return !!this.map && !this.coldOpen && this.engine.scene === this && !this.cutscene.running && !this.inputLocked && !this.pendingWarp && !this.loading
       && !(this.banner && this.banner.active) && !this.closeup.isOpen && this.fadeAlpha < 0.5 && !(this.engine.cave && this.engine.cave.inRun(this.game));
   }
+  /** H6: the cold open has no Aim line, menu or banner. */
+  get coldOpen() { return this.mapId === 'bell_tower' && !this.hasFlag('cold_open_done'); }
   /** True while the Aim line is on screen (tests and LQ_DEBUG.state()). */
   get aimShown() { return this.aim.t > 0 && !!this.aim.title && this.aimDrawable(); }
   drawAim(r) {
     if (this.engine.cave && this.engine.cave.drawTag(this, r)) return;   // the Deep Stacks' floor tag takes the Aim line's place
     if (!this.aimShown) return;
-    const a = { ...this.aim, title: (currentStep(this.hasFlag, mainQuestFor(this.hasFlag)) || {}).aim || this.aim.title };   // H4: the step's present-tense aim when it has one
+    // H4: the step's aim; H6: and the vow carried
+    const vow = activeVow(this.game);
+    const a = { ...this.aim, title: (aimFor(currentStep(this.hasFlag, mainQuestFor(this.hasFlag)), this.hasFlag) || this.aim.title) + (vow ? ` - Vow: ${vow.name}` : '') };
     const k = Math.min(1, (AIM_FRAMES - a.t + 1) / 8, a.t / 16);   // in over 8 frames, out over the last 16
     const tw = r.measure(a.title);
     const w = tw + 30, h = 17;
@@ -976,11 +978,7 @@ export class FieldScene {
     return near;
   }
 
-  /**
-   * One-shot particle tells from the map's `ambientFx` (fxTriggersOf): a `page_fall` entry sends one page
-   * drifting down into a pit when the party first steps into its `area` (or, with no area, within `radius`
-   * tiles of the nearest pit tile). Once per map load.
-   */
+  /** One-shot `ambientFx` tells (fxTriggersOf): a `page_fall` drifts into a pit when the party first enters its `area`. */
   checkFxTriggers() {
     if (!this.fxTriggers.length) return;
     const L = this.leader;
@@ -1022,14 +1020,11 @@ export class FieldScene {
     this.lockInput();
     try {
       if (e.hasScene('credits')) await e.pushAwait('credits', episode === 2 ? { cards: h.cards, music: h.music } : undefined);
-      // W15: Episode 2 ends on a card that says the story goes on and the next road is not in the game yet; the night
-      // square stays dark under it.
       if (h.endCard && e.hasScene('titleCard')) { this.fadeAlpha = 1; this.fadeTween = null; await e.pushAwait('titleCard', { ...h.endCard }); }
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);
       await e.fadeTo(() => this.loadMap(h.map, null, null, 'down', { mark: h.mark, landmark: true }), { duration: 1.0, hold: 0.2 });
-      // A scene the wake-up map starts on entry (Episode 2's ep2_morning, right after the Episode 1 credits) owns the
-      // fade from here: dropping its tween left it waiting forever with input locked (E2-integrate).
+      // a scene the wake-up map starts on entry (ep2_morning) owns the fade from here
       if (!(this.fadeTween && this.cutscene.running)) { this.fadeAlpha = 0; this.fadeTween = null; }
       this.lighting.setTint('day', 0);
     } finally { this.unlockInput(); }
@@ -1063,6 +1058,7 @@ export class FieldScene {
     for (const g of ab.ghosts) items.push({ y: g.y, k: 0.5, g });          // Dash Strike afterimages
     items.sort((u, v) => (u.y - v.y) || (u.k - v.k));
     const lean = ab.lean;
+    const tucked = this.tuckedBed();
     for (const it of items) {
       if (it.p) {
         const p = it.p;
@@ -1074,7 +1070,8 @@ export class FieldScene {
         it.a.px += lean.dx * 2; it.a.py += lean.dy * 2;
         it.a.draw(r, t);
         it.a.px -= lean.dx * 2; it.a.py -= lean.dy * 2;
-      } else it.a.draw(r, t);
+      } else if (tucked && it.a === this.leader) this.drawTucked(r, t, tucked);
+      else it.a.draw(r, t);
     }
     ab.drawFx(r);
     this.reflections.drawOver(r);      // E2: faces in the fountain go over the fountain's art
@@ -1101,6 +1098,38 @@ export class FieldScene {
     if (this.fadeAlpha > 0) r.fade('#000000', this.fadeAlpha);
     if (!this.closeup.isOpen) this.banner.draw(r);
     this.drawAim(r);
+    this.drawKeptBar(r);
+  }
+
+  /** H6: in bed, under the blanket, until the jump or the first step (the bed prop, or null). */
+  tuckedBed() {
+    const L = this.leader;
+    if (this.untucked || !L || this.mapId !== 'hero_home') return null;
+    if (L.moving || L.hopping) { this.untucked = true; return null; }
+    const waking = !this.hasFlag('intro_done') || (this.hasFlag('ep1_complete') && !this.hasFlag('ep2_morning_done'));
+    return waking ? this.map.props.find((p) => p.t === 'bed_single' && p.x === L.tx && p.y === L.ty && p.draw && p.visible) || null : null;
+  }
+  drawTucked(r, t, bed) {
+    const L = this.leader, d = bed.draw, fold = d.dy + bed.offY + 14;   // the sheet's fold
+    r.pushClip(d.dx + bed.offX - 1, fold - 48, d.w + 2, 48);
+    L.py += 2;
+    try { L.draw(r, t, { shadow: false }); } finally { L.py -= 2; r.popClip(); }
+    r.image(d.img, d.dx + bed.offX, fold, { sx: d.sx, sy: d.sy + 14, sw: d.w, sh: d.h - 14 });
+  }
+
+  /** H6: a kept vow's pay, seen: the member's card beside the rest box, the mastery bar filling by the points. */
+  drawKeptBar(r) {
+    const k = this.keptBar, m = k && (this.game.party || []).find((x) => x.id === k.to);
+    const box = m && m.weapon === k.weapon && (this.engine.stack || []).find((sc) => sc.name === 'dialog' && sc.rect);
+    if (!box) return;
+    const R = box.rect, y = box.position === 'top' ? R.y + R.h + 3 : R.y - 47, pts = m.mastery[k.weapon];
+    m.mastery[k.weapon] = Math.round(k.before + (k.after - k.before) * Math.max(0, Math.min(1, (k.t - 14) / 40)));
+    const x = R.x + R.w - 164, now = m.mastery[k.weapon], lv = masteryLevel(k.after), lo = MASTERY_XP[lv - 1] || 0;
+    try { drawMemberHeader(r, m, x, y, 164, 44, { mastery: true }); } finally { m.mastery[k.weapon] = pts; }
+    // the points just paid, lit on the bar (drawMemberHeader's gauge geometry)
+    const gx = x + 85 + r.measure(k.weapon[0].toUpperCase() + k.weapon.slice(1)), gw = x + 155 - gx, at = (v) => gx + Math.round(gw * Math.max(0, Math.min(1, (v - lo) / Math.max(1, (MASTERY_XP[lv] ?? lo) - lo))));
+    if (lv < MAX_MASTERY && now > k.before) r.rect(at(Math.max(lo, k.before)), y + 24, at(now) - at(Math.max(lo, k.before)), 2, '#fff2b0');
+    r.text(`+${k.points}`, R.x + R.w - 8, y + 5, { align: 'right', color: 'green' });
   }
 
   /**

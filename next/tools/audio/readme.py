@@ -74,7 +74,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | Defeat | `stopMusic(0.5)`, `await jingle('gameover_sting', { duckMusic: false })`, `music('gameover')` |
 | Inn / save | `await jingle('inn_rest')` across the fade to black (music pauses and resumes); the chapel Bell: `jingle('save')` |
 | Party / quests | `party_join` when Mira or Bram joins, `quest_done` for side quests |
-| Story | `bell_toll` (the Thirteenth Bell), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
+| Story | `bell_toll` (a tower bell; the cold open's twelve tolls), `bell_thirteenth` (the Thirteenth Bell, core), `bell_peal`, `sign_fade`, `name_restore`, `door_rumble`, `ink_gurgle`, `page_flutter`, `summon`, `name_devour`; Episode 2: `reflection_out` (the Other Selves step out), `kept` / `kept_break` (the Kept status starts / ends) |
 | Ambience | map `ambience:` field: `river_birds` (Willowmere, riverside valley), `wind_valley` (open meadow, pilgrim road), `archive_hush` (all Archive floors), `mere_still` (the Hollow and its interiors), `court_hush` (every Court floor) |
 """
 

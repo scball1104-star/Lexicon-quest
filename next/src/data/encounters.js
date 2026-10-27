@@ -11,7 +11,7 @@ import { scaleForEpisode, scaleExp, OPTIONAL_FOE_EXP_MUL } from './expcurve.js';
 
 export const ENCOUNTERS = {};
 // `export` is the registry seam: an expansion pack's register() adds its groups through enc() (src/data/x1/encounters.js).
-// Options beyond enemies/zone/leader: boss, noFlee, music, noElite, elite, flag, power, speed, startFury, bossLoot, backdrop and
+// Options beyond enemies/zone/leader: boss, noFlee, music, noElite, elite, flag, power, speed, startFury, bossLoot, backdrop, stage and
 // `expMul` (the group pays that multiple of its foes' EXP; default 1; see expcurve.js).
 export function enc(id, o) { ENCOUNTERS[id] = { id, boss: false, noFlee: false, music: 'battle', ...o }; }
 
@@ -21,7 +21,7 @@ enc('valley_slimes', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime
 enc('valley_scarab', { zone: 'valley', leader: 'moss_scarab', enemies: ['moss_scarab', 'ink_slime'] });
 enc('valley_mixed', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'moss_scarab'] });
 enc('valley_pack', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'briar_wolf', 'ink_slime'] });
-enc('yard_slime', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime'], noFlee: true, noElite: true, power: 0.5, speed: 0.7, hp: 0.55 });   // H1: the Lv 1 hero alone (ep1.js yard_slime); not in a plan, proved by qa/content/h1_opening.test.mjs
+enc('yard_slime', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime'], noFlee: true, noElite: true, power: 0.5, speed: 0.7, hp: 0.55, stage: 'willowmere' });   // H1: the Lv 1 hero alone (ep1.js yard_slime); not in a plan, proved by qa/content/h1_opening.test.mjs
 
 // ---------------------------------------------------------------- Archive F1: The Catalog Halls
 enc('f1_slimes', { zone: 'archive_f1', leader: 'ink_slime', enemies: ['ink_slime', 'ink_slime', 'bookmite'] });

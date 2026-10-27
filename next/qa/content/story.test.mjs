@@ -357,7 +357,7 @@ test('music cues: mystery for the signs and the bell, sorrow for lost names, tri
   const bell = await runOnce(scenes.thirteenth_bell, { flags: [...both, 'archive_f2_done'], branchFlags: false });
   assert.deepEqual(musics(bell.log), [null, 'mystery']);
   assert.equal(musics(bell.log).at(-1), ARCHIVE_F3.music, 'the scene ends on the F3 map track');
-  assert.ok(idx(bell.log, (e) => e.op === 'music') < idx(bell.log, (e) => e.op === 'sfx' && e.args[0] === 'bell_toll'), 'silence falls before the toll');
+  assert.ok(idx(bell.log, (e) => e.op === 'music') < idx(bell.log, (e) => e.op === 'sfx' && e.args[0] === 'bell_thirteenth'), 'silence falls before the toll');
   // The faint name after the Archivore, and the Register at home: triumph gives way to sorrow, never the reverse.
   const after = await runOnce(scenes.archivore, { flags: [...both, 'boss_door_open'], branchFlags: false });
   assert.deepEqual(musics(after.log), [null, 'boss_archivore', 'triumph', 'sorrow']);

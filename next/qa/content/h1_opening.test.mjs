@@ -71,8 +71,12 @@ test('each step tolls once and only in order: a skipped step is silent, a repeat
 test('the thirteenth toll: the alarm bell, no name, the hero\'s "!", 90 to 120 frames of silence, black, one card', async () => {
   const { log } = await runOnce(scenes.thirteenth_toll, { flags: TOLL_FLAGS, branchFlags: false });
   const names = log.map((e) => e.op);
-  const bell = log.findIndex((e) => e.op === 'sfx' && e.args[0] === 'bell_first');
-  assert.ok(bell >= 0, 'bell_first rings');
+  // H6 (CRITIQUE_ARC 10): a bell of its own, in the core set, never a doubled town toll
+  const bell = log.findIndex((e) => e.op === 'sfx' && e.args[0] === 'bell_thirteenth');
+  assert.ok(bell >= 0, 'bell_thirteenth rings');
+  assert.deepEqual(ops(log, 'sfx').map((e) => e.args[0]), ['bell_thirteenth'], 'one bell, not the town toll doubled');
+  const audio = JSON.parse(readFileSync(join(NEXT, 'assets/audio/manifest.json'), 'utf8')).sfx.bell_thirteenth;
+  assert.ok(audio && audio.pack === 'core' && !audio.fallback, 'in the core set: a New Game has it');
   assert.equal(log[names.indexOf('music')].args[0], null, 'silence before the alarm bell');
   const fade = log.findIndex((e) => e.op === 'fade' && e.args[0] === 'out');
   assert.ok(fade > bell, 'fades to black after the toll');

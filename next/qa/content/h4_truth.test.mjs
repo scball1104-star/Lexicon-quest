@@ -28,11 +28,11 @@ const RUNS = {};
 for (const [id, fn] of Object.entries(ALL)) RUNS[id] = await explore(fn);
 
 // Every pair, the scene that asks, the index of the true answer (the autoplay bot picks 0 unless told otherwise, so
-// every new choice puts the truth first; Mael's choice predates H4 and keeps its order).
+// every choice puts the truth first; H6 gave Mael a new ask about the night, truth first too).
 const PAIRS = {
   oren: { scene: 'fading_sign', truth: 0, flags: ['intro_done'] },
   hazel: { scene: 'hazel_farewell', truth: 0, flags: ['met_mael'] },
-  mael: { scene: 'mael_intro', truth: 1, flags: ['intro_done'] },
+  mael: { scene: 'mael_intro', truth: 0, flags: ['intro_done'] },
   garrick: { scene: 'garrick_farewell', truth: 0, flags: PARTY },
   tess: { scene: 'tess_letters', truth: 0, flags: ['tess_quest_started', 'tess_letter_3_found', ...PARTY] },
   quill: { scene: 'quill_hint', truth: 0, flags: ['saw_milestone', ...PARTY] },
@@ -62,20 +62,21 @@ const MEMORY = {
   nico: { scene: 'nico_crowns', flags: [...EP1_DONE_FLAGS, 'court_entered', 'nico_crowns_started', 'paper_crown_found'] },
 };
 
-// The small reward on the truth side: the scene that gives it and the item (Oren's is one more of the starter reward).
+// What changes hands (H6, CRITIQUE_ARC 6, decision D: never a quiz): a gift only where the fiction hands one over. `side` is
+// the answer that carries it (truth, lie) or null (the line is all); the scene that gives it and the item.
 const REWARD = {
-  oren: { scene: 'oren_starter', flags: ['starter_quest_started', 'starter_found'], byFlag: true, item: 'hi_potion', more: true },
-  hazel: { scene: 'hazel_farewell', flags: ['met_mael'], item: 'tent' },
-  mael: { scene: 'ep2_mael', flags: EP1_DONE_FLAGS, byFlag: true, item: 'ether' },
-  garrick: { scene: 'garrick_farewell', flags: PARTY, item: 'echo_herb' },
-  tess: { scene: 'tess_letters', flags: ['tess_quest_started', 'tess_letter_3_found', ...PARTY], item: 'hi_potion' },
-  quill: { scene: 'quill_hint', flags: ['saw_milestone', ...PARTY], item: 'eye_drops' },
-  door: { scene: 'archive_door', flags: PARTY, item: 'potion' },
-  corin: { scene: 'nh_arrival', flags: [...EP1_DONE_FLAGS, 'crossing_done'], item: 'potion' },
-  elian: { scene: 'elian_letter', flags: [...EP1_DONE_FLAGS, 'nh_restored'], byFlag: true, item: 'silver_salve' },
-  lena: { scene: 'lena_testimony', flags: [...EP1_DONE_FLAGS, 'fountain_started'], item: 'ether' },
-  anwen: { scene: 'anwen_testimony', flags: [...EP1_DONE_FLAGS, 'fountain_started'], byFlag: true, item: 'phoenix_feather' },
-  nico: { scene: 'nico_crowns', flags: [...EP1_DONE_FLAGS, 'court_entered', 'nico_crowns_started', 'paper_crown_found'], byFlag: true, item: 'potion' },
+  oren: { scene: 'oren_starter', flags: ['starter_quest_started', 'starter_found'], byFlag: true, side: null },
+  hazel: { scene: 'hazel_farewell', flags: ['met_mael'], side: 'truth', item: 'tent' },
+  mael: { scene: 'ep2_mael', flags: EP1_DONE_FLAGS, byFlag: true, side: null },
+  garrick: { scene: 'garrick_farewell', flags: PARTY, side: 'truth', item: 'echo_herb' },
+  tess: { scene: 'tess_letters', flags: ['tess_quest_started', 'tess_letter_3_found', ...PARTY], side: 'truth', item: 'hi_potion' },
+  quill: { scene: 'quill_hint', flags: ['saw_milestone', ...PARTY], side: 'lie', item: 'eye_drops' },
+  door: { scene: 'archive_door', flags: PARTY, side: 'truth', item: 'potion' },
+  corin: { scene: 'nh_arrival', flags: [...EP1_DONE_FLAGS, 'crossing_done'], side: 'lie', item: 'potion' },
+  elian: { scene: 'elian_letter', flags: [...EP1_DONE_FLAGS, 'nh_restored'], byFlag: true, side: null },
+  lena: { scene: 'lena_testimony', flags: [...EP1_DONE_FLAGS, 'fountain_started'], side: 'truth', item: 'ether' },
+  anwen: { scene: 'anwen_testimony', flags: [...EP1_DONE_FLAGS, 'fountain_started'], byFlag: true, side: 'truth', item: 'phoenix_feather' },
+  nico: { scene: 'nico_crowns', flags: [...EP1_DONE_FLAGS, 'court_entered', 'nico_crowns_started', 'paper_crown_found'], byFlag: true, side: null },
 };
 
 // ------------------------------------------------------------------------------------------------ the pairs
@@ -158,26 +159,34 @@ test('each pair is remembered by exactly one later line that differs by the flag
   }
 });
 
-test('the truth side carries one small consumable the lie side does not; never a key, never a route flag', async () => {
+test('a gift only where the fiction hands one over: about half the truths, two kind lies, never a key or a route flag', async () => {
   for (const [p, r] of Object.entries(REWARD)) {
     const T = `${p}_truth`, L = `${p}_lie`;
     const run = (extra, decisions) => runOnce(ALL[r.scene], { flags: [...r.flags, ...extra], decisions, branchFlags: false });
     const truth = r.byFlag ? await run([T], []) : await run([], [PAIRS[p].truth]);
     const lie = r.byFlag ? await run([L], []) : await run([], [1 - PAIRS[p].truth]);
     const gives = (log) => ops(log, 'give').map((e) => [e.args[0], e.args[1] ?? 1]);
-    const gt = gives(truth.log).find(([id]) => id === r.item), gl = gives(lie.log).find(([id]) => id === r.item);
-    assert.ok(gt, `${p}: the truth gives ${r.item}`);
-    if (r.more) assert.ok(gl && gt[1] === gl[1] + 1, `${p}: one more ${r.item} than the lie`);
-    else assert.ok(!gl, `${p}: the lie gives no ${r.item}`);
-    assert.equal(ITEMS[r.item].kind, 'consumable', `${p}: ${r.item} is a consumable`);
-    assert.ok(!ITEMS[r.item].key, `${p}: never a key`);
-    assert.ok(gt[1] <= (r.more ? 3 : 2), `${p}: small (${gt[1]})`);
+    if (!r.side) assert.deepEqual(gives(truth.log), gives(lie.log), `${p}: the same things change hands either way`);
+    else {
+      const [win, other] = r.side === 'truth' ? [truth, lie] : [lie, truth];
+      const g = gives(win.log).find(([id]) => id === r.item);
+      assert.ok(g, `${p}: the ${r.side} gives ${r.item}`);
+      assert.ok(!gives(other.log).some(([id]) => id === r.item), `${p}: the other answer gives no ${r.item}`);
+      assert.equal(ITEMS[r.item].kind, 'consumable', `${p}: ${r.item} is a consumable`);
+      assert.ok(!ITEMS[r.item].key, `${p}: never a key`);
+      assert.ok(g[1] <= 2, `${p}: small (${g[1]})`);
+    }
     // no route flag moves with the answer: the sets differ only by the pair
     const diff = (a, b) => a.filter((f) => !b.includes(f));
     const st = setsOf(truth.log), sl = setsOf(lie.log);
     if (r.byFlag) { assert.deepEqual(diff(st, sl), []); assert.deepEqual(diff(sl, st), []); }   // the memory scene sets nothing new
     else { assert.deepEqual(diff(st, sl), [T]); assert.deepEqual(diff(sl, st), [L]); }
   }
+  const sides = Object.values(REWARD).map((r) => r.side);
+  assert.equal(sides.filter((s) => s === 'truth').length, 6, 'half the twelve truths carry a gift');
+  assert.ok(sides.filter((s) => s === 'lie').length >= 1 && sides.filter((s) => !s).length >= 3, 'some kind lies carry one, some answers none');
+  assert.equal(REWARD.mael.side, null, "Mael pays in a line, never in ethers");
+  for (const id of Object.keys(ALL)) for (const r of RUNS[id]) for (const t of says(r.log)) assert.ok(!/collect honest answers/i.test(t), `${id}: ${t}`);
 });
 
 test('Oren\'s pair is the H1 one, unchanged: the sign scene asks, the starter quest remembers', async () => {
@@ -208,8 +217,8 @@ const MAIN2 = ['ep2_started', 'crossing_done', 'east_road_arrived', 'east_first_
   'vow_door_open', 'nameless_king_defeated', 'aurel_named', 'nh_restored', 'ep2_complete'];
 // Decisions that answer every choice on the route with its SECOND option and still win every battle (a battle is a
 // decision point too: 0 wins).
-const TRUTHS1 = { mael_intro: [1, 0] };   // Mael's truth is his second option
-const LIES1 = { wake_up: [1], fading_sign: [1], mael_intro: [0, 1], hazel_farewell: [1], garrick_farewell: [1], campfire_rest: [1],
+const TRUTHS1 = {};   // every truth is a first option (H6 put Mael's first with his new ask)
+const LIES1 = { wake_up: [1], fading_sign: [1], mael_intro: [1, 1], hazel_farewell: [1], garrick_farewell: [1], campfire_rest: [1],
   quill_hint: [1], archive_door: [1], boss_door: [0], return_to_willowmere: [1], tess_letters: [1] };
 const LIES2 = { ep2_morning: [1], ep2_mael: [1], waystation_rest: [1], nh_arrival: [1], elian_hall: [1, 1], anwen_register: [1],
   lena_testimony: [1], nico_crowns: [1], court_f1_arrival: [1], vex_mirror: [1], nameless_king: [1, 0] };
@@ -243,6 +252,7 @@ test('every dungeon floor ends on exactly one new question: a line, a named soun
   const bi = f1.findIndex((e) => e.op === 'setFlag' && e.args[0] === 'archive_f1_done');
   assert.ok(f1.slice(bi).some((e) => e.op === 'sfx' && e.args[0] === 'page_flutter'), 'F1: a page turns below');
   assert.match(last(f1), /Nobody is down there to turn them\.$/);
+  assert.ok(!says(f1).some((t) => /short way/.test(t)), 'F1: no shortcut chore line before the question (H6, CRITIQUE_ARC 19)');
   assert.equal(ops(f1, 'say').at(-1).args[0], null, 'F1: seen, not explained (narration)');
   const f2 = (await runOnce(EP1.archive_f2_exit, { flags: ['lantern_get', ...PARTY], branchFlags: false })).log;
   assert.equal(last(f2), 'Or keep in.', 'F2 already ended on its question; left as it was');
@@ -270,20 +280,22 @@ test('every dungeon floor ends on exactly one new question: a line, a named soun
 test('every boss intro names what the town avoided: on the card where the card is ours, in the last box where it is pinned', async () => {
   const card = (log, name) => ops(log, 'title').find((e) => e.args[0] === name).args[1].sub;
   const w = (await runOnce(EP1.echo_warden, { flags: ['archive_f1_done', ...PARTY], branchFlags: false })).log;
-  assert.equal(card(w, 'ECHO WARDEN'), 'Knight of the Last Order. Nobody came back to end it.');
+  assert.equal(card(w, 'ECHO WARDEN'), 'Knight of the Last Order. Its relief never came.');
   const a = (await runOnce(EP1.archivore, { flags: ['boss_door_open', ...PARTY], branchFlags: false })).log;
   assert.equal(card(a, 'THE ARCHIVORE'), 'Eater of Names. It was fed for a hundred years.');
   const base = [...EP1_DONE_FLAGS, 'court_entered', 'court_f1_done', 'court_f2_arrived'];
   const o = (await runOnce(EP2.other_selves, { flags: base, branchFlags: false })).log;
-  assert.equal(card(o, 'THE OTHER SELVES'), 'Hall of Reflections. Nobody would look at the water.');
+  assert.equal(card(o, 'THE OTHER SELVES'), 'Hall of Reflections. The town turned from the water.');
   const k = (await runOnce(EP2.nameless_king, { flags: [...base, 'vow_door_open'], branchFlags: false })).log;
   const k2 = (await runOnce(EP2.nameless_king, { flags: [...base, 'vow_door_open', 'nameless_king_tried'], branchFlags: false })).log;
   assert.equal(card(k, 'THE NAMELESS KING'), 'Keeper of the Court. Nobody rowed across to ask him.');
   assert.equal(card(k2, 'THE NAMELESS KING'), card(k, 'THE NAMELESS KING'), 'the retry card says the same');
-  for (const sub of [card(w, 'ECHO WARDEN'), card(a, 'THE ARCHIVORE'), card(o, 'THE OTHER SELVES'), card(k, 'THE NAMELESS KING')]) {
-    assert.match(sub, /^[A-Z][^.]+\. (Nobody|It was) [^.]+\.$/, 'epithet, then one sentence about the avoidance');
+  const subs = [card(w, 'ECHO WARDEN'), card(a, 'THE ARCHIVORE'), card(o, 'THE OTHER SELVES'), card(k, 'THE NAMELESS KING')];
+  for (const sub of subs) {
+    assert.match(sub, /^[A-Z][^.]+\. [A-Z][^.]+\.$/, 'epithet, then one sentence about the avoidance');
     assert.ok(sub.length <= 56 && !sub.includes(EM_DASH), 'one line on the card (232 px of 384 in the body font)');
   }
+  assert.ok(subs.filter((x) => /\. Nobody /.test(x)).length <= 1, 'the "Nobody" formula is not the moral (H6, CRITIQUE_ARC 18)');
   // The Briar Alpha's card is pinned by hollow.test.mjs, so its line is the last box before "The Alpha rises."
   const h = (await runOnce(EP1.hollow_alpha, { flags: ['lantern_get', 'hollow_found', ...PARTY], branchFlags: false })).log;
   assert.equal(card(h, 'BRIAR ALPHA'), 'Warden of the Lost Bridge');

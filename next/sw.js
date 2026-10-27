@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '8ce36253494e';
+const SHELL_VERSION = '11fd7d8cedde';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -265,6 +265,7 @@ const PRECACHE = [
   'assets/audio/sfx/axe_chop_1.wav',
   'assets/audio/sfx/axe_chop_2.wav',
   'assets/audio/sfx/bell_peal.wav',
+  'assets/audio/sfx/bell_thirteenth.wav',
   'assets/audio/sfx/bell_toll.wav',
   'assets/audio/sfx/block_push.wav',
   'assets/audio/sfx/boss_die.wav',

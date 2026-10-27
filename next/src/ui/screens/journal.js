@@ -269,7 +269,7 @@ export class JournalScreen {
     if (row.kept) drawIcon(r, 'star', rx - 12, 58);
     r.text(row.placeName, x, 76, { color: 'gray' });
     drawDivider(r, 164, 90, 210);
-    if (!row.kept) { r.text('...', x, 96, { color: 'dim' }); return; }
+    if (!row.kept) { r.text(row.id === 'hero' ? 'Not yet kept.' : '...', x, 96, { color: 'dim' }); return; }
     r.wrap(row.why, 206).slice(0, 4).forEach((line, i) => r.text(line, x, 96 + i * 11, { color: 'white' }));
   }
   draw(r) {

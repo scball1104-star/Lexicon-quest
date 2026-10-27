@@ -109,3 +109,37 @@ Sound by ear: headless, so I logged the audio calls only. Real finger gestures: 
 tablet layout. Tess's choice and the five Episode 2 choices, which I read in script and did not play. Mael's Episode 2 memory scene
 (my rig opened the morning instead; read in `ep2.js`). The Hollow and the Briar Alpha, read only. Hard Road, which is a proposal. Auto
 never spent a Fury art in three fights at full gauge, so I could not break No Fury that way (Fact); it then paid as kept.
+
+## Fixed (H6-fixes, Tuesday 2026-10-27, Eastern)
+
+Items 2 to 25 in rank order (item 1 was the orchestrator's). The five things that work were left as they were. Previews and
+logs: `qa/arc/fixes_out/` (the critic's rigs, copied and retargeted to the fixed text, phone first).
+
+| # | Done | What changed | Test touched |
+|---|---|---|---|
+| 2 | yes | `field.js` `coldOpen`: on `bell_tower` before `cold_open_done` the Aim line never draws or counts, and Menu does nothing | `h3_vows` (ui) unchanged; rig `arc_tower.py` |
+| 3 | yes | `ledger.js`: every Episode 1, expansion and Episode 2 row has its own `why`, verb first, in Holt's and Mael's voice | `h2_ledger` (new test) |
+| 4 | yes | `REACHED`: a place shows and counts once reached (valley `left_town`, Wider Valley `first_fight_done`, Hollow `crossing_done`, Emberpeak `ep3_started`) | `h2_ledger` |
+| 5 | yes | Oren kept on `saw_fading_sign`; his line differs by `oren_truth` / `oren_lie` | `h2_ledger` |
+| 6 | yes | gifts only where the fiction hands one over: six truths (Hazel, Garrick, Tess, the door, Anwen, Lena), two kind lies (Quill's drops, Corin's rations), none for Oren, Mael, Elian, Nico; Mael's ethers and "I collect honest answers" cut | `h4_truth` (rewritten) |
+| 7 | yes | "Did you sleep at all?" / "Not much." (truth, now first) / "Like a stone."; the Episode 2 memory follows | `h4_truth` |
+| 8 | yes | `autoAction`: Auto never takes what the vow forbids (`vowForbids`), else Defend | `h3_vows` (battle, new test) |
+| 9 | yes | one box before the first offer per save (Bram, or the narrator) | `h3_vows`, `h3_vows_headless.py` |
+| 10 | yes | `bell_thirteenth`, a core sfx of its own (moving `bell_first` would add 262 KB; 44.6 KB was free) | `h1_opening`, `story`, `_harness` |
+| 11 | yes | no location banner on the tower; the opening line moved up into the dark shaft (`LINE_Y` 74) | rig |
+| 12 | yes | the member's card beside the kept box, the mastery bar filling, the points just paid lit | `h3_vows` (reward shape) |
+| 13 | yes | Mael's two bell boxes are one | `h4_truth` |
+| 14 | yes | step `aimIf`: "Open the great door" once `stacks_key_found` | rig `fix_aim.py` |
+| 15 | yes | "Walk every step until you rest."; Bram: "You ran. Legs are for that. The vow's done." | `h3_vows` |
+| 16 | yes | in battle the ended line goes to the battle log, not a toast | `h3_vows` |
+| 17 | yes | Hazel: "Are you frightened?"; Elian: "Does it do that everywhere you sign?" | none |
+| 18 | yes | Warden "Its relief never came."; Other Selves "The town turned from the water." | `h4_truth` |
+| 19 | yes | Bram's shortcut line cut | `h4_truth` |
+| 20 | yes | a scene's battle offers its gear after the scene (`pendingDrops`) | rig `arc_truth.py` |
+| 21 | yes | encounter `stage: 'willowmere'`: the town's key art (`title`), darkened a little | rig `fix_stage.py` |
+| 22 | yes | the hero's row reads "Not yet kept." | `h2_ledger_headless.py` |
+| 23 | yes | twelve small bells (`prop_ferry_bell`), three by two on each belfry wall | `h1_opening` (map validates) |
+| 24 | yes | the hero lies in bed under the blanket until the jump (the bed's own sprite over the hero) | shot `story_wake` |
+| 25 | yes | " - Vow: name" after the aim while a vow is active | `h3_vows` (ui) |
+
+Open for Scott: the yard fight's stage is the town at dusk (the only Willowmere art), in the morning.

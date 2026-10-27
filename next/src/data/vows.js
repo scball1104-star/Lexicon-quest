@@ -49,7 +49,7 @@ export const VOWS = [
   },
   {
     id: 'walk', name: 'Walk the road',
-    line: 'Carry the lamp at a walk. No running.',
+    line: 'Walk every step until you rest.',
     rule: 'One running step and it ends.',
     breaksOn: ['run'],
     to: ['hero'],
@@ -59,7 +59,7 @@ export const VOWS = [
       { who: null, text: 'You walked it. Every step.' },
     ],
     brokenLine: [
-      { who: 'bram', text: "You ran. The lamp's still lit. The vow isn't." },
+      { who: 'bram', text: "You ran. Legs are for that. The vow's done." },
       { who: 'mira', text: "A run, then. The road doesn't mind. The vow ends." },
       { who: null, text: 'You ran. The vow ended there.' },
     ],
@@ -106,5 +106,11 @@ export const VOWS = [
 ];
 
 export const VOW_BY_ID = Object.fromEntries(VOWS.map((v) => [v.id, v]));
+
+/** H6: said once, before the first offer. */
+export const VOW_INTRO = [
+  { who: 'bram', text: 'Old guard habit: swear one hard thing at a fire. Keep it to the next fire, and your weapon hand learns from it.' },
+  { who: null, text: 'A vow is one hard rule until the next rest. Kept, it pays in weapon mastery.' },
+];
 
 export default VOWS;

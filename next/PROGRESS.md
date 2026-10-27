@@ -354,3 +354,21 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   descent are in progress; the switch stays off until they pass and a critic has played it.
 - Usage note: the account is at 74 percent of its weekly allowance, so from here the agents run one at a time and
   stop above 85 until the Wednesday morning reset.
+
+## 2026-10-27 (Tue) morning: the critic's 24 notes worked through (not published)
+- The bell tower is clean now: no aim line, no menu, no place banner, the one caption up in the dark above you,
+  and twelve small bells in the belfry so the thirteenth has something to be the thirteenth of. The thirteenth
+  toll is its own cracked bell, and every later "thirteen" in the game rings the same one.
+- The Ledger reads like the game, not like a flag list: every name has a line in Holt's and Mael's plain voice,
+  a place only appears once you have reached it (so the Hollow's people stay out of sight until you cross), Oren
+  is kept the morning you stand at his sign, and your own row says "Not yet kept." The counts: 1 of 18 after Mael,
+  3 of 25 at the Archive door, 17 of 25 after the credits.
+- The true answer is no longer the quiz answer. A gift comes only where the fiction hands one over (six truths,
+  two kind lies), and nothing comes from Oren, Mael, Elian or Nico either way. Mael's well question is now about
+  the night you both just had ("Did you sleep at all?"), and his Episode 2 memory of it follows.
+- Vows: a line from Bram explains them once before the first offer; Auto battle never takes an action the vow
+  forbids; the aim line carries " - Vow: No fleeing" while one is held; a kept vow shows the mastery bar filling.
+- One thing for you: the bakery-lane slime now fights in front of the town's key art, which shows Willowmere at
+  dusk, while the fight happens in the morning. A daytime stage needs new art and bytes. Say the word if it bothers you.
+- The Deep Stacks balance agent is still running; nothing is published.
+

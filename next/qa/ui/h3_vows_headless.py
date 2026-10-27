@@ -2,7 +2,7 @@
 
 On the desktop and phone profiles, in the real game (docs/VOWS.md):
   1. a clean load has no console or page errors;
-  2. the rest flow at a Keeper's font: "Rest here?", the heal, then "Take a vow?" with "No vow" first and selected, then
+  2. the rest flow at a Keeper's font: "Rest here?", the heal, (H6: once per save, Bram's box on why a vow pays), then "Take a vow?" with "No vow" first and selected, then
      "Record your journey here?": with "No vow" the flow costs exactly ONE more confirm than before H3 and nothing else
      changes (the autoplay bot's generic handler picks index 0, so it is unchanged);
   3. choosing a vow shows its line and asks once; "Not this one" returns to the list; "Take the vow" sets game.vow;
@@ -198,7 +198,12 @@ def run_device(browser, base, device, log):
     f = rig.start_at_font()
     check(f['map'] == 'archive_f3' and f['prompt'] and f['prompt']['kind'] == 'check', f'{device}: standing at the F3 font, facing it', log)
     presses = rig.rest(log, device)                   # the font's line, "Rest here?", Rest: three presses, as before H3
-    d = rig.wait_dialog(900)                          # the heal toast runs its 70 frames, then the vow window
+    d = rig.wait_dialog(900)                          # the heal toast runs its 70 frames, then (H6: once per save) the intro
+    box = rig.log_dialog_texts()
+    check(box and str(box['text']).startswith('Old guard habit') and not box['choices'], f'{device}: once per save, before the first offer, Bram says why a vow pays (saw {box})', log)
+    files.append(rig.shot('intro'))
+    rig.confirm_box(); presses += 1                   # the intro: one press, the first time only (CRITIQUE_ARC 9)
+    d = rig.wait_dialog()
     box = rig.log_dialog_texts()
     check(box and box['text'] == 'Take a vow?', f'{device}: "Take a vow?" follows the heal (saw {box})', log)
     check(box['choices'][0] == 'No vow' and box['index'] == 0, f'{device}: "No vow" is first and selected ({box["choices"]})', log)
@@ -208,7 +213,7 @@ def run_device(browser, base, device, log):
     d = rig.wait_dialog()
     box = rig.log_dialog_texts()
     check(box and box['text'] == 'Record your journey here?' and box['choices'] == ['Save', 'Not now'], f'{device}: the save prompt follows at once (saw {box})', log)
-    check(presses == 4, f'{device}: with "No vow" the flow to the save prompt is 4 presses: 3 as before H3 plus the one window ({presses})', log)
+    check(presses == 5, f'{device}: with "No vow" the flow to the save prompt is 3 presses as before H3, plus the one window, plus the intro once per save ({presses})', log)
     rig.pick(1)                       # Not now
     rig.wait_field()
     check(rig.ev(GAME + '.vow') is None, f'{device}: no vow taken', log)

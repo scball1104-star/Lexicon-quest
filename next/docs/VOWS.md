@@ -12,7 +12,8 @@ Tests: `qa/battle/h3_vows.test.mjs`, `qa/saves/h3_vows.test.mjs`, `qa/ui/h3_vows
 
 At every rest (a Keeper's font, the chapel bell, the Pilgrim's Rest campfire, every later landmark that runs the rest
 flow) the player may take ONE vow, optional and self-imposed, that lasts until the next rest. Keep it and that rest pays
-a small permanent reward and one line from the party. Break it and it simply ends: one toast when it breaks, one honest
+a small permanent reward and one line from the party. Break it and it simply ends: one toast when it breaks (in battle,
+a line in the battle log instead: H6, so it never covers the help line or the timeline), one honest
 line at the next rest, nothing else (decision D: small and honest, no punishment screen, no lecture, no second cost).
 Nobody in the game says "responsibility". The vow is a thing the player does.
 
@@ -22,7 +23,7 @@ Nobody in the game says "responsibility". The vow is a thing the player does.
 |---|---|---|---|---|---|---|
 | `no_flee` | No fleeing | Stand in every fight until you rest. | Flee once and the vow ends. | the Flee command succeeds (`escape` op, `scenes/battle.js`) | the hero | always |
 | `no_heal` | No healing items | No potion, no feather, until you rest. | Use one, in a fight or from the bag, and it ends. | an item that restores HP or revives, in battle (`action_start`, `performParty`) or from the bag (`ui/screens/items.js`); ethers and cures do not count | Bram, else the hero | always |
-| `walk` | Walk the road | Carry the lamp at a walk. No running. | One running step and it ends. | a running step (`tryLeaderStep`, `scenes/field.js`); the walk itself is normal speed | the hero | not while Always Run is on (every step would be a run) |
+| `walk` | Walk the road | Walk every step until you rest. | One running step and it ends. | a running step (`tryLeaderStep`, `scenes/field.js`); the walk itself is normal speed | the hero | not while Always Run is on (every step would be a run) |
 | `mira_stands` | Mira stands | Mira does not fall until you rest. | If she drops to zero, it ends. | Mira at 0 HP (`ko` op for a party actor, `scenes/battle.js`) | Mira | Mira in the party |
 | `no_fury` | No Fury | Spend no Fury until you rest. | One Fury art and it ends. | a Fury art spent (`fury_gain` with reason `spent`, `performParty`) | the hero | always |
 
@@ -32,8 +33,10 @@ most of all at the F3 font, which is the last rest before the Archivore: a playe
 without the Fury arts. That is the chosen weight the arc asks for. The purchase seam is still hooked (`vowEvent`
 `{ type: 'buy' }` in `scenes/shop.js`) so a later vow can use it with a table row and nothing else.
 
-Auto battle fights on its own and can break a vow (a potion at 40 percent, a Fury art when ready). A vow is the player's
-to keep; Auto is the player's choice too, so the game does not special-case it.
+Auto battle keeps the vow (H6, CRITIQUE_ARC 8): while one is carried its brain sees what the vow forbids switched off
+(no healing item under No healing items, no Fury art under No Fury, no Flee under No fleeing; `vowForbids` in
+`src/game/vows.js`, `autoAction` in `scenes/battle.js`), and when what it picks would still break the vow it defends.
+The player may still break it by hand; the vow just ends. The simulator calls `partyAction` directly and is unchanged.
 
 ## The rest flow
 
@@ -41,9 +44,12 @@ to keep; Auto is the player's choice too, so the game does not special-case it.
 the vow row, then "Record your journey here?". The vow row (`vowRow`):
 
 1. `settleVow(game)`. A kept vow pays first: the reward box ("Vow kept: No fleeing." and the mastery line) then one party
-   line (Bram or Mira, in character, two boxes in all). A broken vow says its one line. An untested vow (no battle
+   line (Bram or Mira, in character, two boxes in all). H6: beside the boxes the member's card shows the weapon's mastery
+   bar filling by the points paid (`field.keptBar`, `drawKeptBar`; the reward carries `before` and `after`). A broken vow says its one line. An untested vow (no battle
    since it was taken) rides on unchanged and nothing is offered, so resting twice at one font neither pays nor eats it.
-2. "Take a vow?" with the vow names under **"No vow", first and selected**; cancel also lands on it. One confirm press
+2. Once per save, before the first offer, one box says why a vow is worth taking (H6, `VOW_INTRO`, `takeVowIntro`,
+   counter `vow_intro`): Bram, "Keep it to the next fire, and your weapon hand learns from it", or the narrator alone.
+   Then "Take a vow?" with the vow names under **"No vow", first and selected**; cancel also lands on it. One confirm press
    leaves the flow as it was, which is what the autoplay bot does (its generic handler picks index 0 when no preferred
    label matches; `qa/autoplay.py` is unchanged). With "No vow" the flow costs exactly one press more than before H3.
 3. A chosen vow shows its offer line and rule in one box and asks once: "Take the vow" / "Not this one" (back to the
@@ -51,8 +57,8 @@ the vow row, then "Record your journey here?". The vow row (`vowRow`):
 
 While a vow is carried the menu's info box shows a "Vow" row (desktop: in place of Chapter; touch: in place of Time,
 the map title stays) and the Journal's Quests header shows "Vow: No fleeing" at the right of the quest title. After a
-break both read "Vow ended" (dim) until the next rest clears it. Nothing else joins the HUD; the H2 Aim line was left
-alone (its suffix was optional in the brief and `scenes/field.js` is limited to the one run hook).
+break both read "Vow ended" (dim) until the next rest clears it. H6 (CRITIQUE_ARC 25): the H2 Aim line carries
+" - Vow: No fleeing" while a vow is active.
 
 ## Rules
 

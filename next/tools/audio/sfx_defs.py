@@ -452,6 +452,25 @@ def bell_toll(g, v):
     return verb(y, 1.9, 0.3, bright=0.4, predelay=0.02)
 
 
+@sfx("bell_thirteenth", "big", "The Thirteenth Bell, the cracked bell of the Stacks, as the town hears it (the cold open's thirteenth toll, F1, the Stacks, the credits): one hard strike of a great bronze bell a tritone below the town's twelve (nominal D-sharp 3 against their A3). The crack splits every partial so it beats sour and rattles, and it never sings on: the crack chokes it in under a second, then silence. Core set, under 40 KB (H6, CRITIQUE_ARC 10).", target=-14.5, tail_db=-40)
+def bell_thirteenth(g, v):
+    f, d, choke = hz("D#3"), 0.84, 0.62
+    n = ns(d)
+    t = dsp.tvec(n)
+    spec = [(0.5, 0.42, 0.50), (1.0, 0.72, 0.36), (1.19, 0.58, 0.30), (1.5, 0.30, 0.24), (2.0, 1.00, 0.27),
+            (2.5, 0.40, 0.18), (2.67, 0.38, 0.17), (3.03, 0.30, 0.14), (4.1, 0.24, 0.10), (5.4, 0.15, 0.07), (6.9, 0.09, 0.05)]
+    y = np.zeros(n)
+    for r, a, dec in spec:
+        for split, w in ((0.989, 0.55), (1.014, 0.45)):   # the crack: every partial in two, a sour fast beat
+            y += a * w * np.sin(dsp.TAU * f * r * split * t + g.random() * dsp.TAU) * np.exp(-t / dec)
+    y *= 1.0 + 0.35 * np.sin(dsp.TAU * 37.0 * t) * np.exp(-t / 0.5)   # the cracked bronze rattles against itself
+    strike = dsp.butter(dsp.white(ns(0.05), g), "band", (f * 2.0, min(SR * 0.45, f * 14)), SR, 2)
+    y[: len(strike)] += 0.9 * strike * dsp.env_exp(len(strike), SR, 0.012, 0.0004)   # a hard, dry clapper knock
+    y *= (1 - np.clip((t - choke) / (d - choke), 0, 1)) ** 2   # choked: it stops short instead of ringing on
+    y *= np.clip(t / 0.0015, 0, 1)
+    return dsp.mono(dsp.reverb(y, SR, t60=0.7, wet=0.16, predelay=0.012, bright=0.45, extend=False))
+
+
 @sfx("bell_peal", "story", "Willowmere's twelve bells ringing together in celebration: one full round of twelve bells descending a major scale (G6 to C5), then the start of a second round with pairs swapped, as in English change ringing. About 4.5 s.", target=-15.0, tail_db=-46)
 def bell_peal(g, v):
     m = M()
