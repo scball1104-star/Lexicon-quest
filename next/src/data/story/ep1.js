@@ -131,6 +131,17 @@ async function wake_up(s) {
 async function hazel_farewell(s) {
   await say(s, 'hazel', 'So. The Archive.');
   await say(s, 'hazel', "Mael told me. Don't look at me like that. He tells me everything eventually, and usually first.");
+  // H4 (RESPONSIBILITY_ARC 3.4): the true answer is the awkward one. Remembered once she has you home (npcs.js hazel).
+  await say(s, 'hazel', "Are you frightened? Don't say no to please me. I'll know.");
+  const c = await s.choice(['Yes.', 'No.']);
+  if (c === 0) {
+    await say(s, 'hazel', "Good. Frightened people look where they're going. Here, a tent. The blanket stays home, so you come back for it.");
+    await s.give('tent', 1);
+    await s.setFlag('hazel_truth');
+  } else {
+    await say(s, 'hazel', "'No.' ...You get that from me. Neither of us is any good at it.");
+    await s.setFlag('hazel_lie');
+  }
   await s.emote('hazel', '...');
   await say(s, 'hazel', 'I knitted this over the winter. I was saving it for your birthday, but archives are only cellars with ambitions.');
   await s.give(REWARDS.hazel.item, REWARDS.hazel.qty);
@@ -212,8 +223,10 @@ async function mael_intro(s) {
   await s.face('mael', 'hero');
   await say(s, 'mael', 'Ah, there you are. Did you sleep through the bell again?');
   const c = await s.choice(['I was up early!', '...Maybe.']);
-  if (c === 0) await say(s, 'mael', 'Up early, and still late. That is a rare gift. Treasure it.');
-  else await say(s, 'mael', 'Honest, at least. Honesty is in short supply this morning.');
+  // H4 (RESPONSIBILITY_ARC 3.4): the small lie and the honest 'maybe' are remembered; Mael pays the honest one back
+  // when he hands over the letter east (ep2_mael). Neither touches the route.
+  if (c === 0) { await say(s, 'mael', 'Up early, and still late. That is a rare gift. Treasure it.'); await s.setFlag('mael_lie'); }
+  else { await say(s, 'mael', 'Honest, at least. Honesty is in short supply this morning.'); await s.setFlag('mael_truth'); }
   await say(s, 'mael', "You saw Oren's sign. It is not the only one. Names are slipping off Willowmere like rain off a roof.");
   await s.camera.panTo('bell_tower', 50);
   await say(s, 'mael', 'And last night the tower rang thirteen times. It holds twelve bells. I have counted them every day for sixty years.');
@@ -346,6 +359,19 @@ async function garrick_farewell(s) {
   await say(s, 'garrick', 'You. {hero}. A sword is a fine thing, but some doors want an axe. Take this one.');
   await s.give(REWARDS.garrick.item, REWARDS.garrick.qty);
   await say(s, 'garrick', 'Do not rush a forge. Do not rush a fight. Respect the rhythm, and come home.');
+  // H4 (RESPONSIBILITY_ARC 3.4): Holt softened the gate for him. The truth costs the father a breath; the kind lie
+  // costs nothing now. Remembered once the names are home (npcs.js garrick).
+  await say(s, 'garrick', 'Holt came by. Says the boy was fine at the gate. Was he?');
+  const c = await s.choice(['He lost your name a moment.', 'He was fine.']);
+  if (c === 0) {
+    await say(s, 'garrick', 'A moment. ...Then I say it louder. Loud enough for the gate. Take these, for the day one of you cannot get a word out.');
+    await s.give('echo_herb', 2);
+    await s.setFlag('garrick_truth');
+  } else {
+    await say(s, 'garrick', 'Good.');
+    await s.emote('bram', 'sweat');
+    await s.setFlag('garrick_lie');
+  }
   await say(s, 'bram', 'Garrick.');
   await s.wait(30);
   await say(s, 'bram', 'I just wanted to say it. Out loud. While I can.');
@@ -487,6 +513,18 @@ async function archive_door(s) {
   await s.face('mira', 'hero');
   await say(s, 'mira', "Old doors. Hard of hearing. That's all it was.");
   await say(s, 'bram', 'Right. Old door.');
+  // H4 (RESPONSIBILITY_ARC 3.4): the hero's own name. Saying it plainly is the hard thing; 'old door' is the kind lie
+  // all three of them want. Remembered under the golden page (archivore_after).
+  await say(s, 'mira', "...That's all it was. Wasn't it, {hero}?");
+  const c = await s.choice(["It didn't hear me.", 'Old door.']);
+  if (c === 0) {
+    await say(s, 'bram', "...Then we say it for you. Every door, every time. Here, drink. Your voice went thin.");
+    await s.give('potion', 1);
+    await s.setFlag('door_truth');
+  } else {
+    await say(s, 'mira', 'Old door. Yes. ...Good.');
+    await s.setFlag('door_lie');
+  }
   await all(s.emote('mira', '...'), s.emote('bram', '...'));
   await s.camera.follow('hero');
 }
@@ -534,6 +572,9 @@ async function archive_f1_bell(s) {
   await s.shake(1, 20);
   await narrate(s, 'The toll has shaken a panel loose beside the stairs: a narrow back-stair, running down to the antechamber by the entrance.');
   await say(s, 'bram', "Good. Next time we come this way, it's the short way.");
+  // H5 (RESPONSIBILITY_ARC 3.5): the floor ends on one question. F2's readers answer it.
+  await s.sfx('page_flutter');
+  await narrate(s, 'From the stair below, a page turns. Then another. Nobody is down there to turn them.');
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -576,7 +617,7 @@ async function echo_warden(s) {
   await say(s, 'echo_warden', '...RUN OUT... RUN OUT...');
   await say(s, 'mira', 'Watch its stance. One stance turns back magic, the other turns back steel. Read it before you swing.');
   // Boss intro: name card, a jolt, then the battle theme and the swirl.
-  await s.title('ECHO WARDEN', { sub: 'Knight of the Last Order', frames: 100 });
+  await s.title('ECHO WARDEN', { sub: 'Knight of the Last Order. Nobody came back to end it.', frames: 100 });   // H5 (3.6): what the Keepers avoided
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
   await s.music('battle');
@@ -709,6 +750,8 @@ async function boss_door(s) {
   await s.shake(2, 30);
   await s.setFlag('boss_door_open');
   await say(s, 'bram', 'Our road brought us here. Hold fast.');
+  // H5 (RESPONSIBILITY_ARC 3.5): the Stacks end on one question. The Archivore answers it: it stopped to taste a name.
+  await say(s, 'mira', "...Bram. It's stopped chewing. Why would it stop?");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -735,7 +778,7 @@ async function archivore(s) {
   await say(s, 'mira', 'A list. Someone gave it orders.');
   await say(s, 'mira', 'Keep saying each other\'s names. A name is harder to eat while someone is holding it.');
   // Boss intro: name card, a jolt, then its own theme and the swirl.
-  await s.title('THE ARCHIVORE', { sub: 'Eater of Names', frames: 100 });
+  await s.title('THE ARCHIVORE', { sub: 'Eater of Names. It was fed for a hundred years.', frames: 100 });   // H5 (3.6): what the town avoided
   await s.shake(4, 30);
   await s.flash('#ffffff', 10);
   await s.music('boss_archivore');
@@ -782,6 +825,9 @@ async function archivore_after(s) {
   await say(s, 'mira', 'Yours is still faint.');
   await say(s, 'bram', "It'll come back. They all came back.");
   await say(s, 'mira', '...Maybe it just takes longer.');
+  // H4: the one line that remembers the Archive door (door_truth / door_lie).
+  if (await s.hasFlag('door_truth')) await say(s, 'bram', "You said it plain, at the door. 'It didn't hear me.' Then we keep saying yours until it does.");
+  else if (await s.hasFlag('door_lie')) await say(s, 'mira', "'Old door,' we said. All three of us. ...It wasn't the door.");
   // The legendary: given here, with its own line, so the player sees it land (not a silent battle drop).
   await s.camera.panTo('archivore', 30);
   await s.sfx('name_restore');
@@ -938,6 +984,18 @@ async function tess_letters(s) {
     await s.emote('tess', '...');
     await say(s, 'tess', 'He knew I would come looking.');
     await say(s, 'tess', "I can't remember his name. I've tried every night for years. But he wrote to me. He wrote to me.");
+    // H4 (RESPONSIBILITY_ARC 3.4): the signature is eaten through (find_letter_3). The truth tells her it was taken,
+    // not lost; the kind lie leaves her the road. Remembered once the names are home (npcs.js tess).
+    await say(s, 'tess', "The bottom of the page. Where he signed. Is his name there? I can't look. You look.");
+    const c = await s.choice(["The paper's eaten through.", "It's smudged. That's all."]);
+    if (c === 0) {
+      await say(s, 'tess', "...Eaten. Not smudged. Then something took it, years before any of this. Here. He packed one for every run north.");
+      await s.give('hi_potion', 1);
+      await s.setFlag('tess_truth');
+    } else {
+      await say(s, 'tess', "Smudged. Rain does that. ...Thank you, {hero}. I'll clean it when my hands stop shaking.");
+      await s.setFlag('tess_lie');
+    }
   }
   let done = true;
   for (const n of [1, 2, 3]) if (!(await s.hasFlag(`tess_letter_${n}_delivered`))) done = false;
@@ -982,7 +1040,7 @@ async function oren_starter(s) {
     await say(s, 'oren', "And {hero}. That morning, with the sign. You said you'd forgotten too. You hadn't. I could tell.");
   }
   await say(s, 'oren', "Here. For the road. Don't eat them all at once. They're medicine, not breakfast.");
-  await s.give(REWARDS.starter.item, REWARDS.starter.qty);
+  await s.give(REWARDS.starter.item, REWARDS.starter.qty + ((await s.hasFlag('oren_truth')) ? 1 : 0));   // H4: one more for the true answer
   await s.setFlag('starter_done');
 }
 
@@ -1093,6 +1151,20 @@ async function quill_hint(s) {
   } else {
     await say(s, 'quill', 'Ink remembers, they say. It only wants a true light to read it by.');
   }
+  // H4 (RESPONSIBILITY_ARC 3.4): only once the party has read the milestone. The truth is the word Mira saw going;
+  // the kind lie lets him keep not looking. Remembered once the names are home (npcs.js quill).
+  if (await s.hasFlag('saw_milestone')) {
+    await say(s, 'quill', "You read the milestone just now. I copy it every year, and this year I'm afraid to look. Is it going?");
+    const c = await s.choice(['"Forgotten" is going first.', "It's sharp as ever."]);
+    if (c === 0) {
+      await say(s, 'quill', "...The last word. Of course it would be. I'll copy that one first, from now on. Here: scribe's drops, for bad light.");
+      await s.give('eye_drops', 2);
+      await s.setFlag('quill_truth');
+    } else {
+      await say(s, 'quill', "Sharp as ever. Good. Good. ...I'll look tomorrow, when the light is better.");
+      await s.setFlag('quill_lie');
+    }
+  }
   await s.setFlag('lost_bridge_started');
 }
 
@@ -1130,6 +1202,8 @@ async function hollow_alpha(s) {
   const late = { boss_door_open: await s.hasFlag('boss_door_open'), archivore_defeated: await s.hasFlag('archivore_defeated') };
   const encounter = alphaEncounter((f) => !!late[f]);
   if (encounter !== 'whisperwood_alpha') await narrate(s, 'Its muzzle is grey, and the briar has grown right into its hide. Down here, alone, it has only grown stronger.');
+  // H5 (RESPONSIBILITY_ARC 3.6): what the valley avoided, in the last box before the card (the card's text is fixed).
+  await say(s, 'mira', 'A hundred years. Nobody came looking for the bridge, so nobody came looking for the names.');
   await narrate(s, 'The Alpha rises. Thorns lift along its spine like hackles.');
   // Boss intro (W5 style): name card, a jolt, then the battle theme and the swirl.
   await s.title('BRIAR ALPHA', { sub: 'Warden of the Lost Bridge', frames: 100 });
@@ -1160,6 +1234,8 @@ async function hollow_after(s) {
   await say(s, 'mira', 'And a wolf lay on them for years, so nothing could scratch them out either.');
   await say(s, 'mira', "The Archive isn't the only place names are kept. A stone. A bench. A friend who says them out loud.");
   await say(s, 'bram', "Then I'll say them. Sorrel, Ansel, Wren. There. Kept.");
+  // H5 (RESPONSIBILITY_ARC 3.5): the Hollow ends on one question (the Keepers' order, a century back, is the answer).
+  await say(s, 'mira', 'Whoever hid them knew something would come eating. A hundred years ago. How did they know?');
   await s.camera.follow('hero');
   await s.music('mystery');
   await s.setFlag('hollow_cleared');

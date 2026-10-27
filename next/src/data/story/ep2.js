@@ -80,6 +80,13 @@ async function ep2_mael(s) {
   await narrate(s, 'Mael holds up the envelope. Where the name of the town should be, there is a blank line.');
   await s.give('mael_letter');
   await say(s, 'mael', "If anyone in the Hollow can say {hero}'s name better than I can, bring me back how.");
+  // H4: the one line that remembers the well on the first morning (mael_truth / mael_lie, ep1.js mael_intro).
+  if (await s.hasFlag('mael_truth')) {
+    await say(s, 'mael', "'Maybe,' you said at the well, that first morning. Most would have said 'up early'. Take these. I collect honest answers.");
+    await s.give('ether', 2);
+  } else if (await s.hasFlag('mael_lie')) {
+    await say(s, 'mael', "'Up early,' you told me at the well, that first morning. I have been lied to by better. Never by kinder.");
+  }
   await say(s, 'bram', "My father left before dawn. There's a note on the forge. GONE TO THE FORD. That's the whole note.");
   await say(s, 'mira', "The list had a place scratched out. East. That's where we go.");
   const c = await s.choice(['East, then.', 'What is the Hollow?']);
@@ -294,6 +301,18 @@ async function nh_arrival(s) {
   await narrate(s, 'The square beyond the gate is busy and cheerful. Every shop sign in it is blank.');
   await say(s, 'mira', 'Not faded. Blank. Like the milestone.');
   await say(s, 'corin', "I'm Corin, of the watch. I have stood this watch for a year I cannot name.");
+  // H4 (RESPONSIBILITY_ARC 3.4): the watch asks the only people who can see the town from outside. Remembered once
+  // it has its name (npcs.js corin).
+  await say(s, 'corin', 'You came in from outside. Tell me straight, stranger. Does it look like a home, from out there?');
+  const c = await s.choice(['It looks lost.', 'It looks like home.']);
+  if (c === 0) {
+    await say(s, 'corin', '...Lost. I thought so. Nobody in here can say it. Take the watch rations. We never go anywhere to need them.');
+    await s.give('potion', 2);
+    await s.setFlag('corin_truth');
+  } else {
+    await say(s, 'corin', "Like home. Then I'll keep saying it. Welcome home.");
+    await s.setFlag('corin_lie');
+  }
   await say(s, 'corin', 'The mayor will want to see you. He is at the fountain, in the middle of the square. He usually is.');
   await s.setFlag('nh_arrived');
 }
@@ -361,6 +380,17 @@ async function elian_hall(s) {
   await say(s, 'elian', "He couldn't write it either. Good. I'll answer it when I have a name to sign.");
   await narrate(s, 'He writes Mira, then Bram, then {hero} in his ledger. The last name goes pale while the ink is still wet.');
   await s.emote('elian', '...');
+  // H4 (RESPONSIBILITY_ARC 3.4): the mayor's ledger of true things. 'Only here' is the kind lie; the truth is the
+  // hero's own fading, said out loud. Remembered when he signs his reply (elian_letter).
+  await say(s, 'elian', 'Does it do that everywhere you sign? ...I keep a ledger of true things. Tell me the true thing.');
+  const t = await s.choice(['Everywhere.', 'Only here.']);
+  if (t === 0) {
+    await say(s, 'elian', 'Everywhere. Then I write it every morning with the others, and I underline it.');
+    await s.setFlag('elian_truth');
+  } else {
+    await say(s, 'elian', "Only here. ...Then it is the Hollow's fault, and the Hollow is sorry.");
+    await s.setFlag('elian_lie');
+  }
   await say(s, 'elian', 'Sister Anwen keeps the chapel register, south-east of the square. She heard the bell first.');
   await s.setFlag('heard_crisis');
 }
@@ -386,6 +416,17 @@ async function anwen_register(s) {
   await say(s, 'anwen', "Then your hands remember. That's a start.");
   // W11 (PLAYTEST_REVIEW_3 fix 5): the chapel step and the coat, on the main path before king_after pays them off
   await say(s, 'anwen', "I raised half this town's foundlings. Elian came to me on that step, in a coat that still doesn't fit him.");
+  // H4 (RESPONSIBILITY_ARC 3.4): the hero's own name, asked plainly by the one who keeps names here. Remembered at
+  // her testimony (anwen_testimony).
+  await say(s, 'anwen', 'And yours, {hero}. Your name. They say the water barely holds your face. Is it keeping?');
+  const c = await s.choice(["It's fading.", "It's keeping."]);
+  if (c === 0) {
+    await say(s, 'anwen', 'Then say it here, under the candles, where I can hear it. Names are held in more than the mouth.');
+    await s.setFlag('anwen_truth');
+  } else {
+    await say(s, 'anwen', 'Keeping. Good. ...Say it anyway, now and then, where someone can hear. It costs nothing.');
+    await s.setFlag('anwen_lie');
+  }
   await s.music('hollow');
   await say(s, 'anwen', "Tovin rows the only boat on the mere. He won't go to the Court. Ask him anyway.");
   await say(s, 'anwen', 'He mends nets at the pier on the north shore. He will tell you no. Let him. Then ask again.');
@@ -454,6 +495,18 @@ async function lena_testimony(s) {
   await say(s, 'lena', 'Our clocks strike at midnight, but the tower has no hands. Fifteen years, and never once late.');
   await say(s, 'lena', 'The night before the name went, the king came to my shop. He asked me how long a bargain lasts.');
   await say(s, 'lena', 'I said, until somebody remembers what it cost. He thanked me. He looked so tired.');
+  // H4 (RESPONSIBILITY_ARC 3.4): she asks for the comfortable lie she tells herself. Remembered once the tower has
+  // hands (npcs.js lena).
+  await say(s, 'lena', 'Fifteen years without hands on that tower. One gets used to it. ...Say you would get used to it.');
+  const c = await s.choice(["I wouldn't.", "You'd get used to it."]);
+  if (c === 0) {
+    await say(s, 'lena', 'No. Nor did I. I say it so the others can. Take these. Watchmakers keep them for long nights. You have one coming.');
+    await s.give('ether', 2);
+    await s.setFlag('lena_truth');
+  } else {
+    await say(s, 'lena', "You'd get used to it. ...Everyone says so. Everyone is very kind. Mind the step on your way out.");
+    await s.setFlag('lena_lie');
+  }
   await s.setFlag('testimony_lena');
 }
 
@@ -461,6 +514,13 @@ async function anwen_testimony(s) {
   await say(s, 'anwen', 'You want my testimony. It is short, and it has been heavy for fifteen years.');
   await say(s, 'anwen', 'The king gave up his name to keep this town alive. I know that the way I know my prayers.');
   await say(s, 'anwen', 'And he cannot remember why. Nor can I. A name is a promise, not a title. His was kept somewhere.');
+  // H4: the one line that remembers the register (anwen_truth / anwen_lie).
+  if (await s.hasFlag('anwen_truth')) {
+    await say(s, 'anwen', 'You told me yours was fading. I have lit a candle for it since. Take this. It burns when nothing else will.');
+    await s.give('phoenix_feather', 1);
+  } else if (await s.hasFlag('anwen_lie')) {
+    await say(s, 'anwen', 'You told me yours was keeping. I lit a candle for it anyway. Forgive an old woman her habits.');
+  }
   await s.setFlag('testimony_anwen');
 }
 
@@ -511,6 +571,16 @@ async function nico_crowns(s) {
     await say(s, 'nico', 'I dream about a crown. A paper one. Somebody gives it to somebody. I always wake up before I see who.');
     await say(s, 'mira', "A paper crown. If we find one, Nico, we'll bring it to you.");
     await say(s, 'nico', 'Promise? Promises are big here. Everybody keeps them extra hard.');
+    // H4 (RESPONSIBILITY_ARC 3.4): a child asks for certainty. Remembered when the crown comes home (below).
+    await say(s, 'nico', "You're going over the water. To him. Is the king coming back? Ma says he is. Say he is.");
+    const c = await s.choice(["I don't know.", 'He is.']);
+    if (c === 0) {
+      await say(s, 'nico', "...You don't know. Nobody says that. Everybody says 'he is'. I like 'I don't know' better. It's got room in it.");
+      await s.setFlag('nico_truth');
+    } else {
+      await say(s, 'nico', "He is! See, Ma was right. I'm telling Corin.");
+      await s.setFlag('nico_lie');
+    }
     await s.setFlag('nico_crowns_started');
     return;
   }
@@ -530,6 +600,13 @@ async function nico_crowns(s) {
   }
   await say(s, 'bram', 'You could keep it, Nico.');
   await say(s, 'nico', "No. I'm going to draw a better one. Mine will have more points.");
+  // H4: the one line that remembers 'is the king coming back' (nico_truth / nico_lie).
+  if (await s.hasFlag('nico_truth')) {
+    await say(s, 'nico', "You said you didn't know. Then you went and found out. That's better than knowing. Here. Ma's, for scrapes.");
+    await s.give('potion', 2);
+  } else if (await s.hasFlag('nico_lie')) {
+    await say(s, 'nico', "You said he was coming back. You were right. ...Were you sure? You weren't sure. That's okay. I wasn't either.");
+  }
   await s.setFlag('nico_crowns_done');
 }
 
@@ -543,6 +620,13 @@ async function elian_letter(s) {
   await s.give('elian_reply');
   await say(s, 'mira', 'Mael will read it three times. Then he will write it down.');
   await say(s, 'elian', 'Good. The more places a name is written, the harder it is to lose.');
+  // H4: the one line that remembers the ledger of true things (elian_truth / elian_lie, elian_hall).
+  if (await s.hasFlag('elian_truth')) {
+    await say(s, 'elian', "You told a mayor the true thing. I underlined it every morning since. From Fitch's shelf, on the town's account.");
+    await s.give('silver_salve', 1);
+  } else if (await s.hasFlag('elian_lie')) {
+    await say(s, 'elian', "'Only here,' you told me, that first day. It was not only here. I kept the page open anyway.");
+  }
   await s.setFlag('letter_answer_started');
 }
 
@@ -629,9 +713,11 @@ async function silverglass_lock(s) {
   await s.setFlag('silverglass_lock_seen');
 }
 
-// Step trigger on the stairs down to court_f2. Sets court_f1_done. W11 (PLAYTEST_REVIEW_3 section 4): no banter, the
-// stairs speak for themselves.
+// Step trigger on the stairs down to court_f2. Sets court_f1_done. W11 (PLAYTEST_REVIEW_3 section 4) left it silent;
+// H5 (RESPONSIBILITY_ARC 3.5) ends the floor on one question, a sound, that the Other Selves answer.
 async function court_f1_stairs(s) {
+  await s.sfx('footstep_stone');
+  await narrate(s, 'On the first step down, the dark sends up a sound: three sets of footsteps, going down ahead of you.');
   await s.setFlag('court_f1_done');
 }
 
@@ -750,7 +836,7 @@ async function other_selves(s) {
   // W11 (PLAYTEST_REVIEW_3 fix 8): the Mirrored Combo's answer, said once before the fight
   await say(s, 'mira', 'When two of them stand side by side on the timeline, push one back.');
   await s.setFlag('other_selves_tried');
-  await s.title('THE OTHER SELVES', { sub: 'Hall of Reflections', frames: 100 });
+  await s.title('THE OTHER SELVES', { sub: 'Hall of Reflections. Nobody would look at the water.', frames: 100 });   // H5 (3.6): what the Hollow avoided
   await s.shake(3, 24);
   await s.flash('#ffffff', 8);
   await s.music('battle');
@@ -770,6 +856,8 @@ async function other_selves(s) {
 
 // Step trigger on the stair the great mirror became. Sets court_f2_done (silently since W11, as court_f1_stairs).
 async function court_f2_stairs(s) {
+  // H5 (RESPONSIBILITY_ARC 3.5): one question for the floor; the throne room answers it.
+  await say(s, 'mira', "Mine knew what I feared. Bram's knew his drill. Yours said nothing at all, {hero}. What does yours know?");
   await s.setFlag('court_f2_done');
 }
 
@@ -853,6 +941,9 @@ async function vow_door(s) {
   await say(s, 'mira', 'Then we relieve him.');
   await s.music('mystery');
   await s.camera.follow('hero');
+  // H5 (RESPONSIBILITY_ARC 3.5): the Unnamed Throne ends on one sound nobody explains; the great mirror answers it.
+  await s.sfx('glass_break');
+  await narrate(s, 'From beyond the open door comes a small, clear sound. Glass, cracking. Then another.');
   await s.setFlag('mira_memory_3');
   await s.setFlag('vow_door_open');
 }
@@ -909,7 +1000,7 @@ async function nameless_king(s) {
 }
 async function king_fight(s) {
   await s.setFlag('nameless_king_tried');
-  await s.title('THE NAMELESS KING', { sub: 'Keeper of the Court', frames: 100 });
+  await s.title('THE NAMELESS KING', { sub: 'Keeper of the Court. Nobody rowed across to ask him.', frames: 100 });   // H5 (3.6): what the Hollow avoided
   await s.shake(4, 30);
   await s.flash('#ffffff', 10);
   await s.music('boss_king');

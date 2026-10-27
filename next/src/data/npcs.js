@@ -108,6 +108,15 @@ export const NPCS = {
       { if: 'last_route_started', lines: [
         "A satchel with red post marks. If the Hollow has a lost-property shelf, it's on it. I'd bet my boots.",
       ] },
+      // H4: the one line that remembers the eaten signature (tess_truth / tess_lie)
+      { if: ['tess_quest_done', DONE, 'tess_truth'], lines: [
+        'You told me his name was eaten through. I looked that night. Whatever took it was older than your Archivore.',
+        'But I have his letter, and his crossed sevens. That is a thread. Couriers follow threads.',
+      ] },
+      { if: ['tess_quest_done', DONE, 'tess_lie'], lines: [
+        "You said smudged. I looked that night, {hero}. It was eaten through. ...I know why you said it. I'd have said it too.",
+        'But I have his letter, and his crossed sevens. That is a thread. Couriers follow threads.',
+      ] },
       { if: ['tess_quest_done', DONE], lines: [
         "I still can't remember my father's name. Whatever took it, it wasn't your Archivore. That was older.",
         'But I have his letter, and his crossed sevens. That is a thread. Couriers follow threads.',
@@ -376,6 +385,13 @@ export const NPCS = {
         'When you came to me, your name was already stitched on your blanket. Someone loved you enough to choose it.',
         'Remember that, whatever happens to the ink. Now eat.',
       ] },
+      // H4: the one line that remembers the farewell's question (hazel_truth / hazel_lie)
+      { if: [DONE, 'hazel_truth'], lines: [
+        "You're home. You said you were frightened, and you went anyway. That's all brave is. Sit. Eat. Then tell me everything.",
+      ] },
+      { if: [DONE, 'hazel_lie'], lines: [
+        "You're home. 'Not frightened,' you said. I packed the extra apples anyway. Sit. Eat. Then tell me everything, in order.",
+      ] },
       { if: DONE, lines: [
         "You're home. Sit. Eat. Then tell me everything, in order, with nothing left out.",
       ] },
@@ -477,6 +493,15 @@ export const NPCS = {
       { if: B, ifNot: ['garrick_farewell_done', DONE], scene: 'garrick_farewell' },
       { if: 'starter_quest_started', ifNot: 'starter_found', lines: [
         "Something's living by my forge. It's warm, and it's rising. I've decided not to ask.",
+      ] },
+      // H4: the one line that remembers the forge question (garrick_truth / garrick_lie)
+      { if: [DONE, 'garrick_truth'], lines: [
+        'Bram says my name every time he walks in here. Every time.',
+        "You told me he lost it at the gate. A moment, you said. I listen for that moment now. ...I haven't told him to stop.",
+      ] },
+      { if: [DONE, 'garrick_lie'], lines: [
+        'Bram says my name every time he walks in here. Every time.',
+        "Holt told me, after. About the gate. You gave me one more quiet day. ...I haven't told him to stop.",
       ] },
       { if: DONE, lines: [
         'Bram says my name every time he walks in here. Every time.',
@@ -668,6 +693,15 @@ export const NPCS = {
         'Lost, not broken. I always said so. It only wanted a light, and someone stubborn enough to carry it.',
       ] },
       { ifNot: 'lost_bridge_started', scene: 'quill_hint' },
+      // H4: the one line that remembers the milestone question (quill_truth / quill_lie)
+      { if: [DONE, 'quill_truth'], lines: [
+        "The milestone's words are sharp again. You told me which word was going, when I couldn't look. I copy that one first now.",
+        'Somewhere, a great many people are remembering things right now, and they will never know who to thank.',
+      ] },
+      { if: [DONE, 'quill_lie'], lines: [
+        "The milestone's words are sharp again. You said they were, that night. I looked. They weren't. ...Kindly meant. I kept it.",
+        'Somewhere, a great many people are remembering things right now, and they will never know who to thank.',
+      ] },
       { if: DONE, lines: [
         'The milestone\'s words are sharp again. I copied them twice anyway. Old habits.',
         'Somewhere, a great many people are remembering things right now, and they will never know who to thank.',
@@ -748,6 +782,15 @@ export const NPCS = {
     move: 'stand', noReflection: true,
     about: 'The gate watch. Greets everyone with "Welcome home" because the town has no other greeting. First to shout Hollowmere.',
     talk: [
+      // H4: the one line that remembers the gate question (corin_truth / corin_lie)
+      { if: [E2END, 'corin_truth'], lines: [
+        'Welcome to Hollowmere! I say it to everyone now. Twice to the ducks.',
+        'You told me we looked lost, the day you came. We were. I say Hollowmere twice to you, for that.',
+      ] },
+      { if: [E2END, 'corin_lie'], lines: [
+        'Welcome to Hollowmere! I say it to everyone now. Twice to the ducks.',
+        "You told me it looked like home, the day you came. It didn't. It does now. I keep both answers.",
+      ] },
       { if: E2END, lines: [
         'Welcome to Hollowmere! I say it to everyone now. Twice to the ducks.',
         'A year I can name. This one. I am going to stand this watch until it is a very old year.',
@@ -814,6 +857,15 @@ export const NPCS = {
     about: 'The watchmaker. Spectacles, an apron of tiny tools. Precise and wry. Fountain witness.',
     talk: [
       { if: 'fountain_started', ifNot: 'testimony_lena', scene: 'lena_testimony' },
+      // H4: the one line that remembers 'say you would get used to it' (lena_truth / lena_lie)
+      { if: [E2END, 'lena_truth'], lines: [
+        'The tower runs four minutes fast. I have decided to leave it. We are owed some time.',
+        "You said you wouldn't get used to it. The only one in fifteen years who said so. I am framing that too.",
+      ] },
+      { if: [E2END, 'lena_lie'], lines: [
+        'The tower runs four minutes fast. I have decided to leave it. We are owed some time.',
+        "You said I'd get used to it. I never did. ...It was kindly said, and I have kept kinder lies than that.",
+      ] },
       { if: E2END, lines: [
         'The tower runs four minutes fast. I have decided to leave it. We are owed some time.',
         'Ten past four, it said, the moment the hands came back. I wrote it down. I am framing it.',

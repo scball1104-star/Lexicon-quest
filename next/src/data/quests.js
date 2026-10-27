@@ -78,6 +78,21 @@ export const FLAGS = {
   quill_reminded: 'Mira pointed back at the lost bridge in the valley after the Lantern (quill_reminder, once).',
   briar_alpha_defeated: 'The Briar Alpha is beaten (encounter flag; hollow_after also sets it). Its map actor is gone.',
   hollow_cleared: "The pilgrims' stone gave back three names; the lost bridge story is resolved (hollow_after).",
+
+  // Name Truth choices (H4, docs/RESPONSIBILITY_ARC.md 3.4). Exactly one of each pair is set by its choice; Oren's pair
+  // (oren_truth / oren_lie) is declared with the opening in story/ep1.js. Never a route: one later line, one small reward.
+  hazel_truth: 'Told Hazel you were frightened (hazel_farewell); her welcome-home line remembers it, and she packed a tent.',
+  hazel_lie: 'Told Hazel you were not frightened (hazel_farewell); her welcome-home line remembers it.',
+  mael_truth: "Answered Mael's bell question with 'maybe' (mael_intro); he pays it back when he hands over the letter east.",
+  mael_lie: 'Told Mael you were up early (mael_intro); he remembers it when he hands over the letter east.',
+  garrick_truth: 'Told Garrick that Bram lost his name at the gate (garrick_farewell); his post-Archive line remembers it.',
+  garrick_lie: 'Told Garrick that Bram was fine at the gate (garrick_farewell); his post-Archive line remembers it.',
+  tess_truth: "Told Tess her father's signature was eaten through (tess_letters); her post-Archive line remembers it.",
+  tess_lie: "Told Tess her father's signature was only smudged (tess_letters); her post-Archive line remembers it.",
+  quill_truth: 'Told Quill which word of the milestone was going first (quill_hint); his post-Archive line remembers it.',
+  quill_lie: 'Told Quill the milestone was sharp as ever (quill_hint); his post-Archive line remembers it.',
+  door_truth: 'Said at the Archive door that it did not hear you (archive_door); Bram remembers it under the golden page.',
+  door_lie: 'Agreed it was only an old door (archive_door); Mira remembers it under the golden page.',
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -161,6 +176,18 @@ export const EP2_FLAGS = {
   nico_crowns_started: 'Nico told the party about his dream of a paper crown (nico_crowns).',
   paper_crown_found: 'Set by the F3 Belonging chest that holds the Paper Crown (map chest flag).',
   nico_crowns_done: 'Showed Nico the crown; he insisted the hero keep it (nico_crowns).',
+
+  // Name Truth choices (H4, docs/RESPONSIBILITY_ARC.md 3.4): exactly one of each pair is set by its choice.
+  corin_truth: 'Told Corin the town looked lost from outside (nh_arrival); his Hollowmere line remembers it.',
+  corin_lie: 'Told Corin the town looked like home (nh_arrival); his Hollowmere line remembers it.',
+  elian_truth: 'Told Elian your name goes pale everywhere (elian_hall); he remembers it when he signs his reply.',
+  elian_lie: 'Told Elian your name goes pale only in the Hollow (elian_hall); he remembers it when he signs his reply.',
+  lena_truth: 'Told Lena you would not get used to the handless tower (lena_testimony); her restored line remembers it.',
+  lena_lie: 'Told Lena she would get used to it (lena_testimony); her restored line remembers it.',
+  anwen_truth: 'Told Anwen your name is fading (anwen_register); she remembers it at her testimony.',
+  anwen_lie: 'Told Anwen your name is keeping (anwen_register); she remembers it at her testimony.',
+  nico_truth: 'Told Nico you did not know if the king was coming back (nico_crowns); he remembers it when the crown comes home.',
+  nico_lie: 'Told Nico the king was coming back (nico_crowns); he remembers it when the crown comes home.',
 };
 Object.assign(FLAGS, EP2_FLAGS);
 
@@ -180,6 +207,8 @@ export const REWARDS = {
 
 // ------------------------------------------------------------------------------------------------
 // Main quest. The current step is the first whose `done` flag is not set.
+// `aim` (H4, RESPONSIBILITY_ARC 3.3): the field's Aim line, present tense, under 32 characters, what to do now.
+// `title` stays the journal's heading.
 // ------------------------------------------------------------------------------------------------
 const TOWN_MAPS = ['willowmere', 'hero_home', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery'];
 const ARCHIVE_MAPS = ['archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
@@ -189,12 +218,12 @@ export const MAIN_QUEST = {
   title: 'The Missing Name',
   steps: [
     {
-      id: 'wake', title: 'Morning', done: 'intro_done',
+      id: 'wake', title: 'Morning', aim: 'Get out of bed', done: 'intro_done',
       journal: 'Morning in Willowmere. Someone is calling your name.',
       chat: [{ lines: [{ who: 'hero', text: '(Five more minutes...)' }] }],
     },
     {
-      id: 'find_mael', title: 'The Elder\'s Errand', done: 'met_mael',
+      id: 'find_mael', title: 'The Elder\'s Errand', aim: 'Find Mael at the well', done: 'met_mael',
       journal: 'Hazel says Elder Mael has been asking for you. He is in Lantern Square, by the well.',
       chat: [
         { map: 'hero_home', lines: [{ who: 'hero', text: '(Mael is waiting in Lantern Square. Out the front door, then follow the lane to the well.)' }] },
@@ -202,7 +231,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'find_mira', title: 'The Apprentice', done: 'mira_joined',
+      id: 'find_mira', title: 'The Apprentice', aim: 'Find Mira at the library', done: 'mira_joined',
       journal: 'Mael wants you to go to the Rootbound Archive. First, find Mira at the library, east of the square.',
       chat: [
         { map: 'library', lines: [{ who: 'hero', text: '(Mira should be here somewhere, probably behind a stack of books.)' }] },
@@ -210,7 +239,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'south_gate', title: 'The South Gate', done: 'bram_joined',
+      id: 'south_gate', title: 'The South Gate', aim: 'Meet Bram at the south gate', done: 'bram_joined',
       journal: 'With Mira beside you, head for the south gate. Mael says Bram may be on watch.',
       chat: [
         { lines: [
@@ -221,7 +250,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'to_archive', title: 'The Pilgrim Road', done: 'archive_entered',
+      id: 'to_archive', title: 'The Pilgrim Road', aim: 'Reach the Archive door', done: 'archive_entered',
       journal: 'Cross Willowmere Valley and follow the pilgrim road north to the Rootbound Archive.',
       chat: [
         { map: TOWN_MAPS, lines: [
@@ -240,7 +269,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'catalog_halls', title: 'The Catalog Halls', done: 'archive_f1_done',
+      id: 'catalog_halls', title: 'The Catalog Halls', aim: 'Find the stairs down', done: 'archive_f1_done',
       journal: 'Explore the Catalog Halls, the Archive\'s first floor, and find the way down.',
       chat: [
         { map: 'archive_f1', if: 'archive_key_found', lines: [
@@ -255,7 +284,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'warden', title: 'The Repeating Voice', done: 'echo_warden_defeated',
+      id: 'warden', title: 'The Repeating Voice', aim: 'Find the repeating voice', done: 'echo_warden_defeated',
       journal: 'In the Reading Galleries, something repeats itself, guarding a treasure. Find it.',
       chat: [
         { map: 'archive_f2', lines: [
@@ -267,14 +296,14 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'lantern', title: 'What It Guarded', done: 'lantern_get',
+      id: 'lantern', title: 'What It Guarded', aim: 'Claim what it guarded', done: 'lantern_get',
       journal: 'The Echo Warden has fallen. Claim what it was guarding.',
       chat: [
         { lines: [{ who: 'mira', text: 'The pedestal behind where the Warden stood. Something on it is glowing, and I want to know what.' }] },
       ],
     },
     {
-      id: 'galleries', title: 'Bridges of Ink', done: 'archive_f2_done',
+      id: 'galleries', title: 'Bridges of Ink', aim: 'Cross the ink to the stairs', done: 'archive_f2_done',
       journal: 'Use the Lantern of Recall to reveal hidden ink and find the stairs down.',
       chat: [
         { map: 'archive_f2', lines: [
@@ -285,7 +314,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'stacks', title: 'The Rootbound Stacks', done: 'boss_door_open',
+      id: 'stacks', title: 'The Rootbound Stacks', aim: 'Find the key to the great door', done: 'boss_door_open',
       journal: 'Search the Rootbound Stacks for the Stacks Key and open the great door at the bottom.',
       chat: [
         { map: 'archive_f3', if: 'stacks_key_found', lines: [
@@ -301,7 +330,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'archivore', title: 'Heart of the Archive', done: 'archivore_defeated',
+      id: 'archivore', title: 'Heart of the Archive', aim: 'Stop what is eating names', done: 'archivore_defeated',
       journal: 'Something is eating names behind the great door. Stop it.',
       chat: [
         { lines: [
@@ -311,7 +340,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'go_home', title: 'Home', done: 'ep1_complete',
+      id: 'go_home', title: 'Home', aim: 'Return to Willowmere', done: 'ep1_complete',
       journal: 'The Archivore is gone and the first fragment of the Book of Names is yours. Return to Willowmere.',
       chat: [
         { map: ARCHIVE_MAPS, lines: [
@@ -325,7 +354,7 @@ export const MAIN_QUEST = {
       ],
     },
     {
-      id: 'epilogue', title: 'The Road East', done: null,
+      id: 'epilogue', title: 'The Road East', aim: 'Take the road east', done: null,
       journal: 'Willowmere\'s names are home. Yours is still faint. East of the river lies the Nameless Hollow.',
       chat: [
         { lines: [
@@ -612,7 +641,7 @@ export const MAIN_QUEST_EP2 = {
   title: 'The Town Without a Name',
   steps: [
     {
-      id: 'road_east', title: 'The Road East', done: 'crossing_done',
+      id: 'road_east', title: 'The Road East', aim: 'See Mael, then the east ford', done: 'crossing_done',
       journal: 'Mael has written a letter to the town east of the river. Take it across the valley, by the east branch.',
       chat: [
         { map: 'hero_home', ifNot: 'ep2_started', lines: [
@@ -633,7 +662,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'fading_road', title: 'The Fading Road', done: 'nh_arrived',
+      id: 'fading_road', title: 'The Fading Road', aim: 'Follow the river east', done: 'nh_arrived',
       journal: 'Follow the Fading Road upstream along the river. Where the mist hides the road, keep to the cairns.',
       chat: [
         { map: 'valley', lines: [
@@ -650,7 +679,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'nameless_hollow', title: 'The Nameless Hollow', done: 'court_ferry_open',
+      id: 'nameless_hollow', title: 'The Nameless Hollow', aim: 'Find who keeps the names', done: 'court_ferry_open',
       journal: 'A town with no name and no reflections. Hear Mayor Elian, then Sister Anwen, then find a boat.',
       chat: [
         { ifNot: 'met_elian', map: NH_MAPS, lines: [m('Corin said the mayor would be at the fountain, in the middle of the square.')] },
@@ -671,7 +700,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'court_f1', title: 'The Silverglass Antechamber', done: 'court_f1_done',
+      id: 'court_f1', title: 'The Silverglass Antechamber', aim: 'Follow the moonlight down', done: 'court_f1_done',
       journal: 'Across the mere stands the Court of Mirrors. Follow the moonlight through the antechamber and find the way down.',
       chat: [
         { map: NH_MAPS, lines: [b("Tovin's boat is at the pier. Ring the post at the end, and he rows us across.")] },
@@ -689,7 +718,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'court_f2', title: 'The Hall of Other Selves', done: 'court_f2_done',
+      id: 'court_f2', title: 'The Hall of Other Selves', aim: 'Cross the Well of Reflections', done: 'court_f2_done',
       journal: 'On the second floor, light makes bridges. Cross the Well of Reflections and find what waits in the west wing.',
       chat: [
         { map: 'court_f1', lines: [b('We found the stairs already. North end of the stairs hall, then down.')] },
@@ -714,7 +743,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'court_f3', title: 'The Unnamed Throne', done: 'vow_door_open',
+      id: 'court_f3', title: 'The Unnamed Throne', aim: 'Light the three vow mirrors', done: 'vow_door_open',
       journal: 'Three wings, three vows, one door. Light the vow mirror in each wing of the Unnamed Throne.',
       chat: [
         { map: 'court_f2', lines: [b('The mirror stair in the arena goes down to the third floor.')] },
@@ -736,7 +765,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'king', title: "The King's Mirror", done: 'nameless_king_defeated',
+      id: 'king', title: "The King's Mirror", aim: 'Face the Nameless King', done: 'nameless_king_defeated',
       journal: 'Behind the vow door lies the throne room. Someone there is keeping the whole town in a mirror.',
       chat: [
         { map: ['court_f3', 'court_throne'], lines: [
@@ -748,7 +777,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'hollowmere', title: 'Hollowmere', done: 'nh_restored',
+      id: 'hollowmere', title: 'Hollowmere', aim: 'Go through the great mirror', done: 'nh_restored',
       journal: 'The King has his name back. Go through the great mirror. The town should see you come home.',
       chat: [
         { map: 'court_throne', lines: [m('Through the great mirror. Aurel said the town should see us come home.')] },
@@ -756,7 +785,7 @@ export const MAIN_QUEST_EP2 = {
       ],
     },
     {
-      id: 'epilogue2', title: 'Toward Emberpeak', done: null,
+      id: 'epilogue2', title: 'Toward Emberpeak', aim: EP3_LIVE ? 'Take the old sand road east' : 'Rest in Hollowmere', done: null,
       // W15 (PLAYTEST_REVIEW_4 fix 3): while Episode 3 is not in the game, the journal and Talk say the road is not open
       // yet and point at what is (placeholder wording, Scott chooses the final words). E3-story: when EP3_LIVE the
       // same step points at the old sand road gate instead (EPILOGUE2_LIVE).
@@ -1013,7 +1042,7 @@ export const MAIN_QUEST_EP3 = {
   title: 'The Forge of Ash',
   steps: [
     {
-      id: 'sand_road', title: 'The Old Sand Road', done: 'pk_arrived',
+      id: 'sand_road', title: 'The Old Sand Road', aim: 'Follow the sand road east', done: 'pk_arrived',
       journal: "Bram's father has lost his name and ridden for Emberpeak, up the old sand road east of Hollowmere. Follow him.",
       chat: [
         { map: NH_MAPS, ifNot: 'sand_gate_open', lines: [
@@ -1038,7 +1067,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'emberpeak', title: 'Emberpeak', done: 'foundry_entered',
+      id: 'emberpeak', title: 'Emberpeak', aim: 'Hear Veyra, then Ilya', done: 'foundry_entered',
       journal: 'Emberpeak is buried in ash. Hear Foreman Veyra in the square, then Ilya in the Bell House. She keeps the foundry key.',
       chat: [
         { map: 'emberpeak', ifNot: 'met_veyra', lines: [
@@ -1063,7 +1092,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'foundry_f1', title: 'The Cinder Liftworks', done: 'foundry_f1_done',
+      id: 'foundry_f1', title: 'The Cinder Liftworks', aim: 'Wake the wheel with water', done: 'foundry_f1_done',
       journal: 'Water cools slag. Turn the sluice paddles, send the water down the troughs, and wake the wheel that works the ore lift.',
       chat: [
         { map: EMBER_MAPS, lines: [
@@ -1087,7 +1116,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'foundry_f2', title: 'The Ventilation Galleries', done: 'foundry_f2_done',
+      id: 'foundry_f2', title: 'The Ventilation Galleries', aim: 'Cool the hot gates', done: 'foundry_f2_done',
       journal: 'The Ventilation Galleries are choked with soot. Cool the hot gates with water and find what is feeding the fans.',
       chat: [
         { map: 'foundry_f1', lines: [b('The lift is in the Wheelhouse, south-east. Down to the galleries.')] },
@@ -1104,7 +1133,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'foundry_f3', title: 'The Heartforge Crucible', done: 'bell_gate_open',
+      id: 'foundry_f3', title: 'The Heartforge Crucible', aim: 'Strike the three anvils', done: 'bell_gate_open',
       journal: 'Three wings, three anvils, one gate. Strike the Hand, the Heart and the Home, and the Bell Gate will open.',
       chat: [
         { map: ['foundry_f2', 'foundry_f1'], lines: [b('The stair under the great fan goes down to the Crucible.')] },
@@ -1129,7 +1158,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'warden', title: 'The Cinder Warden', done: 'cinder_warden_defeated',
+      id: 'warden', title: 'The Cinder Warden', aim: 'Face the Cinder Warden', done: 'cinder_warden_defeated',
       journal: 'Behind the Bell Gate, the Crucible Hook opens the Heartforge. The Cinder Warden is waiting.',
       chat: [
         { map: 'foundry_f3', ifNot: 'crucible_hook_found', lines: [
@@ -1148,7 +1177,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'first_bell', title: 'The First Bell', done: 'pk_restored',
+      id: 'first_bell', title: 'The First Bell', aim: 'Bring the clapper to Ilya', done: 'pk_restored',
       journal: 'The Warden is down and the clapper is yours. Take the lift up to Emberpeak, where Ilya waits to hang the First Bell.',
       chat: [
         { map: FOUNDRY_MAPS, lines: [
@@ -1159,7 +1188,7 @@ export const MAIN_QUEST_EP3 = {
       ],
     },
     {
-      id: 'epilogue3', title: 'Toward Valewyn', done: null,
+      id: 'epilogue3', title: 'Toward Valewyn', aim: 'Rest in Emberpeak', done: null,
       journal: 'Emberpeak has its bell, and its names. A courier says the east road is flooded and a decree will not stay sealed.',
       chat: [
         { map: 'emberpeak', lines: [

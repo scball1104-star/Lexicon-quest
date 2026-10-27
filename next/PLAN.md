@@ -171,7 +171,8 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 - [x] H3-vows: five Vows at rests, No vow default, seams, mastery reward, save fields; docs/VOWS.md; docs/HARD_ROAD.md emailed to Scott 10/27 (`docs/briefs/H3-vows.md`); 10/27 01:10
   - H3 gaps for H6: the Aim line carries no vow suffix; Auto battle can break a vow (consider pausing auto when a vow is active or warning once); the break toast overlaps the battle help bar for 1.5 s
 - [ ] H3b-hard-road: PROPOSAL emailed 10/27 (docs/HARD_ROAD.md: one tier, carry the character, rollable legendaries on the tier); waits for Scott's three answers; no code
-- [~] H4-story (H4 + H5 merged): Name Truth choices, floor-ending questions, boss intro lines, aim strings per main step (`docs/briefs/H4-story.md`); launched 10/27 01:25
+- [x] H4-story (H4 + H5 merged): 12 Name Truth choices (7 in Episode 1, 5 in Episode 2) with one remembered line and one small reward each, seven floor-ending questions, four boss card lines plus Mira's line for the Briar Alpha, aim strings on all 30 main steps; 11 tests; both bot routes clear (`docs/briefs/H4-story.md`); 10/27 04:00
+  - H4 gaps for H6: no new ledger keeps (every scene id must be staged in STAGING.md and STAGING_EP2.md, which H4 did not own: one staging row each unlocks Hob, Cobb and Penny beats); the bot never opens Tess's quest, so her choice is proven by the test only; H4's one field.js line lands with C2-world's commit (same file in flight)
 - [ ] H6: critic, play-critic, fixes, publish gate list, Scott's explicit yes
 
 ## Wave C: the Deep Stacks, a 100-floor Ancient Cave (Scott 2026-10-26; `docs/DEEP_STACKS_PLAN.md`; up to 3 agents at once under the usage guard)

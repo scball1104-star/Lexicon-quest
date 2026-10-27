@@ -152,6 +152,36 @@ the third, a taste of a fight by the fifth.
 Tess, Wick and Nella open their quests only once Bram has joined (the party is whole and the valley is next); before
 that each has a line that hints something is on their mind. Oren's starter opens as soon as the hero is up.
 
+### Name Truth choices (H4, 2026-10-27)
+
+Seven places (`docs/RESPONSIBILITY_ARC.md` 3.4; Scott's decision D: small and honest, never a locked route) where the
+true thing is harder than the kind lie. Both answers play; exactly one flag of the pair is set; one later line
+remembers it, and the truth side carries one small consumable. Nobody says "you should have".
+
+| Who, where | The ask | True / kind lie | Remembered | Truth reward |
+|---|---|---|---|---|
+| Oren, `fading_sign` (H1) | What did my sign say? | "Oren's Ovens." / "I can't remember either." | `oren_starter`, one line | one more Hi-Potion with the starter reward |
+| Hazel, `hazel_farewell` | Are you frightened? | "Yes." / "No." | her welcome-home talk line after the Archive | a Tent ("the blanket stays home, so you come back for it") |
+| Mael, `mael_intro` | Did you sleep through the bell again? | "...Maybe." / "I was up early!" | `ep2_mael`, when he hands over the letter east | 2 Ethers |
+| Garrick, `garrick_farewell` | Holt says the boy was fine at the gate. Was he? | "He lost your name a moment." / "He was fine." | his smithy talk line after the Archive | 2 Echo Herbs ("for the day one of you cannot get a word out") |
+| Tess, `tess_letters` (letter 3) | Is his name there? I can't look. You look. | "The paper's eaten through." / "It's smudged. That's all." | her talk line after the quest and the Archive | 1 Hi-Potion ("he packed one for every run north") |
+| Quill, `quill_hint` (only once the milestone is read) | Is it going? | '"Forgotten" is going first.' / "It's sharp as ever." | his talk line after the Archive | 2 Eye Drops ("scribe's drops, for bad light") |
+| The Archive door, `archive_door` (Mira asks) | That's all it was. Wasn't it? | "It didn't hear me." / "Old door." | `archivore_after`, under the golden page (Bram or Mira) | 1 Potion from Bram ("your voice went thin") |
+
+Flags: `<who>_truth` / `<who>_lie` in `quests.js` FLAGS (Oren's in `ep1.js`). The autoplay bot answers every new choice
+with its first option, the truth; Mael's choice predates H4 and keeps the lie first. No new scene and no new Ledger
+keep: every scene id must be staged in `STAGING.md`, which H4 did not own, so Hob, Cobb and Penny (the Ledger's
+candidates) still wait for a beat of their own. Test: `qa/content/h4_truth.test.mjs`.
+
+### Floor questions and boss lines (H5, 2026-10-27)
+
+Every floor's last scene ends on one new question (3.5): F1 `archive_f1_bell`, a page turning on the stair below with
+nobody to turn it; F2 `archive_f2_exit` already ended on "Or keep in." and was left alone; F3 `boss_door`, the chewing
+stops ("Why would it stop?"); Whisperwood Hollow `hollow_after`, "How did they know?". Boss cards name what the town
+avoided (3.6): ECHO WARDEN "Knight of the Last Order. Nobody came back to end it."; THE ARCHIVORE "Eater of Names.
+It was fed for a hundred years."; the BRIAR ALPHA's card is pinned by `hollow.test.mjs`, so Mira says its line in the
+last box before it rises.
+
 ---
 
 ## 3. Character bible

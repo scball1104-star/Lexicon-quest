@@ -112,7 +112,7 @@ first; the test refuses a keep it cannot find.
 
 ## The Aim line (section 3.3)
 
-One thin window at the top of the field: the Journal's current main step (`j.main.step`, the step's title). It
+One thin window at the top of the field: the current main step's `aim` (a present-tense line such as "Find Mira at the library", H4-story; the step's title when a step has no aim). It
 shows for about four seconds when the step changes, when the menu closes, and after ten seconds standing still,
 then the HUD is clean again. It never draws during a scene, under a dialogue box, under the menu or a battle, while
 the location banner is up, or during a fade; its timer waits while it cannot be drawn, so a step that changes inside
