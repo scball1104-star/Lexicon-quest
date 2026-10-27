@@ -173,3 +173,14 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 - [ ] H4-truth: six to eight Name Truth choices and remembered lines
 - [ ] H5-floor-hooks: floor-ending questions and boss intro lines
 - [ ] H6: critic, play-critic, fixes, publish gate list, Scott's explicit yes
+
+## Wave C: the Deep Stacks, a 100-floor Ancient Cave (Scott 2026-10-26; `docs/DEEP_STACKS_PLAN.md`; up to 3 agents at once under the usage guard)
+- [~] C1-gen: seeded floor generator, prefabs for bands one and two, previews, determinism and walkability tests (`docs/briefs/C1-gen.md`)
+- [~] C1-data: bands, pools, scale(floor), loot zones, sixteen uniques + the Binder's Quill, the Bookmark, the Binder, pack index (`docs/briefs/C1-data.md`)
+- [ ] C1-state: src/game/cave.js (enter, descend, bank, die, clear, resume), suspend save, old-save compatibility (`docs/briefs/C1-state.md`); launches when H3 closes
+- [ ] C2-world: pack entry, trapdoor and cave_landing0, floor transitions, runtime encounter registration, chest colours, floor tag, death and bank flows
+- [ ] C2-story-ui: the Archivist (Hollis), lines, plaques, Journal line, title entries, Bookmark use, the plaque screen
+- [ ] C2-sprites-boss: blue chest sprite, the Binder's art and B100 map, prefabs for bands three to five
+- [ ] C3-sim-bot: --cave sim route with death-rate targets, --cave autoplay route, balance pass
+- [ ] C3-critic: fresh-eyes play-critic, Lufia feel, issue list
+- [ ] C4-fixes: the issue list, then the publish gate list, Scott's explicit yes
