@@ -289,3 +289,20 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   a New Game sees it. The ledger, the Vows, the post-game mode and the truth choices follow in that order.
 - Nothing is published until you say so. The post-game mode's exact shape comes to you for a read before it is
   built.
+
+## 2026-10-26 (Mon) night: the first five minutes are built (not published)
+- A New Game now starts you on the bell tower stair at night, alone with a lantern, within about five seconds.
+  Each of the twelve steps up tolls a bell and shows a name from the town. The thirteenth toll shows no name.
+  Black, one card, and you wake up at home. The old six title cards are gone; the attract loop on the title still
+  shows one.
+- Hazel's wake-up is half as long. Oren's sign scene remembers whether you told him the truth, and he says one
+  different line later. Before you reach Mael, a runaway ink slime blocks the bakery lane: one small fight, three
+  hits, no fleeing. Mira and Bram's wolf fight on the road still teaches Lunge and Appraise.
+- Measured on a phone: control at 5 seconds, the first choice at about 1 minute 45, the slime fight at about
+  2 minutes, which beats the "choice by minute 3, fight by minute 5" rule.
+- Your saves are untouched; only a New Game sees any of this. The Episode 2 start is unchanged. The bot plays
+  both Episode 1 routes and the Episode 2 start to the credits.
+- Housekeeping: the developer-only screens no longer download with the game (about 12 KB saved on first load),
+  which keeps the first-load budget line where it was.
+- Next, now running: the Ledger of Names (every named person, faded or bright), the "Names kept" count on the
+  title, and a quiet one-line Aim on the field.

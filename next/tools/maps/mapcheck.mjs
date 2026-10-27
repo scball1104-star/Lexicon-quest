@@ -836,7 +836,8 @@ export function parseStagingChecklist(md, { section = /^## 5\. Marks checklist/m
 
 // ------------------------------------------------------------------------------------------------ validation
 export const MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
-  'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss'];
+  'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss',
+  'bell_tower'];   // H1: the cold open's bell tower stair (a New Game's first map; no door in or out)
 /** Episode 2 maps (EPISODE2_PLAN 2.1). */
 export const MAP_IDS_EP2 = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chapel', 'nh_inn', 'nh_shop', 'nh_smithy',
   'court_f1', 'court_f2', 'court_f3', 'court_throne'];

@@ -142,11 +142,17 @@ def render_pack_files(packs):
                        **pack_file_lists(packs)}, indent=1) + '\n'
 
 
+def is_dev(rel):
+    """src/scenes/_dev*.js: the dev title, test field, gallery and their UI. main.js imports them lazily for debug runs and
+    ?scene=_dev... only, so they are neither precached nor preloaded (about 12 KB gzipped kept off a player's first load)."""
+    return rel.startswith('src/scenes/_dev')
+
+
 def shell_files():
     skip = audio_pack_files()
     packs = load_packs()
     out = [p for p in FIXED if (NEXT / p).is_file()]
-    out += sorted(r for r in (p.relative_to(NEXT).as_posix() for p in (NEXT / 'src').rglob('*.js')) if not pack_of(r, packs))
+    out += sorted(r for r in (p.relative_to(NEXT).as_posix() for p in (NEXT / 'src').rglob('*.js')) if not pack_of(r, packs) and not is_dev(r))
     for folder, exts in FOLDERS.items():
         d = NEXT / folder
         if d.is_dir():
@@ -189,8 +195,8 @@ def module_graph(entry='src/main.js', packs=None):
         queue = [seed]
         while queue:
             rel = queue.pop(0)
-            if rel in seen or (packs and pack_of(rel, packs)):
-                continue                     # a pack file is never preloaded (it is fetched when the pack is wanted)
+            if rel in seen or is_dev(rel) or (packs and pack_of(rel, packs)):
+                continue                     # a pack file is never preloaded (it is fetched when the pack is wanted); nor a dev scene
             seen.add(rel)
             f = NEXT / rel
             if not f.is_file():

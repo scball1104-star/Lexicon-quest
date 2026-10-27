@@ -131,3 +131,7 @@ ambience 1.1 MB, `environments.webp` 0.68 MB.
 ## Expansion packs (XP-packs, 2026-10-25)
 
 The two expansions are **packs**, not part of the shell: every file with the `x1_` / `x2_` prefix (and `src/data/x1/**`, `src/data/x2/**` except `live.js`) is left out of the precache and the preload block, fetched on first need, and cached by the worker's runtime route. The initial download is held by `qa/pwa/budget_ratchet.json` (6.33 MB after XP-packs). The whole API, call sites and checklists are in `docs/PWA_PACKS.md`.
+
+## Dev scenes (2026-10-26)
+
+`src/scenes/_dev*.js` (dev title, test field, gallery, their UI) are imported lazily by `main.js` for a debug run or `?scene=_dev...` only, and `build_pwa.py` leaves them out of the precache and the modulepreload block: about 12 KB gzipped off a player's first load. They are not available offline, which is fine for dev-only screens.

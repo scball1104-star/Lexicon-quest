@@ -116,7 +116,7 @@ test('helpers: talkTo, isPresent, moveFor, npcsOnMap, speakerName', () => {
   assert.equal(moveFor('wick', has(['wick_tag_done'])).move, 'tag');
   assert.equal(moveFor('wick', has(['wick_tag_done'])).partner, 'lark');
   assert.ok(npcsOnMap('willowmere').some((n) => n.id === 'tess'));
-  for (const m of MAP_IDS.filter((x) => !x.startsWith('archive') && x !== 'whisperwood_hollow')) assert.ok(npcsOnMap(m).length >= 1, `nobody on ${m}`);
+  for (const m of MAP_IDS.filter((x) => !x.startsWith('archive') && x !== 'whisperwood_hollow' && x !== 'bell_tower')) assert.ok(npcsOnMap(m).length >= 1, `nobody on ${m}`);   // the dungeon floors and the cold open's tower hold nobody
   assert.equal(speakerName('archivore'), 'The Archivore');
   assert.equal(speakerName('pip'), 'Pip');
   // Every shop/inn NPC hands back its service after the lines.

@@ -383,10 +383,10 @@
   },
   {
    "name": "ui_prologue",
-   "note": "prologue card 2 (W2-ui)",
+   "note": "attract-mode card 2 over the key art (W2-ui; H1: the prologue scene is only the hand-off into the cold open now, the cards live in the title's attract loop)",
    "steps": [
     {
-     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "waitFor": "LQ_DEBUG.engine.hasScene('prologue') && LQ_DEBUG.commands().includes('newGame')",
      "timeout": 20000
     },
     {
@@ -394,18 +394,19 @@
      "args": [
       "Arden",
       {
-       "scene": "prologue"
+       "scene": "none"
       }
      ]
     },
     {
-     "frames": 40
+     "eval": "LQ_DEBUG.engine.reset('prologue', { attract: true })"
     },
     {
-     "press": "confirm"
+     "frames": 300
     },
     {
-     "frames": 50
+     "assert": "LQ_DEBUG.scene() === 'prologue' && LQ_DEBUG.state().sceneState.index === 1",
+     "message": "the attract loop is on its second card"
     }
    ]
   },
@@ -4928,6 +4929,151 @@
     {
      "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && f.map && f.map.id === \"x1_larchhill\"; })()",
      "message": "the party is on x1_larchhill"
+    }
+   ]
+  },
+  {
+   "name": "cold_open_first_step",
+   "note": "H1 cold open: the first step up the bell tower stair, the first toll and its name (Hazel), the opening line",
+   "steps": [
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "field",
+       "map": "bell_tower",
+       "pos": {
+        "x": 12,
+        "y": 36,
+        "dir": "up"
+       }
+      }
+     ]
+    },
+    {
+     "frames": 100
+    },
+    {
+     "press": "up",
+     "frames": 14
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "!!LQ_ENGINE.game.flags.toll_1",
+     "message": "the first toll fired on the first step"
+    },
+    {
+     "assert": "LQ_ENGINE.coldOpen.caption && LQ_ENGINE.coldOpen.caption.text.replace(/ /g,'') === 'HAZEL'",
+     "message": "the caption is Hazel"
+    }
+   ]
+  },
+  {
+   "name": "cold_open_seventh_toll",
+   "note": "H1 cold open: the seventh toll (Holt) with its caption, second flight, the mystery bed under it",
+   "steps": [
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "field",
+       "map": "bell_tower",
+       "pos": {
+        "x": 8,
+        "y": 21,
+        "dir": "up"
+       },
+       "flags": {
+        "toll_1": true,
+        "toll_2": true,
+        "toll_3": true,
+        "toll_4": true,
+        "toll_5": true,
+        "toll_6": true
+       }
+      }
+     ]
+    },
+    {
+     "frames": 160
+    },
+    {
+     "press": "up",
+     "frames": 2
+    },
+    {
+     "frames": 36
+    },
+    {
+     "assert": "!!LQ_ENGINE.game.flags.toll_7 && !LQ_ENGINE.game.flags.toll_8",
+     "message": "exactly the seventh toll fired"
+    },
+    {
+     "assert": "LQ_ENGINE.coldOpen.caption && LQ_ENGINE.coldOpen.caption.text.replace(/ /g,'') === 'HOLT'",
+     "message": "the caption is Holt"
+    }
+   ]
+  },
+  {
+   "name": "cold_open_thirteenth",
+   "note": "H1 cold open: the thirteenth toll at the top, no name, the hero's ! and the bells hanging still in the silence",
+   "steps": [
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "field",
+       "map": "bell_tower",
+       "pos": {
+        "x": 12,
+        "y": 7,
+        "dir": "up"
+       },
+       "flags": {
+        "toll_1": true,
+        "toll_2": true,
+        "toll_3": true,
+        "toll_4": true,
+        "toll_5": true,
+        "toll_6": true,
+        "toll_7": true,
+        "toll_8": true,
+        "toll_9": true,
+        "toll_10": true,
+        "toll_11": true,
+        "toll_12": true
+       }
+      }
+     ]
+    },
+    {
+     "frames": 160
+    },
+    {
+     "press": "up",
+     "frames": 2
+    },
+    {
+     "frames": 80
+    },
+    {
+     "snap": "emote"
+    },
+    {
+     "frames": 50
+    },
+    {
+     "assert": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return f && f.cutscene ? f.cutscene.running : null; })() === 'thirteenth_toll'",
+     "message": "the thirteenth toll scene is running"
+    },
+    {
+     "assert": "!LQ_ENGINE.coldOpen.caption",
+     "message": "no caption on the thirteenth"
     }
    ]
   }

@@ -8,7 +8,7 @@
 //
 // Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, {hero} = player name.
 
-import { REWARDS } from '../quests.js';
+import { REWARDS, FLAGS, FLAG_IDS } from '../quests.js';
 import { alphaEncounter } from '../encounters.js';
 import { CREDITS } from '../text.js';
 
@@ -40,26 +40,69 @@ const cut = (fn, cond) => async (s) => {
 };
 
 // ------------------------------------------------------------------------------------------------
-// Prologue (title cards over the animated key art). Skippable by the prologue scene.
+// The opening (H1, docs/RESPONSIBILITY_ARC.md 2, decision B: replaced, no flag). A New Game opens playable, at
+// night, on the bell tower stair (map bell_tower): twelve steps toll twelve names (captions drawn by
+// scenes/prologue.js, no press), a thirteenth toll with no name, black, the one card, then home. PROLOGUE is that
+// card; ATTRACT is the title's attract loop. The flags are declared here, as the x1 pack declares its own.
 // ------------------------------------------------------------------------------------------------
-export const PROLOGUE = [
+export const PROLOGUE = ['In Aethelgard, every name is a promise.'];
+export const ATTRACT = [
   'In Aethelgard, every name is a promise.',
-  'A promise that someone, somewhere, will remember.',
-  'The Keepers wrote every name in the Book of Names, and the world held its shape.',
-  'When the Keepers fell silent, they divided the Book among their archives and sealed the doors.',
-  'Now, in the river valley of Willowmere, names have begun to fade.',
-  'And last night, in a tower that holds twelve bells, a thirteenth bell rang.',
+  'In the river town of Willowmere, names are fading from the signs.',
+  'And in a tower that holds twelve bells, a thirteenth has begun to ring.',
 ];
+export const H1_FLAGS = {
+  cold_open_done: 'The cold open played through its card (thirteenth_toll); a New Game sets it before intro_done.',
+  yard_fight_done: 'The yard slime in the bakery lane is beaten (yard_slime); the Ledger (H2) reads it.',
+  oren_truth: "Told Oren what his sign said (fading_sign); his starter line remembers it.",
+  oren_lie: "Told Oren you could not remember either (fading_sign); his starter line remembers it.",
+};
+export const TOLL_NAMES = ['Hazel', 'Mael', 'Oren', 'Pip', 'Tess', 'Iris', 'Holt', 'Garrick', 'Nella', 'Wick', 'Edda', 'Bram'];
+export const TOLL_FLAGS = TOLL_NAMES.map((_, i) => `toll_${i + 1}`);
+TOLL_NAMES.forEach((name, i) => { H1_FLAGS[TOLL_FLAGS[i]] = `Cold open: bell ${i + 1} tolled for ${name} (toll_${i + 1}).`; });
+Object.assign(FLAGS, H1_FLAGS);
+for (const id of Object.keys(H1_FLAGS)) if (!FLAG_IDS.includes(id)) FLAG_IDS.push(id);
+
+export const TOLL_HOLD = 84;              // frames the hero is held on a toll step (the caption lives as long)
+export const TOLL_MUSIC_AT = 6;           // the mystery bed enters on this toll
+export const THIRTEENTH_SILENCE = 60;     // frames of silence after the thirteenth toll, after the 60-frame pan
+export const COLD_OPEN_LINE = 'Willowmere. Last night.';
+
+// Step n tolls once, only after step n-1 (walking back down re-tolls nothing; a player who stops leaves the bells
+// waiting). The map puts a plain cell after every toll cell: see bell_tower.js.
+function tollScene(n) {
+  return async (s) => {
+    await s.sfx('bell_toll');
+    await s.setFlag(TOLL_FLAGS[n - 1]);
+    if (n === TOLL_MUSIC_AT) await s.music('mystery');
+    await s.wait(TOLL_HOLD);
+  };
+}
+const TOLL_SCENES = Object.fromEntries(TOLL_FLAGS.map((f, i) => [f, tollScene(i + 1)]));
+
+// The thirteenth toll: the alarm bell, no name, the hero's "!", the bells hanging still, silence, black, the card.
+async function thirteenth_toll(s) {
+  await s.wait(24);
+  await s.music(null);
+  // bell_first (the alarm bell) is in the ep3 sfx pack, which a New Game has not loaded, so it plays its fallback
+  // (bell_toll); a second toll in the same frame doubles it, so the thirteenth lands louder either way.
+  await s.sfx('bell_first');
+  await s.sfx('bell_toll');
+  await s.shake(3, 30);
+  await all(s.emote('hero', '!'), s.camera.panTo('bells', 60));
+  await s.wait(THIRTEENTH_SILENCE);
+  await s.fade('out', 60);
+  await s.title(PROLOGUE[0], { frames: 200 });
+  await s.setFlag('cold_open_done');
+}
 
 async function prologue(s) {
-  await s.music('title');
-  await s.fade('in', 60);
-  for (const card of PROLOGUE) await s.title(card, { frames: 240 });
-  await s.fade('out', 60);
+  await s.title(PROLOGUE[0], { frames: 200 });
 }
 
 // ------------------------------------------------------------------------------------------------
-// 1. Waking up (hero_home). Runs on New Game after the prologue. Sets intro_done.
+// 1. Waking up (hero_home). Runs on New Game after the cold open. Sets intro_done.
+// H1: half the boxes it had. Hazel's bell line confirms what the player just heard instead of reporting it.
 // ------------------------------------------------------------------------------------------------
 async function wake_up(s) {
   await s.fade('in', 60);
@@ -72,17 +115,15 @@ async function wake_up(s) {
   await s.jump('hero');
   await s.walk('hero', ['down']);
   await s.face('hero', 'hazel');
-  await say(s, 'hazel', 'Did you hear the bells last night? Pip has been at the chapel since dawn, swearing he counted thirteen.');
-  const c = await s.choice(['I heard them too.', 'Thirteen?']);
+  await say(s, 'hazel', "You heard them too. Don't tell me you didn't. Pip counted thirteen, and this once I believe him.");
+  const c = await s.choice(['I counted thirteen.', 'I must have dreamt it.']);
   if (c === 0) {
-    await say(s, 'hazel', "Then I'm not the only one who lay awake counting. Good. Misery likes a crowd.");
+    await say(s, 'hazel', "Then it wasn't a dream. I was hoping it was.");
   } else {
-    await say(s, 'hazel', 'Thirteen. The tower holds twelve. Pip is beside himself, and he was never a small man to begin with.');
+    await say(s, 'hazel', 'Then we dreamt it together, and the tower rang anyway.');
   }
-  await say(s, 'hazel', 'Elder Mael came by asking for you. He had his worried face on, the one he thinks nobody notices.');
-  await say(s, 'hazel', "He'll be in Lantern Square, by the well. Take these, in case his errand runs long.");
+  await say(s, 'hazel', "Mael came by with his worried face on. He's at the well. Take these, in case his errand runs long.");
   await s.give('potion', 2);
-  await say(s, 'hazel', "Breakfast is on the table. That wasn't a suggestion.");
   await s.setFlag('intro_done');
 }
 
@@ -115,22 +156,53 @@ async function fading_sign(s) {
   await s.camera.follow('hero');
   await s.face('oren_out', 'hero');
   await say(s, 'oren_out', '{hero}! You can read. What did my sign say?');
+  // H1 (RESPONSIBILITY_ARC 3.4): the first choice with a cost. The true name costs Oren a breath of himself; the
+  // kind lie costs nothing now. Both are remembered (oren_truth / oren_lie): Oren's starter line differs by them.
   const c = await s.choice(["Oren's Ovens.", "I can't remember either."]);
   if (c === 0) {
     await say(s, 'oren_out', "Oren's Ovens! Of course. Ha!");
     await s.wait(30);
     await s.emote('oren_out', '...');
     await say(s, 'oren_out', "Oren. That's... me. I'm Oren.");
+    await s.setFlag('oren_truth');
   } else {
     await say(s, 'oren_out', "Then it's not just me.");
     await s.emote('oren_out', 'sweat');
     await say(s, 'oren_out', "That's worse, isn't it. That's a great deal worse.");
+    await s.setFlag('oren_lie');
   }
   await say(s, 'oren_out', "Long, strange morning. Mael's been pacing the square since dawn, asking after you. I'll find some paint.");
   await s.walk('oren_out', ['up']);
   await s.despawn('oren_out');
   await s.music('willowmere');
   await s.setFlag('saw_fading_sign');
+}
+
+// ------------------------------------------------------------------------------------------------
+// 2b. The yard slime (willowmere; H1). The step trigger is a one-column cut of the town (x 12), so nobody reaches
+// Mael without it: a runaway ink slime drops out of the bakery yard and attacks the hero alone, no flee. It teaches
+// Attack and the weakness row only (the valley wolves teach Lunge and Appraise). A loss is a Game Over; the
+// trigger fires again on reload.
+// ------------------------------------------------------------------------------------------------
+async function yard_slime(s) {
+  await s.sfx('ink_gurgle');
+  await s.spawn('yard_slime', { sprite: 'ink_slime', name: 'Ink Slime', at: 'yard', dir: 'down' });
+  await s.camera.panTo('yard_slime', 24);
+  await s.jump('yard_slime');
+  await narrate(s, 'Something black and wet drops off the bakery eave and slaps down across the lane.');
+  await s.walk('yard_slime', 'hero', { speed: 'run' });
+  await s.camera.follow('hero');
+  await s.emote('hero', '!');
+  const result = await s.battle('yard_slime', { canFlee: false });
+  if (result !== 'win') return;
+  await s.despawn('yard_slime');
+  await s.spawn('oren_out', { sprite: 'npc_baker', name: 'Oren', at: 'bakery_door', dir: 'down' });
+  await s.walk('oren_out', ['down']);
+  await s.face('oren_out', 'hero');
+  await say(s, 'oren_out', "Not my starter, then. Mine's paler, and it only ever bit bread. Good swing, {hero}.");
+  await s.walk('oren_out', ['up']);
+  await s.despawn('oren_out');
+  await s.setFlag('yard_fight_done');
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -903,6 +975,12 @@ async function oren_starter(s) {
     await s.emote('oren', '?');
     await say(s, 'oren', "Whoever Hal is, he's very rude. And he knows my name.");
   }
+  // H1 (RESPONSIBILITY_ARC 3.4): the one line that remembers the fading-sign choice. H4 widens the set.
+  if (await s.hasFlag('oren_truth')) {
+    await say(s, 'oren', "And {hero}. That morning, with the sign. You said my name like it was nothing. It wasn't nothing.");
+  } else if (await s.hasFlag('oren_lie')) {
+    await say(s, 'oren', "And {hero}. That morning, with the sign. You said you'd forgotten too. You hadn't. I could tell.");
+  }
   await say(s, 'oren', "Here. For the road. Don't eat them all at once. They're medicine, not breakfast.");
   await s.give(REWARDS.starter.item, REWARDS.starter.qty);
   await s.setFlag('starter_done');
@@ -1093,9 +1171,13 @@ async function hollow_after(s) {
 // ------------------------------------------------------------------------------------------------
 export const SCENE_CONDITIONS = {
   prologue: null,
+  // H1: the cold open. Step n only after step n-1, each once; the top only after the twelfth, once.
+  ...Object.fromEntries(TOLL_FLAGS.map((f, i) => [f, i === 0 ? { ifNot: f } : { if: TOLL_FLAGS[i - 1], ifNot: f }])),
+  thirteenth_toll: { if: TOLL_FLAGS[TOLL_FLAGS.length - 1], ifNot: 'cold_open_done' },
   wake_up: { ifNot: 'intro_done' },
   hazel_farewell: { if: 'met_mael', ifNot: ['hazel_farewell_done', 'archivore_defeated'] },
   fading_sign: { if: 'intro_done', ifNot: 'saw_fading_sign' },
+  yard_slime: { if: 'saw_fading_sign', ifNot: 'yard_fight_done' },
   mael_intro: { if: 'intro_done', ifNot: 'met_mael' },
   mira_joins: { if: 'met_mael', ifNot: 'mira_joined' },
   south_gate: { ifNot: 'bram_joined' },
@@ -1137,7 +1219,7 @@ export const SCENE_CONDITIONS = {
 };
 
 const RAW = {
-  prologue, wake_up, hazel_farewell, fading_sign, mael_intro, mira_joins, south_gate, garrick_farewell,
+  prologue, ...TOLL_SCENES, thirteenth_toll, wake_up, hazel_farewell, fading_sign, yard_slime, mael_intro, mira_joins, south_gate, garrick_farewell,
   leave_town, valley_arrival, milestone, first_fight, campfire_rest, archive_door, archive_f1_arrival, find_letter_1, archive_f1_bell,
   archive_f2_arrival, find_letter_2, echo_warden, lantern_get, archive_f2_exit, archive_f3_arrival,
   find_letter_3, thirteenth_bell, boss_door, archivore, return_to_willowmere, ending_hook,

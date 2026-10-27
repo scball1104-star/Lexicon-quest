@@ -161,6 +161,8 @@ const events = [
   door('door_smithy', 29, 25, ['smithy', 8, 10, 'up']),
   // story triggers
   trigger('fading_sign_trig', 4, 16, 1, 1, 'fading_sign'),
+  // H1: the yard slime cut (ep1.js yard_slime): column 12 over every passable row, so the first fight is not walked around
+  trigger('yard_slime_trig', 12, 3, 1, 27, 'yard_slime'),
   trigger('south_gate_trig', 20, 28, 2, 1, 'south_gate'),
   trigger('leave_town_trig', 20, 29, 2, 1, 'leave_town'),
   // NPCs (sprites, movement and talk come from npcs.js)
@@ -223,6 +225,7 @@ export default {
   exits: [{ x: 20, y: 31, w: 2, h: 1, to: ['valley', 1, 33, 'right'] }],
   marks: {
     home_door: [4, 16], bakery_sign: [12, 13], bakery_door: [11, 16],
+    yard: [13, 14],                       // H1: where the yard slime drops in
     well: [22, 17], bell_tower: [22, 6],
     gate_inner: [20, 28], town_sign: [20, 29],
     return_spot: [22, 19], meet_holt: [22, 21],

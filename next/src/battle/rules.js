@@ -261,6 +261,7 @@ export function createBattle(cfg = {}) {
     exp *= expMul;
     if (spec && spec.power > 0) { atk *= spec.power; mag *= spec.power; }   // the encounter's `power` (encounters.js)
     if (spec && spec.speed > 0) spd *= spec.speed;                           // and its `speed` (Episode 3, Foundry F3)
+    if (spec && spec.hp > 0) hp *= spec.hp;                                 // and its `hp` (H1: the yard slime, a Lv 1 hero alone)
     if (extra.hpScale) hp *= extra.hpScale;
     if (extra.hp) hp = extra.hp;
     hp = Math.round(hp);

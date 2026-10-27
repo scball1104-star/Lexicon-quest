@@ -343,7 +343,7 @@ shimmer, day tint. Respect a `reduceMotion` setting (no shake/flash).
 
 ## 9. Episode 1 content outline (writers expand; keep consistent with root story files)
 
-- **Prologue** (skippable): title card text over animated key art. "In Aethelgard, every name is a promise..."
+- **Cold open** (playable, about a minute): "The Thirteenth Toll". The hero climbs the bell tower stair at night; each of twelve steps tolls a bell and shows a name as a caption; the thirteenth tolls and shows none. Black, one card ("In Aethelgard, every name is a promise."), then the wake-up. Replaced the skippable title-card prologue on 2026-10-26 (Scott, decision B).
 - **Willowmere, morning.** The hero wakes (DQ). Outside, a lantern-sign's name flickers and fades. The
   Thirteenth Bell rang at night though the tower holds twelve. **Elder Mael** asks the hero to visit the
   **Rootbound Archive** north of the valley and recover the first fragment of the Book of Names.

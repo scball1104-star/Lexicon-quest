@@ -68,7 +68,7 @@ OPP = {'up': 'down', 'down': 'up', 'left': 'right', 'right': 'left'}
 WALK, RUN = 12, 8
 SOFTLOCK_S = 90
 SHOT_EVERY_S = 30
-MAIN_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done',
+MAIN_FLAGS = ['cold_open_done', 'intro_done', 'met_mael', 'mira_joined', 'bram_joined', 'left_town', 'archive_entered', 'archive_f1_done',
               'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open', 'archivore_defeated', 'ep1_complete']
 MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
            'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss']
@@ -1511,19 +1511,45 @@ class Episode:
         b.frames(6)
         b.shot('name_entry')
         b.page.keyboard.press('Enter')
-        b.page.wait_for_function("LQ_DEBUG.scene() === 'prologue'", timeout=20000, polling=30)
-        b.frames(40)
-        b.shot('prologue')
-        # Read each card for a moment, then advance it.
-        for _ in range(12):
-            if b.scene() != 'prologue':
-                break
-            b.frames(40)
-            b.tap('confirm', 6)
-        b.page.wait_for_function("LQ_DEBUG.scene() === 'field'", timeout=30000, polling=30)
-        b.settle()
+        # H1: the prologue scene is only a hand-off now. The field opens on the bell tower stair (the cold open,
+        # "The Thirteenth Toll"): twelve toll steps, each a step trigger that holds the hero while the bell rings
+        # and the name shows, then the thirteenth at the top, black, one card, and the engine carries the game home.
+        on_tower = "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return LQ_DEBUG.scene() === 'field' && !!(f && f.map && f.map.id === 'bell_tower'); })()"
+        b.page.wait_for_function(on_tower, timeout=30000, polling=30)
+        f = b.settle()
         if (b.game() or {}).get('heroName') != b.hero:
             raise Fail(f'hero name is {(b.game() or {}).get("heroName")!r}, typed {b.hero!r}')
+        b.mark('cold_open')                                      # control: the hero can move
+        b.shot('cold_open')
+        steps = {e['script']: tuple(e['cells'][0]) for e in f['ents'] if e['type'] == 'trigger' and e['script']}
+        for n in range(1, 13):
+            cell = steps.get(f'toll_{n}')
+            if not cell:
+                raise Fail(f'bell_tower has no trigger for toll_{n}')
+            b.walk_to([cell], label=f'toll_{n}')
+            b.settle()                                           # the toll scene holds the hero while the bell rings
+            if not self.has(f'toll_{n}'):
+                raise Fail(f'toll_{n} did not fire on its step {cell}')
+            if n == 1:
+                b.mark('first_toll')
+            if n == 7:
+                b.shot('seventh_toll')
+        top = steps.get('thirteenth_toll')
+        if not top:
+            raise Fail('bell_tower has no thirteenth_toll trigger')
+        # the step onto the top cell runs thirteenth_toll; walk_to's own settle plays through the silence, the black
+        # and the card (handle skips a title card with confirm), and the engine's hand-off lands the party at home
+        b.walk_to([top], label='thirteenth_toll')
+        at_home = "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return LQ_DEBUG.scene() === 'field' && !!(f && f.map && f.map.id === 'hero_home'); })()"
+        for _ in range(400):
+            if b.js(at_home):
+                break
+            b.handle()
+        else:
+            raise Fail('the cold open never handed the game to hero_home')
+        if not self.has('cold_open_done'):
+            raise Fail('thirteenth_toll did not set cold_open_done')
+        b.settle()                                               # wake_up runs on entry
         b.mark('wake')
 
     def town_morning(self):
@@ -1539,9 +1565,21 @@ class Episode:
         self.talk('hazel')
         b.through('home_exit')
         self.ensure_map('willowmere')
-        b.settle()                                              # fading_sign fires on the landing tile
+        # H1: the fading sign's choice is remembered: the desktop run tells Oren the truth, the phone run the kind lie
+        oren = ["can't remember"] if b.device.startswith('phone') else ["Oren's Ovens"]
+        b.settle(prefer=oren)                                   # fading_sign fires on the landing tile
         if not self.has('saw_fading_sign'):
             raise Fail('fading_sign did not run on the doorstep')
+        if not (self.has('oren_truth') or self.has('oren_lie')):
+            raise Fail('fading_sign did not remember the Oren choice')
+        b.mark('oren_choice')
+        # H1: the yard slime blocks the lane to Lantern Square (a one-column cut at x 12); the generic battle
+        # handler wins it with Auto battle, then Oren's line, then yard_fight_done
+        b.walk_to([(12, 16)], label='yard lane')
+        b.settle()
+        if not self.has('yard_fight_done'):
+            raise Fail('yard_slime did not set yard_fight_done')
+        b.mark('yard_fight')
         b.mark('find_mael')
         self.sign('sign_bakery')
         self.talk('mael')                                        # mael_intro

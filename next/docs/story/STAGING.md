@@ -136,6 +136,8 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 
 | Scene | Cue |
 |---|---|
+| the cold open (`toll_6`) | the tower is silent but for footsteps and bells; a low `mystery` bed enters on the sixth toll |
+| `thirteenth_toll` | silence, then `bell_first` (the alarm bell; it sits in the ep3 sfx pack, so a New Game hears its `bell_toll` fallback) doubled with a `bell_toll` in the same frame, so the thirteenth is louder either way; the hold, black; no music under the card |
 | `fading_sign` | `mystery` as the painted name goes, back to `willowmere` when Oren walks off |
 | `south_gate` (Bram joins) | `sorrow` enters in the silence after "tell him... tell...", holds through Holt's promise, `willowmere` before Bram joins |
 | `campfire_rest` (Emberpeak answer) | `sorrow` from "The fire took the lower town", back to `valley` |
@@ -144,10 +146,33 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 | `return_to_willowmere` | `triumph` at the gate, `sorrow` when Mael opens the Register ("Every name but one"), silence, then the bells |
 | `ending_hook` | silence, `bell_peal`, `bell_toll`, `mystery` on "Thirteen." |
 
-### prologue
-- Where: before `hero_home`, over the title key art (`scenes/prologue.js` may also read `PROLOGUE` directly).
-- Order: Title, New Game, name entry, prologue, `hero_home`. Skippable.
-- Music: `title`. Six `title()` cards, about 4 s each.
+### The cold open, "The Thirteenth Toll": `toll_1` to `toll_12` and `thirteenth_toll` (H1)
+- Order: Title, New Game, name entry, `scenes/prologue.js` (now only the hand-off, black, title music out), the
+  field on map **`bell_tower`** at mark **`stair_foot`** facing up. Not skippable, but short: a player who holds
+  up is in the morning scene in well under a minute. The old six-card prologue is gone (Scott, 2026-10-26,
+  decision B). The `prologue` scene id stays as one card (`PROLOGUE[0]`) for the tests; the title's attract mode
+  cycles `ATTRACT` instead.
+- Map: a dark shaft (`dark` 0.8, tint `night`, `music` null, no door in or out). Three switchback flights of stone
+  steps, two landings, the belfry with the bells at the top. Twelve flight cells are **toll steps**, each with a
+  1 x 1 step trigger running, in climbing order, `toll_1`, `toll_2`, `toll_3`, `toll_4` (flight 1), `toll_5`,
+  `toll_6`, `toll_7`, `toll_8` (flight 2), `toll_9`, `toll_10`, `toll_11`, `toll_12` (flight 3); the map module
+  exports `TOLL_STEPS`. Every
+  toll cell is followed by a plain step cell, so a held direction (which starts one more step on the frame a trigger
+  fires, before the scene's lock lands) ends on the plain cell and the next toll still fires on its own step. The
+  first belfry cell (mark **`top`**) runs `thirteenth_toll`. Mark **`bells`** is the cell between the two bells.
+- Control at once: no enter trigger, no box. The location banner slides in; `scenes/prologue.js` draws the one
+  opening line (`COLD_OPEN_LINE`, "Willowmere. Last night.") in the lower third, no press, fading on its own.
+- Each toll scene: `bell_toll`, its flag `toll_n` (guarded: step n only after step n-1, each once, so walking back
+  down re-tolls nothing and a player who stops leaves the bells waiting), `mystery` on the sixth, then a hold of
+  `TOLL_HOLD` frames (84) with input locked. The name is **not a box**: `scenes/prologue.js` reads the new toll
+  flag and draws the name (`TOLL_NAMES`: Hazel, Mael, Oren, Pip, Tess, Iris, Holt, Garrick, Nella, Wick, Edda,
+  Bram) as a spaced-capitals caption in the upper third for exactly the hold, then it fades.
+- `thirteenth_toll`: a short wait, music to silence, `bell_first`, a 3 px shake, the hero's `!` while the camera pans
+  60 frames to **`bells`**, `THIRTEENTH_SILENCE` frames of nothing (no name), fade out 60, the one card
+  (`title(PROLOGUE[0], 200)`), then `cold_open_done`. `scenes/prologue.js` sees the flag and carries the game to
+  `hero_home` at `bed` under an engine fade; `wake_up` runs on entry as before.
+- Existing saves hold `intro_done`, `newGameEp2` goes straight to bed: neither ever sees the tower
+  (`coldOpenWanted` in `scenes/prologue.js`; `qa/content/h1_opening.test.mjs`).
 
 ### wake_up
 - Map: `hero_home`. Trigger: `on: 'enter'` (scene needs `intro_done` unset, so it only plays once).
@@ -155,6 +180,9 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 - Hazel (NPC `hazel`) at her spot by the hearth, at least two open tiles from the bed. Mark **`bedside`**: the
   floor tile next to the bed where she stops.
 - Lighting `dawn`. Hero emotes zzz, Hazel calls, walks to `bedside`, hero hops awake and steps down.
+- H1: four boxes and the one choice (it was seven). Hazel's bell line confirms what the player just heard on the
+  stair ("You heard them too") instead of reporting Pip's count as news; the choice is "I counted thirteen" or
+  "I must have dreamt it". The doorframe clue (`home_doorframe`) is untouched.
 - Gives `potion` x2. Sets `intro_done`.
 
 ### hazel_farewell (optional)
@@ -167,6 +195,24 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 - Oren is spawned at `bakery_door` as `oren_out` (sprite `npc_baker`), steps down, talks, steps back, despawns.
 - SFX `sign_fade` as `signs_fading` is set: the sign must visibly go blank at that moment (swap frame).
 - Camera: pan to `bakery_sign` (40 frames), then follow hero.
+- H1 (RESPONSIBILITY_ARC 3.4): the choice is remembered. "Oren's Ovens" sets `oren_truth`, "I can't remember
+  either" sets `oren_lie`. One later line differs by them: Oren's starter line when the dough comes home
+  (`oren_starter`, the `starter_found` branch). Nothing on the main route changes.
+
+### yard_slime (H1: the first fight, in town)
+- Map: `willowmere`. Step trigger **`yard_slime_trig`**: column 12 over every passable row (3 to 28), a full cut of
+  the town between the hero's lane and Lantern Square, like the valley's `first_fight_trig`. Needs
+  `saw_fading_sign`, not `yard_fight_done`. Oren has just gone in for paint.
+- Mark **`yard`** (13,14): the plaza corner beside the bakery where the slime drops in. The scene spawns
+  `yard_slime` (sprite `ink_slime` from `enemies_field`, name "Ink Slime") there, pans to it (24 frames), it hops,
+  one narration box, then it runs at the hero (`walk('yard_slime', 'hero', run)`), camera back, the hero's `!`,
+  and `battle('yard_slime', { canFlee: false })`: the hero alone at Lv 1 against one soft, slow Ink Slime
+  (encounters.js `yard_slime`: power 0.5, speed 0.7, no elite). Attack and the weakness row are all it teaches;
+  the valley wolves stay the teaching fight for Lunge and Appraise.
+- On a win: the slime despawns, Oren steps out at `bakery_door` for one box ("Not my starter, then..."), goes back
+  in, `yard_fight_done`. A loss is the engine's Game Over and the trigger fires again on reload.
+- The lane cell (12,16) is the plaza's only mouth from the lane (the sign at (12,15) and the lamp at (12,17) are
+  solid), so the common path meets the slime face to face; the cut catches the long way round too.
 
 ### mael_intro
 - Map: `willowmere`. Talk to Mael (NPC `mael` by the well). Needs `intro_done`.
@@ -370,8 +416,9 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
 
 | Map | Marks / named events |
 |---|---|
+| `bell_tower` | `stair_foot`, `bells`, `top` |
 | `hero_home` | `bed`, `bedside`; NPC `hazel` |
-| `willowmere` | `home_door`, `bakery_sign`, `bakery_door`, `well`, `bell_tower`, `gate_inner`, `town_sign`, `return_spot`, `meet_holt`, `gather_garrick`, `meet_garrick`, `gather_iris`, `meet_iris`, `gather_oren`, `meet_oren`, `gather_hazel`, `meet_hazel`, `meet_mael`; object `duck_nest`; NPCs `mael tess nella edda holt bram cobb henrietta bertha wick lark the_duke loaf` |
+| `willowmere` | `home_door`, `bakery_sign`, `bakery_door`, `yard`, `well`, `bell_tower`, `gate_inner`, `town_sign`, `return_spot`, `meet_holt`, `gather_garrick`, `meet_garrick`, `gather_iris`, `meet_iris`, `gather_oren`, `meet_oren`, `gather_hazel`, `meet_hazel`, `meet_mael`; object `duck_nest`; NPCs `mael tess nella edda holt bram cobb henrietta bertha wick lark the_duke loaf` |
 | `library` | `mira_meet`; NPCs `mira iris` |
 | `smithy` | NPCs `garrick anvil starter_dough` |
 | `bakery` | NPCs `oren hal` |

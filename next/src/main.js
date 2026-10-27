@@ -17,9 +17,6 @@
 import { Engine } from './core/engine.js';
 import { installDebug } from './core/debug.js';
 import { startPackWatch } from './game/packs.js';
-import { DevTitleScene } from './scenes/_devTitle.js';
-import { DevFieldScene } from './scenes/_devField.js';
-import { DevGalleryScene } from './scenes/_devGallery.js';
 
 const params = new URLSearchParams(location.search);
 const debug = params.get('debug') === '1';
@@ -33,9 +30,17 @@ const engine = new Engine({
 installDebug(engine, { debug, overlay: debug && params.get('fps') !== '0' });
 window.LQ_ENGINE = engine;
 
-engine.registerScene('_devTitle', DevTitleScene);
-engine.registerScene('_devField', DevFieldScene);
-engine.registerScene('_devGallery', DevGalleryScene);
+// Dev scenes (dev title, test field, gallery) load only for a debug run or when ?scene=_dev... asks for one, so a
+// player never downloads them (about 12 KB gzipped off the first load; tools/pwa/build_pwa.py leaves them out of
+// the precache and the modulepreload block). They register before the scene registry, as before.
+const wantDev = debug || (params.get('scene') || '').startsWith('_dev');
+async function loadDevScenes() {
+  if (!wantDev) return;
+  const [t, f, g] = await Promise.all([import('./scenes/_devTitle.js'), import('./scenes/_devField.js'), import('./scenes/_devGallery.js')]);
+  engine.registerScene('_devTitle', t.DevTitleScene);
+  engine.registerScene('_devField', f.DevFieldScene);
+  engine.registerScene('_devGallery', g.DevGalleryScene);
+}
 
 async function loadRegistry() {
   // src/scenes/registry.js (owned by the scene agents) exports { name: SceneClassOrFactory, ... } as its
@@ -121,7 +126,7 @@ async function main() {
   if (boot) boot.style.display = 'none';
   engine.registryLoaded = false;   // LQ_DEBUG.ready() waits for the registry too (boot race fix)
   // The scene modules load in parallel with the assets (they are part of the bar). Debug runs skip the tap gate.
-  await engine.boot({ scenes: loadRegistry, gate: !debug && params.get('gate') !== '0' });
+  await engine.boot({ scenes: async () => { await loadDevScenes(); return loadRegistry(); }, gate: !debug && params.get('gate') !== '0' });
   if (debug && engine.lazyLoad) await engine.lazyLoad;   // deterministic QA: every lazy group is in before ready()
   engine.registryLoaded = true;
   watchEpisodePacks();

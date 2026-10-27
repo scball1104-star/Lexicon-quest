@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'a62c3648c0db';
+const SHELL_VERSION = 'e1a5ddfd07d0';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -63,6 +63,7 @@ const PRECACHE = [
   'src/data/maps/archive_f2.js',
   'src/data/maps/archive_f3.js',
   'src/data/maps/bakery.js',
+  'src/data/maps/bell_tower.js',
   'src/data/maps/chapel.js',
   'src/data/maps/court_f1.js',
   'src/data/maps/court_f2.js',
@@ -102,10 +103,6 @@ const PRECACHE = [
   'src/game/state.js',
   'src/game/story.js',
   'src/main.js',
-  'src/scenes/_devField.js',
-  'src/scenes/_devGallery.js',
-  'src/scenes/_devTitle.js',
-  'src/scenes/_devUi.js',
   'src/scenes/battle.js',
   'src/scenes/config.js',
   'src/scenes/credits.js',

@@ -13,6 +13,8 @@ import { toInstance } from '../battle/loot.js';
 export const SAVE_VERSION = 1;
 export const START_MAP = 'hero_home';
 export const START_POS = { x: 4, y: 3, dir: 'down' };   // map authors keep `marks.bedside` next to this
+/** H1: where a New Game begins (the cold open; scenes/prologue.js hands the field here). */
+export const COLD_OPEN_START = { map: 'bell_tower', mark: 'stair_foot', dir: 'up' };
 
 export function createGame(heroName = 'Hero', opts = {}) {
   const name = cleanName(heroName);

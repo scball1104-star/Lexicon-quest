@@ -18,12 +18,14 @@ export const CAMERA_API = new Set(['panTo', 'follow']);
 // Canonical ids from COMMON.md / DESIGN.md.
 export const MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy', 'library', 'chapel', 'bakery', 'valley',
   'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss',
-  'whisperwood_hollow'];   // W6-content: the optional side dungeon
+  'whisperwood_hollow',    // W6-content: the optional side dungeon
+  'bell_tower'];           // H1: the cold open's stair (a New Game's first map; nobody lives there)
 export const NPC_SPRITES = ['npc_elder', 'npc_tess', 'npc_baker', 'npc_ferry', 'npc_innkeeper', 'npc_shopkeeper',
   'npc_smith', 'npc_child_a', 'npc_child_b', 'npc_guard', 'npc_old_woman', 'npc_farmer', 'npc_scholar', 'npc_parent',
   'npc_bellkeeper', 'animal_cat', 'animal_dog', 'animal_chicken', 'animal_duck'];
 // Extra sprite ids agreed with W1-sprites for the story (see report): party sprites and npc_dough.
-export const EXTRA_SPRITES = ['hero', 'mira', 'bram', 'npc_dough'];
+// H1: ink_slime (enemies_field) for the yard slime that ep1.js yard_slime spawns and despawns in Willowmere.
+export const EXTRA_SPRITES = ['hero', 'mira', 'bram', 'npc_dough', 'ink_slime'];
 export const PORTRAITS = ['hero', 'mira', 'bram', 'mael', 'tess', 'iris', 'nella', 'pell', 'hazel', 'hob', 'garrick',
   'pip']; // W1-sprites portraits.json (48 and 32 px)
 export const MUSIC = ['title', 'willowmere', 'valley', 'archive', 'battle', 'boss_archivore', 'mystery', 'sorrow',
@@ -38,6 +40,8 @@ export const SFX = [
   'drop_magic', 'drop_rare', 'drop_legendary', 'menu_open', 'menu_close', 'equip', 'buy', 'save_chime',
   // Added by W1-audio at W1-content's request
   'bell_toll', 'bell_peal', 'sign_fade', 'name_restore', 'door_rumble', 'ink_gurgle', 'page_flutter',
+  // H1: the alarm bell of the cold open's thirteenth toll (an Episode 3 id in the manifest, falls back to bell_toll)
+  'bell_first',
   // Extra ids W1-audio ships
   'switch_off', 'door_locked', 'door_unlock', 'jump', 'land', 'fall', 'brazier_light', 'shelf_move', 'crystal_hit',
   'emote_pop', 'item_use', 'revive', 'defend', 'stun', 'telegraph', 'summon', 'name_devour', 'coin',

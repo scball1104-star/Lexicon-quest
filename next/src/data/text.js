@@ -221,6 +221,7 @@ export const BOOKS = {
 // ------------------------------------------------------------------------------------------------
 export const BANNERS = {
   hero_home: { title: 'Home', sub: 'Willowmere' },
+  bell_tower: { title: 'The Bell Tower', sub: 'Willowmere' },   // H1: the cold open
   willowmere: { title: 'Willowmere', sub: 'Lantern Square' },
   inn: { title: 'The Lantern Inn' },
   item_shop: { title: 'Willowmere Goods' },

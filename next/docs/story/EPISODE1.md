@@ -18,16 +18,32 @@ boss 8, return and ending 6, plus 15 to 20 of optional side stories.
 
 Scene ids from `ep1.js` are in brackets. Flags are the COMMON.md main flags unless noted.
 
-### Act I: Willowmere, morning
-1. **Prologue** [`prologue`]. Six title cards over the key art. "In Aethelgard, every name is a promise." The last
-   card lands the hook: last night, in a tower that holds twelve bells, a thirteenth bell rang.
-2. **Waking up** [`wake_up`, sets `intro_done`]. Dawn in the hero's home. Hazel, the hero's guardian, calls them
-   up in true Dragon Quest fashion. She mentions Pip swearing he counted thirteen bells, and that Elder Mael came
-   by with "his worried face on." She hands over two Potions. The doorframe height marks (inspect) already look
-   paler than they should: the first, quiet clue.
-3. **The fading sign** [`fading_sign`]. Out the front door, the bakery's lantern-sign goes blank before your eyes.
-   Oren steps out and cannot remember what it said. If the hero answers "Oren's Ovens," Oren forgets his own name
-   for a breath, then laughs it off. Warmth, then the first chill.
+### Act I: The night before, and Willowmere, morning
+The first five minutes follow `docs/RESPONSIBILITY_ARC.md` section 2 (Scott, 2026-10-26, decision B: the six-card
+prologue is replaced, not flag-gated): control in seconds, a question by the first minute, a choice with a cost by
+the third, a taste of a fight by the fifth.
+1. **The Thirteenth Toll** [`toll_1` to `toll_12`, `thirteenth_toll`, sets `cold_open_done`]. Playable cold open on
+   the bell tower stair at night (map `bell_tower`): the hero alone, a lantern pool, no box, one line that fades on
+   its own ("Willowmere. Last night."). Every step up tolls a bell and shows a name from the town, no press needed:
+   Hazel, Mael, Oren, Pip, Tess, Iris, Holt, Garrick, Nella, Wick, Edda, Bram. Stop, and the bells wait. At the top
+   the thirteenth toll sounds, the alarm bell, louder, and no name shows: a gap the player hears. The hero's "!",
+   the bells hanging still, a held silence, black, and the one card: "In Aethelgard, every name is a promise."
+   The question the whole episode answers is asked without a word: whose name was the thirteenth?
+2. **Waking up** [`wake_up`, sets `intro_done`]. Dawn in the hero's home, half as long as it was. Hazel, the hero's
+   guardian, calls them up in true Dragon Quest fashion and confirms what the player just heard ("You heard them
+   too. Pip counted thirteen, and this once I believe him"); the hero counted thirteen or must have dreamt it. Elder
+   Mael came by with his worried face on. She hands over two Potions. The doorframe height marks (inspect) already
+   look paler than they should: the first, quiet clue.
+3. **The fading sign** [`fading_sign`, sets `oren_truth` or `oren_lie`]. Out the front door, the bakery's
+   lantern-sign goes blank before your eyes. Oren steps out and cannot remember what it said. The first choice with
+   a cost: answer "Oren's Ovens," and Oren forgets his own name for a breath, then laughs it off; answer "I can't
+   remember either," a kind lie that costs nothing now. Both are remembered: when his runaway starter comes home
+   (`oren_starter`) he says one line about that morning that differs by the answer. Warmth, then the first chill.
+3a. **The yard slime** [`yard_slime`, sets `yard_fight_done`]. As Oren goes in for paint, a runaway ink slime drops
+   out of the bakery yard and blocks the lane to Lantern Square (a one-column cut of the town, so nobody reaches
+   Mael without it). The hero alone, one soft, slow slime, no flee: a taste of a fight that teaches Attack and the
+   weakness row and nothing else (the valley wolves still teach Lunge and Appraise). Reward: the slime's EXP and
+   Oren's one line, "Not my starter, then. Mine's paler, and it only ever bit bread."
 4. **Meeting Mael** [`mael_intro`, sets `met_mael`]. By the well. "Did you sleep through the bell again?" Mael
    explains the fading signs and the thirteenth toll, the old saying ("when a name is taken, a thirteenth bell
    tolls for it"), and asks the hero to go to the Rootbound Archive, north of the valley, where the Keepers kept

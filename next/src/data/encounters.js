@@ -21,6 +21,7 @@ enc('valley_slimes', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime
 enc('valley_scarab', { zone: 'valley', leader: 'moss_scarab', enemies: ['moss_scarab', 'ink_slime'] });
 enc('valley_mixed', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'moss_scarab'] });
 enc('valley_pack', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'briar_wolf', 'ink_slime'] });
+enc('yard_slime', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime'], noFlee: true, noElite: true, power: 0.5, speed: 0.7, hp: 0.55 });   // H1: the Lv 1 hero alone (ep1.js yard_slime); not in a plan, proved by qa/content/h1_opening.test.mjs
 
 // ---------------------------------------------------------------- Archive F1: The Catalog Halls
 enc('f1_slimes', { zone: 'archive_f1', leader: 'ink_slime', enemies: ['ink_slime', 'ink_slime', 'bookmite'] });
