@@ -156,7 +156,7 @@ function enterPhase(ctx, u, idx) {
   const p = d.phases[idx];
   u.ai.phase = idx;
   ctx.cancelCharge(u, 'phase');
-  ctx.emit({ type: 'phase', actor: u.uid, phase: idx + 1, id: p.id, name: p.name, text: p.text });
+  ctx.emit({ type: 'phase', actor: u.uid, phase: idx + 1, id: p.id, name: p.name, text: p.text, sprite: p.sprite || null });   // the phase's look, as the King's script forwards it (the Binder's three looks)
   ctx.setWeak(u, p.weak, p.resist, `${u.id}:${p.id}`);
   if (idx > 0) ctx.setShields(u, p.shields);
   if (p.summon) summonPages(ctx, u, p.summon);

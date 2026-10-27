@@ -14,6 +14,7 @@
 //   node tools/sim/simulate.mjs --check         exit 1 if a target is missed (also runs the route, economy and optional-EXP checks)
 //   node tools/sim/simulate.mjs --json          also write tools/sim/out/sim.json
 //   node tools/sim/simulate.mjs --trace enc seed policy   print one battle's events
+//   node tools/sim/simulate.mjs --cave [--check]        the Deep Stacks descent instead (tools/sim/cave.mjs: 50 seeds, B1 to B100)
 //
 // Also importable: runSuite(), checkTargets(), progression(), LOADOUTS, TARGETS.
 
@@ -432,7 +433,11 @@ const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].repla
 if (isMain) {
   const args = process.argv.slice(2);
   const get = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-  if (args.includes('--trace')) {
+  if (args.includes('--cave')) {
+    // The Deep Stacks descent (tools/sim/cave.mjs, docs/DEEP_STACKS_PLAN.md 11): its own seeds, tables and targets.
+    const { caveMain } = await import('./cave.mjs');
+    process.exit(await caveMain(args));
+  } else if (args.includes('--trace')) {
     const i = args.indexOf('--trace');
     const enc = args[i + 1];
     const seed = Number(args[i + 2] || 1);

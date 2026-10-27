@@ -10,11 +10,16 @@
 //               weights of rarityAt apply to chests only; the sim pass that owns loot.js next can route drops through them).
 //   opts.props  the party's active cave-unique props (items.js wornProps): bookmark_twice, red_rarity_up, gold_double act here.
 // Note: battle/loot.js rollItem turns a 'legendary' rarity into 'rare' today (Episode 1's placed-only rule), so the 2 to 3%
-// legendary weight of deep floors reads as "rare" until C3 decides otherwise. Pinned in qa/cave/data_loot.test.mjs.
+// legendary weight of deep floors reads as "rare" (kept: the blue chests are the Stacks' legendaries). Pinned in
+// qa/cave/data_loot.test.mjs.
+// C3-sim-bot's balance pass (docs/DEEP_STACKS_BALANCE.md): the larder (CONSUMABLES_BY_BAND, CONSUMABLE_EXTRA, LANDING_SUPPLY,
+// one row at most four), the first band's weapons leaning to the start kinds (EARLY_WEAPON_TYPES), and red-chest bases drawn at
+// item level 2 at least (BASE_ILVL_MIN: no base has item level 1, so B1 to B5 lent nothing but Short Swords). Battle drops on
+// B1 to B5 still roll at item level 1 through the engine (every weapon drop there is a Short Sword): a C4 item.
 
-import { ZONE_LOOT, BOSS_LOOT } from '../loot-tables.js';
+import { ZONE_LOOT, BOSS_LOOT, SLOT_WEIGHTS } from '../loot-tables.js';
 import { CONSUMABLES } from '../items.js';
-import { rollItem, rollRarity } from '../../battle/loot.js';
+import { rollItem, rollRarity, rollBase } from '../../battle/loot.js';
 import { bandIndex, isLanding, itemLevel, zoneIdFor, BOSS_FLOOR, FLOORS } from './foes.js';
 import { CAVE_UNIQUES, CAVE_UNIQUE_IDS, BINDER_QUILL_ID } from './items.js';
 
@@ -62,15 +67,45 @@ export function shiftRarityUp(weights) {
 }
 
 // ---------------------------------------------------------------- consumables by band (plan 6.1)
+// C3-sim-bot (docs/DEEP_STACKS_BALANCE.md): the Stacks have no rests, so these are the party's whole larder. Potions and Ethers
+// lead (Mira's MP is the healing budget), Phoenix Feathers from the first band (a member who falls with none in the bag stays down
+// for the rest of the reading), the cures that have no use outside a fight stay rare.
 export const CONSUMABLES_BY_BAND = {
-  1: [{ item: 'potion', weight: 50 }, { item: 'antidote', weight: 15 }, { item: 'eye_drops', weight: 15 }, { item: 'echo_herb', weight: 10 }, { item: 'ether', weight: 10 }],
-  2: [{ item: 'potion', weight: 30 }, { item: 'hi_potion', weight: 20 }, { item: 'ether', weight: 25 }, { item: 'echo_herb', weight: 15 }, { item: 'phoenix_feather', weight: 10 }],
-  3: [{ item: 'hi_potion', weight: 35 }, { item: 'ether', weight: 20 }, { item: 'hi_ether', weight: 10 }, { item: 'silver_salve', weight: 10 }, { item: 'phoenix_feather', weight: 15 }, { item: 'echo_herb', weight: 10 }],
-  4: [{ item: 'hi_potion', weight: 35 }, { item: 'hi_ether', weight: 20 }, { item: 'phoenix_feather', weight: 15 }, { item: 'quench_flask', weight: 15 }, { item: 'echo_herb', weight: 15 }],
-  5: [{ item: 'hi_potion', weight: 30 }, { item: 'hi_ether', weight: 25 }, { item: 'phoenix_feather', weight: 20 }, { item: 'quench_flask', weight: 10 }, { item: 'silver_salve', weight: 15 }],
+  1: [{ item: 'potion', weight: 42 }, { item: 'ether', weight: 32 }, { item: 'phoenix_feather', weight: 14 }, { item: 'echo_herb', weight: 6 }, { item: 'antidote', weight: 3 }, { item: 'eye_drops', weight: 3 }],
+  2: [{ item: 'potion', weight: 18 }, { item: 'hi_potion', weight: 24 }, { item: 'ether', weight: 32 }, { item: 'hi_ether', weight: 10 }, { item: 'phoenix_feather', weight: 12 }, { item: 'echo_herb', weight: 4 }],
+  3: [{ item: 'hi_potion', weight: 40 }, { item: 'ether', weight: 12 }, { item: 'hi_ether', weight: 18 }, { item: 'phoenix_feather', weight: 5 }, { item: 'silver_salve', weight: 8 }, { item: 'echo_herb', weight: 10 }],
+  4: [{ item: 'hi_potion', weight: 40 }, { item: 'hi_ether', weight: 18 }, { item: 'phoenix_feather', weight: 5 }, { item: 'quench_flask', weight: 10 }, { item: 'echo_herb', weight: 12 }, { item: 'silver_salve', weight: 6 }],
+  5: [{ item: 'hi_potion', weight: 40 }, { item: 'hi_ether', weight: 18 }, { item: 'phoenix_feather', weight: 5 }, { item: 'quench_flask', weight: 10 }, { item: 'silver_salve', weight: 10 }, { item: 'echo_herb', weight: 8 }],
 };
 /** The consumable table of a floor: [{ item, weight }]. */
 export function consumablesAt(floor) { return CONSUMABLES_BY_BAND[bandIndex(clampFloor(floor))].map((c) => ({ ...c })); }
+/**
+ * How many consumable rolls a red chest that holds no gear makes: one, a second at CONSUMABLE_EXTRA[0], a third at [1]. The
+ * Stacks have no rests (plan 3), so the chests are the party's only larder (C3-sim-bot; the numbers are the balance pass's).
+ */
+export const CONSUMABLE_EXTRA = [0.6, 0.3];
+export function consumableCount(rng, floor) {
+  let n = 1;
+  for (const p of CONSUMABLE_EXTRA) if (p > 0 && rand(rng) < p) n++;
+  return n;
+}
+/**
+ * The landing's red chest is also the Keepers' larder (C3-sim-bot): every landing (B10 ... B90) adds this bundle to its roll,
+ * so a reading that reaches a landing can stand up again before the next band. [{ item, qty }] by band.
+ */
+export const LANDING_SUPPLY = {
+  1: [{ item: 'potion', qty: 4 }, { item: 'ether', qty: 3 }, { item: 'phoenix_feather', qty: 1 }],
+  2: [{ item: 'hi_potion', qty: 3 }, { item: 'ether', qty: 3 }, { item: 'phoenix_feather', qty: 2 }],
+  3: [{ item: 'hi_potion', qty: 3 }, { item: 'hi_ether', qty: 2 }],
+  4: [{ item: 'hi_potion', qty: 3 }, { item: 'hi_ether', qty: 2 }],
+  5: [{ item: 'hi_potion', qty: 3 }, { item: 'hi_ether', qty: 2 }],
+};
+export function landingSupply(floor) { return (LANDING_SUPPLY[bandIndex(clampFloor(floor))] || []).map((c) => ({ ...c })); }
+const CHEST_ROW_MAX = 4;   // one consumable at most four to a chest roll (a third Potion roll adds nothing past it)
+function addConsumable(out, id, qty, max = CHEST_ROW_MAX) {
+  const row = out.consumables.find((c) => c.item === id);
+  if (row) row.qty = Math.min(max, row.qty + qty); else out.consumables.push({ item: id, qty: Math.min(max, qty) });
+}
 
 // ---------------------------------------------------------------- zones (ZONE_LOOT, battle drops)
 export const CAVE_ZONE_LOOT = {
@@ -102,6 +137,20 @@ export function bookmarkChance(floor, opts = {}) {
 /** Chance a red chest holds gear rather than consumables: the first floors lend weapons to empty hands. */
 export function redEquipChance(floor) { const f = clampFloor(floor); return f <= 3 ? 0.6 : f <= 19 ? 0.5 : 0.45; }
 const EARLY_SLOTS = { weapon: 60, body: 15, head: 10, charm: 5, boots: 5, mantle: 5 };
+/**
+ * B1 to B19 (C3-sim-bot): a lent weapon is mostly a kind each reader starts with (the hero's sword, Mira's staff, Bram's spear),
+ * so three empty pairs of hands fill in the first floors; the axe and the bow still turn up. Before this, two readers in five
+ * were still bare-handed on B4 and the descent died there (docs/DEEP_STACKS_BALANCE.md).
+ */
+export const EARLY_WEAPON_TYPES = { sword: 3, staff: 3, spear: 3, axe: 1, bow: 1 };
+/** The last floor whose red-chest weapons lean to the start kinds (the first band). */
+export const EARLY_WEAPON_FLOORS = 19;
+/**
+ * The lowest item level any base has: the tier 1 bases (data/items.js) are item level 2. Below it battle/loot.js rollBase has an
+ * empty pool and falls back to the slot's single lowest base whatever the type (every B1 to B5 weapon was a Short Sword), so a
+ * red chest draws its BASE at this level at least; the instance keeps the floor's item level (plan 6.1). C3-sim-bot.
+ */
+export const BASE_ILVL_MIN = 2;
 /** Gold in a red chest: [min, max], grows with the floor (there is nothing to buy; gold is lost on exit). */
 export function goldAt(floor) { const f = clampFloor(floor); return [8 + 4 * f, 20 + 9 * f]; }
 
@@ -120,18 +169,24 @@ export function rollRedChest(rng, floor, vaultIds = [], opts = {}) {
     let weights = rarityAt(f);
     if (has(opts, 'red_rarity_up')) weights = shiftRarityUp(weights);
     const rarity = rollRarity(rng, weights);
-    const slot = f <= 5 ? weighted(rng, Object.entries(EARLY_SLOTS)) : undefined;
-    out.items.push(rollItem(rng, { ilvl: itemLevel(f), rarity, slot }));
+    const il = itemLevel(f);
+    // B1 to B5 lend weapons first (EARLY_SLOTS); the rest of the first band rolls the engine's own slot weights, but a weapon there
+    // is still mostly a start kind (EARLY_WEAPON_FLOORS), so Mira finds a staff (Channel is her only MP back between rests that
+    // never come) and Bram a spear
+    const slot = f <= 5 ? weighted(rng, Object.entries(EARLY_SLOTS)) : f <= EARLY_WEAPON_FLOORS ? weighted(rng, Object.entries(SLOT_WEIGHTS)) : undefined;
+    const type = slot === 'weapon' ? weighted(rng, Object.entries(EARLY_WEAPON_TYPES)) : undefined;
+    const base = il < BASE_ILVL_MIN ? rollBase(rng, { slot, ilvl: BASE_ILVL_MIN, type }) : null;
+    out.items.push(rollItem(rng, { ilvl: il, rarity, slot, type, base: base ? base.id : undefined }));
   } else {
     const table = consumablesAt(f).map((c) => [c.item, c.weight]);
-    const n = rand(rng) < 0.35 ? 2 : 1;
+    const n = consumableCount(rng, f);
     for (let i = 0; i < n; i++) {
       const id = weighted(rng, table);
       const qty = CONSUMABLES[id] && CONSUMABLES[id].price < 30 ? 2 : 1;
-      const row = out.consumables.find((c) => c.item === id);
-      if (row) row.qty += qty; else out.consumables.push({ item: id, qty });
+      addConsumable(out, id, qty);
     }
   }
+  if (opts.landing) for (const c of landingSupply(f)) addConsumable(out, c.item, c.qty, 99);
   const guaranteed = !!opts.landing && !opts.holdsBookmark;
   out.bookmark = guaranteed || rand(rng) < bookmarkChance(f, opts);
   return out;

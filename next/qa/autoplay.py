@@ -2800,6 +2800,554 @@ class Episode2(Episode):
                 return
 
 
+# ================================================================================================ the Deep Stacks (C3-sim-bot)
+CAVE_OUT = HERE / 'cave' / 'out'
+CAVE_JS = 'LQ_DEBUG.state().cave'
+CAVE_CHEAP_TILES = 24          # --cave-chests cheap: a red chest only when the detour to it and on to the stairs is at most this many tiles
+
+
+class CaveRoute:
+    """The Deep Stacks from the library (docs/DEEP_STACKS_PLAN.md 11, docs/briefs/C3-sim-bot.md 3), on a page with ?cave=1.
+
+    A game past the Episode 1 credits (LQ_DEBUG.newGameEp2 with the run's seed, as the Episode 2 bot starts), the library,
+    the trapdoor, Hollis's offer (Begin, Go down), then floor by floor with the real walk model: the floor's grid is the
+    generated module rebuilt in Node from the reading's seed (qa/autoplay_grid.mjs --cave), every reachable foe is fought by
+    the generic battle handler (Auto battle), the blue chest always and red chests when the detour is cheap, the equip prompt
+    answered Yes, upkeep through the real menu (Feathers, Potions, Ethers, Optimize), and the stairs walked. At or after
+    floor `target` the reading is banked with a Keeper's Bookmark from the Items screen; without one the bot goes on to the
+    next landing (which lends one). Then a second reading: Optimize equips the vault, B5 is reached with a vault unique worn.
+    A wipe is recorded and a new reading started (at most `readings` in all). resume=True instead: B7, a new tab, the
+    title's "Resume the Deep Stacks (B7)" row, B7 again at its arrival.
+    Writes qa/cave/out/bot_<device>_s<seed>.json and prints CAVE_BOT: <json> as its last line."""
+
+    def __init__(self, bot, target=30, seed=1, readings=3, again=5, resume=False, chests='all'):
+        self.b = bot
+        self.cheap = CAVE_CHEAP_TILES if chests == 'cheap' else 10 ** 6     # 'all': every reachable chest, the simulator's policy
+        self.target = target
+        self.seed = seed
+        self.readings = readings
+        self.again = again
+        self.resume_test = resume
+        self.floors = []            # per floor: {reading, floor, game_s, wall_s, fights, chests, level, hp}
+        self.wipes = []
+        self.banked = None
+        self.second = None
+        self.events = []
+        self.reading = 0
+        self.fight_count = 0
+
+    # ---------------------------------------------------------------- views
+    def cave(self):
+        return self.b.js(CAVE_JS) or {}
+
+    def stairs(self):
+        return self.b.call('caveStairs') or {}
+
+    def vitals(self):
+        return self.b.party_vitals()
+
+    def note(self, text):
+        self.events.append(text)
+        print('  cave:', text, flush=True)
+
+    def cave_grid(self, map_id):
+        """Prime the bot's grid cache for a Deep Stacks map: the generated floor of THIS reading (the ids repeat per reading)."""
+        b = self.b
+        c = self.cave()
+        seed = c.get('seed') or 0
+        key = ('cave', map_id, seed)
+        if key not in b.grids:
+            args = ['node', str(HERE / 'autoplay_grid.mjs'), map_id, f'--cave={seed}', '--vault=' + ','.join(c.get('vault') or [])]
+            r = subprocess.run(args, capture_output=True, text=True, timeout=60, cwd=str(NEXT))
+            if r.returncode != 0:
+                raise Fail(f'grid {map_id} (seed {seed}): {r.stderr[-400:]}')
+            g = json.loads(r.stdout)
+            g['by_id'] = {e['id']: e for e in g['events']}
+            b.grids[key] = g
+        b.gated[map_id] = []
+        b.grids[(map_id, ())] = b.grids[key]       # what Bot.grid() looks up for this map from now on
+        return b.grids[key]
+
+    def on_cave_map(self):
+        f = self.b.settle()
+        if f['map'].startswith('cave_'):
+            self.cave_grid(f['map'])
+        return f
+
+    # ---------------------------------------------------------------- the way in
+    def wait_pack(self):
+        b = self.b
+        b.page.wait_for_function('window.LQ_PACKS && LQ_PACKS.packReady("cave")', timeout=60000, polling=100)
+        b.page.wait_for_function('LQ_DEBUG.commands().includes("caveBegin")', timeout=20000, polling=100)
+
+    def new_game(self):
+        b = self.b
+        self.wait_pack()
+        b.js(f'LQ_DEBUG.newGameEp2({json.dumps(b.hero)}, {{ scene: "none", seed: {int(self.seed)} }})')
+        if not b.flag('ep1_complete'):
+            raise Fail('newGameEp2 did not set ep1_complete')
+        # the library door's arrival (library.js start): the bot walks to the trapdoor from there
+        b.js('LQ_DEBUG.warp("library", 10, 13, "up")')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'field'", timeout=30000, polling=30)
+        b.settle()
+        b.mark('cave_library')
+
+    def to_hall(self):
+        b = self.b
+        f = b.settle()
+        if f['map'] == 'cave_landing0':
+            return f
+        if f['map'] != 'library':
+            raise Fail(f'expected the library, on {f["map"]}')
+        door = next((e for e in f['ents'] if e['id'] == 'stacks_trapdoor'), None)
+        if not door:
+            raise Fail(f'no trapdoor stair in the library ({[e["id"] for e in f["ents"] if "stacks" in e["id"]]})')
+        b.shot('cave_trapdoor')
+        # the trapdoor is on the mezzanine: up the library's inner stair (a same-map stair at 12,2 -> 15,2), then onto it
+        if (f['leader']['x'], f['leader']['y']) != (15, 2) and not (f['leader']['x'] >= 15 and f['leader']['y'] <= 9):
+            b.through('library_up', label='the mezzanine stair')
+        b.walk_to([tuple(door['cells'][0])], label='the trapdoor')
+        b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_landing0' && !f.loading; })()", timeout=30000, polling=30)
+        f = self.on_cave_map()
+        b.shot('cave_hall')
+        return f
+
+    def begin(self):
+        """Hollis's desk: the first talk (rules, offer) or the offer; Begin, Go down. Lands on B1 of a new reading."""
+        b = self.b
+        f = self.to_hall()
+        self.cave_grid('cave_landing0')
+        before = self.cave()
+        desk = next((e for e in f['ents'] if e['id'] in ('stacks_desk', 'archivist_fallback')), None)
+        if desk:
+            b.interact(ent_id=desk['id'], prefer=['Begin', 'Go down'], label='Hollis')
+        elif b.actor(f, 'hollis'):
+            b.interact(actor_id='hollis', prefer=['Begin', 'Go down'], label='Hollis')
+        else:
+            raise Fail('no Hollis and no desk in the hall')
+        b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_b1' && !f.loading; })()", timeout=60000, polling=50)
+        f = self.on_cave_map()
+        c = self.cave()
+        if not c.get('inRun') or c.get('floor') != 1:
+            raise Fail(f'the reading did not start ({c})')
+        self.reading += 1
+        lv = [m['level'] for m in self.vitals()]
+        if lv != [1, 1, 1]:
+            raise Fail(f'the party is not level 1 on B1 ({lv})')
+        if (b.js('LQ_DEBUG.fieldState().floorTag')) != 'B1':
+            raise Fail('the floor tag does not read B1')
+        self.note(f'reading {self.reading}: seed {c.get("seed")}, vault {c.get("vault")} (record before {before.get("record")})')
+        b.mark(f'cave_r{self.reading}_b1')
+        return f
+
+    # ---------------------------------------------------------------- upkeep (the real menu)
+    def menu_safe(self, label, fn, *args):
+        """A menu errand that a chasing foe can interrupt (the Menu press lands as a battle starts): settle and try once more,
+        then skip it this time. Only timeouts are caught; anything else is a real failure."""
+        for attempt in range(2):
+            try:
+                return fn(*args)
+            except Exception as e:  # noqa: BLE001  (Playwright's TimeoutError)
+                if 'Timeout' not in type(e).__name__:
+                    raise
+                self.note(f'{label}: the menu did not come up ({type(e).__name__}); {"settle and retry" if attempt == 0 else "skipped"}')
+                for _ in range(3):
+                    try:
+                        self.b.close_menu()
+                        self.b.settle()
+                        break
+                    except Exception:  # noqa: BLE001
+                        self.b.frames(30)
+        return False
+
+    def mira_heals(self, below=0.6, reserve=0.25):
+        """Menu -> Magic -> Mira -> Mend (Mending Rain for two or more) on anyone under `below`, while she keeps `reserve` of her
+        MP: the descent simulator's field policy (tools/sim/cave.mjs fieldCare), through the real screens. Returns the casts."""
+        b = self.b
+        vit = self.vitals()
+        mi = next((i for i, v in enumerate(vit) if v['id'] == 'mira'), None)
+        hurt = lambda vs: [i for i, v in enumerate(vs) if 0 < v['hp'] < v['maxHp'] * below]
+        if mi is None or vit[mi]['hp'] <= 0 or not hurt(vit) or vit[mi]['mp'] - 4 < vit[mi]['maxMp'] * reserve:
+            return 0
+        SCR = "(() => { const sc = LQ_ENGINE.scene && LQ_ENGINE.scene.screen; if (!sc || !sc.list) return null; return { ids: sc.list.items.map(i => i.id), dis: sc.list.items.map(i => !!i.disabled), index: sc.list.index, picker: sc.picker ? sc.picker.list.index : null }; })()"
+        b.open_menu()
+        b.menu_command('magic')
+        b.frames(4)
+        b.pick(mi, (b.scene_state()['ss'] or {}).get('member') or 0)
+        b.frames(6)
+        casts = 0
+        for _ in range(8):
+            vit = self.vitals()
+            h = sorted(hurt(vit), key=lambda i: vit[i]['hp'] / max(1, vit[i]['maxHp']))
+            m = vit[mi]
+            if not h or m['hp'] <= 0:
+                break
+            sc = b.js(SCR)
+            if not sc:
+                break
+            want = 'mending_rain' if len(h) >= 2 and 'mending_rain' in sc['ids'] and not sc['dis'][sc['ids'].index('mending_rain')] else 'mend'
+            cost = 10 if want == 'mending_rain' else 4
+            if want not in sc['ids'] or sc['dis'][sc['ids'].index(want)] or m['mp'] - cost < m['maxMp'] * reserve:
+                break
+            if sc['picker'] is not None:
+                b.tap('cancel', 4)                          # back to the list (the picker belongs to the last spell)
+                sc = b.js(SCR) or sc
+            b.pick(sc['ids'].index(want), sc['index'])      # the spell: opens the member picker
+            b.frames(6)
+            sc = b.js(SCR) or {}
+            if sc.get('picker') is None:
+                break
+            b.pick(h[0], sc['picker'])
+            b.frames(12)
+            casts += 1
+        b.close_menu()
+        if casts:
+            print(f'  mend x{casts}', flush=True)
+        return casts
+
+    def care(self):
+        """Between fights: a Feather for a fallen member, Mira's Mend above a quarter of her MP for anyone under 60%, a Potion
+        for anyone still under 45%, an Ether for Mira under 30% (the descent simulator's field policy, by the real menu)."""
+        b = self.b
+        for _ in range(3):
+            vit = self.vitals()
+            down = [i for i, v in enumerate(vit) if v['hp'] <= 0]
+            if down and b.items().get('phoenix_feather', 0) > 0:
+                if not self.menu_safe('feather', b.menu_use_item, 'phoenix_feather', down[0]):
+                    break
+                continue
+            break
+        self.menu_safe('mend', self.mira_heals)
+        for _ in range(4):
+            vit = self.vitals()
+            down = [i for i, v in enumerate(vit) if v['hp'] <= 0]
+            items = b.items()
+            if down and items.get('phoenix_feather', 0) > 0:
+                if not self.menu_safe('feather', b.menu_use_item, 'phoenix_feather', down[0]):
+                    break
+                continue
+            rich = items.get('potion', 0) + items.get('hi_potion', 0) > 6            # a full bag tops up sooner (the sim's FIELD)
+            low = sorted([(v['hp'] / max(1, v['maxHp']), i, v) for i, v in enumerate(vit) if 0 < v['hp'] < v['maxHp'] * (0.7 if rich else 0.45)])
+            if low:
+                _, i, v = low[0]
+                pid = 'hi_potion' if v['maxHp'] - v['hp'] > 150 and items.get('hi_potion', 0) > 0 else 'potion' if items.get('potion', 0) > 0 else 'hi_potion' if items.get('hi_potion', 0) > 0 else None
+                if pid and self.menu_safe('potion', b.menu_use_item, pid, i):
+                    continue
+            break
+        # an Ether for Mira only (her MP is the party's healing; the hero's and Bram's techs can wait), as the simulator does
+        vit = self.vitals()
+        mi = next((i for i, v in enumerate(vit) if v['id'] == 'mira'), None)
+        items = b.items()
+        if mi is not None and vit[mi]['hp'] > 0 and vit[mi]['mp'] < vit[mi]['maxMp'] * 0.3:
+            eid = 'hi_ether' if vit[mi]['maxMp'] - vit[mi]['mp'] > 30 and items.get('hi_ether', 0) > 0 else 'ether' if items.get('ether', 0) > 0 else 'hi_ether' if items.get('hi_ether', 0) > 0 else None
+            if eid:
+                self.menu_safe('ether', b.menu_use_item, eid, mi)
+
+    # ---------------------------------------------------------------- one floor
+    def path_len(self, f, start, goals):
+        passable, ecells = self.b.model(f, fight=True)
+        p = self.b.bfs(start, [tuple(g) for g in goals], passable, stop_at_enemy=ecells)
+        return None if p is None else len(p)
+
+    def fight_all(self, label):
+        """Every reachable visible foe on the floor (Bot.hunt's walk into each, care after every fight)."""
+        b = self.b
+        fights = 0
+        for _ in range(16):
+            f = b.settle()
+            foes = [a for a in f['actors'] if a['kind'] == 'enemy' and not a['fighting']]
+            if not foes:
+                break
+            before = len(b.battles)
+            b.hunt(limit=1, label=label)
+            f = b.settle()
+            if len(b.battles) > before:
+                fights += len(b.battles) - before
+                if not self.cave().get('inRun'):
+                    return fights                  # a wipe: the Stacks closed
+                self.care()
+            elif not [a for a in f['actors'] if a['kind'] == 'enemy' and not a['fighting']]:
+                break
+            else:
+                # a foe nobody can reach (behind another, on a ledge): move on after one more look
+                passable, ecells = b.model(f, fight=True)
+                L = (f['leader']['x'], f['leader']['y'])
+                if all(b.bfs(L, [(a['x'], a['y'])], passable, stop_at_enemy=ecells) is None for a in f['actors'] if a['kind'] == 'enemy'):
+                    break
+        return fights
+
+    def open_chests(self):
+        """The blue chest always, red ones when the detour is cheap (the stairs room is where the bot is going)."""
+        b = self.b
+        opened = 0
+        for _ in range(6):
+            f = b.settle()
+            if not self.cave().get('inRun'):
+                return opened
+            chests = [c for c in (b.call('caveChests') or []) if c['state'] != 'open']
+            if not chests:
+                break
+            st = self.stairs()
+            sx, sy = st['stairs']
+            L = (f['leader']['x'], f['leader']['y'])
+            direct = self.path_len(f, L, [(sx, sy)]) or 0
+            best = None
+            for c in chests:
+                to_c = self.path_len(f, L, [tuple(c['front'])])
+                if to_c is None:
+                    continue
+                on = self.path_len(f, tuple(c['front']), [(sx, sy)]) or 0
+                detour = to_c + on - direct
+                if c['tier'] == 'blue' or detour <= self.cheap or st.get('landing'):
+                    if best is None or detour < best[0]:
+                        best = (detour, c)
+            if not best:
+                break
+            c = best[1]
+            fought = len(b.battles)
+            try:
+                b.interact(ent_id=c['id'], label=f'chest {c["id"]}')
+            except Fail as e:
+                self.note(f'chest {c["id"]} skipped: {e}')
+                break
+            opened += 1
+            if len(b.battles) > fought and self.cave().get('inRun'):
+                self.care()                     # a guard or a chaser caught the party on the way: upkeep before the next room
+            if c['tier'] == 'blue':
+                self.note(f'blue chest on B{self.cave().get("floor")}: blues {self.cave().get("blues")}')
+        return opened
+
+    def descend(self):
+        """Clear the floor the way the bot plays it, then the stairs. Returns the new floor (0 after a wipe)."""
+        b = self.b
+        c = self.cave()
+        floor = c['floor']
+        t0 = (b.game() or {}).get('playtime', 0)
+        w0 = time.time()
+        f = self.on_cave_map()
+        # the foes the floor places against the foes standing on arrival (a reading after another one in the same session
+        # finds the earlier reading's defeated foe ids still marked gone by the field: reported, not worked around)
+        placed = sum(1 for e in self.cave_grid(f['map'])['events'] if e.get('type') == 'enemy')
+        present = sum(1 for a in f['actors'] if a['kind'] == 'enemy')
+        if present < placed:
+            self.note(f'B{floor} (reading {self.reading}): {placed} foes placed, {present} on arrival')
+        fights = self.fight_all(f'B{floor}')
+        chests = 0
+        if self.cave().get('inRun'):
+            chests = self.open_chests()
+            fights += self.fight_all(f'B{floor} again')        # a chest's guard, a wanderer that came back
+        if not self.cave().get('inRun'):
+            self.wipe(floor)
+            return 0
+        if floor % 3 == 0 or chests:
+            self.menu_safe('optimize', b.menu_optimize_all)
+        self.care()
+        vit = self.vitals()
+        row = {'reading': self.reading, 'floor': floor, 'fights': fights, 'chests': chests, 'foes_placed': placed, 'foes_present': present,
+               'level': round(sum(v['level'] for v in vit) / len(vit), 1),
+               'hp': round(sum(max(0, v['hp']) for v in vit) / max(1, sum(v['maxHp'] for v in vit)), 2)}
+        if floor >= 100:
+            self.floors.append({**row, 'game_s': 0, 'wall_s': round(time.time() - w0, 1)})
+            return floor
+        st = self.stairs()
+        sx, sy = st['stairs']
+        f = b.settle()
+        door = next((e for e in f['ents'] if e['type'] == 'door' and e.get('to') and str(e['to'][0]).startswith('cave_b')), None)
+        cell = tuple(door['cells'][0]) if door else (sx, sy - 1)
+        for attempt in range(4):
+            try:
+                b.walk_to([cell], fight=True, label=f'B{floor} stairs')
+            except Fail as e:
+                self.note(f'B{floor} stairs walk: {e}')
+                self.fight_all(f'B{floor} stairs clear')
+            if self.cave().get('floor') != floor or not self.cave().get('inRun'):
+                break
+            f = b.settle()
+        if not self.cave().get('inRun'):
+            self.wipe(floor)
+            return 0
+        if self.cave().get('floor') == floor:
+            raise Fail(f'B{floor}: could not take the stairs at {cell}')
+        b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && !f.loading && !f.pendingWarp; })()", timeout=30000, polling=30)
+        self.on_cave_map()
+        self.fight_count += fights
+        row.update({'game_s': round((b.game() or {}).get('playtime', 0) - t0, 1), 'wall_s': round(time.time() - w0, 1)})
+        self.floors.append(row)
+        nf = self.cave().get('floor')
+        print(f'  B{floor} -> B{nf}: {fights} fights, {chests} chests, Lv {row["level"]}, HP {int(row["hp"] * 100)}%, {row["game_s"] / 60:.1f} game min, {row["wall_s"]:.0f} s wall', flush=True)
+        if nf % 10 == 0:
+            b.shot(f'cave_b{nf}_landing')
+        return nf
+
+    def wipe(self, floor):
+        b = self.b
+        b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_landing0' && !f.loading; })()", timeout=90000, polling=50)
+        b.settle()
+        c = self.cave()
+        last = c.get('lastExit') or {}
+        if last.get('how') != 'die':
+            raise Fail(f'the Stacks closed but lastExit is {last}')
+        self.wipes.append({'reading': self.reading, 'floor': floor, 'lost': last.get('lost')})
+        self.note(f'wipe on B{floor} (reading {self.reading}); lost {last.get("lost")}')
+        b.shot(f'cave_wipe_b{floor}')
+
+    # ---------------------------------------------------------------- the way out
+    def bank(self):
+        """Items -> Key items -> the Keeper's Bookmark -> Close it."""
+        b = self.b
+        c = self.cave()
+        floor = c['floor']
+        b.open_menu()
+        b.menu_command('items')
+        b.frames(6)
+        b.tap('pageR', 6)
+        ids = b.js("(() => { const s = LQ_ENGINE.scene; return s.screen && s.screen.list ? s.screen.list.items.map(i => i.id) : []; })()")
+        if 'keepers_bookmark' not in ids:
+            b.close_menu()
+            raise Fail(f'no Bookmark row on the key items tab ({ids})')
+        ss = (b.scene_state()['ss'] or {}).get('screen') or {}
+        b.shot('cave_bookmark')
+        b.grid_pick(ids.index('keepers_bookmark'), ss.get('index') or 0, columns=2)
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'dialog'", timeout=15000, polling=30)     # "Close the book here?"
+        for _ in range(400):
+            b.handle(prefer=['Close it'])
+            if b.js("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_landing0' && !f.loading; })()"):
+                break
+        b.settle(prefer=['Close it'])
+        c = self.cave()
+        last = c.get('lastExit') or {}
+        if c.get('inRun') or last.get('how') != 'bank':
+            raise Fail(f'the Bookmark did not bank the reading ({c})')
+        lv = [m['level'] for m in self.vitals()]
+        self.banked = {'reading': self.reading, 'floor': floor, 'blues': last.get('blues'), 'vault': c.get('vault'), 'levels': lv}
+        self.note(f'banked on B{floor}: blues {last.get("blues")}, vault {c.get("vault")}, party back at Lv {lv}')
+        b.shot('cave_banked')
+
+    def second_reading(self):
+        """Re-enter with the vault: Optimize equips it on B1; B`again` with a vault unique worn."""
+        b = self.b
+        vault = self.cave().get('vault') or []
+        self.begin()
+        self.menu_safe('optimize', b.menu_optimize_all)
+        worn = self.worn_uniques(vault)
+        self.note(f'second reading: vault {vault}, worn on B1 {worn}')
+        while self.cave().get('floor', 0) < self.again:
+            if not self.descend():
+                break
+        c = self.cave()
+        worn2 = self.worn_uniques(vault)
+        self.second = {'vault': vault, 'wornB1': worn, 'floor': c.get('floor'), 'worn': worn2, 'inRun': c.get('inRun')}
+        b.shot(f'cave_second_b{c.get("floor")}')
+        if vault and not worn2:
+            raise Fail(f'B{c.get("floor")} of the second reading with no vault unique worn (vault {vault})')
+
+    def worn_uniques(self, vault):
+        return self.b.js(f"(() => {{ const v = {json.dumps(vault)}; const out = []; for (const m of LQ_ENGINE.game.party) for (const [k, it] of Object.entries(m.equip)) {{ const id = it && (typeof it === 'string' ? it : it.base); if (id && v.includes(id)) out.push(m.id + ':' + id); }} return out; }})()")
+
+    # ---------------------------------------------------------------- resume
+    def resume_check(self, at=7):
+        """B`at`, then a new tab on the same storage, the title's Resume row, B`at` again at its arrival."""
+        b = self.b
+        while self.cave().get('floor', 0) < at:
+            if not self.descend():
+                raise Fail('a wipe before the resume floor')
+        st = self.stairs()
+        arrival = st.get('arrival')
+        seed = self.cave().get('seed')
+        meta = b.js('LQ_ENGINE.save.loadEnvelope("cave").meta.cave')
+        if not meta or meta.get('floor') != at:
+            raise Fail(f'the suspend save does not hold B{at} ({meta})')
+        old = b.page
+        page = b.ctx.new_page()           # no init script on this tab: the storage (the suspend save) is kept, as after closing the game
+        page.on('console', b._on_console)
+        page.on('pageerror', lambda e: b.errors.append(f'pageerror: {e}'))
+        page.goto(f'http://127.0.0.1:{b.server.server_port}/next/index.html?debug=1&fps=0{b.query}', wait_until='load')
+        old.close()
+        b.page = page
+        b.page.wait_for_function('window.LQ_DEBUG && true', timeout=30000)
+        b.page.evaluate('Promise.race([LQ_DEBUG.ready(), new Promise((_, no) => setTimeout(() => no(new Error("ready timeout")), 30000))])')
+        b.js(f'LQ_DEBUG.setSpeed({b.speed})')
+        b.js("LQ_DEBUG.settings({ textSpeed: 4, battleSpeed: 2, autoBattle: true })")
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title'", timeout=30000, polling=50)
+        b.frames(20)
+        ss = b.scene_state()['ss'] or {}
+        items = ss.get('items') or []
+        b.shot('cave_title_resume')
+        if 'stacks' not in items:
+            raise Fail(f'the title offers no Resume row ({items})')
+        label = b.js("(() => { const s = LQ_ENGINE.scene; const it = s.list ? s.list.items.find(i => i.id === 'stacks') : null; return it ? it.label : null; })()")
+        b.pick(items.index('stacks'), ss.get('index') or 0)
+        b.page.wait_for_function(f"(() => {{ const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_b{at}' && !f.loading; }})()", timeout=60000, polling=50)
+        f = self.on_cave_map()
+        c = self.cave()
+        here = [f['leader']['x'], f['leader']['y']]
+        tag = b.js('LQ_DEBUG.fieldState().floorTag')
+        ok = c.get('inRun') and c.get('floor') == at and c.get('seed') == seed and here == arrival and tag == f'B{at}'
+        self.resumed = {'label': label, 'floor': c.get('floor'), 'seed': c.get('seed'), 'at': here, 'arrival': arrival, 'tag': tag, 'ok': bool(ok)}
+        self.note(f'resume: {self.resumed}')
+        b.shot(f'cave_resumed_b{at}')
+        if not ok:
+            raise Fail(f'the resume did not land on B{at} at its arrival ({self.resumed})')
+        b.mark(f'cave_resumed_b{at}')
+
+    # ---------------------------------------------------------------- the run
+    def run(self):
+        b = self.b
+        self.new_game()
+        self.begin()
+        if self.resume_test:
+            self.resume_check(7)
+            return
+        while True:
+            c = self.cave()
+            if not c.get('inRun'):
+                if self.reading >= self.readings:
+                    self.note(f'{self.readings} readings without reaching B{self.target}')
+                    break
+                if self.wipes and self.wipes[-1]['reading'] == self.reading:
+                    # the field remembers the last reading's defeated foe ids per map id (field.js dungeonGone), so a reading
+                    # begun on the same field finds the floors it cleared empty: the bot starts a fresh field in the hall, as a
+                    # player who quits and continues would (reported as a bug; the vault reading after a bank keeps the field)
+                    hall = self.cave_grid('cave_landing0')
+                    ps = (hall.get('marks') or {}).get('party_stop') or [10, 10]
+                    # engine.reset makes a new field scene (LQ_DEBUG.warp would reuse the live one through warpTo)
+                    b.js(f'LQ_ENGINE.reset("field", {{ map: "cave_landing0", x: {int(ps[0])}, y: {int(ps[1])}, dir: "up" }})')
+                    b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_landing0' && !f.loading; })()", timeout=30000, polling=50)
+                    self.note('a fresh field in the hall after the wipe (the dungeonGone carry-over)')
+                self.begin()
+                continue
+            floor = c['floor']
+            if floor >= self.target and c.get('bookmarks', 0) > 0:
+                try:
+                    self.bank()
+                except Exception as e:  # noqa: BLE001  (a foe's touch can take the Menu press: settle, then once more)
+                    if 'Timeout' not in type(e).__name__ or not self.cave().get('inRun'):
+                        raise
+                    self.note(f'bank: the menu did not come up ({type(e).__name__}); once more')
+                    b.close_menu()
+                    b.settle()
+                    self.bank()
+                break
+            if floor >= 100:
+                self.note('B100 reached')
+                break
+            self.descend()
+            b.check_errors()
+        if self.banked:
+            self.second_reading()
+
+    def report(self):
+        rows = [r for r in self.floors if r.get('game_s')]
+        return {
+            'seed': self.seed, 'target': self.target, 'readings': self.reading, 'floors': len(rows), 'fights': self.fight_count,
+            'wipes': self.wipes, 'banked': self.banked, 'second': self.second, 'resumed': getattr(self, 'resumed', None),
+            'deepest': max([r['floor'] for r in self.floors] + [0]),
+            'game_min_per_floor': round(sum(r['game_s'] for r in rows) / max(1, len(rows)) / 60, 2),
+            'wall_s_per_floor': round(sum(r['wall_s'] for r in rows) / max(1, len(rows)), 1),
+            'per_floor': self.floors, 'events': self.events,
+        }
+
+
 # ================================================================================================ wrong order
 def wrong_order(bot):
     """For every prefix of the main flags: a fresh game with those flags, every map, every NPC and sign."""
@@ -2872,7 +3420,16 @@ def main(argv):
                     help='Episode 1: regular = the main path (unchanged bot); complete = the completionist route through the expansion (implies --x1)')
     ap.add_argument('--start', default='save', choices=['save', 'new'],
                     help='Episode 2: load the Episode 1 credits save (save) or use the title\'s Episode 2 entry (new)')
+    ap.add_argument('--cave', type=int, nargs='?', const=30, default=None,
+                    help='the Deep Stacks (C3-sim-bot): descend to floor N (default 30), bank, re-enter to B5 with a vault unique worn')
+    ap.add_argument('--cave-resume', action='store_true', help='the Deep Stacks: B7, a new tab, the title\'s Resume row, B7 again')
+    ap.add_argument('--seeds', type=int, default=10, help='--cave: how many game seeds (from --seed0)')
+    ap.add_argument('--seed0', type=int, default=1, help='--cave: the first game seed')
+    ap.add_argument('--jobs', type=int, default=1, help='--cave: seeds run in this many parallel child processes')
+    ap.add_argument('--cave-chests', default='all', choices=['all', 'cheap'], help='--cave: every reachable chest (the policy of the simulator) or only cheap detours')
     a = ap.parse_args(argv)
+    if a.cave is not None or a.cave_resume:
+        return cave_main(a)
     shots.watchdog(5 * 3600 if a.route == 'complete' else 3 * 3600)
     if a.route == 'complete':
         a.x1 = True
@@ -2959,6 +3516,102 @@ def main(argv):
             print('  ', w[:200])
     print(f'{status} {detail}')
     return 0 if status == 'ok' else 1
+
+
+def cave_main(a):
+    """--cave N / --cave-resume: one seed in this process, or every seed in child processes (--jobs), then the summary."""
+    CAVE_OUT.mkdir(parents=True, exist_ok=True)
+    seeds = [a.seed0] if a.cave_resume else list(range(a.seed0, a.seed0 + max(1, a.seeds)))
+    prof = '_cheap' if a.cave_chests == 'cheap' else ''
+    if len(seeds) > 1:
+        import concurrent.futures
+
+        def child(seed):
+            log = CAVE_OUT / f'bot_{a.device}{prof}_s{seed}.log'
+            args = [sys.executable, str(pathlib.Path(__file__).resolve()), '--cave', str(a.cave), '--seeds', '1', '--seed0', str(seed),
+                    '--device', a.device, '--speed', str(a.speed), '--name', a.name, '--cave-chests', a.cave_chests]
+            with open(log, 'w', encoding='utf-8') as fh:
+                try:
+                    r = subprocess.run(args, stdout=fh, stderr=subprocess.STDOUT, timeout=4 * 3600, cwd=str(NEXT))
+                    return seed, r.returncode
+                except subprocess.TimeoutExpired:
+                    return seed, 'timeout'
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, a.jobs)) as ex:
+            codes = dict(ex.map(child, seeds))
+        return cave_summary(a, seeds, codes)
+    seed = seeds[0]
+    shots.watchdog(3 * 3600)
+    tag = f'-cave-resume-s{seed}' if a.cave_resume else f'-cave{prof}-s{seed}'
+    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, tag=tag, query='&cave=1')
+    route = CaveRoute(bot, target=a.cave or 30, seed=seed, resume=a.cave_resume, chests=a.cave_chests)
+    status, detail = 'ok', ''
+    rep = {}
+    try:
+        bot.open()
+        route.run()
+        bot.check_errors()
+    except Fail as e:
+        status, detail = 'FAIL', str(e)
+        try:
+            bot.shot('fail')
+        except Exception:
+            pass
+    except Exception as e:  # crash: still write the report
+        status, detail = 'CRASH', f'{type(e).__name__}: {e}'
+        import traceback
+        traceback.print_exc()
+        try:
+            bot.shot('crash')
+        except Exception:
+            pass
+    finally:
+        try:
+            eng = bot.js('LQ_DEBUG.errors().map(e => e.msg)') or []
+        except Exception:
+            eng = []
+        rep = {'device': a.device, 'status': status, 'detail': detail, 'speed': a.speed, **route.report(),
+               'softlocks': 1 if ('no progress' in detail or 'settle timed out' in detail) else 0,
+               'errors': bot.errors + [f'engine: {m}' for m in eng], 'warnings': sorted(set(bot.warnings))[:40],
+               'battles': bot.battles, 'timing': bot.timing, 'wall_s': round(time.time() - bot.t0, 1)}
+        name = f'bot_{a.device}_resume.json' if a.cave_resume else f'bot_{a.device}{prof}_s{seed}.json'
+        (CAVE_OUT / name).write_text(json.dumps(rep, indent=1), encoding='utf-8')
+        bot.close()
+    short = {k: rep.get(k) for k in ('device', 'seed', 'status', 'detail', 'floors', 'fights', 'deepest', 'readings', 'game_min_per_floor', 'wall_s_per_floor', 'softlocks')}
+    short.update({'wipes': len(rep.get('wipes') or []), 'errors': len(rep.get('errors') or []), 'banked': (rep.get('banked') or {}).get('floor'),
+                  'second': rep.get('second'), 'resumed': rep.get('resumed')})
+    print('CAVE_BOT: ' + json.dumps(short), flush=True)
+    return 0 if status == 'ok' else 1
+
+
+def cave_summary(a, seeds, codes):
+    """Merge the seeds' reports into qa/cave/out/bot_<device>_summary.json and .md."""
+    prof = '_cheap' if getattr(a, 'cave_chests', 'all') == 'cheap' else ''
+    reps = []
+    for s in seeds:
+        f = CAVE_OUT / f'bot_{a.device}{prof}_s{s}.json'
+        reps.append(json.loads(f.read_text(encoding='utf-8')) if f.exists() else {'seed': s, 'status': f'no report ({codes.get(s)})'})
+    ok = [r for r in reps if r.get('status') == 'ok']
+    floors = sum(r.get('floors', 0) for r in reps)
+
+    def row(r):
+        banked = r.get('banked') or {}
+        second = r.get('second') or {}
+        return (f'| {r.get("seed")} | {r.get("status")} | {r.get("deepest", 0)} | {r.get("floors", 0)} | {r.get("fights", 0)} | {len(r.get("wipes") or [])} | '
+                f'{banked.get("floor", "-")} | {", ".join(banked.get("blues") or []) or "-"} | {"; ".join(second.get("worn") or []) or "-"} | '
+                f'{r.get("game_min_per_floor", 0)} | {r.get("wall_s_per_floor", 0)} | {len(r.get("errors") or [])} | {r.get("softlocks", 0)} |')
+    lines = [f'# Deep Stacks bot ({a.device}, --cave {a.cave}, chests {getattr(a, "cave_chests", "all")}, seeds {seeds[0]} to {seeds[-1]})', '',
+             'Written by `python qa/autoplay.py --cave` (C3-sim-bot). Game minutes are engine time (text instant, battles at 2x).', '',
+             '| seed | status | deepest | floors | fights | wipes | banked on | blues kept | worn on the second reading | game min / floor | wall s / floor | console errors | softlocks |',
+             '|---|---|---|---|---|---|---|---|---|---|---|---|---|']
+    lines += [row(r) for r in reps]
+    lines += ['', f'{len(ok)} of {len(reps)} seeds ok; {floors} floors; {sum(r.get("fights", 0) for r in reps)} fights; '
+              f'{sum(len(r.get("wipes") or []) for r in reps)} wipes; {sum(len(r.get("errors") or []) for r in reps)} console errors; '
+              f'{sum(r.get("softlocks", 0) for r in reps)} softlocks.', '']
+    md = '\n'.join(lines)
+    (CAVE_OUT / f'bot_{a.device}{prof}_summary.md').write_text(md, encoding='utf-8')
+    (CAVE_OUT / f'bot_{a.device}{prof}_summary.json').write_text(json.dumps(reps, indent=1), encoding='utf-8')
+    print(md)
+    return 0 if len(ok) == len(reps) else 1
 
 
 if __name__ == '__main__':

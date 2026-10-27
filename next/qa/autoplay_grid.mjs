@@ -4,6 +4,9 @@
 //   node qa/autoplay_grid.mjs <mapId>                      JSON on stdout (every gated overlay present)
 //   node qa/autoplay_grid.mjs <mapId> --flags=a,b,c        the grid a save holding exactly these flags sees
 //   node qa/autoplay_grid.mjs <mapId> --ascii              the grid as text (debugging)
+//   node qa/autoplay_grid.mjs cave_b7 --cave=<runSeed> [--vault=a,b]   a Deep Stacks floor (C3-sim-bot): rebuilt from the
+//                                                          reading's seed and the vault at its start (world.js buildFloor, the
+//                                                          module the game registers); cave_landing0 / cave_b100 are the pack's maps
 //
 // The bot overlays the live state it reads from the page (actors, opened gates, pushed blocks, revealed
 // ink, lit glass bridges) on top of this static model before it pathfinds. `gated` lists the flags the
@@ -15,7 +18,17 @@ import { loadDb, loadMap, buildGrid, withFlags } from '../tools/maps/mapcheck.mj
 const id = process.argv[2];
 if (!id) { console.error('usage: node qa/autoplay_grid.mjs <mapId> [--flags=a,b] [--ascii]'); process.exit(2); }
 const db = await loadDb();
-const map = await loadMap(id);
+const caveArg = process.argv.find((a) => a.startsWith('--cave='));
+let map;
+if (caveArg) {
+  const seed = Number(caveArg.slice('--cave='.length)) >>> 0;
+  const vaultArg = process.argv.find((a) => a.startsWith('--vault='));
+  const vault = vaultArg ? vaultArg.slice('--vault='.length).split(',').filter(Boolean) : [];
+  await (await import('../src/data/cave/index.js')).default();
+  const W = await import('../src/data/cave/world.js');
+  const n = W.floorOfMapId(id);
+  map = n >= 1 && n <= 99 ? W.buildFloor(seed, n, vault) : (await import(`../src/data/cave/maps/${id}.js`)).default;
+} else map = await loadMap(id);
 const gated = new Set();
 for (const o of [...(map.overlays || []), ...(map.overhead || [])]) {
   for (const k of ['if', 'ifNot']) for (const f of [].concat(o[k] || [])) gated.add(f);

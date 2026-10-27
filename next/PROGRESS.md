@@ -372,3 +372,20 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   dusk, while the fight happens in the morning. A daytime stage needs new art and bytes. Say the word if it bothers you.
 - The Deep Stacks balance agent is still running; nothing is published.
 
+## 2026-10-27 (Tue) 8 AM: the Deep Stacks balance is proved, three bugs fixed, agents paused until Wednesday (not published)
+- The balance pass is done and it was needed: as handed over, 94 of 100 readings died before B10, because the Stacks have
+  no rests (Mira's magic points were the only healing and they ran dry) and the first floors lent nothing but Short
+  Swords. Now, on 50 simulated readings through the game's own floors and fights, 2 in 100 die in B1 to B9, 10 in 100 in
+  B10 to B29, 7 in 100 in B30 to B59 and 17 in 100 in B60 to B99, inside the plan's targets with room to spare, and the
+  party arrives at every landing within a level of the plan. The Binder at B100 is beaten by careful play 93 times in
+  100 inside 20 rounds, and never by attack-only play. The larder is the difficulty: a bot that skipped the far chests
+  died twice as often.
+- The bot went down thirty floors on ten readings (plus three on a phone), banked with a Bookmark at B30 every time,
+  came back in wearing its vault finds, and resumed a suspended run on B7. No errors, no stuck screens.
+- Three bugs found by the pass and fixed by me: a second descent in the same sitting found the cleared floors empty
+  (level 1 into B20 with nothing to fight); the Binder kept its first look through all three phases; two floors in about
+  fifty thousand refused to build. All three are fixed and every other floor is unchanged.
+- Usage is at 82 percent of the weekly allowance, so no more agents run until the Wednesday 9 AM reset. The fresh-eyes
+  critic for the Stacks is written and waits for that; after it, one fix pass, the switch on, the full publish check on a
+  quiet machine, and your yes. Nothing is published.
+

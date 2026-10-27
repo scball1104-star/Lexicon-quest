@@ -1,6 +1,6 @@
 // The Deep Stacks (docs/DEEP_STACKS_PLAN.md sections 4, 5, 11): the five bands and their foe pools, the per-floor scaling
 // curve, the deterministic encounter picker, the per-floor encounter registration and the Binder (B100). Pure data and
-// pure helpers over the shared tables; nothing here touches the DOM. Written by C1-data; C3-sim-bot owns the numbers next.
+// pure helpers over the shared tables; nothing here touches the DOM. Written by C1-data; the numbers are C3-sim-bot's (10/27).
 //
 // HOW THE CURVE WORKS (scale(floor) -> { hp, power, speed, expMul, elite })
 //   The pools reuse foes the main game tuned for a known party level (the valley for Lv 2 to 3, the Court for Lv 10 to 13 ...).
@@ -23,17 +23,20 @@
 //   `power` is also capped by the W15 rule (powerCapAt: no ordinary action may fell a full-HP member, Mira being the softest),
 //   and B1 and B2 carry an opening ease (OPENING_EASE). qa/cave/data_foes.test.mjs pins all of it.
 //
-//   The numbers (TUNING kHp 1.25, kPower 1.5, hpRamp -0.45, powerRamp 1.2; EP3_LIVE=false, so bands 4 and 5 are the fallback
-//   court pools with a two-mod elite leader on every group; the pace knots [floor, pace] are [0, 2.03] [9, 2.03] [29, 2.06]
-//   [59, 1.46] [89, 0.74] [99, 0.98], and refit themselves when the Episode 3 pools go live):
+//   The numbers are C3-sim-bot's balance pass (docs/DEEP_STACKS_BALANCE.md has every before and after): TUNING kHp 0.75, kPower
+//   0.85, hpRamp -0.2, powerRamp 2.0; OPENING_EASE B1 0.9 / B2 0.9; EARLY_EASE power from 0.55 on B1 to 1 on B12; BAND_ADJUST per
+//   band below. EP3_LIVE=false, so bands 4 and 5 are the fallback court pools with a two-mod elite leader on every group; the
+//   pace knots [floor, pace] are [0, 2.03] [9, 2.03] [29, 2.06] [59, 1.46] [89, 0.74] [99, 0.98] and refit themselves when the
+//   Episode 3 pools go live (then re-run `node tools/sim/simulate.mjs --cave --check`: the band corrections are tuned to these pools):
 //     floor  party  hp    power  speed  expMul  elite      floor  party  hp    power  speed  expMul  elite
-//     B1     Lv 1   0.56   0.69   0.91   3.05    0         B45    Lv 33  2.89  11.69   2.01   2.62    1
-//     B10    Lv 12  2.82   6.43   1.43   3.05    0         B60    Lv 40  2.78  18.06   2.15   2.16    2
-//     B20    Lv 17  2.43   7.07   1.46   3.08    1         B90    Lv 55  3.57  39.91   3.04   1.15    2
-//     B30    Lv 25  3.58  16.22   1.89   3.06    1         B99    Lv 59  3.49  45.00   3.23   1.48    2
-//   Sim (qa/cave/out/cave_sanity.md, 60 fights a floor, the cave party of qa/cave/data_cave_harness.mjs): careful play wins
-//   100% at every checkpoint in 3.3 to 5.1 rounds losing 14 to 28% HP; attack-only wins 90% on B1, 72% on B10, 27% on B30,
-//   3 to 22% from B60. Regenerate with `node qa/cave/out/cave_sanity.mjs --n 60 --binder`.
+//     B1     Lv 1   0.38   0.30   0.91   3.05    0         B45    Lv 33  2.23  11.69   2.72   2.62    1
+//     B10    Lv 12  1.74   3.57   1.43   3.05    0         B60    Lv 40  1.91  15.72   3.34   2.16    2
+//     B20    Lv 17  1.53   4.51   1.46   3.08    1         B90    Lv 55  2.52  39.91   3.40   1.15    2
+//     B30    Lv 25  2.57  10.80   1.89   3.06    1         B99    Lv 59  2.59  45.00   3.62   1.48    2
+//   The proof is the descent (tools/sim/cave.mjs, 50 seeds from B1 with no rests, the game's own floors, fights, chests and equip
+//   prompt): death rates 2% B1-B9, 10% B10-B29, 7% B30-B59, 17% B60-B99 (targets under 5, 15, 30, 45), arrival Lv 11.3 / 24.8 /
+//   40.6 / 56.1 against the plan's 12 / 25 / 40 / 55, the Binder won within 20 rounds 93% of the time. C1-data's checkpoint
+//   harness (qa/cave/data_sanity.test.mjs, full HP each fight) still holds: careful 100%, attack-only 70% at B30, 10 to 20% deep.
 //
 // ELITES: none before B20, one modifier B20 to B49, two from B50 (plan 5.2), rolled deterministically by encounterFor at
 //   ELITE_RATE_DEEP and written into the spec as a fixed `elite: { mods, index }` (encounters.js honours a fixed elite whatever
@@ -41,9 +44,8 @@
 //   live rollEncounter adds no second, random one. Band 5 and the fallback pools carry `elite: 2` on the template: a two-mod
 //   elite leader every time ("every earlier pool's elites").
 //
-// THE hp MULTIPLIER NEEDS ONE SHARED LINE: battle/rules.js makeEnemyUnit applies spec.hp, but encounters.js rollEncounter copies
-//   only power, speed and expMul into the unit spec (checked 2026-10-26: the H1 yard slime's hp 0.55 is dropped the same way).
-//   The integrator adds `if (e.hp) spec.hp = e.hp;` beside the power line there. Until then every cave foe has its base HP.
+// THE hp MULTIPLIER: encounters.js rollEncounter forwards `hp` into the unit spec since the orchestrator's 10/27 fix (the H1
+//   yard slime's line), so battle/rules.js makeEnemyUnit applies it; the descent above is measured with it.
 
 import { ENEMIES, enemy, ELITE_BASE, RANDOM_ELITE_MODS } from '../enemies.js';
 import { ENCOUNTERS, ZONES, enc } from '../encounters.js';
@@ -270,10 +272,39 @@ function toughness(level, A) {
  * B99 over B1 (negative hpRamp: the deep fights hit harder rather than lasting longer). A plain object so a harness can try
  * other values in place (qa/cave/out/cave_sanity.mjs --grid).
  */
-export const TUNING = { kHp: 1.25, kPower: 1.5, hpRamp: -0.45, powerRamp: 1.2, powerCap: 45 };
+export const TUNING = { kHp: 0.75, kPower: 0.85, hpRamp: -0.2, powerRamp: 2.0, powerCap: 45, speedRamp: 0 };
 /** B1 and B2 ease in: three Lv 1 members with empty hands meet the first fight (the yard slime's own 0.55 / 0.5 is the model). */
-export const OPENING_EASE = { 1: 0.8, 2: 0.9 };
-export const SPEED_CAP = 3.5;
+export const OPENING_EASE = { 1: 0.9, 2: 0.9 };
+/**
+ * The first floors ease in further (C3-sim-bot): the Stacks have no rests, so a run that loses a member or its potions early
+ * spirals. hp and power start at these fractions on B1 and rise linearly to full on B`until` (then nothing). Applied on top of
+ * OPENING_EASE. The numbers are the balance pass's (docs/DEEP_STACKS_BALANCE.md).
+ */
+export const EARLY_EASE = { until: 12, hp: 1, power: 0.55 };
+export function earlyEase(floor, k) {
+  const f = clamp(Math.round(floor), 1, FLOORS);
+  const until = EARLY_EASE.until || 1;
+  if (f >= until) return 1;
+  const start = EARLY_EASE[k] ?? 1;
+  return start + (1 - start) * (f - 1) / Math.max(1, until - 1);
+}
+export const SPEED_CAP = 4;
+/**
+ * Per-band corrections on top of the parity curve (C3-sim-bot): the pools differ in how dangerous their kits are at parity
+ * (statuses, multi-hits, elite mods), so the descent's measured danger is evened out band by band. hp, power and speed
+ * multiply the band's floors (a number, or [first floor, last floor] read linearly across the band); power still obeys the
+ * one-shot cap and speed SPEED_CAP. docs/DEEP_STACKS_BALANCE.md has the
+ * before and after of every number here.
+ */
+export const BAND_ADJUST = { 1: { hp: 1, power: 1, speed: 1 }, 2: { hp: [1, 1.2], power: 1, speed: 1 }, 3: { hp: [1.12, 1.15], power: 1, speed: 1.35 },
+  4: { hp: 0.95, power: 1, speed: 1.55 }, 5: { hp: 0.85, power: 1, speed: 1.12 } };
+/** A band's correction on floor f: a number, or [first, last] read linearly from the band's first floor to its last. */
+function bandAdjust(band, key, f) {
+  const v = (BAND_ADJUST[band.k] && BAND_ADJUST[band.k][key]) ?? 1;
+  if (!Array.isArray(v)) return v;
+  const [a, b] = band.floors;
+  return v[0] + (v[1] - v[0]) * clamp((f - a) / Math.max(1, b - a), 0, 1);
+}
 export const EXP_BASE_MUL = 1.5;
 /**
  * The W15 rule, kept by data: at a floor's power no ordinary (non-telegraphed) move of any pool foe, elite or not, may fell a
@@ -390,10 +421,10 @@ export function scale(floor, opts = {}) {
   const cave = caveGear(f), nat = nativeGear(band.nativeLevel);
   const nl = band.nativeLevel;
   const ease = OPENING_EASE[f] || 1;
-  const hp = clamp(ease * TUNING.kHp * (1 + TUNING.hpRamp * d) * offence(level, cave.W, caveMastery(f)) / offence(nl, nat.W, nativeMastery(nl)), 0.3, 30);
-  const parityPower = ease * TUNING.kPower * (1 + TUNING.powerRamp * d) * toughness(level, cave.A) / toughness(nl, nat.A);
+  const hp = clamp(ease * earlyEase(f, 'hp') * bandAdjust(band, 'hp', f) * TUNING.kHp * (1 + TUNING.hpRamp * d) * offence(level, cave.W, caveMastery(f)) / offence(nl, nat.W, nativeMastery(nl)), 0.3, 30);
+  const parityPower = ease * earlyEase(f, 'power') * bandAdjust(band, 'power', f) * TUNING.kPower * (1 + TUNING.powerRamp * d) * toughness(level, cave.A) / toughness(nl, nat.A);
   const power = clamp(Math.min(parityPower, powerCapAt(f, { ...opts, level })), 0.3, TUNING.powerCap);
-  const speed = clamp(partyAt(level).spd / partyAt(nl).spd, 0.8, SPEED_CAP);
+  const speed = clamp(partyAt(level).spd / partyAt(nl).spd * (1 + (TUNING.speedRamp || 0) * d) * bandAdjust(band, 'speed', f), 0.8, SPEED_CAP);
   const expMul = curveFor(bands).expMul[f];
   return { hp: round2(hp), power: round2(power), speed: round2(speed), expMul, elite: eliteModsAt(f) };
 }
@@ -439,17 +470,28 @@ export function floorEncounters(seed, floor, opts = {}) {
   return out;
 }
 
+/** Two cave encounter specs are the same group: foes, scale, elite. */
+const SPEC_KEYS = ['zone', 'leader', 'template', 'floor', 'hp', 'power', 'speed', 'expMul'];
+function sameSpec(a, b) {
+  if (!a || !b || a.enemies.join() !== b.enemies.join()) return false;
+  if (SPEC_KEYS.some((k) => a[k] !== b[k])) return false;
+  return JSON.stringify(a.elite || null) === JSON.stringify(b.elite || null);
+}
 /**
- * Put encounter specs into ENCOUNTERS so the field and battle can start them. Idempotent; clears nothing; an id already
- * registered is kept as it was (the same (seed, floor, index) always yields the same spec). Also makes sure the band zones
- * exist on ZONES. Returns { added: [ids], kept: [ids] }. The integrator calls it when a floor is generated.
+ * Put encounter specs into ENCOUNTERS so the field and battle can start them. Idempotent; clears nothing. An id already
+ * registered with the same spec is kept (the same (seed, floor, index) always yields the same spec). An id holding a cave
+ * spec that DIFFERS is replaced and reported as added: the ids carry no seed (`cave_b23_e4`), so the second reading of a
+ * session (a new seed) must not fight the first reading's groups under the new floor's sprites (C3-sim-bot, 2026-10-27).
+ * Also makes sure the band zones exist on ZONES. Returns { added: [ids], kept: [ids] }. The integrator calls it when a
+ * floor is generated.
  */
 export function registerFloorEncounters(specs) {
   ensureZones();
   const out = { added: [], kept: [] };
   for (const spec of specs || []) {
     if (!spec || !spec.id) continue;
-    if (ENCOUNTERS[spec.id]) { out.kept.push(spec.id); continue; }
+    const have = ENCOUNTERS[spec.id];
+    if (have && (!have.cave || sameSpec(have, spec))) { out.kept.push(spec.id); continue; }
     enc(spec.id, { ...spec, enemies: spec.enemies.slice() });
     out.added.push(spec.id);
   }
@@ -480,7 +522,7 @@ function ensureZones() {
 export const BINDER_ID = 'binder';
 export const BINDER = {
   name: 'The Binder', family: 'devourer', level: 58, size: 'boss', boss: true, ai: 'archivore',
-  hp: 6500, mp: 99, atk: 1500, def: 70, mag: 2200, spr: 60, spd: 46, luk: 12,
+  hp: 4000, mp: 99, atk: 2200, def: 70, mag: 3200, spr: 60, spd: 46, luk: 12,
   shields: 8, weak: ['fire', 'light'], resist: ['ice'],
   statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],
   exp: 6000, gold: 5000, masteryPts: 40,
@@ -489,13 +531,16 @@ export const BINDER = {
     { id: 'the_spine', name: 'The Spine', at: 1.0, weak: ['fire', 'light'], resist: ['ice'], shields: 8,
       text: 'The Binder unfolds from the last shelf. Every name the Stacks kept is stitched along its spine.' },
     { id: 'loose_leaves', name: 'Loose Leaves', at: 0.7, weak: ['fire', 'light', 'thunder'], resist: ['ice'], shields: 9,
-      summon: 2, text: 'The stitching gives. Loose leaves tear free and circle it, and each one still has a name.' },
+      summon: 2, sprite: 'binder_loose', text: 'The stitching gives. Loose leaves tear free and circle it, and each one still has a name.' },
     { id: 'the_last_binding', name: 'The Last Binding', at: 0.3, weak: ['light', 'axe', 'spear'], resist: [], shields: 10,
-      haste: true, text: 'It burns its own pages for thread. What is left is the binding, and it wants yours.' },
+      haste: true, sprite: 'binder_binding', text: 'It burns its own pages for thread. What is left is the binding, and it wants yours.' },
   ],
   drops: [], lootZone: 'cave_band_5', uniqueDrop: 'cave_binders_quill',
-  // C2-sprites-boss: swap frame to 'binder' once the recolour is in an atlas; the Archivore's frame keeps the fight playable.
-  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'archivore' },
+  // C2-sprites-boss's three looks (assets/sprites/cave_bosses_battle, merged into bosses_battle by the pack loader): 'binder'
+  // for The Spine, then each phase's `sprite` (binder_loose, binder_binding), which the battle scene swaps in on the phase event
+  // (animator ev_phase -> swapSprite) once ai.js's archivore enterPhase forwards `sprite: p.sprite || null` as the Nameless
+  // King's script does (C3-sim-bot's report; until then the fight keeps the first look). The field avatar is binder_avatar.
+  sprite: { atlas: 'enemies_battle', field: 'enemies_field', frame: 'binder' },
   flavor: 'It bound every name the Stacks ever kept. It would like yours for the spine.',
 };
 export const BINDER_ENCOUNTER_ID = 'cave_binder';

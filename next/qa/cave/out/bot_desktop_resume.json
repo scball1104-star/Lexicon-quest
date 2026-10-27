@@ -1,0 +1,335 @@
+{
+ "device": "desktop",
+ "status": "ok",
+ "detail": "",
+ "speed": 3.0,
+ "seed": 11,
+ "target": 30,
+ "readings": 1,
+ "floors": 6,
+ "fights": 23,
+ "wipes": [],
+ "banked": null,
+ "second": null,
+ "resumed": {
+  "label": null,
+  "floor": 7,
+  "seed": 3077745192,
+  "at": [
+   23,
+   5
+  ],
+  "arrival": [
+   23,
+   5
+  ],
+  "tag": "B7",
+  "ok": true
+ },
+ "deepest": 6,
+ "game_min_per_floor": 2.31,
+ "wall_s_per_floor": 50.3,
+ "per_floor": [
+  {
+   "reading": 1,
+   "floor": 1,
+   "fights": 4,
+   "chests": 4,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 4.0,
+   "hp": 0.87,
+   "game_s": 139.8,
+   "wall_s": 49.0
+  },
+  {
+   "reading": 1,
+   "floor": 2,
+   "fights": 4,
+   "chests": 4,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 6.0,
+   "hp": 0.64,
+   "game_s": 164.9,
+   "wall_s": 57.7
+  },
+  {
+   "reading": 1,
+   "floor": 3,
+   "fights": 4,
+   "chests": 2,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 7.0,
+   "hp": 0.81,
+   "game_s": 126.4,
+   "wall_s": 45.8
+  },
+  {
+   "reading": 1,
+   "floor": 4,
+   "fights": 4,
+   "chests": 3,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 8.0,
+   "hp": 0.8,
+   "game_s": 111.7,
+   "wall_s": 42.4
+  },
+  {
+   "reading": 1,
+   "floor": 5,
+   "fights": 3,
+   "chests": 2,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 9.0,
+   "hp": 0.89,
+   "game_s": 126.7,
+   "wall_s": 47.6
+  },
+  {
+   "reading": 1,
+   "floor": 6,
+   "fights": 4,
+   "chests": 4,
+   "foes_placed": 4,
+   "foes_present": 4,
+   "level": 9.0,
+   "hp": 0.87,
+   "game_s": 163.9,
+   "wall_s": 59.2
+  }
+ ],
+ "events": [
+  "reading 1: seed 3077745192, vault [] (record before {'floor': 0, 'readings': 0, 'clears': 0, 'time': 0})",
+  "blue chest on B4: blues ['cave_shelf_mail']",
+  "resume: {'label': None, 'floor': 7, 'seed': 3077745192, 'at': [23, 5], 'arrival': [23, 5], 'tag': 'B7', 'ok': True}"
+ ],
+ "softlocks": 0,
+ "errors": [],
+ "warnings": [],
+ "battles": [
+  {
+   "map": "cave_b1",
+   "rounds": 3,
+   "wall_s": 3.5,
+   "enc": "cave_b1_e1",
+   "elite": false,
+   "level": 1
+  },
+  {
+   "map": "cave_b1",
+   "rounds": 2,
+   "wall_s": 2.3,
+   "enc": "cave_b1_e2",
+   "elite": false,
+   "level": 2
+  },
+  {
+   "map": "cave_b1",
+   "rounds": 1,
+   "wall_s": 1.8,
+   "enc": "cave_b1_e2",
+   "elite": false,
+   "level": 3
+  },
+  {
+   "map": "cave_b1",
+   "rounds": 3,
+   "wall_s": 2.9,
+   "enc": "cave_b1_e0",
+   "elite": false,
+   "level": 4
+  },
+  {
+   "map": "cave_b2",
+   "rounds": 3,
+   "wall_s": 3.0,
+   "enc": "cave_b2_e0",
+   "elite": false,
+   "level": 4
+  },
+  {
+   "map": "cave_b2",
+   "rounds": 5,
+   "wall_s": 4.9,
+   "enc": "cave_b2_e2",
+   "elite": false,
+   "level": 5
+  },
+  {
+   "map": "cave_b2",
+   "rounds": 3,
+   "wall_s": 2.9,
+   "enc": "cave_b2_e0",
+   "elite": false,
+   "level": 5
+  },
+  {
+   "map": "cave_b2",
+   "rounds": 4,
+   "wall_s": 4.1,
+   "enc": "cave_b2_e2",
+   "elite": false,
+   "level": 5
+  },
+  {
+   "map": "cave_b3",
+   "rounds": 6,
+   "wall_s": 4.7,
+   "enc": "cave_b3_e1",
+   "elite": false,
+   "level": 6
+  },
+  {
+   "map": "cave_b3",
+   "rounds": 3,
+   "wall_s": 3.4,
+   "enc": "cave_b3_e1",
+   "elite": false,
+   "level": 6
+  },
+  {
+   "map": "cave_b3",
+   "rounds": 3,
+   "wall_s": 3.5,
+   "enc": "cave_b3_e2",
+   "elite": false,
+   "level": 6
+  },
+  {
+   "map": "cave_b3",
+   "rounds": 4,
+   "wall_s": 3.2,
+   "enc": "cave_b3_e0",
+   "elite": false,
+   "level": 7
+  },
+  {
+   "map": "cave_b4",
+   "rounds": 3,
+   "wall_s": 2.7,
+   "enc": "cave_b4_e3",
+   "elite": false,
+   "level": 7
+  },
+  {
+   "map": "cave_b4",
+   "rounds": 3,
+   "wall_s": 2.4,
+   "enc": "cave_b4_e3",
+   "elite": false,
+   "level": 7
+  },
+  {
+   "map": "cave_b4",
+   "rounds": 4,
+   "wall_s": 3.8,
+   "enc": "cave_b4_e2",
+   "elite": false,
+   "level": 7
+  },
+  {
+   "map": "cave_b4",
+   "rounds": 2,
+   "wall_s": 1.9,
+   "enc": "cave_b4_e0",
+   "elite": false,
+   "level": 8
+  },
+  {
+   "map": "cave_b5",
+   "rounds": 4,
+   "wall_s": 4.3,
+   "enc": "cave_b5_e1",
+   "elite": false,
+   "level": 8
+  },
+  {
+   "map": "cave_b5",
+   "rounds": 3,
+   "wall_s": 3.2,
+   "enc": "cave_b5_e1",
+   "elite": false,
+   "level": 8
+  },
+  {
+   "map": "cave_b5",
+   "rounds": 7,
+   "wall_s": 6.7,
+   "enc": "cave_b5_e2",
+   "elite": false,
+   "level": 8
+  },
+  {
+   "map": "cave_b5",
+   "rounds": 4,
+   "wall_s": 3.8,
+   "enc": "cave_b5_e1",
+   "elite": false,
+   "level": 9
+  },
+  {
+   "map": "cave_b6",
+   "rounds": 5,
+   "wall_s": 4.4,
+   "enc": "cave_b6_e2",
+   "elite": false,
+   "level": 9
+  },
+  {
+   "map": "cave_b6",
+   "rounds": 3,
+   "wall_s": 2.6,
+   "enc": "cave_b6_e3",
+   "elite": false,
+   "level": 9
+  },
+  {
+   "map": "cave_b6",
+   "rounds": 3,
+   "wall_s": 2.6,
+   "enc": "cave_b6_e3",
+   "elite": false,
+   "level": 9
+  },
+  {
+   "map": "cave_b6",
+   "rounds": 3,
+   "wall_s": 2.5,
+   "enc": "cave_b6_e3",
+   "elite": false,
+   "level": 9
+  }
+ ],
+ "timing": [
+  {
+   "step": "cave_library",
+   "map": "library",
+   "game_s": 1.0,
+   "wall_s": 1.2,
+   "level": 9,
+   "gold": 900
+  },
+  {
+   "step": "cave_r1_b1",
+   "map": "cave_b1",
+   "game_s": 14.4,
+   "wall_s": 6.1,
+   "level": 1,
+   "gold": 0
+  },
+  {
+   "step": "cave_resumed_b7",
+   "map": "cave_b7",
+   "game_s": 847.6,
+   "wall_s": 309.4,
+   "level": 9,
+   "gold": 1504
+  }
+ ],
+ "wall_s": 309.4
+}

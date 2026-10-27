@@ -556,8 +556,9 @@ function arrivalCell(seed, floor, L) {
 }
 
 /**
- * generateFloor(seed, floor, opts) -> map module. See the header for opts. Throws CaveGenError when no attempt produced a
- * floor whose stair, chests and foes are reachable (the tests prove this never happens on 200 seeds).
+ * generateFloor(seed, floor, opts) -> map module. See the header for opts. Throws CaveGenError only when no layout attempt
+ * and no dressing re-roll produced a floor whose stair, chests and foes are reachable (the tests prove 200 seeds; the sim
+ * scanned 48,600 floors).
  */
 export function generateFloor(seed, floor, opts = {}) {
   if (!Number.isInteger(floor) || floor < 1 || floor > 99) throw new CaveGenError(`floor ${floor} is not 1..99 (B100 is a hand-made map)`);
@@ -568,7 +569,21 @@ export function generateFloor(seed, floor, opts = {}) {
   const next = nextArrival(seed, floor, opts);
   if (floor % 10 === 0) return buildLanding(seed, floor, band, id, name, next, opts);
   const L = layout(seed, floor, band.id);
-  const rng = createRng(hashSeed(`${seed}:${floor}:dress`));
+  // The dressing (stair, chests, foes, decals) is proved at the end; a dressing whose proof fails re-rolls from a derived
+  // sub-seed (C3-sim-bot found 2 refusals in 48,600 floors: seed 318 B18, seed 503 B3). The first dressing's seed is unchanged,
+  // so every floor that built before builds the same; the arrival cell is the layout's and never moves.
+  let lastErr = null;
+  for (let k = 0; k < DRESS_ATTEMPTS; k++) {
+    const rng = createRng(hashSeed(k === 0 ? `${seed}:${floor}:dress` : `${seed}:${floor}:dress:${k}`));
+    try { return dressFloor(seed, floor, band, id, name, next, opts, L, rng); }
+    catch (e) { if (!(e instanceof CaveGenError)) throw e; lastErr = e; }
+  }
+  throw new CaveGenError(`floor ${floor} seed ${seed}: no dressing left the stair, chests and foes reachable (${lastErr && lastErr.message})`);
+}
+const DRESS_ATTEMPTS = 8;
+
+/** One dressing of a laid-out floor on `rng`: rooms' props, the stair, chests, foes, lights, then the proof. Throws CaveGenError. */
+function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
   const [ax, ay] = arrivalCell(seed, floor, L);
   const arrivalRoom = L.arrivalRoom;
   const ground = wallDepth(L.grid.map((r) => r.join('')));

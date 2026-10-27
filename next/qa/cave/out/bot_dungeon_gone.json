@@ -1,0 +1,27 @@
+{
+ "first": {
+  "map": "cave_b1",
+  "placed": 4,
+  "present": 4,
+  "seed": 77,
+  "fixDropped": 0
+ },
+ "second": {
+  "map": "cave_b1",
+  "placed": 4,
+  "present": 4,
+  "seed": 99,
+  "fixDropped": 0
+ },
+ "third_with_fix": {
+  "map": "cave_b1",
+  "placed": 4,
+  "present": 4,
+  "seed": 123,
+  "fixDropped": 1
+ },
+ "bug_reproduced": false,
+ "fix_works": true,
+ "status": "ok",
+ "errors": []
+}

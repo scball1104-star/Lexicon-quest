@@ -417,6 +417,10 @@ export async function beginReading(engine, game, opts = {}) {
   prepareFloor(g, 1);
   const [ax, ay] = arrivalOf(r.seed, 1);
   const field = fieldOf(e);
+  // C3-sim-bot's find: the field remembers defeated foes per map id for its whole life, and every reading reuses cave_bN, so a
+  // second reading in one sitting found its cleared floors empty (no foes, no EXP). A new reading forgets them; resumeReading
+  // resets the field and needs nothing.
+  if (field && field.dungeonGone) for (const k of [...field.dungeonGone.keys()]) if (/^cave_b\d+$/.test(k)) field.dungeonGone.delete(k);
   if (field && opts.warp !== false) await field.warpTo('cave_b1', ax, ay, 'down', 'stairs');
   else if (e && typeof e.reset === 'function' && opts.warp !== false) e.reset('field', { map: 'cave_b1', x: ax, y: ay, dir: 'down' });
   writeSuspend(e, g);
