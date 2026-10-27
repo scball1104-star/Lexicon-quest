@@ -131,5 +131,5 @@ test('the ratchet file: stage, ceilings and caps are consistent', () => {
   assert.deepEqual(Object.keys(ratchet.stages), ['today', 'after-XP-packs', 'after-X1-integrate', 'after-X2-integrate']);
   assert.deepEqual(Object.values(ratchet.stages).map((s) => s.initialMB), [6.30, 6.33, 6.38, 6.45]);
   assert.ok(ratchet.initialMB === ratchet.stages[ratchet.stage].initialMB, 'the ratchet sits at its stage value');
-  assert.ok(ratchet.tapPromptMB <= 2.32);
+  assert.ok(ratchet.tapPromptMB <= 2.34);   // 2.32 after XP-packs; 2.34 since 2026-10-26 for the responsibility arc (precache.test.mjs says why)
 });

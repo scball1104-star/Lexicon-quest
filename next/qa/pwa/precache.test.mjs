@@ -121,7 +121,9 @@ test('load budget: before the tap prompt (wire bytes) and the whole initial down
   assert.equal(ratchet.tapCapMB, 2.5, 'the 2.5 MB tap-prompt cap is not raised (Scott)');
   assert.ok(beforePrompt < ratchet.tapCapMB * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, budget ${ratchet.tapCapMB} MB (about 2 s at 10 Mbps)`);
   assert.ok(beforePrompt < ratchet.tapPromptMB * 1048576, `before the tap prompt: ${mb(beforePrompt)} MB, ratchet ${ratchet.tapPromptMB} MB (qa/pwa/budget_ratchet.json; it never grows after XP-packs)`);
-  assert.ok(ratchet.tapPromptMB <= 2.32, 'the tap-prompt ratchet may not be raised above 2.32 MB');
+  // 2.32 after XP-packs; 2.34 since 2026-10-26 for the responsibility arc (core content: Vows, truth choices), the orchestrator's
+  // call, inside Scott's 2.5 cap. Expansions still pay their own way through packs and never move this line.
+  assert.ok(ratchet.tapPromptMB <= 2.34, 'the tap-prompt ratchet may not be raised above 2.34 MB');
   const stage = ratchet.stages[ratchet.stage];
   assert.ok(stage && ratchet.initialMB <= stage.initialMB, `the ratchet (${ratchet.initialMB} MB) may not exceed its stage '${ratchet.stage}' (${stage && stage.initialMB} MB)`);
   assert.ok(ratchet.initialMB <= ratchet.capMB, 'the ratchet is inside the cap');

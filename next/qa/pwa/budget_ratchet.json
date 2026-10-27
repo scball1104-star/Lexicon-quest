@@ -1,15 +1,34 @@
 {
-  "$comment": "The load-budget ratchet (docs/briefs/XP-packs.md, docs/PWA_PACKS.md). qa/pwa/precache.test.mjs asserts the measured initial download and the before-the-tap-prompt load against 'initialMB' and 'tapPromptMB'. Only the agent named in 'stages' may raise 'initialMB' to that stage's value, and only at that stage; 'capMB' (6.5) and 'tapCapMB' (2.5) are Scott's and never move; 'tapPromptMB' never grows after XP-packs. Measures are the test's wire-size measure (text gzipped, png and audio as is), in MiB.",
+  "$comment": "The load-budget ratchet (docs/briefs/XP-packs.md, docs/PWA_PACKS.md). qa/pwa/precache.test.mjs asserts the measured initial download and the before-the-tap-prompt load against 'initialMB' and 'tapPromptMB'. Only the agent named in 'stages' may raise 'initialMB' to that stage's value, and only at that stage; 'capMB' (6.5) and 'tapCapMB' (2.5) are Scott's and never move; 'tapPromptMB' never grows after XP-packs. Measures are the test's wire-size measure (text gzipped, png and audio as is), in MiB. 2026-10-26 (orchestrator): tapPromptMB moved 2.32 -> 2.34 for the responsibility arc (H3 Vows, H4 truth choices: core-game content, not an expansion); Scott's 2.5 cap untouched; the dev scenes left the precache the same day (12 KB back).",
   "stage": "after-X1-integrate",
   "initialMB": 6.38,
-  "tapPromptMB": 2.32,
+  "tapPromptMB": 2.34,
   "capMB": 6.5,
   "tapCapMB": 2.5,
   "stages": {
-    "today": { "initialMB": 6.30, "who": "measured 2026-10-25" },
-    "after-XP-packs": { "initialMB": 6.33, "who": "XP-packs" },
-    "after-X1-integrate": { "initialMB": 6.38, "who": "X1-integrate (the hub's small edits to five existing maps)" },
-    "after-X2-integrate": { "initialMB": 6.45, "who": "X2-integrate (its six small edits to existing maps)" }
+    "today": {
+      "initialMB": 6.3,
+      "who": "measured 2026-10-25"
+    },
+    "after-XP-packs": {
+      "initialMB": 6.33,
+      "who": "XP-packs"
+    },
+    "after-X1-integrate": {
+      "initialMB": 6.38,
+      "who": "X1-integrate (the hub's small edits to five existing maps)"
+    },
+    "after-X2-integrate": {
+      "initialMB": 6.45,
+      "who": "X2-integrate (its six small edits to existing maps)"
+    }
   },
-  "packCapsMB": { "x1": 1.0, "x2": 0.8 }
+  "packCapsMB": {
+    "x1": 1.0,
+    "x2": 0.8
+  },
+  "tapPromptHistory": {
+    "after-XP-packs": 2.32,
+    "2026-10-26 responsibility arc (orchestrator; core content, Scott's 2.5 cap untouched)": 2.34
+  }
 }
