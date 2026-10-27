@@ -266,3 +266,26 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - That finishes everything queued. I have stopped the check-ins and will not start Episode 3 until you say what
   you want it to be.
 
+
+## 2026-10-26 (Mon): the Wider Valley, first fix pass (not published)
+- Tapping FLEE twice on a phone froze the battle (the command menu stayed open). Fixed with one line; the bug is older than the expansion, so the published game most likely has it too.
+- A save made inside the Barrow's Ewe Chamber no longer reloads you into a sealed room, and the Culvert gate stays open once opened.
+- The west gates now look like a way once the first fight is won (a worn lane and an arrow post), and Mira says so once.
+- Talk now speaks about the map you are standing on, and no longer sends you to Mael's well from the Downs.
+- A save inside the expansion can never load into the developer test town: the game waits a few seconds for the new
+  places, otherwise puts you on the valley road and brings you back when they load.
+- The four puzzle weapons are real prizes now (Reeve's Crook 24 ATK beats the Winged Lance's 22; Orchard Axe 21, Drover's Bow 17,
+  Chime Staff MAG 15). The main route is unchanged.
+- Smaller: the pine over the first cleft bridge cell is gone, the mill wheel and Hesper and the Culvert have the right words,
+  barks wait while a monster is chasing you, a chasing monster walks round a tree, "Five roads" at the five-arm sign.
+- The plan docs now say what the code does: optional fights pay full EXP (a completionist ends about three levels over).
+
+## 2026-10-26 (Mon) evening: your answers on the responsibility and adventure arc
+- Read back from your reply: A no credit or nod to Dr. Peterson anywhere in the game. B the new opening replaces
+  the old one outright, no switch to keep both. C Vows at campfires and a harder mode that opens after you finish
+  the game, like Diablo's higher difficulties. D a true answer costs a little and never locks a route.
+- Started now, one agent at a time: the first five minutes (the bell tower cold open, a shorter wake-up, Oren's
+  choice remembered, a one-slime fight in the bakery lane before you meet Mael). Your saves are not touched; only
+  a New Game sees it. The ledger, the Vows, the post-game mode and the truth choices follow in that order.
+- Nothing is published until you say so. The post-game mode's exact shape comes to you for a read before it is
+  built.

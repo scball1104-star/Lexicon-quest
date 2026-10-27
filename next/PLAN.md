@@ -162,3 +162,12 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 - [ ] Wave 17e: critic-5 -> play-critic-5 (`docs/briefs/E3-review.md`, read-only) -> E3-fixes
 - Decisions for Scott (defaults in EPISODE3_PLAN 13): Garrick as the toll [yes]; grey Bram sprites [yes, shown first];
   quick-start free-slot rule for Episode 3 only [yes]; Episode 4 card wording [placeholder].
+
+## Wave H: Responsibility and adventure arc (decided by Scott 2026-10-26; `docs/RESPONSIBILITY_ARC.md`)
+- [~] H1-opening: cold open "The Thirteenth Toll", shorter wake-up, Oren choice remembered, yard slime fight, autoplay updated (`docs/briefs/H1-opening.md`)
+- [ ] H2-ledger: Ledger of Names scene, title counter, Aim line
+- [ ] H3-vows: Vow table, campfire row, battle and field hooks
+- [ ] H3b-hard-road: post-game mode, shape to Scott first
+- [ ] H4-truth: six to eight Name Truth choices and remembered lines
+- [ ] H5-floor-hooks: floor-ending questions and boss intro lines
+- [ ] H6: critic, play-critic, fixes, publish gate list, Scott's explicit yes
