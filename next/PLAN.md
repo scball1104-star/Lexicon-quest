@@ -184,8 +184,10 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 - [x] C1-state: src/game/cave.js (enter, descend, bank, die, quit, clear, resume, reconcileVault, second_life rise), 35 tests (`docs/briefs/C1-state.md`); 10/27 02:00
   - C1-state calls: spare Bookmarks are run inventory and are lost on exit; clear spends none; reserve members are snapshotted, not reset; suspend slot 'cave' needs SUSPEND_SLOTS in core/save.js (C2-world)
 - [~] C2-world: world.js glue (beginReading, endReading, prepareFloor, resumeReading), trapdoor, chest tiers, Bookmark use, death card and Quit, suspend save, floor tag, props (`docs/briefs/C2-world.md`); launched 10/27 02:10
-- [ ] C2-story-ui: the Archivist (Hollis), scenes, plaques, Journal line, title rows, the plaque screen (`docs/briefs/C2-story-ui.md`); brief written, launches when a slot frees
-- [~] C2-sprites-boss: chest sprites, plaque, trapdoor, the Binder's art, B100 and the entrance hall maps, prefabs and landings for bands three to five (`docs/briefs/C2-sprites-boss.md`); launched 10/27 01:40
+- [~] C2-story-ui: the Archivist (Hollis), scenes, plaques, Journal line, title rows, the plaque screen (`docs/briefs/C2-story-ui.md`)
+- [x] C2-sprites-boss: cave_props (chest_red, chest_blue, plaque, trapdoor), the Binder's three looks on the Archivore kit with every boss frame, binder_avatar field sprite, cave_b100.js and cave_landing0.js with marks, 36 prefabs each for court, ember and forge plus landings (bands345.js); 18 tests (`docs/briefs/C2-sprites-boss.md`); 10/27 02:50
+  - C2-sprites-boss handoffs: foes.js BINDER needs sprite.frame 'binder' and phase sprites 'binder_loose', 'binder_binding' (C3 may set it; foes.js is C3-sim-bot's then); chest tiers red/blue map to chest_red/chest_blue; hall stairs_down must be rewritten from arrivalOf(seed, 1) (placeholder fails mapcheck on purpose); npc hollis at [10,8] and the plaque at [10,4] (C2-story-ui); no timeline head for the Binder (assets/ui not owned, hud falls back); gen.js strews roots down bands 3 to 5 corridors (propose a band corridorDecals field); the builders are standalone, not in build_all.py
+- [~] C2-story-ui launched 10/27 02:55 (weekly usage 68%: from 75% the guard drops to one agent at a time, above 85% none until the Wednesday 9 AM reset)
 - [ ] C3-sim-bot: --cave sim route with death-rate targets, --cave autoplay route, balance pass
 - [ ] C3-critic: fresh-eyes play-critic, Lufia feel, issue list
 - [ ] C4-fixes: the issue list, then the publish gate list, Scott's explicit yes

@@ -1,0 +1,151 @@
+{
+ "image": "cave_props.png",
+ "tile": 16,
+ "notes": "Deep Stacks pack props (C2-sprites-boss). Same shape as props.json: anchor = bottom-centre of the footprint in frame px; frames/frameNames = state alternates (closed/open, plain/glint). `props` is not a loader merge base: read these objects from this atlas (assets.atlas(\"cave_props\").meta.objects) when props.json lacks the id. chest_red and chest_blue are the chest tiers red and blue (DEEP_STACKS_PLAN 9); plaque hangs on a face cell (solid false, the wall carries the collision); trapdoor lies on the library floor under the stairs event (solid false, state 1 = open).",
+ "objects": {
+  "chest_red": {
+   "frame": [
+    36,
+    0,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "frames": [
+    [
+     36,
+     0,
+     16,
+     16
+    ],
+    [
+     54,
+     0,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "chest_red_closed",
+    "chest_red_open"
+   ]
+  },
+  "chest_blue": {
+   "frame": [
+    0,
+    0,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "frames": [
+    [
+     0,
+     0,
+     16,
+     16
+    ],
+    [
+     18,
+     0,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "chest_blue_closed",
+    "chest_blue_open"
+   ]
+  },
+  "plaque": {
+   "frame": [
+    72,
+    0,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    15
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": false,
+   "overheadY": 0,
+   "frames": [
+    [
+     72,
+     0,
+     16,
+     16
+    ],
+    [
+     90,
+     0,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "plaque_0",
+    "plaque_1"
+   ]
+  },
+  "trapdoor": {
+   "frame": [
+    108,
+    0,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    15
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": false,
+   "overheadY": 0,
+   "frames": [
+    [
+     108,
+     0,
+     16,
+     16
+    ],
+    [
+     0,
+     18,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "trapdoor_closed",
+    "trapdoor_open"
+   ]
+  }
+ }
+}

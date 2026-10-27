@@ -1,0 +1,332 @@
+{
+ "image": "cave_bosses_battle.png",
+ "frames": {
+  "binder_loose_die_0": [
+   0,
+   0,
+   147,
+   145
+  ],
+  "binder_die_0": [
+   149,
+   0,
+   147,
+   141
+  ],
+  "binder_loose": [
+   298,
+   0,
+   147,
+   141
+  ],
+  "binder_loose_idle_1": [
+   0,
+   147,
+   149,
+   141
+  ],
+  "binder_loose_attack": [
+   151,
+   147,
+   159,
+   141
+  ],
+  "binder_loose_devour": [
+   312,
+   147,
+   155,
+   141
+  ],
+  "binder_binding_die_0": [
+   0,
+   290,
+   147,
+   140
+  ],
+  "binder_loose_hurt": [
+   149,
+   290,
+   159,
+   139
+  ],
+  "binder": [
+   310,
+   290,
+   147,
+   138
+  ],
+  "binder_idle_1": [
+   0,
+   432,
+   149,
+   138
+  ],
+  "binder_attack": [
+   151,
+   432,
+   153,
+   138
+  ],
+  "binder_devour": [
+   306,
+   432,
+   153,
+   138
+  ],
+  "binder_loose_cast": [
+   0,
+   572,
+   139,
+   138
+  ],
+  "binder_binding": [
+   141,
+   572,
+   147,
+   138
+  ],
+  "binder_binding_idle_1": [
+   290,
+   572,
+   149,
+   138
+  ],
+  "binder_binding_attack": [
+   0,
+   712,
+   153,
+   138
+  ],
+  "binder_binding_devour": [
+   155,
+   712,
+   147,
+   138
+  ],
+  "binder_hurt": [
+   304,
+   712,
+   159,
+   136
+  ],
+  "binder_binding_hurt": [
+   0,
+   852,
+   159,
+   136
+  ],
+  "binder_cast": [
+   161,
+   852,
+   139,
+   135
+  ],
+  "binder_loose_die_1": [
+   302,
+   852,
+   147,
+   135
+  ],
+  "binder_binding_cast": [
+   0,
+   990,
+   139,
+   135
+  ],
+  "binder_die_1": [
+   141,
+   990,
+   147,
+   133
+  ],
+  "binder_binding_die_1": [
+   290,
+   990,
+   147,
+   128
+  ],
+  "binder_loose_die_2": [
+   0,
+   1127,
+   147,
+   103
+  ],
+  "binder_die_2": [
+   149,
+   1127,
+   147,
+   99
+  ],
+  "binder_binding_die_2": [
+   298,
+   1127,
+   147,
+   96
+  ]
+ },
+ "origin": {
+  "binder": [
+   73,
+   137
+  ],
+  "binder_idle_1": [
+   74,
+   137
+  ],
+  "binder_attack": [
+   76,
+   137
+  ],
+  "binder_hurt": [
+   79,
+   135
+  ],
+  "binder_cast": [
+   69,
+   134
+  ],
+  "binder_devour": [
+   76,
+   137
+  ],
+  "binder_die_0": [
+   73,
+   140
+  ],
+  "binder_die_1": [
+   73,
+   132
+  ],
+  "binder_die_2": [
+   73,
+   98
+  ],
+  "binder_loose": [
+   73,
+   140
+  ],
+  "binder_loose_idle_1": [
+   74,
+   140
+  ],
+  "binder_loose_attack": [
+   79,
+   140
+  ],
+  "binder_loose_hurt": [
+   79,
+   138
+  ],
+  "binder_loose_cast": [
+   69,
+   137
+  ],
+  "binder_loose_devour": [
+   77,
+   140
+  ],
+  "binder_loose_die_0": [
+   73,
+   144
+  ],
+  "binder_loose_die_1": [
+   73,
+   134
+  ],
+  "binder_loose_die_2": [
+   73,
+   102
+  ],
+  "binder_binding": [
+   73,
+   137
+  ],
+  "binder_binding_idle_1": [
+   74,
+   137
+  ],
+  "binder_binding_attack": [
+   76,
+   137
+  ],
+  "binder_binding_hurt": [
+   79,
+   135
+  ],
+  "binder_binding_cast": [
+   69,
+   134
+  ],
+  "binder_binding_devour": [
+   73,
+   137
+  ],
+  "binder_binding_die_0": [
+   73,
+   139
+  ],
+  "binder_binding_die_1": [
+   73,
+   127
+  ],
+  "binder_binding_die_2": [
+   73,
+   95
+  ]
+ },
+ "anims": {
+  "binder_idle": {
+   "frames": [
+    "binder",
+    "binder_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "binder_die": {
+   "frames": [
+    "binder_die_0",
+    "binder_die_1",
+    "binder_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "binder_loose_idle": {
+   "frames": [
+    "binder_loose",
+    "binder_loose_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "binder_loose_die": {
+   "frames": [
+    "binder_loose_die_0",
+    "binder_loose_die_1",
+    "binder_loose_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "binder_binding_idle": {
+   "frames": [
+    "binder_binding",
+    "binder_binding_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "binder_binding_die": {
+   "frames": [
+    "binder_binding_die_0",
+    "binder_binding_die_1",
+    "binder_binding_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "notes": "Deep Stacks pack atlas (C2-sprites-boss), merged into bosses_battle by the loader. The Binder (B100) on the Archivore's kit: binder (The Spine: cold vellum wings, an ink cover, a crimson thread stitched down the spine with gold knots, a wax-seal amber eye), binder_loose (Loose Leaves: the knots torn out one in two, wings spread wide and high, seven loose leaves circling), binder_binding (The Last Binding: the outer pages burnt to ember fronts, a dark cover with the thread burning across it, the eye swollen). Each with _idle_1 (breathe), _attack (lunge, slit eye), _hurt (recoil, eye shut), _cast (the inhale: wings fold, eye burns, ink and vellum motes), _devour (the eye swells, the tendrils reach), _die_0..2 (burns from the top: ember front, vellum ash); anims <id>_idle and <id>_die. Facing RIGHT, 1x, untinted, origin = bottom-centre (the default, exact for every frame; the table agrees). BINDER.sprite.frame = binder; phases 2 and 3 carry sprite: binder_loose / binder_binding so the scene swaps the frame set on the phase banner (the King's unmask path)."
+}

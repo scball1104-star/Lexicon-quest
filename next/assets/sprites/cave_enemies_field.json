@@ -1,0 +1,50 @@
+{
+ "image": "cave_enemies_field.png",
+ "frames": {
+  "binder_avatar_0": [
+   0,
+   0,
+   55,
+   52
+  ],
+  "binder_avatar_1": [
+   56,
+   0,
+   55,
+   52
+  ],
+  "binder_avatar_2": [
+   112,
+   0,
+   55,
+   52
+  ]
+ },
+ "anims": {
+  "binder_avatar_idle": {
+   "frames": [
+    "binder_avatar_0",
+    "binder_avatar_2",
+    "binder_avatar_1",
+    "binder_avatar_2"
+   ],
+   "fps": 5,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "binder_avatar": {
+   "size": [
+    55,
+    52
+   ],
+   "origin": [
+    27,
+    51
+   ],
+   "hover": 5
+  }
+ },
+ "facing": "left",
+ "notes": "Deep Stacks pack atlas, merged into enemies_field. binder_avatar: the Binder on the B100 floor, 55x52, frontal, hovering `hover` px above its feet (the Archivore avatar rig in vellum, ink and crimson thread); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim binder_avatar_idle plays 0, 2, 1, 2. Facing: symmetric, the flip changes nothing."
+}
