@@ -227,6 +227,7 @@ export function rollEncounter(id, rng, opts = {}) {
     const spec = { id: eid, elite: null };
     if (e.power) spec.power = e.power;
     if (e.speed) spec.speed = e.speed;
+    if (e.hp) spec.hp = e.hp;           // H1 (the yard slime) and the Deep Stacks: the floor's foes carry this much HP
     const mul = encounterExpMul(id);
     if (mul !== 1) spec.expMul = mul;   // expcurve.js: only a group that pays differently carries it
     return spec;
