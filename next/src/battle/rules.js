@@ -580,6 +580,8 @@ export function createBattle(cfg = {}) {
   }
   function kill(u, reason = 'damage') {
     if (!u.alive) return;
+    const rise = u.side === 'party' && state.options.onFall ? state.options.onFall(u) | 0 : 0;   // the Deep Stacks' Rebound: the hook may stand the member back up
+    if (rise > 0) { u.hp = Math.min(u.maxHp, rise); u.statuses = {}; u.mods = []; u.charging = null; emit({ type: 'message', text: `${u.name} rises!`, kind: 'rise' }); emit({ type: 'revive', target: u.uid, hp: u.hp, rise: true }); return; }
     u.alive = false;
     u.hp = 0;
     u.charging = null;
@@ -654,7 +656,7 @@ export function createBattle(cfg = {}) {
       damage(src, amt, tgt, { kind: 'phys', reflected: true, crit: false, weak: false, types: [] });
       return { amount: 0, miss: false, weak: false, reflected: true };
     }
-    const chance = hitChance(src, tgt, part, types);
+    const chance = src.firstBlow ? (src.firstBlow = false, 1) : hitChance(src, tgt, part, types);   // First Line: the first blow cannot miss
     if (chance < 1 && R() >= chance) {
       const evaded = tgt.evade && src.side === 'party' && !types.includes('bow');
       emit({ type: 'miss', source: src.uid, target: tgt.uid, reason: evaded ? 'evade' : 'miss' });

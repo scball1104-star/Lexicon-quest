@@ -298,7 +298,8 @@ test('the seams: one vow call each in battle (three), field, items and shop; rul
   assert.equal(count('src/scenes/battle.js', /vowEvent\(e\.game, \{ type: 'flee' \}, e\)/g), 1, 'escape op: the Flee command succeeded');
   assert.ok(/case 'escape': if \(op\.success\) \{ vowEvent\(/.test(b), 'the flee call sits inside the success branch');
   assert.equal(count('src/scenes/field.js', /vowEvent\(this\.game, \{ type: 'run' \}, this\.engine\)/g), 1, 'tryLeaderStep: a running step');
-  assert.ok(/L\.startStep\(nx, ny, dur\);\r?\n\s*if \(dur === RUN_FRAMES\) vowEvent\(/.test(read('src/scenes/field.js')), 'the run call follows the accepted step');
+  // C2-world scales `dur` inside the Deep Stacks (cave_move_plus), so the seam keys on `running`, read before the scale.
+  assert.ok(/L\.startStep\(nx, ny, dur\);\r?\n\s*if \((dur === RUN_FRAMES|running)\) vowEvent\(/.test(read('src/scenes/field.js')), 'the run call follows the accepted step');
   assert.equal(count('src/ui/screens/items.js', /vowEvent\(this\.g, \{ type: 'item', item: id \}, this\.engine\)/g), 1, 'items screen: an item used from the bag');
   assert.equal(count('src/scenes/shop.js', /vowEvent\(this\.g, \{ type: 'buy', item: it\.id, qty: n \}, this\.engine\)/g), 1, 'shop: a purchase');
   // (Episode 2's story flags are named vow_door_open, vow_courage and so on: the check is for the vow MODULE, not the word.)

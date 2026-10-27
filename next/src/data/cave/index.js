@@ -4,18 +4,19 @@
 //
 // register() imports each data module behind a guard and calls the module's register() (named export `register`, or the default
 // export when that is a function) in this fixed order:
-//     items, loot, foes
-// and later, when C2 writes them: story, text. A module that does not exist yet is skipped (listed in the result's `skipped`), so
-// the agents that write the modules plug in just by exporting register(). A module that exists but throws is NOT swallowed: the
-// error reaches the caller. register() is idempotent (the same promise after success; a retry after a failure re-runs only what
-// did not finish).
+//     items, loot, foes, story, text, world
+// (story and text are C2-story-ui's; world is C2-world's glue, last so the real scenes and text win over its fallbacks; world.js
+// itself loads bands345.js and the two hand-made maps behind the same guard). A module that does not exist yet is skipped (listed
+// in the result's `skipped`), so the agents that write the modules plug in just by exporting register(). A module that exists but
+// throws is NOT swallowed: the error reaches the caller. register() is idempotent (the same promise after success; a retry after a
+// failure re-runs only what did not finish).
 // What registration MUTATES (and nothing else): UNIQUES, KEY_ITEMS and ITEMS (the seventeen uniques, the Bookmark), ZONE_LOOT
 // (cave_band_1..5) and BOSS_LOOT (binder), ZONES (cave_band_1..5 and cave_boss, non-enumerable), ENEMIES (binder) and
 // ENCOUNTERS (cave_binder). The per-floor encounters are NOT registered here: the integrator calls foes.js
 // registerFloorEncounters(floorEncounters(seed, floor)) when a floor is generated, and loot.js setLootFloor(floor) on arrival.
 
 export const ID = 'cave';
-export const ORDER = ['items', 'loot', 'foes', 'story', 'text'];
+export const ORDER = ['items', 'loot', 'foes', 'story', 'text', 'world'];
 
 /** True once register() has finished (also readable as `CAVE_READY`). */
 export let CAVE_READY = false;

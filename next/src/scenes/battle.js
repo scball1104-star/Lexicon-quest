@@ -271,6 +271,7 @@ export class BattleScene {
       forceElite: data.forceElite, noElite: data.noElite, eliteRate: data.eliteRate,
     });
     if (data.canFlee != null) battle.state.options.canFlee = !!data.canFlee && !battle.state.options.boss;
+    if (e.cave) e.cave.armBattle(battle, g);   // the Deep Stacks: the Rebound rise and First Line
     this.b = battle; this.encounter = encounter;
     this.zone = encounter.zone || (ENCOUNTERS[data.encounterId] && ENCOUNTERS[data.encounterId].zone) || 'valley';
     this.backdropLayer = buildBackdrop(e, this.zone, !!encounter.boss);
@@ -703,8 +704,8 @@ export class BattleScene {
     this.menu.close();
     this.telegraphs.clear();
     e.audio.stopMusic(0.5);
-    // The gameover scene plays the sting itself; only a scripted loss (no gameover) needs it here.
-    if (this.data.gameover === false || this.data.scripted || !e.hasScene('gameover')) e.audio.jingle('gameover_sting', { duckMusic: false });
+    // The gameover scene plays the sting itself; only a scripted loss (no gameover) needs it here, and a wipe in the Stacks.
+    if (this.data.gameover === false || this.data.scripted || !e.hasScene('gameover') || (e.cave && e.cave.inRun(e.game))) e.audio.jingle('gameover_sting', { duckMusic: false });
     this.finishOutcome();
     this.setHelp('{c:red}The party has fallen...{/c}');
     this.timer = this.fast ? 1 : this.scaled(DEFEAT_WAIT);
@@ -740,7 +741,7 @@ export class BattleScene {
       // the field (under us) offers to equip what dropped once the rewards are closed and the fade is in
       e.lastBattleDrops = result === 'win' && this.summary && this.summary.items.length ? this.summary.items.map((it) => it.uid).filter((u) => u != null) : null;
       e.pop(result);
-      if (result === 'lose' && this.data.gameover !== false && !this.data.scripted && e.hasScene('gameover')) e.push('gameover');
+      if (result === 'lose' && this.data.gameover !== false && !this.data.scripted && e.hasScene('gameover') && !(e.cave && e.cave.inRun(e.game))) e.push('gameover');
       if (typeof this.onDone === 'function') this.onDone(result);
     }, { duration: dur, style, color: result === 'lose' ? '#000000' : '#14101e' });
   }

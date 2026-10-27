@@ -62,6 +62,9 @@ export async function loadDb() {
   const partyField = readJson(a('sprites/party_field.json'));
   // Expansion packs ship tiles and sprites as fragments: merge them the way the pack loader does so x1_/x2_ ids resolve.
   const maybe = (p) => { try { return readJson(a(p)); } catch (e) { return null; } };
+  // the Deep Stacks' props (chest_red, chest_blue, plaque, trapdoor) live in the cave pack's own atlas (src/data/cave/world.js merges them)
+  const caveProps = maybe('sprites/cave_props.json');
+  if (caveProps && caveProps.objects) props.objects = { ...caveProps.objects, ...props.objects };
   for (const px of ['x1', 'x2']) {
     const frag = maybe(`tiles/${px}_tiles.json`);
     if (frag) for (const k of ['terrains', 'walls', 'tiles', 'objects', 'overlays']) tiles[k] = { ...(tiles[k] || {}), ...Object.fromEntries(Object.entries(frag[k] || {}).filter(([id]) => !(id in (tiles[k] || {})))) };
@@ -845,7 +848,7 @@ const EVENT_TYPES = new Set(['npc', 'actor', 'door', 'chest', 'sign', 'book', 'o
   'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor']);
 const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne', 'x1_gate_culvert', 'x1_gate_barrow'];
 const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog']);
-const CHEST_TIERS = new Set(['wood', 'iron', 'gold']);
+const CHEST_TIERS = new Set(['wood', 'iron', 'gold', 'red', 'blue']);   // red and blue: the Deep Stacks (src/data/cave/world.js)
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 
 /**
@@ -890,7 +893,8 @@ export function validate(map, db, maps, { staging = null, links = loadPendingLin
         const enc = db.ENCOUNTERS[e.encounter];
         if (!enc) E(`enemy ${e.id}: encounter ${e.encounter} missing`);
         else {
-          if (enc.zone !== map.id) E(`enemy ${e.id}: encounter ${e.encounter} belongs to zone ${enc.zone}`);
+          // a Deep Stacks encounter belongs to its band's zone (cave_band_k), not to the generated floor it stands on
+          if (enc.zone !== map.id && !(enc.cave && /^cave_/.test(map.id))) E(`enemy ${e.id}: encounter ${e.encounter} belongs to zone ${enc.zone}`);
           if (enc.leader !== e.sprite) Wn(`enemy ${e.id}: sprite ${e.sprite} is not the leader ${enc.leader} of ${e.encounter}`);
         }
         if (!['wander', 'patrol', 'chase', 'guard'].includes(e.move)) E(`enemy ${e.id}: move ${e.move}`);
@@ -1023,9 +1027,11 @@ export function validate(map, db, maps, { staging = null, links = loadPendingLin
 }
 
 function checkTarget(to, label, map, maps, db, E, Wn, links = []) {
-  const [mid, x, y, dir] = to;
+  let [mid, x, y, dir] = to;
   if (dir && !DIR_NAMES.has(dir)) E(`${label}: bad dir ${dir}`);
   const target = mid === map.id ? map : maps[mid];
+  // x and y both null: the party lands on the target's `start` (scenes/field.js loadMap; the library's trapdoor into the Stacks' hall)
+  if (target && x == null && y == null && target.start) { x = target.start.x; y = target.start.y; }
   if (!target) {
     // X1: a link whose target map is built later (tools/maps/x1_links.json) is a warning; an entry whose target exists is never reached
     if (links.some((l) => l.from === map.id && l.to === mid)) Wn(`${label}: target map ${mid} is not built yet (pending in x1_links.json)`);

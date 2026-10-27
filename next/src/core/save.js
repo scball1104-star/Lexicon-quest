@@ -3,12 +3,14 @@
 //
 // Keys:   lq-next-slot-1 .. lq-next-slot-3   manual save slots (player-facing numbers 1..3)
 //         lq-next-slot-0                     autosave / resume slot (optional use)
+//         lq-next-slot-cave                  the Deep Stacks suspend save (SUSPEND_SLOTS; never listed)
 //         lq-next-settings                   settings object
 // Format: { v: SAVE_VERSION, savedAt: ISO string, meta: {...summary for the load screen}, data: {...} }
 
 export const SAVE_VERSION = 1;
 export const SLOT_COUNT = 3;
 export const AUTO_SLOT = 0;
+export const SUSPEND_SLOTS = ['cave'];   // named resume-only slots beside 0..3 (src/game/cave.js)
 
 export const DEFAULT_SETTINGS = Object.freeze({
   master: 0.8, music: 0.7, sfx: 0.8, ambience: 0.6,
@@ -79,6 +81,7 @@ export function createSave(opts = {}) {
     try { return JSON.parse(raw); } catch { log('corrupt JSON in', key); return null; }
   }
   function checkSlot(n) {
+    if (typeof n === 'string' && SUSPEND_SLOTS.includes(n)) return;
     if (!Number.isInteger(n) || n < 0 || n > SLOT_COUNT) throw new RangeError(`save slot must be 0..${SLOT_COUNT}, got ${n}`);
   }
   function migrate(env) {

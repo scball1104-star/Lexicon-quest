@@ -35,7 +35,7 @@ test('register() resolves the X1 shape, is idempotent, and flips CAVE_READY', as
   assert.equal(result.id, 'cave');
   for (const m of ['items', 'loot', 'foes']) assert.ok(result.loaded.includes(m), m);
   for (const m of result.skipped) assert.ok(['story', 'text'].includes(m), `${m} skipped: a module that exists must load`);
-  assert.deepEqual(pack.ORDER, ['items', 'loot', 'foes', 'story', 'text']);
+  assert.deepEqual(pack.ORDER, ['items', 'loot', 'foes', 'story', 'text', 'world']);   // world: C2-world's glue, registered last
   assert.equal(pack.ID, 'cave');
   assert.equal(pack.register(), first, 'the same promise after success');
   assert.deepEqual(await pack.register(), result);

@@ -104,7 +104,7 @@ export class MenuScene {
       case 'journal': this.startScreen('journal'); break;
       case 'talk': this.talk(); break;
       case 'config': this.mode = 'busy'; e.pushAwait('config').then(() => { this.mode = 'commands'; }); break;
-      case 'save': this.mode = 'busy'; e.pushAwait('loadGame', { mode: 'save' }).then(() => { this.mode = 'commands'; }); break;
+      case 'save': this.mode = 'busy'; ((e.cave && e.cave.menuSave(e, this.g)) || e.pushAwait('loadGame', { mode: 'save' })).then(() => { this.mode = 'commands'; }); break;
       case 'quit': this.quit(); break;
       default: break;
     }
@@ -134,6 +134,8 @@ export class MenuScene {
   async quit() {
     const e = this.engine;
     this.mode = 'busy';
+    const q = e.cave && await e.cave.quit(e, this.g);   // inside the Deep Stacks: 'left' (the menu is popped) or 'stay'
+    if (q) { if (q === 'stay') this.mode = 'commands'; return; }
     const i = await e.pushAwait('choice', { options: ['Return to title', 'Stay'], x: e.renderer.W / 2, y: e.renderer.H / 2, anchor: 'center', cancel: 1 });
     if (i === 0) { e.fadeTo(() => e.reset('title'), { duration: 0.8 }); return; }
     this.mode = 'commands';

@@ -1,20 +1,25 @@
-// The Deep Stacks switch. Part of the INITIAL bundle on purpose (the library map and the title will import it) and the one file
-// in src/data/cave/ that is not a pack file (tools/pwa/build_pwa.py excludes only this one, the x1/x2 pattern).
-//
-//   CAVE_LIVE    the master switch. false = the Stacks do not exist: ensurePack('cave') never fetches, nothing is registered,
-//                the trapdoor is a locked inspect line, no title row. The integrator (C2-world) flips it, last.
-//   caveOn()     the gate every edit of an existing map, NPC talk entry and scene condition uses: CAVE_LIVE and the cave pack
-//                has loaded (packReady). A touched map may call it at module top level: the map is re-imported once the pack
-//                becomes ready (src/world/maps.js), so it re-evaluates.
-//
-// packs.js will import CAVE_LIVE from here and this file imports packReady from packs.js: a cycle on purpose, both sides only
-// read the other inside a function, so evaluation order does not matter.
-import { packReady } from '../../game/packs.js';
+// The Deep Stacks switch. Part of the INITIAL bundle on purpose (the title will import it) and the one file in src/data/cave/
+// that is not a pack file (tools/pwa/build_pwa.py excludes only this one, the x1/x2 pattern).
+//   CAVE_LIVE     the master switch. false = the Stacks do not exist: ensurePack('cave') never fetches, nothing is registered,
+//                 no trapdoor, no title row. The integrator flips it, last.
+//   caveForced()  QA: ?cave=1 or ?pack=cave on the page URL, or globalThis.LQ_CAVE_ON in Node, turns the pack on while CAVE_LIVE is false.
+//   caveOn()      the switch (or the force) and the cave pack has loaded (packReady).
+// The cycle with packs.js is on purpose: both sides read the other inside a function. The force registers in a microtask, after
+// packs.js's own module body has run.
+import { packReady, forcePack } from '../../game/packs.js';
 
 export const CAVE_LIVE = false;
 
-/** True when the Stacks are on and the cave pack has loaded. */
-export function caveOn() {
-  if (!CAVE_LIVE) return false;
-  return packReady('cave');
+export function caveForced() {
+  try {
+    if (globalThis.LQ_CAVE_ON === true) return true;
+    const q = typeof location !== 'undefined' ? location.search : '';
+    if (/[?&]cave=1(&|$)/.test(q)) return true;
+    const m = /[?&]pack=([^&]*)/.exec(q);
+    return !!m && decodeURIComponent(m[1]).split(',').includes('cave');
+  } catch (e) { return false; }
 }
+
+export function caveOn() { return (CAVE_LIVE || caveForced()) && packReady('cave'); }
+
+if (caveForced() && typeof queueMicrotask === 'function') queueMicrotask(() => { try { forcePack('cave'); } catch (e) { /* packs.js not up yet */ } });

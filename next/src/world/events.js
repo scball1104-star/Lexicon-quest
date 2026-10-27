@@ -253,8 +253,8 @@ function create(field, ent) {
       break;
     }
     case 'door': {
-      // a mirror door (kind 'mirror', sprite mirror_tall) shows its active frame while it exists
-      if (ev.sprite) addProp(field, ent, ev.sprite, ev.kind === 'mirror' ? 1 : 0);
+      // a mirror door (kind 'mirror', sprite mirror_tall) shows its active frame while it exists; the Stacks' trapdoor its open one
+      if (ev.sprite) addProp(field, ent, ev.sprite, ev.kind === 'mirror' ? 1 : (ev.state || 0));
       // a flag-gated door that just appeared opens its painted doors (door_double_closed -> door_double_open)
       if (ev.if != null) {
         for (const [cx, cy] of [...ent.cells, ...ent.cells.map(([x, y]) => [x, y - 1])]) {
@@ -553,6 +553,7 @@ export async function restFlow(field, o = {}) {
   if (field.dead) return true;
   await vowRow(field);
   if (field.dead) return true;
+  if (engine.cave && await engine.cave.refuseSave(engine, g)) return true;   // the Deep Stacks keep their own pages
   const s = await field.dialog({ who: null, text: HELP.save.prompt, choices: ['Save', 'Not now'], cancel: 1 });
   if (s === 0 && engine.hasScene('menu') && !field.dead) await engine.pushAwait('menu', { page: 'save' });
   return true;
@@ -656,6 +657,7 @@ async function openChest(field, ent) {
   field.particles.sparkle(ent.x * TILE + 8, ent.y * TILE + 4, 6, '#ffd34d');
   await engine.waitFrames(18);
   const ev = ent.ev;
+  if (engine.cave && await engine.cave.openChest(field, ent)) { await field.bark('first_chest'); return; }   // the Deep Stacks' red and blue tiers
   if (ev.item || ev.gold) {
     // a placed chest pays its item and its gold (E2: the Remembrance Cache holds both)
     if (ev.item) {

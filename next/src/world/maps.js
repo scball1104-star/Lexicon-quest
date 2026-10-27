@@ -54,6 +54,7 @@ export async function loadMap(id) {
   const hit = packForMap(id);
   const needs = hit && packEnabled(hit.id) && !packReady(hit.id);
   if (needs) await guard(id);
+  if (extra.has(id)) return extra.get(id);                                             // registered by the pack's register() while we waited
   if (hit && hit.prefixed && packEnabled(hit.id) && !packReady(hit.id)) return null;   // the pack never arrived: no such place
   if (cache.has(id) && !stale.has(id)) return cache.get(id);
   let mod = null;

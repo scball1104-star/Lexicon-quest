@@ -11,6 +11,7 @@ export class GameOverScene {
   enter() {
     const e = this.engine;
     this.t = 0; this.frame = 0; this.busy = false; this.menuAt = 2.6;
+    if (e.cave && e.cave.gameOver(this)) return;   // a wipe inside the Deep Stacks is never a Game Over
     // Touch layouts get taller rows (W5, W7: 20 px): the window grows and sits higher so the line under it fits
     // (its bottom edge stays at or above y 196, the continue line is drawn 6 px below it).
     const rowH = rowHeightFor(e, 11);
@@ -50,6 +51,7 @@ export class GameOverScene {
   }
   draw(r) {
     r.clear('#07060c');
+    if (this.routed) return;
     const k = Math.min(1, this.t / 1.5);
     // Slow red-violet glow that settles behind the words: the whole frame, brightest at the title line,
     // banded top and bottom (CRITIQUE_1 C14: no hard black band).

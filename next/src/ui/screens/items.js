@@ -70,13 +70,14 @@ export class ItemsScreen {
       }
       return null;
     }
+    if (this.busy) return null;
     const act = this.list.update(input, audio);
     if (act === 'cancel') return 'back';
     if (act === 'pageL' || act === 'pageR') { this.switchTab(act === 'pageL' ? -1 : 1); return null; }
     if (act === 'confirm') {
       const it = this.list.item;
       if (!it) return null;
-      if (this.tab === 1) { this.say(it.help); return null; }
+      if (this.tab === 1) { if (!(this.engine.cave && this.engine.cave.useKeyItem(this, it.id))) this.say(it.help); return null; }   // the Keeper's Bookmark
       const d = CONSUMABLES[it.id];
       if (d.savePointOnly) { audio.sfx('buzzer'); this.say('Only at a save point.'); return null; }
       const onlyKo = d.target === 'ko_ally';

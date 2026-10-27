@@ -294,6 +294,7 @@ export class FieldScene {
   }
 
   autosave() {
+    if (this.engine.cave && this.engine.cave.autosave(this)) return;   // the Deep Stacks: the suspend save instead (src/data/cave/world.js)
     try { this.engine.save.save(normSlot(this.game && this.game.autosaveSlot), serialize(this.game), saveMeta(this.game)); } catch (err) { this.warnOnce('autosave', `autosave failed: ${err && err.message}`); }
   }
 
@@ -646,6 +647,7 @@ export class FieldScene {
     if (result === undefined) result = 'lose';
     // the battle writes outcome flags (echo_warden_defeated, ...) straight into engine.game
     if (!this.dead) { EV.refreshEntities(this); for (const a of this.actors) if (a.kind === 'npc') refreshNpcBehaviour(this, a); }
+    if (e.cave && !this.dead && await e.cave.afterBattle(this, encounterId, result)) return result;   // the Deep Stacks: kills, B100, a wipe
     // gear that dropped in the fight (battle.js leaves the uids on the engine): the equip prompt after the rewards
     const drops = e.lastBattleDrops; e.lastBattleDrops = null;
     if (result === 'win' && drops && drops.length && !this.dead) {
@@ -821,8 +823,10 @@ export class FieldScene {
     const v = this.canStep(L, L.tx, L.ty, nx, ny, dir);
     if (v === false) return false;
     if (v === 'hop') { L.hop(dir); this.partyFollow(14); return true; }
+    const running = dur === RUN_FRAMES;
+    if (this.engine.cave) dur = this.engine.cave.moveFrames(this.game, dur);
     L.startStep(nx, ny, dur);
-    if (dur === RUN_FRAMES) vowEvent(this.game, { type: 'run' }, this.engine);   // H3: "Walk the road" (docs/VOWS.md)
+    if (running) vowEvent(this.game, { type: 'run' }, this.engine);   // H3: "Walk the road" (docs/VOWS.md)
     this.partyFollow(dur);
     this.stepCount++;
     if (L.stepSfx && this.stepCount % 2 === 0) this.engine.audio.sfx(`footstep_${this.map.surfaceAt(nx, ny)}`, { volume: 0.7 });
@@ -865,6 +869,7 @@ export class FieldScene {
     const kind = k === 'stairs' || k === 'mirror' || k === 'fog' ? k : 'door';
     // W11 (PLAYTEST_REVIEW_3 item 9): a fog door lands the party at the last cairn passed, not the stretch's start
     if (kind === 'fog' && to[0] === this.mapId) { const at = this.fog.landing(); if (at) to = [to[0], ...at]; }
+    if (this.engine.cave) { to = this.engine.cave.beforeDoor(this, to); if (!to) return; }   // the Deep Stacks: a stair into cave_bN
     this.warpTo(to[0], to[1], to[2], to[3] || this.leader.dir, kind);
   }
 
@@ -917,16 +922,17 @@ export class FieldScene {
     if (a.t > 0 && this.aimDrawable()) a.t--;
   }
   showAim() { this.aim.t = AIM_FRAMES; }
-  /** Never over a dialogue box, never during a scene, never under another scene (the menu, a battle). */
+  /** Never over a dialogue box, never during a scene, never under another scene (the menu, a battle), never inside the Deep Stacks. */
   aimDrawable() {
     return !!this.map && this.engine.scene === this && !this.cutscene.running && !this.inputLocked && !this.pendingWarp && !this.loading
-      && !(this.banner && this.banner.active) && !this.closeup.isOpen && this.fadeAlpha < 0.5;
+      && !(this.banner && this.banner.active) && !this.closeup.isOpen && this.fadeAlpha < 0.5 && !(this.engine.cave && this.engine.cave.inRun(this.game));
   }
   /** True while the Aim line is on screen (tests and LQ_DEBUG.state()). */
   get aimShown() { return this.aim.t > 0 && !!this.aim.title && this.aimDrawable(); }
   drawAim(r) {
+    if (this.engine.cave && this.engine.cave.drawTag(this, r)) return;   // the Deep Stacks' floor tag takes the Aim line's place
     if (!this.aimShown) return;
-    const a = this.aim;
+    const a = { ...this.aim, title: (currentStep(this.hasFlag, mainQuestFor(this.hasFlag)) || {}).aim || this.aim.title };   // H4: the step's present-tense aim when it has one
     const k = Math.min(1, (AIM_FRAMES - a.t + 1) / 8, a.t / 16);   // in over 8 frames, out over the last 16
     const tw = r.measure(a.title);
     const w = tw + 30, h = 17;
@@ -1322,7 +1328,7 @@ export class FieldScene {
       actors: this.actors.length, props: this.map ? this.map.props.length : 0, lantern: this.lantern,
       entities: [...this.entities.values()].filter((e) => e.present).map((e) => `${e.type}:${e.id}@${e.x},${e.y}${e.state ? ':' + e.state : ''}`),
       prompt: this.prompt ? { x: this.prompt.x, y: this.prompt.y, kind: this.prompt.kind } : null,
-      lanternHint: this.lanternHint, aim: this.aimShown ? this.aim.title : null, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
+      lanternHint: this.lanternHint, aim: this.aimShown ? this.aim.title : null, floorTag: this.engine.cave ? this.engine.cave.floorTag(this.game) : null, fxDone: [...this.fxDone], abilities: this.abilities.debugState(),
       glass: this.glass.debugState(), reflections: this.reflections.drawn,
       perf: this.engine.perfStats(),
     };
