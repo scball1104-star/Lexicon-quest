@@ -324,3 +324,19 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Late correction from you, taken: the post-game mode is difficulty tiers that unlock after completing the game,
   Diablo-style, where harder pays better XP, better loot and better shop equipment. The proposal page will answer
   whether that works for us, with the levers the game already has. Still proposal only.
+
+## 2026-10-27 (Tue) small hours: Vows in, the Deep Stacks under way (not published)
+- Vows: at every rest the game asks "Take a vow?" with No vow first, so nothing changes unless you pick one. Five to
+  choose from: No fleeing, No healing items, Walk the road, Mira stands, No Fury. Keep it to the next rest and
+  the member concerned gains a few weapon mastery points (all of Episode 1's vows together add less than one
+  level). Break it and you get one short toast and one line from the party at the next rest, nothing else.
+- The Hard Road proposal (difficulty tiers after the credits) is in your inbox with three questions only you can
+  answer. Nothing of it is built.
+- The Deep Stacks: the floor generator makes a hundred floors from hand-made room pieces and proves every floor
+  walkable on hundreds of seeds; the data tables (foe bands, scaling, loot by depth, seventeen uniques, the
+  Bookmark, the Binder) are done and tested. Running now: the run state (level 1 in, your real party kept aside
+  and restored), the chest and boss art with the hand-made B100 and entrance hall, and the story pass for the
+  responsibility arc (true-or-kind-lie choices that are remembered, one question at the end of every floor, one
+  line on every boss, and a plain aim line on the field).
+- Housekeeping: a bug of mine from last night (the yard slime was still 74 HP) is fixed; the cave code is a pack
+  that downloads only when you first go in, so the first load does not grow.

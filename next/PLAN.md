@@ -168,21 +168,23 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
   - H1 polish for H6: the "Willowmere. Last night." caption stays up for the whole climb (fade it after the first toll); the thirteenth bell plays `bell_toll` twice because `bell_first` lives in the ep3 sfx pack (a short core alarm bell, or move the id, inside the initial budget); the lantern pool is the party's cool light, a warm lantern would read better; the yard slime is 3 hits at 55% HP (encounter `hp`), check it feels right on a phone
 - [x] H2-ledger: Ledger of Names (Journal tab, 45 rows, 37 live), title counter, Aim line (`docs/briefs/H2-ledger.md`); 10/26
   - H2 polish for H6: the Aim line shows the main step's title ("The Apprentice"); it should read as the present aim ("Find Mira at the library"): give each main step a short `aim` string in quests.js and draw that; on tablet overlay layouts the title counter can sit under the Menu pill; expansion kept lines fall back to "Kept." until the x1 pack registers
-- [~] H3-vows: Vow table, rest-flow row, battle and field hooks; writes the Hard Road proposal doc, no code (`docs/briefs/H3-vows.md`)
-- [ ] H3b-hard-road: post-game mode, shape to Scott first
-- [ ] H4-truth: six to eight Name Truth choices and remembered lines
-- [ ] H5-floor-hooks: floor-ending questions and boss intro lines
+- [x] H3-vows: five Vows at rests, No vow default, seams, mastery reward, save fields; docs/VOWS.md; docs/HARD_ROAD.md emailed to Scott 10/27 (`docs/briefs/H3-vows.md`); 10/27 01:10
+  - H3 gaps for H6: the Aim line carries no vow suffix; Auto battle can break a vow (consider pausing auto when a vow is active or warning once); the break toast overlaps the battle help bar for 1.5 s
+- [ ] H3b-hard-road: PROPOSAL emailed 10/27 (docs/HARD_ROAD.md: one tier, carry the character, rollable legendaries on the tier); waits for Scott's three answers; no code
+- [~] H4-story (H4 + H5 merged): Name Truth choices, floor-ending questions, boss intro lines, aim strings per main step (`docs/briefs/H4-story.md`); launched 10/27 01:25
 - [ ] H6: critic, play-critic, fixes, publish gate list, Scott's explicit yes
 
 ## Wave C: the Deep Stacks, a 100-floor Ancient Cave (Scott 2026-10-26; `docs/DEEP_STACKS_PLAN.md`; up to 3 agents at once under the usage guard)
-- [~] C1-gen: seeded floor generator, prefabs for bands one and two, previews, determinism and walkability tests (`docs/briefs/C1-gen.md`)
+- [x] C1-gen: seeded floor generator (aligned-door room accretion), 35 + 36 prefabs, landings, preview and lint tools, 37 tests (`docs/briefs/C1-gen.md`); 10/27 01:30
+  - C1-gen notes for C2: hollow.png has no dungeon walls, the Cellars use the stacks kit over dirt and water; bands 3 to 5 borrow it until registerBand; corridors have no face rows; the validator is shimmed in tests (chest tiers red/blue, stub encounters); C2-world must registerMap floor N and N+1 at every stair, register encounter ids from C1-data's pools, teach events.js and mapcheck the red/blue chest tiers, clear game.opened cave_b* keys per run, pass opts.plaque and opts.nextArrival(99)
+- [x] cave pack registered by the orchestrator 10/27 (packs.js entry, cap 0.8 MB, CAVE_LIVE off, live.js precached as the switch)
 - [x] C1-data: bands, pools, scale(floor), loot zones, 17 uniques, the Bookmark, the Binder, pack index with register() (`docs/briefs/C1-data.md`); 10/27 00:30; 34 tests
   - C1-data gaps for C2/C3: bands 4 and 5 use court fallback pools until EP3_LIVE (buildBands(true) swaps in cinder/forge foes); ai.js prints "The Archivore" in three Binder messages; props needing hooks: cave_move_plus and stairs_sense (field), first_blow_true (battle), second_life (state); noSell needs an inventory hook; battle drops use the engine's normal table (depth rarity applies to chests only); bands 4 and 5 use existing backdrops
   - Fixed by the orchestrator 10/27: encounters.js rollEncounter dropped `hp`, so H1's yard slime was still 74 HP; now carried (41 HP, three hits)
 - [~] C1-state: src/game/cave.js (enter, descend, bank, die, clear, resume), suspend save, old-save compatibility (`docs/briefs/C1-state.md`); launched 10/27 00:35 beside H3 and C1-gen
 - [ ] C2-world: pack entry, trapdoor and cave_landing0, floor transitions, runtime encounter registration, chest colours, floor tag, death and bank flows
 - [ ] C2-story-ui: the Archivist (Hollis), lines, plaques, Journal line, title entries, Bookmark use, the plaque screen
-- [ ] C2-sprites-boss: blue chest sprite, the Binder's art and B100 map, prefabs for bands three to five
+- [~] C2-sprites-boss: chest sprites, plaque, trapdoor, the Binder's art, B100 and the entrance hall maps, prefabs and landings for bands three to five (`docs/briefs/C2-sprites-boss.md`); launched 10/27 01:40
 - [ ] C3-sim-bot: --cave sim route with death-rate targets, --cave autoplay route, balance pass
 - [ ] C3-critic: fresh-eyes play-critic, Lufia feel, issue list
 - [ ] C4-fixes: the issue list, then the publish gate list, Scott's explicit yes
