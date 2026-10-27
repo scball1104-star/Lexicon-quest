@@ -321,3 +321,6 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Next, now running: Vows at every rest (optional, one at a time, a small reward for keeping one, one honest line
   for breaking one), and a one-page proposal for the post-game Hard Road mode for you to read before anything
   is built.
+- Late correction from you, taken: the post-game mode is difficulty tiers that unlock after completing the game,
+  Diablo-style, where harder pays better XP, better loot and better shop equipment. The proposal page will answer
+  whether that works for us, with the levers the game already has. Still proposal only.

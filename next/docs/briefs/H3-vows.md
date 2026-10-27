@@ -72,11 +72,20 @@ clears, returns what to say). Pure over `game`; the engine is passed in only for
 save (`game.vow`, `game.vowsKept`), default `null` and `[]`.
 
 ### 4. Hard Road: proposal only (`docs/HARD_ROAD.md`)
-One page for Scott, no code and no flags. In it: the unlock (after the credits of the latest live episode; the
-title shows a "Hard Road" entry under New Game); what changes (foes scaled, a vow offered at every rest with one
-always on, fewer safe rests, the Ledger carried over, nothing else carried); the Diablo parallel he named in one
-sentence; the three questions only he can answer (carry gear or not; scale by a flat multiplier or by a new tier
-table; a name he likes). Mark every default as Inference. No em dashes.
+One page for Scott, no code and no flags. Scott clarified on 2026-10-26 (arc doc section 7 C, his words):
+difficulty tiers that unlock after completing the game, like Diablo's Nightmare and Hell, where harder means
+better XP, better loot and better equipment in shops, and he is "not sure if it works for us or not". The page
+answers that question honestly. In it: the unlock (after the credits of the last live episode; the title offers
+the next tier for a completed save); two tiers at most, each with an EXP multiplier, a higher item level and
+shifted rarity weights on drops, and shop stock gated by tier (point at the existing levers: `loot-tables.js`
+rarity weights and affix tiers by item level, equipment base tiers 1 to 6, `shops.js` flag-gated stock; say
+which are enough and which need a table); what carries over (Inference default: the character, levels and gear,
+and the Ledger, as Diablo carries the character; the alternative is a fresh party at the harder tier); foe scaling
+by a flat multiplier per tier with the sim as the proof; how Vows sit beside it (optional at every rest, as in the
+base game, not forced); what it costs to build (a day or a week, in agent terms) and the one risk you see (for
+example: the story is short, so the replay value rests on the loot depth; say whether the depth is there). End
+with the three questions only he can answer (carry the character or not; one tier or two; a name). Mark every
+default as Inference. No em dashes.
 
 ### 5. Shots and previews
 Up to three shots: the vow offer window (desktop), the Journal header with an active vow (phone), the kept-vow

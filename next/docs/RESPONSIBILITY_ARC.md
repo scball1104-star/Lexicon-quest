@@ -96,10 +96,15 @@ What each one does to the build:
 - **B.** The cold open replaces the six-card prologue and the long wake-up. No `HOOK_OPENING` flag, no old path
   kept. Existing saves never see it (they already hold `intro_done`); the Episode 2 title entry is untouched.
   Brief: `docs/briefs/H1-opening.md`.
-- **C.** Vows stay opt-in at campfires and fonts (section 3.2) AND a harder mode unlocks after the player
-  completes the game, in the way Diablo opens its higher difficulties after a first clear. Working name: Hard
-  Road. Inference, my default shape for Scott to correct before H3b is built: it appears on the title once a save
-  holds the latest episode's complete flag; it is a New Game at a harder tier (foes scaled, a Vow offered on every
-  floor, fewer safe rests); the Ledger of Names carries over. Nothing is built for it until the H3 brief is
-  written and he has seen the shape.
+- **C.** Vows stay opt-in at campfires and fonts (section 3.2) AND difficulty tiers unlock after the player
+  completes the game, the way Diablo opens Nightmare and Hell after a first clear. Scott's clarification,
+  2026-10-26 late, his words: "difficulty settings that unlock after successfully completing the game. Like how
+  Diablo does? Harder difficulty means better XP and better loot and better equipment in shops. Not sure if it
+  works for us or not." So the shape is: tiers, not one mode; unlocked by completing the game; each harder tier
+  pays better (EXP multiplier, higher item level and rarity weights on drops, shop stock gated by tier). Fact:
+  the loot system already has the levers (`loot-tables.js` rarity weights, affix tiers by item level, base tiers
+  1 to 6; `shops.js` stock gated by flags), so a tier is data plus balance proof, not a new system. Working name
+  until Scott picks one: Hard Road. Status: PROPOSAL ONLY, `docs/HARD_ROAD.md` (H3 writes it, no code); Scott
+  reads it and says whether it works for us before anything is built. My earlier default (foes scaled, a vow
+  always on, fewer rests, nothing else carried) was half of it and is superseded by this paragraph.
 - **D.** The true answer's cost stays small and honest; no locked routes, no morality meter.
