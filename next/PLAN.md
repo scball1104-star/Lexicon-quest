@@ -170,10 +170,18 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
   - H2 polish for H6: the Aim line shows the main step's title ("The Apprentice"); it should read as the present aim ("Find Mira at the library"): give each main step a short `aim` string in quests.js and draw that; on tablet overlay layouts the title counter can sit under the Menu pill; expansion kept lines fall back to "Kept." until the x1 pack registers
 - [x] H3-vows: five Vows at rests, No vow default, seams, mastery reward, save fields; docs/VOWS.md; docs/HARD_ROAD.md emailed to Scott 10/27 (`docs/briefs/H3-vows.md`); 10/27 01:10
   - H3 gaps for H6: the Aim line carries no vow suffix; Auto battle can break a vow (consider pausing auto when a vow is active or warning once); the break toast overlaps the battle help bar for 1.5 s
-- [ ] H3b-hard-road: PROPOSAL emailed 10/27 (docs/HARD_ROAD.md: one tier, carry the character, rollable legendaries on the tier); waits for Scott's three answers; no code
+- [ ] H3b-hard-road: PROPOSAL emailed 10/27; Scott answered 10/27 (verbatim in docs/HARD_ROAD.md): carry the character, one tier, name still open; APPROVED TO BUILD as H7-hard-road (`docs/briefs/H7-hard-road.md`), queued below
 - [x] H4-story (H4 + H5 merged): 12 Name Truth choices (7 in Episode 1, 5 in Episode 2) with one remembered line and one small reward each, seven floor-ending questions, four boss card lines plus Mira's line for the Briar Alpha, aim strings on all 30 main steps; 11 tests; both bot routes clear (`docs/briefs/H4-story.md`); 10/27 04:00
   - H4 gaps for H6: no new ledger keeps (every scene id must be staged in STAGING.md and STAGING_EP2.md, which H4 did not own: one staging row each unlocks Hob, Cobb and Penny beats); the bot never opens Tess's quest, so her choice is proven by the test only; H4's one field.js line lands with C2-world's commit (same file in flight)
 - [x] H6: critic and fix pass done (below); C3-critic and C4-fixes next, then the publish gate list and Scott's explicit yes
+
+## Launch queue after the Wednesday 10/28 9 AM ET usage reset (one agent at a time from 75% weekly, none above 85%; check get_usage before each)
+1. C3-critic (read-only, `docs/briefs/C3-critic.md`)
+2. C4-uniques (`docs/briefs/C4-uniques.md`, Scott's call E)
+3. C4-fixes (write the brief from the critic's table, DEEP_STACKS_BALANCE 7 items 4 to 10, the arc notes in Wave H)
+4. H7-hard-road (`docs/briefs/H7-hard-road.md`, Scott's three answers)
+5. Media (separate, waits for Scott's answers to reports/lexicon_quest_media_upgrade/assessment.md in the PKA repo): Runway stage paintings through tools/art/backdrops/quantize_still.py, music via Suno Pro or Eleven Music, a dozen SFX
+Then: flip CAVE_LIVE, the full publish gate list (EXPANSION_SCHEDULE 4) on a quiet machine, Scott's explicit yes.
 
 ## Wave C: the Deep Stacks, a 100-floor Ancient Cave (Scott 2026-10-26; `docs/DEEP_STACKS_PLAN.md`; up to 3 agents at once under the usage guard)
 - [x] C1-gen: seeded floor generator (aligned-door room accretion), 35 + 36 prefabs, landings, preview and lint tools, 37 tests (`docs/briefs/C1-gen.md`); 10/27 01:30
@@ -200,4 +208,5 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
   - C2-sprites-boss handoffs: foes.js BINDER needs sprite.frame 'binder' and phase sprites 'binder_loose', 'binder_binding' (C3 may set it; foes.js is C3-sim-bot's then); chest tiers red/blue map to chest_red/chest_blue; hall stairs_down must be rewritten from arrivalOf(seed, 1) (placeholder fails mapcheck on purpose); npc hollis at [10,8] and the plaque at [10,4] (C2-story-ui); no timeline head for the Binder (assets/ui not owned, hud falls back); gen.js strews roots down bands 3 to 5 corridors (propose a band corridorDecals field); the builders are standalone, not in build_all.py
 - [~] C2-story-ui launched 10/27 02:55 (weekly usage 68%: from 75% the guard drops to one agent at a time, above 85% none until the Wednesday 9 AM reset)
 - [ ] C3-critic: brief written 10/27 (`docs/briefs/C3-critic.md`, read-only, phone first, B7 to B21 by hand, the vault reading, resume, deep floors, the Binder); LAUNCH ONLY AFTER the Wednesday 10/28 9 AM ET usage reset (weekly all models 82% at 07:15 10/27; the guard allows no agent above 85%)
-- [ ] C4-fixes: the issue list, then the publish gate list, Scott's explicit yes
+- [ ] C4-uniques: Scott's answer to open call E (10/27, verbatim in DEEP_STACKS_PLAN 13): sixty uniques in three grades with the odds turning over with depth, enough to equip the party in uniques several times over (`docs/briefs/C4-uniques.md`); launch after the Wednesday 10/28 reset, after C3-critic, one agent at a time
+- [ ] C4-fixes: the critic's issue list plus DEEP_STACKS_BALANCE 7 items 4 to 10, then flip CAVE_LIVE, the publish gate list on a quiet machine, Scott's explicit yes

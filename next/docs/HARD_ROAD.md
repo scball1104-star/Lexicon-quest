@@ -66,3 +66,13 @@ honest chase. I would not promise Diablo's hundreds of hours either way; the hon
 1. Carry the character into the tier (my default), or start a fresh party at the harder tier?
 2. One tier or two? (My default: one, and a second only after the first is played.)
 3. A name. Working name: Hard Road. In the game's own voice: The Second Toll, or The Long Way.
+
+## Scott's answers (2026-10-27, verbatim)
+
+> 1. Default, carry the character into the tier.2. Default3. let's keeping trying to come up with a better name.
+
+So: the character is carried; one tier; the name is open. Status: APPROVED TO BUILD as `docs/briefs/H7-hard-road.md`
+(queued behind the Deep Stacks critic and fixes under the usage guard). Name candidates offered 10/27, in the game's own
+words: Second Edition, The Unabridged, Red Ink, Fine Print, The Second Toll, The Long Way. Until he picks, the strings
+say "Hard Road" in one place (`text.js` TIER).
+

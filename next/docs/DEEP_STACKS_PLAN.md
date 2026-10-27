@@ -223,6 +223,8 @@ section 8; the pack id `cave` with prefix `cave_`; EXP inside = 1.5x via `expMul
   rule, where death keeps everything blue (then the Bookmark only saves time).
 - **D. Suspend save.** Default: one resume-only save per floor. Alternative: none (one sitting per run, Lufia).
 - **E. Uniques.** Default: sixteen plus the Binder's Quill. More later if the Stacks are loved.
+  **Scott's answer, 2026-10-27, verbatim:** "E. More uniques. Vary the quality of each so that lower levels are more likely to produce a low strength unique and less likely to produce high strength unique, and the probability reversing the deeper you go into the cave so that lower levels have a higher probability of producing a high strength unique instead of a low strength one. There should be enough uniques available to find to full equip the players with uniques from different measures of strength, and different special qualities, multiple times over."
+  Build: sixty uniques in three grades (Lesser, Greater, Named), twenty per grade across every slot, the grade odds turning over with depth (85/14/1 at B1 to 3/17/80 at B99), a second blue chest on some floors; `docs/briefs/C4-uniques.md`. Launches after the Wednesday 10/28 reset, after C3-critic.
 - **F. B100 prize.** Default: the Quill and a title-screen mark. Alternative: a new ending line in the credits.
 
 ## 14. Risks and how they are held

@@ -389,3 +389,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   critic for the Stacks is written and waits for that; after it, one fix pass, the switch on, the full publish check on a
   quiet machine, and your yes. Nothing is published.
 
+## 2026-10-27 (Tue) 9 AM: your three answers, and the Runway and Suno question
+- Deep Stacks uniques (your call E): recorded word for word. The build is sixty uniques in three grades, twenty per
+  grade across every slot, with the odds turning over with depth (a shallow blue chest is 85 percent a weak unique and
+  1 percent a strong one; at B99 it is 3 and 80), so the party can be fitted out in uniques three times over. It runs
+  after the Stacks critic, under the usage guard.
+- Hard Road (your three answers): the character is carried, one tier, and the name stays open. Approved to build;
+  queued behind the Stacks work. Name candidates for you: Second Edition, The Unabridged, Red Ink, Fine Print, The
+  Second Toll, The Long Way.
+- Runway and Suno: the assessment is in your inbox. Short form: Runway yes, for painted stages and story cards (three
+  test stills made for 12 credits, on one sheet in the chat); Suno yes for music, but that account is on the Free plan
+  with no commercial rights and no downloads, so it needs Pro or Premier first, or we use the Eleven Music model inside
+  your Runway plan instead. Nothing is built until you answer.
+
