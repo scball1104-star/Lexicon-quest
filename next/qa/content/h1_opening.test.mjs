@@ -179,7 +179,8 @@ test('yard_slime: after the sign, one ink_slime, no flee, the hero alone; a win 
   const enc = ENCOUNTERS.yard_slime;
   assert.deepEqual(enc.enemies, ['ink_slime']);
   assert.ok(enc.noFlee && enc.noElite);
-  assert.deepEqual(SCENE_CONDITIONS.yard_slime, { if: 'saw_fading_sign', ifNot: 'yard_fight_done' });
+  // never after Mael: an old save or the Episode 2 start must not meet the tutorial slime (CRITIQUE_ARC 1)
+  assert.deepEqual(SCENE_CONDITIONS.yard_slime, { if: 'saw_fading_sign', ifNot: ['yard_fight_done', 'met_mael'] });
   const win = await runOnce(scenes.yard_slime, { flags: ['saw_fading_sign'], branchFlags: false });
   const b = ops(win.log, 'battle')[0];
   assert.equal(b.args[0], 'yard_slime');

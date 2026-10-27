@@ -1253,7 +1253,7 @@ export const SCENE_CONDITIONS = {
   wake_up: { ifNot: 'intro_done' },
   hazel_farewell: { if: 'met_mael', ifNot: ['hazel_farewell_done', 'archivore_defeated'] },
   fading_sign: { if: 'intro_done', ifNot: 'saw_fading_sign' },
-  yard_slime: { if: 'saw_fading_sign', ifNot: 'yard_fight_done' },
+  yard_slime: { if: 'saw_fading_sign', ifNot: ['yard_fight_done', 'met_mael'] },   // never after Mael: old saves and the Episode 2 start skip it (CRITIQUE_ARC 1)
   mael_intro: { if: 'intro_done', ifNot: 'met_mael' },
   mira_joins: { if: 'met_mael', ifNot: 'mira_joined' },
   south_gate: { ifNot: 'bram_joined' },

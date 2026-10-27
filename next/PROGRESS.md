@@ -340,3 +340,17 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   line on every boss, and a plain aim line on the field).
 - Housekeeping: a bug of mine from last night (the yard slime was still 74 HP) is fixed; the cave code is a pack
   that downloads only when you first go in, so the first load does not grow.
+
+## 2026-10-27 (Tue) before dawn: the critic's read of the arc, and the Stacks wired (not published)
+- A fresh-eyes critic played the new opening on a phone: control in 6 seconds, the thirteenth toll at 47 seconds,
+  the first real choice at 2:09, the first fight at 2:39. Its verdict: a Lufia or Chrono Trigger player keeps
+  going after five minutes. Its best lines: Oren's sign and the Archive door, which it says must not be touched.
+- It found one blocker, now fixed: your old saves and the Episode 2 start could meet the bakery-lane slime a
+  second time. It also found the long pull soft: the Ledger's kept lines read like notes to a programmer, it lists
+  Episode 2's people from minute five, and every true answer pays an item so the choices start to feel like a quiz.
+  A fix pass is working through its 25 items in order.
+- The Deep Stacks are playable end to end behind a test switch: trapdoor, Hollis, a hundred generated floors,
+  red and blue chests, the Bookmark, the close on a wipe, the resume row on the title. The balance run and the bot
+  descent are in progress; the switch stays off until they pass and a critic has played it.
+- Usage note: the account is at 74 percent of its weekly allowance, so from here the agents run one at a time and
+  stop above 85 until the Wednesday morning reset.

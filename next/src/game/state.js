@@ -54,7 +54,8 @@ export const EP1_DONE_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_jo
   'archive_f1_done', 'echo_warden_defeated', 'lantern_get', 'archive_f2_done', 'boss_door_open', 'archivore_defeated',
   'ep1_complete', 'signs_fading', 'saw_fading_sign', 'hazel_farewell_done', 'garrick_farewell_done', 'valley_arrived',
   'saw_milestone', 'f1_arrived', 'f2_arrived', 'f3_arrived', 'found_thirteenth_bell', 'first_fight_done',
-  'campfire_rested', 'archive_key_found', 'stacks_key_found', 'returned_home', 'hal_returned'];
+  'campfire_rested', 'archive_key_found', 'stacks_key_found', 'returned_home', 'hal_returned',
+  'cold_open_done', 'yard_fight_done'];   // H1's opening beats are behind a finished Episode 1 too (CRITIQUE_ARC 1)
 /**
  * The party Episode 2 expects at Lv 9: the simulator's `east_road` loadout (tools/sim/loadouts.mjs; the test in
  * qa/world/ep2_plumbing.test.mjs keeps the two in step). W11 (PLAYTEST_REVIEW_3 fix 1): `exp` is Episode 1's full
