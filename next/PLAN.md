@@ -181,9 +181,10 @@ Run ONE agent at a time, in order, checking usage before each launch; each step 
 - [x] C1-data: bands, pools, scale(floor), loot zones, 17 uniques, the Bookmark, the Binder, pack index with register() (`docs/briefs/C1-data.md`); 10/27 00:30; 34 tests
   - C1-data gaps for C2/C3: bands 4 and 5 use court fallback pools until EP3_LIVE (buildBands(true) swaps in cinder/forge foes); ai.js prints "The Archivore" in three Binder messages; props needing hooks: cave_move_plus and stairs_sense (field), first_blow_true (battle), second_life (state); noSell needs an inventory hook; battle drops use the engine's normal table (depth rarity applies to chests only); bands 4 and 5 use existing backdrops
   - Fixed by the orchestrator 10/27: encounters.js rollEncounter dropped `hp`, so H1's yard slime was still 74 HP; now carried (41 HP, three hits)
-- [~] C1-state: src/game/cave.js (enter, descend, bank, die, clear, resume), suspend save, old-save compatibility (`docs/briefs/C1-state.md`); launched 10/27 00:35 beside H3 and C1-gen
-- [ ] C2-world: pack entry, trapdoor and cave_landing0, floor transitions, runtime encounter registration, chest colours, floor tag, death and bank flows
-- [ ] C2-story-ui: the Archivist (Hollis), lines, plaques, Journal line, title entries, Bookmark use, the plaque screen
+- [x] C1-state: src/game/cave.js (enter, descend, bank, die, quit, clear, resume, reconcileVault, second_life rise), 35 tests (`docs/briefs/C1-state.md`); 10/27 02:00
+  - C1-state calls: spare Bookmarks are run inventory and are lost on exit; clear spends none; reserve members are snapshotted, not reset; suspend slot 'cave' needs SUSPEND_SLOTS in core/save.js (C2-world)
+- [~] C2-world: world.js glue (beginReading, endReading, prepareFloor, resumeReading), trapdoor, chest tiers, Bookmark use, death card and Quit, suspend save, floor tag, props (`docs/briefs/C2-world.md`); launched 10/27 02:10
+- [ ] C2-story-ui: the Archivist (Hollis), scenes, plaques, Journal line, title rows, the plaque screen (`docs/briefs/C2-story-ui.md`); brief written, launches when a slot frees
 - [~] C2-sprites-boss: chest sprites, plaque, trapdoor, the Binder's art, B100 and the entrance hall maps, prefabs and landings for bands three to five (`docs/briefs/C2-sprites-boss.md`); launched 10/27 01:40
 - [ ] C3-sim-bot: --cave sim route with death-rate targets, --cave autoplay route, balance pass
 - [ ] C3-critic: fresh-eyes play-critic, Lufia feel, issue list

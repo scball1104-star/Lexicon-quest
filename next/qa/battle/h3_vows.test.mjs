@@ -31,7 +31,7 @@ function game(o = {}) {
 }
 const fought = (g, n = 1) => { g.counters.battles = (g.counters.battles || 0) + n; };
 /** Everything about a game except the vow fields, as JSON: the "no other change" witness. */
-const rest = (g) => { const s = serialize(g); delete s.vow; delete s.vowsKept; return JSON.stringify(s); };
+const rest = (g) => { const s = serialize(g); delete s.vow; delete s.vowsKept; delete s.seed; return JSON.stringify(s); };   // seed comes from Date.now(): two games made 1 ms apart differ
 
 // ================================================================================================ 1. the table
 test('five vows, unique ids, names that fit a choice row, lines that fit a box, ASCII only, no em dash', () => {
