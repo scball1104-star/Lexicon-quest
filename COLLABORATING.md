@@ -32,6 +32,11 @@ want, for example:
 - "Review the open pull requests from Scott."
 - "Ship it." (runs the full test list first)
 
+## Who is who on GitHub
+
+- Scott: `scball1104-star`
+- Stephen: (his Claude adds this line in its first pull request, as the test that everything works)
+
 ## What never goes in the repo
 
 Passwords, keys or account logins; anything identifying the kids; art or music you do not have the right to use
