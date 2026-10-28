@@ -3,13 +3,13 @@
  "w": 384,
  "h": 216,
  "cell": null,
- "note": "the Weir Culvert: a wet brick vault with iron ribs, a drain mouth and a trickle, standing water, a light shaft (composed)",
+ "note": "culvert battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py (docs/MEDIA_BUILD.md 1)",
  "extraColors": [],
- "colors": 37,
- "composed": "tools/art/backdrops/x1_compose.py (battle_culvert)",
+ "colors": 55,
  "bandY": 118,
  "bandAlpha": 0.46,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
  "backdropId": "battle_culvert",
- "fallback": "archive_deep"
+ "fallback": "archive_deep",
+ "source": "runway"
 }

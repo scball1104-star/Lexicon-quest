@@ -57,10 +57,8 @@ export const EP1_DONE_FLAGS = ['intro_done', 'met_mael', 'mira_joined', 'bram_jo
   'campfire_rested', 'archive_key_found', 'stacks_key_found', 'returned_home', 'hal_returned',
   'cold_open_done', 'yard_fight_done'];   // H1's opening beats are behind a finished Episode 1 too (CRITIQUE_ARC 1)
 /**
- * The party Episode 2 expects at Lv 9: the simulator's `east_road` loadout (tools/sim/loadouts.mjs; the test in
- * qa/world/ep2_plumbing.test.mjs keeps the two in step). W11 (PLAYTEST_REVIEW_3 fix 1): `exp` is Episode 1's full
- * clear (tools/sim progression(1): 1433, Lv 9 and 60 short of 10), not the Lv 9 floor (1156), so a fresh start
- * meets the Episode 2 curve where a finished Episode 1 save does.
+ * The party Episode 2 expects at Lv 9: the simulator's `east_road` loadout (qa/world/ep2_plumbing.test.mjs keeps them in
+ * step). `exp` is Episode 1's full clear (1433), not the Lv 9 floor, so a fresh start meets the Episode 2 curve (W11).
  */
 export const EP2_START = {
   level: 9, exp: 1433, gold: 900, map: 'hero_home', mark: 'bed',
@@ -73,10 +71,9 @@ export const EP2_START = {
 };
 
 /**
- * A fresh game standing where Episode 2 begins: a Lv 9 party in the east_road loadout, every Episode 1 main flag
- * plus ep1_complete and the credits_rolled counter, the Lantern and the first name fragment, 900 gold and a stocked
- * bag, in bed at home (so `ep2_morning` runs). `pos` is the bed mark of hero_home when the caller passes it
- * (o.pos), else START_POS (hero_home keeps `bed` there). Pure.
+ * A fresh game where Episode 2 begins: a Lv 9 party in the east_road loadout, every Episode 1 main flag, credits_rolled
+ * and the Episode 1 tutorial barks (CRITIQUE_STACKS 19), the Lantern, the first fragment, 900 gold, a stocked bag, in bed
+ * at home (`ep2_morning` runs). `pos` is the bed mark (o.pos), else START_POS. Pure.
  */
 export function newGameEp2(heroName = 'Hero', o = {}) {
   const S = EP2_START;
@@ -97,6 +94,7 @@ export function newGameEp2(heroName = 'Hero', o = {}) {
   g.gold = S.gold;
   for (const f of EP1_DONE_FLAGS) g.flags[f] = true;
   g.counters.credits_rolled = 1;
+  for (const k of ['chest', 'visible_enemy', 'appraise_target', 'dash_target', 'heavy_block', 'font', 'elite']) g.counters[`bark:first_${k}`] = 1;   // Episode 1's lessons, learned
   g.chapter = 2;
   g.lastSafe = { map: g.map, pos: { ...g.pos } };
   return g;
@@ -204,6 +202,7 @@ export function removeGear(g, uid) {
 export function partyMembers(g) { return g.party; }
 export function member(g, id) { return g.party.find((m) => m.id === id) || g.reserve.find((m) => m.id === id) || null; }
 export function addMember(g, id, opts = {}) {
+  const r = (g.reserve || []).findIndex((m) => m.id === id); if (r >= 0) g.party.push(...g.reserve.splice(r, 1));   // Fine Print: reserve joins
   if (member(g, id)) return member(g, id);
   if (!PARTY_IDS.includes(id)) throw new Error('unknown member ' + id);
   const lead = g.party[0];

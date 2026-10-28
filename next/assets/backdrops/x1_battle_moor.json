@@ -3,13 +3,13 @@
  "w": 384,
  "h": 216,
  "cell": null,
- "note": "the High Moor: overcast sky, a low pale sun, heather and bracken, gorse, granite tors, the black tarn, the broken Watchtower (composed)",
+ "note": "the High Moor battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py; replaces the composed stage (docs/MEDIA_BUILD.md 1); bandY/bandAlpha kept",
  "extraColors": [],
- "colors": 50,
- "composed": "tools/art/backdrops/x1_compose.py (battle_moor)",
+ "colors": 44,
  "bandY": 118,
  "bandAlpha": 0.44,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
  "backdropId": "battle_moor",
- "fallback": "valley"
+ "fallback": "valley",
+ "source": "runway"
 }

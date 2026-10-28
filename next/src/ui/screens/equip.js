@@ -11,6 +11,7 @@ import { memberStats, equipDelta } from '../../battle/rules.js';
 import { equipKeys, isWeaponKey, equipped, candidates, equipGear, unequip, optimize, removeAll, itemLine, gearName, baseOf } from '../../game/inventory.js';
 import { SLOT_ICON, SLOT_NAMES, WEAPON_ICON } from '../party.js';
 import { cap } from '../text.js';
+import { fitLine } from './journal.js';
 
 const COMPARE = [['atk', 'ATK'], ['def', 'DEF'], ['mag', 'MAG'], ['spr', 'SPR'], ['spd', 'SPD'], ['maxHp', 'HP']];
 
@@ -35,7 +36,7 @@ export class EquipScreen {
     const m = this.member;
     const items = this.keys.map((key) => {
       const it = equipped(m, key);
-      return { id: key, key, label: it ? gearName(it) : '(none)', icon: this.keyIcon(key), color: it ? (it.rarity || 'common') : 'dim', item: it,
+      return { id: key, key, label: it ? fitLine(this.engine.renderer, gearName(it), 118) : '(none)', icon: this.keyIcon(key), color: it ? (it.rarity || 'common') : 'dim', item: it,
         help: isWeaponKey(m, key) ? (m.weapon === key ? HELP.equip.weapon : 'Second weapon. Swap to it in battle.') : HELP.equip[key] || '' };
     });
     items.push({ id: 'optimize', label: 'Optimize', icon: 'star', color: 'cream', help: 'Equip the strongest gear you carry.' });
@@ -145,7 +146,6 @@ export class EquipScreen {
     }
     r.text(line2, x + 8, y + 16, { color: line2Color, width: w - 16 });
     drawDivider(r, x + 6, y + 28, w - 12);
-    // Compare table: 2 columns x 3 rows.
     const colW = Math.floor((w - 16) / 2);
     COMPARE.forEach(([k, label], i) => {
       const cx = x + 8 + (i % 2) * colW, cy = y + 32 + Math.floor(i / 2) * 11;
@@ -168,7 +168,6 @@ export class EquipScreen {
     drawWindow(r, 4, 50, 164, 112);
     this.slots.draw(r, { frame: r.frame, cursor: this.focus === 'slots', bar: this.focus === 'slots' });
     if (this.slots.isVisible(this.keys.length)) { const divY = this.slots.rowRect(this.keys.length).y - 1; drawDivider(r, 10, divY, 152); }   // the rule spans the window, not the list
-    // Candidate list with a title.
     drawWindow(r, 168, 4, 212, 104);
     const slot = this.slots.item;
     const title = slot && slot.key ? (isWeaponKey(m, slot.key) ? `${cap(slot.key)}s` : this.keyLabel(slot.key)) : slot ? slot.label : '';

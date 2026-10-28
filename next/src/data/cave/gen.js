@@ -82,7 +82,7 @@ export function gridSize(floor) {
   const t = Math.max(0, Math.min(1, (floor - 1) / 98));
   return [40 + Math.round(16 * t), 30 + Math.round(10 * t)];
 }
-export const foeCount = (floor) => Math.min(12, 4 + Math.floor(floor / 10));
+export const foeCount = (floor) => Math.min(floor >= 40 ? 6 : 12, 4 + Math.floor(floor / 10));   // at most 6 from B40 (C4-fixes; foes.js FOE_CAP_DEEP)
 
 // ------------------------------------------------------------------------------------------------ walk model
 const OPEN_TERRAIN = new Set(['catalog_wood', 'dirt', 'carpet_red', 'carpet_blue', 'moss', 'gallery_stone', 'stone_floor', 'stacks_wood',
@@ -349,6 +349,7 @@ function layout(seed, floor, bandId) {
       L.attempt = attempt;
       arrivalCell(seed, floor, L);          // the arrival room and column (its own seeded stream)
       checkDressable(L, band, floor);       // a stair room, enough chest and foe spots: else the next attempt
+      if (!dressProves(seed, floor, band, L)) throw new CaveGenError('no dressing of this layout proves walkable');   // else the next attempt (CRITIQUE_STACKS 1)
       cacheSet(key, L);
       return L;
     } catch (e) {
@@ -581,6 +582,19 @@ export function generateFloor(seed, floor, opts = {}) {
   throw new CaveGenError(`floor ${floor} seed ${seed}: no dressing left the stair, chests and foes reachable (${lastErr && lastErr.message})`);
 }
 const DRESS_ATTEMPTS = 8;
+/**
+ * A layout is accepted only if some dressing of it proves (the stair, every chest and every foe reachable), tried here with the
+ * default options so every caller (the floor itself, and the floor above asking for its arrival) agrees on the same layout.
+ * Seeds 612 B54 and 687 B58 had layouts no dressing could prove; they now take the next layout attempt.
+ */
+function dressProves(seed, floor, band, L) {
+  for (let k = 0; k < DRESS_ATTEMPTS; k++) {
+    const rng = createRng(hashSeed(k === 0 ? `${seed}:${floor}:dress` : `${seed}:${floor}:dress:${k}`));
+    try { dressFloor(seed, floor, band, `cave_b${floor}`, '', [1, 1], {}, L, rng); return true; }
+    catch (e) { if (!(e instanceof CaveGenError)) throw e; }
+  }
+  return false;
+}
 
 /** One dressing of a laid-out floor on `rng`: rooms' props, the stair, chests, foes, lights, then the proof. Throws CaveGenError. */
 function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
@@ -672,9 +686,11 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
     .sort((a, b) => (b.dead - a.dead) || (b.d - a.d) || (a.i - b.i));
   const chestCells = new Set();
   const spotFree = (r, [x, y]) => !chestCells.has(key2(r.x + x, r.y + y)) && walk.touchable(r.x + x, r.y + y) && !(r.x + x === sx && r.y + y === sy);
+  // a chest is a block: a spot that would cut the stair off from the arrival is skipped (CRITIQUE_STACKS 1, seed 311 B92)
+  const keepsStair = (x, y) => walkModel({ ...preMod, decor, overlays, events: [...events, chestEv('probe', x, y, 'red', { floor })] }, [ax, ay]).reached(sx, sy - 1);
   const takeSpot = (c, preferBlue) => {
     const spots = preferBlue && c.r.p.marks.blue.length ? [...c.r.p.marks.blue, ...c.r.p.marks.chest] : c.r.p.marks.chest;
-    const s = spots.find((sp) => spotFree(c.r, sp));
+    const s = spots.find((sp) => spotFree(c.r, sp) && keepsStair(c.r.x + sp[0], c.r.y + sp[1]));
     if (!s) return null;
     chestCells.add(key2(c.r.x + s[0], c.r.y + s[1]));
     return [c.r.x + s[0], c.r.y + s[1]];
@@ -715,7 +731,8 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
       marks[e.id] = front || [e.x, e.y];
     }
   }
-  // foes: from the pool, on prefab spots outside the arrival room, reachable, off the stair and the chests
+  // foes: from the pool, on prefab spots outside the arrival room, reachable WITH the chests in place, off the stair and the chests
+  const walkC = walkModel({ ...preMod, decor, overlays, events }, [ax, ay]);
   const poolRaw = (opts.foes ? opts.foes(floor, band.id) : null) || band.foes;
   const pool = poolRaw.map((e) => foeEntry(e, opts, band));
   const want = foeCount(floor);
@@ -732,7 +749,7 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
   const foeCells = new Set();
   for (const s of ordered) {
     if (placedFoes >= want) break;
-    if (!walk.reached(s.x, s.y) || chestCells.has(key2(s.x, s.y)) || foeCells.has(key2(s.x, s.y))) continue;
+    if (!walkC.reached(s.x, s.y) || chestCells.has(key2(s.x, s.y)) || foeCells.has(key2(s.x, s.y))) continue;
     if (Math.abs(s.x - ax) + Math.abs(s.y - ay) < 4) continue;
     if (s.x === sx && s.y === sy) continue;
     const f = rng.pick(pool);

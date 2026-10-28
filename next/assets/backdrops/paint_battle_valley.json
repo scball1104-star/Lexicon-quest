@@ -1,0 +1,14 @@
+{
+ "image": "paint_battle_valley.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "valley battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-27) quantized by quantize_still.py; approved by Scott 2026-10-27",
+ "extraColors": [],
+ "colors": 61,
+ "source": "runway",
+ "replaces": "battle_valley.png (composed; stays as the placeholder until this file loads)",
+ "bandY": 118,
+ "bandAlpha": 0.42,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}

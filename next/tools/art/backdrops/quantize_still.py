@@ -1,7 +1,9 @@
 """Quantize a painted still into a game backdrop (384 x 216, the palette, Bayer dither), the same path build.py
 takes for the key-art cells, so a Runway (or any) painting can be judged at the game's own pixel density.
 
-    python quantize_still.py in.png out.png [--extras 4] [--max-pair 0.14] [--sharpen 0.55] [--x3 out_3x.png]
+    python quantize_still.py in.png out.png [--extras 4] [--max-pair 0.14] [--sharpen 0.55] [--x3 out_3x.png] [--rgb]
+
+Writes an indexed PNG (half the bytes of RGB, identical pixels) unless --rgb.
 
 Prints the colour count. Read-only on the input. Pairs with build.py (import, no copy of its maths)."""
 import argparse, os, sys
@@ -16,6 +18,7 @@ def main(argv):
     p.add_argument('src'); p.add_argument('dst')
     p.add_argument('--extras', type=int, default=4); p.add_argument('--max-pair', type=float, default=0.14)
     p.add_argument('--sharpen', type=float, default=0.55); p.add_argument('--x3', default=None)
+    p.add_argument('--rgb', action='store_true', help='write an RGB PNG instead of the indexed one')
     a = p.parse_args(argv)
     im = Image.open(a.src).convert('RGB')
     # crop to 16:9 around the centre, then the build's own downscale, sharpen and quantize
@@ -31,7 +34,13 @@ def main(argv):
     idx = B.quantize_ordered(arr, pal2, a.max_pair)
     out = (pal2[idx] * 255 + 0.5).astype(np.uint8)
     img = Image.fromarray(out, 'RGB')
-    img.save(a.dst, optimize=True)
+    if a.rgb: img.save(a.dst, optimize=True)
+    else:
+        # lossless indexed PNG (under 256 colours by construction): about half the bytes, identical pixels (build.py 'indexed')
+        cols = np.unique(out.reshape(-1, 3), axis=0)
+        lut = {tuple(c): i for i, c in enumerate(cols)}
+        idxim = np.array([lut[tuple(px)] for px in out.reshape(-1, 3)], np.uint8).reshape(H, W)
+        pim = Image.fromarray(idxim, 'P'); pim.putpalette(cols.astype(np.uint8).flatten().tolist()); pim.save(a.dst, optimize=True)
     if a.x3: img.resize((W * 3, H * 3), Image.NEAREST).save(a.x3, optimize=True)
     print(f'{a.dst}: {len(np.unique(idx))} colours, {len(extras)} extras, {os.path.getsize(a.dst)} bytes')
     return 0

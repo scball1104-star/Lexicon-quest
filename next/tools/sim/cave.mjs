@@ -258,8 +258,8 @@ function openChest(g, floor, ev, landing) {
     const id = rollBlueChest(rng, floor, CAVE.vaultIds(g), { exclude: CAVE.bluesOf(g) });
     const uid = id ? CAVE.foundBlue(g, id) : null;
     if (uid != null) { out.unique = id; return out; }
-    roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props: props.includes('red_rarity_up') ? props : [...props, 'red_rarity_up'], landing: false, holdsBookmark: holds });
-  } else roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props, landing, holdsBookmark: holds });
+    roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props: props.includes('red_rarity_up') ? props : [...props, 'red_rarity_up'], landing: false, holdsBookmark: holds, bookmarks: CAVE.bookmarks(g) });
+  } else roll = rollRedChest(rng, floor, CAVE.vaultIds(g), W.redChestOpts(g, floor, landing));   // world.js's own (C4-fixes: the lent weapon, the spare cap)
   if (roll.gold > 0) g.gold += roll.gold;
   for (const c of roll.consumables || []) give(g, c.item, c.qty || 1);
   for (const inst of roll.items || []) { addGear(g, inst); out.items++; }

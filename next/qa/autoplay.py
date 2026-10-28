@@ -36,6 +36,8 @@ Crowns and A Letter Answered on the way (not with --no-side).
     python next/qa/autoplay.py --episode 2                       from <device>-ep1-credits-save.json
     python next/qa/autoplay.py --episode 2 --start new           the title's Episode 2 entry (newGameEp2)
     python next/qa/autoplay.py --episode 2 --resume <game.json>  any saved game (e.g. <device>-ep2-last-game.json)
+    python next/qa/autoplay.py --tier 1                          Fine Print: Episode 1 from a carried Episode 2 record
+                                                                 (the title's row; <device>-tier1-* files; docs/TIER.md)
 
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
@@ -1511,6 +1513,11 @@ class Episode:
         b.frames(6)
         b.shot('name_entry')
         b.page.keyboard.press('Enter')
+        self.climb_tower()
+
+    def climb_tower(self):
+        """From the hand-off into the cold open to waking at home (New Game and, with --tier 1, Fine Print's Begin)."""
+        b = self.b
         # H1: the prologue scene is only a hand-off now. The field opens on the bell tower stair (the cold open,
         # "The Thirteenth Toll"): twelve toll steps, each a step trigger that holds the hero while the bell rings
         # and the name shows, then the thirteenth at the top, black, one card, and the engine carries the game home.
@@ -2129,6 +2136,89 @@ class Episode:
             if self.until == step_id:
                 print(f'stopping after {step_id} (--until)', flush=True)
                 return
+
+
+# ================================================================================================ Fine Print (tier_1)
+# H7-hard-road (docs/TIER.md): `--tier 1` plays Episode 1 on Fine Print from a carried record. The record is the Episode 3 quick
+# start's party (LQ_DEBUG.newGameEp3: Lv 13, the Episode 2 finish kit, ep2_complete), written to record 2 as a finished save; the
+# title's Fine Print row carries it (record ask, then Begin) into a run that saves to the autosave, the cold open plays, Mira and
+# Bram join from reserve at their own scenes, and the rest is the regular Episode 1 route on the tier's foes. Writes
+# <device>-tier1-* files; the report's notes give the party's level at each main step and the legendaries held at the end.
+TIER_RECORD_SLOT = 2
+TIER_SEED_JS = """(name) => {
+  LQ_DEBUG.newGameEp3(name, { slot: %d, scene: 'none' });
+  const g = LQ_ENGINE.game;
+  const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 21600, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) };
+  const ok = LQ_ENGINE.save.save(%d, JSON.parse(JSON.stringify(g)), meta);
+  LQ_ENGINE.game = null;
+  LQ_ENGINE.reset('title');
+  return ok;
+}""" % (TIER_RECORD_SLOT, TIER_RECORD_SLOT)
+
+
+class TierEpisode(Episode):
+    def title_to_bed(self):
+        b = self.b
+        if b.scene() != 'title':
+            return
+        if not b.js(f'({TIER_SEED_JS})({json.dumps(b.hero)})'):
+            raise Fail('could not write the carried record')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title' && ((LQ_DEBUG.state().sceneState || {}).items || []).includes('tier')", timeout=30000, polling=50)
+        b.frames(10)
+        b.shot('tier_title')
+        ss = b.scene_state()['ss'] or {}
+        b.pick(ss['items'].index('tier'), ss.get('index') or 0)            # Fine Print
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'finePrint'", timeout=10000, polling=20)
+        b.frames(8)
+        st = b.scene_state()['ss'] or {}
+        if st.get('step') != 'pick' or TIER_RECORD_SLOT not in (st.get('ids') or []):
+            raise Fail(f'the Fine Print ask does not offer record {TIER_RECORD_SLOT}: {st}')
+        b.shot('tier_ask')
+        b.pick(st['ids'].index(TIER_RECORD_SLOT), st.get('index') or 0)
+        b.frames(8)
+        st = b.scene_state()['ss'] or {}
+        if st.get('step') != 'terms' or 'begin' not in (st.get('ids') or []):
+            raise Fail(f'the Fine Print terms do not offer Begin: {st}')
+        b.shot('tier_terms')
+        b.pick(st['ids'].index('begin'), st.get('index') or 0)
+        g = None
+        for _ in range(200):
+            g = b.game()
+            if g and g.get('tier') == 1:
+                break
+            b.frames(6)
+        if not g or g.get('tier') != 1 or not (g.get('flags') or {}).get('tier_1'):
+            raise Fail('Begin did not start a tier_1 game')
+        if [m['id'] for m in g['party']] != ['hero'] or [m['id'] for m in g['reserve']] != ['mira', 'bram']:
+            raise Fail(f'the carry: party {[m["id"] for m in g["party"]]}, reserve {[m["id"] for m in g["reserve"]]}')
+        b.notes.append(f'tier: carried {b.hero} Lv {g["party"][0]["level"]} with Mira Lv {g["reserve"][0]["level"]} and Bram Lv {g["reserve"][1]["level"]} '
+                       f'in reserve, {g["gold"]} gold, run saves to slot {g.get("autosaveSlot")}')
+        self.climb_tower()
+
+    def run(self):
+        b = self.b
+        seen = set()
+        orig = b.mark
+
+        def mark(step):
+            orig(step)
+            g = b.game() or {}
+            party = g.get('party') or []
+            if party and step not in seen:
+                seen.add(step)
+                b.notes.append(f'tier level at {step}: ' + ', '.join(f'{m["id"]} {m["level"]}' for m in party))
+        b.mark = mark
+        try:
+            super().run()
+        finally:
+            b.mark = orig
+        g = b.game() or {}
+        held = [it for m in (g.get('party') or []) + (g.get('reserve') or []) for it in (m.get('equip') or {}).values() if isinstance(it, dict)]
+        held += list(g.get('gear') or [])
+        legend = sorted({it.get('base') for it in held if it.get('rarity') == 'legendary' and it.get('base')})
+        fl = g.get('flags') or {}
+        b.notes.append(f'tier end: tier_1={bool(fl.get("tier_1"))} ep1_complete={bool(fl.get("ep1_complete"))}, {len(b.battles)} battles, '
+                       f'{b.gameovers} game overs, legendaries held: {", ".join(legend) or "none"}')
 
 
 # ================================================================================================ Episode 2
@@ -3414,6 +3504,7 @@ def main(argv):
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
     ap.add_argument('--episode', type=int, default=1, choices=[1, 2])
+    ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
     ap.add_argument('--route', default='regular', choices=['regular', 'complete'],
@@ -3438,7 +3529,9 @@ def main(argv):
         tag = '-complete'
     elif a.x1:
         tag += '-x1'
-    if a.episode == 2:
+    if a.tier:
+        tag, resume = '-tier1', None
+    if a.episode == 2 and not a.tier:
         tag = '-ep2' + ('-new' if a.start == 'new' and not a.resume else '')
         if a.start == 'new' and not a.resume:
             query = '&ep=2'                   # the title offers Episode 2 without a finished save (title.js ep2Offer)
@@ -3453,6 +3546,8 @@ def main(argv):
         bot.open()
         if a.wrong_order:
             wrong = wrong_order(bot)
+        elif a.tier:
+            TierEpisode(bot, side=not a.no_side, until=a.until, hollow=a.hollow).run()
         elif a.episode == 2:
             Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.route == 'complete':

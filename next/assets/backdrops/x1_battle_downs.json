@@ -3,13 +3,13 @@
  "w": 384,
  "h": 216,
  "cell": null,
- "note": "Shepherd's Downs: wide sky, three swells of downland, a drystone wall, a hawthorn in may, sheep, the Stones on the far crest (composed)",
+ "note": "downs battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py; replaces the composed stage (docs/MEDIA_BUILD.md 1); bandY/bandAlpha kept",
  "extraColors": [],
- "colors": 40,
- "composed": "tools/art/backdrops/x1_compose.py (battle_downs)",
+ "colors": 55,
  "bandY": 118,
  "bandAlpha": 0.42,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
  "backdropId": "battle_downs",
- "fallback": "valley"
+ "fallback": "valley",
+ "source": "runway"
 }

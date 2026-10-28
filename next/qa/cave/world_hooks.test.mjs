@@ -18,6 +18,7 @@ const { ZONE_LOOT } = await import('../../src/data/loot-tables.js');
 const { itemLevel } = await import('../../src/data/cave/foes.js');
 const { createEncounterBattle, PARTY_HIT } = await import('../../src/battle/rules.js');
 const { ENCOUNTERS } = await import('../../src/data/encounters.js');
+const { EQUIPMENT } = await import('../../src/data/items.js');
 
 function running(seed = 7) {
   const g = newGameEp2('Arden');
@@ -187,7 +188,7 @@ test('afterBattle: a win inside a run counts the group\'s foes; a flee counts no
   assert.equal(W.HOOKS.autosave({ game: g2 }), false);
 });
 
-test('openCaveChest on a fake field: a red chest lends (gold, items or consumables, maybe the Bookmark); a blue chest gives one unique into the bag and the run', async () => {
+test('openCaveChest on a fake field: a red chest lends (items or consumables, maybe the Bookmark, never gold); B1\'s first lends an empty-handed reader a weapon; a blue chest gives one unique into the bag and the run', async () => {
   const g = running(6);
   const [b1] = W.prepareFloor(g, 1);
   const log = [];
@@ -201,8 +202,11 @@ test('openCaveChest on a fake field: a red chest lends (gold, items or consumabl
   const red = b1.events.find((e) => e.type === 'chest' && e.tier === 'red');
   const r = await W.openCaveChest(field, { id: red.id, ev: red, x: red.x, y: red.y });
   assert.equal(r.tier, 'red');
-  assert.ok(r.roll.gold > 0 && g.gold === r.roll.gold);
-  assert.ok(r.roll.items.length + r.roll.consumables.length >= 1);
+  assert.ok(r.roll.gold === 0 && g.gold === 0, 'no gold in the Stacks (C4-fixes, CRITIQUE_STACKS 15)');
+  // the floor's first red chest on B1 to B3 lends the first bare-handed reader (the hero) a weapon of his kind (CRITIQUE_STACKS 13)
+  assert.equal(r.roll.items.length, 1);
+  assert.equal(EQUIPMENT[r.roll.items[0].base].type, 'sword');
+  assert.deepEqual(g.cave.run.lentOn, [1]);
   assert.equal(g.cave.run.chests, 1);
   // deterministic: the same chest opened on a fresh identical run rolls the same
   const g2 = running(6); W.prepareFloor(g2, 1);

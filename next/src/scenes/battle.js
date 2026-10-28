@@ -36,8 +36,7 @@ const LOG_SHOW = 3;
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
   east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
-// In-battle boss name card (name + epithet), keyed by the encounter's leader id: it settles onto the stage as the party
-// enters (the field scene shows its own `s.title` card before the swirl).
+// In-battle boss name card by leader id (the field scene shows its own card before the swirl).
 const BOSS_CARD = {
   refl_hero: { name: 'THE OTHER SELVES', sub: 'Hall of Reflections' },
   nameless_king: { name: 'THE NAMELESS KING', sub: 'Keeper of the Court' },
@@ -80,9 +79,17 @@ const BACKDROPS = {
   x1_culvert: { asset: 'x1_battle_culvert', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
   // H6: the town's key art, for the yard slime
   willowmere: { asset: 'title', cell: 0, bright: 1.0, tint: null, darken: 0.22 },
+  // the Deep Stacks' band stages (cave pack assets)
+  cave_cellars: { asset: 'cave_battle_cellars', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
+  cave_ember: { asset: 'cave_battle_ember', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
+  cave_forge: { asset: 'cave_battle_forge', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
 };
 const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
-  'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne'];
+  'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne',
+  'cave_battle_cellars', 'cave_battle_ember', 'cave_battle_forge'];   // cave pack files, path-loaded once fetched
+// Painted stages (docs/MEDIA_BUILD.md 1): lazy (build_pwa LAZY_PREFIXES); the composed stage stands in until one loads.
+const PAINTED = { valley: 'paint_battle_valley', valley_dusk: 'paint_battle_valley_dusk', hollow: 'paint_battle_hollow', east_road: 'paint_battle_east_road' };
+const PAINTED_ASSETS = Object.values(PAINTED);
 /** Zone -> stage key overrides (W8-art): the hollow's zone data still names 'valley', its stage is 'hollow'. */
 const ZONE_BACKDROP = { whisperwood_hollow: 'hollow' };
 const artLoads = new Map();      // asset id -> 'loading' | 'ok' | 'missing'
@@ -102,7 +109,7 @@ function loadImageUrl(href) {
 export function preloadBattleArt(engine) {
   const assets = engine && engine.assets;
   if (!assets || typeof Image === 'undefined') return;
-  for (const id of BACKDROP_ASSETS) {
+  for (const id of [...BACKDROP_ASSETS, ...PAINTED_ASSETS]) {
     if (artLoads.has(id) || assets.has(id)) continue;
     artLoads.set(id, 'loading');
     (async () => {
@@ -136,6 +143,8 @@ function backdropAssetReady(engine, key) {
   const rec = BACKDROPS[key] || BACKDROPS.valley;
   return !!backdropArt(engine.assets, rec.asset);
 }
+function paintedArt(assets, key) { return PAINTED[key] ? backdropArt(assets, PAINTED[key]) : null; }
+function paintedReady(engine, layer) { return !!(layer && !layer.painted && paintedArt(engine.assets, layer.key)); }
 export function backdropKey(zoneId, isBoss, stage = null) {
   if (stage && BACKDROPS[stage]) return stage;   // H6
   const zone = ZONES[zoneId];
@@ -157,7 +166,8 @@ export function buildBackdrop(engine, zoneId, isBoss, stage = null) {
   const assets = engine.assets;
   let usedAsset = false;
   let band = { y: BAND.y, alpha: BAND.alpha };
-  const art = backdropArt(assets, rec.asset);
+  const painted = paintedArt(assets, key);
+  const art = painted || backdropArt(assets, rec.asset);
   if (art) {
     g.imageSmoothingEnabled = false;
     g.drawImage(art.image, 0, 0, W, H);
@@ -196,7 +206,7 @@ export function buildBackdrop(engine, zoneId, isBoss, stage = null) {
     if (rec.tint) { g.fillStyle = rec.tint; g.fillRect(0, 0, W, H); }
   }
   drawStageBand(g, band);
-  return Object.assign(layer, { usedAsset, band, key });
+  return Object.assign(layer, { usedAsset, band, key, painted: !!painted });
 }
 /** The indigo ground band: solid from band.y down, its top `BAND.edge` rows dithered (Bayer) so the edge is soft. */
 function drawStageBand(g, band) {
@@ -356,7 +366,7 @@ export class BattleScene {
     if (this.bossIntro && this.phase !== 'intro' && this.bossIntro.t < this.bossIntro.frames) this.bossIntro.t = this.fast ? this.bossIntro.frames : this.bossIntro.t + 1;
     if (this.slow) { if (--this.slow.frames <= 0) this.slow = null; }
     if (this.kick.frames > 0 && --this.kick.frames <= 0) { this.kick.x = 0; this.kick.y = 0; }
-    if (this.backdropLayer && !this.backdropLayer.usedAsset && backdropAssetReady(e, this.backdropLayer.key)) {
+    if (this.backdropLayer && ((!this.backdropLayer.usedAsset && backdropAssetReady(e, this.backdropLayer.key)) || paintedReady(e, this.backdropLayer))) {
       this.backdropLayer = buildBackdrop(e, this.zone, !!(this.encounter && this.encounter.boss), this.stage);
       e.renderer.setBackdrop(this.backdropLayer.canvas);
     }
@@ -614,7 +624,8 @@ export class BattleScene {
     for (const a of this.party()) if (!a.ko) { a.setPose('victory'); a.defending = false; }
     e.audio.stopMusic(0.2);
     this.fanfare = e.audio.jingle('victory_fanfare', { duckMusic: false });
-    if (this.fanfare && this.fanfare.then) this.fanfare.then(() => { if (this.phase === 'rewards' || this.phase === 'victory') e.audio.music('victory'); });
+    // only while this battle is still on top (CRITIQUE_STACKS 2)
+    if (this.fanfare && this.fanfare.then) this.fanfare.then(() => { if ((this.phase === 'rewards' || this.phase === 'victory') && !this.leaving && e.scene === this) e.audio.music('victory'); });
     this.finishOutcome();
     this.timer = this.fast ? 1 : this.scaled(VICTORY_WAIT);
     this.setHelp('{c:gold}Victory!{/c}');

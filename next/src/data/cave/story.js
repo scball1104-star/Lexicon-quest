@@ -119,12 +119,19 @@ async function stacks_enter(s) {
   await offer(s);
 }
 
-// The offer: Begin / The record / Not yet (cancel). Begin asks once more; "Stay" gets one dry line. Up to 4 boxes.
+// The offer: Begin / The record / Not yet (cancel). Begin asks once more (and first whether to abandon a suspended reading);
+// "Stay" and "Keep it" get one dry line. Up to 5 boxes.
 async function offer(s) {
   await say(s, T.offer);
   const pick = await s.choice([T.offer_yes, T.offer_record, T.offer_no]);
   if (pick === 1) { await record(s); return; }
   if (pick !== 0) return;
+  // a reading waits in the suspend save: a new one would write over it (C4-fixes, CRITIQUE_STACKS 12); "Keep it" keeps it
+  const w = await worldModule();
+  if (w && typeof w.suspendOpen === 'function' && w.suspendOpen(PROBE.engine())) {
+    await say(s, T.abandon);
+    if ((await s.choice([T.abandon_yes, T.abandon_no])) !== 0) { await say(s, T.abandon_kept); return; }
+  }
   await say(s, T.confirm);
   const go = await s.choice([T.confirm_yes, T.confirm_no]);
   if (go !== 0) { await say(s, T.stay); return; }
@@ -237,7 +244,7 @@ export const SCENE_MAP = {
 };
 /** Box budgets, chains counted together (stacks_talk and stacks_intro carry the offer). */
 export const BOX_BUDGET = {
-  stacks_locked: 1, stacks_talk: 8, stacks_intro: 8, stacks_enter: 4, stacks_vault: 1, stacks_return: 2, stacks_record: 1,
+  stacks_locked: 1, stacks_talk: 9, stacks_intro: 9, stacks_enter: 5, stacks_vault: 1, stacks_return: 2, stacks_record: 1,
   stacks_no_save: 1, binder_intro: 1, binder_cleared: 1,
 };
 export const scenes = Object.fromEntries(Object.entries(rawScenes).map(([id, fn]) => [id, cut(fn, SCENE_CONDITIONS[id])]));
@@ -360,7 +367,7 @@ export default { scenes, register };
 //           blues in band order, the Binder's Quill last
 // Layout is the Journal's Ledger tab (ui/screens/journal.js): the header strip (the title, the record), the list on the left
 // (the slot icon and the name: bright cream when held, faded ink when not), the detail on the right (name, home band, who wears
-// it; the prop and the two lore lines when held, "..." and the unfound line when not), the help bar. Touch rows come from
+// it; the prop and the two lore lines when held, the unfound line when not), the help bar. Touch rows come from
 // rowHeightFor (seven visible on a phone); the list scrolls and its arrows are tappable. Cancel pops with the selected id.
 // ================================================================================================
 /** The faded-ink treatment of a unique not yet found (the Ledger's). */
@@ -445,8 +452,8 @@ export class StacksScene {
     if (row.wear) r.text(fitLabel(r, row.wear, DETAIL_W), x, 65, { color: 'gray' });
     drawDivider(r, 164, 78, 210);
     if (!row.held) {
-      r.text('...', x, 84, { color: 'dim' });
-      r.wrap(T.unfound, DETAIL_W).slice(0, 2).forEach((line, i) => r.text(line, x, 96 + i * 11, { color: 'dim' }));
+      // the unfound line alone (C4-fixes, CRITIQUE_STACKS 25: a "..." above it read as a missing string)
+      r.wrap(T.unfound, DETAIL_W).slice(0, 2).forEach((line, i) => r.text(line, x, 84 + i * 11, { color: 'dim' }));
       return;
     }
     let y = 84;

@@ -10,6 +10,7 @@ import { dirname, join, resolve } from 'node:path';
 const NEXT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const man = JSON.parse(readFileSync(join(NEXT, 'assets/audio/manifest.json'), 'utf8'));
 const abs = (src) => resolve(NEXT, src);
+const isSuno = (id) => { try { return /Suno/.test(JSON.parse(readFileSync(join(NEXT, 'assets', 'audio', 'music', `${id}.json`), 'utf8')).source || ''); } catch (e) { return false; } };
 const srcs = (e) => (Array.isArray(e.src) ? e.src : [e.src]);
 
 const DESIGN_SFX = `cursor confirm cancel buzzer text_blip door_open door_close stairs chest_open pot_break
@@ -181,16 +182,29 @@ test('total synthesized audio stays small', () => {
   assert.ok(total < 8.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
-test('Episode 2 music: the five composed tracks have fallbacks and sidecar loop points', () => {
+test('Episode 2 music: the five tracks have fallbacks and loop points (composed: the 60 ms guard; a Suno Pro replacement: measured)', () => {
   const FALLBACK = { hollow: 'willowmere', hollowmere: 'hollow', fading_road: 'valley', court: 'archive', boss_king: 'boss_archivore' };
   for (const [id, fb] of Object.entries(FALLBACK)) {
     const e = man.music[id];
     assert.ok(e, `music ${id}`);
     assert.equal(e.src, `assets/audio/music/${id}.mp3`, `${id}: src`);
     assert.equal(e.fallback, fb, `${id}: fallback`);
-    assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+    let side = {};
+    try { side = JSON.parse(readFileSync(join(NEXT, 'assets', 'audio', 'music', `${id}.json`), 'utf8')); } catch (e2) { side = {}; }
+    const suno = /Suno/.test(side.source || '');
+    if (suno) {
+      // docs/MEDIA_BUILD.md 3: a generated track keeps the loop points music_scan.py measured (written into its sidecar by
+      // tools/audio/finish_tracks.py) and its own loudness; the manifest's volume brings it to -16 LUFS at runtime
+      assert.ok(e.loopStart >= 0 && e.loopStart < 1, `${id}: measured loopStart`);
+      assert.ok(e.measuredLufs > -18.5 && e.measuredLufs < -12.5, `${id}: measured ${e.measuredLufs} LUFS`);
+      assert.ok(Math.abs(e.volume - Math.min(1.25, Math.max(0.2, Math.pow(10, (-16 - e.measuredLufs) / 20)))) < 0.01, `${id}: volume brings it to -16 LUFS`);
+    } else {
+      if (!isSuno(id)) assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+      else assert.ok(e.loopStart >= 0 && e.loopStart < 1, `${id}: measured loopStart (Suno)`);
+      if (!isSuno(id)) assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.3, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
+      else assert.ok(e.measuredLufs > -18.5 && e.measuredLufs < -12.5, `${id}: measured ${e.measuredLufs} LUFS (Suno)`);
+    }
     assert.ok(e.loopEnd > 60 && e.loopEnd <= e.duration, `${id}: loopEnd`);
-    assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.3, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
   }
 });
 
@@ -236,7 +250,8 @@ test('Expansion 1 music: the eight composed tracks have fallbacks, sidecar loop 
     assert.ok(e, `music ${id}`);
     assert.equal(e.src, `assets/audio/music/${id}.mp3`, `${id}: src`);
     assert.equal(e.fallback, fb, `${id}: fallback`);
-    assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+    if (!isSuno(id)) assert.ok(Math.abs(e.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+    else assert.ok(e.loopStart >= 0 && e.loopStart < 1, `${id}: measured loopStart (Suno)`);
     assert.ok(e.loopEnd > 60 && e.loopEnd <= e.duration, `${id}: loopEnd`);
     assert.ok(Math.abs(e.measuredLufs + 16.4) < 0.4, `${id}: measured ${e.measuredLufs} LUFS (about -16.4 after MP3)`);
     assert.ok(statSync(abs(e.src)).size < 3.5e6, `${id}: under 3.5 MB`);

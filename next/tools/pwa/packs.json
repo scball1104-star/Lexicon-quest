@@ -32,5 +32,12 @@
     "assets": "assets/cave_manifest.json",
     "audioPack": null,
     "touches": []
+  },
+  "tier": {
+    "entry": "../data/tier/index.js",
+    "prefix": "tier_",
+    "assets": "assets/tier_manifest.json",
+    "audioPack": null,
+    "touches": []
   }
 }

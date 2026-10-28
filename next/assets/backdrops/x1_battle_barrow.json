@@ -3,13 +3,13 @@
  "w": 384,
  "h": 216,
  "cell": null,
- "note": "the Wethers' Barrow: a turf-capped stone vault, five burial niches with two candles lit, cold flags, mist (composed)",
+ "note": "Wether's Barrow battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py; replaces the composed stage (docs/MEDIA_BUILD.md 1); bandY/bandAlpha kept",
  "extraColors": [],
- "colors": 34,
- "composed": "tools/art/backdrops/x1_compose.py (battle_barrow)",
+ "colors": 45,
  "bandY": 118,
  "bandAlpha": 0.46,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
  "backdropId": "battle_barrow",
- "fallback": "archive_deep"
+ "fallback": "archive_deep",
+ "source": "runway"
 }

@@ -28,18 +28,18 @@ ending "open flat ground across the whole foreground third."
 
 | id | replaces | scene (the composed stage's own notes, README) | status |
 |---|---|---|---|
-| battle_valley | composed | sunlit meadow at midday, river and old stone bridge mid-distance, pines left, limestone cliffs right, banded sky, haze | painted 10/27 (approved still 1), not yet in the game |
-| battle_valley_dusk | composed | the same scene at dusk: indigo to orange sky, violet shadows, warm river glints | |
-| battle_hollow | composed | root cave under pines, indigo to earth back wall, hanging roots, three canopy openings, light shafts right, black ink pool | painted 10/27 (approved still 2) |
-| battle_east_road | composed | the Fading Road at dusk, pale moon, violet streaks, the still mere with the Court glinting on the far shore, silver birches, ground mist | painted 10/27 (approved still 3) |
-| x1_battle_downs | composed | the Downs: rolling sheep pasture, drystone walls, a standing-stone circle on a rise, big sky | |
-| x1_battle_moor | composed | the High Moor: heather and peat, a tarn, wind-bent larches, low cloud | |
-| x1_battle_larchhill | composed | Larchhill: a larch wood in autumn gold, a mill race, a wooden wheel | |
-| x1_battle_barrow | composed | Wether's Barrow: a turf mound with a stone doorway, mist, dusk | |
-| x1_battle_culvert | composed | the culvert: a brick water channel under the road, lamplight, moss | |
-| cave band 2 (root_cellars) | reuses hollow | the Root Cellars: shelves grown through with roots, earth floor, lamplight | new id `battle_cellars` |
-| cave band 4 (ember_shelves) | reuses archive_deep | the Ember Shelves: scorched shelving, embers in the gaps, red light from below | new id `battle_ember` |
-| cave band 5 (forge_of_names) | reuses boss | the Forge of Names: a forge hall of iron shelving and molten script | new id `battle_forge` |
+| battle_valley | composed | sunlit meadow at midday, river and old stone bridge mid-distance, pines left, limestone cliffs right, banded sky, haze | in the game 10/28 (paint_battle_valley, lazy) |
+| battle_valley_dusk | composed | the same scene at dusk: indigo to orange sky, violet shadows, warm river glints | in the game 10/28 (paint_battle_valley_dusk, lazy) |
+| battle_hollow | composed | root cave under pines, indigo to earth back wall, hanging roots, three canopy openings, light shafts right, black ink pool | in the game 10/28 (paint_battle_hollow, lazy) |
+| battle_east_road | composed | the Fading Road at dusk, pale moon, violet streaks, the still mere with the Court glinting on the far shore, silver birches, ground mist | in the game 10/28 (paint_battle_east_road, lazy) |
+| x1_battle_downs | composed, REPLACED 10/28 | the Downs: rolling sheep pasture, drystone walls, a standing-stone circle on a rise, big sky | |
+| x1_battle_moor | composed, REPLACED 10/28 | the High Moor: heather and peat, a tarn, wind-bent larches, low cloud | |
+| x1_battle_larchhill | composed, REPLACED 10/28 | Larchhill: a larch wood in autumn gold, a mill race, a wooden wheel | |
+| x1_battle_barrow | composed, REPLACED 10/28 | Wether's Barrow: a turf mound with a stone doorway, mist, dusk | |
+| x1_battle_culvert | composed, REPLACED 10/28 | the culvert: a brick water channel under the road, lamplight, moss | |
+| cave band 2 (root_cellars) | reuses hollow | the Root Cellars: shelves grown through with roots, earth floor, lamplight | in the game 10/28 as `cave_battle_cellars` (BACKDROPS key cave_cellars) |
+| cave band 4 (ember_shelves) | reuses archive_deep | the Ember Shelves: scorched shelving, embers in the gaps, red light from below | in the game 10/28 as `cave_battle_ember` (cave_ember) |
+| cave band 5 (forge_of_names) | reuses boss | the Forge of Names: a forge hall of iron shelving and molten script | in the game 10/28 as `cave_battle_forge` (cave_forge) |
 
 **Bytes.** Core backdrops are precached (17 today). A painted stage is 78 to 165 KB against 6 to 35 KB composed, and the
 initial download has 8 KB of room under Scott's 6.5 MB cap. So the painted core stages are NOT precached: `build_pwa.py`
@@ -48,6 +48,12 @@ named `paint_<id>.png`, `BACKDROPS[key].asset` points at it with `fallback: '<id
 `preloadBattleArt` loads the painted set after the composed set; the scene already rebuilds the layer when art arrives
 (`backdropAssetReady`). The x1 and cave stages are pack assets and lazy already. `node qa/run.mjs pwa` proves the
 initial download did not move.
+
+### Field notes, 10/28 (orchestrator)
+- Painting: 4 credits a stage; first takes kept on all twelve. Two generations ran as Gen-4.5 VIDEO by mistake (the session opened in Video mode; about 192 credits): the Downs clip is kept at reports/lexicon_quest_media_upgrade/video/source/ for the video test.
+- Chrome downloads from Runway land on the Desktop as complete `.tmp` files that never get renamed (full bytes; identify by header and hash, `python` harvest). Suno: only the first MP3 download produced a file; later ones fire nothing (Chrome's automatic-downloads block for suno.com, to be allowed by Scott in the address bar).
+- quantize_still.py now writes indexed PNGs (27 to 39 KB a stage, half the RGB bytes, identical pixels).
+- Suno Pro verified; 20 themes created on v6 (two takes each, 3 of them twice by accident); only the title theme is downloaded and in the game. Suno's list is virtualized: scroll to the top before a find.
 
 ## 2. Story cards (Runway, same pipeline, `dialog_keyart`-style sidecar, vignette baked)
 

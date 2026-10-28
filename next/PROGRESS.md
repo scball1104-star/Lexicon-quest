@@ -415,3 +415,61 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   and the schedule generators. Nothing more runs today. The reset is Wednesday 9 AM; the Stacks critic, the sixty
   uniques, the fix pass, the Hard Road and the media build all start from there, one at a time.
 - Name settled: the post-credits tier is Fine Print.
+
+## 2026-10-28 (Wed) 9:30 AM: the reset, the first paintings in, the first Suno Pro theme in (not published)
+- The Stacks critic is playing (one agent). The three approved paintings and a dusk version of the valley are in the
+  game as painted battle stages that load the first time you fight there, with the old drawn stage as the placeholder,
+  so the first download did not grow by a byte. Suno Pro is confirmed on your account; the new title theme is in the
+  game's manifest at 112 kbps, and the old Free-tier title file is no longer referenced.
+- Your other Claude's shared-repo setup landed this morning on a branch of its own: overhaul is to become pull-request
+  only, with issues claimed before building. Two things it still needs: overhaul pushed to GitHub (only main is there
+  now) and the GitHub command line tool on this machine. Until then my work waits on local branches, ready to go up as
+  pull requests.
+- I stopped driving Chrome at 9:25 because you were at the PC. Say the word and I resume: eight more stages to paint,
+  nineteen more themes to make this month, the video test.
+
+## 2026-10-28 (Wed) 10:40 AM: every battle stage is a painting now (not published)
+- Twelve stages painted on Runway and quantized into the game this morning: the valley by day and at dusk, the
+  Hollow, the Fading Road, the five Wider Valley stages, and three new ones for the Deep Stacks' deeper bands (the
+  Root Cellars, the Ember Shelves, the Forge of Names). The four core ones load lazily so the first download did
+  not grow; the rest live in their packs. One slip: two of the generations ran as eight-second videos instead of
+  images (about 190 credits); the Downs clip is kept for the video test rather than wasted.
+- Music: all twenty themes for this month are made on Suno Pro, two takes each. Only the title theme is in the game
+  so far: Chrome stopped letting suno.com download files after the first one. Allowing automatic downloads for
+  suno.com in Chrome's address bar (the blocked-download icon) unblocks the other nineteen.
+- The Stacks critic is still playing. Nothing is published.
+
+## 2026-10-28 (Wed) 1 PM: all twenty themes in, the sixty uniques, Fine Print built (not published)
+- Music: every one of this month's twenty Suno Pro themes is in the game now, your hand-saved takes included, each with
+  its loop measured. Nine themes still use the composed pieces until November's downloads: the High Moor, Wether's
+  Barrow, the orrery, Larchhill, the millrace, and the Reeve and Millstone boss themes, plus the victory and game-over
+  jingles that never had a file.
+- The Deep Stacks have their sixty uniques in three grades. The odds turn over with depth as you asked, the first blue
+  chest always comes by B9, and every unique out-scores a rolled item of its level. Forty-four of the names are
+  placeholders you can veto. Side effect to balance next: deaths are now under half the targets in the deep bands.
+- Fine Print is built: a row on the title once a save has finished Episode 2, your finished character carried in, foes
+  lifted to your level and then hardened, better drops, legendaries that can finally roll, tier stock in the shops. It
+  lives in its own lazy pack so the first download did not move. Three of its calls are yours: gold x1.5 on the tier,
+  shop prices at 1.25 times, and the six new legendary names (Codicil, Marginalia, Errata, Countersign, Strikethrough,
+  Witness Seal).
+- The Stacks critic's fix pass is running now. After it: the switch goes on, the full publish check on a quiet machine,
+  and your yes. Nothing is published.
+
+## 2026-10-28 (Wed) 2:15 PM: the Deep Stacks switch is on, the whole queue is one pull request (not published)
+- The Stacks critic's fix pass landed: 23 of its 25 findings are fixed. The stair now builds the next floor before it
+  moves you, so a floor the generator cannot build keeps you where you are with one line instead of a red panel. Closing
+  the app mid-fight and coming back restarts that fight. Hollis says up front that a fall takes back the reading's gifts,
+  and asks before a new reading writes over one you left open. Deep floors have at most six fights, the deep bands mix
+  every earlier foe at its own strength, foes drop no cures down there, red chests hold no gold, and the Binder is decided
+  by whether you heed its warnings (careful play wins 98 percent, ignoring them 77). Two things need new art, not code:
+  a page-burst effect and sound for the Binder, and a proper head for Hollis.
+- The switch is on: every save that has finished Episode 1 will find the trapdoor under the library once this ships.
+- The publish checks all ran on this PC with nothing else open: the old game's gate, the full NEXT suite (1216 tests, none
+  failing), the screenshot sweep (212 of 212, after one stale shot was repointed at the new sixty-one-row plaque), and all
+  three balance simulators, and the bot runs: the Deep Stacks on three seeds to B30 (no wipes, no errors, no softlocks),
+  the Resume case, Fine Print, Episode 1, Episode 2, and the complete Wider Valley route, all clean.
+- All of today's work (the painted stages, the Suno Pro themes, the sixty uniques, Fine Print, the fix pass, the switch) is
+  pull request #11 into overhaul under Stephen's shared-repo rules; GitHub's own gate passed on it. Merging it only lands
+  the work on overhaul. Shipping (the push that players see) still waits for your word, or Stephen's.
+- Your open calls, none of them blocking: Fine Print's gold x1.5 and shop 1.25x, the six legendary names, the forty-four
+  placeholder unique names, and the plaque's "n of 61" wording.

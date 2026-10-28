@@ -5604,7 +5604,7 @@
   },
   {
    "name": "ui_stacks_plaque",
-   "note": "C2-story-ui: the Archivist's plaque screen: the record in the header, the vault in band order (bright when held, faded ink when not), the detail of a held unique, the Quill last",
+   "note": "C2-story-ui: the Archivist's plaque screen: the record in the header, the vault in grade order then band order (sixty-one since C4-uniques; bright when held, faded ink when not), the detail of a held unique, the Quill last",
    "query": "&cave=1",
    "steps": [
     {
@@ -5654,7 +5654,7 @@
      "frames": 5
     },
     {
-     "eval": "(() => { LQ_DEBUG.engine.game.cave = { vault: ['cave_catalogue_pen', 'cave_reading_hood', 'cave_cellar_key', 'cave_root_boots'], record: { floor: 23, readings: 4, clears: 0, time: 5025 }, run: null, snapshot: null }; return true; })()"
+     "eval": "(() => { LQ_DEBUG.engine.game.cave = { vault: ['cave_catalogue_pen', 'cave_reading_hood', 'cave_cellar_key', 'cave_rootspur'], record: { floor: 23, readings: 4, clears: 0, time: 5025 }, run: null, snapshot: null }; return true; })()"
     },
     {
      "eval": "(() => { LQ_DEBUG.caveStacks(); return true; })()"
@@ -5687,12 +5687,12 @@
      "frames": 12
     },
     {
-     "assert": "LQ_DEBUG.scene() === 'stacks' && LQ_DEBUG.state().sceneState.id === 'cave_root_boots'",
-     "message": "the plaque screen is up on the fifth row (Rootbound Boots, held)"
+     "assert": "LQ_DEBUG.scene() === 'stacks' && LQ_DEBUG.state().sceneState.id === 'cave_rootspur'",
+     "message": "the plaque screen is up on the fifth row (Rootspur Pike, held; C4-uniques' grade order)"
     },
     {
-     "assert": "LQ_DEBUG.state().sceneState.held === 4 && LQ_DEBUG.state().sceneState.total === 17",
-     "message": "four of seventeen in the vault"
+     "assert": "LQ_DEBUG.state().sceneState.held === 4 && LQ_DEBUG.state().sceneState.total === 61",
+     "message": "four of sixty-one in the vault"
     }
    ]
   },

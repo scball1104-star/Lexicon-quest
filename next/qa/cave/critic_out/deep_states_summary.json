@@ -1,0 +1,154 @@
+{
+ "seed": 1,
+ "states": {
+  "state_b45": {
+   "floor": 45,
+   "levels": [
+    34,
+    34,
+    34
+   ],
+   "bag": {
+    "antidote": 16,
+    "phoenix_feather": 16,
+    "keepers_bookmark": 6,
+    "echo_herb": 3,
+    "eye_drops": 18,
+    "silver_salve": 1
+   },
+   "bagRows": 6,
+   "bagCount": 60,
+   "gear": 87,
+   "blues": [
+    "cave_reading_hood",
+    "cave_shelf_mail",
+    "cave_damp_mantle",
+    "cave_root_boots",
+    "cave_name_mantle",
+    "cave_twice_read"
+   ],
+   "worn": [
+    "hero: longsword, battle_axe, chain_shirt, iron_helm, cave_twice_read, traveler_boots, scout_mantle",
+    "mira: crystal_rod, hunters_bow, scholar_robe, cave_reading_hood, owl_charm, leather_boots, cave_name_mantle",
+    "bram: winged_lance, battle_axe, cave_shelf_mail, iron_helm, river_charm, cave_root_boots, cave_damp_mantle"
+   ]
+  },
+  "state_b75": {
+   "floor": 75,
+   "levels": [
+    49,
+    49,
+    49
+   ],
+   "bag": {
+    "antidote": 22,
+    "phoenix_feather": 16,
+    "keepers_bookmark": 18,
+    "echo_herb": 42,
+    "eye_drops": 43,
+    "silver_salve": 7,
+    "quench_flask": 6
+   },
+   "bagRows": 7,
+   "bagCount": 154,
+   "gear": 338,
+   "blues": [
+    "cave_reading_hood",
+    "cave_shelf_mail",
+    "cave_damp_mantle",
+    "cave_root_boots",
+    "cave_name_mantle",
+    "cave_twice_read",
+    "cave_glass_coat",
+    "cave_court_word",
+    "cave_ember_reader",
+    "cave_cinder_stride"
+   ],
+   "worn": [
+    "hero: silverglass_blade, cave_ember_reader, cave_shelf_mail, glass_helm, cave_twice_read, mere_boots, ranger_mantle",
+    "mira: mirror_rod, glasswing_bow, mirrorweave_robe, mirror_circlet, mirror_charm, mere_boots, veil_mantle",
+    "bram: mere_pike, bearded_axe, chain_shirt, glass_helm, mirror_charm, mere_boots, veil_mantle"
+   ]
+  },
+  "state_b95": {
+   "floor": 95,
+   "levels": [
+    58,
+    58,
+    58
+   ],
+   "bag": {
+    "antidote": 22,
+    "phoenix_feather": 21,
+    "keepers_bookmark": 24,
+    "echo_herb": 62,
+    "eye_drops": 62,
+    "silver_salve": 17,
+    "quench_flask": 16,
+    "potion": 1
+   },
+   "bagRows": 8,
+   "bagCount": 225,
+   "gear": 617,
+   "blues": [
+    "cave_reading_hood",
+    "cave_shelf_mail",
+    "cave_damp_mantle",
+    "cave_root_boots",
+    "cave_name_mantle",
+    "cave_twice_read",
+    "cave_glass_coat",
+    "cave_court_word",
+    "cave_ember_reader",
+    "cave_cinder_stride",
+    "cave_ash_helm",
+    "cave_vellum_robe"
+   ],
+   "worn": [
+    "hero: silverglass_blade, moonsteel_axe, chain_shirt, glass_helm, owl_charm, mere_boots, veil_mantle",
+    "mira: mirror_rod, glasswing_bow, mirrorweave_robe, silver_circlet, mirror_charm, mere_boots, veil_mantle",
+    "bram: mere_pike, moonsteel_axe, silver_mail, glass_helm, mirror_charm, mere_boots, veil_mantle"
+   ]
+  },
+  "state_b99": {
+   "floor": 99,
+   "levels": [
+    60,
+    60,
+    60
+   ],
+   "bag": {
+    "antidote": 22,
+    "phoenix_feather": 19,
+    "keepers_bookmark": 24,
+    "echo_herb": 72,
+    "eye_drops": 66,
+    "silver_salve": 20,
+    "quench_flask": 17
+   },
+   "bagRows": 7,
+   "bagCount": 240,
+   "gear": 699,
+   "blues": [
+    "cave_reading_hood",
+    "cave_shelf_mail",
+    "cave_damp_mantle",
+    "cave_root_boots",
+    "cave_name_mantle",
+    "cave_twice_read",
+    "cave_glass_coat",
+    "cave_court_word",
+    "cave_ember_reader",
+    "cave_cinder_stride",
+    "cave_ash_helm",
+    "cave_vellum_robe",
+    "cave_binders_mark"
+   ],
+   "worn": [
+    "hero: silverglass_blade, moonsteel_axe, chain_shirt, glass_helm, owl_charm, mere_boots, veil_mantle",
+    "mira: mirror_rod, glasswing_bow, mirrorweave_robe, silver_circlet, mirror_charm, mere_boots, veil_mantle",
+    "bram: mere_pike, moonsteel_axe, silver_mail, glass_helm, mirror_charm, mere_boots, veil_mantle"
+   ]
+  }
+ }
+}

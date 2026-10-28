@@ -40,7 +40,7 @@ const KBPS = 160;
 const SR = 44100;
 const FRAME_SAMPLES = 1152;
 
-function parseMp3(buf) {
+function parseMp3(buf, kbps = KBPS) {
   // CBR MPEG-1 Layer III, 160 kbps, 44.1 kHz: count frames and read the Info/LAME tag from frame 0
   let pos = 0;
   let frames = 0;
@@ -55,9 +55,9 @@ function parseMp3(buf) {
     const pad = (h >>> 9) & 1;
     assert.equal(version, 3, 'MPEG-1 expected');
     assert.equal(layer, 1, 'Layer III expected');
-    assert.equal(brIdx, 10, '160 kbps expected');
+    assert.equal(brIdx, kbps === 160 ? 10 : (kbps === 112 ? 8 : 10), `${kbps} kbps expected`);
     assert.equal(srIdx, 0, '44.1 kHz expected');
-    const flen = Math.floor((144 * KBPS * 1000) / SR) + pad;
+    const flen = Math.floor((144 * kbps * 1000) / SR) + pad;
     if (frames === 0) {
       const tag = buf.subarray(pos + 36, pos + 40).toString('latin1');
       if (tag === 'Info' || tag === 'Xing') {
@@ -80,6 +80,18 @@ for (const [id, spec] of Object.entries(TRACKS)) {
   assert.ok(fs.existsSync(jsonPath), `${id}.json missing`);
   const buf = fs.readFileSync(mp3Path);
   const meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  if (/Suno/.test(meta.source || '')) {
+    // a Suno Pro replacement (docs/MEDIA_BUILD.md 3): 112 kbps through tools/audio/add_track.py, loop points measured by
+    // music_scan.py into the sidecar by finish_tracks.py; the composed piece's duration, bpm and key pins do not apply
+    const { frames: f2, info: i2 } = parseMp3(buf, 112);
+    assert.ok(i2 && i2.lame.startsWith('LAME'), `${id}.mp3 (Suno) has no Info/LAME gapless tag`);
+    const sec2 = ((f2 - 1) * FRAME_SAMPLES - i2.encoderDelay - i2.padding) / SR;
+    assert.ok(typeof meta.loopStart === 'number' && meta.loopStart >= 0 && meta.loopStart < 1, `${id} (Suno) loopStart`);
+    assert.ok(typeof meta.loopEnd === 'number' && meta.loopEnd > meta.loopStart + 10 && meta.loopEnd <= sec2 + 1, `${id} (Suno) loopEnd ${meta.loopEnd} for ${sec2.toFixed(1)}s`);
+    console.log(`ok - ${id} (Suno): ${sec2.toFixed(2)}s, ${buf.length} bytes, loop ${meta.loopStart}..${meta.loopEnd}`);
+    ok += 1;
+    continue;
+  }
   const { frames, info } = parseMp3(buf);
   assert.ok(info, `${id}.mp3 has no Info/LAME gapless tag`);
   assert.ok(info.lame.startsWith('LAME'), `${id}.mp3 LAME version string missing`);

@@ -63,10 +63,25 @@
   "loopKind": "trimmed"
  },
  "assets/audio/music/archive.mp3": {
-  "lufs": -16.44,
-  "duration": 93.493,
+  "lufs": -15.28,
+  "duration": 193.56,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 192.5,
+  "candidate": {
+   "loopStart": 71.0031,
+   "loopEnd": 167.5552,
+   "score": 0.484,
+   "xcorr": 0.269,
+   "spliceFluxPct": 77.7,
+   "bestAnywhere": {
+    "score": 0.636,
+    "a": 103.0,
+    "b": 154.64
+   }
+  },
+  "loopStart": 0.1605,
+  "loopEnd": 192.75,
+  "loopKind": "trimmed"
  },
  "../assets/audio/battle.mp3": {
   "lufs": -16.77,
@@ -111,88 +126,238 @@
   "loopKind": "trimmed"
  },
  "assets/audio/music/mystery.mp3": {
-  "lufs": -16.44,
-  "duration": 45.16,
+  "lufs": -16.12,
+  "duration": 128.8,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 128.0,
+  "candidate": {
+   "loopStart": 4.1088,
+   "loopEnd": 109.0409,
+   "score": 0.706,
+   "xcorr": 0.373,
+   "spliceFluxPct": 85.3,
+   "bestAnywhere": {
+    "score": 0.706,
+    "a": 4.09,
+    "b": 109.04
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 128.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/sorrow.mp3": {
-  "lufs": -16.45,
-  "duration": 60.346,
+  "lufs": -16.52,
+  "duration": 183.2,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 182.0,
+  "candidate": {
+   "loopStart": 116.801,
+   "loopEnd": 157.9886,
+   "score": 0.682,
+   "xcorr": 0.311,
+   "spliceFluxPct": 88.0,
+   "bestAnywhere": {
+    "score": 0.777,
+    "a": 43.19,
+    "b": 99.29
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 182.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/triumph.mp3": {
-  "lufs": -16.44,
-  "duration": 51.828,
+  "lufs": -15.85,
+  "duration": 69.2,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 69.0,
+  "candidate": {
+   "loopStart": 11.1374,
+   "loopEnd": 50.8053,
+   "score": 0.297,
+   "xcorr": 0.201,
+   "spliceFluxPct": 96.1,
+   "bestAnywhere": {
+    "score": 0.308,
+    "a": 4.09,
+    "b": 39.1
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 69.2,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/hollow.mp3": {
-  "lufs": -16.44,
-  "duration": 68.731,
+  "lufs": -15.47,
+  "duration": 157.12,
   "sampleRate": 44100,
   "loopKind": "sidecar"
  },
  "assets/audio/music/hollowmere.mp3": {
-  "lufs": -16.44,
-  "duration": 68.731,
+  "lufs": -15.96,
+  "duration": 149.6,
   "sampleRate": 44100,
   "loopKind": "sidecar"
  },
  "assets/audio/music/fading_road.mp3": {
-  "lufs": -16.46,
-  "duration": 90.16,
+  "lufs": -16.16,
+  "duration": 105.56,
   "sampleRate": 44100,
   "loopKind": "sidecar"
  },
  "assets/audio/music/court.mp3": {
-  "lufs": -16.44,
-  "duration": 88.581,
+  "lufs": -14.32,
+  "duration": 193.16,
   "sampleRate": 44100,
   "loopKind": "sidecar"
  },
  "assets/audio/music/boss_king.mp3": {
-  "lufs": -16.5,
-  "duration": 120.16,
+  "lufs": -15.73,
+  "duration": 188.36,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 187.0,
+  "candidate": {
+   "loopStart": 77.2486,
+   "loopEnd": 163.4685,
+   "score": 0.705,
+   "xcorr": 0.537,
+   "spliceFluxPct": 90.2,
+   "bestAnywhere": {
+    "score": 0.705,
+    "a": 77.28,
+    "b": 163.47
+   }
+  },
+  "loopStart": 0.1394,
+  "loopEnd": 187.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/emberpeak.mp3": {
-  "lufs": -16.57,
-  "duration": 74.006,
+  "lufs": -16.31,
+  "duration": 154.96,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 154.0,
+  "candidate": {
+   "loopStart": 22.4698,
+   "loopEnd": 139.5984,
+   "score": 0.586,
+   "xcorr": 0.465,
+   "spliceFluxPct": 96.2,
+   "bestAnywhere": {
+    "score": 0.586,
+    "a": 22.48,
+    "b": 139.6
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 154.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/first_bell.mp3": {
-  "lufs": -16.44,
-  "duration": 74.006,
+  "lufs": -15.5,
+  "duration": 147.84,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 147.0,
+  "candidate": {
+   "loopStart": 13.6499,
+   "loopEnd": 126.5023,
+   "score": 0.3,
+   "xcorr": 0.424,
+   "spliceFluxPct": 98.6,
+   "bestAnywhere": {
+    "score": 0.456,
+    "a": 38.08,
+    "b": 114.8
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 147.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/ash_road.mp3": {
-  "lufs": -16.48,
-  "duration": 91.36,
+  "lufs": -15.15,
+  "duration": 156.8,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 155.5,
+  "candidate": {
+   "loopStart": 71.7963,
+   "loopEnd": 131.7965,
+   "score": 0.699,
+   "xcorr": 0.416,
+   "spliceFluxPct": 83.2,
+   "bestAnywhere": {
+    "score": 0.699,
+    "a": 71.8,
+    "b": 131.8
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 155.75,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/foundry.mp3": {
-  "lufs": -16.45,
-  "duration": 87.433,
+  "lufs": -15.78,
+  "duration": 159.92,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 159.0,
+  "candidate": {
+   "loopStart": 37.1965,
+   "loopEnd": 136.9049,
+   "score": 0.584,
+   "xcorr": 0.285,
+   "spliceFluxPct": 94.5,
+   "bestAnywhere": {
+    "score": 0.584,
+    "a": 37.15,
+    "b": 136.9
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 159.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/boss_warden.mp3": {
-  "lufs": -16.52,
-  "duration": 116.827,
+  "lufs": -15.27,
+  "duration": 171.8,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 171.0,
+  "candidate": {
+   "loopStart": 98.6168,
+   "loopEnd": 156.874,
+   "score": 0.394,
+   "xcorr": 0.308,
+   "spliceFluxPct": 98.5,
+   "bestAnywhere": {
+    "score": 0.56,
+    "a": 44.12,
+    "b": 107.46
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 171.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/the_downs.mp3": {
-  "lufs": -16.45,
-  "duration": 78.421,
+  "lufs": -16.57,
+  "duration": 128.0,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 126.0,
+  "candidate": {
+   "loopStart": 37.7121,
+   "loopEnd": 114.5208,
+   "score": 0.378,
+   "xcorr": 0.455,
+   "spliceFluxPct": 70.8,
+   "bestAnywhere": {
+    "score": 0.406,
+    "a": 3.99,
+    "b": 95.11
+   }
+  },
+  "loopStart": 0.0672,
+  "loopEnd": 126.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/high_moor.mp3": {
   "lufs": -16.46,
@@ -235,5 +400,65 @@
   "duration": 100.16,
   "sampleRate": 44100,
   "loopKind": "sidecar"
+ },
+ "assets/audio/music/title.mp3": {
+  "lufs": -15.42,
+  "duration": 168.76,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/willowmere.mp3": {
+  "lufs": -16.55,
+  "duration": 118.68,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/battle.mp3": {
+  "lufs": -16.03,
+  "duration": 61.44,
+  "sampleRate": 44100,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/valley.mp3": {
+  "lufs": -15.39,
+  "duration": 126.16,
+  "sampleRate": 44100,
+  "contentEnd": 124.5,
+  "candidate": {
+   "loopStart": 50.0543,
+   "loopEnd": 104.0254,
+   "score": 0.657,
+   "xcorr": 0.538,
+   "spliceFluxPct": 98.1,
+   "bestAnywhere": {
+    "score": 0.66,
+    "a": 39.75,
+    "b": 93.9
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 124.75,
+  "loopKind": "trimmed"
+ },
+ "assets/audio/music/boss_archivore.mp3": {
+  "lufs": -15.29,
+  "duration": 141.56,
+  "sampleRate": 44100,
+  "contentEnd": 140.5,
+  "candidate": {
+   "loopStart": 4.3953,
+   "loopEnd": 135.6045,
+   "score": 0.647,
+   "xcorr": 0.311,
+   "spliceFluxPct": 86.1,
+   "bestAnywhere": {
+    "score": 0.647,
+    "a": 4.37,
+    "b": 135.6
+   }
+  },
+  "loopStart": 0.1902,
+  "loopEnd": 140.75,
+  "loopKind": "trimmed"
  }
 }

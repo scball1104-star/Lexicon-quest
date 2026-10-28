@@ -15,6 +15,7 @@
 //   node tools/sim/simulate.mjs --json          also write tools/sim/out/sim.json
 //   node tools/sim/simulate.mjs --trace enc seed policy   print one battle's events
 //   node tools/sim/simulate.mjs --cave [--check]        the Deep Stacks descent instead (tools/sim/cave.mjs: 50 seeds, B1 to B100)
+//   node tools/sim/simulate.mjs --tier 1 [--check]      Fine Print, the post-credits tier (tools/sim/tier.mjs, docs/TIER.md)
 //
 // Also importable: runSuite(), checkTargets(), progression(), LOADOUTS, TARGETS.
 
@@ -437,6 +438,10 @@ if (isMain) {
     // The Deep Stacks descent (tools/sim/cave.mjs, docs/DEEP_STACKS_PLAN.md 11): its own seeds, tables and targets.
     const { caveMain } = await import('./cave.mjs');
     process.exit(await caveMain(args));
+  } else if (args.includes('--tier')) {
+    // Fine Print, the post-credits tier (tools/sim/tier.mjs, docs/TIER.md): the tier suite at the carried party's level.
+    const { tierMain } = await import('./tier.mjs');
+    process.exit(await tierMain(args, { runSet, checkTargets, formatTable, progression, EPISODES, SUITE_LEVELS, BOSS_LEVELS, BOSS_TARGETS }));
   } else if (args.includes('--trace')) {
     const i = args.indexOf('--trace');
     const enc = args[i + 1];

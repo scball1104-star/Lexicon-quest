@@ -18,6 +18,7 @@ export const PACKS = {
   cave: { entry: '../data/cave/index.js', prefix: 'cave_', assets: 'assets/cave_manifest.json', audioPack: null,
           touches: [],
           wanted: (flags) => !!flags.ep1_complete, enabled: () => CAVE_LIVE },
+  tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
 };
 
 /** Where the generated list of every file of every pack lives (tools/pwa/build_pwa.py writes it). */

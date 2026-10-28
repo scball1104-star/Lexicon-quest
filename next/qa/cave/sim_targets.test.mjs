@@ -48,7 +48,12 @@ test('the tuned curve: the Stacks get harder floor by floor in effective strengt
     prevLv = lv;
   }
   // effective HP (multiplier x the band's mean time-to-kill) and effective power (multiplier x the band's mean ATK/MAG) by decade
-  const eff = (f) => { const s = F.scale(f), b = F.bandAt(f); return { hp: s.hp * meanHp(b), power: s.power * b.pool.reduce((a, t) => a + t.weight * t.enemies.reduce((x, id) => x + Math.max(ENEMIES[id].atk, ENEMIES[id].mag), 0) / t.enemies.length, 0) / b.pool.reduce((a, t) => a + t.weight, 0) }; };
+  // a fallback band's group carries its own scale (scale(f, { template }), C4-fixes): the band's strength is the groups' weighted mean
+  const eff = (f) => {
+    const b = F.bandAt(f), W = b.pool.reduce((a, t) => a + t.weight, 0);
+    const one = (t) => { const s = F.scale(f, t.own ? { template: t } : {}); return { hp: s.hp * meanHp({ pool: [t] }), power: s.power * t.enemies.reduce((x, id) => x + Math.max(ENEMIES[id].atk, ENEMIES[id].mag), 0) / t.enemies.length }; };
+    return b.pool.reduce((a, t) => { const o = one(t); return { hp: a.hp + o.hp * t.weight / W, power: a.power + o.power * t.weight / W }; }, { hp: 0, power: 0 });
+  };
   const decades = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95].map(eff);
   for (let i = 1; i < decades.length; i++) {
     assert.ok(decades[i].power > decades[i - 1].power, `effective power rises decade ${i}`);

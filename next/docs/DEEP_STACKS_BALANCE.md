@@ -261,3 +261,204 @@ Ordered by what a player meets first. None of these files is C3-sim-bot's; each 
 What C3-critic should look at first: item 1 (a player's second reading in one sitting is broken), then B7 to B21 for a human
 player (the bot wiped on B7 and B16 in 2 of 10 careful readings, and in 4 of 8 when it skipped the far chests, 6.2: the larder
 is the difficulty), then the length of a deep floor.
+
+## 8. Sixty uniques in three grades (C4-uniques, 2026-10-28)
+
+Scott's answer to open call E (plan 13 E, verbatim there): weak uniques likely on shallow floors and strong ones unlikely, the odds
+reversing deeper, and enough uniques of different strengths and qualities to equip the party several times over. CRITIQUE_STACKS
+issue 10 measured the gap: the careful party wore 0 of the 12 uniques it had found by B95, and the first band's trailed Episode 2
+gear (the Pen at ATK 16 against Lanternheart's 24). Tags as above (R6).
+
+### 8.1 What was built
+
+| file | change |
+|---|---|
+| `src/data/cave/items.js` | `GRADES` (Lesser item level 5, Greater 10, Named 16), sixty rows plus the Quill, `CAVE_PROPS` rebuilt (a numbered family at two grades at most), `uniquesOfGrade`, `gradeOf`, three lore lines (the first names the grade) |
+| `src/data/cave/loot.js` | `GRADE_ODDS` / `gradeOdds` / `rollGrade`; `rollBlueChest` rolls the grade first, then the band lean, a spent grade falls to the nearest; `blueChestDue`: the first blue by B9 (`BLUE_PITY_FIRST`), the second roll `BLUE_SECOND` (0 on B1 to 10% on B99); the loot props `lent_more`, `larder_1`, `larder`, `feather_find`, `bookmark_more` (gold_double removed: Stacks gold buys nothing) |
+| `src/data/cave/world.js` | three guarded lines in `HOOKS.armBattle`, First Line's hook point (lines 725, 726, 728): the Inkwell (+4 MP at a fight's start), the Standing Grudge (Fury at least 50), Quick Study (each foe's EXP x1.15). The first two also correct the opening `battle_start` snapshot the HUD builds its gauges from (`createBattle` begins before `armBattle` runs) |
+| tests | `qa/cave/data_items`, `data_loot` (rewritten), new `uniques_grades`, `uniques_props`, `uniques_runs` |
+| tools | `qa/cave/out/uniques_report.mjs` (the score table, `uniques_table.md`), `uniques_runs.mjs`, `uniques_worn.mjs`, `uniques_shots.py` (the plaque, desktop and phone) |
+
+### 8.2 The sixty (Fact, items.js)
+
+| slot | Lesser (item level 5) | Greater (10) | Named (16) |
+|---|---|---|---|
+| sword | The Catalogue's Pen: First Line | Sparkwrit Sabre: Storm Edge | Lampwick Blade: Dawn Edge |
+| staff | Reading-Lamp Rod: Inkwell | The Court's Last Word: Thrift 2 | Recordkeeper's Rod: Full Index |
+| spear | Rootspur Pike: Quenched Edge | The Cellar Key: Venom Edge 40 | Taproot Pike: Leeching 15 |
+| axe | Bailiff's Hatchet: Storm Edge | Quench Axe: Quenched Edge | The Ember Reader: Burning Edge |
+| body | Shelf-Keeper's Mail: Poison-proof | Indexer's Robe (Mira): Mender 30 | Rootweave Hauberk: Unwritten |
+|  | Clerk's Gown (Mira): Unhushed | Glass-Lined Coat: Already Moving 2 | Writ-Bound Coat: Venom Edge 60 |
+|  | Alum-Soaked Jerkin (hero, Bram): Unburnt | Ember-Scale Hauberk (hero, Bram): Fire Ward 40 | Vellum Robe (Mira): Better Lent |
+|  | Smith's Apron: Storm Script 25 | Anvil-Riveted Coat: Leeching 10 | The Forge Binding (hero, Bram): Rebound |
+| head | Reading Hood: Clear-eyed | Lector's Circlet (Mira): Dawn Script 40 | Reader's Diadem: Clear Voice |
+|  | Usher's Helm (hero, Bram): Forge Ward | Sergeant's Helm (hero, Bram): Clear-eyed | Clemency Circlet (Mira): Mender 50 |
+|  | Soot Cap (Mira): Thrift 1 | Scorch Cowl: Unburnt | Ash-Reader's Helm: Fire Ward 60 |
+| boots | Cellar Clogs: Unchilled | Ladderstep Boots: First Line | Wellspring Boots: Already Moving 3 |
+|  | Cinder-Step Shoes: Carried Out | Rootbound Boots: Rootbound Step | Cinder Stride: Downward Sense |
+|  | Forge-Runner's Boots: Rootbound Step | Spur Boots: Hairline 15 | Kindling Boots: Short Fuse 80 |
+| mantle | Drip Cloak: Frost Script 25 | Mantle of the Damp Stair: Ink Ward 40 | Mantle of the Deep Well: Ink Ward 60 |
+|  | Juror's Mantle: Owed More | Ash-Wind Mantle: Short Fuse 50 | Mantle of Contempt: Standing Grudge |
+|  | Ribbon Mantle: Dog-Eared | Forge-Smoke Mantle: Fire Script 40 | Mantle of Kept Names: Kept Stores |
+| charm | Draught Candle: Downward Sense | Cistern Charm: Frost Script 40 | Catalogue Seal: Quick Study |
+|  | Banked Coal Charm: Fire Script 25 | Twice-Read Charm: Unhushed | Gavel Charm: Hairline 25 |
+|  | Hearth Charm: Warm Larder | Anvil-Spark Charm: Storm Script 40 | The Binder's Mark: Marked Pages |
+
+B100: the Binder's Quill (charm, anyone), The Binder's Hand (heals a quarter of the damage dealt), the best charm in the Stacks for
+every reader. Unmarked pieces are for anyone. Each grade has four of each home band; a blue chest still leans to the floor's band.
+
+### 8.3 Strength (Fact, `node qa/cave/out/uniques_report.mjs`, pinned by qa/cave/uniques_grades.test.mjs)
+
+Score: the game's role weights (inventory.js `weightedGain`, what Optimize, the equip prompt and the simulator choose by), status
+resists counted on neither side. Margin = the unique's score over the 90th-percentile rolled rare of its grade's item level in its
+slot, for its best wearer: Lesser 1.08 to 1.82 (median 1.22), Greater 1.09 to 1.51 (1.19), Named 1.09 to 2.21 (1.34), the Quill
+2.33. Every Lesser beats the Episode 2 start's piece for everyone who can wear it (the Pen 94.7 against Lanternheart 87.3); the
+next depth's rares overtake each grade's own stats; in all twenty slot-and-reader rungs the best Named beats the best Greater,
+which beats the best Lesser.
+
+### 8.4 Odds and counts (Fact, `node qa/cave/out/uniques_runs.mjs --seeds 400`, first readings to B99)
+
+| floors | Lesser | Greater | Named |
+|---|---|---|---|
+| B1-B29 | 65% | 29% | 6% |
+| B30-B59 | 33% | 42% | 26% |
+| B60-B79 | 12% | 36% | 52% |
+| B80-B99 | 5% | 22% | 73% |
+
+| | before (C1 rule) | after |
+|---|---|---|
+| uniques in a deep first reading (B1-B99) | 12.0 (p10 11, p90 14) | 14.0 (p10 12, median 14, p90 16; 11 to 20) |
+| first blue after B10 | 203 of 400 readings | none (latest B9, mean B6.6) |
+| uniques per run in the simulator (every run, deaths included) | 10.3 | 12.7 |
+| deep readings, each banked, to see all sixty | (sixteen then) | median 5 (p10 4, max 5) |
+
+The grade knots shipped are the brief's: B1 85/14/1, B20 60/33/7, B40 35/45/20, B60 18/42/40, B80 7/28/65, B99 3/17/80.
+
+### 8.5 The proof after (Fact, `node tools/sim/simulate.mjs --cave --check`, careful policy)
+
+| | B1-B9 | B10-B29 | B30-B59 | B60-B99 | cleared B100 | the Binder (careful) |
+|---|---|---|---|---|---|---|
+| target | under 5% | under 15% | under 30% | under 45% | | 80% within 20 rounds |
+| before, 50 seeds | 2.0% | 10.2% | 6.8% | 17.1% | 34 | 93%, 14.5 rounds, 9% HP lost |
+| after, 50 seeds | 4.0% (2 of 50) | 6.3% (3 of 48) | 0.0% (0 of 45) | 11.1% (5 of 45) | 40 | 96%, 12.7 rounds, 9% HP lost |
+| before, 300 seeds from 101 | 1.0% | 8.4% | 9.6% | 27.8% | 177 | 97%, 14.3 rounds |
+| after, 300 seeds from 101 | 1.3% (4 of 300) | 4.7% (14 of 296) | 7.1% (20 of 282) | 13.8% (36 of 261) | 225 | 97%, 12.6 rounds, 7% HP lost |
+
+Arrival levels unchanged (B10 11.3, B30 24.8, B60 40.6, B90 56.0); Quick Study moves nothing visible. All cave targets met.
+**Under half their target (the brief asks this said, not re-tuned):** B10-B29, B30-B59 and B60-B99 on both seed sets (B60-B99 was
+already under half before C4). B1-B9's 4.0% on the 50 seeds is two wipes, on B7 and B8; on 300 seeds it reads 1.3% (4 of 300).
+Inference: the uniques make the deep runs easier, as the brief expected; the foe curve is C3-sim-bot's to retune if Scott wants the
+deep bands harder.
+
+### 8.6 Worn (Fact, `node qa/cave/out/uniques_worn.mjs --seeds 12`, CRITIQUE_STACKS 10's measure)
+
+| on arrival | Lesser worn / found | Greater | Named |
+|---|---|---|---|
+| B45 | 29 / 37 | 16 / 18 | 8 / 8 |
+| B75 | 12 / 43 | 19 / 36 | 23 / 29 |
+| B95 | 2 / 45 | 14 / 51 | 33 / 46 |
+
+Seed 1, the critic's: 0 of 12 worn at B95 before, 3 of 12 now (3 of its 4 Named). Each grade is worn at its depth and overtaken
+deeper, which is what "measures of strength" asks. The Named left in the bag are heads and charms that lose to rolled rares
+stacking status resists past 100 (a `resSilence 144` charm scores 43 points, and anything over 100 is wasted): inventory.js
+`equipScore` / `weightedGain` count every resist point at 0.3 with no cap. Owner: inventory.js (game-wide; not changed here).
+Suggest: clamp each `res*` stat at 100 before weighting (Inference: the deep Named heads and charms are then worn, and Optimize
+stops preferring a wasted resist everywhere in the game).
+
+### 8.7 Left open
+
+1. **A literal second blue chest on a floor**: `gen.js` places one (`chests.blue` is a boolean), so the second roll adds blue floors
+   instead. If Scott wants two on one floor: `gen.js` takes `chests.blue: 2` and `world.js blueFloors` returns a count (C1-gen,
+   C2-world).
+2. **The generator refuses one more floor** (Fact, a scan of seeds 1 to 400 x 99 floors): 0 refusals with the old pity rule, 1 with
+   the new (seed 311 B92, a floor that now carries a blue chest: "foe foe_4 unreachable"). It is CRITIQUE_STACKS issue 1 (owner gen,
+   world: build without the optional dressing instead of throwing); more blue floors meet it slightly more often.
+3. **Three test files outside my paths pin the old seventeen** (`qa/cave/data_pack`, `story_scenes`, `ui_stacks`: 4 assertions).
+   The exact patch, verified green against copies on the real source: `qa/cave/out/uniques_pins.patch` (`patch -p1` from the repo
+   root). Until it is applied `node qa/run.mjs cave` shows those three red.
+4. **The count reads "n of 61"** (sixty and the Quill) on the plaque and in Hollis's record line: story.js `VAULT_TOTAL` counts the
+   Quill, as the plaque lists it. The Journal line keeps "N names in the vault" (journal.js is precached and cannot read the pack's
+   total). The plaque lists by grade but shows no divider between grades (story.js, C2-story-ui: a header row per grade would help
+   a 61-row list).
+5. **The resist over-count** (8.6), and the Binder's ease (CRITIQUE_STACKS 11 gets a little easier still: 12.7 rounds, 9% HP lost).
+
+## 9. The critique's balance pass (C4-fixes, 2026-10-28)
+
+The brief (`docs/briefs/C4-fixes.md`) asks for CRITIQUE_STACKS 5, 6, 7, 8, 11 and section 7 items 4, 5 and 7, proven with
+`node tools/sim/simulate.mjs --cave --check` (targets unchanged). Tags as above (R6). "Before" is the tree C4-uniques handed over
+(its section 8.5 "after"), measured again here with the same command; "after" is this pass.
+
+### 9.1 What changed
+
+| issue | file | change |
+|---|---|---|
+| 5 (Known 6) | `foes.js` `foesPerFloor`, `FOE_CAP_DEEP`; `gen.js` `foeCount` (the one line) | at most 6 foes a floor from B40 (was 8 to 12); the EXP pace refits itself (`fitCurve` reads `foesPerFloor`), the level anchors land as before |
+| 6 | `foes.js` `POOL_FALLBACK_4/5`, `scale(f, { template })`, `OWN_CAPS`, `FALLBACK_ELITE_RATE` | until `EP3_LIVE`, bands 4 and 5 draw from all 25 groups of the three earlier pools (the Forge leans to the Court's); each group is scaled from its OWN native level, its own one-shot cap, power up to 400 and speed up to 6, and pays the band's mean EXP (its raw EXP and the expected elite share come out); an elite leader on one group in three (was: every group, two mods, the six Court foes) |
+| 6 | `foes.js` `BAND_ADJUST` 4 and 5 | hp 1.15, power 0.85, speed 1 (was hp 0.95 / 0.85, speed 1.55 / 1.12, tuned to the Court-only pools) |
+| 7 | `foes.js` `BAND_ADJUST` 2 | hp 1 (was 1 rising to 1.2), power 1.15 (was 1): shorter, sharper fights (1.25 put B30 to B39 at 26% deaths) |
+| 8 (Known 7) | `loot.js` `CURE_IDS`, zone `noDrops`; `battle/loot.js` `rollBattleDrops` (one guarded read) | foes drop no cures inside the Stacks (Antidote, Eye Drops, Echo Herb, Silver Salve, Quench Flask), and from B60 no plain Potions (the valley's groups walk in there); the rng is drawn as before |
+| 8 | `loot.js` `CONSUMABLES_BY_BAND`, `LANDING_SUPPLY` | bands 3 to 5 are 92 to 93% Hi-Potions and Hi-Ethers (were 58 to 64%); Feathers 9 / 4 / 3 / 2 / 2 by band (were 14 / 12 / 5 / 5 / 5), the B20 landing one Feather (was two); cures a sliver of every band |
+| 8 | `loot.js` `BOOKMARK_SPARES` | a red chest rolls no Bookmark while two are held (the landing guarantee and the odds are the plan's while fewer are) |
+| 15 | `loot.js` `rollRedChest`, `GEAR_CHEST_SUPPLY` | no gold in a red chest (was 12 to 911 a chest, nothing to buy); a chest that lends gear carries a supply roll 35% of the time |
+| 13 | `world.js` `redChestOpts` (the game and the simulator both open chests through it), `loot.js` `LEND_FLOORS` | B1 to B3: the floor's first red chest lends the first bare-handed reader a weapon of his own kind |
+| Known 4 | `battle/loot.js` `rollBase`; `rollBattleDrops` | below every base (item level 1, B1 to B5) a drop draws the slot's lowest bases of every type (it fell back to the one Short Sword); an elite's drop inside the Stacks rolls at the floor's item level + 1 (was its home zone's: valley elites on B70 dropped item level 3). The base game never reaches either branch (its zones start at item level 2) |
+| 11 | `foes.js` `BINDER` | HP 3000 (was 4000), MAG 4000 (was 3200: Devour Name and Ink Storm a quarter up), SPD 66 (was 46: it acted four or five times a fight, so its telegraphs rarely came); its stage is the Forge's (`stage: 'cave_forge'`) |
+| Known 5 | `battle/ai.js` `competentPolicy` (one line) | under 35% with no potion, Defend only while a heal (Mira within reach) or a Feather is coming; else attack (it Defended until it died) |
+
+### 9.2 Death rates and the Binder (Fact, competent policy)
+
+| | B1-B9 | B10-B29 | B30-B59 | B60-B99 | cleared B100 | the Binder: win in 20 rounds, rounds, HP lost | ignoring its telegraphs |
+|---|---|---|---|---|---|---|---|
+| target | under 5% | under 15% | under 30% | under 45% | | 80% within 20 | |
+| before, 50 seeds | 4.0% (2 of 50) | 6.3% (3 of 48) | 0.0% (0 of 45) | 11.1% (5 of 45) | 40 | 96%, 12.7, 9% | 93%, 19% HP lost |
+| after, 50 seeds | 0.0% (0 of 50) | 0.0% (0 of 50) | 10.0% (5 of 50) | 24.4% (11 of 45) | 34 | 97%, 9.4, 15% (0.41 KOs) | 69%, 40% HP lost |
+| before, 300 seeds from 101 (8.5) | 1.3% | 4.7% | 7.1% | 13.8% | 225 | 97%, 12.6, 7% | |
+| after, 300 seeds from 101 | 0.0% (0 of 300) | 3.3% (10 of 300) | 10.3% (30 of 290) | 22.3% (58 of 260) | 202 | 98%, 9.4, 13% (0.26 KOs) | 77%, 32% HP lost |
+
+Arrival levels (50 seeds): B10 11.3, B30 24.8, B60 40.6, B90 55.7 (plan 12 / 25 / 40 / 55; were 11.3 / 24.8 / 40.6 / 56.0). All cave
+targets met. The deep bands are harder again (C4-uniques had left B30 to B99 under half their targets): B60 to B99 now sits at about half
+its target, B30 to B59 at a third. Inference: the early floors got easier (no wipe in B1 to B9 on 350 seeds) from the lent weapons and the
+varied early drops; nobody asked for harder early floors, so they were not retuned.
+
+The Binder in C1-data's checkpoint harness (a synthetic Lv 58 party in plain gear, no uniques, `qa/cave/data_sanity.test.mjs`): careful
+65% in 11.3 rounds, ignoring the telegraphs 25%, attack-only 0%. The old pin was careful at least 85% and "ignoring costs win rate or
+health" (at SPD 46 with the new HP and MAG this party won 100% either way). The test now pins "care decides it" (careful at least 55%,
+ignoring at least 20 points worse and 10 points more HP lost).
+
+### 9.3 Minutes a floor and rounds a fight (Inference: the model, `tools/sim/cave.mjs` TIME; `node qa/cave/fixes_out/hoard.mjs`)
+
+| on the floor | B45 | B75 | B95 | rounds B20-B29 | rounds B30-B39 |
+|---|---|---|---|---|---|
+| before (10 seeds) | 5.9 min | 8.2 min | 9.0 min | 3.59 | 3.84 |
+| after (12 seeds) | 4.5 min | 4.1 min | 3.8 min | 3.37 | 3.45 |
+
+The critic measured 10.4 / 20.0 / 17.1 game minutes by hand at 1x on B45 / B75 / B95 with 8 / 11 / 12 fights; six fights cut the count in
+half to two thirds. Rounds by hand run about twice the careful model's (7.0 against 3.6 on B21 to B29); a by-hand recount on the new
+tuning is for the next critic.
+
+### 9.4 The bag on arrival at B90 (Fact, mean over the seeds that got there, `node qa/cave/fixes_out/hoard.mjs --seeds 12`)
+
+| item | before (10 seeds) | after (9 of 12 seeds) | after, the fullest bag |
+|---|---|---|---|
+| Eye Drops | 68.6 | 4.9 | 10 |
+| Echo Herbs | 63.3 | 6.7 | 16 |
+| spare Bookmarks | 31.0 | 2.0 | 2 |
+| Antidotes | 21.9 | 5.1 | 10 |
+| Phoenix Feathers | 22.8 | 8.3 | 15 |
+| Silver Salves | 12.2 | 3.8 | 5 |
+| Quench Flasks | 10.6 | 0 | 0 |
+| Hi-Potions | 2.1 | 10.0 | 40 |
+| Hi-Ethers | 0 | 8.0 | 35 |
+| Ethers | 0 | 6.8 | 23 |
+| Potions | 2.6 | 1.4 | 9 |
+
+Every mean is under a dozen. The fullest bags are healing a careful party never needed (one seed held 40 Hi-Potions); the cures that
+cluttered the bag are gone. Before, the party met the Binder with Mira near empty; after, with Hi-Ethers in hand.
+
+### 9.5 Left open
+
+1. **Fights stay short for careful play** (2.9 rounds a fight B60 to B99 in the model). If the next critic finds deep fights over in a
+   turn or two by hand, the lever is `BAND_ADJUST` 4 and 5 `hp` (1.3 put B60 to B99 at 63% deaths; 1.15 holds 22%).
+2. **Episode 3 switch** (unchanged from 7.8): when `EP3_LIVE` flips, bands 4 and 5 become cinder and forge pools with the old
+   `elite: 2` templates and `BAND_ADJUST` 4 and 5 must be re-tuned; re-run the check then.
+3. **The resist over-count** (8.6) is still inventory.js's (game-wide, not changed here).

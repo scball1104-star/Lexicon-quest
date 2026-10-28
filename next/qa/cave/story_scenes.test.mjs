@@ -201,9 +201,9 @@ test('stacks_record: the record line by the record, then the plaque screen throu
   r = await runOnce(rawScenes.stacks_record, { branchFlags: false });
   assert.deepEqual(ops(r.log, 'say').map((e) => e.args[1]), [`B23 is the deepest page anyone has read. 4 of ${VAULT_TOTAL} names in the vault. The rest are waiting.`]);
   const data = pushed[1][1];
-  assert.equal(data.rows.length, VAULT_TOTAL); assert.equal(data.total, 17);
+  assert.equal(data.rows.length, VAULT_TOTAL); assert.equal(data.total, 61);   // C4-uniques: sixty in three grades and the Quill
   assert.deepEqual(data.rows.filter((x) => x.held).map((x) => x.id), ['cave_catalogue_pen', 'cave_reading_hood', 'cave_cellar_key', 'cave_root_boots']);
-  assert.equal(data.rows[16].id, 'cave_binders_quill', 'the Quill is last');
+  assert.equal(data.rows[60].id, 'cave_binders_quill', 'the Quill is last');
   assert.deepEqual(data.record, { floor: 23, readings: 0, clears: 0, time: 0 });
   // "The record" in the offer opens the same screen
   r = await runOnce(rawScenes.stacks_enter, { decisions: [1], branchFlags: false });

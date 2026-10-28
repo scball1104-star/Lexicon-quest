@@ -1,9 +1,5 @@
-// Loot generation (Diablo II style): rarity tiers, base items, prefix/suffix affixes with rolled
-// values, elite and boss drop rules, chests. Pure: every roll takes an injected rng.
-//
-// rng: an object with next() -> [0,1) (core/rng.js createRng) or a plain function returning floats.
-//
-// Item instance format:
+// Loot (Diablo II style): rarities, bases, rolled affixes, elite and boss drops, chests. Pure: rng = core/rng.js
+// createRng or a function returning floats. Item instance format:
 //   { base: 'iron_pike', rarity: 'magic', ilvl: 5, name: 'Gleaming Iron Pike of Embers',
 //     affixes: [{ id: 'gleaming', tier: 2, value: 5 }, { id: 'of_embers', tier: 2, value: 14 }] }
 //   uniques/sets: { base: 'lanternheart', rarity: 'legendary', unique: true, name: 'Lanternheart', affixes: [] }
@@ -56,12 +52,10 @@ export function rollRarity(rng, table = 'normal') {
 /** Pick a base of a slot whose ilvl <= cap. Prefers the highest eligible tier (weighted). */
 export function rollBase(rng, { slot, ilvl = 1, type } = {}) {
   const pickSlot = slot || weighted(rng, Object.entries(SLOT_WEIGHTS));
-  const pool = Object.values(EQUIPMENT).filter((b) => b.slot === pickSlot && b.ilvl <= Math.max(1, ilvl)
-    && (!type || b.type === type));
-  if (!pool.length) {
-    const any = Object.values(EQUIPMENT).filter((b) => b.slot === pickSlot);
-    return any.sort((a, b) => a.ilvl - b.ilvl)[0];
-  }
+  const fits = Object.values(EQUIPMENT).filter((b) => b.slot === pickSlot && (!type || b.type === type));
+  let pool = fits.filter((b) => b.ilvl <= Math.max(1, ilvl));
+  // under the lowest base: the slot's lowest of every type
+  if (!pool.length) pool = fits.filter((b) => b.ilvl <= Math.min(...fits.map((x) => x.ilvl)));
   // Newer (higher ilvl) bases are more likely, older ones still show up.
   return weighted(rng, pool.map((b) => [b, 1 + b.ilvl]));
 }
@@ -78,10 +72,7 @@ function rareName(rng, base, ilvl = 1) {
   return `${a} ${b}`;
 }
 
-/**
- * Roll one equipment item.
- * opts: { ilvl, rarity?, table?, slot?, base?, type? }
- */
+/** Roll one equipment item. opts: { ilvl, rarity?, table?, slot?, base?, type? } */
 export function rollItem(rng, opts = {}) {
   const ilvl = Math.max(1, opts.ilvl || 1);
   let rarity = opts.rarity || rollRarity(rng, opts.table || 'normal');
@@ -100,7 +91,7 @@ export function rollItem(rng, opts = {}) {
       if (!pool.length) break;
       const a = weighted(rng, pool.map((x) => [x, x.weight]));
       const maxTier = tierFor(a, ilvl);
-      // Lower tiers stay possible at high item level, but the top tier is most likely.
+      // the top tier is most likely
       const tier = weighted(rng, a.tiers.slice(0, maxTier + 1).map((t, idx) => [idx, idx === maxTier ? 3 : 1]));
       const [, lo, hi] = a.tiers[tier];
       item.affixes.push({ id: a.id, tier: tier + 1, value: int(rng, lo, hi) });
@@ -211,15 +202,17 @@ export function itemValue(item) {
  * Returns { items: [instances], consumables: [{ item, qty }] }.
  */
 export function rollBattleDrops(rng, killed, opts = {}) {
+  const tier = globalThis.LQ_TIER && LQ_TIER.drops(rng, killed, opts); if (tier) return tier;   // Fine Print (data/tier)
   const items = [];
   const consumables = {};
   const addC = (id, qty = 1) => { consumables[id] = (consumables[id] || 0) + qty; };
   let zone = opts.zone || null;
+  const zl = ZONE_LOOT[zone] || {};   // the Stacks: noDrops, elites at the floor's level
   for (const k of killed) {
     zone = zone || k.lootZone;
-    for (const d of k.drops || []) if (rand(rng) < d.chance) addC(d.item, 1);
+    for (const d of k.drops || []) if (rand(rng) < d.chance && !(zl.noDrops || []).includes(d.item)) addC(d.item, 1);
     if (k.elite && k.elite.length) {
-      const z = ZONE_LOOT[k.lootZone] || { ilvl: 3 };
+      const z = (zl.cave && zl) || ZONE_LOOT[k.lootZone] || { ilvl: 3 };
       items.push(rollItem(rng, { ilvl: z.ilvl + 1, table: 'elite' }));
     }
     const boss = BOSS_LOOT[k.id];

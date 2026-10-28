@@ -1,5 +1,5 @@
 // C1-data: the cave pack entry (src/data/cave/index.js, live.js): register() is idempotent, adds exactly the ids it says and
-// nothing else, the switch is off, and nothing in the cave files carries an em dash. Snapshots the shared tables BEFORE
+// nothing else, the switch is on (since 2026-10-28), and nothing in the cave files carries an em dash. Snapshots the shared tables BEFORE
 // register(), so this file must not import anything that registers at load.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,7 +10,7 @@ import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, EP2_ZONE_ORDER, EP3_ZONE
 import { ZONE_LOOT, BOSS_LOOT, RARITY_TABLES, CHEST_TIERS } from '../../src/data/loot-tables.js';
 import { SKILLS } from '../../src/data/skills.js';
 import { SHOPS } from '../../src/data/shops.js';
-import { PACKS } from '../../src/game/packs.js';
+import { PACKS, packReady } from '../../src/game/packs.js';
 import { CAVE_LIVE, caveOn } from '../../src/data/cave/live.js';
 import * as pack from '../../src/data/cave/index.js';
 
@@ -26,9 +26,17 @@ const first = pack.register();
 const result = await first;
 const after = snap();
 
-const UNIQUE_IDS = ['cave_ash_helm', 'cave_binders_mark', 'cave_binders_quill', 'cave_catalogue_pen', 'cave_cellar_key', 'cave_cinder_stride', 'cave_court_word',
-  'cave_damp_mantle', 'cave_ember_reader', 'cave_forge_binding', 'cave_glass_coat', 'cave_name_mantle', 'cave_reading_hood', 'cave_root_boots', 'cave_shelf_mail',
-  'cave_twice_read', 'cave_vellum_robe'];
+// C4-uniques: the sixty in three grades and the Quill (src/data/cave/items.js)
+const UNIQUE_IDS = ['cave_alum_jerkin', 'cave_anvil_coat', 'cave_anvil_spark', 'cave_ash_helm', 'cave_ashwind_mantle', 'cave_bailiff_hatchet',
+  'cave_banked_coal', 'cave_binders_mark', 'cave_binders_quill', 'cave_catalogue_pen', 'cave_catalogue_seal', 'cave_cellar_clogs', 'cave_cellar_key',
+  'cave_cinder_shoes', 'cave_cinder_stride', 'cave_cistern_charm', 'cave_clemency_circlet', 'cave_clerk_gown', 'cave_contempt_mantle',
+  'cave_court_word', 'cave_damp_mantle', 'cave_deep_well_mantle', 'cave_draught_candle', 'cave_drip_cloak', 'cave_ember_hauberk',
+  'cave_ember_reader', 'cave_forge_binding', 'cave_gavel_charm', 'cave_glass_coat', 'cave_hearth_charm', 'cave_indexer_robe', 'cave_juror_mantle',
+  'cave_kindling_boots', 'cave_ladder_boots', 'cave_lamp_rod', 'cave_lampwick', 'cave_lector_circlet', 'cave_name_mantle', 'cave_quench_axe',
+  'cave_reader_diadem', 'cave_reading_hood', 'cave_record_rod', 'cave_ribbon_mantle', 'cave_root_boots', 'cave_rootspur', 'cave_rootweave',
+  'cave_runner_boots', 'cave_scorch_cowl', 'cave_sergeant_helm', 'cave_shelf_mail', 'cave_smith_apron', 'cave_smoke_mantle', 'cave_soot_cap',
+  'cave_sparkwrit', 'cave_spur_boots', 'cave_taproot_pike', 'cave_twice_read', 'cave_usher_helm', 'cave_vellum_robe', 'cave_wellspring_boots',
+  'cave_writ_coat'];
 const diff = (a, b) => b.filter((k) => !a.includes(k)).sort();
 
 test('register() resolves the X1 shape, is idempotent, and flips CAVE_READY', async () => {
@@ -62,9 +70,9 @@ test('register() adds exactly the documented ids and touches nothing else', () =
   assert.ok(!before.enemies.includes('binder') && !before.encounters.includes('cave_binder') && !before.zoneLoot.includes('cave_band_1'));
 });
 
-test('the switch is off and the gate reads false; a packs.js entry, when C2-world adds it, uses the cave_ prefix', () => {
-  assert.equal(CAVE_LIVE, false);
-  assert.equal(caveOn(), false);
+test('the switch is ON (flipped 2026-10-28 after C4-fixes); the gate reads true only once the pack is loaded; the packs.js entry uses the cave_ prefix', () => {
+  assert.equal(CAVE_LIVE, true);
+  assert.equal(caveOn(), packReady('cave'), 'register() alone (no ensurePack) does not make the pack ready');
   if (PACKS.cave) { assert.equal(PACKS.cave.prefix, 'cave_'); assert.equal(PACKS.cave.enabled(), CAVE_LIVE); assert.ok(PACKS.cave.entry.endsWith('cave/index.js')); }
 });
 
