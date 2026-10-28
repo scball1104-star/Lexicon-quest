@@ -194,11 +194,11 @@ test('the pieces work on a member: the engine reads the folded stats, the extra 
   for (const u of ALL.filter((x) => x.slot === 'weapon')) assert.ok(PARTY_IDS.some((id) => PARTY[id].weapons.includes(u.type)), u.id);
 });
 
-test('the Keeper\'s Bookmark: a counted, consumable key item with the plan\'s line', () => {
+test('the Keeper\'s Bookmark: a counted, consumable key item whose line says what it keeps (world.js writes text.js bookmark_desc over it)', () => {
   const b = KEY_ITEMS[KEEPERS_BOOKMARK_ID];
   assert.equal(b, KEEPERS_BOOKMARK);
   assert.equal(b.id, 'keepers_bookmark'); assert.ok(b.key && b.counted && b.consumable && b.cave);
-  assert.equal(b.desc, 'Closes the book where you stand.');
+  assert.equal(b.desc, "Closes the book where you stand. This reading's blue gifts come up with you.");   // C4-fixes, CRITIQUE_STACKS 4
   assert.equal(b.use, 'cave_bank');
   assert.equal(ITEMS.keepers_bookmark.kind, 'key');
   assert.ok(!b.name.includes(EM) && b.icon);

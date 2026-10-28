@@ -34,7 +34,8 @@ test('the eleven plaques: one box each, the gold line names the landing, the Sta
 });
 
 test('the strings world.js reads: every key, ASCII, fits a box, the placeholders', () => {
-  const keys = ['close', 'bank', 'quit_ask', 'quit_yes', 'quit_no', 'bank_ask', 'bank_yes', 'bank_no', 'save_refused', 'floor_tag', 'bookmark_outside', 'stair_wait', 'rise'];
+  const keys = ['close', 'bank', 'quit_ask', 'quit_yes', 'quit_no', 'bank_ask', 'bank_yes', 'bank_no', 'save_refused', 'floor_tag', 'bookmark_outside', 'stair_wait', 'rise',
+    'stair_stuck', 'bookmark_desc', 'vault_ask', 'vault_yes', 'vault_no', 'vault_worn'];   // C4-fixes
   assert.deepEqual(Object.keys(STACKS_TEXT).sort(), keys.sort());
   for (const [k, s] of Object.entries(STACKS_TEXT)) { plain(`STACKS_TEXT.${k}`, s); assert.ok(fits(fillLine(s, WIDEST)), k); }
   assert.equal(STACKS_TEXT.floor_tag, 'B{n}');
@@ -42,7 +43,10 @@ test('the strings world.js reads: every key, ASCII, fits a box, the placeholders
   for (const k of ['quit_yes', 'quit_no', 'bank_yes', 'bank_no']) assert.ok(STACKS_TEXT[k].length <= CHOICE_COLS, k);
   assert.equal(STACKS_TEXT.close, 'The Stacks close.');
   assert.equal(STACKS_TEXT.save_refused, 'The Stacks keep their own pages.');
-  assert.equal(STACKS_TEXT.bank_ask, 'Close the book here?');
+  // the Bookmark and its question say up front what a close keeps (C4-fixes, CRITIQUE_STACKS 4)
+  assert.match(STACKS_TEXT.bank_ask, /^Close the book here\? .*gifts come up with you\.$/);
+  assert.match(STACKS_TEXT.bookmark_desc, /blue gifts come up with you/);
+  for (const k of ['vault_yes', 'vault_no']) assert.ok(STACKS_TEXT[k].length <= CHOICE_COLS, k);
 });
 
 test('Hollis: every line fits with the widest fill, the choice labels fit, the voice rules hold (no "responsibility", no explaining)', () => {
@@ -54,7 +58,7 @@ test('Hollis: every line fits with the widest fill, the choice labels fit, the v
   assert.ok(!src.includes(EM_DASH), 'no em dash in the file');
   for (const [k, s] of Object.entries(LINES)) {
     plain(`LINES.${k}`, s);
-    if (/^(offer|confirm)_(yes|no|record)$/.test(k)) { assert.ok(s.length <= CHOICE_COLS, k); continue; }
+    if (/^(offer|confirm|abandon)_(yes|no|record)$/.test(k)) { assert.ok(s.length <= CHOICE_COLS, k); continue; }
     if (k === 'binder_card') continue;
     assert.ok(fits(fillLine(s, WIDEST)), `${k}: ${boxLines(fillLine(s, WIDEST)).join(' / ')}`);
     assert.doesNotMatch(s, /erased|forgetting spell|magic|list-writer|Eraser|First Keeper|curse/i, `${k}: explains the forgetting`);
@@ -63,6 +67,8 @@ test('Hollis: every line fits with the widest fill, the choice labels fit, the v
   assert.match(LINES.rule_1, /level one, empty hands/);
   assert.match(LINES.rule_2, /red chest lends/i); assert.match(LINES.rule_2, /blue chest gives/i);
   assert.match(LINES.rule_3, /Bookmark/);
+  assert.match(LINES.rule_3, /Fall.*take back this reading's gifts/, 'rule 3 says a fall takes back what this reading gave (CRITIQUE_STACKS 4)');
+  assert.equal(LINES.abandon, 'A reading is open below. Abandon it?', 'CRITIQUE_STACKS 12');
   assert.equal(LINES.offer, 'Begin a reading?');
   assert.equal(LINES.die, 'The Stacks close. You woke here.');
   assert.match(LINES.binder_sub, /^Keeper of the Spine\. Nobody /, 'the card names what was avoided');

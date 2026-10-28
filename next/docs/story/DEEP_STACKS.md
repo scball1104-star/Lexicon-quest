@@ -79,7 +79,7 @@ use and `pushAwait`s it with `plaqueData(game)`. In node both are absent and the
 | `greet` | Hollis. Keeper, once. The others went up when the Archive went quiet. I stayed down to mind the desk. |
 | `rule_1` | Under this hall the Stacks go down a hundred floors. Whoever goes down goes as a first page: level one, empty hands. |
 | `rule_2` | What you find down there, the Stacks lend. A red chest lends. A blue chest gives, and a gift you may carry out. |
-| `rule_3` | One way up alive: the Keeper's Bookmark. Use it, and the book closes where you stand. Fall, and it closes on you. |
+| `rule_3` | One way up alive: the Keeper's Bookmark. Fall instead, and the Stacks take back this reading's gifts. |
 | `offer` | Begin a reading? |
 | `offer_yes` | Begin |
 | `offer_record` | The record |
@@ -88,6 +88,10 @@ use and `pushAwait`s it with `plaqueData(game)`. In node both are absent and the
 | `confirm_yes` | Go down |
 | `confirm_no` | Stay |
 | `stay` | The desk is not going anywhere. Neither am I. |
+| `abandon` | A reading is open below. Abandon it? |
+| `abandon_yes` | Abandon it |
+| `abandon_no` | Keep it |
+| `abandon_kept` | Then it waits where you left it. The title page will take you back down to it. |
 | `refused` | The stair is not taking anyone just now. Come back when the hall is quieter. |
 | `vault` | Your vault is not empty. What the Stacks gave you before waits in your pack at the first page. Put it on before you walk. |
 | `bank_kept` | {n} kept. The Stacks noticed. |
@@ -122,7 +126,7 @@ Read through `world.js textOf(key)`; its `FALLBACK_TEXT` has the same keys and l
 | `quit_ask` | Leave the Stacks? This reading ends here. What it gave goes back on the shelf. | the menu's Quit inside a run |
 | `quit_yes` | Leave | its first option |
 | `quit_no` | Stay | its cancel option |
-| `bank_ask` | Close the book here? | the Bookmark from Items |
+| `bank_ask` | Close the book here? This reading's gifts come up with you. | the Bookmark from Items |
 | `bank_yes` | Close it | its first option |
 | `bank_no` | Not yet | its cancel option |
 | `save_refused` | The Stacks keep their own pages. | Save, or a font, inside a run |
@@ -130,6 +134,16 @@ Read through `world.js textOf(key)`; its `FALLBACK_TEXT` has the same keys and l
 | `bookmark_outside` | The Bookmark marks nothing up here. | the Bookmark used outside a run |
 | `stair_wait` | The stair waits. A reading begins at the desk, with Hollis. | the hall's stair before the intro |
 | `rise` | {name} rises! | the Rebound prop's toast |
+| `stair_stuck` | The stair goes down into nothing. A Bookmark still closes the book; the menu still leaves. | a stair whose floor the generator refused twice (the party stays) |
+| `bookmark_desc` | Closes the book where you stand. This reading's blue gifts come up with you. | the Bookmark's line in Items (world.js writes it over items.js's) |
+| `vault_ask` | The vault came down with you. Put it on? | B1 of a reading that brought the vault down |
+| `vault_yes` | Put it on | its first option (Optimize for every member) |
+| `vault_no` | Later | its cancel option |
+| `vault_worn` | Wearing {n} from the vault. | the toast after it |
+
+C4-fixes, 2026-10-28 (CRITIQUE_STACKS 4, 12, 20 and 1): rule 3 and the Bookmark say up front that a fall takes back this
+reading's blue finds; Hollis asks before a new reading would write over a suspended one (`abandon`, in the offer after Begin);
+B1 asks once whether to put the vault on; a stair the generator cannot build says so and the party stays.
 
 ### 3.3 The plaques (`PLAQUES`)
 

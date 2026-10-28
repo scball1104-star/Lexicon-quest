@@ -33,15 +33,16 @@
 import { registerMap, peekMap, loadMap } from '../../world/maps.js';
 import { drawWindow } from '../../ui/window.js';
 import { KEY_ITEMS } from '../items.js';
-import { generateFloor, arrivalOf, B100_ARRIVAL, BANDS } from './gen.js';
+import { generateFloor, arrivalOf, B100_ARRIVAL, BANDS, CaveGenError, registerBand } from './gen.js';
 import { floorEncounters, registerFloorEncounters, isLanding, BOSS_FLOOR, BINDER_ENCOUNTER_ID } from './foes.js';
-import { setLootFloor, rollRedChest, rollBlueChest, blueChestDue } from './loot.js';
-import { wornProps, KEEPERS_BOOKMARK_ID } from './items.js';
+import { setLootFloor, rollRedChest, rollBlueChest, blueChestDue, LEND_FLOORS } from './loot.js';
+import { wornProps, KEEPERS_BOOKMARK_ID, KEEPERS_BOOKMARK, BINDER_QUILL_ID } from './items.js';
 import { LANDINGS, parseLanding } from './landing.js';
 import { wallDepth, stairs as stairsEv, light as lightEv, sign as signEv, trigger as triggerEv, enemy as enemyEv } from '../maps/_kit.js';
 import * as CAVE from '../../game/cave.js';
 import { createRng, hashSeed } from '../../core/rng.js';
 import { serialize, deserialize, findGear, hasFlag } from '../../game/state.js';
+import { weaponTypes, optimize } from '../../game/inventory.js';
 import { sceneById, registerStory, LINES } from '../../game/story.js';
 import { ENCOUNTERS } from '../encounters.js';
 import { mergeAtlasInto } from '../../core/assets.js';
@@ -60,6 +61,8 @@ export const HALL_ARRIVAL = [5, 5];
 export const BINDER_SCENE = 'cave_binder';
 export const MOVE_PLUS = 1.15;                 // cave_move_plus: walk and run 15% faster inside a run
 export const CHEST_TIERS_CAVE = ['red', 'blue'];
+/** The Catalogue's track (gen.js BANDS keeps 'archive'; register() swaps it): the Orrery's celesta, an existing Episode 1 piece. */
+export const CATALOGUE_MUSIC = 'orrery';
 
 // ---------------------------------------------------------------- text (text.js wins; one plain line each here)
 const FALLBACK_TEXT = {
@@ -73,6 +76,10 @@ const FALLBACK_TEXT = {
   bookmark_outside: 'The Bookmark marks nothing here.',
   stair_wait: 'The stair waits. A reading begins with the Archivist.',
   rise: '{name} rises!',
+  stair_stuck: 'The stair goes down into nothing. A Bookmark still closes the book; the menu still leaves.',
+  bookmark_desc: "Closes the book where you stand, and keeps this reading's blue finds.",
+  vault_ask: 'The vault came down with you. Put it on?', vault_yes: 'Put it on', vault_no: 'Later',
+  vault_worn: 'Wearing {n} from the vault.',
 };
 const FALLBACK_PLAQUES = {
   plaque_hall: 'THE DEEP STACKS. What the Book could not file, it kept here.',
@@ -160,13 +167,17 @@ export function b100Arrival() {
   return Array.isArray(a) ? [a[0], a[1]] : B100_ARRIVAL.slice();
 }
 
-/** Generate (and register the encounters of) one floor 1..99 for a run. Pure apart from the ENCOUNTERS registration. */
-export function buildFloor(seed, floor, vault = []) {
+/**
+ * Generate (and register the encounters of) one floor 1..99 for a run. Pure apart from the ENCOUNTERS registration. `genSeed`
+ * (default the run seed) is the generator's seed: a floor the generator refuses is built once more from a derived one
+ * (floorSeedAgain, C4-fixes, CRITIQUE_STACKS 1); the foes and the blue chest stay the run's.
+ */
+export function buildFloor(seed, floor, vault = [], genSeed = seed) {
   const specs = floorEncounters(seed, floor);
   registerFloorEncounters(specs);
   const pool = specs.map((s) => ({ enc: s.id, sprite: s.leader, move: s.move || null }));
   const blue = blueFloors(seed, vault).has(floor);
-  return generateFloor(seed, floor, {
+  return generateFloor(genSeed >>> 0, floor, {
     foes: () => (pool.length ? pool : null),
     chests: { red: 'auto', blue },
     plaque: (f) => plaqueId(f),
@@ -174,10 +185,25 @@ export function buildFloor(seed, floor, vault = []) {
   });
 }
 
+/** The generator's second seed for a (run seed, floor) it refused (deterministic, so a resume rebuilds the same floor). */
+export function floorSeedAgain(seed, floor) { return hashSeed(`cave:${seed >>> 0}:${floor}:again`); }
+/** buildFloor, and once more from floorSeedAgain when the generator refuses; a second refusal throws the CaveGenError. */
+export function buildFloorSafe(seed, floor, vault = []) {
+  try { return buildFloor(seed, floor, vault); }
+  catch (err) {
+    if (!(err instanceof CaveGenError)) throw err;
+    console.warn(`[cave] floor ${floor} of reading ${seed >>> 0} refused (${err.message}); built from its second seed`);
+    const mod = buildFloor(seed, floor, vault, floorSeedAgain(seed, floor));
+    mod.runSeed = seed >>> 0; mod.again = true;
+    return mod;
+  }
+}
+
 /**
  * Make floor n and n + 1 of the current run loadable: generated, registered (registerMap) with their encounters; B100 is the
  * hand-made map (a placeholder when it has not landed). A floor already registered for this seed is kept (its encounters are
- * re-registered, a no-op). Returns the modules.
+ * re-registered, a no-op). Floor n refused twice throws the CaveGenError (the stair catches it); n + 1 refused is skipped (its own
+ * stair tries again). Returns the modules.
  */
 export function prepareFloor(game, n, o = {}) {
   const c = CAVE.ensureCave(game);
@@ -189,12 +215,21 @@ export function prepareFloor(game, n, o = {}) {
     if (f === BOSS_FLOOR) { out.push(ensureB100()); continue; }
     const id = `cave_b${f}`;
     const have = peekMap(id);
-    if (have && have.seed === seed && !o.force) { registerFloorEncounters(floorEncounters(seed, f)); out.push(have); continue; }
-    const mod = buildFloor(seed, f, vault);
+    if (have && (have.runSeed != null ? have.runSeed : have.seed) === seed && !o.force) { registerFloorEncounters(floorEncounters(seed, f)); out.push(have); continue; }
+    let mod;
+    try { mod = buildFloorSafe(seed, f, vault); }
+    catch (err) { if (f === n || !(err instanceof CaveGenError)) throw err; continue; }
     registerMap(mod);
     out.push(mod);
   }
   return out;
+}
+/** Where a floor of the run is entered: the registered module's arrival mark (a second-seed floor has its own), else the generator's. */
+export function floorArrival(seed, floor) {
+  if (floor >= BOSS_FLOOR) return b100Arrival();
+  const m = peekMap(`cave_b${floor}`);
+  const a = m && m.marks && m.marks.arrival;
+  return Array.isArray(a) ? [a[0], a[1]] : arrivalOf(seed, floor);
 }
 
 // ---------------------------------------------------------------- the entrance hall and B100 (fallbacks)
@@ -279,11 +314,31 @@ function ensureHall() {
   registerMap(mod);
   return mod;
 }
+/** Where B100's plaque hangs: the antechamber's north face beside the stair the party came down (read from the cell below). */
+export const B100_PLAQUE = [13, 17];
+/**
+ * The B100 module as the reading wants it (C4-fixes, CRITIQUE_STACKS 17 and DEEP_STACKS_BALANCE 7.10; cave_b100.js is untouched):
+ * the Quill's chest goes (game/cave.js clear puts the Quill in the vault, and the warp out left the chest unopenable), and the
+ * plaque_b100 sign hangs in the antechamber. Idempotent; true when something changed.
+ */
+export function installB100(mod) {
+  if (!mod || !Array.isArray(mod.events)) return false;
+  let changed = false;
+  const i = mod.events.findIndex((e) => e && e.id === 'quill_chest');
+  if (i >= 0) { mod.events.splice(i, 1); changed = true; }
+  if (!mod.placeholder && !mod.events.some((e) => e && e.id === 'plaque')) {
+    mod.events.push(signEv('plaque', B100_PLAQUE[0], B100_PLAQUE[1], plaqueId(BOSS_FLOOR), { solid: false, sprite: 'plaque' }));
+    mod.marks = { ...(mod.marks || {}), plaque: [B100_PLAQUE[0], B100_PLAQUE[1] + 1] };
+    changed = true;
+  }
+  return changed;
+}
 function ensureB100() {
   const have = peekMap(B100_ID);
   if (have) return have;
   const mod = (mods.b100 && (mods.b100.default || mods.b100.map)) || buildB100Placeholder();
   if (!mod.id) mod.id = B100_ID;
+  installB100(mod);
   registerMap(mod);
   return mod;
 }
@@ -392,10 +447,40 @@ export function installCaveArt(engine) {
 }
 
 // ---------------------------------------------------------------- saves
-function writeSuspend(engine, game) {
+/**
+ * The suspend save is honest about the floor (C4-fixes, CRITIQUE_STACKS 3): besides the arrival it is written at every battle start
+ * with `run.inBattle` (the foe's event id, its encounter, where the leader stood) and after every fight, and it carries
+ * `run.gone` (this floor's beaten foes), so a Resume restarts an interrupted fight from its start and never brings a beaten foe back.
+ * Both ride on game.cave.run (serialized with it; game/cave.js clears the run on every exit). `inBattle` lives only in the file:
+ * the live game drops it as soon as the save is written.
+ */
+function syncGone(field, game, extra = null) {
+  const c = game && game.cave;
+  if (!c || !c.run) return;
+  const floor = CAVE.floorOf(game);
+  const ids = field && field.dungeonGone && field.mapId === `cave_b${floor}` ? [...(field.dungeonGone.get(field.mapId) || [])] : [];
+  if (extra && !ids.includes(extra)) ids.push(extra);
+  c.run.gone = { floor, ids };
+}
+function writeSuspend(engine, game, o = {}) {
   const e = engineOf(engine);
   if (!e || !e.save || !CAVE.inRun(game)) return false;
+  const f = fieldOf(e);
+  if (f && f.game === game) syncGone(f, game, o.won || null);
+  if (o.inBattle) game.cave.run.inBattle = o.inBattle;
   try { return !!e.save.save(CAVE.SUSPEND_SLOT, serialize(game), CAVE.suspendMeta(game)); } catch (err) { console.warn('[cave] suspend save failed', err && err.message); return false; }
+  finally { delete game.cave.run.inBattle; }
+}
+/** A reading waits in the suspend slot (Hollis asks before a new one would write over it, CRITIQUE_STACKS 12). */
+export function suspendOpen(engine) {
+  const e = engineOf(engine);
+  try { return !!(e && e.save && e.save.exists(CAVE.SUSPEND_SLOT)); } catch (err) { return false; }
+}
+/** The foe the field is fighting right now (touchEnemy marks it), or null. */
+function fightingFoe(field) {
+  if (!field || !field.entities) return null;
+  for (const ent of field.entities.values()) if (ent.type === 'enemy' && ent.actor && ent.actor.data && ent.actor.data.fighting) return ent;
+  return null;
 }
 function removeSuspend(engine) {
   const e = engineOf(engine);
@@ -415,7 +500,7 @@ export async function beginReading(engine, game, opts = {}) {
   if (!r) return { ok: false, why: 'refused' };
   setLootFloor(1);
   prepareFloor(g, 1);
-  const [ax, ay] = arrivalOf(r.seed, 1);
+  const [ax, ay] = floorArrival(r.seed, 1);
   const field = fieldOf(e);
   // C3-sim-bot's find: the field remembers defeated foes per map id for its whole life, and every reading reuses cave_bN, so a
   // second reading in one sitting found its cleared floors empty (no foes, no EXP). A new reading forgets them; resumeReading
@@ -424,7 +509,30 @@ export async function beginReading(engine, game, opts = {}) {
   if (field && opts.warp !== false) await field.warpTo('cave_b1', ax, ay, 'down', 'stairs');
   else if (e && typeof e.reset === 'function' && opts.warp !== false) e.reset('field', { map: 'cave_b1', x: ax, y: ay, dir: 'down' });
   writeSuspend(e, g);
+  if (e && opts.warp !== false && typeof e.after === 'function') e.after(1, () => { vaultOffer(e, g); });
   return { ok: true, seed: r.seed, floor: 1, arrival: [ax, ay] };
+}
+
+/**
+ * B1 of a reading that brought the vault down (CRITIQUE_STACKS 20: from the third reading a player walked B1 bare-handed beside
+ * his own uniques): once the field is quiet, one question, then Optimize for every member (the bag holds nothing else on B1).
+ * Resolves the number of pieces put on, or 0.
+ */
+export async function vaultOffer(engine, game) {
+  const e = engineOf(engine);
+  const g = gameOf(e, game);
+  if (!g || !running(g) || CAVE.floorOf(g) !== 1) return 0;
+  const vault = new Set(CAVE.vaultIds(g));
+  if (!(g.gear || []).some((it) => vault.has(it.base))) return 0;
+  const f = await untilFieldIdle(e, 900);
+  if (!f || f.dead || !running(g) || CAVE.floorOf(g) !== 1) return 0;
+  const i = await ask(e, textOf('vault_ask'), [textOf('vault_yes'), textOf('vault_no')]);
+  if (i !== 0) return 0;
+  let n = 0;
+  for (const m of g.party) n += optimize(g, m) || 0;
+  if (e.audio && e.audio.sfx) e.audio.sfx(n ? 'equip' : 'buzzer');
+  if (n && e.toasts && e.toasts.show) await e.toasts.show({ text: textOf('vault_worn').replace('{n}', String(n)), icon: 'star', frames: 80 });
+  return n;
 }
 
 /**
@@ -494,9 +602,32 @@ export async function resumeReading(engine, game) {
   installCaveArt(e);
   setLootFloor(info.floor);
   prepareFloor(g, info.floor);
-  const at = info.floor >= BOSS_FLOOR ? b100Arrival() : arrivalOf(info.seed, info.floor);
-  if (e && typeof e.reset === 'function') e.reset('field', { map: `cave_b${info.floor}`, x: at[0], y: at[1], dir: 'down' });
-  return { ok: true, floor: info.floor, seed: info.seed, arrival: at };
+  const run = g.cave.run;
+  const fight = run.inBattle && run.inBattle.floor === info.floor ? run.inBattle : null;
+  delete run.inBattle;
+  const gone = run.gone && run.gone.floor === info.floor && Array.isArray(run.gone.ids) ? run.gone.ids.slice() : [];
+  const at = fight && Array.isArray(fight.pos) ? fight.pos.slice(0, 2) : floorArrival(info.seed, info.floor);
+  const mapId = `cave_b${info.floor}`;
+  if (e && typeof e.reset === 'function') {
+    const f = e.reset('field', { map: mapId, x: at[0], y: at[1], dir: (fight && fight.pos && fight.pos[2]) || 'down' });
+    // the field's enter is still loading the map: its beaten foes are known before any entity is placed
+    if (f && f.dungeonGone && gone.length) f.dungeonGone.set(mapId, new Set(gone));
+    if (fight) e.after(1, () => { restartFight(e, fight); });
+  }
+  return { ok: true, floor: info.floor, seed: info.seed, arrival: at, gone, fight: fight ? fight.foe : null };
+}
+/** A Resume from inside a fight: that foe's fight again from its start (full-HP foes, the party as the suspend kept it), through the field's own touch. */
+async function restartFight(engine, fight) {
+  const e = engineOf(engine);
+  const f = await untilFieldIdle(e, 900);
+  if (!f || f.dead) return false;
+  const ent = f.entities && f.entities.get(fight.foe);
+  if (!ent || !ent.present || !ent.actor || !f.leader) return false;
+  // face each other, so the touch starts an ordinary fight (no preemptive strike for having closed the app)
+  if (typeof f.leader.faceToward === 'function') f.leader.faceToward(ent.actor);
+  if (typeof ent.actor.faceToward === 'function') ent.actor.faceToward(f.leader);
+  await f.touchEnemy(ent.actor, 'player');
+  return true;
 }
 
 // ---------------------------------------------------------------- the flows the seams call
@@ -559,7 +690,12 @@ async function clearFlow(engine, game, field) {
   const e = engineOf(engine);
   const f = await untilFieldIdle(e, 900) || field;
   if (f && !f.dead && sceneById('binder_cleared')) { await f.runScene('binder_cleared'); await untilFieldIdle(e, 300); }
-  return endReading(e, game, 'clear');
+  const r = await endReading(e, game, 'clear');
+  // the Quill, now the vault's, is offered once the hall's line is said (the field's pending-drop prompt, H6)
+  const f2 = fieldOf(e), g = gameOf(e, game);
+  const quill = g && (g.gear || []).find((it) => it && it.base === BINDER_QUILL_ID);
+  if (r && r.ok && f2 && !f2.dead && quill && Array.isArray(f2.pendingDrops)) f2.pendingDrops.push(quill.uid);
+  return r;
 }
 
 // ---------------------------------------------------------------- chests
@@ -578,6 +714,26 @@ async function giveRed(field, roll, at) {
   }
   if (roll.bookmark) await field.giveItem(KEEPERS_BOOKMARK_ID, 1);
 }
+/**
+ * The party's side of a red chest's roll (world.js and tools/sim/cave.mjs open chests through this): the worn props, the landing,
+ * the Bookmarks held, and on B1 to B3 the floor's first red chest lends a weapon of an empty-handed reader's own kind (C4-fixes,
+ * CRITIQUE_STACKS 13: Bram walked B1 to B9 bare-handed). Marks the floor as lent-on (run.lentOn) when that first chest is opened.
+ */
+export function redChestOpts(g, floor, landing) {
+  const c = CAVE.ensureCave(g);
+  const opts = { props: wornProps(g.party), landing, holdsBookmark: CAVE.hasBookmark(g), bookmarks: CAVE.bookmarks(g) };
+  const run = c.run;
+  if (run && floor <= LEND_FLOORS && !landing) {
+    if (!Array.isArray(run.lentOn)) run.lentOn = [];
+    if (!run.lentOn.includes(floor)) {
+      run.lentOn.push(floor);
+      const bare = (g.party || []).find((m) => m.hp > 0 && !weaponTypes(m).some((w) => m.equip && m.equip[w]));
+      if (bare) opts.lend = weaponTypes(bare).includes(bare.weapon) ? bare.weapon : weaponTypes(bare)[0];
+    }
+  }
+  return opts;
+}
+
 /**
  * A red or blue chest, after events.js opened it (state, sound, saved as opened). Red: rollRedChest at the floor with the party's
  * props, the landing guarantee and the Bookmark; blue: rollBlueChest, foundBlue, the legendary toast and the equip prompt (a
@@ -603,11 +759,11 @@ export async function openCaveChest(field, ent) {
       await field.bark('first_legendary_drop');
       return { tier: 'blue', unique: id, uid };
     }
-    const roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props: props.includes('red_rarity_up') ? props : [...props, 'red_rarity_up'], landing: false, holdsBookmark: holds });
+    const roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props: props.includes('red_rarity_up') ? props : [...props, 'red_rarity_up'], landing: false, holdsBookmark: holds, bookmarks: CAVE.bookmarks(g) });
     await giveRed(field, roll, at);
     return { tier: 'blue', unique: null, roll };
   }
-  const roll = rollRedChest(rng, floor, CAVE.vaultIds(g), { props, landing, holdsBookmark: holds });
+  const roll = rollRedChest(rng, floor, CAVE.vaultIds(g), redChestOpts(g, floor, landing));
   await giveRed(field, roll, at);
   return { tier: 'red', roll };
 }
@@ -618,7 +774,9 @@ const running = (g) => !!(g && g.cave) && CAVE.inRun(g);
 function anyWears(game, prop) { return !!(game && Array.isArray(game.party) && game.party.some((m) => CAVE.wearsProp(m, prop))); }
 /** The floor tag ("B23") where the Aim line draws, permanent inside a reading, hidden only under the banner, a fade or a close-up; the Downward Sense arrow beside it. */
 function drawTag(field, r) {
-  const tag = running(field.game) && field.map && !field.loading ? floorTagOf(CAVE.floorOf(field.game)) : null;
+  // the floor of the map on screen, not the run's: during the stair's fade the run is already one floor down (CRITIQUE_STACKS 1)
+  const mf = field.map && field.map.mod ? Number(field.map.mod.floor) : 0;
+  const tag = running(field.game) && field.map && !field.loading ? floorTagOf(mf > 0 ? mf : CAVE.floorOf(field.game)) : null;
   if (!tag) return false;
   if ((field.banner && field.banner.active) || (field.closeup && field.closeup.isOpen) || field.fadeAlpha >= 0.5) return true;
   const dir = HOOKS.stairsDir(field);
@@ -670,10 +828,19 @@ export const HOOKS = {
       }
       return false;
     }
-    const floor = CAVE.descend(g);   // always one floor down, whatever the door's own number says (the hall's placeholder, a stale map)
-    prepareFloor(g, floor);
+    // always one floor down, whatever the door's own number says (the hall's placeholder, a stale map); the floor is built BEFORE
+    // the run moves, so a refusal keeps the party, the run and the tag where they are, with one line (CRITIQUE_STACKS 1)
+    const next = Math.min(BOSS_FLOOR, CAVE.floorOf(g) + 1);
+    try { prepareFloor(g, next); }
+    catch (err) {
+      if (!(err instanceof CaveGenError)) throw err;
+      console.warn('[cave] stair refused', err.message);
+      if (!(field.cutscene && field.cutscene.running)) field.showBoxes([{ who: null, text: textOf('stair_stuck') }]);
+      return false;
+    }
+    const floor = CAVE.descend(g);
     setLootFloor(floor);
-    const at = floor >= BOSS_FLOOR ? b100Arrival() : arrivalOf(g.cave.run.seed, floor);
+    const at = floorArrival(g.cave.run.seed, floor);
     return [`cave_b${floor}`, at[0], at[1], 'down'];
   },
   /** After any battle on the field: the kill count; the B100 win closes the reading; a wipe is the Stacks' close (resolves true: the field stops there). */
@@ -681,10 +848,17 @@ export const HOOKS = {
     const g = field.game;
     if (!running(g)) return false;
     if (result === 'lose') { await wipeFlow(field.engine, g); return true; }
-    if (result !== 'win') return false;
+    const foe = fightingFoe(field);
+    if (result !== 'win') { if (foe) writeSuspend(field.engine, g); return false; }
     const enc = ENCOUNTERS[encounterId];
     CAVE.noteKills(g, enc && Array.isArray(enc.enemies) ? enc.enemies.length : 1);
-    if (encounterId === BINDER_ENCOUNTER_ID) { const e = field.engine; e.after(2, () => { clearFlow(e, g, field); }); }
+    if (encounterId === BINDER_ENCOUNTER_ID) {
+      // the Binder's drops were lent and go back with the clear: no equip prompt before its last line (CRITIQUE_STACKS 17)
+      const e = field.engine; e.lastBattleDrops = null;
+      e.after(2, () => { clearFlow(e, g, field); });
+      return false;
+    }
+    if (foe) writeSuspend(field.engine, g, { won: foe.id });
     return false;
   },
   /** The rest flow's "Record your journey?" inside a reading: the one line instead. True when refused. */
@@ -726,6 +900,10 @@ export const HOOKS = {
       if (m && u.alive && CAVE.wearsProp(m, 'fury_floor')) { u.fury = Math.max(u.fury, 50); for (const ev of battle.state.startEvents || []) for (const x of (ev.type === 'battle_start' && ev.units) || []) if (x.uid === u.uid) x.fury = u.fury; }   // C4 Standing Grudge (CAVE_PROPS.fury_floor.value)
     }
     if (anyWears(game, 'exp_lean')) for (const x of battle.units()) if (x.side === 'enemy' && x.rewards) x.rewards.exp = Math.round(x.rewards.exp * 1.15);   // C4 Quick Study (CAVE_PROPS.exp_lean.value)
+    // the suspend save knows this fight (CRITIQUE_STACKS 3): closing the app now resumes into it, not at the floor's arrival
+    const field = fieldOf();
+    const foe = field && field.game === game ? fightingFoe(field) : null;
+    if (foe && field.leader) writeSuspend(field.engine, game, { inBattle: { floor: CAVE.floorOf(game), foe: foe.id, enc: foe.ev.encounter, pos: [field.leader.tx, field.leader.ty, field.leader.dir] } });
     return true;
   },
   /** events.js opened a chest: a red or blue tier (not a placed one) is rolled here; resolves the roll, or false when the chest is not ours. */
@@ -828,6 +1006,10 @@ async function run() {
     if (fn) await fn();
   }
   const story = registerFallbackStory();
+  // C4-fixes: the Catalogue sounds like itself, not the Archive the party just finished (CRITIQUE_STACKS 16); the Bookmark says
+  // what it keeps (CRITIQUE_STACKS 4; items.js keeps its own copy, the text lives in text.js)
+  registerBand('catalogue', { music: CATALOGUE_MUSIC });
+  for (const k of [KEEPERS_BOOKMARK, KEY_ITEMS[KEEPERS_BOOKMARK_ID]]) if (k) k.desc = textOf('bookmark_desc');
   const hall = ensureHall();
   ensureArchivistFallback(hall);
   // the trapdoor into the library (the module is cached by maps.js: patched once, it stays patched for every later visit)

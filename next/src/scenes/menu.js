@@ -216,14 +216,14 @@ export class MenuScene {
     drawWindow(r, P.x, P.y, P.w, P.h, { open: k });
     drawWindow(r, C.x, C.y, C.w, C.h, { open: k });
     drawWindow(r, I.x, I.y, I.w, I.h, { open: k });
-    const helpText = HELP.menu[this.commands.item.id] || '';
+    const helpText = (this.mode !== 'busy' && HELP.menu[this.commands.item.id]) || '';
     if (!this.touch) drawHelpBar(r, helpText, { right: this.mapTitle, open: k });
     if (k < 1) return;
     this.g.party.forEach((m, i) => {
       drawMemberRow(r, m, P.x + 8, P.y + 8 + i * 57, { w: P.w - 16, frame: this.frame, divider: i < this.g.party.length - 1 });
     });
     if (this.touch) {
-      // Help line inside the panel (the help bar's place is taken by the taller command window).
+      // Help line inside the panel (none under a question box: the box says it).
       const hy = P.y + P.h - 21;
       drawDivider(r, P.x + 6, hy - 4, P.w - 12);
       r.text(helpText, P.x + 8, hy + 3, { color: 'white', width: P.w - 16 });

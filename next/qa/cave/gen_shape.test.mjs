@@ -74,7 +74,7 @@ test('chests: red 2 to 4 (dead ends first), at most one blue, ids and marks dete
   assert.equal(m0.events.filter((e) => e.type === 'chest').length, 2);
 });
 
-test('foes: 4 + floor/10 (max 12), never in the arrival room, never within 3 of the arrival, chase or wander or guard; the opts.foes contract', () => {
+test('foes: 4 + floor/10 (max 12, max 6 from B40), never in the arrival room, never within 3 of the arrival, chase or wander or guard; the opts.foes contract', () => {
   for (const seed of SEEDS.slice(0, 40)) for (const floor of [1, 9, 19, 35, 55, 99]) {
     const m = generateFloor(seed, floor);
     const foes = m.events.filter((e) => e.type === 'enemy');
@@ -89,7 +89,7 @@ test('foes: 4 + floor/10 (max 12), never in the arrival room, never within 3 of 
       assert.ok(BANDS[m.band].foes.some((p) => p.enc === f.encounter && p.sprite === f.sprite), 'default stub pool');
     }
   }
-  assert.equal(foeCount(1), 4); assert.equal(foeCount(10), 5); assert.equal(foeCount(80), 12); assert.equal(foeCount(99), 12);
+  assert.equal(foeCount(1), 4); assert.equal(foeCount(10), 5); assert.equal(foeCount(39), 7); assert.equal(foeCount(40), 6); assert.equal(foeCount(99), 6);   // C4-fixes
   // injected pools: strings with opts.sprites, or objects with a fixed move
   const pool = ['cave_test_a', { enc: 'cave_test_b', sprite: 'tome_golem', move: 'guard' }];
   const m = generateFloor(5, 88, { foes: () => pool, sprites: { cave_test_a: 'ink_wraith' } });   // twelve foes: both entries show up

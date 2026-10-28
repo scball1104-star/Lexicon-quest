@@ -235,7 +235,7 @@ const archivore = {
   damageTakenMult(ctx, u) { return u.ai.phase === 1 && pages(ctx).length ? PAGE_ARMOR : 1; },
   special(ctx, u, sk, e, targets) {
     if (e.summon) {
-      ctx.emit({ type: 'message', text: 'The Archivore rips fresh pages from the Book!' });
+      ctx.emit({ type: 'message', text: `${u.name} rips fresh pages from the Book!` });
       summonPages(ctx, u, 2);
       return;
     }
@@ -243,7 +243,7 @@ const archivore = {
       const ps = pages(ctx);
       if (!ps.length) {
         ctx.emit({ type: 'feast', actor: u.uid, pages: [], healed: 0 });
-        ctx.emit({ type: 'message', text: 'The Archivore snaps at empty air. Its pages are gone!' });
+        ctx.emit({ type: 'message', text: `${u.name} snaps at empty air. Its pages are gone!` });
         return;
       }
       for (const p of ps) ctx.kill(p, 'devoured');
@@ -262,7 +262,7 @@ const archivore = {
           continue;
         }
         ctx.emit({ type: 'devour', actor: u.uid, target: t.uid, success: true });
-        ctx.emit({ type: 'message', text: `The Archivore devours ${t.name}'s name!` });
+        ctx.emit({ type: 'message', text: `${u.name} devours ${t.name}'s name!` });
         ctx.addStatus(t, 'silence', 3, u);
         ctx.addStatus(t, 'nameless', 99, u);
         ctx.heal(u, u.maxHp * DEVOUR_DRAIN, u, { drain: true });
@@ -1099,12 +1099,11 @@ export function competentPolicy(b, me, opts = {}) {
       if (hasItem('hi_potion')) return { type: 'item', item: 'hi_potion', target: low.uid };
     }
   }
-  // Under 35% with no potion and no healer coming: Defend (halves the next hit) instead of trading blows.
-  // Bram with Guard covers a teammate in that spot instead.
+  // Under 35%, no potion: Defend only while a heal or a Feather is coming. Bram's Guard covers a teammate.
   if (!finishingBlow(b, me, foes)) {
     const healer = healerReady(b, order);
     const lowOther = allies.find((a) => a.uid !== me.uid && pct(a) < 0.35);
-    if (pct(me) < 0.35 && me.id !== 'mira' && !healer && !hasItem('potion') && !hasItem('hi_potion')) return { type: 'defend' };
+    if (pct(me) < 0.35 && me.id !== 'mira' && (healer || hasItem('phoenix_feather')) && !hasItem('potion') && !hasItem('hi_potion')) return { type: 'defend' };
     if (lowOther && me.id === 'bram' && !healer && !hasItem('potion') && !hasItem('hi_potion') && canSkill('guard') && foes.length > 1) {
       return { type: 'skill', skill: 'guard', target: lowOther.uid };
     }

@@ -2,12 +2,9 @@
 // painted crop is the fallback), New Game / Continue / [Episode 2] / Config, version string, attract mode after
 // 20 s idle (prologue cards, then back). Also the UI module's install(): toasts, the 'choice', '_uiStage' and
 // 'nameEntryEp2' scenes, the stats provider, and LQ_DEBUG.newGame / give / uiStage.
-// Episode 2 shows once any slot has `ep1_complete` (or with ?ep=2): name step, newGameEp2, the card, home in bed.
-// The row says it is a ready-made party ("Episode 2: new party") and a note beside the menu says the player's own
-// game stays under Continue (W15, PLAYTEST_REVIEW_4 fix 1). Both fresh starts share the autosave (slot 0) with
-// every other run, so when it already holds a game New Game and the Episode 2 start ask once first (the save guard:
-// name, level and place of what would be replaced; "Keep my save" is the default and the cancel answer, a free
-// record can take a copy first).
+// Episode 2 shows once any slot has `ep1_complete` (or ?ep=2): a ready-made party, its note says the player's own game
+// stays under Continue. Fresh starts share the autosave (slot 0), so over a game they ask first (the save guard: what
+// would be replaced; "Keep my save" is the default and the cancel answer, a free record can take a copy first).
 // Held upright on a phone the game is a 384 px strip, so the title first shows a one-time card that says to turn the
 // phone (W15, PLAYTEST_REVIEW_4 fix 5): any tap or key dismisses it, settings.rotateHintSeen remembers it, landscape
 // never shows it and turning the phone counts as reading it. The portrait layout stays for players who keep it.
@@ -61,11 +58,11 @@ export class TitleScene {
       ...(this.ep3.show ? [{ id: 'ep3', label: EP3_ROW_LABEL }] : []),
       { id: 'config', label: 'Config' },
     ];
-    // Menu window: anchored at the bottom (y 196; 210 for four touch rows, clear of the subtitle), centred, as wide
-    // as its longest row needs (100 px for the three plain rows).
-    const rowH = rowHeightFor(e, 11);
-    const h = items.length * rowH + 13;
+    // Menu window: bottom at 196 (210 for 4+ touch rows), as wide as its rows; a tall one lifts the logo, then tightens rows
+    let rowH = rowHeightFor(e, 11);
     const bottom = items.length > 3 && rowH > 11 ? 210 : 196;
+    while (rowH > 14 && bottom - items.length * rowH - 13 < 91) rowH--;
+    const h = items.length * rowH + 13;
     let tw = 0;
     for (const it of items) tw = Math.max(tw, e.renderer && e.renderer.measure ? e.renderer.measure(it.label) : it.label.length * 5);
     const w = Math.max(100, tw + 34);
@@ -256,7 +253,7 @@ export class TitleScene {
     const f = logo && logo.frames.logo;
     if (f) {
       if (!this.points) this.samplePoints(r);
-      const lx = Math.round((r.W - f.w) / 2), ly = 26;
+      const lx = Math.round((r.W - f.w) / 2), ly = Math.max(4, Math.min(26, this.win.y - 87));
       r.sprite(logo, f, lx, ly, { topLeft: true });
       const sub = logo.frames.subtitle;
       if (sub) r.sprite(logo, sub, Math.round((r.W - sub.w) / 2), ly + f.h + 3, { topLeft: true });

@@ -129,3 +129,42 @@ No dialogue box ran over two lines; nothing overlapped the touch bars (Fact).
 
 Sound by ear (audio state only); real finger gestures (injected actions, touch layout shown); the tablet layout; Auto battle; a natural
 wipe (none came in 47 floors by hand; the wipe was forced); B30 to B44 and B46 to B74 by hand; EP3-live pools.
+
+## Fixed (C4-fixes, 2026-10-28)
+
+`docs/briefs/C4-fixes.md`, in rank order. Rigs: `python qa/cave/fixes_rig.py` (phone, then desktop: issues 1, 3, 4, 12, 17 in the real
+game) and `python qa/cave/fixes_ui_shots.py` (23, 24); shots in `qa/cave/fixes_out/` (`<device>-fix-NN-*.png`, `_page.png` the whole
+page). Node: `qa/cave/fixes_world.test.mjs`, `qa/cave/fixes_balance.test.mjs`. Numbers: `docs/DEEP_STACKS_BALANCE.md` 9.
+
+| # | Done | What changed | Proof |
+|---|---|---|---|
+| 1 | yes (world half; the generator half was the orchestrator's) | `world.js` builds the next floor BEFORE the run moves; a refusal is built once more from a derived seed (`floorSeedAgain`), a second refusal keeps the party, the run and the tag on the floor with one line (`stair_stuck`), never a red panel; the tag reads the map on screen | fixes_world 1 to 3; `*-fix-02-stair_refused` |
+| 2 | earlier (orchestrator) | | |
+| 3 | yes | the suspend is written at every battle start with `run.inBattle` and after every fight with `run.gone`; Resume restarts that fight where it began, the party as suspended, the beaten foes gone | fixes_world; `*-fix-03` to `-06` |
+| 4 | yes | rule 3: "Fall instead, and the Stacks take back this reading's gifts."; the Bookmark's line and its question say the gifts come up with it | story_text, fixes_world; `*-fix-01-rule3` |
+| 5 | yes | at most six foes a floor from B40, the EXP pace refit | fixes_balance; model 5.9 / 8.2 / 9.0 to 4.5 / 4.1 / 3.8 min at B45 / B75 / B95 |
+| 6 | yes | until EP3_LIVE bands 4 and 5 draw all 25 earlier groups, each at its own level, an elite one group in three | data_foes, fixes_balance |
+| 7 | yes | the Root Cellars hp 1, power 1.15 | 3.59 / 3.84 to 3.37 / 3.45 rounds (B20s / B30s) |
+| 8 | yes | no cures from foes, the deep larder Hi-Potions and Hi-Ethers, Feathers rarer, one spare Bookmark | B90 bag: every mean under a dozen (was 69 Eye Drops) |
+| 9 | yes (C4-uniques' `BLUE_PITY_FIRST`) | pinned: the first blue by B9 on 200 seeds | fixes_balance |
+| 10 | C4-uniques | | |
+| 11 | yes | the Binder HP 3000, MAG 4000, SPD 66: careful wins 98% in 9.4 rounds, ignoring the telegraphs 77% (was 93%) | sim 300 seeds; data_sanity |
+| 12 | yes | Hollis: "A reading is open below. Abandon it?" Keep it keeps it | fixes_world; `*-fix-07`, `-08` |
+| 13 | yes | the first red chest of B1 to B3 lends a bare-handed reader his kind of weapon; B1 to B5 drops draw every weapon kind | fixes_world, world_hooks |
+| 14 | yes | `field.js` drops a leading "The " from the name in the prompt | `*-fix-11-quill_prompt` |
+| 15 | yes | no gold in red chests (a gear chest may carry a supply); Kept Stores was C4-uniques' | data_loot |
+| 16 | yes | the Catalogue plays `orrery`; the Binder fights on the Forge's painted stage | fixes_world |
+| 17 | yes | the Binder's lent drops never prompt; "The Binder comes apart..." then the hall's lines, then the Quill's own prompt; the Quill chest gone; the B100 plaque in the antechamber | fixes_world (mapcheck); `*-fix-09` to `-11` |
+| 18 | no (art gap) | the page-burst fx and a paper-tear sound need a new fx kind in the precached animator and a new SFX; nothing in the sheets fits | |
+| 19 | yes | `newGameEp2` marks seven Episode 1 lesson barks seen | ep2 tests |
+| 20 | yes | B1 of a reading that brought the vault down asks "The vault came down with you. Put it on?", then Optimize for every member | fixes_world |
+| 21 | no (art gap) | Hollis's 48 px head: no existing portrait is his (npc_scholar has no head) | |
+| 22 | yes | five or more touch rows lift the logo (to 10 px) and then tighten the rows; the window never covers the subtitle | `phone-fix-04-title_resume` |
+| 23 | yes | the Equip slot names fit the panel (journal.js `fitLine`) | `phone-ui-equip_long_name` |
+| 24 | yes | the menu draws no help line under its own question box | `phone-ui-quit_question` |
+| 25 | yes | no "..." above "Not yet found." | ui_stacks |
+| Known 4 | yes | `battle/loot.js` `rollBase` keeps slot and type below every base; Stacks elites drop at the floor's item level | fixes_world |
+| Known 5 | yes | Auto Defends at low HP only while a heal or a Feather is coming | fixes_balance |
+| Known 7 | yes (with 8) | | |
+| Known 9 | yes | `qa/cave/out/cave_sanity.md` regenerated | |
+| Known 10 | yes (with 17) | | |

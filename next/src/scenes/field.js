@@ -139,7 +139,7 @@ export class FieldScene {
     const e = this.engine, g = this.game;
     this.loading = true;
     let mod = await loadMap(mapId);
-    // W7: a pack map that did not come up is never the test town: wait (bounded), else land on a real map and return once the pack is up
+    // W7: a pack map not up yet: wait (bounded), else a real map, and back once the pack is up
     const hit = !mod && packForMap(mapId);
     if (hit && hit.prefixed && packEnabled(hit.id)) {
       await awaitPacks([hit.id], 8000);
@@ -581,7 +581,7 @@ export class FieldScene {
     if (this.dead || e.settings.equipPrompts === false) return false;
     const offer = equipOffers(this.game, uid);
     if (!offer) return false;
-    const name = gearName(offer.item);
+    const name = gearName(offer.item).replace(/^The /, '');
     const names = offer.offers.map((x) => memberName(x.member));
     let text, choices, cancel;
     if (offer.offers.length === 1) { text = `Equip the ${name} on ${names[0]}?`; choices = ['Yes', 'Later']; cancel = 1; }
@@ -640,7 +640,7 @@ export class FieldScene {
     // the battle writes outcome flags (echo_warden_defeated, ...) straight into engine.game
     if (!this.dead) { EV.refreshEntities(this); for (const a of this.actors) if (a.kind === 'npc') refreshNpcBehaviour(this, a); }
     if (e.cave && !this.dead && await e.cave.afterBattle(this, encounterId, result)) return result;   // the Deep Stacks: kills, B100, a wipe
-    // gear that dropped in the fight (battle.js leaves the uids on the engine): the equip prompt after the rewards
+    // the fight's gear (battle.js lastBattleDrops): the equip prompt after the rewards
     const drops = e.lastBattleDrops; e.lastBattleDrops = null;
     // H6: a scene's battle offers its gear after the scene
     if (result === 'win' && drops && drops.length && !this.dead && this.cutscene.running) this.pendingDrops.push(...drops);

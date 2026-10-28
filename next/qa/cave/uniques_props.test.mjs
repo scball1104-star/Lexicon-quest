@@ -289,7 +289,8 @@ test('the loot properties reach the chest: Kept Stores, Warm Larder, Owed More, 
   const props = ['larder', 'larder_1', 'lent_more', 'feather_find', 'bookmark_more', 'bookmark_twice'];
   for (const p of props) assert.ok(W.HOOKS.inRun(g) && (await import('../../src/data/cave/items.js')).wornProps(g.party).includes(p), p);
   const r = await W.openCaveChest(field, ent);
-  const want = L.rollRedChest(W.chestRng(g.cave.run.seed, 1, red.id), 1, CAVE.vaultIds(g), { props: (await import('../../src/data/cave/items.js')).wornProps(g.party), landing: false, holdsBookmark: false });
+  // B1's first red chest also lends the bare-handed hero a sword (C4-fixes, world.js redChestOpts)
+  const want = L.rollRedChest(W.chestRng(g.cave.run.seed, 1, red.id), 1, CAVE.vaultIds(g), { props: (await import('../../src/data/cave/items.js')).wornProps(g.party), landing: false, holdsBookmark: false, bookmarks: 0, lend: 'sword' });
   assert.deepEqual(r.roll, want, 'the chest rolled with the worn props');
   assert.equal(L.bookmarkChance(1, { props }), 0.12, 'Dog-Eared and Marked Pages: three times the Bookmark odds');
   assert.equal(L.redEquipChance(1, { props }), Math.min(0.8, 0.6 + L.LENT_MORE));

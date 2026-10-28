@@ -82,7 +82,7 @@ export function gridSize(floor) {
   const t = Math.max(0, Math.min(1, (floor - 1) / 98));
   return [40 + Math.round(16 * t), 30 + Math.round(10 * t)];
 }
-export const foeCount = (floor) => Math.min(12, 4 + Math.floor(floor / 10));
+export const foeCount = (floor) => Math.min(floor >= 40 ? 6 : 12, 4 + Math.floor(floor / 10));   // at most 6 from B40 (C4-fixes; foes.js FOE_CAP_DEEP)
 
 // ------------------------------------------------------------------------------------------------ walk model
 const OPEN_TERRAIN = new Set(['catalog_wood', 'dirt', 'carpet_red', 'carpet_blue', 'moss', 'gallery_stone', 'stone_floor', 'stacks_wood',

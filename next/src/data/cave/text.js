@@ -53,12 +53,18 @@ export const STACKS_TEXT = {
   bank: 'The book closes where you stand.',
   quit_ask: 'Leave the Stacks? This reading ends here. What it gave goes back on the shelf.',
   quit_yes: 'Leave', quit_no: 'Stay',
-  bank_ask: 'Close the book here?', bank_yes: 'Close it', bank_no: 'Not yet',
+  bank_ask: "Close the book here? This reading's gifts come up with you.", bank_yes: 'Close it', bank_no: 'Not yet',
   save_refused: 'The Stacks keep their own pages.',
   floor_tag: 'B{n}',
   bookmark_outside: 'The Bookmark marks nothing up here.',
   stair_wait: 'The stair waits. A reading begins at the desk, with Hollis.',
   rise: '{name} rises!',
+  // C4-fixes: the stair the generator refused twice (world.js beforeDoor keeps the party on the floor); the Bookmark's own line
+  // (world.js writes it over items.js's at register); the vault offer on B1 of a reading that brought the vault down
+  stair_stuck: 'The stair goes down into nothing. A Bookmark still closes the book; the menu still leaves.',
+  bookmark_desc: "Closes the book where you stand. This reading's blue gifts come up with you.",
+  vault_ask: 'The vault came down with you. Put it on?', vault_yes: 'Put it on', vault_no: 'Later',
+  vault_worn: 'Wearing {n} from the vault.',
 };
 
 /** Hollis's lines and the Stacks' own, by scene. {n} a count, {floor} a floor, {vault} and {total} the vault's numbers. */
@@ -69,13 +75,17 @@ export const LINES = {
   greet: 'Hollis. Keeper, once. The others went up when the Archive went quiet. I stayed down to mind the desk.',
   rule_1: 'Under this hall the Stacks go down a hundred floors. Whoever goes down goes as a first page: level one, empty hands.',
   rule_2: 'What you find down there, the Stacks lend. A red chest lends. A blue chest gives, and a gift you may carry out.',
-  rule_3: "One way up alive: the Keeper's Bookmark. Use it, and the book closes where you stand. Fall, and it closes on you.",
+  rule_3: "One way up alive: the Keeper's Bookmark. Fall instead, and the Stacks take back this reading's gifts.",
   // the offer (stacks_enter): yes, the record, or no; then one confirm
   offer: 'Begin a reading?',
   offer_yes: 'Begin', offer_record: 'The record', offer_no: 'Not yet',
   confirm: 'Level one. Empty hands. The Stacks lend the rest. Down you go?',
   confirm_yes: 'Go down', confirm_no: 'Stay',
   stay: 'The desk is not going anywhere. Neither am I.',
+  // a reading still waits in the suspend save (C4-fixes, CRITIQUE_STACKS 12): asked before a new one would write over it
+  abandon: 'A reading is open below. Abandon it?',
+  abandon_yes: 'Abandon it', abandon_no: 'Keep it',
+  abandon_kept: 'Then it waits where you left it. The title page will take you back down to it.',
   refused: 'The stair is not taking anyone just now. Come back when the hall is quieter.',
   // the vault reminder (stacks_vault), once, the first reading that starts with something in the vault
   vault: 'Your vault is not empty. What the Stacks gave you before waits in your pack at the first page. Put it on before you walk.',

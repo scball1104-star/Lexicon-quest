@@ -143,11 +143,11 @@ test('the plaque screen: the record in the header, sixty-one rows in grade order
   assert.ok(all.includes("A keeper's pen, ground to an edge.") && all.includes('It never misses the first line.'), 'held: the lore');
   assert.ok(all.some((t) => t.startsWith('Vault 2 of 61')), 'the help bar count');
   assert.ok(all.includes(STACKS_HELP.screen));
-  // move to an unheld row: name only, "..." and the unfound line
+  // move to an unheld row: name only and the unfound line, no "..." above it (C4-fixes, CRITIQUE_STACKS 25)
   e.input.step('down'); scene.update(); e.input.step(null);
   const r2 = fakeRenderer(); scene.draw(r2.r);
   const all2 = r2.texts.map((t) => t.t);
-  assert.ok(all2.includes("Shelf-Keeper's Mail") && all2.includes('...') && all2.some((t) => STACKS_HELP.unfound.startsWith(t)));
+  assert.ok(all2.includes("Shelf-Keeper's Mail") && !all2.includes('...') && all2.some((t) => STACKS_HELP.unfound.startsWith(t)));
   assert.ok(!all2.some((t) => t.startsWith('Riveted from the brackets')), 'unheld: no lore');
   assert.deepEqual(scene.debugState().id, 'cave_shelf_mail');
   assert.equal(scene.debugState().held, 2);

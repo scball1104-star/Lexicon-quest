@@ -25,7 +25,9 @@ test('five bands cover B1 to B99 in order, with the plan\'s tilesets and existin
   for (const b of F.BANDS) {
     assert.ok(MUSIC.includes(b.music), `${b.id} music ${b.music}`);
     assert.ok(b.name && b.id && b.k === F.BANDS.indexOf(b) + 1);
-    assert.ok(b.pool.length >= 6 && b.pool.length <= 10, `${b.id} has ${b.pool.length} templates`);
+    // C4-fixes: a fallback band (EP3_LIVE false) draws from all three earlier pools (25 groups); a band of its own has 6 to 10
+    if (b.fallback) assert.equal(b.pool.length, 25, `${b.id} has ${b.pool.length} templates`);
+    else assert.ok(b.pool.length >= 6 && b.pool.length <= 10, `${b.id} has ${b.pool.length} templates`);
     assert.ok(b.nativeLevel > 1 && b.meanExp > 5);
   }
   for (let f = 1; f <= 99; f++) { const b = F.bandAt(f); assert.ok(f >= b.floors[0] && f <= b.floors[1], `B${f} in ${b.id}`); }
@@ -45,13 +47,25 @@ test('every pool foe exists; each template has a leader that is its first foe, a
   }
 });
 
-test('EP3_LIVE false: bands 4 and 5 fall back to the hardest earlier pools with a two-mod elite on every group; live uses the Episode 3 foes', async () => {
+test('EP3_LIVE false: bands 4 and 5 draw from all three earlier pools, each group scaled from its own level; live uses the Episode 3 foes', async () => {
   const off = F.buildBands(false), on = F.buildBands(true);
+  const earlier = [0, 1, 2].flatMap((k) => off[k].pool.map((t) => t.enemies.join()));
   for (const k of [3, 4]) {
     assert.ok(off[k].fallback && !on[k].fallback);
-    for (const t of off[k].pool) { assert.equal(t.elite, 2, `${off[k].id}/${t.id}`); for (const id of t.enemies) assert.ok(!EP3_FOES.includes(id), id); }
+    // C4-fixes (CRITIQUE_STACKS 6): every earlier group, none with a fixed elite (one in three rolls one), none from Episode 3
+    for (const t of off[k].pool) { assert.ok(t.own && !t.elite, `${off[k].id}/${t.id}`); for (const id of t.enemies) assert.ok(!EP3_FOES.includes(id), id); }
+    assert.deepEqual(off[k].pool.map((t) => t.enemies.join()).sort(), earlier.slice().sort(), `${off[k].id} holds every earlier group`);
+    assert.equal(new Set(off[k].pool.map((t) => t.id)).size, off[k].pool.length, 'ids are unique (cat_, cel_, court_)');
     assert.ok(on[k].pool.some((t) => t.enemies.some((id) => EP3_FOES.includes(id))), `${on[k].id} live uses Episode 3 foes`);
   }
+  // an own-level group is scaled from its own native level: a valley slime on B70 carries far more than a Court knight
+  const slime = off[3].pool.find((t) => t.id === 'cat_slimes'), knight = off[3].pool.find((t) => t.id === 'court_knight');
+  const a = F.scale(70, { template: slime }), b = F.scale(70, { template: knight });
+  assert.ok(a.hp > b.hp * 1.5 && a.power > b.power * 2, `slime ${JSON.stringify(a)} knight ${JSON.stringify(b)}`);
+  assert.ok(a.power <= F.OWN_CAPS.power && a.speed <= F.OWN_CAPS.speed);
+  assert.ok(a.power <= F.powerCapAt(70, { template: slime }) + 0.011, 'the one-shot cap of its own foes binds');
+  // ... and pays the band's mean EXP (its raw EXP and the expected elite share come out)
+  assert.ok(a.expMul > b.expMul * 2, 'the slime group pays far more per raw EXP');
   for (const k of [0, 1, 2]) assert.deepEqual(off[k].pool.map((t) => t.id), on[k].pool.map((t) => t.id));
   assert.ok(on[4].pool.some((t) => t.elite === 2), 'the Forge of Names keeps the earlier pools\' elites when live');
   // the live table is whichever the switch says
@@ -61,7 +75,8 @@ test('EP3_LIVE false: bands 4 and 5 fall back to the hardest earlier pools with 
 
 test('floors: foes per floor, landings, item level, zone ids', () => {
   assert.equal(F.foesPerFloor(1), 4); assert.equal(F.foesPerFloor(9), 4); assert.equal(F.foesPerFloor(11), 5);
-  assert.equal(F.foesPerFloor(79), 11); assert.equal(F.foesPerFloor(81), 12); assert.equal(F.foesPerFloor(99), 12);
+  // C4-fixes (CRITIQUE_STACKS 5): at most six from B40
+  assert.equal(F.foesPerFloor(39), 7); assert.equal(F.foesPerFloor(41), 6); assert.equal(F.foesPerFloor(79), 6); assert.equal(F.foesPerFloor(99), 6);
   for (const f of [10, 20, 50, 90]) { assert.ok(F.isLanding(f)); assert.equal(F.foesPerFloor(f), 0); }
   assert.ok(!F.isLanding(100) && F.foesPerFloor(100) === 0 && !F.isLanding(5));
   assert.deepEqual([1, 5, 6, 12, 30, 60, 89, 90, 99, 100].map(F.itemLevel), [1, 1, 2, 3, 6, 11, 15, 16, 16, 16]);
@@ -73,10 +88,12 @@ test('the level curve: the EXP pace lands the plan\'s levels (12 by B10, 25 by B
   for (const [f, lv] of [[9, 12], [29, 25], [59, 40], [89, 55], [99, 59]]) assert.ok(Math.abs(F.targetLevel(f) - lv) < 0.6, `leaving B${f}: Lv ${F.targetLevel(f).toFixed(2)} (want ${lv})`);
   assert.deepEqual([1, 10, 30, 60, 90].map((f) => F.arrivalLevel(f)), [1, 12, 25, 40, 55]);
   assert.equal(F.EXP_PACE_KNOTS.length, 6);
-  for (const [, p] of F.EXP_PACE_KNOTS) assert.ok(p >= 0.5 && p <= 4, `pace ${p}`);
+  // C4-fixes: six fights a floor from B40 and the fallback bands' low raw EXP (valley groups among them; each group then pays the
+  // band mean, scale({ template })) put the B89 knot near 6; the pace stays continuous, one step at most 0.5
+  for (const [, p] of F.EXP_PACE_KNOTS) assert.ok(p >= 0.5 && p <= 7, `pace ${p}`);
   for (let f = 1; f < 99; f++) {
     const a = F.scale(f).expMul, b = F.scale(f + 1).expMul;
-    assert.ok(a > 0 && Math.abs(b - a) < 0.3, `expMul B${f} ${a} -> B${f + 1} ${b}`);
+    assert.ok(a > 0 && Math.abs(b - a) < 0.5, `expMul B${f} ${a} -> B${f + 1} ${b}`);
   }
   assert.ok(F.scale(1).expMul >= F.EXP_BASE_MUL, 'the Stacks pay at least the plan\'s 1.5x at the top');
   // a landing pays like the floor before it (it fights nothing) and expPace is expMul over the base
@@ -142,7 +159,8 @@ test('encounterFor is deterministic, picks from the band\'s pool, carries the sc
   assert.equal(count(5).elites, 0); assert.equal(count(19).elites, 0);
   const b30 = count(30); assert.ok(b30.elites > 0.05 && b30.elites < 0.25 && b30.two === 0, JSON.stringify(b30));
   const b55 = count(55); assert.ok(b55.elites > 0.1 && b55.elites < 0.35 && b55.two === b55.elites, JSON.stringify(b55));
-  const b85 = count(85); assert.equal(b85.elites, 1, 'the Forge of Names (fallback): every group has a two-mod elite'); assert.equal(b85.two, 1);
+  // the Forge of Names (fallback): an elite leader on one group in three, two mods (C4-fixes, CRITIQUE_STACKS 6; was every group)
+  const b85 = count(85); assert.ok(Math.abs(b85.elites - F.FALLBACK_ELITE_RATE) < 0.06, JSON.stringify(b85)); assert.equal(b85.two, b85.elites);
   assert.equal(F.encounterFor(1, 100, 0).floor, 99, 'B100 has no ordinary encounters: the index clamps to B99');
 });
 
@@ -183,7 +201,7 @@ test('zones: cave_band_1..5 and cave_boss resolve on ZONES but are not listed, n
     assert.ok(!ZONE_ORDER.includes(id) && !OPTIONAL_ZONES.includes(id));
     assert.ok(z.backdrop && z.music && Array.isArray(z.plan));
   }
-  assert.deepEqual(ZONES.cave_band_1.level, [1, 16]); assert.deepEqual(ZONES.cave_band_5.level, [51, 59]);
+  assert.deepEqual(ZONES.cave_band_1.level, [1, 16]); assert.deepEqual(ZONES.cave_band_5.level, [49, 59]);
   assert.deepEqual(ZONES.cave_boss.plan, [['cave_binder', 1]]);
 });
 

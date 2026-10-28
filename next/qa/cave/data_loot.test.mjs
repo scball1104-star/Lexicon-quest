@@ -67,7 +67,7 @@ test('loot zones: cave_band_1..5 on ZONE_LOOT at the band\'s first item level; s
   assert.equal(ZONE_LOOT.valley.ilvl, 2, 'the main game\'s zones are untouched');
 });
 
-test('red chests: gear or consumables every time, gold in range, the Bookmark at its odds, weapons first on B1 to B5', () => {
+test('red chests: gear or consumables every time, no gold, the Bookmark at its odds, weapons first on B1 to B5', () => {
   const rng = createRng(11);
   let gear = 0, weapons = 0, marks = 0, cons = 0;
   const N = 600;
@@ -75,17 +75,16 @@ test('red chests: gear or consumables every time, gold in range, the Bookmark at
     const r = L.rollRedChest(rng, 1, [], {});
     assert.ok(r.items.length + r.consumables.length > 0, 'never empty');
     assert.ok(r.items.length <= 1);
-    const [g0, g1] = L.goldAt(1);
-    assert.ok(r.gold >= g0 && r.gold <= g1, `gold ${r.gold}`);
+    assert.equal(r.gold, 0, 'no gold in the Stacks (C4-fixes, CRITIQUE_STACKS 15): a gear chest may carry a supply instead');
     for (const it of r.items) { assert.ok(EQUIPMENT[it.base], it.base); assert.equal(it.ilvl, 1); if (EQUIPMENT[it.base].slot === 'weapon') weapons++; }
     for (const c of r.consumables) { assert.ok(CONSUMABLES[c.item]); assert.ok(c.qty >= 1 && c.qty <= 4); }
-    gear += r.items.length; cons += r.consumables.length ? 1 : 0;
+    gear += r.items.length; cons += r.consumables.length && !r.items.length ? 1 : 0;
     if (r.bookmark) marks++;
   }
   assert.ok(gear / N > 0.5 && gear / N < 0.7, `gear share ${gear / N}`);
   assert.ok(weapons / gear > 0.45, `weapons ${weapons} of ${gear} gear on B1`);
   assert.ok(marks / N > 0.01 && marks / N < 0.08, `bookmarks ${marks / N}`);
-  assert.equal(gear + cons, N, 'gear or consumables, never both');
+  assert.equal(gear + cons, N, 'gear (with a supply at GEAR_CHEST_SUPPLY) or consumables');
   // deeper: ilvl follows the floor, slots are the engine's own weights, more consumables of the band
   const deep = L.rollRedChest(createRng(3), 70, [], {});
   if (deep.items.length) assert.equal(deep.items[0].ilvl, L.itemLevel(70));

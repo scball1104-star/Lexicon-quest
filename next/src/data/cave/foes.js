@@ -25,24 +25,29 @@
 //
 //   The numbers are C3-sim-bot's balance pass (docs/DEEP_STACKS_BALANCE.md has every before and after): TUNING kHp 0.75, kPower
 //   0.85, hpRamp -0.2, powerRamp 2.0; OPENING_EASE B1 0.9 / B2 0.9; EARLY_EASE power from 0.55 on B1 to 1 on B12; BAND_ADJUST per
-//   band below. EP3_LIVE=false, so bands 4 and 5 are the fallback court pools with a two-mod elite leader on every group; the
-//   pace knots [floor, pace] are [0, 2.03] [9, 2.03] [29, 2.06] [59, 1.46] [89, 0.74] [99, 0.98] and refit themselves when the
-//   Episode 3 pools go live (then re-run `node tools/sim/simulate.mjs --cave --check`: the band corrections are tuned to these pools):
+//   band below. C4-fixes (2026-10-28, DEEP_STACKS_BALANCE 9): at most six foes a floor from B40 (FOE_CAP_DEEP; the pace refits
+//   itself), the Root Cellars at hp 1 and power 1.15 (shorter, sharper fights), and while EP3_LIVE is false bands 4 and 5 draw
+//   from all three earlier pools, every group scaled from its own native level (scale(f, { template }); OWN_CAPS), an elite
+//   leader on one group in three (FALLBACK_ELITE_RATE), hp 1.15, power 0.85, speed 1. The pace knots [floor, pace] are [0, 2.03]
+//   [9, 2.03] [29, 2.06] [59, 2.29] [89, 6.19] [99, 2.94] (the fallback bands' low raw mean EXP is why the B89 knot is high: each
+//   group then pays the band mean) and refit themselves when the Episode 3 pools go live (then re-run
+//   `node tools/sim/simulate.mjs --cave --check`: the band corrections are tuned to these pools). The band-level scale:
 //     floor  party  hp    power  speed  expMul  elite      floor  party  hp    power  speed  expMul  elite
-//     B1     Lv 1   0.38   0.30   0.91   3.05    0         B45    Lv 33  2.23  11.69   2.72   2.62    1
-//     B10    Lv 12  1.74   3.57   1.43   3.05    0         B60    Lv 40  1.91  15.72   3.34   2.16    2
-//     B20    Lv 17  1.53   4.51   1.46   3.08    1         B90    Lv 55  2.52  39.91   3.40   1.15    2
-//     B30    Lv 25  2.57  10.80   1.89   3.06    1         B99    Lv 59  2.59  45.00   3.62   1.48    2
+//     B1     Lv 1   0.38   0.30   0.91   3.05    0         B45    Lv 34  2.24  11.84   2.73   3.27    1
+//     B10    Lv 12  1.74   3.57   1.43   3.05    0         B60    Lv 40  4.30  18.05   2.69   3.63    2
+//     B20    Lv 17  1.53   5.19   1.46   3.08    1         B90    Lv 55  5.59  39.90   3.66   8.80    2
+//     B30    Lv 25  2.33  12.42   1.89   3.11    1         B99    Lv 59  5.75  45.00   3.90   4.41    2
+//   (a fallback band's own-level group carries its own hp, power, speed and expMul; the row is the band's, for the record)
 //   The proof is the descent (tools/sim/cave.mjs, 50 seeds from B1 with no rests, the game's own floors, fights, chests and equip
-//   prompt): death rates 2% B1-B9, 10% B10-B29, 7% B30-B59, 17% B60-B99 (targets under 5, 15, 30, 45), arrival Lv 11.3 / 24.8 /
-//   40.6 / 56.1 against the plan's 12 / 25 / 40 / 55, the Binder won within 20 rounds 93% of the time. C1-data's checkpoint
-//   harness (qa/cave/data_sanity.test.mjs, full HP each fight) still holds: careful 100%, attack-only 70% at B30, 10 to 20% deep.
+//   prompt): death rates 0% B1-B9, 0% B10-B29, 10% B30-B59, 24% B60-B99 (targets under 5, 15, 30, 45), arrival Lv 11.3 / 24.8 /
+//   40.6 / 55.7 against the plan's 12 / 25 / 40 / 55, the Binder won within 20 rounds 97% of the time (ignoring its telegraphs,
+//   69%). C1-data's checkpoint harness (qa/cave/data_sanity.test.mjs, full HP each fight) still holds: careful 100% to B99.
 //
 // ELITES: none before B20, one modifier B20 to B49, two from B50 (plan 5.2), rolled deterministically by encounterFor at
 //   ELITE_RATE_DEEP and written into the spec as a fixed `elite: { mods, index }` (encounters.js honours a fixed elite whatever
 //   the caller's noElite says), so a floor's elites are the same on every machine. Every cave encounter is `noElite: true` so the
-//   live rollEncounter adds no second, random one. Band 5 and the fallback pools carry `elite: 2` on the template: a two-mod
-//   elite leader every time ("every earlier pool's elites").
+//   live rollEncounter adds no second, random one. Band 5's live (EP3) pool carries `elite: 2` on its elite templates: a two-mod
+//   elite leader every time ("every earlier pool's elites"); the fallback bands roll one on a group in three instead.
 //
 // THE hp MULTIPLIER: encounters.js rollEncounter forwards `hp` into the unit spec since the orchestrator's 10/27 fix (the H1
 //   yard slime's line), so battle/rules.js makeEnemyUnit applies it; the descent above is measured with it.
@@ -63,10 +68,15 @@ export const BOSS_FLOOR = 100;
 export function isLanding(floor) { return floor > 0 && floor < BOSS_FLOOR && floor % LANDING_EVERY === 0; }
 /** Band number 1..5 of a floor (B100 reads as band 5 for lookups). */
 export function bandIndex(floor) { return floor <= 19 ? 1 : floor <= 39 ? 2 : floor <= 59 ? 3 : floor <= 79 ? 4 : 5; }
-/** Visible foes on a floor: 4 + floor/10, at most 12; none on a landing or on B100 (plan 4). C1-gen places this many. */
+/**
+ * Visible foes on a floor: 4 + floor/10, at most 12, and at most FOE_CAP_DEEP.max from B40 (C4-fixes, CRITIQUE_STACKS 5: eight to
+ * twelve fights made a deep floor 10 to 20 minutes by hand; the EXP pace refits itself, fitCurve reads this); none on a landing or
+ * on B100 (plan 4). C1-gen places this many (gen.js foeCount carries the same cap; qa/cave/fixes_balance.test.mjs holds them equal).
+ */
+export const FOE_CAP_DEEP = { from: 40, max: 6 };
 export function foesPerFloor(floor) {
   if (floor < 1 || floor >= BOSS_FLOOR || isLanding(floor)) return 0;
-  return Math.min(12, 4 + Math.floor(floor / 10));
+  return Math.min(floor >= FOE_CAP_DEEP.from ? FOE_CAP_DEEP.max : 12, 4 + Math.floor(floor / 10));
 }
 /** The floor's item level (plan 6.1): min(16, 1 + floor/6), whole numbers. B1 1, B6 2, B30 6, B60 11, B90 16. */
 export function itemLevel(floor) { return Math.max(1, Math.min(16, Math.floor(1 + floor / 6))); }
@@ -145,23 +155,14 @@ const POOL_FORGE = [       // Foundry F3 foes plus every earlier pool's elites (
   T('elite_pack', ['thornback_wolf', 'thornback_wolf', 'thornback_wolf'], 1, 'chase', { elite: 2 }),
   T('elite_shadows', ['borrowed_shadow', 'shard_swarm'], 1, 'chase', { elite: 2 }),
 ];
-// EP3_LIVE false: bands 4 and 5 fall back to the hardest earlier pools with a two-mod elite leader on every group (the brief).
-const POOL_FALLBACK_4 = [
-  T('knight', ['faceless_knight', 'glint_wisp'], 3, 'chase', { elite: 2 }),
-  T('sentinel', ['glass_sentinel', 'shard_swarm'], 2, 'wander', { elite: 2 }),
-  T('shadows', ['borrowed_shadow', 'shard_swarm'], 2, 'chase', { elite: 2 }),
-  T('shards', ['shard_swarm', 'shard_swarm'], 2, 'wander', { elite: 2 }),
-  T('court', ['faceless_knight', 'glass_sentinel', 'shard_swarm'], 1, 'chase', { elite: 2 }),
-  T('shadow_pair', ['borrowed_shadow', 'borrowed_shadow'], 1, 'chase', { elite: 2 }),
-];
-const POOL_FALLBACK_5 = [
-  T('knights', ['faceless_knight', 'faceless_knight'], 3, 'chase', { elite: 2 }),
-  T('court', ['faceless_knight', 'glass_sentinel', 'shard_swarm'], 2, 'chase', { elite: 2 }),
-  T('shadow_pair', ['borrowed_shadow', 'borrowed_shadow'], 2, 'chase', { elite: 2 }),
-  T('sentinels', ['glass_sentinel', 'glass_sentinel', 'glint_wisp'], 2, 'wander', { elite: 2 }),
-  T('shards', ['shard_swarm', 'shard_swarm', 'shard_swarm'], 1, 'wander', { elite: 2 }),
-  T('elite_shelf', ['tome_golem', 'ink_wraith', 'ink_wraith'], 1, 'wander', { elite: 2 }),
-];
+// EP3_LIVE false (C4-fixes, CRITIQUE_STACKS 6; was: the six Court foes with a two-mod elite on every group for sixty floors):
+// bands 4 and 5 draw from all three earlier pools, each group scaled up from its OWN native level (`own`: scale(f, { template })
+// reads the group's level, its own one-shot cap and pays the band's mean EXP), with an elite leader on one group in three
+// (FALLBACK_ELITE_RATE; two mods from B50). The Forge leans to the Court's groups.
+const own = (pool, prefix, mul = 1) => pool.map((t) => ({ ...t, id: `${prefix}_${t.id}`, weight: t.weight * mul, own: true }));
+const POOL_FALLBACK_4 = [...own(POOL_CATALOGUE, 'cat'), ...own(POOL_CELLARS, 'cel'), ...own(POOL_COURT, 'court')];
+const POOL_FALLBACK_5 = [...own(POOL_CATALOGUE, 'cat'), ...own(POOL_CELLARS, 'cel', 1.5), ...own(POOL_COURT, 'court', 2)];
+export const FALLBACK_ELITE_RATE = 1 / 3;
 
 const BAND_ROWS = [
   { k: 1, id: 'catalogue', name: 'The Catalogue', floors: [1, 19], tileset: 'archive', music: 'archive', backdrop: 'archive', wantsBackdrop: 'archive' },
@@ -289,6 +290,8 @@ export function earlyEase(floor, k) {
   return start + (1 - start) * (f - 1) / Math.max(1, until - 1);
 }
 export const SPEED_CAP = 4;
+/** The caps of a fallback band's own-level group (a Lv 2 slime on B70 needs more than the Court's 45 to reach parity; the one-shot cap still binds). */
+export const OWN_CAPS = { power: 400, speed: 6 };
 /**
  * Per-band corrections on top of the parity curve (C3-sim-bot): the pools differ in how dangerous their kits are at parity
  * (statuses, multi-hits, elite mods), so the descent's measured danger is evened out band by band. hp, power and speed
@@ -296,8 +299,8 @@ export const SPEED_CAP = 4;
  * one-shot cap and speed SPEED_CAP. docs/DEEP_STACKS_BALANCE.md has the
  * before and after of every number here.
  */
-export const BAND_ADJUST = { 1: { hp: 1, power: 1, speed: 1 }, 2: { hp: [1, 1.2], power: 1, speed: 1 }, 3: { hp: [1.12, 1.15], power: 1, speed: 1.35 },
-  4: { hp: 0.95, power: 1, speed: 1.55 }, 5: { hp: 0.85, power: 1, speed: 1.12 } };
+export const BAND_ADJUST = { 1: { hp: 1, power: 1, speed: 1 }, 2: { hp: 1, power: 1.15, speed: 1 }, 3: { hp: [1.12, 1.15], power: 1, speed: 1.35 },
+  4: { hp: 1.15, power: 0.85, speed: 1 }, 5: { hp: 1.15, power: 0.85, speed: 1 } };
 /** A band's correction on floor f: a number, or [first, last] read linearly from the band's first floor to its last. */
 function bandAdjust(band, key, f) {
   const v = (BAND_ADJUST[band.k] && BAND_ADJUST[band.k][key]) ?? 1;
@@ -335,7 +338,7 @@ function worstOrdinaryHit(band, floor, level, A) {
 export function powerCapAt(floor, opts = {}) {
   const f = clamp(Math.round(floor), 1, FLOORS);
   const bands = opts.bands || BANDS;
-  const band = bands[bandIndex(f) - 1];
+  const band = opts.template && opts.template.own ? { pool: [opts.template] } : bands[bandIndex(f) - 1];
   const level = opts.level != null ? opts.level : targetLevel(f - 1, opts.bands ? { bands } : {});
   const w = worstOrdinaryHit(band, f, level, caveGear(f).A);
   return w.worst > 0 ? round2(ONE_SHOT_MARGIN * w.hp / w.worst) : TUNING.powerCap;
@@ -409,7 +412,8 @@ export function arrivalLevel(floor, opts = {}) { return Math.round(targetLevel(f
 
 /**
  * The encounter multipliers of a floor: { hp, power, speed, expMul, elite }. Pure; the same on every machine.
- * `opts.bands` (tests) swaps the band table; `opts.level` overrides the party level the floor is tuned for.
+ * `opts.bands` (tests) swaps the band table; `opts.level` overrides the party level the floor is tuned for; `opts.template`, a
+ * group of a fallback band (`own`), is scaled from its own native level and one-shot cap and pays the band's mean EXP.
  */
 export function scale(floor, opts = {}) {
   const f = clamp(Math.round(floor), 1, FLOORS);
@@ -418,14 +422,17 @@ export function scale(floor, opts = {}) {
   // tuned to the level the party ARRIVES with (the first fight of the floor is the hardest one; a floor's EXP lifts the rest)
   const level = opts.level != null ? opts.level : targetLevel(f - 1, opts.bands ? { bands } : {});
   const d = (f - 1) / (FLOORS - 2);
-  const cave = caveGear(f), nat = nativeGear(band.nativeLevel);
-  const nl = band.nativeLevel;
+  const t = opts.template && opts.template.own ? opts.template : null;
+  const nl = t ? templateLevel(t) : band.nativeLevel;
+  const cave = caveGear(f), nat = nativeGear(nl);
   const ease = OPENING_EASE[f] || 1;
   const hp = clamp(ease * earlyEase(f, 'hp') * bandAdjust(band, 'hp', f) * TUNING.kHp * (1 + TUNING.hpRamp * d) * offence(level, cave.W, caveMastery(f)) / offence(nl, nat.W, nativeMastery(nl)), 0.3, 30);
   const parityPower = ease * earlyEase(f, 'power') * bandAdjust(band, 'power', f) * TUNING.kPower * (1 + TUNING.powerRamp * d) * toughness(level, cave.A) / toughness(nl, nat.A);
-  const power = clamp(Math.min(parityPower, powerCapAt(f, { ...opts, level })), 0.3, TUNING.powerCap);
-  const speed = clamp(partyAt(level).spd / partyAt(nl).spd * (1 + (TUNING.speedRamp || 0) * d) * bandAdjust(band, 'speed', f), 0.8, SPEED_CAP);
-  const expMul = curveFor(bands).expMul[f];
+  const power = clamp(Math.min(parityPower, powerCapAt(f, { ...opts, level })), 0.3, t ? OWN_CAPS.power : TUNING.powerCap);
+  const speed = clamp(partyAt(level).spd / partyAt(nl).spd * (1 + (TUNING.speedRamp || 0) * d) * bandAdjust(band, 'speed', f), 0.8, t ? OWN_CAPS.speed : SPEED_CAP);
+  // an own-level group pays the band's mean EXP: its raw EXP and the one-in-three elite leader's extra (ELITE_BASE.exp) come out
+  const ownExp = t ? templateExp(t) + FALLBACK_ELITE_RATE * (ELITE_BASE.exp - 1) * ((ENEMIES[t.enemies[0]] || { exp: 0 }).exp) : 1;
+  const expMul = t ? round2(curveFor(bands).expMul[f] * band.meanExp / Math.max(1, ownExp)) : curveFor(bands).expMul[f];
   return { hp: round2(hp), power: round2(power), speed: round2(speed), expMul, elite: eliteModsAt(f) };
 }
 
@@ -450,7 +457,7 @@ export function encounterFor(seed, floor, index, opts = {}) {
   const band = bands[bandIndex(f) - 1];
   const rng = createRng(hashSeed(`cave:${seed}:${f}:${index}`));
   const t = rng.weighted(band.pool, (x) => x.weight);
-  const s = scale(f, opts.bands ? { bands } : {});
+  const s = scale(f, { ...(opts.bands ? { bands } : {}), ...(t.own ? { template: t } : {}) });
   const spec = {
     id: `cave_b${f}_e${index}`, zone: `cave_band_${band.k}`, leader: t.leader, enemies: t.enemies.slice(), move: t.move,
     template: t.id, floor: f, band: band.k, cave: true,
@@ -458,7 +465,7 @@ export function encounterFor(seed, floor, index, opts = {}) {
   };
   let mods = null;
   if (t.elite) mods = pickMods(rng, t.elite);
-  else if (s.elite > 0 && rng.chance(eliteRateAt(f))) mods = pickMods(rng, s.elite);
+  else if (s.elite > 0 && rng.chance(band.fallback ? FALLBACK_ELITE_RATE : eliteRateAt(f))) mods = pickMods(rng, s.elite);
   if (mods) spec.elite = { mods, index: 0 };
   return spec;
 }
@@ -505,7 +512,8 @@ for (const b of BAND_ROWS) {
   CAVE_ZONES[`cave_band_${b.k}`] = { id: `cave_band_${b.k}`, name: b.name, level: [arrivalLevel(b.floors[0]), arrivalLevel(b.floors[1])],
     backdrop: b.backdrop, music: 'battle', optional: true, cave: true, band: b.k, plan: [] };
 }
-CAVE_ZONES.cave_boss = { id: 'cave_boss', name: 'The Binding', level: [58, 60], backdrop: 'boss', music: 'boss_archivore', optional: true, cave: true, band: 5, plan: [['cave_binder', 1]] };
+// the Binder fights on the Forge's painted stage, not the Archivore's (C4-fixes, CRITIQUE_STACKS 16; battle.js BACKDROPS.cave_forge)
+CAVE_ZONES.cave_boss = { id: 'cave_boss', name: 'The Binding', level: [58, 60], backdrop: 'cave_forge', music: 'boss_archivore', optional: true, cave: true, band: 5, plan: [['cave_binder', 1]] };
 function ensureZones() {
   for (const [id, z] of Object.entries(CAVE_ZONES)) {
     if (!Object.prototype.hasOwnProperty.call(ZONES, id)) Object.defineProperty(ZONES, id, { value: z, enumerable: false, configurable: true, writable: true });
@@ -522,7 +530,10 @@ function ensureZones() {
 export const BINDER_ID = 'binder';
 export const BINDER = {
   name: 'The Binder', family: 'devourer', level: 58, size: 'boss', boss: true, ai: 'archivore',
-  hp: 4000, mp: 99, atk: 2200, def: 70, mag: 3200, spr: 60, spd: 46, luk: 12,
+  // C4-fixes (CRITIQUE_STACKS 11: 26 rounds by hand, nobody fell): HP 4000 -> 3000, MAG 3200 -> 4000 (Devour Name and Ink Storm a
+  // quarter up), SPD 46 -> 66 (it acted four or five times a fight, so its telegraphs rarely came). The careful descent party wins
+  // 97% within 20 rounds in about 9.4; ignoring the telegraphs, 69% (docs/DEEP_STACKS_BALANCE.md 9)
+  hp: 3000, mp: 99, atk: 2200, def: 70, mag: 4000, spr: 60, spd: 66, luk: 12,
   shields: 8, weak: ['fire', 'light'], resist: ['ice'],
   statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],
   exp: 6000, gold: 5000, masteryPts: 40,
@@ -545,7 +556,7 @@ export const BINDER = {
 };
 export const BINDER_ENCOUNTER_ID = 'cave_binder';
 export const BINDER_ENCOUNTER = { zone: 'cave_boss', leader: BINDER_ID, enemies: [BINDER_ID], boss: true, noFlee: true, canFlee: false,
-  music: 'boss_archivore', noElite: true, flag: 'deep_stacks_cleared', bossLoot: BINDER_ID, backdrop: 'boss', cave: true, floor: BOSS_FLOOR, band: 5 };
+  music: 'boss_archivore', noElite: true, flag: 'deep_stacks_cleared', bossLoot: BINDER_ID, backdrop: 'cave_forge', stage: 'cave_forge', cave: true, floor: BOSS_FLOOR, band: 5 };
 
 let done = false;
 /** Add the band zones, the Binder and its encounter. Safe to call twice. */
