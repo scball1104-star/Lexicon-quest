@@ -1,5 +1,5 @@
 // C1-data: the cave pack entry (src/data/cave/index.js, live.js): register() is idempotent, adds exactly the ids it says and
-// nothing else, the switch is off, and nothing in the cave files carries an em dash. Snapshots the shared tables BEFORE
+// nothing else, the switch is on (since 2026-10-28), and nothing in the cave files carries an em dash. Snapshots the shared tables BEFORE
 // register(), so this file must not import anything that registers at load.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,7 +10,7 @@ import { ENCOUNTERS, ZONES, ZONE_ORDER, OPTIONAL_ZONES, EP2_ZONE_ORDER, EP3_ZONE
 import { ZONE_LOOT, BOSS_LOOT, RARITY_TABLES, CHEST_TIERS } from '../../src/data/loot-tables.js';
 import { SKILLS } from '../../src/data/skills.js';
 import { SHOPS } from '../../src/data/shops.js';
-import { PACKS } from '../../src/game/packs.js';
+import { PACKS, packReady } from '../../src/game/packs.js';
 import { CAVE_LIVE, caveOn } from '../../src/data/cave/live.js';
 import * as pack from '../../src/data/cave/index.js';
 
@@ -70,9 +70,9 @@ test('register() adds exactly the documented ids and touches nothing else', () =
   assert.ok(!before.enemies.includes('binder') && !before.encounters.includes('cave_binder') && !before.zoneLoot.includes('cave_band_1'));
 });
 
-test('the switch is off and the gate reads false; a packs.js entry, when C2-world adds it, uses the cave_ prefix', () => {
-  assert.equal(CAVE_LIVE, false);
-  assert.equal(caveOn(), false);
+test('the switch is ON (flipped 2026-10-28 after C4-fixes); the gate reads true only once the pack is loaded; the packs.js entry uses the cave_ prefix', () => {
+  assert.equal(CAVE_LIVE, true);
+  assert.equal(caveOn(), packReady('cave'), 'register() alone (no ensurePack) does not make the pack ready');
   if (PACKS.cave) { assert.equal(PACKS.cave.prefix, 'cave_'); assert.equal(PACKS.cave.enabled(), CAVE_LIVE); assert.ok(PACKS.cave.entry.endsWith('cave/index.js')); }
 });
 
