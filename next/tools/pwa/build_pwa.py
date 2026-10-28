@@ -38,6 +38,13 @@ PACKS_JS = NEXT / 'src' / 'game' / 'packs.js'
 PACKS_MIRROR = pathlib.Path(__file__).resolve().parent / 'packs.json'
 PACK_FILES = NEXT / 'assets' / 'pack_files.json'
 PACK_ASSET_DIRS = ('tiles', 'sprites', 'ui', 'backdrops')
+# Core files that load on first use, not at install (docs/MEDIA_BUILD.md 1): the painted battle stages. Left out of the shell
+# list (so the first download does not move) and matched by PACK_PATTERN (so the service worker runtime-caches them).
+LAZY_PREFIXES = ('assets/backdrops/paint_',)
+
+
+def is_lazy(rel):
+    return any(rel.startswith(pre) for pre in LAZY_PREFIXES)
 
 FIXED = ['index.html', 'manifest.webmanifest', 'assets/manifest.json', 'assets/palette.json', 'assets/audio/manifest.json']
 FOLDERS = {                                   # folder -> allowed suffixes
@@ -134,6 +141,7 @@ def pack_pattern(packs):
         e = re.escape(pid)
         alts += [f'src/data/{e}/', f'src/data/maps/{re.escape(d["prefix"])}', f'assets/({"|".join(PACK_ASSET_DIRS)})/{e}(_|\\.)', f'assets/{e}_manifest\\.json']
     alts.append('assets/pack_files\\.json')
+    alts += [re.escape(pre) for pre in LAZY_PREFIXES]
     return '^(' + '|'.join(alts) + ')'
 
 
@@ -156,7 +164,7 @@ def shell_files():
     for folder, exts in FOLDERS.items():
         d = NEXT / folder
         if d.is_dir():
-            out += sorted(p.relative_to(NEXT).as_posix() for p in d.iterdir() if p.is_file() and p.suffix.lower() in exts and p.relative_to(NEXT).as_posix() not in skip and not pack_of(p.relative_to(NEXT).as_posix(), packs))
+            out += sorted(p.relative_to(NEXT).as_posix() for p in d.iterdir() if p.is_file() and p.suffix.lower() in exts and p.relative_to(NEXT).as_posix() not in skip and not pack_of(p.relative_to(NEXT).as_posix(), packs) and not is_lazy(p.relative_to(NEXT).as_posix()))
     return list(dict.fromkeys(out))
 
 
