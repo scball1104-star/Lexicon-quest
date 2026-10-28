@@ -428,3 +428,14 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - I stopped driving Chrome at 9:25 because you were at the PC. Say the word and I resume: eight more stages to paint,
   nineteen more themes to make this month, the video test.
 
+## 2026-10-28 (Wed) 10:40 AM: every battle stage is a painting now (not published)
+- Twelve stages painted on Runway and quantized into the game this morning: the valley by day and at dusk, the
+  Hollow, the Fading Road, the five Wider Valley stages, and three new ones for the Deep Stacks' deeper bands (the
+  Root Cellars, the Ember Shelves, the Forge of Names). The four core ones load lazily so the first download did
+  not grow; the rest live in their packs. One slip: two of the generations ran as eight-second videos instead of
+  images (about 190 credits); the Downs clip is kept for the video test rather than wasted.
+- Music: all twenty themes for this month are made on Suno Pro, two takes each. Only the title theme is in the game
+  so far: Chrome stopped letting suno.com download files after the first one. Allowing automatic downloads for
+  suno.com in Chrome's address bar (the blocked-download icon) unblocks the other nineteen.
+- The Stacks critic is still playing. Nothing is published.
+
