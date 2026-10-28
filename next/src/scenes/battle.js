@@ -80,9 +80,14 @@ const BACKDROPS = {
   x1_culvert: { asset: 'x1_battle_culvert', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
   // H6: the town's key art, for the yard slime
   willowmere: { asset: 'title', cell: 0, bright: 1.0, tint: null, darken: 0.22 },
+  // The Deep Stacks' own painted stages (docs/MEDIA_BUILD.md 1; cave pack assets, lazy): bands 2, 4 and 5
+  cave_cellars: { asset: 'cave_battle_cellars', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
+  cave_ember: { asset: 'cave_battle_ember', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
+  cave_forge: { asset: 'cave_battle_forge', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
 };
 const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
-  'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne'];
+  'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne',
+  'cave_battle_cellars', 'cave_battle_ember', 'cave_battle_forge'];   // pack files: missing until the cave pack is fetched, then path-loaded
 /**
  * Painted stages (docs/MEDIA_BUILD.md 1): a Runway painting quantized by tools/art/backdrops/quantize_still.py, kept OUT of
  * the precache (build_pwa.py LAZY_PREFIXES: `assets/backdrops/paint_*` is fetched on first use and runtime-cached), so the

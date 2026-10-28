@@ -165,12 +165,12 @@ const POOL_FALLBACK_5 = [
 
 const BAND_ROWS = [
   { k: 1, id: 'catalogue', name: 'The Catalogue', floors: [1, 19], tileset: 'archive', music: 'archive', backdrop: 'archive', wantsBackdrop: 'archive' },
-  { k: 2, id: 'root_cellars', name: 'The Root Cellars', floors: [20, 39], tileset: 'hollow', music: 'hollow', backdrop: 'hollow', wantsBackdrop: 'hollow' },
+  { k: 2, id: 'root_cellars', name: 'The Root Cellars', floors: [20, 39], tileset: 'hollow', music: 'hollow', backdrop: 'cave_cellars', wantsBackdrop: 'hollow' },
   { k: 3, id: 'court_below', name: 'The Court Below', floors: [40, 59], tileset: 'court', music: 'court', backdrop: 'court_deep', wantsBackdrop: 'court_deep' },
   // battle.js has no ember or forge stage yet (an unknown key falls back to the valley), so these two name existing stages and
   // record the one they want for C2-sprites-boss / C4.
-  { k: 4, id: 'ember_shelves', name: 'The Ember Shelves', floors: [60, 79], tileset: 'ember', music: 'ash_road', backdrop: 'archive_deep', wantsBackdrop: 'foundry' },
-  { k: 5, id: 'forge_of_names', name: 'The Forge of Names', floors: [80, 99], tileset: 'forge', music: 'foundry', backdrop: 'boss', wantsBackdrop: 'crucible' },
+  { k: 4, id: 'ember_shelves', name: 'The Ember Shelves', floors: [60, 79], tileset: 'ember', music: 'ash_road', backdrop: 'cave_ember', wantsBackdrop: 'foundry' },
+  { k: 5, id: 'forge_of_names', name: 'The Forge of Names', floors: [80, 99], tileset: 'forge', music: 'foundry', backdrop: 'cave_forge', wantsBackdrop: 'crucible' },
 ];
 
 /** Mean raw EXP a template's group pays (a fixed elite leader pays ELITE_BASE.exp times its row). */

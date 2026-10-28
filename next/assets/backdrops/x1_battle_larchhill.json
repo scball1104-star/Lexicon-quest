@@ -3,13 +3,13 @@
  "w": 384,
  "h": 216,
  "cell": null,
- "note": "Larchhill: warm afternoon, honey drystone terraces, orchard rows, white hives, the Windmill, the aqueduct (composed)",
+ "note": "larchhill battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py; replaces the composed stage (docs/MEDIA_BUILD.md 1); bandY/bandAlpha kept",
  "extraColors": [],
- "colors": 41,
- "composed": "tools/art/backdrops/x1_compose.py (battle_larchhill)",
+ "colors": 42,
  "bandY": 118,
  "bandAlpha": 0.42,
  "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
  "backdropId": "battle_larchhill",
- "fallback": "valley"
+ "fallback": "valley",
+ "source": "runway"
 }

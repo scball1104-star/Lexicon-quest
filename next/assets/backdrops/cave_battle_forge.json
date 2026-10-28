@@ -1,0 +1,12 @@
+{
+ "image": "cave_battle_forge.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "colors": 38,
+ "source": "runway",
+ "note": "forge battle stage: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-10-28) quantized by quantize_still.py (docs/MEDIA_BUILD.md 1)",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites"
+}
