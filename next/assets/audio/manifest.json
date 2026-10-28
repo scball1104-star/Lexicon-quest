@@ -21,24 +21,22 @@
    "duration": 118.68
   },
   "valley": {
-   "src": "../assets/audio/region-1.mp3",
-   "volume": 1.25,
+   "src": "assets/audio/music/valley.mp3",
+   "volume": 0.932,
    "loopStart": 0.0,
-   "loopEnd": 148.75,
+   "loopEnd": 124.75,
    "fallback": "willowmere",
-   "measuredLufs": -18.28,
-   "duration": 148.814
+   "measuredLufs": -15.39,
+   "duration": 126.16
   },
   "archive": {
    "src": "assets/audio/music/archive.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 93.393333,
+   "volume": 0.92,
+   "loopStart": 0.1605,
+   "loopEnd": 192.75,
    "fallback": null,
-   "bpm": 72.0,
-   "key": "D dorian",
-   "measuredLufs": -16.44,
-   "duration": 93.493
+   "measuredLufs": -15.28,
+   "duration": 193.56
   },
   "battle": {
    "src": "assets/audio/music/battle.mp3",
@@ -50,46 +48,40 @@
    "duration": 61.44
   },
   "boss_archivore": {
-   "src": "../assets/audio/boss.mp3",
-   "volume": 1.199,
-   "loopStart": 0.0,
-   "loopEnd": 138.25,
+   "src": "assets/audio/music/boss_archivore.mp3",
+   "volume": 0.922,
+   "loopStart": 0.1902,
+   "loopEnd": 140.75,
    "fallback": "battle",
-   "measuredLufs": -17.58,
-   "duration": 139.614
+   "measuredLufs": -15.29,
+   "duration": 141.56
   },
   "mystery": {
    "src": "assets/audio/music/mystery.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 45.06,
+   "volume": 1.014,
+   "loopStart": 0.0,
+   "loopEnd": 128.25,
    "fallback": null,
-   "bpm": 64.0,
-   "key": "E phrygian",
-   "measuredLufs": -16.44,
-   "duration": 45.16
+   "measuredLufs": -16.12,
+   "duration": 128.8
   },
   "sorrow": {
    "src": "assets/audio/music/sorrow.mp3",
-   "volume": 1.053,
-   "loopStart": 0.06,
-   "loopEnd": 60.2461,
+   "volume": 1.062,
+   "loopStart": 0.0,
+   "loopEnd": 182.25,
    "fallback": null,
-   "bpm": 64.0,
-   "key": "A minor",
-   "measuredLufs": -16.45,
-   "duration": 60.346
+   "measuredLufs": -16.52,
+   "duration": 183.2
   },
   "triumph": {
    "src": "assets/audio/music/triumph.mp3",
-   "volume": 1.052,
+   "volume": 0.983,
    "loopStart": 0.0,
-   "loopEnd": 51.827846,
+   "loopEnd": 69.2,
    "fallback": "title",
-   "bpm": 100.0,
-   "key": "D major",
-   "measuredLufs": -16.44,
-   "duration": 51.828
+   "measuredLufs": -15.85,
+   "duration": 69.2
   },
   "victory": {
    "src": null,
@@ -143,80 +135,66 @@
   },
   "boss_king": {
    "src": "assets/audio/music/boss_king.mp3",
-   "volume": 1.059,
-   "loopStart": 0.06,
-   "loopEnd": 120.06,
+   "volume": 0.969,
+   "loopStart": 0.1394,
+   "loopEnd": 187.25,
    "fallback": "boss_archivore",
-   "bpm": 132.0,
-   "key": "C minor",
-   "measuredLufs": -16.5,
-   "duration": 120.16
+   "measuredLufs": -15.73,
+   "duration": 188.36
   },
   "emberpeak": {
    "src": "assets/audio/music/emberpeak.mp3",
-   "volume": 1.068,
-   "loopStart": 0.06,
-   "loopEnd": 73.906168,
+   "volume": 1.036,
+   "loopStart": 0.0,
+   "loopEnd": 154.25,
    "fallback": "hollow",
-   "bpm": 104.0,
-   "key": "D dorian",
-   "measuredLufs": -16.57,
-   "duration": 74.006
+   "measuredLufs": -16.31,
+   "duration": 154.96
   },
   "first_bell": {
    "src": "assets/audio/music/first_bell.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 73.906168,
+   "volume": 0.944,
+   "loopStart": 0.0,
+   "loopEnd": 147.25,
    "fallback": "hollowmere",
-   "bpm": 104.0,
-   "key": "D major",
-   "measuredLufs": -16.44,
-   "duration": 74.006
+   "measuredLufs": -15.5,
+   "duration": 147.84
   },
   "ash_road": {
    "src": "assets/audio/music/ash_road.mp3",
-   "volume": 1.057,
-   "loopStart": 0.06,
-   "loopEnd": 91.26,
+   "volume": 0.907,
+   "loopStart": 0.0,
+   "loopEnd": 155.75,
    "fallback": "fading_road",
-   "bpm": 100.0,
-   "key": "A minor to C major",
-   "measuredLufs": -16.48,
-   "duration": 91.36
+   "measuredLufs": -15.15,
+   "duration": 156.8
   },
   "foundry": {
    "src": "assets/audio/music/foundry.mp3",
-   "volume": 1.053,
-   "loopStart": 0.06,
-   "loopEnd": 87.332744,
+   "volume": 0.975,
+   "loopStart": 0.0,
+   "loopEnd": 159.25,
    "fallback": "court",
-   "bpm": 88.0,
-   "key": "E phrygian",
-   "measuredLufs": -16.45,
-   "duration": 87.433
+   "measuredLufs": -15.78,
+   "duration": 159.92
   },
   "boss_warden": {
    "src": "assets/audio/music/boss_warden.mp3",
-   "volume": 1.062,
-   "loopStart": 0.06,
-   "loopEnd": 116.726667,
+   "volume": 0.919,
+   "loopStart": 0.0,
+   "loopEnd": 171.25,
    "fallback": "boss_king",
-   "bpm": 144.0,
-   "key": "C minor",
-   "measuredLufs": -16.52,
-   "duration": 116.827
+   "measuredLufs": -15.27,
+   "duration": 171.8
   },
   "the_downs": {
    "src": "assets/audio/music/the_downs.mp3",
-   "volume": 1.053,
-   "loopStart": 0.06,
-   "loopEnd": 78.320884,
+   "volume": 1.068,
+   "loopStart": 0.0672,
+   "loopEnd": 126.25,
    "fallback": "valley",
-   "bpm": 92.0,
-   "key": "G major",
-   "measuredLufs": -16.45,
-   "duration": 78.421
+   "measuredLufs": -16.57,
+   "duration": 128.0
   },
   "high_moor": {
    "src": "assets/audio/music/high_moor.mp3",

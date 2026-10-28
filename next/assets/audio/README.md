@@ -257,10 +257,10 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 |---|---|---|
 | `title` | assets/audio/music/title.mp3 | silence |
 | `willowmere` | assets/audio/music/willowmere.mp3 | silence |
-| `valley` | ../assets/audio/region-1.mp3 | willowmere |
+| `valley` | assets/audio/music/valley.mp3 | willowmere |
 | `archive` | assets/audio/music/archive.mp3 | silence |
 | `battle` | assets/audio/music/battle.mp3 | silence |
-| `boss_archivore` | ../assets/audio/boss.mp3 | battle |
+| `boss_archivore` | assets/audio/music/boss_archivore.mp3 | battle |
 | `mystery` | assets/audio/music/mystery.mp3 | silence |
 | `sorrow` | assets/audio/music/sorrow.mp3 | silence |
 | `triumph` | assets/audio/music/triumph.mp3 | title |
