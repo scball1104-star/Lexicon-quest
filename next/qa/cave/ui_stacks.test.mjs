@@ -114,16 +114,16 @@ test('the Journal line: hidden until deep_stacks_open, then the deepest floor an
   assert.match(src, /const ds = stacksLine\(g\);/, 'one line under the main quest');
 });
 
-test('the plaque screen: the record in the header, seventeen rows in band order, held bright and unheld faded, the detail, the help bar, cancel pops', () => {
+test('the plaque screen: the record in the header, sixty-one rows in grade order (C4-uniques), held bright and unheld faded, the detail, the help bar, cancel pops', () => {
   const g = newGameEp2('Arden');
   CAVE.ensureCave(g); g.cave.record = { floor: 23, readings: 4, clears: 0, time: 5025 };
   g.cave.vault.push('cave_catalogue_pen', 'cave_root_boots');
   const data = plaqueData(g);
-  assert.equal(data.rows.length, VAULT_TOTAL); assert.equal(VAULT_TOTAL, 17);
-  assert.deepEqual(data.rows.map((x) => x.band), [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 0], 'band order, the Quill (band 0) last');
+  assert.equal(data.rows.length, VAULT_TOTAL); assert.equal(VAULT_TOTAL, 61);
+  assert.deepEqual(data.rows.map((x) => x.band), [...[1, 2, 3].flatMap(() => [1, 2, 3, 4, 5].flatMap((b) => [b, b, b, b])), 0], 'grade order, then band order, the Quill (band 0) last');
   assert.deepEqual(data.rows[0], { id: 'cave_catalogue_pen', name: "The Catalogue's Pen", held: true, icon: 'sword', band: 1, where: 'The Catalogue, B1 to B19', wear: 'Sword',
-    prop: { name: 'First Line', text: 'The first blow each fight cannot miss.' }, lore: ["A keeper's pen, ground to an edge.", 'It never misses the first line.'] });
-  assert.equal(data.rows[12].wear, 'Body, Mira'); assert.equal(data.rows[13].wear, 'Body, the hero and Bram'); assert.equal(data.rows[1].wear, 'Body, anyone');
+    prop: { name: 'First Line', text: 'The first blow each fight cannot miss.' }, lore: ['A Lesser gift: a loose page of the Stacks.', "A keeper's pen, ground to an edge.", 'It never misses the first line.'] });
+  assert.equal(data.rows[9].wear, 'Body, Mira'); assert.equal(data.rows[12].wear, 'Body, the hero and Bram'); assert.equal(data.rows[1].wear, 'Body, anyone');
   const e = fakeEngine({ game: g });
   const scene = new StacksScene(e);
   scene.enter(data);
@@ -135,13 +135,13 @@ test('the plaque screen: the record in the header, seventeen rows in band order,
   for (const row of data.rows.slice(0, 11)) assert.ok(all.includes(fitLabel(r, row.name, 100)), `row ${row.id} is listed as ${fitLabel(r, row.name, 100)}`);
   const listed = texts.filter((t) => t.x === 24 + 19);
   assert.equal(listed.length, 11, 'eleven rows visible at the keyboard row height');
-  assert.ok(!all.includes('Cinder Stride'), 'the twelfth row waits below the fold');
+  assert.ok(!all.includes("Juror's Mantle"), 'the twelfth row waits below the fold');
   assert.ok(listed[0].o.color === 'cream' && listed[0].o.alpha === undefined, 'held: bright');
   assert.ok(listed[1].o.alpha === FADED.alpha && listed[1].o.shadow === false, 'unheld: faded ink');
   // the detail of the first (held) row: name, home, wear, prop, lore
   assert.ok(all.includes("The Catalogue's Pen") && all.includes('The Catalogue, B1 to B19') && all.includes('Sword') && all.includes('First Line'));
   assert.ok(all.includes("A keeper's pen, ground to an edge.") && all.includes('It never misses the first line.'), 'held: the lore');
-  assert.ok(all.some((t) => t.startsWith('Vault 2 of 17')), 'the help bar count');
+  assert.ok(all.some((t) => t.startsWith('Vault 2 of 61')), 'the help bar count');
   assert.ok(all.includes(STACKS_HELP.screen));
   // move to an unheld row: name only, "..." and the unfound line
   e.input.step('down'); scene.update(); e.input.step(null);
@@ -152,7 +152,7 @@ test('the plaque screen: the record in the header, seventeen rows in band order,
   assert.deepEqual(scene.debugState().id, 'cave_shelf_mail');
   assert.equal(scene.debugState().held, 2);
   // the Quill last; cancel pops with the row id
-  scene.list.moveTo(16); assert.equal(scene.row.id, 'cave_binders_quill');
+  scene.list.moveTo(60); assert.equal(scene.row.id, 'cave_binders_quill');
   const r3 = fakeRenderer(); scene.draw(r3.r);
   assert.ok(r3.texts.some((t) => t.t === fitLabel(r3.r, "The Binder's Quill", 100)) && r3.texts.some((t) => t.t === 'The Binder, B100'), 'the Quill row scrolled into view with its home');
   e.input.step(null, ['cancel']); scene.update();
@@ -166,7 +166,7 @@ test('the plaque screen on a phone: touch rows, seven visible, the list scrolls;
   const scene = new StacksScene(e);
   scene.enter(plaqueData(g));
   assert.equal(scene.list.rowH, TOUCH_ROW_H); assert.equal(scene.list.rows, 7);
-  scene.list.moveTo(16);
+  scene.list.moveTo(60);
   assert.ok(scene.list.scroll > 0, 'the Quill scrolls into view');
   const { r } = fakeRenderer();
   assert.equal(recordSummary(r, { floor: 5, readings: 1, clears: 0, time: 0 }, 400), 'Deepest B5   1 reading');
@@ -180,7 +180,7 @@ test('the plaque screen on a phone: touch rows, seven visible, the list scrolls;
   const pushed = [];
   e.pushAwait = async (n, d) => { pushed.push([n, d]); };
   assert.equal(await openPlaqueScreen(e), true);
-  assert.ok(e.hasScene('stacks') && pushed[0][0] === 'stacks' && pushed[0][1].rows.length === 17);
+  assert.ok(e.hasScene('stacks') && pushed[0][0] === 'stacks' && pushed[0][1].rows.length === 61);
   assert.equal(await openPlaqueScreen({ game: null, pushAwait: async () => {} }), false, 'no game: nothing');
   // the screen is pack code on purpose (the tap-prompt ratchet): nothing of it sits in the precached src/ui/screens/
   assert.ok(!fs.existsSync(path.join(NEXT, 'src/ui/screens/stacks.js')), 'no precached copy of the plaque screen');

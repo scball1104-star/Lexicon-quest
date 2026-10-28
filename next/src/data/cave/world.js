@@ -722,7 +722,10 @@ export const HOOKS = {
       if (u.side !== 'party') continue;
       const m = (game.party || []).find((x) => x.id === u.id);
       if (m && HOOKS.firstBlow(m)) u.firstBlow = true;
+      if (m && u.alive && CAVE.wearsProp(m, 'ink_well')) { u.mp = Math.min(u.maxMp, u.mp + 4); u.startMp = u.mp; for (const ev of battle.state.startEvents || []) for (const x of (ev.type === 'battle_start' && ev.units) || []) if (x.uid === u.uid) x.mp = u.mp; }   // C4 Inkwell (items.js CAVE_PROPS.ink_well.value; the opening snapshot the HUD reads)
+      if (m && u.alive && CAVE.wearsProp(m, 'fury_floor')) { u.fury = Math.max(u.fury, 50); for (const ev of battle.state.startEvents || []) for (const x of (ev.type === 'battle_start' && ev.units) || []) if (x.uid === u.uid) x.fury = u.fury; }   // C4 Standing Grudge (CAVE_PROPS.fury_floor.value)
     }
+    if (anyWears(game, 'exp_lean')) for (const x of battle.units()) if (x.side === 'enemy' && x.rewards) x.rewards.exp = Math.round(x.rewards.exp * 1.15);   // C4 Quick Study (CAVE_PROPS.exp_lean.value)
     return true;
   },
   /** events.js opened a chest: a red or blue tier (not a placed one) is rolled here; resolves the roll, or false when the chest is not ours. */

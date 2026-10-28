@@ -138,14 +138,45 @@ death costs you this run's finds (Diablo tension, Lufia frame).
    item level = `min(16, 1 + floor/6)`, rarity weights shift with depth (common 70/magic 25/rare 5 on B1,
    30/45/22/3 legendary on B60+), consumables by band. Nothing new in the engine; a `zone` per band with its
    tables.
-2. **Cave uniques**: sixteen at launch, registered into `UNIQUES` by the pack's `register()` (the X1 pattern,
-   no edit to `items.js`): four weapons (one per type the party uses: sword, staff, spear, axe), four body,
-   two helms, two boots, two mantles, two charms, each with a fixed affix set and one property no rolled item
-   has (for example: "Bookmark drops twice as often", "+1 move inside the Stacks", "the first blow each fight
-   cannot miss"). Ids `cave_*`. Names from the Stacks' lore (the Catalogue's Pen, the Cellar Key, the Court's
-   Last Word, the Ember Reader, the Forge Binding...). The Binder's Quill is the seventeenth, B100 only.
-3. **Which blue chest gives which**: a blue chest rolls among uniques not in the vault, weighted toward the
-   current band's four, so the deep ones need depth.
+2. **Cave uniques** (built by C4-uniques on 2026-10-28 from Scott's answer to 13 E; the first sixteen were C1-data's): **sixty in
+   three grades**, registered into `UNIQUES` by the pack's `register()` (the X1 pattern, no edit to `items.js`), plus the Binder's
+   Quill (B100 only, the best charm in the Stacks). Grades, the "measures of strength": **Lesser** (built at item level 5),
+   **Greater** (10), **Named** (16), twenty each: four weapons (sword, staff, spear, axe), four bodies (one for Mira, one for the
+   hero or Bram, two for anyone), three heads, three boots, three mantles, three charms, so each grade is a full set for the three
+   readers with two to spare, and four of each grade call each band home. Each has a fixed affix set and one property no rolled
+   item has; no property twice in a grade, and no property (or numbered family) at more than two grades. Lesser leans to
+   conveniences and status proofs (Poison-, Blind-, Silence-, Burn-, Chill-proof, Forge Ward, Downward Sense, Rootbound Step, the
+   Inkwell's MP, Owed More, Dog-Eared, Carried Out, Warm Larder) with a few small edges (First Line, two struck elements, three
+   scripts at 25%, Thrift 1); Greater to battle edges (striking as ice or thunder, the scripts at 40%, Venom Edge, Thrift 2,
+   Already Moving, Hairline, Short Fuse, Mender, Leeching, Ink and Fire Ward); Named to run-changers (Rebound, Better Lent, Kept
+   Stores, Marked Pages, Quick Study's EXP, the Standing Grudge's Fury, Unwritten, Clear Voice, Full Index and the bigger
+   numbers of the Greater families). The grade is the first lore line ("A Lesser gift: a loose page of the
+   Stacks.") and the plaque's, never a number in a name. Strength, by the game's own role weights (`inventory.js weightedGain`,
+   status resists counted on neither side): each unique beats the 90th-percentile rolled rare of its grade's item level in its
+   slot for its best wearer, every Lesser beats the Episode 2 start's piece in its slot for everyone who can wear it (the Pen
+   over Lanternheart), the next depth's rares overtake a grade's stats, and in every slot each reader's best Named beats their
+   best Greater, which beats their best Lesser (`qa/cave/uniques_grades.test.mjs`; the table: `node qa/cave/out/uniques_report.mjs`).
+   The sixteen keep their ids, slots and properties (band 1 became Lesser, bands 2 and 3 Greater, bands 4 and 5 Named, rebuilt
+   at their grade's item level); the Mantle of Kept Names trades doubled gold, which buys nothing in the Stacks, for Kept Stores.
+3. **Which blue chest gives which**: a blue chest first rolls a **grade by floor** (`loot.js GRADE_ODDS`, linear between the
+   knots below), then a unique of that grade not in the vault (nor found this reading), weighted toward the current band's own
+   (4 for the floor's band, 1 for an earlier band, a quarter for a deeper one). A grade with nothing left falls to the nearest grade
+   that has something (a tie goes to the grade the floor favours). The Quill is never in a chest.
+
+   | floor | Lesser | Greater | Named |
+   |---|---|---|---|
+   | B1 | 85 | 14 | 1 |
+   | B20 | 60 | 33 | 7 |
+   | B40 | 35 | 45 | 20 |
+   | B60 | 18 | 42 | 40 |
+   | B80 | 7 | 28 | 65 |
+   | B99 | 3 | 17 | 80 |
+
+   **How often** (`blueChestDue`): the first blue by B9 (so the first landing's Bookmark always has one to bank), then within ten
+   floors of the last; the plan's 7% roll per floor; and a second roll that rises from 0 on B1 to 10% on B99. Never two floors in
+   a row, never a landing, at most one blue chest a floor (the generator places one; a literal second chest on a floor would need
+   `gen.js` to take `chests.blue: 2`). A deep first reading finds 14 on average (11 to 20), and every banked deep reading finds
+   only new ones, so the sixty are all seen in about five (`node qa/cave/out/uniques_runs.mjs`).
 4. **The Bookmark**: key item `keepers_bookmark`, consumable, section 2.6.
 
 ## 7. What resets and what carries
@@ -225,6 +256,9 @@ section 8; the pack id `cave` with prefix `cave_`; EXP inside = 1.5x via `expMul
 - **E. Uniques.** Default: sixteen plus the Binder's Quill. More later if the Stacks are loved.
   **Scott's answer, 2026-10-27, verbatim:** "E. More uniques. Vary the quality of each so that lower levels are more likely to produce a low strength unique and less likely to produce high strength unique, and the probability reversing the deeper you go into the cave so that lower levels have a higher probability of producing a high strength unique instead of a low strength one. There should be enough uniques available to find to full equip the players with uniques from different measures of strength, and different special qualities, multiple times over."
   Build: sixty uniques in three grades (Lesser, Greater, Named), twenty per grade across every slot, the grade odds turning over with depth (85/14/1 at B1 to 3/17/80 at B99), a second blue chest on some floors; `docs/briefs/C4-uniques.md`. Launches after the Wednesday 10/28 reset, after C3-critic.
+  **Built 2026-10-28 (C4-uniques)**: sections 6.2 and 6.3 as above. Weak uniques are likely shallow (B1-B29: 65% Lesser, 6% Named)
+  and strong ones likely deep (B80-B99: 73% Named, 5% Lesser); each grade is a full party set; the second roll is a second blue
+  floor, not a second chest on a floor (one line in `gen.js` if Scott wants the literal version). Numbers: `docs/DEEP_STACKS_BALANCE.md` 8.
 - **F. B100 prize.** Default: the Quill and a title-screen mark. Alternative: a new ending line in the credits.
 
 ## 14. Risks and how they are held

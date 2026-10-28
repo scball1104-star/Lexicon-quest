@@ -686,9 +686,11 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
     .sort((a, b) => (b.dead - a.dead) || (b.d - a.d) || (a.i - b.i));
   const chestCells = new Set();
   const spotFree = (r, [x, y]) => !chestCells.has(key2(r.x + x, r.y + y)) && walk.touchable(r.x + x, r.y + y) && !(r.x + x === sx && r.y + y === sy);
+  // a chest is a block: a spot that would cut the stair off from the arrival is skipped (CRITIQUE_STACKS 1, seed 311 B92)
+  const keepsStair = (x, y) => walkModel({ ...preMod, decor, overlays, events: [...events, chestEv('probe', x, y, 'red', { floor })] }, [ax, ay]).reached(sx, sy - 1);
   const takeSpot = (c, preferBlue) => {
     const spots = preferBlue && c.r.p.marks.blue.length ? [...c.r.p.marks.blue, ...c.r.p.marks.chest] : c.r.p.marks.chest;
-    const s = spots.find((sp) => spotFree(c.r, sp));
+    const s = spots.find((sp) => spotFree(c.r, sp) && keepsStair(c.r.x + sp[0], c.r.y + sp[1]));
     if (!s) return null;
     chestCells.add(key2(c.r.x + s[0], c.r.y + s[1]));
     return [c.r.x + s[0], c.r.y + s[1]];
@@ -729,7 +731,8 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
       marks[e.id] = front || [e.x, e.y];
     }
   }
-  // foes: from the pool, on prefab spots outside the arrival room, reachable, off the stair and the chests
+  // foes: from the pool, on prefab spots outside the arrival room, reachable WITH the chests in place, off the stair and the chests
+  const walkC = walkModel({ ...preMod, decor, overlays, events }, [ax, ay]);
   const poolRaw = (opts.foes ? opts.foes(floor, band.id) : null) || band.foes;
   const pool = poolRaw.map((e) => foeEntry(e, opts, band));
   const want = foeCount(floor);
@@ -746,7 +749,7 @@ function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {
   const foeCells = new Set();
   for (const s of ordered) {
     if (placedFoes >= want) break;
-    if (!walk.reached(s.x, s.y) || chestCells.has(key2(s.x, s.y)) || foeCells.has(key2(s.x, s.y))) continue;
+    if (!walkC.reached(s.x, s.y) || chestCells.has(key2(s.x, s.y)) || foeCells.has(key2(s.x, s.y))) continue;
     if (Math.abs(s.x - ax) + Math.abs(s.y - ay) < 4) continue;
     if (s.x === sx && s.y === sy) continue;
     const f = rng.pick(pool);

@@ -26,9 +26,17 @@ const first = pack.register();
 const result = await first;
 const after = snap();
 
-const UNIQUE_IDS = ['cave_ash_helm', 'cave_binders_mark', 'cave_binders_quill', 'cave_catalogue_pen', 'cave_cellar_key', 'cave_cinder_stride', 'cave_court_word',
-  'cave_damp_mantle', 'cave_ember_reader', 'cave_forge_binding', 'cave_glass_coat', 'cave_name_mantle', 'cave_reading_hood', 'cave_root_boots', 'cave_shelf_mail',
-  'cave_twice_read', 'cave_vellum_robe'];
+// C4-uniques: the sixty in three grades and the Quill (src/data/cave/items.js)
+const UNIQUE_IDS = ['cave_alum_jerkin', 'cave_anvil_coat', 'cave_anvil_spark', 'cave_ash_helm', 'cave_ashwind_mantle', 'cave_bailiff_hatchet',
+  'cave_banked_coal', 'cave_binders_mark', 'cave_binders_quill', 'cave_catalogue_pen', 'cave_catalogue_seal', 'cave_cellar_clogs', 'cave_cellar_key',
+  'cave_cinder_shoes', 'cave_cinder_stride', 'cave_cistern_charm', 'cave_clemency_circlet', 'cave_clerk_gown', 'cave_contempt_mantle',
+  'cave_court_word', 'cave_damp_mantle', 'cave_deep_well_mantle', 'cave_draught_candle', 'cave_drip_cloak', 'cave_ember_hauberk',
+  'cave_ember_reader', 'cave_forge_binding', 'cave_gavel_charm', 'cave_glass_coat', 'cave_hearth_charm', 'cave_indexer_robe', 'cave_juror_mantle',
+  'cave_kindling_boots', 'cave_ladder_boots', 'cave_lamp_rod', 'cave_lampwick', 'cave_lector_circlet', 'cave_name_mantle', 'cave_quench_axe',
+  'cave_reader_diadem', 'cave_reading_hood', 'cave_record_rod', 'cave_ribbon_mantle', 'cave_root_boots', 'cave_rootspur', 'cave_rootweave',
+  'cave_runner_boots', 'cave_scorch_cowl', 'cave_sergeant_helm', 'cave_shelf_mail', 'cave_smith_apron', 'cave_smoke_mantle', 'cave_soot_cap',
+  'cave_sparkwrit', 'cave_spur_boots', 'cave_taproot_pike', 'cave_twice_read', 'cave_usher_helm', 'cave_vellum_robe', 'cave_wellspring_boots',
+  'cave_writ_coat'];
 const diff = (a, b) => b.filter((k) => !a.includes(k)).sort();
 
 test('register() resolves the X1 shape, is idempotent, and flips CAVE_READY', async () => {
