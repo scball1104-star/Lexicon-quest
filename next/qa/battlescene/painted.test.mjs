@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const rd = (p) => fs.readFileSync(path.join(NEXT, p), 'utf8');
-const PAINTED = ['valley', 'hollow', 'east_road'];
+const PAINTED = ['valley', 'valley_dusk', 'hollow', 'east_road'];
 
 test('every painted stage has its png and sidecar, at the game size, under 80 colours, beside its composed placeholder', () => {
   for (const k of PAINTED) {

@@ -3,13 +3,14 @@
  "generatedBy": "python tools/audio/build.py (W1-audio). Edit the generators, not this file.",
  "music": {
   "title": {
-   "src": "../assets/audio/title.mp3",
-   "volume": 0.877,
-   "loopStart": 0.1265,
-   "loopEnd": 176.75,
+   "src": "assets/audio/music/title.mp3",
+   "volume": 0.935,
+   "loopStart": 0.0,
+   "loopEnd": 168.75,
    "fallback": null,
-   "measuredLufs": -14.86,
-   "duration": 178.774
+   "measuredLufs": -15.42,
+   "duration": 168.76,
+   "loopNote": "whole track, trailing silence/fade skipped"
   },
   "willowmere": {
    "src": "../assets/audio/town.mp3",

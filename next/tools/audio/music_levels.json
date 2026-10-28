@@ -235,5 +235,26 @@
   "duration": 100.16,
   "sampleRate": 44100,
   "loopKind": "sidecar"
+ },
+ "assets/audio/music/title.mp3": {
+  "lufs": -15.42,
+  "duration": 168.76,
+  "sampleRate": 44100,
+  "contentEnd": 168.5,
+  "candidate": {
+   "loopStart": 122.1175,
+   "loopEnd": 162.261,
+   "score": 0.473,
+   "xcorr": 0.248,
+   "spliceFluxPct": 66.8,
+   "bestAnywhere": {
+    "score": 0.712,
+    "a": 86.66,
+    "b": 135.7
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 168.75,
+  "loopKind": "trimmed"
  }
 }

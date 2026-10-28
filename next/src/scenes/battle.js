@@ -89,7 +89,7 @@ const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'batt
  * first download does not move. The composed stage above is the placeholder; the layer is rebuilt the moment the painting
  * arrives (update()). Scott approved the three on 2026-10-27.
  */
-const PAINTED = { valley: 'paint_battle_valley', hollow: 'paint_battle_hollow', east_road: 'paint_battle_east_road' };
+const PAINTED = { valley: 'paint_battle_valley', valley_dusk: 'paint_battle_valley_dusk', hollow: 'paint_battle_hollow', east_road: 'paint_battle_east_road' };
 const PAINTED_ASSETS = Object.values(PAINTED);
 /** Zone -> stage key overrides (W8-art): the hollow's zone data still names 'valley', its stage is 'hollow'. */
 const ZONE_BACKDROP = { whisperwood_hollow: 'hollow' };
