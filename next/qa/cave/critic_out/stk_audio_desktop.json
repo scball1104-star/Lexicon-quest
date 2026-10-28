@@ -1,0 +1,200 @@
+{
+ "device": "desktop",
+ "status": "ok",
+ "cave_before": {
+  "music": "archive",
+  "key": "archive",
+  "mode": "element",
+  "stack": [],
+  "amb": "archive_hush",
+  "unlocked": true,
+  "ctx": "running"
+ },
+ "cave_fight": {
+  "f0": 3779,
+  "floor": 1,
+  "enc": "cave_b1_e1",
+  "foes": [
+   "Page Wraith",
+   "Bookmite"
+  ],
+  "start": "normal",
+  "hp0": 144,
+  "rounds": 4,
+  "cmds": 10,
+  "whys": {
+   "attack": 10
+  },
+  "speed": 2,
+  "kos": 0,
+  "telegraphs": 1,
+  "pt": 10,
+  "result": "win",
+  "frames": 1046,
+  "rounds_played": 4,
+  "s": 17.4,
+  "hp1": 153,
+  "down_after": 0
+ },
+ "cave_after": [
+  {
+   "f": 0,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 60,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 120,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 180,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 240,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 300,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 360,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 420,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 480,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 540,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 600,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 660,
+   "music": "victory",
+   "scene": "field"
+  }
+ ],
+ "f1_before": {
+  "music": "victory",
+  "key": null,
+  "mode": null,
+  "stack": [],
+  "amb": "archive_hush",
+  "unlocked": true,
+  "ctx": "running"
+ },
+ "f1_fight": {
+  "f0": 7019,
+  "floor": 0,
+  "enc": "f1_slimes",
+  "foes": [
+   "Ink Slime",
+   "Ink Slime",
+   "Bookmite"
+  ],
+  "start": "normal",
+  "hp0": 464,
+  "rounds": 3,
+  "cmds": 7,
+  "whys": {
+   "attack": 7
+  },
+  "speed": 2,
+  "kos": 0,
+  "telegraphs": 0,
+  "pt": 7,
+  "result": "win",
+  "frames": 616,
+  "rounds_played": 3,
+  "s": 10.3,
+  "hp1": 447,
+  "down_after": 0
+ },
+ "f1_after": [
+  {
+   "f": 0,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 60,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 120,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 180,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 240,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 300,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 360,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 420,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 480,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 540,
+   "music": null,
+   "scene": "field"
+  },
+  {
+   "f": 600,
+   "music": "victory",
+   "scene": "field"
+  },
+  {
+   "f": 660,
+   "music": "victory",
+   "scene": "field"
+  }
+ ],
+ "errors": []
+}

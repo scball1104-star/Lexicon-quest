@@ -349,6 +349,7 @@ function layout(seed, floor, bandId) {
       L.attempt = attempt;
       arrivalCell(seed, floor, L);          // the arrival room and column (its own seeded stream)
       checkDressable(L, band, floor);       // a stair room, enough chest and foe spots: else the next attempt
+      if (!dressProves(seed, floor, band, L)) throw new CaveGenError('no dressing of this layout proves walkable');   // else the next attempt (CRITIQUE_STACKS 1)
       cacheSet(key, L);
       return L;
     } catch (e) {
@@ -581,6 +582,19 @@ export function generateFloor(seed, floor, opts = {}) {
   throw new CaveGenError(`floor ${floor} seed ${seed}: no dressing left the stair, chests and foes reachable (${lastErr && lastErr.message})`);
 }
 const DRESS_ATTEMPTS = 8;
+/**
+ * A layout is accepted only if some dressing of it proves (the stair, every chest and every foe reachable), tried here with the
+ * default options so every caller (the floor itself, and the floor above asking for its arrival) agrees on the same layout.
+ * Seeds 612 B54 and 687 B58 had layouts no dressing could prove; they now take the next layout attempt.
+ */
+function dressProves(seed, floor, band, L) {
+  for (let k = 0; k < DRESS_ATTEMPTS; k++) {
+    const rng = createRng(hashSeed(k === 0 ? `${seed}:${floor}:dress` : `${seed}:${floor}:dress:${k}`));
+    try { dressFloor(seed, floor, band, `cave_b${floor}`, '', [1, 1], {}, L, rng); return true; }
+    catch (e) { if (!(e instanceof CaveGenError)) throw e; }
+  }
+  return false;
+}
 
 /** One dressing of a laid-out floor on `rng`: rooms' props, the stair, chests, foes, lights, then the proof. Throws CaveGenError. */
 function dressFloor(seed, floor, band, id, name, next, opts, L, rng) {

@@ -1,0 +1,49 @@
+{
+ "318:18": {
+  "ok": true,
+  "W": 43,
+  "H": 32,
+  "foes": 5,
+  "chests": [
+   "red",
+   "red"
+  ],
+  "stairs": [
+   9,
+   24
+  ],
+  "arrival": [
+   7,
+   17
+  ]
+ },
+ "503:3": {
+  "ok": true,
+  "W": 40,
+  "H": 30,
+  "foes": 4,
+  "chests": [
+   "red",
+   "red",
+   "red",
+   "red"
+  ],
+  "stairs": [
+   34,
+   18
+  ],
+  "arrival": [
+   26,
+   5
+  ]
+ },
+ "scan": {
+  "floors": 9000,
+  "refused": 2,
+  "fails": [
+   "612:54 floor 54 seed 612: no dressing left the stair, chests and foes reachable (stair ",
+   "687:58 floor 58 seed 687: no dressing left the stair, chests and foes reachable (stair "
+  ],
+  "ms": 29825
+ }
+}

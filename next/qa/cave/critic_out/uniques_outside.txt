@@ -1,0 +1,17 @@
+The Catalogue's Pen          band 1 ilvl 4: atk 16  | Ep3 start sword: hero lanternheart (atk 24)
+Shelf-Keeper's Mail          band 1 ilvl 4: def 9, spr 2, hp 32  | Ep3 start body: hero silver_mail (def 18, spr 3); mira mirrorguard_mail (def 11, spr 9, hp 20); bram silver_mail (def 18, spr 3)
+Reading Hood                 band 1 ilvl 4: def 3, spr 3, mag 3  | Ep3 start head: hero glass_helm (def 8, spr 2); mira mirror_circlet (def 4, spr 7, mag 4); bram glass_helm (def 8, spr 2)
+The Cellar Key               band 2 ilvl 7: atk 30, def 2  | Ep3 start spear: bram mere_pike (atk 30, def 3)
+Rootbound Boots              band 2 ilvl 7: spd 2, def 2, hp 22  | Ep3 start boots: hero mere_boots (spd 2, def 2, hp 15); bram mere_boots (spd 2, def 2, hp 15)
+Mantle of the Damp Stair     band 2 ilvl 7: def 3, spr 3  | Ep3 start mantle: 
+The Court's Last Word        band 3 ilvl 10: atk 8, mag 24, spr 5  | Ep3 start staff: mira mirror_rod (atk 9, mag 25, spr 4)
+Glass-Lined Coat             band 3 ilvl 10: def 22, spr 6  | Ep3 start body: hero silver_mail (def 18, spr 3); mira mirrorguard_mail (def 11, spr 9, hp 20); bram silver_mail (def 18, spr 3)
+Twice-Read Charm             band 3 ilvl 10: atk 4, mag 4  | Ep3 start charm: hero twinfold_charm (atk 4, mag 4, spd 1); mira owl_charm (mag 2)
+The Ember Reader             band 4 ilvl 14: atk 36, spd -1  | Ep3 start axe: hero moonsteel_axe (atk 34, spd -1); bram hatchet (atk 8, spd -1)
+Ash-Reader's Helm            band 4 ilvl 14: def 8, spr 4, hp 52  | Ep3 start head: hero glass_helm (def 8, spr 2); mira mirror_circlet (def 4, spr 7, mag 4); bram glass_helm (def 8, spr 2)
+Cinder Stride                band 4 ilvl 14: spd 3, def 3  | Ep3 start boots: hero mere_boots (spd 2, def 2, hp 15); bram mere_boots (spd 2, def 2, hp 15)
+Vellum Robe                  band 5 ilvl 16: def 14, spr 22, mag 5, hp 60  | Ep3 start body: hero silver_mail (def 18, spr 3); mira mirrorguard_mail (def 11, spr 9, hp 20); bram silver_mail (def 18, spr 3)
+The Forge Binding            band 5 ilvl 16: def 36, spr 5, hp 100  | Ep3 start body: hero silver_mail (def 18, spr 3); mira mirrorguard_mail (def 11, spr 9, hp 20); bram silver_mail (def 18, spr 3)
+Mantle of Kept Names         band 5 ilvl 16: def 6, spr 6, spd 4  | Ep3 start mantle: 
+The Binder's Mark            band 5 ilvl 16: atk 6, mag 6, spd 1  | Ep3 start charm: hero twinfold_charm (atk 4, mag 4, spd 1); mira owl_charm (mag 2)
+The Binder's Quill           band 0 ilvl 16: atk 8, mag 8, spr 6, spd 2  | Ep3 start charm: hero twinfold_charm (atk 4, mag 4, spd 1); mira owl_charm (mag 2)

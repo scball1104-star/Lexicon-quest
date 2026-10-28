@@ -632,7 +632,8 @@ export class BattleScene {
     for (const a of this.party()) if (!a.ko) { a.setPose('victory'); a.defending = false; }
     e.audio.stopMusic(0.2);
     this.fanfare = e.audio.jingle('victory_fanfare', { duckMusic: false });
-    if (this.fanfare && this.fanfare.then) this.fanfare.then(() => { if (this.phase === 'rewards' || this.phase === 'victory') e.audio.music('victory'); });
+    // the victory loop only while this battle is still on top (CRITIQUE_STACKS 2: a late `then` left it playing on the field)
+    if (this.fanfare && this.fanfare.then) this.fanfare.then(() => { if ((this.phase === 'rewards' || this.phase === 'victory') && !this.leaving && e.scene === this) e.audio.music('victory'); });
     this.finishOutcome();
     this.timer = this.fast ? 1 : this.scaled(VICTORY_WAIT);
     this.setHelp('{c:gold}Victory!{/c}');
