@@ -1,0 +1,49 @@
+name: NEXT gate
+
+# Runs the game's tests on every pull request into overhaul or main, and after every merge into overhaul,
+# so neither side has to trust the other's machine. AGENTS.md lists the same commands for local runs.
+on:
+  pull_request:
+    branches: [overhaul, main]
+  push:
+    branches: [overhaul]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: next-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: NEXT tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Browser and image tools for the walk tests
+        run: |
+          python -m pip install --quiet playwright pillow numpy
+          python -m playwright install --with-deps chromium
+      - name: Old game gate (repo root)
+        run: node qa/run-gate.cjs
+      - name: NEXT suites
+        run: node next/qa/run.mjs --jobs 2
+      - name: Battle and Deep Stacks balance
+        working-directory: next
+        run: |
+          node tools/sim/simulate.mjs --check
+          node tools/sim/simulate.mjs --cave --check
+      - name: Release check (sw.js current), shipping pull requests only
+        if: github.base_ref == 'main'
+        env:
+          LQ_RELEASE: '1'
+        run: node next/qa/run.mjs pwa
