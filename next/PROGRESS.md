@@ -439,3 +439,19 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   suno.com in Chrome's address bar (the blocked-download icon) unblocks the other nineteen.
 - The Stacks critic is still playing. Nothing is published.
 
+## 2026-10-28 (Wed) 1 PM: all twenty themes in, the sixty uniques, Fine Print built (not published)
+- Music: every one of this month's twenty Suno Pro themes is in the game now, your hand-saved takes included, each with
+  its loop measured. Nine themes still use the composed pieces until November's downloads: the High Moor, Wether's
+  Barrow, the orrery, Larchhill, the millrace, and the Reeve and Millstone boss themes, plus the victory and game-over
+  jingles that never had a file.
+- The Deep Stacks have their sixty uniques in three grades. The odds turn over with depth as you asked, the first blue
+  chest always comes by B9, and every unique out-scores a rolled item of its level. Forty-four of the names are
+  placeholders you can veto. Side effect to balance next: deaths are now under half the targets in the deep bands.
+- Fine Print is built: a row on the title once a save has finished Episode 2, your finished character carried in, foes
+  lifted to your level and then hardened, better drops, legendaries that can finally roll, tier stock in the shops. It
+  lives in its own lazy pack so the first download did not move. Three of its calls are yours: gold x1.5 on the tier,
+  shop prices at 1.25 times, and the six new legendary names (Codicil, Marginalia, Errata, Countersign, Strikethrough,
+  Witness Seal).
+- The Stacks critic's fix pass is running now. After it: the switch goes on, the full publish check on a quiet machine,
+  and your yes. Nothing is published.
+
