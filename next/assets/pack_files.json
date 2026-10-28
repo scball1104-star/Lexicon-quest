@@ -52,6 +52,12 @@
   "src/data/x2/index.js"
  ],
  "cave": [
+  "assets/backdrops/cave_battle_cellars.json",
+  "assets/backdrops/cave_battle_cellars.png",
+  "assets/backdrops/cave_battle_ember.json",
+  "assets/backdrops/cave_battle_ember.png",
+  "assets/backdrops/cave_battle_forge.json",
+  "assets/backdrops/cave_battle_forge.png",
   "assets/cave_manifest.json",
   "assets/sprites/cave_bosses_battle.json",
   "assets/sprites/cave_bosses_battle.png",
@@ -75,5 +81,13 @@
   "src/data/cave/story.js",
   "src/data/cave/text.js",
   "src/data/cave/world.js"
+ ],
+ "tier": [
+  "assets/tier_manifest.json",
+  "src/data/tier/index.js",
+  "src/data/tier/legendaries.js",
+  "src/data/tier/text.js",
+  "src/data/tier/tier.js",
+  "src/data/tier/title.js"
  ]
 }

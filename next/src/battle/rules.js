@@ -264,6 +264,7 @@ export function createBattle(cfg = {}) {
     if (spec && spec.hp > 0) hp *= spec.hp;                                 // and its `hp` (H1: the yard slime, a Lv 1 hero alone)
     if (extra.hpScale) hp *= extra.hpScale;
     if (extra.hp) hp = extra.hp;
+    if (globalThis.LQ_TIER) ({ hp, atk, mag, def, spd, exp, gold } = LQ_TIER.foe(d, { hp, atk, mag, def, spd, exp, gold }, storyFlags, state, extra));   // Fine Print (data/tier)
     hp = Math.round(hp);
     return {
       uid: `e${n}`, side: 'enemy', id, name, elite, level: d.level, boss: !!d.boss,

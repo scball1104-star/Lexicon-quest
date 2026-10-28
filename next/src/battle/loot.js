@@ -211,6 +211,7 @@ export function itemValue(item) {
  * Returns { items: [instances], consumables: [{ item, qty }] }.
  */
 export function rollBattleDrops(rng, killed, opts = {}) {
+  const tier = globalThis.LQ_TIER && LQ_TIER.drops(rng, killed, opts); if (tier) return tier;   // Fine Print (data/tier)
   const items = [];
   const consumables = {};
   const addC = (id, qty = 1) => { consumables[id] = (consumables[id] || 0) + qty; };

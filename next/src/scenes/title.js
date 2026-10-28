@@ -72,6 +72,7 @@ export class TitleScene {
     this.win = { x: Math.round(192 - w / 2), y: bottom - h, w, h };
     this.guard = null;
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
+    if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print (data/tier)
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);

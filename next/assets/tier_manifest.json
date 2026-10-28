@@ -1,0 +1,7 @@
+{
+  "$comment": "The Fine Print (tier) pack has no art or data files of its own; this empty manifest keeps the pack shape (docs/PWA_PACKS.md). Paths are relative to next/.",
+  "images": {},
+  "atlases": {},
+  "json": {},
+  "fonts": {}
+}

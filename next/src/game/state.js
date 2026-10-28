@@ -204,6 +204,7 @@ export function removeGear(g, uid) {
 export function partyMembers(g) { return g.party; }
 export function member(g, id) { return g.party.find((m) => m.id === id) || g.reserve.find((m) => m.id === id) || null; }
 export function addMember(g, id, opts = {}) {
+  const r = (g.reserve || []).findIndex((m) => m.id === id); if (r >= 0) g.party.push(...g.reserve.splice(r, 1));   // Fine Print: reserve joins
   if (member(g, id)) return member(g, id);
   if (!PARTY_IDS.includes(id)) throw new Error('unknown member ' + id);
   const lead = g.party[0];

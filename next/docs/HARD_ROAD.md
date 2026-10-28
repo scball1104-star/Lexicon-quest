@@ -77,3 +77,31 @@ words: Second Edition, The Unabridged, Red Ink, Fine Print, The Second Toll, The
 say "Hard Road" in one place (`text.js` TIER).
 
 **Name, Scott 2026-10-27, verbatim:** "For the name question: I think I like Fine Print" The tier is **Fine Print**.
+
+## Built (H7-hard-road, 2026-10-28)
+
+Fine Print is built as `tier_1`, unpublished. The player-facing rules and the contract for agents: `docs/TIER.md`.
+Evidence: **Fact** read or run on 10/28 (the command is named).
+
+- **The row.** "Fine Print" under Continue once a record holds `ep2_complete`; it asks which finished record to carry, shows
+  the terms and the save slot (Back is the default), and Begin opens the cold open with the hero alone (Fact:
+  `python qa/tier/title_shots.py`, desktop and phone PNGs in `qa/out/tier`).
+- **The carry**, as Scott answered: levels, EXP, mastery, gear, the bag, gold, the bestiary and the vows kept; story flags,
+  key items, chests and counters start over; Mira and Bram wait in `reserve` and join at their own scenes (Fact:
+  `qa/tier/carry.test.mjs`). The Ledger of Names counts this lap's names (it reads flags): a gap, named in TIER.md.
+- **The five levers** carry this page's numbers unchanged: HP x1.6, ATK and MAG x1.35, SPD +1, EXP x1.5, drop item level +6
+  capped at 16, normal 50/35/15, elites rare 60 / legendary 5, bosses rare 85 / legendary 15, tier 4 to 6 bases in
+  Willowmere and the Hollow (at 1.25x list). Battle gold rises x1.5 with the EXP. The twelve placed legendaries roll, and six
+  new ones exist only on the tier (Codicil, Marginalia, Errata, Countersign, Strikethrough, Witness Seal; names open to veto).
+- **One addition the proof needed: the lift.** Fact (`tools/sim`, before the lift): the carried Lv 13 party fights Episode 1
+  in 1.4 to 3.9 rounds at x1.6 alone, the Archivore in 6.9. This page assumed a party of the foe's own level. So each foe is
+  first raised toward the party that meets it on the tier (its HP to five levels under, its hit and tempo at that level), then
+  the x1.6 / x1.35 / +1 apply; 27 encounters carry a small `terms` correction. Details: TIER.md "Why the lift".
+- **Proof.** `node tools/sim/simulate.mjs --tier 1 --check`: all targets met (ordinary fights 3.3 to 4.3 rounds by zone, the
+  Echo Warden 6.4 to 6.7, the Archivore 10.7 with ignoring its telegraphs costing 24 points, the King 10.5 to 11.3; the economy
+  and first-fight checks green). `--check` without `--tier` is unchanged. The bot: `python qa/autoplay.py --tier 1` clears Episode 1 from a carried
+  Lv 13 record on desktop and phone (33 and 35 battles, 0 game overs, 0 console errors, about 26 game minutes; Lv 13 to 16;
+  the Archivore at Lv 15 in 16 and 12 rounds; a Codicil dropped on the phone run). The base bot on 10/27: 33 battles, 5.4
+  rounds a fight; the tier bot: 5.5.
+- **Cost.** The shell grows by 349 bytes gzipped (five guarded lines and the precached switch); everything else is the `tier`
+  pack, outside the first download.

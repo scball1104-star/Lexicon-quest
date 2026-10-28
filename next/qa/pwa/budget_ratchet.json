@@ -26,7 +26,8 @@
   "packCapsMB": {
     "x1": 1.0,
     "x2": 0.8,
-    "cave": 0.8
+    "cave": 0.8,
+    "tier": 0.3
   },
   "tapPromptHistory": {
     "after-XP-packs": 2.32,
