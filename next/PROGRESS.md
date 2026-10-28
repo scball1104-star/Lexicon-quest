@@ -473,3 +473,11 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   the work on overhaul. Shipping (the push that players see) still waits for your word, or Stephen's.
 - Your open calls, none of them blocking: Fine Print's gold x1.5 and shop 1.25x, the six legendary names, the forty-four
   placeholder unique names, and the plaque's "n of 61" wording.
+
+## 2026-10-28 (Wed) 4:00 PM: shipped
+- On your word at 3:58 PM, overhaul went to main as a plain fast-forward (live main d77f904). Players now have the
+  responsibility arc, the Deep Stacks under the library once Episode 1 is done, Fine Print after the credits, painted
+  battle stages everywhere, and this month's twenty Suno Pro themes.
+- Checked live right after: the page loads to the title on desktop and phone sizes with no console errors, the Deep
+  Stacks pack downloads from the network, and the service worker takes over on the second load. One thing I could not
+  check from here is an offline reload. The ship is noted on the Ship log issue.
