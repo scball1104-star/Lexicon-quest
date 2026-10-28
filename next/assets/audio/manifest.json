@@ -9,17 +9,17 @@
    "loopEnd": 168.75,
    "fallback": null,
    "measuredLufs": -15.42,
-   "duration": 168.76,
-   "loopNote": "whole track, trailing silence/fade skipped"
+   "duration": 168.76
   },
   "willowmere": {
-   "src": "../assets/audio/town.mp3",
-   "volume": 1.25,
-   "loopStart": 0.0,
-   "loopEnd": 131.75,
+   "src": "assets/audio/music/willowmere.mp3",
+   "volume": 1.065,
+   "loopStart": 0.0627,
+   "loopEnd": 118.25,
    "fallback": null,
-   "measuredLufs": -18.15,
-   "duration": 132.094
+   "measuredLufs": -16.55,
+   "duration": 118.68,
+   "loopNote": "whole track, trailing silence/fade skipped"
   },
   "valley": {
    "src": "../assets/audio/region-1.mp3",
@@ -42,13 +42,14 @@
    "duration": 93.493
   },
   "battle": {
-   "src": "../assets/audio/battle.mp3",
-   "volume": 1.093,
+   "src": "assets/audio/music/battle.mp3",
+   "volume": 1.003,
    "loopStart": 0.0,
-   "loopEnd": 170.75,
+   "loopEnd": 61.25,
    "fallback": null,
-   "measuredLufs": -16.77,
-   "duration": 173.654
+   "measuredLufs": -16.03,
+   "duration": 61.44,
+   "loopNote": "whole track, trailing silence/fade skipped"
   },
   "boss_archivore": {
    "src": "../assets/audio/boss.mp3",

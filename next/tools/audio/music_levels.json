@@ -240,21 +240,48 @@
   "lufs": -15.42,
   "duration": 168.76,
   "sampleRate": 44100,
-  "contentEnd": 168.5,
+  "loopKind": "sidecar"
+ },
+ "assets/audio/music/willowmere.mp3": {
+  "lufs": -16.55,
+  "duration": 118.68,
+  "sampleRate": 44100,
+  "contentEnd": 118.0,
   "candidate": {
-   "loopStart": 122.1175,
-   "loopEnd": 162.261,
-   "score": 0.473,
-   "xcorr": 0.248,
-   "spliceFluxPct": 66.8,
+   "loopStart": 20.9523,
+   "loopEnd": 104.0254,
+   "score": 0.426,
+   "xcorr": 0.068,
+   "spliceFluxPct": 92.2,
    "bestAnywhere": {
-    "score": 0.712,
-    "a": 86.66,
-    "b": 135.7
+    "score": 0.609,
+    "a": 39.47,
+    "b": 89.35
+   }
+  },
+  "loopStart": 0.0627,
+  "loopEnd": 118.25,
+  "loopKind": "trimmed"
+ },
+ "assets/audio/music/battle.mp3": {
+  "lufs": -16.03,
+  "duration": 61.44,
+  "sampleRate": 44100,
+  "contentEnd": 61.0,
+  "candidate": {
+   "loopStart": 4.8628,
+   "loopEnd": 45.6969,
+   "score": 0.354,
+   "xcorr": 0.224,
+   "spliceFluxPct": 95.6,
+   "bestAnywhere": {
+    "score": 0.354,
+    "a": 4.83,
+    "b": 45.7
    }
   },
   "loopStart": 0.0,
-  "loopEnd": 168.75,
+  "loopEnd": 61.25,
   "loopKind": "trimmed"
  }
 }
