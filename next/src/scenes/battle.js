@@ -413,8 +413,9 @@ export class BattleScene {
           const run = this.menu.fleeTap(audio);
           if (run) { this.menu.close(); this.performParty(run); return; }
         }
+        // close first: Defend/Swap/Flee return with the menu open, and an open menu stalls runOps
         const action = this.menu.update(input, audio);
-        if (action) this.performParty(action);
+        if (action) { this.menu.close(); this.performParty(action); }
         return;
       }
     }
