@@ -129,28 +129,88 @@
   "loopKind": "sidecar"
  },
  "assets/audio/music/hollow.mp3": {
-  "lufs": -16.44,
-  "duration": 68.731,
+  "lufs": -15.47,
+  "duration": 157.12,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 156.5,
+  "candidate": {
+   "loopStart": 80.8542,
+   "loopEnd": 137.1835,
+   "score": 0.416,
+   "xcorr": 0.319,
+   "spliceFluxPct": 91.8,
+   "bestAnywhere": {
+    "score": 0.416,
+    "a": 80.81,
+    "b": 137.18
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 156.75,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/hollowmere.mp3": {
-  "lufs": -16.44,
-  "duration": 68.731,
+  "lufs": -15.96,
+  "duration": 149.6,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 149.0,
+  "candidate": {
+   "loopStart": 110.9132,
+   "loopEnd": 147.3074,
+   "score": 0.363,
+   "xcorr": 0.296,
+   "spliceFluxPct": 91.4,
+   "bestAnywhere": {
+    "score": 0.546,
+    "a": 6.5,
+    "b": 75.6
+   }
+  },
+  "loopStart": 0.114,
+  "loopEnd": 149.25,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/fading_road.mp3": {
-  "lufs": -16.46,
-  "duration": 90.16,
+  "lufs": -16.16,
+  "duration": 105.56,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 105.5,
+  "candidate": {
+   "loopStart": 4.4569,
+   "loopEnd": 101.7963,
+   "score": 0.398,
+   "xcorr": 0.543,
+   "spliceFluxPct": 74.6,
+   "bestAnywhere": {
+    "score": 0.448,
+    "a": 11.7,
+    "b": 49.04
+   }
+  },
+  "loopStart": 0.1674,
+  "loopEnd": 105.56,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/court.mp3": {
-  "lufs": -16.44,
-  "duration": 88.581,
+  "lufs": -14.32,
+  "duration": 193.16,
   "sampleRate": 44100,
-  "loopKind": "sidecar"
+  "contentEnd": 192.5,
+  "candidate": {
+   "loopStart": 116.616,
+   "loopEnd": 167.741,
+   "score": 0.747,
+   "xcorr": 0.48,
+   "spliceFluxPct": 95.1,
+   "bestAnywhere": {
+    "score": 0.776,
+    "a": 82.85,
+    "b": 159.2
+   }
+  },
+  "loopStart": 0.0,
+  "loopEnd": 192.75,
+  "loopKind": "trimmed"
  },
  "assets/audio/music/boss_king.mp3": {
   "lufs": -16.5,
@@ -246,42 +306,12 @@
   "lufs": -16.55,
   "duration": 118.68,
   "sampleRate": 44100,
-  "contentEnd": 118.0,
-  "candidate": {
-   "loopStart": 20.9523,
-   "loopEnd": 104.0254,
-   "score": 0.426,
-   "xcorr": 0.068,
-   "spliceFluxPct": 92.2,
-   "bestAnywhere": {
-    "score": 0.609,
-    "a": 39.47,
-    "b": 89.35
-   }
-  },
-  "loopStart": 0.0627,
-  "loopEnd": 118.25,
-  "loopKind": "trimmed"
+  "loopKind": "sidecar"
  },
  "assets/audio/music/battle.mp3": {
   "lufs": -16.03,
   "duration": 61.44,
   "sampleRate": 44100,
-  "contentEnd": 61.0,
-  "candidate": {
-   "loopStart": 4.8628,
-   "loopEnd": 45.6969,
-   "score": 0.354,
-   "xcorr": 0.224,
-   "spliceFluxPct": 95.6,
-   "bestAnywhere": {
-    "score": 0.354,
-    "a": 4.83,
-    "b": 45.7
-   }
-  },
-  "loopStart": 0.0,
-  "loopEnd": 61.25,
-  "loopKind": "trimmed"
+  "loopKind": "sidecar"
  }
 }

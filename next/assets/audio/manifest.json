@@ -18,8 +18,7 @@
    "loopEnd": 118.25,
    "fallback": null,
    "measuredLufs": -16.55,
-   "duration": 118.68,
-   "loopNote": "whole track, trailing silence/fade skipped"
+   "duration": 118.68
   },
   "valley": {
    "src": "../assets/audio/region-1.mp3",
@@ -48,8 +47,7 @@
    "loopEnd": 61.25,
    "fallback": null,
    "measuredLufs": -16.03,
-   "duration": 61.44,
-   "loopNote": "whole track, trailing silence/fade skipped"
+   "duration": 61.44
   },
   "boss_archivore": {
    "src": "../assets/audio/boss.mp3",
@@ -109,47 +107,39 @@
   },
   "hollow": {
    "src": "assets/audio/music/hollow.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 68.631429,
+   "volume": 0.941,
+   "loopStart": 0.0,
+   "loopEnd": 156.75,
    "fallback": "willowmere",
-   "bpm": 84.0,
-   "key": "A dorian",
-   "measuredLufs": -16.44,
-   "duration": 68.731
+   "measuredLufs": -15.47,
+   "duration": 157.12
   },
   "hollowmere": {
    "src": "assets/audio/music/hollowmere.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 68.631429,
+   "volume": 0.995,
+   "loopStart": 0.114,
+   "loopEnd": 149.25,
    "fallback": "hollow",
-   "bpm": 84.0,
-   "key": "D major",
-   "measuredLufs": -16.44,
-   "duration": 68.731
+   "measuredLufs": -15.96,
+   "duration": 149.6
   },
   "fading_road": {
    "src": "assets/audio/music/fading_road.mp3",
-   "volume": 1.054,
-   "loopStart": 0.06,
-   "loopEnd": 90.06,
+   "volume": 1.019,
+   "loopStart": 0.1674,
+   "loopEnd": 105.56,
    "fallback": "valley",
-   "bpm": 96.0,
-   "key": "E minor",
-   "measuredLufs": -16.46,
-   "duration": 90.16
+   "measuredLufs": -16.16,
+   "duration": 105.56
   },
   "court": {
    "src": "assets/audio/music/court.mp3",
-   "volume": 1.052,
-   "loopStart": 0.06,
-   "loopEnd": 88.481066,
+   "volume": 0.824,
+   "loopStart": 0.0,
+   "loopEnd": 192.75,
    "fallback": "archive",
-   "bpm": 76.0,
-   "key": "D phrygian",
-   "measuredLufs": -16.44,
-   "duration": 88.581
+   "measuredLufs": -14.32,
+   "duration": 193.16
   },
   "boss_king": {
    "src": "assets/audio/music/boss_king.mp3",
