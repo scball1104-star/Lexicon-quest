@@ -13,11 +13,16 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 3. `next/docs/EPISODE2_PLAN.md` section 10 (the Episode 2 build waves) and `next/docs/story/EPISODE2.md`.
 
 ## Working rules
-- Branch `overhaul`. The orchestrator commits; agents never run git and stay in their brief's owned paths.
-- Publish = `git push origin overhaul:main`, ONLY after all of: `python next/tools/pwa/build_pwa.py` (commit sw.js and
+- **Shared with Stephen Ball since 2026-10-28.** Read the root `AGENTS.md` first: it is the rulebook both Claudes
+  follow. `overhaul` is on GitHub and protected (pull requests only, no force pushes). The orchestrator commits agent
+  work on a `scott/<wave>` branch from the latest `origin/overhaul`, opens a pull request, and merges it when the
+  NEXT gate check is green. Pull `overhaul` before every session; Stephen's merges land there too.
+- Agents never run git and stay in their brief's owned paths.
+- Publish ("ship"; Scott or Stephen may call it) = `git push origin overhaul:main` from an up-to-date overhaul, ONLY
+  after all of: `python next/tools/pwa/build_pwa.py` (commit sw.js and
   index.html if changed), `LQ_RELEASE=1 node next/qa/run.mjs pwa`, root `node qa/run-gate.cjs`, `node next/qa/run.mjs`,
   `python next/qa/shots.py` (125 shots, zero errors). Then verify live: wait ~2 min and load the page headless
-  (desktop + phone profiles, no console errors).
+  (desktop + phone profiles, no console errors). Then comment on the pinned Ship log issue.
 - View agents' preview images before committing their work. No em dashes anywhere. Commit trailer:
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` (or the current model).
 - Usage guard (Scott): check `mcp__ccd_session_mgmt__get_usage`. Weekly (all models) under 75% = up to 3 agents at
@@ -54,8 +59,8 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 `overhaul` carries unpublished Episode 2, so `push overhaul:main` would publish it. For a bug Scott reports on the
 live build: commit the fix on overhaul, `git worktree add -b hotfix/<name> ../LexiconQuest-hotfix origin/main`,
 cherry-pick, run the full gate list there (build_pwa first, commit sw.js), `git push origin hotfix/<name>:main`,
-verify live, then `git merge origin/main` into overhaul; sw.js conflicts every time, so take ours and rerun
-build_pwa.py. Done this way 2026-10-21 for the Load page finger (8a1084a).
+verify live, then bring main back into overhaul by pull request (branch `scott/sync-main` from origin/overhaul,
+`git merge origin/main`); sw.js conflicts every time, so take ours and rerun build_pwa.py. Done this way 2026-10-21 for the Load page finger (8a1084a).
 
 ## Heartbeat
 The 3-hourly heartbeat cron was STOPPED 2026-10-23 when the queue emptied. If Scott restarts work, recreate it (CronCreate) with a
