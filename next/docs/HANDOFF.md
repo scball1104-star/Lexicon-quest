@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-23, 18:30 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-10-28, 16:15 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -21,7 +21,7 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - Publish ("ship"; Scott or Stephen may call it) = `git push origin overhaul:main` from an up-to-date overhaul, ONLY
   after all of: `python next/tools/pwa/build_pwa.py` (commit sw.js and
   index.html if changed), `LQ_RELEASE=1 node next/qa/run.mjs pwa`, root `node qa/run-gate.cjs`, `node next/qa/run.mjs`,
-  `python next/qa/shots.py` (125 shots, zero errors). Then verify live: wait ~2 min and load the page headless
+  `python next/qa/shots.py` (212 shots, zero errors). Then verify live: wait ~2 min and load the page headless
   (desktop + phone profiles, no console errors). Then comment on the pinned Ship log issue.
 - View agents' preview images before committing their work. No em dashes anywhere. Commit trailer:
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` (or the current model).
@@ -32,6 +32,14 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   it alone before treating it as real.
 
 ## Status at handoff
+- **Shipped 2026-10-28 15:58 ET on Scott's word: live main = d77f904 (sw ebb3d0b4b07b).** What went out, all of it through pull
+  request #11 (merged into overhaul, then `push overhaul:main`): the responsibility arc (cold open "The Thirteenth Toll", vows,
+  the Ledger), the Deep Stacks with `CAVE_LIVE` on (100 floors, sixty uniques in three grades, the critic's fix pass), Fine Print
+  (the post-credits tier, `tier_1`), all twelve battle stages as paintings, twenty Suno Pro themes. Verified live on desktop and
+  phone sizes with no console errors, the cave pack loading from the network; the note is on Ship log issue #4. Open: Scott's calls
+  (Fine Print gold x1.5 and shop 1.25x, six legendary names, 44 placeholder unique names, the plaque's "n of 61" wording), two
+  art gaps (the Binder's page-burst fx and sound, Hollis's 48 px head), the media leftovers under issue #9 (story cards, SFX,
+  the video test, the trailer, nine themes in November), Episode 3 (waits for Scott).
 - **Episode 1: complete and live** (last publish 2026-10-20 11:33, sw version d45f8019607a). Includes the optional
   Whisperwood Hollow, battle animation, distinct Archive floors, field abilities (Dash Strike, Appraise, Shove),
   PWA install, phone UX, two playtest-review fix passes. Autoplay bot (`next/qa/autoplay.py`) clears it with 0 game
@@ -55,8 +63,8 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - Small backlog: Episode 2 reflection timeline heads read as blobs; drawn Episode 2 portraits are simpler than the
   painted Episode 1 ones; a 2x Briar Alpha avatar; autoplay does not visit the Hollow.
 
-## Hotfixing the live /next while Episode 2 is unpublished
-`overhaul` carries unpublished Episode 2, so `push overhaul:main` would publish it. For a bug Scott reports on the
+## Hotfixing the live /next while overhaul carries unpublished work
+Whenever `overhaul` is ahead of `main` with unfinished work, `push overhaul:main` would publish it. For a bug Scott reports on the
 live build: commit the fix on overhaul, `git worktree add -b hotfix/<name> ../LexiconQuest-hotfix origin/main`,
 cherry-pick, run the full gate list there (build_pwa first, commit sw.js), `git push origin hotfix/<name>:main`,
 verify live, then bring main back into overhaul by pull request (branch `scott/sync-main` from origin/overhaul,
