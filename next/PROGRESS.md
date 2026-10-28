@@ -455,3 +455,21 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - The Stacks critic's fix pass is running now. After it: the switch goes on, the full publish check on a quiet machine,
   and your yes. Nothing is published.
 
+## 2026-10-28 (Wed) 2:15 PM: the Deep Stacks switch is on, the whole queue is one pull request (not published)
+- The Stacks critic's fix pass landed: 23 of its 25 findings are fixed. The stair now builds the next floor before it
+  moves you, so a floor the generator cannot build keeps you where you are with one line instead of a red panel. Closing
+  the app mid-fight and coming back restarts that fight. Hollis says up front that a fall takes back the reading's gifts,
+  and asks before a new reading writes over one you left open. Deep floors have at most six fights, the deep bands mix
+  every earlier foe at its own strength, foes drop no cures down there, red chests hold no gold, and the Binder is decided
+  by whether you heed its warnings (careful play wins 98 percent, ignoring them 77). Two things need new art, not code:
+  a page-burst effect and sound for the Binder, and a proper head for Hollis.
+- The switch is on: every save that has finished Episode 1 will find the trapdoor under the library once this ships.
+- The publish checks all ran on this PC with nothing else open: the old game's gate, the full NEXT suite (1216 tests, none
+  failing), the screenshot sweep (212 of 212, after one stale shot was repointed at the new sixty-one-row plaque), and all
+  three balance simulators, and the bot runs: the Deep Stacks on three seeds to B30 (no wipes, no errors, no softlocks),
+  the Resume case, Fine Print, Episode 1, Episode 2, and the complete Wider Valley route, all clean.
+- All of today's work (the painted stages, the Suno Pro themes, the sixty uniques, Fine Print, the fix pass, the switch) is
+  pull request #11 into overhaul under Stephen's shared-repo rules; GitHub's own gate passed on it. Merging it only lands
+  the work on overhaul. Shipping (the push that players see) still waits for your word, or Stephen's.
+- Your open calls, none of them blocking: Fine Print's gold x1.5 and shop 1.25x, the six legendary names, the forty-four
+  placeholder unique names, and the plaque's "n of 61" wording.
