@@ -1,0 +1,700 @@
+{
+ "image": "props.png",
+ "tile": 16,
+ "notes": "anchor = bottom-centre of the footprint in frame px. To place an object whose footprint bottom-centre sits at tile (tx,ty): draw frame at x = tx*16 + footprint[0]*8 - anchor[0] (tx = left footprint tile), y = ty*16 + 15 - anchor[1] (ty = bottom footprint row). overheadY: frame rows [0, overheadY) draw in the overhead layer above actors (0 = none). frames/frameNames: state alternates (closed/open, unlit/lit, glint).",
+ "objects": {
+  "tree_willow": {
+   "frame": [
+    0,
+    0,
+    78,
+    82
+   ],
+   "anchor": [
+    37,
+    81
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 49
+  },
+  "tree_pine": {
+   "frame": [
+    156,
+    0,
+    50,
+    66
+   ],
+   "anchor": [
+    26,
+    64
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 32
+  },
+  "tree_pine_snow": {
+   "frame": [
+    208,
+    0,
+    52,
+    66
+   ],
+   "anchor": [
+    28,
+    64
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 32
+  },
+  "tree_violet": {
+   "frame": [
+    80,
+    0,
+    74,
+    74
+   ],
+   "anchor": [
+    34,
+    72
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 40
+  },
+  "fountain": {
+   "frame": [
+    322,
+    0,
+    66,
+    53
+   ],
+   "anchor": [
+    34,
+    51
+   ],
+   "footprint": [
+    4,
+    2
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "arch_ruin": {
+   "frame": [
+    262,
+    0,
+    58,
+    53
+   ],
+   "anchor": [
+    30,
+    51
+   ],
+   "footprint": [
+    3,
+    1
+   ],
+   "solid": true,
+   "overheadY": 19,
+   "passable": [
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "rune_shrine": {
+   "frame": [
+    390,
+    0,
+    58,
+    53
+   ],
+   "anchor": [
+    29,
+    52
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "lamp_post": {
+   "frame": [
+    52,
+    84,
+    26,
+    46
+   ],
+   "anchor": [
+    8,
+    45
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 13,
+   "frames": [
+    [
+     52,
+     84,
+     26,
+     46
+    ],
+    [
+     80,
+     84,
+     26,
+     46
+    ]
+   ],
+   "frameNames": [
+    "lamp_post",
+    "lamp_post_lit"
+   ]
+  },
+  "bench": {
+   "frame": [
+    0,
+    133,
+    42,
+    30
+   ],
+   "anchor": [
+    20,
+    29
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "anvil": {
+   "frame": [
+    74,
+    133,
+    38,
+    27
+   ],
+   "anchor": [
+    18,
+    26
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "hedge_flowers": {
+   "frame": [
+    152,
+    84,
+    50,
+    41
+   ],
+   "anchor": [
+    24,
+    40
+   ],
+   "footprint": [
+    3,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "bush": {
+   "frame": [
+    132,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    13
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "bookshelf": {
+   "frame": [
+    204,
+    84,
+    42,
+    39
+   ],
+   "anchor": [
+    21,
+    38
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "desk": {
+   "frame": [
+    436,
+    84,
+    42,
+    36
+   ],
+   "anchor": [
+    19,
+    35
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "bed": {
+   "frame": [
+    108,
+    84,
+    42,
+    41
+   ],
+   "anchor": [
+    29,
+    40
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "fireplace": {
+   "frame": [
+    0,
+    84,
+    50,
+    47
+   ],
+   "anchor": [
+    25,
+    46
+   ],
+   "footprint": [
+    3,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "printing_press": {
+   "frame": [
+    340,
+    84,
+    42,
+    38
+   ],
+   "anchor": [
+    16,
+    37
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "lectern": {
+   "frame": [
+    300,
+    84,
+    38,
+    38
+   ],
+   "anchor": [
+    28,
+    37
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "crates_barrels": {
+   "frame": [
+    384,
+    84,
+    50,
+    37
+   ],
+   "anchor": [
+    25,
+    35
+   ],
+   "footprint": [
+    3,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "rug": {
+   "frame": [
+    248,
+    84,
+    50,
+    39
+   ],
+   "anchor": [
+    25,
+    37
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "solid": false,
+   "overheadY": 0
+  },
+  "barrel": {
+   "frame": [
+    114,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "crate": {
+   "frame": [
+    258,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "pot": {
+   "frame": [
+    276,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "breaksTo": "pot_broken"
+  },
+  "pot_broken": {
+   "frame": [
+    294,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": false,
+   "overheadY": 0
+  },
+  "signboard": {
+   "frame": [
+    366,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    15
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "prop_milestone": {
+   "frame": [
+    480,
+    84,
+    16,
+    32
+   ],
+   "anchor": [
+    8,
+    28
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "prop_thirteenth_bell": {
+   "frame": [
+    450,
+    0,
+    48,
+    48
+   ],
+   "anchor": [
+    24,
+    47
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "solid": true,
+   "overheadY": 0
+  },
+  "prop_letter": {
+   "frame": [
+    330,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    13
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": false,
+   "overheadY": 0,
+   "frames": [
+    [
+     330,
+     133,
+     16,
+     16
+    ],
+    [
+     348,
+     133,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "prop_letter_0",
+    "prop_letter_1"
+   ]
+  },
+  "prop_ferry_bell": {
+   "frame": [
+    312,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": false,
+   "overheadY": 0
+  },
+  "chest_wood": {
+   "frame": [
+    222,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "frames": [
+    [
+     222,
+     133,
+     16,
+     16
+    ],
+    [
+     240,
+     133,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "chest_wood_closed",
+    "chest_wood_open"
+   ]
+  },
+  "chest_iron": {
+   "frame": [
+    186,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "frames": [
+    [
+     186,
+     133,
+     16,
+     16
+    ],
+    [
+     204,
+     133,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "chest_iron_closed",
+    "chest_iron_open"
+   ]
+  },
+  "chest_gold": {
+   "frame": [
+    150,
+    133,
+    16,
+    16
+   ],
+   "anchor": [
+    8,
+    14
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "solid": true,
+   "overheadY": 0,
+   "frames": [
+    [
+     150,
+     133,
+     16,
+     16
+    ],
+    [
+     168,
+     133,
+     16,
+     16
+    ]
+   ],
+   "frameNames": [
+    "chest_gold_closed",
+    "chest_gold_open"
+   ]
+  },
+  "lamp_glow": {
+   "frame": [
+    44,
+    133,
+    28,
+    28
+   ],
+   "anchor": [
+    14,
+    14
+   ],
+   "footprint": [
+    0,
+    0
+   ],
+   "solid": false,
+   "overheadY": 0,
+   "blend": "lighter",
+   "note": "additive glow; centre it on a lit lamp or candle"
+  }
+ }
+}

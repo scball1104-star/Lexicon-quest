@@ -1,0 +1,19 @@
+// Smooth, chunky UI icons (SVG data URLs) to match the blocky 3D look.
+const wrap = (body, vb = '0 0 64 64') => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${body}</svg>`);
+const HEART = 'M32 56 C14 42 4 32 4 20 C4 11 11 5 19 5 C25 5 29 8 32 13 C35 8 39 5 45 5 C53 5 60 11 60 20 C60 32 50 42 32 56 Z';
+const STAR = 'M32 4 L40 23 L60 24 L44 37 L50 58 L32 46 L14 58 L20 37 L4 24 L24 23 Z';
+
+export const SVG = {
+  heart: wrap(`<path d="${HEART}" fill="#ff3a4a" stroke="#1b1d20" stroke-width="5" stroke-linejoin="round"/><path d="M15 15 C18 11 23 11 25 14" stroke="#ffb3ba" stroke-width="5" fill="none" stroke-linecap="round"/>`),
+  heart_half: wrap(`<defs><clipPath id="h"><rect x="0" y="0" width="32" height="64"/></clipPath></defs><path d="${HEART}" fill="#3a3d42"/><path d="${HEART}" fill="#ff3a4a" clip-path="url(#h)"/><path d="${HEART}" fill="none" stroke="#1b1d20" stroke-width="5" stroke-linejoin="round"/>`),
+  heart_empty: wrap(`<path d="${HEART}" fill="#3a3d42" stroke="#1b1d20" stroke-width="5" stroke-linejoin="round"/>`),
+  coin: wrap(`<circle cx="32" cy="32" r="26" fill="#ffc83a" stroke="#7a4a10" stroke-width="5"/><circle cx="32" cy="32" r="16" fill="none" stroke="#f0a020" stroke-width="4"/><rect x="28" y="20" width="8" height="24" rx="3" fill="#fff3b0"/>`),
+  star: wrap(`<path d="${STAR}" fill="#ffc83a" stroke="#7a4a10" stroke-width="4" stroke-linejoin="round"/><path d="M22 26 L30 25" stroke="#fff3b0" stroke-width="4" stroke-linecap="round"/>`),
+  star_empty: wrap(`<path d="${STAR}" fill="#3a3d42" stroke="#1b1d20" stroke-width="4" stroke-linejoin="round"/>`),
+  scroll: wrap(`<rect x="14" y="10" width="36" height="44" rx="4" fill="#f4efe2" stroke="#1b1d20" stroke-width="4"/><rect x="8" y="6" width="48" height="10" rx="5" fill="#c48a3e" stroke="#1b1d20" stroke-width="4"/><rect x="8" y="48" width="48" height="10" rx="5" fill="#c48a3e" stroke="#1b1d20" stroke-width="4"/><path d="M22 26 H42 M22 34 H42 M22 42 H34" stroke="#8e8c9c" stroke-width="4" stroke-linecap="round"/>`),
+  sword: wrap(`<g transform="rotate(45 32 32)"><rect x="28" y="2" width="8" height="40" rx="2" fill="#e6eaf2" stroke="#1b1d20" stroke-width="3"/><rect x="18" y="40" width="28" height="7" rx="3" fill="#ffc83a" stroke="#1b1d20" stroke-width="3"/><rect x="28" y="46" width="8" height="14" rx="2" fill="#8a5a2b" stroke="#1b1d20" stroke-width="3"/></g>`),
+  staff: wrap(`<g transform="rotate(45 32 32)"><rect x="29" y="16" width="6" height="46" rx="3" fill="#a06a32" stroke="#1b1d20" stroke-width="3"/><circle cx="32" cy="12" r="10" fill="#7ad0ff" stroke="#1b1d20" stroke-width="3"/><circle cx="29" cy="9" r="3" fill="#fff"/></g>`),
+  hammer: wrap(`<g transform="rotate(45 32 32)"><rect x="29" y="18" width="6" height="44" rx="3" fill="#a06a32" stroke="#1b1d20" stroke-width="3"/><rect x="14" y="4" width="36" height="18" rx="4" fill="#b8bcc8" stroke="#1b1d20" stroke-width="3"/><rect x="18" y="7" width="20" height="4" rx="2" fill="#e6eaf2"/></g>`),
+  hook: wrap(`<g transform="rotate(30 32 32)"><rect x="29" y="22" width="6" height="40" rx="3" fill="#6e5e58" stroke="#1b1d20" stroke-width="3"/><path d="M32 24 L32 8 M32 8 L22 16 M32 8 L42 16" stroke="#1b1d20" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M32 24 L32 8 M32 8 L22 16 M32 8 L42 16" stroke="#d9dce6" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="32" cy="56" r="5" fill="#ff7a1a" stroke="#1b1d20" stroke-width="2.5"/></g>`),
+  boomerang: wrap(`<path d="M10 14 L30 10 L54 46 Q56 54 48 52 L26 22 L12 22 Q6 20 10 14 Z" fill="#e8a33a" stroke="#1b1d20" stroke-width="3" stroke-linejoin="round"/><path d="M44 46 L52 50" stroke="#ff6a3a" stroke-width="5" stroke-linecap="round"/><path d="M15 15 L28 13" stroke="#ffd27a" stroke-width="3" stroke-linecap="round"/>`),
+};
