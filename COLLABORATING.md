@@ -35,7 +35,7 @@ want, for example:
 ## Who is who on GitHub
 
 - Scott: `scball1104-star`
-- Stephen: (his Claude adds this line in its first pull request, as the test that everything works)
+- Stephen: `smball-afk`
 
 ## What never goes in the repo
 
