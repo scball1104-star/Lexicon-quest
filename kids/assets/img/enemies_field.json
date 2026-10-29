@@ -1,0 +1,1190 @@
+{
+ "image": "enemies_field.png",
+ "frames": {
+  "ink_slime_0": [
+   0,
+   0,
+   16,
+   16
+  ],
+  "ink_slime_1": [
+   17,
+   0,
+   16,
+   16
+  ],
+  "bookmite_0": [
+   34,
+   0,
+   16,
+   16
+  ],
+  "bookmite_1": [
+   51,
+   0,
+   16,
+   16
+  ],
+  "moss_scarab_0": [
+   68,
+   0,
+   16,
+   16
+  ],
+  "moss_scarab_1": [
+   85,
+   0,
+   16,
+   16
+  ],
+  "lost_page_0": [
+   102,
+   0,
+   16,
+   16
+  ],
+  "lost_page_1": [
+   119,
+   0,
+   16,
+   16
+  ],
+  "page_wraith_0": [
+   136,
+   0,
+   24,
+   24
+  ],
+  "page_wraith_1": [
+   161,
+   0,
+   24,
+   24
+  ],
+  "ink_wraith_0": [
+   186,
+   0,
+   24,
+   24
+  ],
+  "ink_wraith_1": [
+   211,
+   0,
+   24,
+   24
+  ],
+  "briar_wolf_0": [
+   0,
+   25,
+   24,
+   24
+  ],
+  "briar_wolf_1": [
+   25,
+   25,
+   24,
+   24
+  ],
+  "tome_golem_0": [
+   50,
+   25,
+   24,
+   24
+  ],
+  "tome_golem_1": [
+   75,
+   25,
+   24,
+   24
+  ],
+  "echo_warden_0": [
+   100,
+   25,
+   24,
+   32
+  ],
+  "echo_warden_1": [
+   125,
+   25,
+   24,
+   32
+  ],
+  "archivore_0": [
+   150,
+   25,
+   32,
+   32
+  ],
+  "archivore_1": [
+   183,
+   25,
+   32,
+   32
+  ],
+  "archivore_avatar_0": [
+   0,
+   58,
+   55,
+   52
+  ],
+  "archivore_avatar_1": [
+   56,
+   58,
+   55,
+   52
+  ],
+  "archivore_avatar_2": [
+   112,
+   58,
+   55,
+   52
+  ],
+  "thornback_wolf_0": [
+   168,
+   58,
+   24,
+   24
+  ],
+  "thornback_wolf_1": [
+   193,
+   58,
+   24,
+   24
+  ],
+  "ink_blot_0": [
+   218,
+   58,
+   16,
+   16
+  ],
+  "ink_blot_1": [
+   235,
+   58,
+   16,
+   16
+  ],
+  "briar_alpha_0": [
+   0,
+   111,
+   24,
+   24
+  ],
+  "briar_alpha_1": [
+   25,
+   111,
+   24,
+   24
+  ],
+  "mist_wolf_0": [
+   50,
+   111,
+   24,
+   24
+  ],
+  "mist_wolf_1": [
+   75,
+   111,
+   24,
+   24
+  ],
+  "glassback_0": [
+   100,
+   111,
+   16,
+   16
+  ],
+  "glassback_1": [
+   117,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_0": [
+   134,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_1": [
+   151,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_bead_0": [
+   168,
+   111,
+   16,
+   16
+  ],
+  "quicksilver_bead_1": [
+   185,
+   111,
+   16,
+   16
+  ],
+  "glint_wisp_0": [
+   202,
+   111,
+   24,
+   24
+  ],
+  "glint_wisp_1": [
+   227,
+   111,
+   24,
+   24
+  ],
+  "borrowed_shadow_0": [
+   0,
+   136,
+   24,
+   24
+  ],
+  "borrowed_shadow_1": [
+   25,
+   136,
+   24,
+   24
+  ],
+  "glass_sentinel_0": [
+   50,
+   136,
+   24,
+   24
+  ],
+  "glass_sentinel_1": [
+   75,
+   136,
+   24,
+   24
+  ],
+  "faceless_knight_0": [
+   100,
+   136,
+   24,
+   32
+  ],
+  "faceless_knight_1": [
+   125,
+   136,
+   24,
+   32
+  ],
+  "false_pride_0": [
+   150,
+   136,
+   24,
+   32
+  ],
+  "false_pride_1": [
+   175,
+   136,
+   24,
+   32
+  ],
+  "false_sorrow_0": [
+   200,
+   136,
+   24,
+   24
+  ],
+  "false_sorrow_1": [
+   225,
+   136,
+   24,
+   24
+  ],
+  "shard_swarm_0": [
+   0,
+   169,
+   16,
+   16
+  ],
+  "shard_swarm_1": [
+   17,
+   169,
+   16,
+   16
+  ],
+  "refl_hero_0": [
+   34,
+   169,
+   24,
+   32
+  ],
+  "refl_hero_1": [
+   59,
+   169,
+   24,
+   32
+  ],
+  "refl_mira_0": [
+   84,
+   169,
+   24,
+   32
+  ],
+  "refl_mira_1": [
+   109,
+   169,
+   24,
+   32
+  ],
+  "refl_bram_0": [
+   134,
+   169,
+   24,
+   32
+  ],
+  "refl_bram_1": [
+   159,
+   169,
+   24,
+   32
+  ],
+  "nameless_king_avatar_0": [
+   184,
+   169,
+   40,
+   50
+  ],
+  "nameless_king_avatar_1": [
+   0,
+   220,
+   40,
+   50
+  ],
+  "nameless_king_avatar_back_0": [
+   41,
+   220,
+   40,
+   50
+  ],
+  "nameless_king_avatar_back_1": [
+   82,
+   220,
+   40,
+   50
+  ],
+  "cinder_hound_0": [
+   123,
+   220,
+   24,
+   24
+  ],
+  "cinder_hound_1": [
+   148,
+   220,
+   24,
+   24
+  ],
+  "cinder_beetle_0": [
+   173,
+   220,
+   16,
+   16
+  ],
+  "cinder_beetle_1": [
+   190,
+   220,
+   16,
+   16
+  ],
+  "slag_slime_0": [
+   207,
+   220,
+   16,
+   16
+  ],
+  "slag_slime_1": [
+   224,
+   220,
+   16,
+   16
+  ],
+  "ashbound_miner_0": [
+   0,
+   271,
+   24,
+   24
+  ],
+  "ashbound_miner_1": [
+   25,
+   271,
+   24,
+   24
+  ],
+  "furnace_construct_0": [
+   50,
+   271,
+   24,
+   24
+  ],
+  "furnace_construct_1": [
+   75,
+   271,
+   24,
+   24
+  ],
+  "soot_phantom_0": [
+   100,
+   271,
+   24,
+   24
+  ],
+  "soot_phantom_1": [
+   125,
+   271,
+   24,
+   24
+  ],
+  "forge_defender_0": [
+   150,
+   271,
+   24,
+   32
+  ],
+  "forge_defender_1": [
+   175,
+   271,
+   24,
+   32
+  ],
+  "cinder_warden_avatar_0": [
+   200,
+   271,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_1": [
+   0,
+   326,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_back_0": [
+   45,
+   326,
+   44,
+   54
+  ],
+  "cinder_warden_avatar_back_1": [
+   90,
+   326,
+   44,
+   54
+  ]
+ },
+ "anims": {
+  "ink_slime_idle": {
+   "frames": [
+    "ink_slime_0",
+    "ink_slime_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "bookmite_idle": {
+   "frames": [
+    "bookmite_0",
+    "bookmite_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "moss_scarab_idle": {
+   "frames": [
+    "moss_scarab_0",
+    "moss_scarab_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "lost_page_idle": {
+   "frames": [
+    "lost_page_0",
+    "lost_page_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "page_wraith_idle": {
+   "frames": [
+    "page_wraith_0",
+    "page_wraith_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "ink_wraith_idle": {
+   "frames": [
+    "ink_wraith_0",
+    "ink_wraith_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "briar_wolf_idle": {
+   "frames": [
+    "briar_wolf_0",
+    "briar_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "tome_golem_idle": {
+   "frames": [
+    "tome_golem_0",
+    "tome_golem_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "echo_warden_idle": {
+   "frames": [
+    "echo_warden_0",
+    "echo_warden_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "archivore_idle": {
+   "frames": [
+    "archivore_0",
+    "archivore_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  "archivore_avatar_idle": {
+   "frames": [
+    "archivore_avatar_0",
+    "archivore_avatar_2",
+    "archivore_avatar_1",
+    "archivore_avatar_2"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  "thornback_wolf_idle": {
+   "frames": [
+    "thornback_wolf_0",
+    "thornback_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ink_blot_idle": {
+   "frames": [
+    "ink_blot_0",
+    "ink_blot_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "briar_alpha_idle": {
+   "frames": [
+    "briar_alpha_0",
+    "briar_alpha_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "mist_wolf_idle": {
+   "frames": [
+    "mist_wolf_0",
+    "mist_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glassback_idle": {
+   "frames": [
+    "glassback_0",
+    "glassback_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "quicksilver_idle": {
+   "frames": [
+    "quicksilver_0",
+    "quicksilver_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "quicksilver_bead_idle": {
+   "frames": [
+    "quicksilver_bead_0",
+    "quicksilver_bead_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glint_wisp_idle": {
+   "frames": [
+    "glint_wisp_0",
+    "glint_wisp_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "borrowed_shadow_idle": {
+   "frames": [
+    "borrowed_shadow_0",
+    "borrowed_shadow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "glass_sentinel_idle": {
+   "frames": [
+    "glass_sentinel_0",
+    "glass_sentinel_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "faceless_knight_idle": {
+   "frames": [
+    "faceless_knight_0",
+    "faceless_knight_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "false_pride_idle": {
+   "frames": [
+    "false_pride_0",
+    "false_pride_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "false_sorrow_idle": {
+   "frames": [
+    "false_sorrow_0",
+    "false_sorrow_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "shard_swarm_idle": {
+   "frames": [
+    "shard_swarm_0",
+    "shard_swarm_1"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  "refl_hero_idle": {
+   "frames": [
+    "refl_hero_0",
+    "refl_hero_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "refl_mira_idle": {
+   "frames": [
+    "refl_mira_0",
+    "refl_mira_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "refl_bram_idle": {
+   "frames": [
+    "refl_bram_0",
+    "refl_bram_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "nameless_king_avatar_idle": {
+   "frames": [
+    "nameless_king_avatar_0",
+    "nameless_king_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "nameless_king_avatar_back_idle": {
+   "frames": [
+    "nameless_king_avatar_back_0",
+    "nameless_king_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "cinder_hound_idle": {
+   "frames": [
+    "cinder_hound_0",
+    "cinder_hound_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "cinder_beetle_idle": {
+   "frames": [
+    "cinder_beetle_0",
+    "cinder_beetle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "slag_slime_idle": {
+   "frames": [
+    "slag_slime_0",
+    "slag_slime_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ashbound_miner_idle": {
+   "frames": [
+    "ashbound_miner_0",
+    "ashbound_miner_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "furnace_construct_idle": {
+   "frames": [
+    "furnace_construct_0",
+    "furnace_construct_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "soot_phantom_idle": {
+   "frames": [
+    "soot_phantom_0",
+    "soot_phantom_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "forge_defender_idle": {
+   "frames": [
+    "forge_defender_0",
+    "forge_defender_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "cinder_warden_avatar_idle": {
+   "frames": [
+    "cinder_warden_avatar_0",
+    "cinder_warden_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "cinder_warden_avatar_back_idle": {
+   "frames": [
+    "cinder_warden_avatar_back_0",
+    "cinder_warden_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "ink_slime": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "bookmite": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "moss_scarab": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "lost_page": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "page_wraith": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "ink_wraith": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "briar_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "tome_golem": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "echo_warden": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "archivore": {
+   "size": [
+    32,
+    32
+   ],
+   "origin": [
+    16,
+    31
+   ]
+  },
+  "archivore_avatar": {
+   "size": [
+    55,
+    52
+   ],
+   "origin": [
+    27,
+    51
+   ],
+   "hover": 5
+  },
+  "thornback_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "ink_blot": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "briar_alpha": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "mist_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "glassback": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "quicksilver": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "quicksilver_bead": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "glint_wisp": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "borrowed_shadow": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "glass_sentinel": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "faceless_knight": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "false_pride": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "false_sorrow": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "shard_swarm": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "refl_hero": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "refl_mira": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "refl_bram": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "nameless_king_avatar": {
+   "size": [
+    40,
+    50
+   ],
+   "origin": [
+    20,
+    49
+   ]
+  },
+  "nameless_king_avatar_back": {
+   "size": [
+    40,
+    50
+   ],
+   "origin": [
+    20,
+    49
+   ]
+  },
+  "cinder_hound": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "cinder_beetle": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "slag_slime": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "ashbound_miner": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "furnace_construct": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "soot_phantom": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "forge_defender": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "cinder_warden_avatar": {
+   "size": [
+    44,
+    54
+   ],
+   "origin": [
+    22,
+    53
+   ]
+  },
+  "cinder_warden_avatar_back": {
+   "size": [
+    44,
+    54
+   ],
+   "origin": [
+    22,
+    53
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Visible map enemies. Frames face LEFT; draw flipped (scaleX -1) when moving right. 2-frame idle/hop; when an enemy steps, show frame 1 for the step. origin = bottom-centre (feet on the tile bottom). archivore_avatar (W8-art): the boss on the field, 55x52, frontal, hovering `hover` px above its feet (the shadow shows under it); _0 wings up, _1 wings down, _2 level; the field alternates _0/_1, anim archivore_avatar_idle plays 0,2,1,2. E2-sprites: Episode 2 foes as the grids of their Episode 1 kin in their own palettes, shard_swarm (16x16), refl_hero/refl_mira/refl_bram (24x32, left stand and step; the 4-direction walking versions are in npcs.json and win the sprite lookup), nameless_king_avatar (40x50, frontal) and nameless_king_avatar_back (the same seen from behind; a separate sprite id)."
+}
