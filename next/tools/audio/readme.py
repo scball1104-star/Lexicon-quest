@@ -115,6 +115,22 @@ def write(man: dict, stats: dict):
             note = f" ({', '.join(extra)})" if extra else ""
             lines.append(f"| `{i}` | {_fmt_dur(e['duration'])} | {n}{note} | {sfx_defs.REG[i]['intent']} |")
         lines.append("")
+    try:
+        import build as _b
+        ext = _b.external_sfx()
+    except Exception:  # noqa: BLE001
+        ext = {}
+    ext = {i: x for i, x in ext.items() if i in man["sfx"]}
+    if ext:
+        lines.append("### Made outside the generators (docs/MEDIA_BUILD.md 4)\n")
+        lines.append("Brought in by `tools/audio/add_sfx.py` (registry `tools/audio/external_sfx.json`), mastered to the same spec. A swapped core "
+                     "sound keeps its generated render as `<id>_synth` in the lazy `media` pack, named as its fallback, so the two can be compared by ear.\n")
+        lines.append("| id | length | pack | fallback | intent | source |")
+        lines.append("|---|---|---|---|---|---|")
+        for i, x in ext.items():
+            e = man["sfx"][i]
+            lines.append(f"| `{i}` | {_fmt_dur(e['duration'])} | {e.get('pack', 'core')} | {e.get('fallback') or ''} | {x.get('intent', '')} | {x.get('source', '')} |")
+        lines.append("")
     lines.append("## Jingles\n")
     lines.append("| id | length | intent |")
     lines.append("|---|---|---|")

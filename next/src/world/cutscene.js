@@ -266,7 +266,7 @@ export class Cutscene {
       },
       async title(text, o = {}) {
         if (self.dead) return;
-        if (E.hasScene('titleCard')) await E.pushAwait('titleCard', { text, sub: o.sub, frames: o.frames || 240 });
+        if (E.hasScene('titleCard')) await E.pushAwait('titleCard', { text, sub: o.sub, frames: o.frames || 240, card: o.card });
         else { await F.dialog({ who: null, text: o.sub ? `{c:gold}${text}{/c}\n${o.sub}` : `{c:gold}${text}{/c}` }); }
       },
     };

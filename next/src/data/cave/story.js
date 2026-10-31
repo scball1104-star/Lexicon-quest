@@ -41,6 +41,7 @@ import { cap, fmtTime } from '../../ui/text.js';
 import { List, rowHeightFor, rowsThatFit } from '../../ui/list.js';
 import { drawWindow, drawIcon, drawDivider } from '../../ui/window.js';
 import { drawHelpBar } from '../../ui/help.js';
+import { drawBackdrop, DARK } from '../../ui/keyart.js';
 import { CAVE_UNIQUES, CAVE_UNIQUE_IDS, BINDER_QUILL_ID, CAVE_PROPS } from './items.js';
 import { HOLLIS, HOLLIS_ID, PLAQUES, STACKS_TEXT, LINES as T, STACKS_HELP, BAND_NAMES, countNames, fillLine } from './text.js';
 
@@ -208,7 +209,7 @@ async function binder_intro(s) {
   await s.wait(20);
   await narrate(s, met ? T.binder_retry : T.binder_intro);
   await s.setFlag('binder_met');
-  await s.title(T.binder_card, { sub: T.binder_sub, frames: 100 });
+  await s.title(T.binder_card, { sub: T.binder_sub, frames: 100, card: 'paint_card_binder_spine' });   // the spine painting (MEDIA_BUILD 2), lazy
   await s.shake(2, 20);
   await s.flash('#ffffff', 8);
   await s.camera.follow('hero');
@@ -219,6 +220,7 @@ async function binder_cleared(s) {
   await s.camera.panTo('binder', 20);
   await s.sfx('name_restore');
   await narrate(s, T.binder_cleared);
+  await s.title(T.clear_card, { sub: T.clear_sub, frames: 160, card: 'paint_card_binder_spine' });   // the B100 clear card over the spine
   await s.camera.follow('hero');
 }
 
@@ -432,7 +434,8 @@ export class StacksScene {
 
   draw(r) {
     const T = this.T;
-    r.withAlpha(0.6, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
+    // the Deep Stacks hall painting behind the plaque (MEDIA_BUILD 2, lazy); the dimmed field until it loads
+    if (!drawBackdrop(r, 'paint_card_stacks_hall', { dark: DARK.three })) r.withAlpha(0.6, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
     drawWindow(r, 4, 4, 376, 24);
     r.text(T.title, 12, 10, { color: 'gold' });
     r.text(recordSummary(r, this.record, 376 - 32 - r.measure(T.title), T), RIGHT_X, 10, { align: 'right', color: 'gray' });
