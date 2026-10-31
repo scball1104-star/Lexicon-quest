@@ -99,6 +99,8 @@ export const LINES = {
   quit: 'You left the Stacks. That reading is lost.',
   quit_2: 'The pages you turned are blank again. The next reading starts at the first.',
   clear: 'The Binder is bound. The Stacks stay open for what is left on the shelves.',
+  clear_card: 'The Binder is bound.',          // the B100 clear card (over the Binder's spine painting, MEDIA_BUILD 2)
+  clear_sub: 'The Stacks stay open for what is left on the shelves.',
   clear_2: 'You read to the last page. Nobody had. I will write that down, and then I will sit for a while.',
   // the record (stacks_record): one line, then the plaque screen
   record_none: 'No page has been turned yet. The record is blank, which is the one honest thing a record can be.',

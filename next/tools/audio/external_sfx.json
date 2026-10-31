@@ -1,0 +1,4 @@
+{
+ "$comment": "Sounds made outside the generators (docs/MEDIA_BUILD.md 4: Runway, ElevenLabs Text to SFX), registered by tools/audio/add_sfx.py and read by build.py. An id that is also a generator keeps its generated file as <id>_synth.wav (manifest id <id>_synth, pack media, the entry's fallback), so a swap stays reversible by ear. Edit by running add_sfx.py, not by hand.",
+ "sfx": {}
+}

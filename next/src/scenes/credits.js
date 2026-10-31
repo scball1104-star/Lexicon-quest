@@ -21,7 +21,8 @@ export class CreditsScene {
     const fit = (line) => (r && r.measure && r.measure(line) > r.W - 16 ? r.wrap(line, r.W - 16) : [line]);
     this.cards = cards.map((c) => ({ heading: fillHero(c.heading || '', e.game), lines: (c.lines || []).flatMap((l) => fit(fillHero(l, e.game))) }));
     const backdrop = data.backdrop || (ep2 && e.assets && e.assets.has && e.assets.has('dialog_keyart_ep2') ? 'dialog_keyart_ep2' : 'dialog_keyart');
-    this.art = new KeyArt(e, { backdrop, cell: data.cell ?? 0, drift: 1.2, range: 12 });
+    const card = data.card || (ep2 ? 'paint_card_hollowmere' : 'paint_card_bell_tower');   // the painted story cards, lazy
+    this.art = new KeyArt(e, { backdrop, card, cell: data.cell ?? 0, drift: 1.2, range: 12 });
     this.y = 0; this.t = 0; this.done = false; this.holdT = 0;
     // Pre-compute card heights.
     let y = e.renderer.H + 10;

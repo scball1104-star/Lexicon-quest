@@ -442,7 +442,7 @@ export function startEpisode2(engine, name) {
     const enter = () => {
       if (e.hasScene('field')) e.reset('field', { map: g.map, mark: EP2_START.mark || 'bed', dir: 'down' });
       else e.reset('_uiStage', {});
-      if (e.hasScene('titleCard')) e.push('titleCard', { text: 'Episode 2', sub: 'The Town Without a Name', frames: 180, backdrop: 'dialog_keyart_ep2' });
+      if (e.hasScene('titleCard')) e.push('titleCard', { text: 'Episode 2', sub: 'The Town Without a Name', frames: 180, backdrop: 'dialog_keyart_ep2', card: 'paint_card_hollowmere' });
     };
     const ids = packsToAwait(g.flags);          // packs the party wants: at most 1.5 s behind the fade (docs/PWA_PACKS.md)
     return ids.length ? awaitPacks(ids).then(enter) : enter();

@@ -53,6 +53,17 @@ AMBIENCE_TARGET = -22.0   # integrated; a bed about 11 dB under the music at def
 # the engine reads `fallback` for music and sfx; maps may also name the older bed directly.
 AMBIENCE_FALLBACK = {"moor_wind": "wind_valley", "larchhill_hum": "river_birds"}
 MUSIC_TARGET = -16.0      # integrated; manifest volume brings each track here
+EXTERNAL_PATH = HERE / "external_sfx.json"   # sounds made outside the generators (add_sfx.py; docs/MEDIA_BUILD.md 4)
+MEDIA_PACK = "media"      # the lazy pack those sounds (and the generated originals they replaced) live in
+
+
+def external_sfx() -> dict:
+    """{id: {src, group, pack, fallback, intent, source, replaces}} from tools/audio/external_sfx.json (add_sfx.py writes it).
+    A registered id that is also a generator keeps its generated render as <id>_synth.wav (manifest id <id>_synth, pack media,
+    the entry's fallback), so a swap can be judged by ear and undone."""
+    if not EXTERNAL_PATH.exists():
+        return {}
+    return json.loads(EXTERNAL_PATH.read_text(encoding="utf-8")).get("sfx", {})
 
 MUSIC_IDS = ["title", "willowmere", "valley", "archive", "battle", "boss_archivore", "mystery", "sorrow",
              "triumph", "victory", "gameover",
@@ -123,6 +134,7 @@ def master(y: np.ndarray, sr_in: int, sr_out: int, target: float, mode: str, tai
 # ----------------------------------------------------------------------------- SFX
 def build_sfx(only=None, quiet=False):
     import sfx_defs
+    ext = external_sfx()
     out = {}
     (AUDIO / "sfx").mkdir(parents=True, exist_ok=True)
     for id_, r in sfx_defs.REG.items():
@@ -134,7 +146,8 @@ def build_sfx(only=None, quiet=False):
             y = r["fn"](g, v)
             target = r["target"] if r["target"] is not None else GROUP_TARGET[r["group"]]
             y, info = master(y, dsp.RENDER_SR, SFX_SR, target, "window", r["tail_db"])
-            name = f"{id_}.wav" if r["variants"] == 1 else f"{id_}_{v + 1}.wav"
+            # a swapped id (external_sfx.json) keeps its generated render beside the new file, never over it
+            name = f"{id_}_synth.wav" if id_ in ext else (f"{id_}.wav" if r["variants"] == 1 else f"{id_}_{v + 1}.wav")
             dsp.write_wav(AUDIO / "sfx" / name, y, SFX_SR, seed=seed_of(id_, v))
             files.append(f"assets/audio/sfx/{name}")
             infos.append(info)
@@ -296,8 +309,10 @@ def write_manifest(results: dict):
             return [f"assets/audio/{kind}/{id_}.wav"]
         return [f"assets/audio/{kind}/{id_}_{i + 1}.wav" for i in range(variants)]
 
+    ext = external_sfx()
     for id_, r in sfx_defs.REG.items():
-        files = files_for("sfx", id_, r["variants"])
+        x = ext.get(id_)
+        files = [f"assets/audio/sfx/{id_}_synth.wav"] if x else files_for("sfx", id_, r["variants"])
         if not all((NEXT / f).exists() for f in files):
             continue
         dur = max(wav_info(NEXT / f)[0] for f in files)
@@ -310,6 +325,20 @@ def write_manifest(results: dict):
             e["cooldown"] = r["cooldown"]
         if r.get("fallback"):
             e["fallback"] = r["fallback"]
+        if x and (NEXT / x["src"]).exists():
+            # the swap: the external file under the id (same pack, so a core sound stays precached, at or under its old bytes),
+            # the generated render under <id>_synth in the lazy media pack as the fallback
+            man["sfx"][f"{id_}_synth"] = {"src": files[0], "volume": 1.0, "duration": round(dur, 3), "group": r["group"], "pack": MEDIA_PACK}
+            e = {**e, "src": x["src"], "duration": round(wav_info(NEXT / x["src"])[0], 3), "fallback": f"{id_}_synth"}
+        man["sfx"][id_] = e
+    for id_, x in ext.items():
+        if id_ in sfx_defs.REG or not (NEXT / x["src"]).exists():
+            continue
+        e = {"src": x["src"], "volume": 1.0, "duration": round(wav_info(NEXT / x["src"])[0], 3), "group": x["group"], "pack": x.get("pack", MEDIA_PACK)}
+        if x.get("maxVoices"):
+            e["maxVoices"] = x["maxVoices"]
+        if x.get("fallback"):
+            e["fallback"] = x["fallback"]
         man["sfx"][id_] = e
     packs = {}
     for id_, e in man["sfx"].items():
