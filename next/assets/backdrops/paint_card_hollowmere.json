@@ -1,0 +1,13 @@
+{
+ "image": "paint_card_hollowmere.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "story card, Hollowmere's fountain at dusk: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-11-02) quantized by quantize_still.py; the Episode 2 card, the Episode 2 credits and the To be continued card (docs/MEDIA_BUILD.md 2)",
+ "extraColors": [
+  "#4a3643"
+ ],
+ "colors": 32,
+ "source": "runway",
+ "replaces": "dialog_keyart_ep2 (the Court key-art cell; stays as the fallback until this file loads)"
+}

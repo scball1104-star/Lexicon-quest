@@ -1,0 +1,13 @@
+{
+ "image": "paint_card_binder_spine.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "story card, the Binder's spine in the Forge of Names: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-11-02) quantized by quantize_still.py; the B100 cards, THE BINDER and the clear card (docs/MEDIA_BUILD.md 2)",
+ "extraColors": [
+  "#3f3838"
+ ],
+ "colors": 41,
+ "source": "runway",
+ "replaces": "dialog_keyart (stays as the fallback until this file loads)"
+}

@@ -1,0 +1,14 @@
+{
+ "image": "paint_card_bells.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "story card, the twelve bells ringing: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-11-02) quantized by quantize_still.py; the End of Episode 1 card (docs/MEDIA_BUILD.md 2)",
+ "extraColors": [
+  "#38384d",
+  "#4d5773"
+ ],
+ "colors": 52,
+ "source": "runway",
+ "replaces": "dialog_keyart (stays as the fallback until this file loads)"
+}
