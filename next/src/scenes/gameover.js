@@ -24,6 +24,7 @@ export class GameOverScene {
     ] });
     e.audio.stopMusic(0.5);
     e.audio.ambience(null);
+    e.audio.sfx('death_card');
     e.audio.jingle('gameover_sting', { duckMusic: false }).then(() => { if (e.scene === this) e.audio.music('gameover'); });
     e.renderer.setBackdrop(null);
   }

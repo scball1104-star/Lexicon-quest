@@ -317,7 +317,7 @@ export class FieldScene {
     const [sx, sy] = this.camera.toScreen(L.feetX, L.feetY - 8);
     const opts = transitionOpts(k, { dir, x: sx, y: sy });
     if (k === 'door' || k === 'same') e.audio.sfx('door_open');
-    else if (k === 'stairs') e.audio.sfx('stairs');
+    else if (k === 'stairs') { const to = /^cave_b(\d+)$/.exec(mapId), at = /^cave_b(\d+)$/.exec(this.mapId || ''); e.audio.sfx(to && (!at || +to[1] > +at[1]) ? 'stairs_down' : 'stairs'); }
     else if (k === 'pit' || k === 'fall') e.audio.sfx('fall');
     else if (k === 'mirror') e.audio.sfx('mirror_step');
     this.inputLocked++;

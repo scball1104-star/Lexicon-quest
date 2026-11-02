@@ -23,20 +23,15 @@
 //   audio.preload(['pack:ep2']);                       // the same, through the preload door every wrapper already has
 //   audio.meter();                                     // {rms, peak} dBFS of the output (debug overlay / QA)
 //
-// Design notes
-// - Importing this module never touches window/document/AudioContext. Everything is created lazily, so the
-//   module imports cleanly in Node and every call is a harmless no-op without WebAudio.
-// - The AudioContext is created on the first user gesture (autoplay policy). Requests made before that
-//   (music, ambience) are remembered and start on unlock. SFX before unlock are dropped. Jingles before
-//   unlock resolve after their manifest duration so cutscene timing is the same with or without sound.
-// - Music: decoded AudioBuffers loop sample-accurately between loopStart and loopEnd. If a track is not
-//   decoded yet it starts streaming at once through an <audio> element (MediaElementSource) while the
-//   buffer decodes; the hand-over to the buffer happens at the next loop point, where a jump already occurs.
-//   Decoded music is kept in a small LRU cache (tracks in use or on the push stack are never evicted).
-// - SFX: max 12 voices (oldest is stolen with a short fade), same-id cooldown 30 ms, optional per-id
-//   maxVoices, optional random pitch variance (`vary`, a fraction: 0.04 = +-4 %), round-robin variants.
-// - The context is suspended while the tab is hidden and resumed when it comes back.
-// - A soft clipper on the master bus keeps summed peaks from hard clipping.
+// Design notes: importing this module never touches window/document/AudioContext (it imports cleanly in Node, and
+// every call is a harmless no-op without WebAudio). The AudioContext is created on the first user gesture; music and
+// ambience asked for before that start on unlock, SFX are dropped, jingles resolve after their manifest duration so
+// cutscene timing is the same with or without sound. Music loops sample-accurately between loopStart and loopEnd; an
+// undecoded track streams through an <audio> element until its buffer is ready and hands over at the next loop point;
+// decoded music sits in a small LRU cache (tracks in use or on the push stack are never evicted). SFX: max 12 voices
+// (the oldest is stolen with a short fade), same-id cooldown 30 ms, optional per-id maxVoices, optional random pitch
+// variance (`vary`), round-robin variants. The context is suspended while the tab is hidden; a soft clipper on the
+// master bus keeps summed peaks from hard clipping.
 
 export const AUDIO_API_VERSION = 1;
 

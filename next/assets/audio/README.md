@@ -96,7 +96,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `door_open` | 400 ms | 1 | Wooden door opens: iron latch click, then a short low hinge creak (stick-slip wood resonance). Friendly, not horror. |
 | `door_close` | 345 ms | 1 | Door shuts: a push of air, a solid wooden thud (90 Hz body) and the latch dropping 40 ms later. |
 | `stairs` | 508 ms | 1 | Taking stairs (map transition). Four quick footsteps stepping down in pitch and level, with a little room. |
-| `chest_open` | 500 ms | 1 | Treasure chest opens: latch clack, short hinge squeak, then the lid thumping back. The item_get jingle follows. |
+| `chest_open` | 498 ms | 1 | Treasure chest opens: latch clack, short hinge squeak, then the lid thumping back. The item_get jingle follows. |
 | `pot_break` | 394 ms | 1 | Breakable pot shatters: ceramic thump, a spray of glassy shards, grit and a couple of debris clunks. |
 | `block_push` | 500 ms | 1 | Pushing a stone block one tile: heavy stone scrape (grainy band noise), gravel crackle and a low rumble. |
 | `switch_on` | 350 ms | 1 | Floor or wall switch pressed ON: mechanical ka-chunk, then a small rising C6-G6 confirmation chime so the player knows something changed. |
@@ -138,7 +138,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 |---|---|---|---|
 | `door_rumble` | 1.72 s | 1 | Great stone-and-root door grinding open (Archive seals, the boss door): deep rumble, grinding stone, straining root creaks, falling grit, a final thud. About 1.5 s. |
 | `bell_toll` | 3.21 s | 1 | One deep bronze church-bell toll, slightly eerie: the Thirteenth Bell. Nominal about A3, hum an octave below, minor-third tierce, slow beating between detuned partials, about 3.5 s decay in a large stone space. |
-| `bell_peal` | 4.25 s | 1 | Willowmere's twelve bells ringing together in celebration: one full round of twelve bells descending a major scale (G6 to C5), then the start of a second round with pairs swapped, as in English change ringing. About 4.5 s. |
+| `bell_peal` | 4.00 s | 1 | Willowmere's twelve bells ringing together in celebration: one full round of twelve bells descending a major scale (G6 to C5), then the start of a second round with pairs swapped, as in English change ringing. About 4.5 s. |
 | `sign_fade` | 944 ms | 1 | A painted sign's name fades away: a soft downward shimmer in a minor color, high tremolo tones sinking and thinning into dust. 0.8 s. |
 | `name_restore` | 947 ms | 1 | A lost name returns: bright upward sparkle on the shared 'name' motif (rising fifth, whole-step lift, falling major third: C6 G6 A6 F6) resolving up to C7, with glitter. 0.9 s. |
 | `ink_gurgle` | 600 ms | 1 | Living ink gurgles (ink pools, ink creatures): wet, low, viscous bubbles with a dark slosh. 0.6 s. |
@@ -181,7 +181,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `item_use` | 717 ms | 1 | Using a potion or tonic: two quick glugs (bubbly bloops) and a soft rising chime. |
 | `fury_ready` | 1.22 s | 1 | Fury gauge full: a charging PWM sweep rising 200 Hz to 1.6 kHz with quickening tremolo, then a bright C7 ding. |
 | `combo_start` | 1.02 s | 1 | Combo tech begins (two or three heroes act together): two bright 'ching' pings (E6, B6) that then ring together over a rising swirl. |
-| `level_up_sparkle` | 1.05 s | 1 | Sparkles over a hero who levels up (under the level_up jingle): glitter of random 2 to 8 kHz pings thinning out, after a small upward swish. |
+| `level_up_sparkle` | 1.00 s | 1 | Sparkles over a hero who levels up (under the level_up jingle): glitter of random 2 to 8 kHz pings thinning out, after a small upward swish. |
 | `hammer_charge` | 1.67 s | 1 | The Last Hammer telegraph: a rising metallic whine that tightens to a ringing point, about 1.4 s. |
 | `oath_ring` | 1.75 s | 1 | Tempered Oath turns the hammer: a bell-like clang with a shimmer of high partials over a warm low ring. |
 | `star_chime` | 719 ms | 1 | A dark star wakes: a three-note glass chime, ascending (D6 F#6 A6), with a little sparkle, about 0.8 s. |
@@ -202,7 +202,7 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 
 | id | length | files | intent |
 |---|---|---|---|
-| `bell_thirteenth` | 787 ms | 1 | The Thirteenth Bell, the cracked bell of the Stacks, as the town hears it (the cold open's thirteenth toll, F1, the Stacks, the credits): one hard strike of a great bronze bell a tritone below the town's twelve (nominal D-sharp 3 against their A3). The crack splits every partial so it beats sour and rattles, and it never sings on: the crack chokes it in under a second, then silence. Core set, under 40 KB (H6, CRITIQUE_ARC 10). |
+| `bell_thirteenth` | 777 ms | 1 | The Thirteenth Bell, the cracked bell of the Stacks, as the town hears it (the cold open's thirteenth toll, F1, the Stacks, the credits): one hard strike of a great bronze bell a tritone below the town's twelve (nominal D-sharp 3 against their A3). The crack splits every partial so it beats sour and rattles, and it never sings on: the crack chokes it in under a second, then silence. Core set, under 40 KB (H6, CRITIQUE_ARC 10). |
 | `enemy_die` | 750 ms | 1 | Enemy defeated: the classic SNES dissolve. Noise crushed to a falling sample rate (8 kHz to 300 Hz), a short descending pulse arpeggio and a soft low poof. |
 | `boss_die` | 2.96 s | 1 | Boss defeated: a chain of growing explosions, then a long collapsing dissolve with phasing and a final deep boom into a big room tail. About 3.2 s. |
 | `encounter` | 1.14 s | 1 | Battle starts (screen swirl): a rising swirl (vibrato pulse 200 to 1200 Hz plus a resonant noise sweep) that bursts into a crash and low boom. Urgent, 1 s. |
@@ -222,6 +222,25 @@ silent no-ops. `text_blip` is an alias of `text_blip_mid`. Ids with several file
 | `drop_magic` | 565 ms | 1 | Magic (blue) item drop: two bright chorused plinks E6 then B6 with a cool shimmer. |
 | `drop_rare` | 941 ms | 1 | Rare (gold) item drop: a three-note E major arpeggio of bells (E6 G#6 B6) with sparkle. |
 | `drop_legendary` | 1.71 s | 1 | Legendary (orange) drop: a deep boom under a bright bell chord (E5 B5 E6 G#6 B6 F#7) struck together, a rising shimmer and a long glittering tail. Unmistakable. |
+
+### Made outside the generators (docs/MEDIA_BUILD.md 4)
+
+Brought in by `tools/audio/add_sfx.py` (registry `tools/audio/external_sfx.json`), mastered to the same spec. A swapped core sound keeps its generated render as `<id>_synth` in the lazy `media` pack, named as its fallback, so the two can be compared by ear.
+
+| id | length | pack | fallback | intent | source |
+|---|---|---|---|---|---|
+| `bell_thirteenth` | 777 ms | core | bell_thirteenth_synth | The Thirteenth Bell, the cracked bell of the Stacks: one hard strike of a huge cracked bronze bell, sour and rattling, choked short (the cold open's thirteenth toll, the ending, the Stacks). Made in Runway; the generated bell stays as bell_thirteenth_synth. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: One hard strike of a huge cracked bronze bell, the crack makes it sour and rattling, choked short with no ringing tail, then silence (1 s asked) |
+| `bell_peal` | 4.00 s | core | bell_peal_synth | Willowmere's twelve bells pealing together (the ending). Made in Runway; the generated peal stays as bell_peal_synth. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Twelve church bells pealing together in a joyful round, bright bronze, heard across a river town at night (4 s asked) |
+| `chest_open` | 498 ms | core | chest_open_synth | A chest opens (the field's chests). Made in Runway; the generated one stays as chest_open_synth. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A small wooden treasure chest lid creaks open quickly with a latch click, fantasy RPG (1 s asked) |
+| `level_up_sparkle` | 1.00 s | core | level_up_sparkle_synth | The level-up sparkle under the level_up jingle. Made in Runway; the generated one stays as level_up_sparkle_synth. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A bright rising magical sparkle shimmer, a short glittering chime, fantasy level up (1 s asked) |
+| `bookmark_use` | 799 ms | media | page_flutter | The Bookmark is used in the Deep Stacks (bookmarkFlow: the reading is banked). Runway; page_flutter until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A silk ribbon bookmark slides into a heavy old book and the book closes with a soft thump (1 s asked) |
+| `title_confirm` | 1.00 s | media | confirm | The title's confirm: the name is set and the game starts (nameEntry done). Runway; confirm until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A bright confirming chime, two quick rising notes with a sparkle, retro 16-bit RPG menu accept (1 s asked) |
+| `chest_blue` | 1.58 s | media | chest_open | A blue chest opens in the Deep Stacks (a unique inside). Runway; chest_open until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A heavy iron-bound chest unlatches with a deep clunk and opens with a magical glowing shimmer (2 s asked) |
+| `binder_phase_1` | 1.65 s | media | door_rumble | The Binder, phase 1 The Spine (the fight opens): the book's iron spine creaks and its chains tighten. Runway; door_rumble until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A huge iron-bound book's spine creaks and heavy iron chains tighten with a deep metallic groan (2 s asked) |
+| `binder_phase_2` | 2.00 s | media | page_flutter | The Binder, phase 2 Loose Leaves: the stitching gives and the pages tear free in a storm. Runway; page_flutter until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Hundreds of paper pages tear free from a book and whirl in a rushing paper storm, flapping and rustling (2 s asked) |
+| `binder_phase_3` | 1.94 s | media | fire | The Binder, phase 3 The Last Binding: it burns its own pages for thread. Runway; fire until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Paper pages burning in a roaring flame while an iron thread pulls tight with a hot metallic creak (2 s asked) |
+| `stairs_down` | 1.44 s | media | stairs | A descent in the Deep Stacks (a stair down to the next floor). Runway; stairs until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Footsteps descending a stone spiral staircase into a deep cave, echoing, with a cold draft of air (2 s asked) |
+| `death_card` | 2.00 s | media | door_rumble | The Game Over card lands (gameover.js, under the gameover_sting jingle). Runway; door_rumble until the media pack arrives. | Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A deep slow drum hit with a dark reverberant tail and a faint low drone, game over (2 s asked) |
 
 ## Jingles
 

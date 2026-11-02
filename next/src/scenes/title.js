@@ -427,7 +427,7 @@ export class NameEntryEp3Scene extends NameEntryScene {
   enter(data = {}) { super.enter(data); this.slot = data.slot || 0; }
   done() {
     const e = this.engine;
-    e.audio.sfx('confirm');
+    e.audio.sfx('title_confirm');
     this.busy = true;
     startEpisode3(e, this.value, this.slot);
   }
@@ -453,7 +453,7 @@ export class NameEntryEp2Scene extends NameEntryScene {
   constructor(engine) { super(engine); this.name = 'nameEntryEp2'; }
   done() {
     const e = this.engine;
-    e.audio.sfx('confirm');
+    e.audio.sfx('title_confirm');
     this.busy = true;
     startEpisode2(e, this.value);
   }
