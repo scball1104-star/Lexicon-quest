@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-10-28, 16:15 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-11-02, 14:50 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -32,6 +32,7 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   it alone before treating it as real.
 
 ## Status at handoff
+- **Shipped 2026-11-02 14:38 ET on Scott's word: live main = 9c1b2de (sw ded590e0379d).** The five painted story cards and the SFX dozen (#21), sw.js rebuilt from an LF checkout (#23). TRAP: this Windows checkout has core.autocrlf on, so `build_pwa.py` hashes a different sw.js version and the pwa load-budget test over-measures; before a ship, rebuild and run `LQ_RELEASE=1 node next/qa/run.mjs pwa` in an LF checkout (`git worktree add`, then inside it `git -c core.autocrlf=false rm --cached -r -q . && git -c core.autocrlf=false reset --hard`). `shots.py` needs `--timeout 3000` here (212 shots take about 950 s). Stephen shipped 0bca403 on 10/29 (the Kids Edition under /kids/). Open on #9: Scott's answers on the video test and the trailer brief, a bells retake, November's nine Suno themes.
 - **Shipped 2026-10-28 15:58 ET on Scott's word: live main = d77f904 (sw ebb3d0b4b07b).** What went out, all of it through pull
   request #11 (merged into overhaul, then `push overhaul:main`): the responsibility arc (cold open "The Thirteenth Toll", vows,
   the Ledger), the Deep Stacks with `CAVE_LIVE` on (100 floors, sixty uniques in three grades, the critic's fix pass), Fine Print
