@@ -1,0 +1,11 @@
+{
+ "image": "paint_card_stacks_hall.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "story card, the Deep Stacks hall: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-11-02) quantized by quantize_still.py; behind the Archivist's plaque screen (docs/MEDIA_BUILD.md 2)",
+ "extraColors": [],
+ "colors": 38,
+ "source": "runway",
+ "replaces": "the dimmed field under the plaque screen (stays until this file loads)"
+}

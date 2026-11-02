@@ -174,12 +174,14 @@ test('total synthesized audio stays small', () => {
   // qa/pwa/precache.test.mjs. Episode 3 adds ~0.8 MB of sfx (pack ep3, fetched on first entry, never precached) and
   // two 16 kHz ambience loops (~0.6 MB, runtime-cached), so the cap moved from 6.0 to 7.5 MB. Expansion 1 adds 0.35 MB of
   // sfx (pack x1, lazy) and two more ambience loops (0.64 MB, runtime-cached), so it moves to 8.5 MB. None of it is precached.
+  // The media build (docs/MEDIA_BUILD.md 4) adds 0.55 MB of Runway sounds in the lazy media pack and keeps the four generated
+  // originals it replaced (0.29 MB, the same pack), so it moves to 9.0 MB. Still nothing precached beyond the swapped core files.
   let total = 0;
   for (const sub of ['sfx', 'jingles', 'ambience']) {
     const d = join(NEXT, 'assets/audio', sub);
     for (const f of readdirSync(d)) total += statSync(join(d, f)).size;
   }
-  assert.ok(total < 8.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  assert.ok(total < 9.0e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
 test('Episode 2 music: the five tracks have fallbacks and loop points (composed: the 60 ms guard; a Suno Pro replacement: measured)', () => {

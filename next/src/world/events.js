@@ -653,7 +653,7 @@ async function openChest(field, ent) {
   const { engine, game: g, map } = field;
   if (ent.state === 'open') return;
   ent.state = 'open';
-  engine.audio.sfx('chest_open');
+  engine.audio.sfx(ent.ev && ent.ev.tier === 'blue' ? 'chest_blue' : 'chest_open');
   if (ent.prop) map.setPropState(ent.prop, 1);
   markOpened(g, map.id, ent.id);
   if (ent.ev.flag) field.setFlag(ent.ev.flag);

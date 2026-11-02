@@ -591,7 +591,7 @@ Object.assign(HELP.inn, { poor_wren: 'Not enough gold. Wren looks sorry.' });
 
 // W15 (PLAYTEST_REVIEW_4 fix 3): the card after the Episode 2 credits, before the party wakes in Hollowmere's inn, so
 // nobody goes looking for a road that is not in the game yet. Placeholder wording: Scott chooses the final words.
-export const END_CARD_EP2 = { text: 'To be continued', sub: 'Episode 3 is not playable yet.', frames: 300, backdrop: 'dialog_keyart_ep2' };
+export const END_CARD_EP2 = { text: 'To be continued', sub: 'Episode 3 is not playable yet.', frames: 300, backdrop: 'dialog_keyart_ep2', card: 'paint_card_hollowmere' };
 
 // Credits for Episode 2. Played after ep2_complete over the "hollowmere" theme (same card shape as CREDITS).
 export const CREDITS_EP2 = [
@@ -766,7 +766,7 @@ Object.assign(HELP.inn, { poor_bess: 'Not enough gold. Bess looks sorry.' });
 // The card after the Episode 3 credits, before the party wakes at the Coal Lantern. Episode 4 is not in the game.
 export const END_CARD_EP3 = { text: 'To be continued', sub: 'Episode 4 is not playable yet.', frames: 300, backdrop: 'dialog_keyart_ep3' };
 // The same card for Episode 2 once Episode 3 is live: story.js CREDITS_HANDOFF[2].endCard becomes this when EP3_LIVE.
-export const END_CARD_EP2_LIVE = { text: 'To be continued', sub: 'Episode 3 begins in the morning.', frames: 300, backdrop: 'dialog_keyart_ep2' };
+export const END_CARD_EP2_LIVE = { text: 'To be continued', sub: 'Episode 3 begins in the morning.', frames: 300, backdrop: 'dialog_keyart_ep2', card: 'paint_card_hollowmere' };
 // The Episode 4 title card text (placeholder wording, Scott chooses the final words): used by ep3_ending.
 export const EPISODE4_CARD = { text: 'Episode 4: The Sunken Keep', sub: 'Downriver, a kingdom forgets who rules it.' };
 

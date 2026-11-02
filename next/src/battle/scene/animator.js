@@ -29,6 +29,7 @@ export const FRAMES = Object.freeze({
   fury: 18, escape: 40, escapeFail: 24, combo: 30, victory: 12, defeat: 40, invalid: 8, mpPop: 10,
 });
 
+const BINDER_STINGS = { the_spine: 'binder_phase_1', loose_leaves: 'binder_phase_2', the_last_binding: 'binder_phase_3' };
 const SWING_SFX = { sword: 'sword_slash', axe: 'axe_chop', spear: 'spear_thrust', staff: 'staff_hit', bow: 'bow_shot' };
 const ARC_FX = { sword: 'slash', axe: 'chop', spear: 'thrust', staff: 'bonk', bow: 'arrow' };
 const STATUS_SFX = { poison: 'poison', burn: 'fire', chill: 'ice', stun: 'stun', silence: 'debuff', blind: 'debuff',
@@ -501,18 +502,19 @@ class Planner {
   }
   ev_phase(e) {
     this.push({ op: 'banner', text: e.name || `Phase ${e.phase}`, style: 'phase' });
+    const sting = BINDER_STINGS[e.id];   // the Binder's own stings (media pack); every other boss keeps the kit's sounds
     // A phase that carries a new sprite (the Nameless King's veil shattering to `nameless_king_unmasked`): the
     // glass breaks, then the frames swap mid-flash (the swap op also white-flashes the actor).
     if (e.sprite) {
       this.push({ op: 'fx', kind: 'shatter', uid: e.actor, big: true });
-      this.push({ op: 'sfx', id: 'glass_break' });
+      this.push({ op: 'sfx', id: sting || 'glass_break' });
       this.push({ op: 'screenFlash', color: '#ffffff', frames: 10, alpha: 0.7 });
       this.push({ op: 'shake', mag: 4, frames: 20 });
       this.wait(6);
       this.push({ op: 'swapSprite', uid: e.actor, sprite: e.sprite });
     } else {
       this.push({ op: 'fx', kind: 'phase', uid: e.actor, phase: e.phase });
-      this.push({ op: 'sfx', id: e.phase >= 3 ? 'door_rumble' : 'summon' });
+      this.push({ op: 'sfx', id: sting || (e.phase >= 3 ? 'door_rumble' : 'summon') });
       this.push({ op: 'shake', mag: 3, frames: 24 });
     }
     this.push({ op: 'reveal', uid: e.actor, reset: true });

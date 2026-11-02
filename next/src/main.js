@@ -103,6 +103,7 @@ function watchEpisodePacks() {
     try { engine.audio.preload([`pack:${pack}`]); } catch { /* audio is optional */ }
   };
   const check = () => {
+    want('media');   // the hero sounds made in Runway (docs/MEDIA_BUILD.md 4): fetched after the title, never precached
     const g = engine.game;
     const map = (g && g.map) || '';
     const flags = (g && g.flags) || {};

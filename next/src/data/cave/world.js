@@ -656,6 +656,7 @@ export async function bookmarkFlow(engine, game) {
   if (!CAVE.hasBookmark(g)) return false;
   const i = await ask(e, textOf('bank_ask'), [textOf('bank_yes'), textOf('bank_no')]);
   if (i !== 0) return false;
+  if (e.audio && e.audio.sfx) e.audio.sfx('bookmark_use');
   const r = await endReading(e, g, 'bank');
   return !!(r && r.ok);
 }

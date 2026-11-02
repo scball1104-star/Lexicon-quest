@@ -4,7 +4,7 @@
 // text, so it looks the same over the field, the prologue or a black fade; `backdrop: false` or a missing
 // atlas gives the flat `bg` color (default near-black).
 
-import { drawBackdrop, DARK } from '../ui/keyart.js';
+import { drawBackdrop, backdropImage, DARK } from '../ui/keyart.js';
 
 const FADE = 20;
 
@@ -18,6 +18,7 @@ export class TitleCardScene {
     this.bg = data.bg || '#000000';
     // Named backdropId, not backdrop: the engine forwards a scene's `backdrop` (an image) to the renderer.
     this.backdropId = data.backdrop === false ? null : (data.backdrop || 'dialog_keyart');
+    this.card = data.card || null;   // a painted card (lazy); the keyart backdrop stands in until it loads
     this.phase = 'in'; this.f = 0;
   }
   update() {
@@ -36,7 +37,8 @@ export class TitleCardScene {
   }
   draw(r) {
     r.clear(this.bg);
-    if (this.backdropId) drawBackdrop(r, this.backdropId, { dark: DARK.three });
+    const id = this.card && backdropImage(r, this.card) ? this.card : this.backdropId;
+    if (id) drawBackdrop(r, id, { dark: DARK.three });
     const a = this.alpha();
     const lines = r.wrap(this.text, 320, 'large');
     const lh = 18;
@@ -45,7 +47,7 @@ export class TitleCardScene {
     lines.forEach((l, i) => r.text(l, r.W / 2, y0 + i * lh, { font: 'large', align: 'center', color: this.color, alpha: a }));
     if (this.sub) r.text(this.sub, r.W / 2, y0 + lines.length * lh + 4, { align: 'center', color: 'gray', alpha: a });
   }
-  debugState() { return { text: this.text, phase: this.phase, backdrop: this.backdropId }; }
+  debugState() { return { text: this.text, phase: this.phase, backdrop: this.backdropId, card: this.card }; }
 }
 
 export default TitleCardScene;

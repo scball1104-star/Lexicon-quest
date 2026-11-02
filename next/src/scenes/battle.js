@@ -89,7 +89,9 @@ const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'batt
   'cave_battle_cellars', 'cave_battle_ember', 'cave_battle_forge'];   // cave pack files, path-loaded once fetched
 // Painted stages (docs/MEDIA_BUILD.md 1): lazy (build_pwa LAZY_PREFIXES); the composed stage stands in until one loads.
 const PAINTED = { valley: 'paint_battle_valley', valley_dusk: 'paint_battle_valley_dusk', hollow: 'paint_battle_hollow', east_road: 'paint_battle_east_road' };
-const PAINTED_ASSETS = Object.values(PAINTED);
+// The painted story cards (docs/MEDIA_BUILD.md 2): lazy the same way, drawn by ui/keyart.js where each card shows.
+const CARD_ASSETS = ['paint_card_bell_tower', 'paint_card_bells', 'paint_card_hollowmere', 'paint_card_stacks_hall', 'paint_card_binder_spine'];
+const PAINTED_ASSETS = [...Object.values(PAINTED), ...CARD_ASSETS];
 /** Zone -> stage key overrides (W8-art): the hollow's zone data still names 'valley', its stage is 'hollow'. */
 const ZONE_BACKDROP = { whisperwood_hollow: 'hollow' };
 const artLoads = new Map();      // asset id -> 'loading' | 'ok' | 'missing'

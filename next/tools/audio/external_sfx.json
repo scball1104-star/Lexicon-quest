@@ -1,0 +1,141 @@
+{
+ "$comment": "Sounds made outside the generators (docs/MEDIA_BUILD.md 4: Runway, ElevenLabs Text to SFX), registered by tools/audio/add_sfx.py and read by build.py. An id that is also a generator keeps its generated file as <id>_synth.wav (manifest id <id>_synth, pack media, the entry's fallback), so a swap stays reversible by ear. Edit by running add_sfx.py, not by hand.",
+ "sfx": {
+  "bell_thirteenth": {
+   "src": "assets/audio/sfx/bell_thirteenth.wav",
+   "group": "big",
+   "pack": "core",
+   "intent": "The Thirteenth Bell, the cracked bell of the Stacks: one hard strike of a huge cracked bronze bell, sour and rattling, choked short (the cold open's thirteenth toll, the ending, the Stacks). Made in Runway; the generated bell stays as bell_thirteenth_synth.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: One hard strike of a huge cracked bronze bell, the crack makes it sour and rattling, choked short with no ringing tail, then silence (1 s asked)",
+   "seconds": 0.777,
+   "lufs": -14.5,
+   "bytes": 34290,
+   "replaces": "bell_thirteenth_synth",
+   "replacedBytes": 34768
+  },
+  "bell_peal": {
+   "src": "assets/audio/sfx/bell_peal.wav",
+   "group": "story",
+   "pack": "core",
+   "intent": "Willowmere's twelve bells pealing together (the ending). Made in Runway; the generated peal stays as bell_peal_synth.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Twelve church bells pealing together in a joyful round, bright bronze, heard across a river town at night (4 s asked)",
+   "seconds": 4.0,
+   "lufs": -15.0,
+   "bytes": 176444,
+   "replaces": "bell_peal_synth",
+   "replacedBytes": 187578
+  },
+  "chest_open": {
+   "src": "assets/audio/sfx/chest_open.wav",
+   "group": "field",
+   "pack": "core",
+   "intent": "A chest opens (the field's chests). Made in Runway; the generated one stays as chest_open_synth.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A small wooden treasure chest lid creaks open quickly with a latch click, fantasy RPG (1 s asked)",
+   "seconds": 0.498,
+   "lufs": -19.5,
+   "bytes": 22006,
+   "replaces": "chest_open_synth",
+   "replacedBytes": 22094
+  },
+  "level_up_sparkle": {
+   "src": "assets/audio/sfx/level_up_sparkle.wav",
+   "group": "magic",
+   "pack": "core",
+   "intent": "The level-up sparkle under the level_up jingle. Made in Runway; the generated one stays as level_up_sparkle_synth.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A bright rising magical sparkle shimmer, a short glittering chime, fantasy level up (1 s asked)",
+   "seconds": 1.0,
+   "lufs": -15.5,
+   "bytes": 44144,
+   "replaces": "level_up_sparkle_synth",
+   "replacedBytes": 46350
+  },
+  "bookmark_use": {
+   "src": "assets/audio/sfx/bookmark_use.wav",
+   "group": "story",
+   "pack": "media",
+   "intent": "The Bookmark is used in the Deep Stacks (bookmarkFlow: the reading is banked). Runway; page_flutter until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A silk ribbon bookmark slides into a heavy old book and the book closes with a soft thump (1 s asked)",
+   "seconds": 0.799,
+   "lufs": -20.4,
+   "bytes": 35258,
+   "fallback": "page_flutter"
+  },
+  "title_confirm": {
+   "src": "assets/audio/sfx/title_confirm.wav",
+   "group": "ui",
+   "pack": "media",
+   "intent": "The title's confirm: the name is set and the game starts (nameEntry done). Runway; confirm until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A bright confirming chime, two quick rising notes with a sparkle, retro 16-bit RPG menu accept (1 s asked)",
+   "seconds": 1.0,
+   "lufs": -19.0,
+   "bytes": 44144,
+   "fallback": "confirm"
+  },
+  "chest_blue": {
+   "src": "assets/audio/sfx/chest_blue.wav",
+   "group": "field",
+   "pack": "media",
+   "intent": "A blue chest opens in the Deep Stacks (a unique inside). Runway; chest_open until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A heavy iron-bound chest unlatches with a deep clunk and opens with a magical glowing shimmer (2 s asked)",
+   "seconds": 1.577,
+   "lufs": -18.0,
+   "bytes": 69598,
+   "fallback": "chest_open"
+  },
+  "binder_phase_1": {
+   "src": "assets/audio/sfx/binder_phase_1.wav",
+   "group": "big",
+   "pack": "media",
+   "intent": "The Binder, phase 1 The Spine (the fight opens): the book's iron spine creaks and its chains tighten. Runway; door_rumble until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A huge iron-bound book's spine creaks and heavy iron chains tighten with a deep metallic groan (2 s asked)",
+   "seconds": 1.65,
+   "lufs": -14.8,
+   "bytes": 72818,
+   "fallback": "door_rumble"
+  },
+  "binder_phase_2": {
+   "src": "assets/audio/sfx/binder_phase_2.wav",
+   "group": "big",
+   "pack": "media",
+   "intent": "The Binder, phase 2 Loose Leaves: the stitching gives and the pages tear free in a storm. Runway; page_flutter until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Hundreds of paper pages tear free from a book and whirl in a rushing paper storm, flapping and rustling (2 s asked)",
+   "seconds": 2.0,
+   "lufs": -16.1,
+   "bytes": 88244,
+   "fallback": "page_flutter"
+  },
+  "binder_phase_3": {
+   "src": "assets/audio/sfx/binder_phase_3.wav",
+   "group": "big",
+   "pack": "media",
+   "intent": "The Binder, phase 3 The Last Binding: it burns its own pages for thread. Runway; fire until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Paper pages burning in a roaring flame while an iron thread pulls tight with a hot metallic creak (2 s asked)",
+   "seconds": 1.935,
+   "lufs": -14.2,
+   "bytes": 85362,
+   "fallback": "fire"
+  },
+  "stairs_down": {
+   "src": "assets/audio/sfx/stairs_down.wav",
+   "group": "field",
+   "pack": "media",
+   "intent": "A descent in the Deep Stacks (a stair down to the next floor). Runway; stairs until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: Footsteps descending a stone spiral staircase into a deep cave, echoing, with a cold draft of air (2 s asked)",
+   "seconds": 1.437,
+   "lufs": -19.2,
+   "bytes": 63404,
+   "fallback": "stairs"
+  },
+  "death_card": {
+   "src": "assets/audio/sfx/death_card.wav",
+   "group": "big",
+   "pack": "media",
+   "intent": "The Game Over card lands (gameover.js, under the gameover_sting jingle). Runway; door_rumble until the media pack arrives.",
+   "source": "Runway, ElevenLabs Text to SFX, 2026-11-02, prompt: A deep slow drum hit with a dark reverberant tail and a faint low drone, game over (2 s asked)",
+   "seconds": 2.0,
+   "lufs": -14.0,
+   "bytes": 88244,
+   "fallback": "door_rumble"
+  }
+ }
+}

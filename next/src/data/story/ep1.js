@@ -87,12 +87,12 @@ async function thirteenth_toll(s) {
   await all(s.emote('hero', '!'), s.camera.panTo('bells', 60));
   await s.wait(THIRTEENTH_SILENCE);
   await s.fade('out', 60);
-  await s.title(PROLOGUE[0], { frames: 200 });
+  await s.title(PROLOGUE[0], { frames: 200, card: 'paint_card_bell_tower' });
   await s.setFlag('cold_open_done');
 }
 
 async function prologue(s) {
-  await s.title(PROLOGUE[0], { frames: 200 });
+  await s.title(PROLOGUE[0], { frames: 200, card: 'paint_card_bell_tower' });
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -918,8 +918,8 @@ async function ending_hook(s) {
   await s.music('mystery');
   await narrate(s, 'Somewhere, someone has just been forgotten.');
   await s.fade('out', 120);
-  await s.title('End of Episode 1', { sub: 'The Missing Name', frames: 240 });
-  await s.title('Episode 2: The Town Without a Name', { sub: 'The road east is waiting.', frames: 240 });
+  await s.title('End of Episode 1', { sub: 'The Missing Name', frames: 240, card: 'paint_card_bells' });
+  await s.title('Episode 2: The Town Without a Name', { sub: 'The road east is waiting.', frames: 240, card: 'paint_card_hollowmere' });
   await s.setFlag('ep1_complete');
 }
 

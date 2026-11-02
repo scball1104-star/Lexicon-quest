@@ -66,7 +66,7 @@ export class NameEntryScene {
   done() {
     const e = this.engine;
     const name = cleanName(this.value);
-    e.audio.sfx('confirm');
+    e.audio.sfx('title_confirm');
     this.busy = true;
     e.game = createGame(name);
     e.fadeTo(() => e.replace('prologue'), { duration: 0.8 });

@@ -1,0 +1,14 @@
+{
+ "image": "paint_card_bell_tower.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "story card, the bell tower at night from the square: a Runway painting (Nano Banana 2.1, 1K, 16:9, 2026-11-02) quantized by quantize_still.py; the cold open card and the Episode 1 credits (docs/MEDIA_BUILD.md 2)",
+ "extraColors": [
+  "#33404f",
+  "#3e5875"
+ ],
+ "colors": 65,
+ "source": "runway",
+ "replaces": "dialog_keyart (the Willowmere key-art cell; stays as the fallback until this file loads)"
+}

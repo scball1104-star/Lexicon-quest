@@ -1,29 +1,23 @@
 // Key art backdrops for the title, name entry, prologue, title cards and credits.
 //
-// Preferred source: the palette-quantized 384x216 stages in assets/backdrops (manifest atlases `title` and
-// `dialog_keyart`, see assets/backdrops/README.md). They sit at the same pixel density as the tiles and
-// sprites (CRITIQUE_1 C1), so they are drawn 1:1 with nearest-neighbor and never scaled. A slow drift of at
-// most 2 px is kept by sliding the image by whole pixels and replicating its edge column/row into the strip
-// that opens up. Fallback when the atlas is missing: the old runtime crop of ../assets/art/environments.webp
-// (2 columns x 4 rows; cell 0 = Willowmere).
+// Source: the palette-quantized 384x216 stages in assets/backdrops (manifest atlases `title`, `dialog_keyart`, and the
+// paintings battle.js path-loads: `paint_*`, docs/MEDIA_BUILD.md). Drawn 1:1, nearest-neighbor, never scaled; a slow
+// drift of at most 2 px slides the image by whole pixels and replicates its edge into the strip that opens. Fallback
+// when the atlas is missing: the old runtime crop of ../assets/art/environments.webp (2 x 4 cells; cell 0 = Willowmere).
 //
-// Darkening (CRITIQUE_2 D1): the vignette, the flat `dark` tint and the prologue's text band are NOT alpha
-// blended (that multiplied the 78 backdrop colours into thousands). Every pixel is instead mapped to one of
-// the backdrop's OWN colours: each colour gets a ladder of darker palette colours (DARK_LEVELS brightness
-// steps, nearest strictly darker colour in the image), and the wanted darkness per screen pixel picks a rung,
-// with a Bayer 4x4 ordered dither between neighbouring rungs where the amount is fractional (the vignette).
-// A flat `dark` that lands exactly on a rung (DARK.one .. DARK.five) draws with no dither pattern at all.
-// The composed frame is cached per (backdrop, drift offset, darkening), so the per-pixel pass runs only when
-// the drift steps, not every frame.
+// Darkening (CRITIQUE_2 D1) never alpha blends (that multiplied 78 colours into thousands): every pixel maps to one of
+// the backdrop's OWN colours. Each colour gets a ladder of darker colours (DARK_LEVELS steps, nearest strictly darker
+// colour in the image); the wanted darkness per pixel picks a rung, Bayer 4x4 dithered between rungs where fractional
+// (the vignette). A flat `dark` on a rung (DARK.one .. DARK.five) draws with no pattern. The composed frame is cached
+// per (backdrop, drift, darkening), so the per-pixel pass runs when the drift steps, not every frame.
 //
-//   const art = new KeyArt(engine, { backdrop: 'title', cell: 0 });   // atlas id + fallback cell
+//   const art = new KeyArt(engine, { backdrop: 'title', card: 'paint_card_x', cell: 0 });   // atlas id, painted card, crop cell
 //   art.update(dt); art.draw(r, { dark: DARK.one, vignette: true });
 //   drawBackdrop(r, 'dialog_keyart', { ox, oy, dark, vignette, band })  // one-off; false when missing
 //   drawKeyArt(r, cell, { ox, oy, dark, vignette, zoom })               // the crop fallback (no drift state)
 //
-//   dark:     0..1 (alpha of an ink tint, as before). DARK.one .. DARK.five are the rung-exact values.
-//   vignette: true adds the radial + bottom falloff (dithered between rungs).
-//   band:     { y, h, dark, alpha } darkens rows y..y+h by `dark` (times alpha): the prologue's text strip.
+//   dark: 0..1 (alpha of an ink tint); DARK.one .. DARK.five are the rung-exact values. vignette: radial + bottom
+//   falloff (dithered between rungs). band: { y, h, dark, alpha } darkens rows y..y+h (the prologue's text strip).
 
 const COLS = 2, ROWS = 4;
 export const BACKDROP_DRIFT = 2;     // max px a quantized backdrop slides (per axis)
@@ -87,11 +81,10 @@ export function keyArtImage(r) {
   return r.assets && r.assets.has('environments') ? r.assets.img('environments') : null;
 }
 
-/** The quantized backdrop image for an atlas id (assets/backdrops), or null when it is not loaded. */
+/** The quantized backdrop image for an id (a manifest atlas, or a painting battle.js path-loaded), or null when not loaded. */
 export function backdropImage(r, id) {
   if (!id || !r.assets || !r.assets.has(id)) return null;
-  const atlas = r.assets.atlas(id);
-  const img = atlas && !atlas.placeholder ? atlas.image : null;
+  const img = r.assets.img(id);
   if (!img) return null;
   const w = img.naturalWidth || img.width || 0, h = img.naturalHeight || img.height || 0;
   return w >= r.W && h >= r.H ? img : null;
@@ -300,6 +293,7 @@ export class KeyArt {
   constructor(engine, o = {}) {
     this.engine = engine;
     this.backdrop = o.backdrop || null;
+    this.card = o.card || null;        // a painted story card (docs/MEDIA_BUILD.md 2), lazy; `backdrop` stands in until it loads
     this.cell = o.cell || 0;
     this.drift = o.drift ?? 1;         // screen px per second (crop fallback)
     this.range = o.range ?? 10;        // +- px (crop fallback)
@@ -327,7 +321,8 @@ export class KeyArt {
   }
   get by() { return this.drift ? Math.round(Math.sin(this.t / 9)) : 0; }
   draw(r, o = {}) {
-    if (this.backdrop && drawBackdrop(r, this.backdrop, { ox: this.bx, oy: this.by, ...o })) return true;
+    const id = this.card && backdropImage(r, this.card) ? this.card : this.backdrop;
+    if (id && drawBackdrop(r, id, { ox: this.bx, oy: this.by, ...o })) return true;
     return drawKeyArt(r, this.cell, { ox: this.ox, oy: this.oy, zoom: this.zoom, ...o });
   }
 }

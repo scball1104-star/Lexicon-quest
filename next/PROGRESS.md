@@ -481,3 +481,19 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Checked live right after: the page loads to the title on desktop and phone sizes with no console errors, the Deep
   Stacks pack downloads from the network, and the service worker takes over on the second load. One thing I could not
   check from here is an offline reload. The ship is noted on the Ship log issue.
+
+## 2026-11-02 (Mon) 1:20 PM: story cards and hero sounds on a pull request (not published)
+- Five painted story cards are in: the bell tower at night (the opening card and the Episode 1 credits), the twelve bells
+  (End of Episode 1), Hollowmere's fountain at dusk (the Episode 2 cards and credits), the Deep Stacks hall (behind the
+  Archivist's record screen) and the Binder's spine (the B100 cards, with a new "The Binder is bound." card after the
+  fight). Each is about 25 KB and loads after the title, so the first download did not move; the old key art stands in
+  until a card has loaded. The bells painting shows more than twelve bells; the card's text sits over it, and a retake with
+  the bells counted out came out worse, so the first stays unless you want another.
+- Twelve sounds from Runway (ElevenLabs Text to SFX): four core sounds replaced in place at or under their old size (the
+  thirteenth bell, the twelve-bell peal, the chest, the level-up sparkle; the synthesized originals stay in the game as
+  their fallbacks, so the two can be compared by ear), and eight new ones in a lazy pack fetched after the title (a blue
+  chest, the Binder's three phase stings, the Stacks' stair down, the Bookmark, the Game Over card, the title's confirm).
+- Runway credits: 24 on the cards (six paintings), about 27 on the sounds. The video test and the trailer brief went to
+  your inbox on Saturday; both wait on your answers, and no video credits were spent.
+- All of it is pull request #21 into overhaul. GitHub's gate runs on it; merging lands it on overhaul only. Shipping waits
+  for your word, or Stephen's.

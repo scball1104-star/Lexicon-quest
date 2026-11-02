@@ -448,12 +448,20 @@
    "group": "field",
    "pack": "core"
   },
-  "chest_open": {
-   "src": "assets/audio/sfx/chest_open.wav",
+  "chest_open_synth": {
+   "src": "assets/audio/sfx/chest_open_synth.wav",
    "volume": 1.0,
    "duration": 0.5,
    "group": "field",
-   "pack": "core"
+   "pack": "media"
+  },
+  "chest_open": {
+   "src": "assets/audio/sfx/chest_open.wav",
+   "volume": 1.0,
+   "duration": 0.498,
+   "group": "field",
+   "pack": "core",
+   "fallback": "chest_open_synth"
   },
   "pot_break": {
    "src": "assets/audio/sfx/pot_break.wav",
@@ -581,19 +589,35 @@
    "group": "story",
    "pack": "core"
   },
-  "bell_thirteenth": {
-   "src": "assets/audio/sfx/bell_thirteenth.wav",
+  "bell_thirteenth_synth": {
+   "src": "assets/audio/sfx/bell_thirteenth_synth.wav",
    "volume": 1.0,
    "duration": 0.787,
    "group": "big",
-   "pack": "core"
+   "pack": "media"
+  },
+  "bell_thirteenth": {
+   "src": "assets/audio/sfx/bell_thirteenth.wav",
+   "volume": 1.0,
+   "duration": 0.777,
+   "group": "big",
+   "pack": "core",
+   "fallback": "bell_thirteenth_synth"
+  },
+  "bell_peal_synth": {
+   "src": "assets/audio/sfx/bell_peal_synth.wav",
+   "volume": 1.0,
+   "duration": 4.252,
+   "group": "story",
+   "pack": "media"
   },
   "bell_peal": {
    "src": "assets/audio/sfx/bell_peal.wav",
    "volume": 1.0,
-   "duration": 4.252,
+   "duration": 4.0,
    "group": "story",
-   "pack": "core"
+   "pack": "core",
+   "fallback": "bell_peal_synth"
   },
   "sign_fade": {
    "src": "assets/audio/sfx/sign_fade.wav",
@@ -874,12 +898,20 @@
    "group": "magic",
    "pack": "core"
   },
-  "level_up_sparkle": {
-   "src": "assets/audio/sfx/level_up_sparkle.wav",
+  "level_up_sparkle_synth": {
+   "src": "assets/audio/sfx/level_up_sparkle_synth.wav",
    "volume": 1.0,
    "duration": 1.05,
    "group": "magic",
-   "pack": "core"
+   "pack": "media"
+  },
+  "level_up_sparkle": {
+   "src": "assets/audio/sfx/level_up_sparkle.wav",
+   "volume": 1.0,
+   "duration": 1.0,
+   "group": "magic",
+   "pack": "core",
+   "fallback": "level_up_sparkle_synth"
   },
   "drop_common": {
    "src": "assets/audio/sfx/drop_common.wav",
@@ -1147,6 +1179,70 @@
    "vary": 0.03,
    "fallback": "crystal_hit"
   },
+  "bookmark_use": {
+   "src": "assets/audio/sfx/bookmark_use.wav",
+   "volume": 1.0,
+   "duration": 0.799,
+   "group": "story",
+   "pack": "media",
+   "fallback": "page_flutter"
+  },
+  "title_confirm": {
+   "src": "assets/audio/sfx/title_confirm.wav",
+   "volume": 1.0,
+   "duration": 1.0,
+   "group": "ui",
+   "pack": "media",
+   "fallback": "confirm"
+  },
+  "chest_blue": {
+   "src": "assets/audio/sfx/chest_blue.wav",
+   "volume": 1.0,
+   "duration": 1.577,
+   "group": "field",
+   "pack": "media",
+   "fallback": "chest_open"
+  },
+  "binder_phase_1": {
+   "src": "assets/audio/sfx/binder_phase_1.wav",
+   "volume": 1.0,
+   "duration": 1.65,
+   "group": "big",
+   "pack": "media",
+   "fallback": "door_rumble"
+  },
+  "binder_phase_2": {
+   "src": "assets/audio/sfx/binder_phase_2.wav",
+   "volume": 1.0,
+   "duration": 2.0,
+   "group": "big",
+   "pack": "media",
+   "fallback": "page_flutter"
+  },
+  "binder_phase_3": {
+   "src": "assets/audio/sfx/binder_phase_3.wav",
+   "volume": 1.0,
+   "duration": 1.935,
+   "group": "big",
+   "pack": "media",
+   "fallback": "fire"
+  },
+  "stairs_down": {
+   "src": "assets/audio/sfx/stairs_down.wav",
+   "volume": 1.0,
+   "duration": 1.437,
+   "group": "field",
+   "pack": "media",
+   "fallback": "stairs"
+  },
+  "death_card": {
+   "src": "assets/audio/sfx/death_card.wav",
+   "volume": 1.0,
+   "duration": 2.0,
+   "group": "big",
+   "pack": "media",
+   "fallback": "door_rumble"
+  },
   "text_blip": {
    "alias": "text_blip_mid"
   }
@@ -1280,6 +1376,22 @@
     "sluice_turn",
     "water_flow",
     "wheel_turn"
+   ]
+  },
+  "media": {
+   "sfx": [
+    "bell_peal_synth",
+    "bell_thirteenth_synth",
+    "binder_phase_1",
+    "binder_phase_2",
+    "binder_phase_3",
+    "bookmark_use",
+    "chest_blue",
+    "chest_open_synth",
+    "death_card",
+    "level_up_sparkle_synth",
+    "stairs_down",
+    "title_confirm"
    ]
   },
   "x1": {

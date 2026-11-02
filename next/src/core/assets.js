@@ -1,19 +1,11 @@
-// Asset loader driven by assets/manifest.json (paths relative to next/):
-// {
-//   "images":  { "id": "assets/tiles/terrain.png", ... },
-//   "atlases": { "id": "assets/sprites/party_field.json", ... },   // JSON with "image" (relative to the JSON)
-//   "json":    { "id": "assets/palette.json", ... },
-//   "fonts":   { "main": "assets/ui/font.json", "large": "...", "num": "..." },
-//   "lazy":    { "story": ["dialog_keyart"], "world": ["terrain", ...], "battle": [...], "art": [...] }
-// }
-// An entry may also be { "path": "...", "optional": true }. Ids are file stems by convention.
-// Missing assets never crash the game: they log one console.warn and return a visible placeholder.
+// Asset loader driven by assets/manifest.json (paths relative to next/): "images", "atlases" (JSON with "image",
+// relative to the JSON), "json", "fonts", and "lazy" groups ({ "story": ["dialog_keyart"], "world": [...], ... }).
+// An entry may also be { "path": "...", "optional": true }. Ids are file stems by convention. Missing assets never
+// crash the game: one console.warn and a visible placeholder.
 //
-// Load order (W6-pwa): loadManifest() loads every id that is NOT in a "lazy" group (the critical set the
-// title needs), then loadLazy() loads the groups one after another in manifest order (world, portraits,
-// battle, ...) while the player sits on the title / name entry / prologue. Scenes keep using img() /
-// atlas() / has() as before; a lazy asset that has not arrived yet behaves like a missing one (placeholder,
-// has() false) and the scenes' existing fallbacks cover that window.
+// Load order (W6-pwa): loadManifest() loads every id NOT in a lazy group (the critical set the title needs), then
+// loadLazy() loads the groups in manifest order while the player sits on the title / name entry / prologue. A lazy
+// asset that has not arrived behaves like a missing one (placeholder, has() false); the scenes' fallbacks cover it.
 //
 //   assets.img(id)            HTMLImageElement or a magenta checker placeholder
 //   assets.atlas(id)          normalized atlas (see normalizeAtlas) or a placeholder atlas
