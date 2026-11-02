@@ -497,3 +497,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   your inbox on Saturday; both wait on your answers, and no video credits were spent.
 - All of it is pull request #21 into overhaul. GitHub's gate runs on it; merging lands it on overhaul only. Shipping waits
   for your word, or Stephen's.
+
+## 2026-11-02 (Mon) 2:40 PM: shipped
+- On your word at 2:38 PM, overhaul went to main as a plain fast-forward (live main 9c1b2de). Players now get the five painted
+  story cards and the twelve Runway sounds, with the old key art and the synthesized sounds standing in wherever a lazy file
+  has not arrived yet.
+- Before the push, every item on the ship list ran green on this PC: the full NEXT suite (1219 tests), the screenshot sweep
+  (212 of 212), the balance check (all targets met) and the old game's gate, plus GitHub's gate on each pull request. One
+  wrinkle for the record: this PC's Windows checkout changes line endings, which made two checks disagree with GitHub; the
+  service worker was rebuilt from the repo's own bytes to settle it, and the note is in the hand-off file.
+- Checked live right after: the new worker takes over on a fresh visit, the title loads on desktop and phone sizes with no
+  console errors, and all five card files download at the title. Not checked from here: an offline reload.
+- Still with you: the video test and the trailer brief (in your inbox since Saturday), whether the bells card should be
+  repainted with exactly twelve bells, and the four swapped sounds by ear. November's nine Suno themes wait for the 27th.
