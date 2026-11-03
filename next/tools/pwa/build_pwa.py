@@ -39,9 +39,10 @@ PACKS_MIRROR = pathlib.Path(__file__).resolve().parent / 'packs.json'
 PACK_FILES = NEXT / 'assets' / 'pack_files.json'
 PACK_ASSET_DIRS = ('tiles', 'sprites', 'ui', 'backdrops')
 # Core files that load on first use, not at install (docs/MEDIA_BUILD.md 1): the painted battle stages and the Episode 3
-# field systems (src/world/ep3/, imported lazily by field.js). Left out of the shell
+# field systems (src/world/ep3/, imported lazily by field.js), and the moving paintings (docs/MEDIA_BUILD.md 5: the clips,
+# their list and src/ui/clips/player.js, imported by ui/keyart.js the first time a painting with a clip is drawn). Left out of the shell
 # list (so the first download does not move) and matched by PACK_PATTERN (so the service worker runtime-caches them).
-LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/')
+LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/', 'assets/clips/', 'src/ui/clips/')
 
 
 def is_lazy(rel):

@@ -6416,6 +6416,50 @@
      "frames": 90
     }
    ]
+  },
+  {
+   "name": "battle_clip_valley",
+   "note": "MEDIA_BUILD 5: the valley stage plays its clip (paint_battle_valley.webm, re-dithered to the still's colours); qa/ui/clips_headless.py checks it moves and the 404 fallback",
+   "steps": [
+    {
+     "call": "battle",
+     "args": [
+      "valley_wolves",
+      {
+       "fresh": true,
+       "seed": 3
+      }
+     ]
+    },
+    {
+     "waitFor": "LQ_ENGINE.scene && LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer && LQ_ENGINE.scene.backdropLayer.clipN > 30",
+     "timeout": 20000
+    },
+    {
+     "assert": "LQ_ENGINE.scene.backdropLayer.painted",
+     "message": "the painted stage (the clip's still) is the stage"
+    }
+   ]
+  },
+  {
+   "name": "ui_end_card_clip",
+   "note": "MEDIA_BUILD 5: the End of Episode 1 card over the twelve bells, playing paint_card_bells.webm under the text",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('titleCard')",
+     "timeout": 20000
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.engine.push('titleCard', { text: 'End of Episode 1', sub: 'The Missing Name', frames: 100000, card: 'paint_card_bells' }); return true; })()"
+    },
+    {
+     "waitFor": "LQ_ENGINE.scene && LQ_ENGINE.scene.name === 'titleCard' && LQ_ENGINE.assets.has('paint_card_bells')",
+     "timeout": 20000
+    },
+    {
+     "wait": 3000
+    }
+   ]
   }
  ]
 }

@@ -100,7 +100,7 @@ export class PrologueScene {
     if (!this.attract) { this.art = null; this.cards = []; e.audio.stopMusic(0.6); this.handOff(); return; }
     this.cards = (data.cards || ATTRACT).slice();
     this.hold = data.frames || HOLD;
-    this.art = new KeyArt(e, { backdrop: data.backdrop || 'dialog_keyart', cell: data.cell ?? 0, drift: 1.4, range: 14 });
+    this.art = new KeyArt(e, { backdrop: data.backdrop || 'dialog_keyart', card: data.card || 'paint_card_bell_tower', cell: data.cell ?? 0, drift: 1.4, range: 14 });
     e.audio.music('title');
   }
 

@@ -96,3 +96,13 @@ ten maps and its edits to `nameless_hollow` and `nh_inn`. Its switch is `EP3_LIV
 played unpatched; `packsForMap(id)` lists every pack a map belongs to (nameless_hollow has x2 and ep3) and `world/maps.js`
 guards on all of them. Wanted from `ep2_started`, so the chained east gate is drawn all through Episode 2. Its `register()`
 also imports `src/world/ep3/` (lazy, never precached) so the field code is runtime-cached with the maps.
+
+## Moving paintings (2026-11-03, media-video)
+
+`tools/pwa/build_pwa.py` `LAZY_PREFIXES` gains `assets/clips/` (the seven WebM clips and `clips.json`) and `src/ui/clips/`
+(the player, imported by `ui/keyart.js` with `import()` the first time a painting with a clip is drawn). Both are left out
+of the precache and the modulepreload block and matched by `PACK_PATTERN`, so the service worker runtime-caches them on
+first use (stale-while-revalidate into `lq-next-runtime-v1`). The clip is fetched whole with `fetch` (no Range request).
+Nothing moved before the tap prompt (net core JS +372 gzip bytes, the hook in `keyart.js`, `battle.js` and `prologue.js`).
+See docs/MEDIA_BUILD.md 5.
+

@@ -21,6 +21,7 @@ import { touchUi } from '../ui/list.js';
 import * as HUD from '../battle/scene/hud.js';
 import { drawWindow, drawLabel, drawIcon, drawIcon16, drawPortrait, drawDivider, uiAtlas, btn } from '../ui/window.js';
 import { NumberPopups } from '../ui/numberPopup.js';
+import { backdropClip } from '../ui/keyart.js';
 import { animFrameAt } from '../core/assets.js';
 import { createRng, hashSeed } from '../core/rng.js';
 
@@ -361,6 +362,8 @@ export class BattleScene {
       this.backdropLayer = buildBackdrop(e, this.zone, !!(this.encounter && this.encounter.boss), this.stage);
       e.renderer.setBackdrop(this.backdropLayer.canvas);
     }
+    const bl = this.backdropLayer, clip = bl && bl.painted && backdropClip(e.renderer, PAINTED[bl.key]);
+    if (clip && clip.n !== bl.clipN) { bl.clipN = clip.n; bl.ctx.drawImage(clip.canvas, 0, 0); drawStageBand(bl.ctx, bl.band); }
     if (this.hitstop > 0) { this.hitstop--; return; }
     for (const a of this.actors.values()) a.update();
     this.fx.update();
