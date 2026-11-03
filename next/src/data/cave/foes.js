@@ -43,6 +43,13 @@
 //   40.6 / 55.7 against the plan's 12 / 25 / 40 / 55, the Binder won within 20 rounds 97% of the time (ignoring its telegraphs,
 //   69%). C1-data's checkpoint harness (qa/cave/data_sanity.test.mjs, full HP each fight) still holds: careful 100% to B99.
 //
+// E3-switch (2026-11-02, EP3_LIVE on): bands 4 and 5 draw POOL_EMBER and POOL_FORGE. At the fallback's correction the Ember
+//   Shelves were soft (B60 checkpoint: attack-only won 97%; the descent lost nobody B60-B99) and half the Forge's groups were elite
+//   (its fixed templates plus a roll on top). Now: BAND_ADJUST 4 is hp 1.3, power 1.2 (the one-shot cap binds), speed 1.5; the
+//   Forge's fixed elite templates are a third of its weight and roll nothing on top (band.ownElites); band 4 rolls one in three.
+//   Checkpoint (30 fights): B60 careful 100% / attack-only 73%, B99 100% / 67%. Descent: deaths B60-B99 8.9%, arrival B60 40.6,
+//   B90 57.1, the Binder 100% within 20 rounds. The fallback table above is the EP3_LIVE-off record.
+//
 // ELITES: none before B20, one modifier B20 to B49, two from B50 (plan 5.2), rolled deterministically by encounterFor at
 //   ELITE_RATE_DEEP and written into the spec as a fixed `elite: { mods, index }` (encounters.js honours a fixed elite whatever
 //   the caller's noElite says), so a floor's elites are the same on every machine. Every cave encounter is `noElite: true` so the
@@ -150,7 +157,7 @@ const POOL_FORGE = [       // Foundry F3 foes plus every earlier pool's elites (
   T('furnace', ['furnace_construct', 'furnace_construct'], 2, 'wander'),
   T('defender_pair', ['forge_defender', 'forge_defender'], 2),
   T('forge_mixed', ['forge_defender', 'slag_slime', 'slag_slime'], 2),
-  T('elite_knights', ['faceless_knight', 'faceless_knight'], 2, 'chase', { elite: 2 }),
+  T('elite_knights', ['faceless_knight', 'faceless_knight'], 1.5, 'chase', { elite: 2 }),   // 1.5 (was 2): the elite templates are a third of the pool
   T('elite_shelf', ['tome_golem', 'ink_wraith', 'ink_wraith'], 1, 'wander', { elite: 2 }),
   T('elite_pack', ['thornback_wolf', 'thornback_wolf', 'thornback_wolf'], 1, 'chase', { elite: 2 }),
   T('elite_shadows', ['borrowed_shadow', 'shard_swarm'], 1, 'chase', { elite: 2 }),
@@ -196,7 +203,7 @@ export function buildBands(ep3Live = EP3_LIVE) {
   const pools = [POOL_CATALOGUE, POOL_CELLARS, POOL_COURT, ep3Live ? POOL_EMBER : POOL_FALLBACK_4, ep3Live ? POOL_FORGE : POOL_FALLBACK_5];
   return BAND_ROWS.map((row, i) => {
     const pool = pools[i].map((t) => ({ ...t, enemies: t.enemies.slice() }));
-    return { ...row, pool, fallback: !ep3Live && i >= 3, nativeLevel: weightedMean(pool, templateLevel), meanExp: weightedMean(pool, templateExp) };
+    return { ...row, pool, fallback: !ep3Live && i >= 3, ownElites: pool.some((t) => t.elite), nativeLevel: weightedMean(pool, templateLevel), meanExp: weightedMean(pool, templateExp) };
   });
 }
 export const BANDS = buildBands(EP3_LIVE);
@@ -300,7 +307,7 @@ export const OWN_CAPS = { power: 400, speed: 6 };
  * before and after of every number here.
  */
 export const BAND_ADJUST = { 1: { hp: 1, power: 1, speed: 1 }, 2: { hp: 1, power: 1.15, speed: 1 }, 3: { hp: [1.12, 1.15], power: 1, speed: 1.35 },
-  4: { hp: 1.15, power: 0.85, speed: 1 }, 5: { hp: 1.15, power: 0.85, speed: 1 } };
+  4: { hp: 1.3, power: 1.2, speed: 1.5 }, 5: { hp: 1.15, power: 0.85, speed: 1 } };
 /** A band's correction on floor f: a number, or [first, last] read linearly from the band's first floor to its last. */
 function bandAdjust(band, key, f) {
   const v = (BAND_ADJUST[band.k] && BAND_ADJUST[band.k][key]) ?? 1;
@@ -465,7 +472,9 @@ export function encounterFor(seed, floor, index, opts = {}) {
   };
   let mods = null;
   if (t.elite) mods = pickMods(rng, t.elite);
-  else if (s.elite > 0 && rng.chance(band.fallback ? FALLBACK_ELITE_RATE : eliteRateAt(f))) mods = pickMods(rng, s.elite);
+  // bands 4 and 5 lead one group in three with an elite (FALLBACK_ELITE_RATE); a pool with fixed elite templates (the live Forge)
+  // has those as its elites and rolls none on top (E3-switch: rolling on top made half the Forge's groups elite)
+  else if (s.elite > 0 && !band.ownElites && rng.chance(band.k >= 4 ? FALLBACK_ELITE_RATE : eliteRateAt(f))) mods = pickMods(rng, s.elite);
   if (mods) spec.elite = { mods, index: 0 };
   return spec;
 }

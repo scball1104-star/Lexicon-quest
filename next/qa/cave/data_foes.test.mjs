@@ -134,9 +134,9 @@ test('scale(floor): sane bounds, elites from B20 and two mods from B50, raw mult
   const [s1, s10, s30, s60, s99] = [1, 10, 30, 60, 99].map((f) => F.scale(f));
   assert.ok(s1.hp < 0.8 && s1.power < 1, 'B1 is gentler than the valley (three Lv 1 members, empty hands)');
   assert.ok(s10.hp > s1.hp * 2 && s30.hp > s10.hp && s99.power > s60.power && s99.speed > s30.speed);
-  // a different band table (EP3 live) gives its own curve without touching the live one
-  const live = F.buildBands(true);
-  const s70 = F.scale(70, { bands: live });
+  // a different band table (the EP3_LIVE-off fallback) gives its own curve without touching the live one
+  const other = F.buildBands(!F.BANDS[3].fallback ? false : true);
+  const s70 = F.scale(70, { bands: other });
   assert.ok(s70.hp > 0 && s70.hp !== F.scale(70).hp);
   assert.equal(F.scale(70).hp, F.scale(70).hp);
 });
@@ -159,7 +159,8 @@ test('encounterFor is deterministic, picks from the band\'s pool, carries the sc
   assert.equal(count(5).elites, 0); assert.equal(count(19).elites, 0);
   const b30 = count(30); assert.ok(b30.elites > 0.05 && b30.elites < 0.25 && b30.two === 0, JSON.stringify(b30));
   const b55 = count(55); assert.ok(b55.elites > 0.1 && b55.elites < 0.35 && b55.two === b55.elites, JSON.stringify(b55));
-  // the Forge of Names (fallback): an elite leader on one group in three, two mods (C4-fixes, CRITIQUE_STACKS 6; was every group)
+  // the Forge of Names: an elite leader on one group in three, two mods (C4-fixes, CRITIQUE_STACKS 6; was every group); live, its
+  // fixed elite templates are that third and nothing rolls on top (E3-switch; rolling on top made it half)
   const b85 = count(85); assert.ok(Math.abs(b85.elites - F.FALLBACK_ELITE_RATE) < 0.06, JSON.stringify(b85)); assert.equal(b85.two, b85.elites);
   assert.equal(F.encounterFor(1, 100, 0).floor, 99, 'B100 has no ordinary encounters: the index clamps to B99');
 });
@@ -201,7 +202,7 @@ test('zones: cave_band_1..5 and cave_boss resolve on ZONES but are not listed, n
     assert.ok(!ZONE_ORDER.includes(id) && !OPTIONAL_ZONES.includes(id));
     assert.ok(z.backdrop && z.music && Array.isArray(z.plan));
   }
-  assert.deepEqual(ZONES.cave_band_1.level, [1, 16]); assert.deepEqual(ZONES.cave_band_5.level, [49, 59]);
+  assert.deepEqual(ZONES.cave_band_1.level, [1, 16]); assert.deepEqual(ZONES.cave_band_5.level, [52, 58]);   // E3-switch: the live Forge's curve (was [49, 59] on the fallback)
   assert.deepEqual(ZONES.cave_boss.plan, [['cave_binder', 1]]);
 });
 

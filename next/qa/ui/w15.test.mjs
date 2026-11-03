@@ -15,7 +15,7 @@ import { bindGlyphs, glyphNameFor, wordCap, ABILITY_WORDS } from '../../src/ui/g
 import { ChoiceBox } from '../../src/ui/choice.js';
 import { createGame, newGameEp2, serialize, saveMeta, EP1_DONE_FLAGS, setPosition } from '../../src/game/state.js';
 import { partyChat, journal, MAIN_QUEST_EP2 } from '../../src/data/quests.js';
-import { END_CARD_EP2, BARKS } from '../../src/data/text.js';
+import { END_CARD_EP2, END_CARD_EP2_LIVE, BARKS } from '../../src/data/text.js';
 import { CREDITS_HANDOFF, sceneAllowed } from '../../src/game/story.js';
 import { ENCOUNTERS, ZONES, C3_POWER, rollEncounter } from '../../src/data/encounters.js';
 import { createEncounterBattle } from '../../src/battle/rules.js';
@@ -179,10 +179,14 @@ test('choice boxes take one tap; the save guard keeps the two-step tap', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ fix 3
-test('after the Episode 2 credits: a closing card, and Talk and the journal say the road is not open yet', () => {
-  assert.equal(CREDITS_HANDOFF[2].endCard, END_CARD_EP2);
-  assert.equal(END_CARD_EP2.text, 'To be continued');
-  for (const s of [END_CARD_EP2.text, END_CARD_EP2.sub]) assert.ok(s.length <= 42 && /^[\x20-\x7e]+$/.test(s));
+test('after the Episode 2 credits: a closing card, and Talk and the journal point at the morning and the sand road', () => {
+  // Episode 3 is live (EP3_LIVE): the card says what comes next, and Talk names a step the player can take (was: "not playable
+  // yet" and "the road isn't open yet", END_CARD_EP2 and EPILOGUE2_WAIT, kept for a build with the switch off)
+  assert.equal(CREDITS_HANDOFF[2].endCard, END_CARD_EP2_LIVE);
+  assert.equal(END_CARD_EP2_LIVE.text, 'To be continued');
+  assert.equal(END_CARD_EP2_LIVE.sub, 'Episode 3 begins in the morning.');
+  for (const card of [END_CARD_EP2_LIVE, END_CARD_EP2]) for (const s of [card.text, card.sub]) assert.ok(s.length <= 42 && /^[ -~]+$/.test(s));
+  assert.equal(END_CARD_EP2_LIVE.backdrop, END_CARD_EP2.backdrop, 'the same card art, only the line changes');
   assert.equal(CREDITS_HANDOFF[1].endCard, undefined, 'Episode 1 hands over to Episode 2 as before');
   const g = newGameEp2('Arden');
   for (const st of MAIN_QUEST_EP2.steps) for (const f of [st.done].flat().filter(Boolean)) g.flags[f] = true;
@@ -192,11 +196,12 @@ test('after the Episode 2 credits: a closing card, and Talk and the journal say 
     const c = partyChat(has, map);
     assert.equal(c.step.id, 'epilogue2');
     const text = c.lines.map((l) => l.text).join(' ');
-    assert.match(text, /isn't open yet/, `${map}: Talk says the road is not open`);
-    assert.ok(!/When you're ready|Not before/.test(text), `${map}: no instruction the player cannot follow`);
+    assert.match(text, /Emberpeak/, `${map}: Talk names where the story goes`);
+    assert.match(text, /east gate/, `${map}: and the way there`);
+    assert.ok(!/isn't open yet|not playable/.test(text), `${map}: nothing says the road is shut`);
   }
-  assert.match(partyChat(has, 'nh_inn').lines.map((l) => l.text).join(' '), /mirror in the chapel/, 'and names something to do');
-  assert.match(journal(has).main.text, /not open yet/);
+  assert.match(journal(has).main.text, /sand road/);
+  assert.ok(!/not open yet/.test(journal(has).main.text));
 });
 
 // ------------------------------------------------------------------------------------------------ fix 7

@@ -15,7 +15,7 @@ import { attach, turnSluice } from '../../src/world/ep3/index.js';
 import { MEMORY_IDS } from '../../src/world/ep3/fx.js';
 import { TEST_FORGE, TEST_FORGE_DARK } from '../../src/world/ep3/_testforge.js';
 import { SCENES, LINES, storyCollisions, creditsPending, markCreditsRolled, CREDITS_HANDOFF, sceneAllowed } from '../../src/game/story.js';
-import { END_CARD_EP2, END_CARD_EP3, CREDITS_EP3 } from '../../src/data/text.js';
+import { END_CARD_EP2_LIVE, END_CARD_EP3, CREDITS_EP3 } from '../../src/data/text.js';
 import { scenes as EP3_SCENES } from '../../src/data/story/ep3.js';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -253,10 +253,12 @@ test('story plumbing: Episode 3 scenes and lines merged, no collisions, the cred
   assert.equal(CREDITS_HANDOFF[3].mark, 'inn_bed');
   assert.equal(CREDITS_HANDOFF[3].cards, CREDITS_EP3);
   assert.equal(CREDITS_HANDOFF[3].endCard, END_CARD_EP3);
-  assert.equal(CREDITS_HANDOFF[2].endCard, END_CARD_EP2, 'switch off: Episode 2 card unchanged');
+  assert.equal(CREDITS_HANDOFF[2].endCard, END_CARD_EP2_LIVE, 'switch on: the Episode 2 card says Episode 3 begins in the morning');
   const g2 = { counters: {} };
   markCreditsRolled(g2, 2); markCreditsRolled(g2, 1);
   assert.deepEqual(g2.counters, { credits2_rolled: 1, credits_rolled: 1 });
-  assert.equal(sceneAllowed('ep3_morning', () => true), false, 'EP3_LIVE off: never');
+  assert.equal(sceneAllowed('ep3_morning', (k) => k === 'ep2_complete'), true, 'EP3_LIVE on: the morning after the Episode 2 credits');
+  assert.equal(sceneAllowed('ep3_morning', (k) => ['ep2_complete', 'ep3_morning_done'].includes(k)), false, 'once only');
+  assert.equal(sceneAllowed('ep3_morning', () => false), false, 'never before Episode 2 is finished');
   assert.equal(sceneAllowed('sand_road_arrival', (k) => k === 'sand_gate_open'), true);
 });

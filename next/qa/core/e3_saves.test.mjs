@@ -86,13 +86,16 @@ test('autosave: a run that owns slot 2 writes slot 2 and nothing else, across se
 const env = (name, at, flags) => ({ savedAt: at, meta: { name }, data: { heroName: name, flags } });
 const fake = (slots) => ({ slots: 3, loadEnvelope: (n) => slots[n] || null });
 
-test('episodes: the switch is off in this build, and ep2Offer is unchanged (title re-exports it)', () => {
-  assert.equal(EP3_LIVE, false);
+test('episodes: the switch is on in this build, and ep2Offer is unchanged (title re-exports it)', () => {
+  assert.equal(EP3_LIVE, true, 'Episode 3 is live (E3-switch, 2026-11-02)');
   assert.equal(ep2Offer, ep2OfferDirect);
   const s = fake({ 1: env('Arden', '2026-10-20T10:00:00Z', { ep1_complete: true }), 2: env('Sol', '2026-10-23T10:00:00Z', { ep1_complete: true, ep2_complete: true }) });
   const o = episodeOffers(s, '');
   assert.deepEqual(o.ep2, ep2Offer(s, ''), 'the Episode 2 offer is exactly ep2Offer');
-  assert.equal(o.ep3.show, false, 'EP3_LIVE is false: no row even with an ep2_complete save');
+  assert.deepEqual([o.ep3.show, o.ep3.name, o.ep3.slot], [true, 'Sol', 2], 'EP3_LIVE: the row shows once a save holds ep2_complete');
+  assert.equal(episodeOffers(s, '', { live: false }).ep3.show, false, 'with the switch off: no row even with an ep2_complete save');
+  const ep1 = fake({ 1: env('Arden', '2026-10-20T10:00:00Z', { ep1_complete: true }) });
+  assert.equal(episodeOffers(ep1, '').ep3.show, false, 'live, an Episode 1 finish alone shows no row');
 });
 
 test('episodes: with the switch live the row needs an ep2_complete save, and names the newest finisher', () => {

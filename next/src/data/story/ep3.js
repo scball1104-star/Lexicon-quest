@@ -13,16 +13,13 @@
 // warden_after, the Aurel pattern). Mara speaks only in memory, tagged "A Voice" until she is read off the Bell Gate.
 // qa/content/ep3.test.mjs scans every box for both names before their reveal.
 //
-// THE SWITCH. `ep3_morning` and `sand_gate` also need EP3_LIVE (src/game/episodes.js). While it is false they do
-// nothing, no other scene can start (every other guard needs a flag only they set), and Episode 3 is unreachable.
+// THE SWITCH. `ep3_morning` and `sand_gate` also need EP3_LIVE (src/game/episodes.js); every other guard needs their flags.
 
 import { REWARDS_EP3 } from '../quests.js';
 import { CREDITS_EP3, EPISODE4_CARD } from '../text.js';
 import { EP3_LIVE } from '../../game/episodes.js';
 
-// Speakers with 48x48 portraits. Ilya borrows the built, unused `goggles_smith` painting (alias `ilya`); the Warden
-// uses a crop of its boss frame. A missing portrait simply draws no portrait (ui/window.js). Vex uses `silver_rogue`.
-// The Smith has Garrick's face: the party can see it, it is the word they cannot find.
+// Speakers with portraits (a missing one draws none). The Smith has Garrick's face: it is the word they cannot find.
 const PORTRAIT = {
   hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael', hazel: 'hazel',
   smith: 'garrick', smith_t: 'garrick', garrick_t: 'garrick', garrick_e: 'garrick',
@@ -67,7 +64,7 @@ async function ep3_morning(s) {
   await say(s, 'wren_up', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
   await s.walk('hero', ['down']);
   await s.camera.panTo('smith_seat', 40);
-  await narrate(s, 'By the hearth sits an old man grey with road dust, his hands open on his knees as if he has put something down.');
+  await narrate(s, `${s.mapId === 'nameless_hollow' ? 'Against the inn wall' : 'By the hearth'} sits an old man grey with road dust, his hands open on his knees as if he has put something down.`);
   await s.walk('bram', 'smith_seat');
   await s.face('bram', 'smith');
   await say(s, 'bram', '...Dad.');

@@ -226,6 +226,7 @@ export class Cutscene {
       },
       async setFlag(flag, value = true) { F.setFlag(flag, value); },
       async hasFlag(flag) { return stateHasFlag(F.game, flag); },
+      get mapId() { return F.mapId; },
       /**
        * give(itemId, qty); give('gold', n) adds n gold with the coin sound and the "Received n gold." toast;
        * give('exp', n) (X1) grants n EXP to every living party member: the toast "The party gains n EXP.", then the

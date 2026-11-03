@@ -1,10 +1,10 @@
 // The episode switch and the quick-start slot choice (E3-saves, EPISODE3_PLAN section 10). Pure: no DOM, no engine.
 // `episodeOffers(save, search)` says which title rows to show; `pickRunSlot(save)` says where an Episode 3 quick start
-// may save without ever touching another run. E3-integrate flips EP3_LIVE; nothing a player can reach changes before.
+// may save without ever touching another run.
 import * as encounters from '../data/encounters.js';
 
 /** The master switch. While false: ep3_morning never runs, the sand gate stays chained, no Episode 3 row on the title. */
-export const EP3_LIVE = false;
+export const EP3_LIVE = true;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }

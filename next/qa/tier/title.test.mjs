@@ -1,5 +1,5 @@
 // H7-hard-road: Fine Print on the title. The row "Fine Print" sits under Continue once any slot holds the latest live episode's
-// complete flag (ep2_complete today); it asks which finished record to carry, says where the run saves (never over a save),
+// complete flag (ep3_complete since Episode 3 went live; was ep2_complete); it asks which finished record to carry, says where the run saves (never over a save),
 // and Begin hands the carried game to the prologue (the cold open). scenes/title.js has one guarded line that loads the pack.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,6 +21,8 @@ function memorySave() {
   return createSave({ storage, now: () => new Date(Date.UTC(2026, 9, 28, 10, 0, t++)).toISOString(), log: () => {} });
 }
 const put = (save, n, g) => save.save(n, serialize(g), saveMeta(g));
+/** A finished Episode 3 record (EP3_LIVE: the unlock is ep3_complete): the quick start's party with the finish flag. */
+function finished(name) { const g = newGameEp3(name); g.flags.ep3_complete = true; return g; }
 
 function fakeEngine(save, touch = false) {
   const pops = [];
@@ -39,7 +41,7 @@ function fakeTitle(e, ids = ['new', 'continue', 'ep2', 'config'], rowH = 11) {
   return { name: 'title', engine: e, menu: { items, rowH, index: 1, update: () => null }, win: null, guard: null, draw() {} };
 }
 
-test('the title seam: one guarded line, after the menu is built, only when a record holds ep2_complete', () => {
+test('the title seam: one guarded line, after the menu is built, only when a record holds ep2_complete (the pack; the row itself wants ep3_complete)', () => {
   const lines = TITLE.split('\n').filter((l) => /LQ_TIER/.test(l));
   assert.equal(lines.length, 1, 'one line in scenes/title.js');
   assert.match(lines[0], /if \(this\.ep3\.slot != null\) ensurePack\('tier'\)\.then\(\(\) => globalThis\.LQ_TIER && LQ_TIER\.title\(this\)\)/);
@@ -53,21 +55,21 @@ test('the title seam: one guarded line, after the menu is built, only when a rec
   assert.equal(episodeOffers(save).ep3.slot, 2);
 });
 
-test('the records the ask lists: every slot holding ep2_complete, newest first, with name, level and place', () => {
+test('the records the ask lists: every slot holding ep3_complete, newest first, with name, level and place', () => {
   const save = memorySave();
   assert.deepEqual(tierRecords(save), []);
   put(save, 0, createGame('Wren'));
-  put(save, 1, newGameEp3('Arden'));
-  put(save, 3, newGameEp2('Holt'));
-  const later = newGameEp3('Tess');
+  put(save, 1, finished('Arden'));
+  put(save, 3, newGameEp3('Holt'));   // Episode 2 finished, Episode 3 not: not a record for Fine Print now
+  const later = finished('Tess');
   later.party[0].level = 15;
   put(save, 2, later);
   const recs = tierRecords(save);
-  assert.deepEqual(recs.map((r) => r.slot), [2, 1], 'only the Episode 2 finishes, newest first');
+  assert.deepEqual(recs.map((r) => r.slot), [2, 1], 'only the Episode 3 finishes, newest first');
   assert.equal(recs[0].name, 'Tess'); assert.equal(recs[0].level, 15);
   assert.match(recordLine(recs[1]), /^Arden, Lv 13, .+/);
   assert.ok(!/\u2014/.test(recordLine(recs[1])));
-  assert.equal(tierRecords(save, 'ep3_complete').length, 0, 'once Episode 3 ships the unlock moves to its finish');
+  assert.deepEqual(tierRecords(save, 'ep2_complete').map((r) => r.slot), [2, 3, 1], 'with EP3_LIVE off the unlock was the Episode 2 finish');
 });
 
 test('offerRow: "Fine Print" under Continue, once; nothing without a record', () => {
@@ -76,7 +78,9 @@ test('offerRow: "Fine Print" under Continue, once; nothing without a record', ()
   const empty = fakeTitle(e);
   assert.equal(offerRow(empty), false);
   assert.deepEqual(empty.menu.items.map((i) => i.id), ['new', 'continue', 'ep2', 'config']);
-  put(save, 1, newGameEp3('Arden'));
+  put(save, 3, newGameEp3('Holt'));
+  assert.equal(offerRow(fakeTitle(e)), false, 'an Episode 2 finish alone no longer unlocks it');
+  put(save, 1, finished('Arden'));
   const s = fakeTitle(e);
   assert.equal(offerRow(s), true);
   assert.deepEqual(s.menu.items.map((i) => i.id), ['new', 'continue', 'tier', 'ep2', 'config']);
@@ -106,7 +110,7 @@ test('layout: the menu never climbs over the logo\'s subtitle; with touch rows i
 test('the ask: pick a record, read the terms and where the run saves, Back is the default; Begin pops the choice', () => {
   const save = memorySave();
   put(save, 0, createGame('Wren'));
-  put(save, 2, newGameEp3('Arden'));
+  put(save, 2, finished('Arden'));
   const { e, pops } = fakeEngine(save);
   const sc = new FinePrintScene(e);
   sc.enter({});
@@ -132,7 +136,7 @@ test('the ask: pick a record, read the terms and where the run saves, Back is th
 test('the ask refuses when every slot holds a game (the run never replaces a save)', () => {
   const save = memorySave();
   for (const n of [0, 1, 3]) put(save, n, createGame('Wren'));
-  put(save, 2, newGameEp3('Arden'));
+  put(save, 2, finished('Arden'));
   const { e, pops } = fakeEngine(save);
   const sc = new FinePrintScene(e);
   sc.enter({});
