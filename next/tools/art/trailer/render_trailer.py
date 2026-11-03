@@ -1,6 +1,9 @@
 """Render the 30 s title trailer (brief: reports/lexicon_quest_media_upgrade/trailer/brief_trailer.md, 30 s cut).
 
-    python render_trailer.py OUT_DIR [--clip downs.webm] [--format wide|tall|square|all] [--stills]
+    python render_trailer.py OUT_DIR [--clip downs.webm] [--format wide|tall|square|all] [--stills] [--gameplay]
+
+--gameplay (v2) swaps the town and battle stills for the moving clips qa/trailer/record_gameplay.py writes
+(qa/trailer/out/<clip>/frame_NNNN.png, 30 fps native). LQ_NEXT points at a checkout whose qa/ holds the captures.
 
 Everything is the 384 by 216 game frame drawn with the game's own assets (painted cards, title backdrop, logo,
 bitmap fonts) and the gate's desktop captures (qa/out/desktop-*.png, 5x the game frame), scaled up with no
@@ -11,13 +14,13 @@ thirteenth toll at 0:06. Formats: wide 1920x1080 (5x, text over the picture), ta
 import argparse, json, os, shutil, subprocess, sys
 from PIL import Image, ImageDraw
 
-NEXT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+NEXT = os.environ.get('LQ_NEXT') or os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 A = lambda *p: os.path.join(NEXT, 'assets', *p)
 FPS = 30
 GW, GH = 384, 216
 ADDRESS = 'scball1104-star.github.io/Lexicon-quest/next'
 
-# (start s, end s, picture, zoom from, zoom to). Pictures: ('clip',), ('img', path), ('black',)
+# (start s, end s, picture, zoom from, zoom to). Pictures: ('clip',), ('img', path), ('seq', clip, offset s), ('black',)
 SHOTS = [
     (0.0, 1.0, ('black',), 1.0, 1.0),
     (1.0, 5.0, ('clip',), 1.0, 1.0),
@@ -27,6 +30,15 @@ SHOTS = [
     (16.5, 20.0, ('img', os.path.join(NEXT, 'qa', 'out', 'desktop-battle_boss.png')), 1.0, 1.04),
     (20.0, 25.0, ('img', A('backdrops', 'paint_card_bells.png')), 1.0, 1.06),
     (25.0, 30.0, ('img', A('backdrops', 'title.png')), 1.04, 1.0),
+]
+SEQ = lambda name, off: ('seq', os.path.join(NEXT, 'qa', 'trailer', 'out', name), off)
+GAMEPLAY_SHOTS = [  # v2: the same timeline, real play in the middle
+    SHOTS[0], SHOTS[1], SHOTS[2],
+    (8.0, 11.77, SEQ('town_walk', 0.0), 1.0, 1.0),
+    (11.77, 14.0, SEQ('field_chest', 2.4), 1.0, 1.0),
+    (14.0, 16.5, SEQ('battle_exchange', 1.0), 1.0, 1.0),
+    (16.5, 20.0, SEQ('archivore_hit', 0.5), 1.0, 1.0),
+    SHOTS[6], SHOTS[7],
 ]
 # (start s, end s, text, font, band) - band darkens behind the line where the picture is busy (gameplay)
 LINES = [
@@ -130,7 +142,12 @@ def picture(shot, t, cache, clip_frames, scale):
     a, b, src, z0, z1 = shot
     if src[0] == 'black':
         return Image.new('RGB', (GW * scale, GH * scale), (0, 0, 0))
-    if src[0] == 'clip':
+    if src[0] == 'seq':
+        n = int(round((src[2] + t - a) * FPS))
+        frames = sorted(f for f in os.listdir(src[1]) if f.startswith('frame_'))
+        f = Image.open(os.path.join(src[1], frames[min(n, len(frames) - 1)])).convert('RGB')
+        base = f.resize((GW * scale, GH * scale), Image.NEAREST)
+    elif src[0] == 'clip':
         f = clip_frames[min(len(clip_frames) - 1, int((t - a) * 12))]  # the clip plays at its own 12 fps
         base = f.resize((GW * scale, GH * scale), Image.NEAREST)
     else:
@@ -215,7 +232,7 @@ def render(fmt, out_dir, ff, clip_frames, audio, stills):
     li = Image.open(A('ui', 'logo.png')).convert('RGBA')
     logo = li.crop((lm['logo'][0], lm['logo'][1], lm['logo'][0] + lm['logo'][2], lm['logo'][1] + lm['logo'][3]))
     sub = li.crop((lm['subtitle'][0], lm['subtitle'][1], lm['subtitle'][0] + lm['subtitle'][2], lm['subtitle'][1] + lm['subtitle'][3]))
-    out = os.path.join(out_dir, f'lexicon_quest_trailer_30s_{fmt}.mp4')
+    out = os.path.join(out_dir, f'lexicon_quest_trailer_30s_{"v2_" if SHOTS is GAMEPLAY_SHOTS else ""}{fmt}.mp4')
     cmd = [ff, '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-']
     cmd += audio + ['-map', '0:v', '-map', '[a]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-pix_fmt', 'yuv420p',
                     '-c:a', 'aac', '-b:a', '192k', '-t', str(DUR), '-movflags', '+faststart', out]
@@ -230,7 +247,7 @@ def render(fmt, out_dir, ff, clip_frames, audio, stills):
         canvas.paste(ov, (0, 0), ov)
         canvas = canvas.crop((0, 0, W, H))
         if stills and i in still_at:
-            canvas.save(os.path.join(out_dir, f'still_{fmt}_{still_at[i]}.png'))
+            canvas.save(os.path.join(out_dir, f'still_{"v2_" if SHOTS is GAMEPLAY_SHOTS else ""}{fmt}_{still_at[i]}.png'))
         p.stdin.write(canvas.tobytes())
     p.stdin.close()
     if p.wait(timeout=600) != 0:
@@ -244,7 +261,11 @@ def main():
     ap.add_argument('--clip', required=True, help='the Downs clip, 384x216 at 12 fps')
     ap.add_argument('--format', default='all', choices=['wide', 'tall', 'square', 'all'])
     ap.add_argument('--stills', action='store_true')
+    ap.add_argument('--gameplay', action='store_true', help='v2: moving clips from qa/trailer/out')
     a = ap.parse_args()
+    global SHOTS
+    if a.gameplay:
+        SHOTS = GAMEPLAY_SHOTS
     os.makedirs(a.out_dir, exist_ok=True)
     ff = find_ffmpeg()
     clip_frames = decode_clip(ff, a.clip)
