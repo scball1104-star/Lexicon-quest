@@ -85,7 +85,7 @@ chains `warden_after` and `first_bell` and the ending.
 
 **`ep3_morning`** (`nh_inn`, on enter; also on enter of `nameless_hollow` for saves that left the inn; needs
 `ep2_complete`, not `ep3_morning_done`, and `EP3_LIVE`). The hero wakes in bed at `inn_bed`, Mira and Bram are
-followers in the room, Wren behind the counter. The Smith is spawned at `smith_seat` by the hearth (facing left); Wren
+followers in the room, Wren behind the counter. The Smith is spawned at `smith_seat` by the guest-room wall (facing left); Wren
 walks to `wren_wake` and wakes the hero; the camera pans to `smith_seat`; Bram walks up to the Smith. One choice; the
 hero's answer box is always "...". At the end the Smith walks out through `inn_door` and is despawned. Music: `sorrow`
 when Bram cannot say the name, `hollowmere` at the end. 14 boxes. Sets `ep3_morning_done` and `ep3_started`.
@@ -230,7 +230,7 @@ remind, deliver (takes `glass_sand`, gives `emberglass_charm`). Sets `sand_start
 
 | Map | Marks the script uses |
 |---|---|
-| `nh_inn` | `inn_bed` (exists), `smith_seat` (new, by the hearth), `wren_wake` (new, beside the bed), `inn_door` (new, the door) |
+| `nh_inn` | `inn_bed` (exists), `smith_seat` (new, by the guest-room wall), `wren_wake` (new, beside the bed), `inn_door` (new, the door) |
 | `nameless_hollow` | `sand_gate`, `vessa_gate`, `penny_cart_h` |
 | `sand_road` | `slag`, `emberpeak_far`, `town_gate`, `smith_crate` (new, a crate at the shelter), `rise_smith` (new, a tile on the last rise); enemy `e_sr_first` |
 | `emberpeak` | `gate_in`, `gate_smith` (new, one tile inside the gate), `coolant`, `memorial`, `memorial_smith` (new, beside the wall), `bellhouse_door`, `bell_tower`, `bell_rope`, `east_road`, `night_view`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_veyra`, `gather_ilya`, `gather_rusk`, `gather_bess`, `gather_garrick` (new), `gather_view` (E3-fixes-world: the camera's frame of tower, town and memorial for the gathering lines) |

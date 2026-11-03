@@ -348,7 +348,7 @@ test('ep3_morning words its first look at the Smith for where it plays: the inn 
   const look = async (mapId) => (await runOnce(scenes.ep3_morning, { flags: EP2_DONE, branchFlags: false, mapId })).log
     .filter((e) => e.op === 'say' && e.args[0] == null).map((e) => e.args[1]).find((t) => /old man grey with road dust/.test(t));
   const inn = await look('nh_inn'), out = await look('nameless_hollow');
-  assert.match(inn, /^By the hearth sits/);
+  assert.match(inn, /^By the guest-room wall sits/);
   assert.match(out, /^Against the inn wall sits/);
   assert.ok(!/hearth/.test(out), 'nothing indoors on the street');
   const { wrap, BOX_COLS } = await import('../../src/data/story/dialogue.js');
