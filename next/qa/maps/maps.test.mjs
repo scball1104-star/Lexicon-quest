@@ -6,11 +6,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { NEXT, MAP_IDS, MAP_IDS_EP2, listMapIds, loadAll, loadDb, validate, walk, parseStagingChecklist, buildGrid, loadStaging } from '../../tools/maps/mapcheck.mjs';
+import { NEXT, MAP_IDS, MAP_IDS_EP2, MAP_IDS_EP3, listMapIds, loadAll, loadDb, validate, walk, parseStagingChecklist, buildGrid, loadStaging } from '../../tools/maps/mapcheck.mjs';
 
 // COMMON.md maps plus the optional side dungeon (W6-content); Episode 2's eleven maps (E2-maps, qa/maps/ep2_maps.test.mjs).
 const EP1_IDS = [...MAP_IDS, 'whisperwood_hollow'];
-const ALL_IDS = [...EP1_IDS, ...MAP_IDS_EP2];
+const ALL_IDS = [...EP1_IDS, ...MAP_IDS_EP2, ...MAP_IDS_EP3];   // E3-maps: the ten Episode 3 maps (qa/maps/ep3_maps.test.mjs)
 
 const db = await loadDb();
 const maps = await loadAll();

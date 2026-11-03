@@ -202,7 +202,7 @@ export const EP3_ZONES = {
 };
 export const EP3_ZONE_ORDER = ['sand_road', 'foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart'];
 /** E3-maps: set to true once the five Episode 3 maps are in src/data/maps (lists the zones for qa/maps and the quick start). */
-export const EP3_MAPS_LISTED = false;
+export const EP3_MAPS_LISTED = true;
 for (const [id, z] of Object.entries(EP3_ZONES)) {
   Object.defineProperty(ZONES, id, { value: z, enumerable: EP3_MAPS_LISTED, configurable: true, writable: true });
 }

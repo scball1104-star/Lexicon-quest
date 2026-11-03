@@ -426,3 +426,110 @@ Eleven new maps and edits to five existing ones, all `x1` pack content (`docs/PW
 - [`docs/maps/X1_HUB.md`](maps/X1_HUB.md): the edits to the five existing maps, the frozen baseline in `qa/maps/x1_baseline/` and the ON-state tooling (`force_on.mjs`)
 
 Tests: `qa/maps/x1_west.test.mjs`, `x1_south.test.mjs`, `x1_north.test.mjs`, `x1_wild.test.mjs`, `x1_hub.test.mjs`. `ZONES` lists the eight x1 zones (`X1_MAPS_LISTED = true`).
+
+---
+
+## 8. Episode 3 (E3-maps, EPISODE3_PLAN 3 to 5)
+
+Ten new maps and two edits, all in the **ep3 pack folder** `src/data/maps/ep3/` (the core download had no room left under
+the tap-prompt ratchet). `ep3/index.js` registers the ten modules (`registerMap`) and swaps in the edited core maps:
+`hollow_gate.js` applies Hollowmere's east gate to `nameless_hollow` and the inn's scene marks to `nh_inn`; the core files
+are unchanged. `mapcheck` resolves the ids the same way (`listMapIds`, `loadMap`; `loadMap(id, { unpatched: true })` gives
+the core module). The pack entry the integrator adds to `src/game/packs.js` is written at the top of `ep3/index.js`
+(prefix `ep3/`, so `build_pwa.py` keeps the folder out of the precache). Tests: `qa/maps/ep3_maps.test.mjs`.
+
+```bash
+node tools/maps/mapcheck.mjs quench foundry_f1        # the start trace and one solved trace per basin / cooled pool
+python tools/maps/preview.py foundry_f2 --solved      # wet troughs, crust, full basins, open grates, shoved crates
+```
+
+### 8.1 Quench vocabulary (E3-world, docs/WORLD.md 1f)
+
+Kit helpers in `ep3/_quench.js`: `spout`, `sluice`, `basin` (always `latch: true`), `hotGate` (gate sprite `hot_grate`,
+2 wide), `lift` (door `kind: 'lift'`), `cisternFont` (`font_cistern`, 2 x 1, `safe`), `oreCrate` (heavy block, sprite
+`ore_crate`), `layTroughs(g, polylines, extraArms)` (joins the arms of every cell and writes the matching `trough_*`
+tile; `TROUGH_LEGEND` is the shared legend: `S` slag, `K` crust). Troughs are ground tiles (walkable); slag is the `slag`
+terrain. The tools trace with the field's own `src/world/ep3/flow.js` (water follows trough arms; a reached slag body
+cools whole, at most 96 cells). `quench.mjs quenchWalk` adds an outer fixpoint to the walk: per spout system every
+assignment of the reachable sluices and every cell a reachable crate can be shoved to; crust and latched basins only
+ever add floor, so the search is monotone. Flag gates (`flags: [...]`) open when the flags are given or set by a
+touchable object script (`SCRIPT_FLAGS`: the three oath anvils, the ledger). Spouts and basins carry no `text` (the
+field never reads it); sluices read `sluice_paddle` once.
+
+### 8.2 The maps
+
+**nameless_hollow (edit).** A dirt spur from the shop road (37,21) down the garden to the east edge (39..43, 26..27);
+two gateposts (42,25) and (42,28) with the chain `sand_chain` (42,26..27, `fence_iron`, `ifNot: sand_gate_open`) between
+them; `sand_gate_trig` (40, 26..27, `if: ep3_started`); the exit `sand_gate_exit`, a door on (43, 26..27) to `sand_road`
+(1,22), present only while `sand_gate_open`. Marks `sand_gate` (41,26), `vessa_gate` (39,24), `penny_cart_h` (39,27).
+The garden willow (40,28) became two bushes. Every Episode 2 mark, event and reachable cell (but the four gate cells) is
+unchanged (tested). `nh_inn` gains `smith_seat` (19,8), `wren_wake` (16,7), `inn_door` (15,3), all in the guest room.
+
+### sand_road (52 x 30, field): The Old Sand Road
+![sand_road](../tools/maps/previews/sand_road_solved.png)
+A ridge along rows 3..5 and a river of slag (x 18..20, rows 6..29) from the ridge to the south edge. Entry (1,22) from
+the Hollow; `first_fight_trig` column 6 (rows 6..25); `e_sr_first` (11,21); `sand_milestone` (3,21) and its ink
+`sand_milestone_ink` (4,21); wood chest (1,25). Spout `sp_road` (15,5) down to `sl_road` (15,20): '/' (start) splashes
+into the gully pool (9,20); '\' crosses the river on row 20 and cools it. `slag_trig` column 16. The cracked boulder
+`crack_boulder` (17,4..5) hides the grotto and its iron chest (17,1). The shelter (26..31, 15..18) with `carters_fire`
+(28,18), Penny `penny_s` (34,20) and her cart. The rise: cliff A (top 15, stairs x 47), cliff B (top 8, stairs x 38),
+`ash_view_trig` (44, 6..7), exit (51, 6..7) to `emberpeak` (19,30). `emberpeak_far` overhead at (42,0).
+
+### emberpeak (40 x 32, town): Emberpeak
+![emberpeak](../tools/maps/previews/emberpeak.png)
+The foundry's face closes the north (rows 0..5) with the gate `foundry_door` (18..21, 5; `foundry_gate`, ifNot
+`foundry_entered`) and then the lift `foundry_lift` (19..20, 5) to F1. South gate (19..20, 31), Rusk (21,29). Bellows
+Square (12..27, 13..21): `memorial` (13,14, 4 wide; plates in the overhead layer with pixel offsets `dx`/`dy` at the
+prefab's `plateSlots`, lettered after `pk_restored`), `coolant_obj` (24,16), `veyra_trig` (13..26, 18), the proclamation
+board, pits, benches. Bell tower (3,11; `bell_rope` (5,12)), Bell House door (6,20), inn (34,12), Ventworks (31,27),
+smithy (9,28). East road (28..37, 14..15) to the flooded drop and `east_road_sign`. Enter triggers `pk_arrival`, `first_bell`.
+
+### Interiors
+`pk_inn` (Bess, `stew_pots`, `inn_bed` (17,7)), `pk_shop` (Taro, pipes), `pk_smithy` (Sella at `anvil` (8,7),
+`garrick_e` / `garrick_n` at `forge` (11,5), `forge_cold` / `forge_lit`), `pk_bellhouse` (Ilya at `ilya_spot` (4,5),
+`ilya_trig` (8..10, 11), the save bell, `bh_mirror` / `mirror_pk_sq` (9,3) to the Hollow square). Every exit lands in front
+of its door (tested).
+
+### foundry_f1 (40 x 30, dark 0.2): The Cinder Liftworks
+![foundry_f1](../tools/maps/previews/foundry_f1_solved.png)
+A landing (start (19,27), `lift_home`, `font_fo1`); B Slag Hall: `sp_b` (19,13) -> `sl_b` (19,17); pools x 14..15 and
+24..25 run wall to wall; start '/' cools pool 1 (the ledge chest) at once, '\' cools pool 2 (the way east). C Ore Lines:
+cistern `sp_c` (30,14) east, `ore_c` (32,14) dams it, `bs_c` (35,14) cools `hg_c` (32,4): `chest_key` (Ash Key). D
+Shaft behind `door_d` (6,22): `shaft_trig`, `sp_d` (4,5) -> `sl_d` (4,7) '\' cools the span (10..14, 6..7) to E;
+`crack_d` (8,4) -> Ashwalker Boots. E Balcony: Crucible Hook; `sp_e` (22,1) -> `sl_f1` (22,6) '\' -> row 6 -> C's little
+pool -> `sl_f2` (36,6) '\' -> column 36 -> `bs_wheel` (36,23) -> `gate_lift` (31,22) to F2; `lift_trig` in front.
+
+### foundry_f2 (40 x 30, dark 0.35): The Ventilation Galleries
+![foundry_f2](../tools/maps/previews/foundry_f2_solved.png)
+A Lift Foot (arrival (6,27), `lift_up`, `font_fo2`). B Bell Gallery: `bell_trig2` row 14 under the bell, `sp_g` (7,4)
+-> `sl_g` (7,9): '/' `bs_b1` -> `hg_b1` (alcove, iron chest), '\' `bs_b2` -> `hg_b2` (the way to C). C Records Cage:
+`ledger_obj` (Lantern), the cache chest and the ledger book after `ledger_found`. D Long Channel: `sp_d2` (28,1) ->
+`sl_d1` (28,5) -> `sl_d2` (34,5); only '\' + '\' runs down column 34, cools the moat (33..35, 20..21) and fills `bs_d`
+(34,25) -> `hg_d` (font room). `door_e` (20,24, Ash Key) -> the Fan Hall: `specter_trig` row 18, the fan (18..20,
+12..14) over its shaft (pits to F1's Slag Hall), after the win `shaft_stairs_trig` (18..20, 16), `stairs_f3` (19,15),
+`lift_f2_short` (22,10).
+
+### foundry_f3 (44 x 32, dark 0.5): The Heartforge Crucible
+![foundry_f3](../tools/maps/previews/foundry_f3_solved.png)
+Hub (arrival (17,21), `bell_gate` (20..22, 13; `flags` the three oaths), `gate_trig` (20..22, 14), `lift_f3_short`). The
+Hand: cistern `sp_h` (13,14) -> `sl_h1` (13,17; start '\' splashes in the passage) '/' cools pool 1 -> `sl_h2` (8,17):
+'/' pool 3 (south bank, iron chest), '\' pool 2 (north bank, `anvil_hand`). The Heart: H1 `sp_k1` -> `sl_k1` '\' ->
+`bs_k1` -> `hg_k1` (33,16); H2 `sp_k2` -> `sl_k2` '\' -> `bs_k2` -> `hg_k2` (38,10); H3 `anvil_heart` (33,5), the
+furnace (40,3), `vex_trig` (39..41, 4), `vex_feather`. The Home: `sp_home` (14,25) -> the junction (14,27): straight on
+into a pool that does nothing; `ore_home` (16,28) shoved west twice to (14,28) dams it and the water runs row 27 to the
+ring round `anvil_home` (30,28). Keeper ink (10,24) beside the hidden ink bridge (9,28) to the cache: Tempered Lexicon
+Blade. Antechamber: `door_heart` (20..22, 4, Crucible Hook), `font_fo3`, wood chest.
+
+### foundry_heart (24 x 20, dark 0.2): The Heartforge
+![foundry_heart](../tools/maps/previews/foundry_heart.png)
+Round hall; `heartforge` (9..14, 4; banked after the win), `cinder_warden` actor (12,7), `heart_anvil` (9,8),
+`warden_trig` row 14, `garrick_t` / `ilya_t` / `sella_t` while `cinder_warden_defeated` and not `pk_restored`,
+`lift_heart_up` (15..16, 4) to Emberpeak's foundry door, `heart_exit` (11..12, 19) back to F3.
+
+### 8.3 Open items
+
+- The Bell House mirror leads to the Hollow square; the square's one mirror door still leads to the Court (a return
+  door is the integrator's call). Wren cannot pathfind from the taproom to `wren_wake` in the guest room.
+- The bell tower's ringing frames and the smithy's chimney smoke after `forge_relit` are decor states the maps cannot
+  switch; the memorial plates use overhead `dx`/`dy` (pixel offsets) that the field must honour.
+- No Keeper note line exists for the Home cache; only the chest is there.

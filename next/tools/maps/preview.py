@@ -10,6 +10,9 @@
                                                  found that lights it (default: the start configuration's beams)
     python preview.py nameless_hollow --flags=nh_restored,court_entered   -> gated overlays/events under these flags
                                                  (default: overlays as a fresh save sees them, every event drawn)
+    python preview.py foundry_f1 --solved     -> Episode 3 water: every configuration the walk used to fill a basin or
+                                                 crust slag, drawn together, crust as the walk left it (default: the
+                                                 start state, what the party sees from the door)
     python preview.py --all --previews        -> refresh tools/maps/previews/<id>.png (the annotated 2x overviews
                                                  docs/MAPS.md and the critiques look at; run after any map or art change)
 
@@ -164,6 +167,9 @@ MECH_SPRITES = {
     'font': lambda e: e.get('sprite', 'fountain'),
     'chest': lambda e: 'chest_%s' % e['tier'],
     'object': lambda e: e.get('sprite'),
+    'spout': lambda e: e.get('sprite', 'spout_wall'),
+    'sluice': lambda e: 'sluice',
+    'basin': lambda e: e.get('sprite', 'basin'),
 }
 
 LABEL_COLORS = {
@@ -174,7 +180,37 @@ LABEL_COLORS = {
     'actor': (255, 120, 255), 'pit': (255, 100, 100), 'ferry': (80, 220, 255), 'font': (120, 255, 200),
     'save': (120, 255, 200), 'brazier': (255, 180, 80), 'pot': (220, 200, 160), 'light': (255, 255, 180),
     'beam': (238, 246, 255), 'mirror': (160, 230, 255), 'receptor': (138, 240, 232),
+    'spout': (120, 200, 255), 'sluice': (120, 200, 255), 'basin': (120, 200, 255),
 }
+
+
+# ------------------------------------------------------------------ water (Episode 3)
+def quench_data(map_id, flags=None):
+    args = ['quench', map_id] + ([','.join(sorted(flags))] if flags else [])
+    try:
+        return node(args, timeout=240)
+    except SystemExit as e:
+        print('quench:', e)
+        return None
+
+
+def water_view(qd, solved):
+    """{ wet, crust, filled, splashes, states, opened } for the preview: the start state, or every solved configuration
+    together (sluices drawn at the last solved configuration that named them)."""
+    if not solved:
+        t = qd['start']
+        return {'wet': set(t['wet']), 'crust': set(t['crust']), 'filled': set(t['filled']),
+                'splashes': [sp for sp in t['splashes'] if not sp.get('dam')], 'states': {}, 'blocks': {}, 'opened': set()}
+    v = {'wet': set(), 'crust': set(qd.get('crust', [])), 'filled': set(qd.get('latched', [])), 'splashes': [], 'states': {},
+         'blocks': {}, 'opened': set(qd.get('opened', []))}
+    goal = [x for x in qd['solved'] if x['label'].startswith('basin')] or qd['solved']
+    for x in qd['solved']:
+        v['wet'] |= set(x['trace']['wet'])
+    for x in goal:
+        v['states'].update(x.get('states') or {})
+        for bid, pos in (x.get('blocks') or {}).items():
+            v['blocks'].setdefault(bid, pos)          # the first solved configuration that names a block moved it
+    return v
 
 
 # ------------------------------------------------------------------ flags (Episode 2 gated overlays and events)
@@ -259,7 +295,7 @@ def merge_traces(traces):
     return out
 
 
-def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
+def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None, water=None):
     ov_flags = flags if flags is not None else set()
     lit = set(trace['lit']) if trace else set()
     lit_rec = set(trace['litReceptors']) if trace else set()
@@ -275,6 +311,14 @@ def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
     rows = mp['ground']
     H, W = len(rows), len(rows[0])
     ids = [[legend.get(ch) for ch in row] for row in rows]
+    if water:
+        for y in range(H):
+            for x in range(W):
+                k = '%d,%d' % (x, y)
+                if k in water['crust'] and ids[y][x] == 'slag':
+                    ids[y][x] = ('slag_crust', 'slag_crust_b', 'slag_crust_c')[(x * 7 + y * 3) % 3]
+                elif k in water['wet'] and ids[y][x] and ids[y][x].startswith('trough_') and (ids[y][x] + '_wet') in db.tiles:
+                    ids[y][x] = ids[y][x] + '_wet'
     under = mp.get('under', 'grass')
     tgrid = [[(i if i in db.terrains else under) for i in r] for r in ids]
     cv = Canvas(W * 16, H * 16)
@@ -299,6 +343,10 @@ def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
                     draw_tile(db, cv, tid, x, y, frame)
     for o in mp.get('overlays', []):
         draw_tile(db, cv, o['t'], o['x'], o['y'], frame)
+    if water:
+        for sp in water['splashes']:
+            if 0 <= sp['x'] < W and 0 <= sp['y'] < H:
+                draw_tile(db, cv, 'splash_puddle', sp['x'], sp['y'], frame)
 
     # objects (decor + event-drawn mechanisms) and actors, y-sorted by anchor row
     objs = []
@@ -320,6 +368,14 @@ def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
                 st = e.get('state') if t in ('object', 'mirror') else None
                 if t == 'receptor':
                     st = 1 if e['id'] in lit_rec else 0
+                if t == 'sluice':
+                    st = (water or {}).get('states', {}).get(e['id'], e.get('state', 0))
+                if t == 'basin':
+                    st = 1 if water and e['id'] in water['filled'] else 0
+                if t == 'gate' and water and e['id'] in water['opened']:
+                    sid = '%s_open' % e['sprite']
+                if t == 'block' and water and e['id'] in water.get('blocks', {}):
+                    e = dict(e, x=water['blocks'][e['id']][0], y=water['blocks'][e['id']][1])
                 if t == 'shelf':
                     px, py = e['positions'][e.get('state', 0)]
                     objs.append({'t': sid, 'x': px, 'y': py})
@@ -357,7 +413,14 @@ def render(mp, db, spr, atl, frame=0, npc_map=None, flags=None, trace=None):
             else:
                 draw_prop(spr, cv, it, part='overhead')
     for o in mp.get('overhead', []):
-        draw_tile(db, cv, o['t'], o['x'], o['y'], frame)
+        if o['t'] in db.objects:                      # E3: an object in the overhead layer (the furnace glow decal)
+            draw_object(db, cv, o, frame, part='base')
+            draw_object(db, cv, o, frame, part='overhead')
+        elif o.get('dx') or o.get('dy'):              # E3: a decal with a pixel offset (the memorial plates in their slots)
+            m = db.tiles[o['t']]
+            cv.blit(db.sheet(m['sheet']).crop(m['x'], m['y'], m.get('w', 16), m.get('h', 16)), o['x'] * 16 + o.get('dx', 0), o['y'] * 16 + o.get('dy', 0))
+        else:
+            draw_tile(db, cv, o['t'], o['x'], o['y'], frame)
     draw_beam_traces(cv, trace)
     return cv
 
@@ -525,13 +588,20 @@ def main(argv):
     for map_id in ids:
         mp = load_map(map_id)
         trace = None
+        water = None
+        if any(e['type'] in ('spout', 'sluice', 'basin') for e in mp.get('events', [])):
+            qd = quench_data(map_id, flags)
+            if qd and qd.get('start'):
+                water = water_view(qd, bool(opt.get('solved')))
+                print('water %s: %d configurations, latched %s, crust %d cells, solved %s' % (
+                    map_id, qd['configs'], qd['latched'], len(qd['crust']), [x['label'] for x in qd['solved']][:12]))
         if any(e['type'] in ('beam', 'mirror', 'receptor') for e in mp.get('events', [])):
             bd = beam_data(map_id, flags)
             if bd and bd.get('start'):
                 trace = merge_traces([x['trace'] for x in bd['solved']]) if opt.get('solved') else bd['start']
                 print('beams %s: %d configurations, %d states, latched %s, softlocks %d, solved %s' % (
                     map_id, bd['configs'], bd['states'], bd['latched'], bd['softlocks'], [x['receptor'] for x in bd['solved']]))
-        cv = render(mp, db, spr, atl, frame=frame, npc_map=npc_map, flags=flags, trace=trace)
+        cv = render(mp, db, spr, atl, frame=frame, npc_map=npc_map, flags=flags, trace=trace, water=water)
         img = cv.image()
         if 'crop' in opt:
             cx, cy, cw, ch = [int(v) for v in opt['crop'].split(',')]
