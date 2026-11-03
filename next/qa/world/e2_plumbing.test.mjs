@@ -12,6 +12,7 @@ import { ITEMS } from '../../src/data/items.js';
 import { LOADOUTS } from '../../tools/sim/loadouts.mjs';
 import { reflectionStyle, hasNoReflection, inGlass } from '../../src/world/reflections.js';
 import { transitionOpts } from '../../src/world/transitions.js';
+import { scenes as EP3_SCENES } from '../../src/data/story/ep3.js';
 import { mistAreasOf } from '../../src/scenes/field.js';
 import { Cutscene } from '../../src/world/cutscene.js';
 import { TINTS, LAMP_TINTS, NIGHT_TINTS } from '../../src/world/lighting.js';
@@ -20,7 +21,8 @@ test('both episodes are merged: every scene and line resolves, and no id is shar
   assert.deepEqual(storyCollisions(), { scenes: [], lines: [] });
   for (const id of Object.keys(EP1)) assert.equal(sceneById(id), EP1[id]);
   for (const id of Object.keys(EP2)) assert.equal(sceneById(id), EP2[id]);
-  assert.equal(sceneIds().length, Object.keys(EP1).length + Object.keys(EP2).length);
+  // E3-world: Episode 3's scenes are merged too (qa/world/e3_field.test.mjs checks them)
+  assert.equal(sceneIds().length, Object.keys(EP1).length + Object.keys(EP2).length + Object.keys(EP3_SCENES).length);
   const no = () => false;
   for (const id of Object.keys(EP2_LINES)) assert.notEqual(inspectBoxes(id, no)[0].text, `(${id})`, id);
   for (const id of Object.keys(EP1_LINES)) assert.notEqual(inspectBoxes(id, no)[0].text, `(${id})`, id);

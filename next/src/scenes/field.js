@@ -47,7 +47,10 @@ const AIM_FRAMES = 240;                             // H2: the Aim line stays ab
 const AIM_STILL_FRAMES = 600;                       // and comes back after ten seconds standing still
 /** The touch layout's on-canvas field ability button (abilities.js ABILITY_BTN); near hidden ink a tap raises the Lantern. */
 export const LANTERN_BTN = ABILITY_BTN;
-const respawnAt = new Map();     // "<map>:<enemyId>" -> engine.time when it comes back (field zones)
+const respawnAt = new Map();
+// Episode 3's field code (src/world/ep3, never precached) attaches on the first map of the episode (docs/WORLD.md 1f)
+const EP3_MAP = /^(sand_road|emberpeak|pk_|foundry_|_testforge)/;
+async function ep3(f) { try { (await import('../world/ep3/' + 'index.js')).attach(f); } catch (e) { f.warnOnce('ep3', `ep3: ${e && e.message}`); } }     // "<map>:<enemyId>" -> engine.time when it comes back (field zones)
 
 export class FieldScene {
   constructor(engine) {
@@ -138,6 +141,7 @@ export class FieldScene {
   async loadMap(mapId, x, y, dir, o = {}) {
     const e = this.engine, g = this.game;
     this.loading = true;
+    if (EP3_MAP.test(mapId)) await ep3(this);
     let mod = await loadMap(mapId);
     // W7: a pack map not up yet: wait (bounded), else a real map, and back once the pack is up
     const hit = !mod && packForMap(mapId);
@@ -1019,7 +1023,7 @@ export class FieldScene {
     markCreditsRolled(this.game, episode);
     this.lockInput();
     try {
-      if (e.hasScene('credits')) await e.pushAwait('credits', episode === 2 ? { cards: h.cards, music: h.music } : undefined);
+      if (e.hasScene('credits')) await e.pushAwait('credits', episode > 1 ? { cards: h.cards, music: h.music, episode } : undefined);
       if (h.endCard && e.hasScene('titleCard')) { this.fadeAlpha = 1; this.fadeTween = null; await e.pushAwait('titleCard', { ...h.endCard }); }
       await this.fadeScreen(1, 1);
       this.lighting.setTint('day', 0);

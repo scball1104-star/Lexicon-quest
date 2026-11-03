@@ -20,17 +20,19 @@ import { makeNpcActor } from './npc.js';
 import { DIRS, OPPOSITE } from './pathfind.js';
 import { TILE } from './tilemap.js';
 
-const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'],
+export const GATE_SPRITES = { door_locked: ['door_locked_closed', 'door_locked_open'], door_key: ['door_key_closed', 'door_key_open'], door_boss: ['door_boss_closed', 'door_boss_open'],
   // Episode 2 (the Court of Mirrors): receptor gates, glass-key doors, the three-crystal vow door, the throne door
   door_glass: ['door_glass_closed', 'door_glass_open'], door_glass_key: ['door_glass_key_closed', 'door_glass_key_open'],
   door_vow: ['door_vow_closed', 'door_vow_open'], door_throne: ['door_throne_closed', 'door_throne_open'],
   x1_gate_culvert: ['x1_gate_culvert_closed', 'x1_gate_culvert_open'], x1_gate_barrow: ['x1_gate_barrow_closed', 'x1_gate_barrow_open'] };
 /** Gates whose closed frame shows how many of their sources are on (the vow door's three crystals). */
-const COUNTING_GATES = new Set(['door_vow']);
-const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor', 'mirror', 'receptor', 'beam']);
+export const COUNTING_GATES = new Set(['door_vow']);
+export const INTERACT_TYPES = new Set(['npc', 'sign', 'book', 'object', 'chest', 'switch', 'pot', 'font', 'save', 'ferry', 'locked_door', 'brazier', 'trigger', 'actor', 'mirror', 'receptor', 'beam']);
 /** Things a beam reads (a change to any of them asks the silverglass system to trace again). */
 const BEAM_RELEVANT = new Set(['beam', 'mirror', 'receptor', 'gate', 'locked_door', 'block', 'pot', 'chest', 'shelf', 'object']);
 const MAX_INK_RADIUS = 6;
+/** E3: event types a lazy module adds ({ create(field, ent), interact? }): src/world/ep3/index.js. */
+export const EXT = {};
 /** In-game art for breakables (src/world/fieldart.js), with the tiles.json stand-ins if that art is missing. */
 const BREAK_ART = { roots: ['ab_root_wall', 'ab_root_wall_broken', 'wall_broken'], rock: ['ab_cliff_crack', 'ab_cliff_grotto', 'wall_broken'],
   // E2: a cracked silverglass pane in a Court wall band (court.png pieces)
@@ -355,7 +357,7 @@ function create(field, ent) {
     }
     case 'trigger': if (ev.on === 'enter') field.enterTriggers.push(ent); break;
     case 'pit': case 'book': case 'exit': break;
-    default: field.warnOnce('ev:' + ent.type, `unknown event type "${ent.type}" (${ent.id})`);
+    default: if (EXT[ent.type]) EXT[ent.type].create(field, ent); else field.warnOnce('ev:' + ent.type, `unknown event type "${ent.type}" (${ent.id})`);
   }
 }
 
@@ -534,7 +536,7 @@ export async function interact(field, ent) {
       for (const t of targetsOf(ev)) fireTarget(field, t);
       return;
     }
-    default: return;
+    default: return EXT[ent.type]?.interact?.(field, ent);
   }
 }
 
@@ -766,7 +768,7 @@ export function fireTarget(field, id, o = {}) {
   }
 }
 
-const SOURCE_TYPES = new Set(['switch', 'plate', 'brazier', 'receptor']);
+export const SOURCE_TYPES = new Set(['switch', 'plate', 'brazier', 'receptor']);
 function sourceIsOn(ent) {
   if (ent.type === 'plate') return ent.state === 'down';
   if (ent.type === 'brazier' || ent.type === 'receptor') return ent.state === 'lit';

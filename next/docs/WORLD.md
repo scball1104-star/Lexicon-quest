@@ -259,6 +259,75 @@ view-relative: no map-size term (0.01 ms a frame in node, about 52 one-pixel fil
 Tests: `node qa/run.mjs world maps` (`qa/world/x1_*.test.mjs`); live: `python qa/world/x1_lab.py [appraise exp pit]` (shots
 `qa/world/out/x1_*.png`).
 
+## 1f. Episode 3 field systems (E3-world, EPISODE3_PLAN 5)
+
+**Where the code lives.** Every Episode 3 field system is in `src/world/ep3/` (`index.js` attaches it to the field,
+`flow.js` is the pure water tracer, `quench.js` the channels on the field, `fx.js` the tint, ash, steam and memory
+vignette, `_testforge.js` the fixtures). None of it is in the first download: `field.js` imports it the first time a
+map whose id matches `/^(sand_road|emberpeak|pk_|foundry_|_testforge)/` loads (`EP3_MAP`), and from then on it rides on
+the field instance (it wraps `glass.reset/update/drawBeams/drawFlares/markDirty`, `collectLights`, `useDoor` and
+`lighting.draw` of that field). **An Episode 3 event or tint only works on a map whose id matches `EP3_MAP`.**
+The orchestrator must keep `src/world/ep3/` out of the precache (see the E3-world report).
+
+**Event contracts** (the usual `{ id, type, x, y, if?, ifNot? }` shape; defaults in brackets):
+
+| type | fields | behaviour |
+|---|---|---|
+| `spout` | `dir` ['down'], `sprite` ['spout_wall'; or 'spout_cistern'] | Water source, always on while present. Emits from its own cell in `dir`; the first water cell is the next one. `spout_wall` sits on the face cell of a north wall. Solid. |
+| `sluice` | `state` [0] (0 = '/', 1 = backslash), `fixed` [false], `sprite` ['sluice'], `text` [none] | A paddle on a trough cell. Turns water as a mirror turns a beam. Confirm while facing toggles it (`sluice_turn`, a 1 px lift, re-trace at once) unless `fixed`. `text` is read the first time only, before the turn (as mirrors). Solid; resets to `state` on re-entry. First faced: bark `first_sluice`. |
+| `basin` | `target` [none] (id or list), `latch` [false], `flag` [none], `script` [none], `face` [none = any side], `sprite` ['basin'; or 'waterwheel'] | The water's receptor. Full while water arrives through `face` (the side its mouth looks toward: `face: 'up'` fills from water travelling down). A gate source while full (AND with switches, plates, receptors, other basins and flag lists). `latch` keeps it full for good (saved in `game.opened` as `<map>:<id>`); `flag` is set on first fill and, when already set at load, starts it full and its gates open, quietly; `script` runs once on the first fill (never on a quiet load, never when the flag was already set). Sound `water_flow` (`wheel_turn` for the wheel); without a script, bark `first_basin`. Solid. |
+| `gate` + `flags` | `flags: ['f1', 'f2', ...]` | Every listed story flag is one more AND source of the gate (with any switches or basins that name it). Re-checked on every `setFlag`. With `sprite: 'bell_gate'` the closed frame shows how many are set (0 to 3 sockets lit; `oath_ring` and a sparkle as each lands). |
+| `door` + `kind: 'lift'` | `to`, `sprite` ['ore_lift_open' recommended] | `lift_rumble`, a short shake, then a plain fade and transfer (a landmark, like any map-to-map door). No other logic: gate it with `if` as any door. |
+
+Gate sprites added: `hot_grate` (`hot_grate_closed` / `hot_grate_open`: opening plays `quench_hiss` and steam), `ore_lift`
+(`ore_lift_closed` / `ore_lift_open`), `bell_gate` (`bell_gate_closed` frames 0..3 / `bell_gate_open`). Heavy and push
+blocks keep their W9 behaviour; `sprite: 'ore_crate'` skins a heavy block.
+
+**Tiles the water reads** (tiles.json `flow`): `flow: 'channel'` (troughs `trough_*`, crust `slag_crust*`, collision none)
+and `flow: 'slag'` (the `slag` terrain, collision water). Trough tiles carry `arms` (N E S W). Wet troughs draw their
+`wet` frames over the dry tile (animated, frame 0 under `reduceMotion`).
+
+**Tracing rules** (`src/world/ep3/flow.js`, pure; the tools import `traceFlow`, `traceFlowFromEvents`, `cellFlow`,
+`quenchCells`): water moves cell by cell from a spout over flow cells only. Sluices and basins are checked first. On a
+trough cell it leaves by the arm straight ahead if it has one and the next cell there is not dammed, else by the other
+arms (one arm: it turns the corner; two: it splits, right hand first); no way out: it rests (`pool`). Cells without
+arms (slag, crust) pass it straight. A flow cell holding a solid thing (a block, a closed gate, a pot) is a dam: the
+water stops before it. Leaving the flow cells onto open floor it stops on that floor cell and leaves a puddle
+(`splash_puddle`); into a wall it splashes on the last cell. 256 cells per spout, loop guard on (cell, direction),
+spouts union, actors never block it.
+
+**Quench.** When water reaches a slag cell, that cell's whole slag body (4-connected, at most 96 cells, nearest first)
+cools into `slag_crust` **for good**: a cooling front spreads from the entry cell (two frames a ring), with steam,
+`quench_hiss` and the `first_quench` bark; each cell becomes walkable as the front passes it, shows
+`slag_crust_fresh` / `slag_crust_rim_fresh` for two seconds, then `slag_crust` (variants b, c by cell) with
+`slag_crust_rim` where a molten neighbour remains. **Map rule:** a slag body is one pool; keep pools at 96 cells or
+fewer and separate two pools by at least one non-slag cell. Water keeps flowing straight over crust.
+
+**Save fields.** `game.quenched[mapId]`: sorted cell indices (`y * w + x`) of crusted cells, written when the front
+starts (so a save made mid-front reloads crusted). Created on first use; old saves without it load as `{}`. Latched
+basins: `game.opened['<map>:<basinId>']` (and the basin's `flag` if it has one). Sluices and blocks reset on re-entry.
+
+**Re-trace** on load (quiet), sluice turn (at once), any change of a block, gate, sluice, basin, spout, pot or chest
+(position, state, presence), any flag change. Deterministic.
+
+**Light.** In dark maps molten slag is the light: a warm light (r 28) on every second slag cell (checkerboard) in view;
+with more than 24 in view an even spread of 24. Crust gives none, so cooling a pool darkens it.
+
+**Tint and particles.** `lighting.tint: 'ash_haze'` (warm grey multiply, colour drained, a faint orange lift;
+measured luminance in the E3-world report). `ambientFx` accepts `'ash'` or `{ fx: 'ash', area?: { x, y, w, h }, if?, ifNot? }`
+(slow grey flakes, at most 24, view-relative); `'steam'` is spawned by the code (cooling fronts, hot grates) and is off
+under `reduceMotion`.
+
+**Memory vignette.** Scene spawns with ids `bram_m`, `mara_m`, `foreman_m` (`MEMORY_IDS` in `ep3/fx.js`) are drawn in a
+warm sepia tint at 88% alpha, and while any is on the map the screen gets a soft dithered warm vignette edge (fades in
+and out over half a second). The Smith to Garrick speaker swap needs nothing new: the scene despawns `smith_t` and
+spawns `garrick_t` named "Garrick" under the flash (`ep3.js warden_after`), and the tag follows the spawn's name.
+
+**Debug.** `LQ_DEBUG.quench()` (streams, wet cells, basins, crust count, front), `turnSluice(id)`, `fieldState().quench`.
+Fixtures `_testforge` (a Slag Hall: spout, sluice, two pools, a dam, basins, a hot grate, a flag gate, a lift) and
+`_testforge_dark` (dark 0.5, lit by its slag). Tests: `qa/world/e3_flow.test.mjs` (tracing), `e3_field.test.mjs`
+(headless field), `walks.test.mjs` (solo slot) runs `python qa/world/e3_lab.py` (browser walk and shots `qa/world/out/e3_*.png`).
+
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 
 Top level: `id name area music ambience lighting{tint,dark,lights[]} under underMap legend ground overlays

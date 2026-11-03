@@ -41,3 +41,13 @@ test('the Episode 2 quick start never overwrites a finished run without asking',
   assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
   assert.match(out, /W15_SAVE_TRAP: PASS/);
 });
+
+// E3-world: the Episode 3 field systems in the real game (qa/world/e3_lab.py) on the _testforge fixtures: sluice turns,
+// the cooling front, dams and Shove, latched basins and AND gates, the hot grate and lift doors, crust kept across a round
+// trip, slag light and draw time, the ash_haze luminance, the memory vignette, the Bell Gate. Solo slot, as above.
+test('the Episode 3 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
+  const r = spawnSync('python', [path.join(HERE, 'e3_lab.py')], { timeout: 170000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const out = (r.stdout || '') + (r.stderr || '');
+  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
+  assert.match(out, /E3_LAB: PASS/);
+});
