@@ -1,0 +1,341 @@
+{
+  "ignoreConsole": [],
+  "clips": [
+    {
+      "name": "town_walk",
+      "note": "Willowmere, Lantern Square in the morning: the party of three walks across the square on held arrow keys",
+      "setup": [
+        {
+          "call": "setFlag",
+          "args": [
+            "intro_done",
+            true
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "willowmere",
+            31,
+            20,
+            "left"
+          ]
+        },
+        {
+          "frames": 10
+        },
+        {
+          "waitFor": "LQ_DEBUG.commands().includes('party')",
+          "timeout": 20000
+        },
+        {
+          "call": "party",
+          "args": [
+            "mira",
+            "bram"
+          ]
+        },
+        {
+          "frames": 240
+        }
+      ],
+      "record": [
+        {
+          "rec": 8
+        },
+        {
+          "walk": [
+            18,
+            20
+          ]
+        },
+        {
+          "walk": [
+            18,
+            18
+          ]
+        },
+        {
+          "rec": 14
+        }
+      ],
+      "query": "&seed=11"
+    },
+    {
+      "name": "battle_exchange",
+      "note": "valley wolves: the hero's Attack chosen on real Z presses, the sword lands, damage numbers, the wolf reels",
+      "setup": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "valley_wolves",
+            {
+              "fresh": true,
+              "seed": 3
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 600; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        }
+      ],
+      "record": [
+        {
+          "rec": 14
+        },
+        {
+          "tap": "KeyZ",
+          "rec": 14
+        },
+        {
+          "tap": "KeyZ",
+          "rec": 100
+        }
+      ],
+      "query": "&seed=11"
+    },
+    {
+      "name": "field_chest",
+      "note": "Willowmere Valley, the cliff plateau: the hero walks to the iron chest, opens it on Z, the received toast (the valley's foes count as already beaten, as after a cleared plateau, so no fight cuts in)",
+      "setup": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 30000
+        },
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "none",
+              "party": [
+                "mira",
+                "bram"
+              ],
+              "flags": {
+                "intro_done": 1,
+                "saw_fading_sign": 1,
+                "met_mael": 1,
+                "mira_joined": 1,
+                "bram_joined": 1,
+                "left_town": 1,
+                "valley_arrived": 1,
+                "saw_milestone": 1,
+                "first_fight_done": 1
+              },
+              "level": 4
+            }
+          ]
+        },
+        {
+          "eval": "(() => { const g = LQ_ENGINE.game; g.counters = g.counters || {}; for (const k of ['first_appraise_target', 'first_dash_target', 'first_heavy_block', 'first_elite']) g.counters['bark:' + k] = 1; return true; })()"
+        },
+        {
+          "call": "warp",
+          "args": [
+            "valley",
+            12,
+            11,
+            "left"
+          ]
+        },
+        {
+          "waitFor": "LQ_DEBUG.scene() === 'field'",
+          "timeout": 20000
+        },
+        {
+          "eval": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); const ids = []; for (const ent of f.entities.values()) { if (ent.type !== 'enemy' || !ent.actor) continue; f.removeActor(ent.actor); ent.actor = null; ent.present = false; ids.push(ent.id); } return ids; })()"
+        },
+        {
+          "frames": 200
+        }
+      ],
+      "record": [
+        {
+          "rec": 8
+        },
+        {
+          "walk": [
+            5,
+            8
+          ],
+          "face": "left"
+        },
+        {
+          "rec": 6
+        },
+        {
+          "tap": "KeyZ",
+          "rec": 62
+        }
+      ],
+      "query": "&seed=11"
+    },
+    {
+      "name": "archivore_hit",
+      "note": "the Archivore on the painted Heart of the Archive stage: Attack chosen, the hit lands on the boss",
+      "setup": [
+        {
+          "eval": "LQ_DEBUG.setSpeed(0)"
+        },
+        {
+          "call": "battle",
+          "args": [
+            "archivore",
+            {
+              "fresh": true,
+              "seed": 2
+            }
+          ]
+        },
+        {
+          "eval": "(() => { for (let i = 0; i < 900; i++) { const b = LQ_DEBUG.state().battle; if (b && b.menu !== 'closed' && !b.fast) return i; LQ_DEBUG.advance(5); } return -1; })()"
+        }
+      ],
+      "record": [
+        {
+          "rec": 14
+        },
+        {
+          "tap": "KeyZ",
+          "rec": 14
+        },
+        {
+          "tap": "KeyZ",
+          "rec": 100
+        }
+      ],
+      "query": "&seed=11"
+    },
+    {
+      "name": "stacks_descend",
+      "note": "the Deep Stacks, B1: the party walks to the stairs on held keys and goes down to B2 (the floor's foes are held still so none cuts in; they stay on screen)",
+      "query": "&cave=1&seed=11",
+      "setup": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp2')",
+          "timeout": 30000
+        },
+        {
+          "waitFor": "window.LQ_PACKS && LQ_PACKS.packReady('cave') && LQ_DEBUG.commands().includes('caveBegin')",
+          "timeout": 60000
+        },
+        {
+          "call": "newGameEp2",
+          "args": [
+            "Arden",
+            {
+              "scene": "none",
+              "seed": 7
+            }
+          ]
+        },
+        {
+          "call": "warp",
+          "args": [
+            "library",
+            10,
+            13,
+            "up"
+          ]
+        },
+        {
+          "waitFor": "LQ_DEBUG.scene() === 'field'",
+          "timeout": 20000
+        },
+        {
+          "call": "caveBegin",
+          "args": [
+            {
+              "seed": 7
+            }
+          ]
+        },
+        {
+          "waitFor": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_b1' && !f.loading; })()",
+          "timeout": 30000
+        },
+        {
+          "eval": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); let n = 0; for (const a of f.actors) if (a.kind === 'enemy' && a.brain) { a.brain.stun = 1e9; n++; } return n; })()"
+        },
+        {
+          "frames": 200
+        }
+      ],
+      "record": [
+        {
+          "walk": [
+            5,
+            4
+          ],
+          "tail": 9
+        },
+        {
+          "until": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!f && !!f.map && f.map.id === 'cave_b2' && !f.loading && !LQ_ENGINE.transition; })()",
+          "max": 150,
+          "then": 40
+        }
+      ]
+    },
+    {
+      "name": "belfry_thirteenth",
+      "note": "the cold open: the hero climbs the last flight into the belfry, the thirteenth toll rings with no name",
+      "setup": [
+        {
+          "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
+          "timeout": 30000
+        },
+        {
+          "call": "newGame",
+          "args": [
+            "Arden",
+            {
+              "scene": "field",
+              "map": "bell_tower",
+              "pos": {
+                "x": 12,
+                "y": 11,
+                "dir": "up"
+              },
+              "flags": {
+                "toll_1": true,
+                "toll_2": true,
+                "toll_3": true,
+                "toll_4": true,
+                "toll_5": true,
+                "toll_6": true,
+                "toll_7": true,
+                "toll_8": true,
+                "toll_9": true,
+                "toll_10": true,
+                "toll_11": true,
+                "toll_12": true
+              }
+            }
+          ]
+        },
+        {
+          "frames": 160
+        }
+      ],
+      "record": [
+        {
+          "rec": 10
+        },
+        {
+          "walk": [
+            12,
+            6
+          ]
+        },
+        {
+          "rec": 120
+        }
+      ],
+      "query": "&seed=11"
+    }
+  ]
+}
