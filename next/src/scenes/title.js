@@ -46,7 +46,7 @@ export class TitleScene {
     this.points = null;
     this.hasSaves = this.anySave();
     this.ledger = this.ledgerCount();   // H2: "Names kept: N of M" from the slot with the most, computed once per entry
-    this.offers = episodeOffers(e.save, typeof location !== 'undefined' ? location.search : '');
+    this.offers = episodeOffers(e.save, typeof location !== 'undefined' ? location.search : '', data.ep3Live ? { live: true } : undefined);   // QA: reset('title', { ep3Live })
     this.ep2 = this.offers.ep2;
     this.ep3 = this.offers.ep3;
     this.stacks = stacksOffer(e.save);

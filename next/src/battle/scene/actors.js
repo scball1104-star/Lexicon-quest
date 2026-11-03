@@ -1,14 +1,4 @@
-// Battle actors: the on-screen view of every unit (position, pose, flash, dissolve, bob) and how it is
-// drawn. Data-driven by atlas frame names (assets/sprites/README.md): party_battle `<id>_<weapon>_<pose>`
-// plus shared `<id>_{cast,hurt,defend,kneel,ko,combo,levelup}`; enemies_battle `<id>` facing right, bosses_battle
-// via enemies_battle.json `external`; lost_page uses its flutter anim. Nothing here touches the rules.
-//
-// W6-anim: enemies play generator-made frames when the atlas has them, `<stem>_<state>` with stem = the enemy
-// id or its ENEMIES[id].sprite.frame (an enemy that borrows another's art): idle_1 (2-frame breathe, a beat
-// every BREATHE frames), attack (pose 'attack'), hurt, cast (pose 'cast', telegraphs, falls back to attack),
-// devour (falls back to cast), die_0..2 (pose 'die', DIE_STEP frames each, held through the white flash and
-// dissolved from die_2), and Echo Warden stance sets `<stem>_<stance>[_<state>]` (pose 'stance_<name>',
-// dropped while broken). Any missing frame falls back to the code-driven bob / squash / breathe.
+// Battle actors: each unit's on-screen view (position, pose, flash, dissolve, bob) and its drawing, by atlas frame
 
 import { dissolveSprite } from '../fx.js';
 import { animFrameAt } from '../../core/assets.js';
@@ -57,6 +47,7 @@ export class Actor {
     this.shields = unit.shields; this.maxShields = unit.shields; this.broken = false; this.shieldFlash = 0;
     this.statuses = {}; this.charging = null; this.defending = false; this.covering = null;
     this.rowFlash = 0; this.furyFlash = 0; this.koLabel = false;
+    this.heat = unit.heat || 0; this.heatFlash = 0; this.flare = false; this.ward = false;   // Episode 3
     this.bobPhase = (unit.uid.charCodeAt(unit.uid.length - 1) * 7) % 60;
     this.def = unit.side === 'enemy' ? ENEMIES[unit.id] || null : null;
     this.rowBeside = !!(this.def && this.def.rowBeside);   // W11: the weakness row stands beside the sprite
@@ -203,6 +194,7 @@ export class Actor {
     if (this.shieldFlash > 0) this.shieldFlash--;
     if (this.rowFlash > 0) this.rowFlash--;
     if (this.furyFlash > 0) this.furyFlash--;
+    if (this.heatFlash > 0) this.heatFlash--;
     // Gauges: the shown value eases toward the real one; the white lag trail follows after a pause.
     this.shownHp = approach(this.shownHp, this.hp, Math.max(1, Math.ceil(Math.abs(this.shownHp - this.hp) / 6)));
     if (this.lagHp > this.shownHp) { if (this.lagWait > 0) this.lagWait--; else this.lagHp = approach(this.lagHp, this.shownHp, Math.max(1, Math.ceil(this.maxHp / 40))); }
@@ -220,6 +212,7 @@ export class Actor {
 
   /** The resting tint (no flash): a variant or borrowed-art tint at 0.35, else the elite gold at 0.14, else none. */
   baseTint() {
+    if (this.flare && this.alive && !this.boss) return { tint: '#fff7d6', amount: (this.engine.frame >> 3) % 2 ? 0.2 : 0.08 };   // the flare: it glows white
     if (this.tint) return { tint: this.tint, amount: 0.35 };
     if (this.elite) return { tint: '#ffd34d', amount: 0.14 };
     return { tint: null, amount: 0 };
@@ -259,8 +252,6 @@ export class Actor {
     const sc = this.scale || 1;
     const flipX = false;
     // Ground shadow (misc atlas) scaled to the sprite's width (about 0.8 of it, so it shows past the feet), centred
-    // 2 px below the feet so most of the ellipse shows in front of the sprite. The atlas pixels are 42% ink, so
-    // grounded units get two passes to read on the dark band; hovering units get one lighter pass.
     const misc = this.engine.assets.has('misc') ? this.engine.assets.atlas('misc') : null;
     const shadowName = shadowFor((this.flying ? 0.6 : 0.8) * this.w);
     if (misc && misc.frames[shadowName] && !opts.noShadow) {
@@ -352,7 +343,11 @@ export function addSummon(engine, actors, unit, index) {
   const a = new Actor(engine, unit, summonSlot(index));
   // The summon slots are hover lines for flying adds (Lost Pages). A grounded summon (the Briar Alpha's
   // Thornback Wolf) stands on the enemy baseline at the slot's x instead of floating in the air.
-  if (!a.flying) { a.y = a.homeY = BASELINE.enemy; }
+  if (!a.flying) {
+    a.y = a.homeY = BASELINE.enemy;
+    // two grounded adds at once (the Warden's coils) stand side by side, not inside each other
+    for (const o of actors.values()) if (o.side === 'enemy' && !o.dead && !o.flying && Math.abs(o.homeX - a.homeX) * 2 < o.w + a.w) a.homeX = a.x = Math.min(258, o.homeX + Math.max(50, Math.round((o.w + a.w) / 2) + 4));
+  }
   a.enterT = 0;
   actors.set(unit.uid, a);
   return a;

@@ -1,17 +1,4 @@
 // Battle presentation effects (W2-battle-scene). Everything here is drawn with the renderer's crisp pixel
-// helpers at the internal resolution: weapon arcs, projectiles, magic circles, element bursts, status
-// sparkles, ink splashes, enemy attack marks, the BREAK burst, the Fury flash, summon pops, the devour
-// vortex, pixel dissolves and the battle-intro slice transition. No game logic lives here.
-// Impact language (W4-battle-polish, CRITIQUE C11): weapon arcs are 2 px with a trailing fade, every hit lands a
-// 4-frame impact star, thrusts leave motion lines, chops a wedge, arrows a trail and magic a brief bloom.
-//
-//   const fx = new BattleFx(engine);
-//   fx.spawn('slash', { x, y, h, fromX, fromY, weapon, big })     target feet (x, y), sprite height h
-//   fx.update();  fx.drawUnder(r);  fx.drawOver(r);  fx.active;  fx.clear();
-//   dissolveSprite(r, atlas, frame, x, y, k, opts)                 pixel dissolve (k 0 = whole, 1 = gone)
-//   new SliceTransition(snapshotCanvas, rng, { reduceMotion })      .update(), .draw(r), .done  (battle intro)
-//
-// Coordinates: (x, y) is the target's feet (sprite origin); cy = y - h / 2 is the body center.
 
 import { animFrameAt } from '../core/assets.js';
 import { hash2d } from '../core/rng.js';
@@ -52,13 +39,7 @@ function ditherPattern(ctx, level, color) {
   return p;
 }
 let scratch = null;
-/**
- * Draw a sprite frame with k (0..1) of its pixels removed in a Bayer dither (SNES death dissolve).
- * opts: { flipX, tint, tintAmount, scale, drop: px the remaining pixels sink, rows: dissolve bottom-up }.
- * W8-art: `scale` and `tint` match Renderer.sprite (feet anchored at (x, y), destination rounded to whole pixels,
- * tint = a tintAmount blend toward the colour), so a scaled or tinted unit does not pop as it starts to dissolve.
- * The dither runs on the frame's own pixels (one Bayer cell per source pixel), so it scales with the sprite.
- */
+/** Draw a sprite frame with k (0..1) of its pixels removed in a Bayer dither (SNES death dissolve). */
 export function dissolveSprite(r, atlas, frame, x, y, k, opts = {}) {
   const f = typeof frame === 'object' ? frame : atlas.frames[frame];
   if (!f || !atlas.image) return;
@@ -155,10 +136,7 @@ export class BattleFx {
   }
 
   // ----------------------------------------------------------------------------------------- spawn table
-  /**
-   * spawn(kind, o): o = { x, y (target feet), h (target sprite height), w, fromX, fromY, fromH, weapon, big,
-   *                        status, item, color, uids, stance, phase, success, pages (positions) }
-   */
+  /** spawn(kind, o): */
   spawn(kind, o = {}) {
     const fn = this[`fx_${kind}`];
     if (typeof fn === 'function') { fn.call(this, o); return true; }
@@ -169,11 +147,7 @@ export class BattleFx {
   center(o) { return { cx: Math.round(o.x || 0), cy: Math.round((o.y || 0) - (o.h || 32) / 2) }; }
 
   // --- weapon arcs (party faces left: arcs sweep from upper-right to lower-left of the target) ----------
-  /**
-   * Weapon arc: a 2 px head (3 px when thick) sweeping a0 -> a1 over the first ~55% of `frames`, with a trail
-   * behind it that fades and thins toward the tail (colors[0] at the head ... colors[last] at the tail), then the
-   * whole arc fades out. Every point is ink-outlined so it reads over any backdrop.
-   */
+  /** Weapon arc: */
   arc(cx, cy, radius, a0, a1, frames, colors, o = {}) {
     const n = Math.max(4, Math.round(Math.abs(a1 - a0) * radius / 2));
     const thick = o.thick ? 3 : 2;
@@ -200,10 +174,7 @@ export class BattleFx {
       if (k < 1 && pts.length) { const h = pts[pts.length - 1]; r.rect(h[0] + 1, h[1] + 1, Math.max(1, h[2] - 2), Math.max(1, h[2] - 2), C.white); }
     }, 'over');
   }
-  /**
-   * Chop wedge: the filled sector the blade sweeps, drawn as rays from the pivot (narrow where the swing began,
-   * full radius at the blade), fading once the swing lands.
-   */
+  /** Chop wedge: */
   wedge(cx, cy, radius, a0, a1, frames, colors, o = {}) {
     this.add(frames, (r, t) => {
       const sweep = Math.max(1, frames * (o.sweep ?? 0.5));
@@ -887,9 +858,11 @@ export class BattleFx {
     const seed = this.seed++;
     const N = 10;
     const rays = [];
+    // o.hot (Episode 3, the Warden's bronze): short white-hot seams over its own body instead of glass across the screen
+    const P = o.hot ? FIRE : [C.white, C.ice, C.cyan];
     for (let i = 0; i < N; i++) {
       let a = (i / N) * TAU + jit(seed, i, 1) * 0.25;
-      const len = 80 + hash2d(i, 2, seed) * 170;
+      const len = o.hot ? (o.h || 60) * (0.25 + hash2d(i, 2, seed) * (o.big ? 0.4 : 0.25)) : 80 + hash2d(i, 2, seed) * 170;
       const segs = 6;
       const pts = [[Math.round(cx + cos(a) * 6), Math.round(cy + sin(a) * 6)]];
       for (let s = 1; s <= segs; s++) {
@@ -914,14 +887,66 @@ export class BattleFx {
       if (alpha <= 0) return;
       for (const ry of rays) {
         const upto = Math.max(1, Math.round(grow * (ry.pts.length - 1)));
-        for (let s = 0; s < upto; s++) seg(r, ry.pts[s], ry.pts[s + 1], s % 2 ? C.white : C.ice, alpha * (1 - s * 0.06));
-        if (upto > ry.bi) seg(r, ry.branch[0], ry.branch[1], C.ice, alpha * 0.8);
+        for (let s = 0; s < upto; s++) seg(r, ry.pts[s], ry.pts[s + 1], P[s % 2], alpha * (1 - s * 0.06));
+        if (upto > ry.bi) seg(r, ry.branch[0], ry.branch[1], P[1], alpha * 0.8);
         const tip = ry.pts[upto];
-        if (t < 10) r.withAlpha(alpha, () => r.rect(tip[0] - 1, tip[1] - 1, 3, 3, C.white));
+        if (t < 10) r.withAlpha(alpha, () => r.rect(tip[0] - 1, tip[1] - 1, 3, 3, P[0]));
       }
-      if (grow >= 0.5) for (let i = 0; i < ring.length; i++) seg(r, ring[i], ring[(i + 1) % ring.length], C.cyan, alpha * 0.85);
+      if (grow >= 0.5) for (let i = 0; i < ring.length; i++) seg(r, ring[i], ring[(i + 1) % ring.length], P[2], alpha * 0.85);
     }, 'top');
-    this.particles(cx, cy, 18, { colors: [C.white, C.cyan, C.ice], speed: 2.4, life: 22, gravity: 0.1, size: 2, shrink: true, radius: 10 });
+    this.particles(cx, cy, 18, { colors: P, speed: 2.4, life: 22, gravity: o.hot ? -0.04 : 0.1, size: 2, shrink: true, radius: 10 });
+  }
+  // --- Episode 3: Heat, the quench, the Warden's cracks and coils, Bram's Tempered Oath ------------------------
+  fx_crack(o) { this.fx_mirror_crack({ ...o, hot: true }); }
+  fx_steam(o) {
+    const { cx, cy } = this.center(o);
+    const n = o.big ? 3 : 2;
+    for (let i = 0; i < n; i++) this.add(30, (r, t) => {
+      const k = t / 30, rad = 5 + Math.round(k * 12) + i * 2;
+      r.withAlpha(0.7 * (1 - k), () => r.ditherEllipse(cx + (i - 1) * 9, cy - Math.round(k * 22) - i * 4, rad, Math.round(rad * 0.7), i % 2 ? C.ice : C.white, 0.5));
+    }, 'top');
+    this.particles(cx, cy, o.big ? 18 : 10, { colors: [C.white, C.ice, '#8e8997'], dir: -Math.PI / 2, spread: 1.4, speed: 0.9, life: 30, radius: 10, size: 2, shrink: true, drift: 0.5 });
+  }
+  fx_embers(o) { const { cx, cy } = this.center(o); this.particles(cx, cy + 6, 9, { colors: FIRE, dir: -Math.PI / 2, spread: 0.9, speed: 1, life: 20, radius: 9, size: 2, shrink: true }); }
+  fx_flare(o) {
+    this.fx_ring(o, { color: C.white, r0: 36, r1: 6, frames: 20 });
+    this.fx_rays(o, { color: C.cream, n: 10, len: 30, frames: 18 });
+    this.fx_embers(o);
+  }
+  fx_fire_wave(o) { this.fx_burst_fire(o); this.fx_ring({ ...o, h: 0 }, { color: FIRE[2], r0: 4, r1: 40, frames: 16, squash: 0.35 }); }
+  fx_coil_rise(o) {
+    this.fx_ring({ ...o, h: 0 }, { color: C.orange, r0: 2, r1: 22, frames: 18, squash: 0.35 });
+    this.particles(o.x, o.y - 4, 16, { colors: FIRE, dir: -Math.PI / 2, spread: 0.8, speed: 1.6, life: 24, radius: 8, radiusY: 2, size: 2, shrink: true });
+    this.bloom(o.x, o.y - (o.h || 40) / 2, FIRE[1]);
+  }
+  /** Tempered Oath raised: a ring of light opens at Bram's feet and a pillar of it stands up through him. */
+  fx_oath(o) {
+    this.fx_ring({ ...o, h: 0 }, { color: C.gold, r0: 4, r1: 26, frames: 22, squash: 0.3 });
+    this.add(30, (r, t) => {
+      const k = t / 30, h = Math.round((o.h || 40) * Math.min(1, t / 8)) + 8;
+      r.withAlpha(0.5 * (1 - k), () => { r.rect(o.x - 6, o.y - h, 12, h, C.gold); r.rect(o.x - 3, o.y - h - 4, 6, h + 4, C.cream); });
+    });
+    this.sparkles(o.x, o.y - (o.h || 40) / 2, 8, [C.gold, C.cream, C.white], 28, 14);
+  }
+  /** The Last Hammer rung off Bram: a bell of light flashes over him and rings out in three waves. */
+  fx_oath_ring(o) {
+    const h = Math.max(30, (o.h || 40) + 10), top = o.y - h - 4;
+    this.add(44, (r, t) => {
+      const k = t / 44, sc = 1 + k * 0.3, a = t < 6 ? 1 : 1 - k;
+      const hw = (u) => Math.round((h * 0.28 + h * 0.08 * u + (u > 0.7 ? (u - 0.7) * h * 0.7 : 0)) * sc);
+      r.withAlpha(a, () => {
+        for (let y = 0; y <= h; y += 1) {
+          const u = y / h, w = hw(u), yy = Math.round(top + h - (h - y) * sc);
+          if (u > 0.08) { r.rect(o.x - w - 1, yy, 2, 1, C.gold); r.rect(o.x + w - 1, yy, 2, 1, C.gold); }
+          if (t < 8) r.withAlpha(0.35, () => r.rect(o.x - w + 1, yy, w * 2 - 2, 1, C.white));
+        }
+        const w0 = hw(0.08), w1 = hw(1), yt = Math.round(top + h - h * 0.92 * sc);
+        r.rect(o.x - w0, yt, w0 * 2, 2, C.gold); r.rect(o.x - w1 - 2, o.y - 3, w1 * 2 + 4, 2, C.cream);
+        r.rect(o.x - 2, yt - 4, 4, 4, C.gold);
+      });
+    }, 'top');
+    for (let i = 0; i < 3; i++) this.fx_ring({ ...o, h: 0 }, { color: i ? C.gold : C.white, r0: 4 + i * 2, r1: 44 + i * 16, frames: 18 + i * 10, squash: 0.4 });
+    this.sparkles(o.x, o.y - h / 2, 12, [C.white, C.gold, C.cream], 34, 22);
   }
   /** A pane of glass shatters over a unit (the King's veil; o.big by default). */
   fx_shatter(o) {
@@ -959,12 +984,7 @@ export class BattleFx {
 }
 
 // ------------------------------------------------------------------------------------------- intro slices
-/**
- * Battle intro (CRITIQUE C5): the field snapshot mosaics in two steps (2 px then 4 px blocks) under a white flash
- * for 8 frames, then splits into 12 axis-aligned vertical slices that slide out alternately up and down over 18
- * frames, revealing the stage beneath. Nothing rotates and nothing is drawn off the pixel grid. 26 frames.
- * reduceMotion: the mosaic, then a plain white fade. Deterministic (the rng only staggers the slices).
- */
+/** Battle intro (CRITIQUE C5): */
 export class SliceTransition {
   constructor(snapshot, rng, opts = {}) {
     this.snap = snapshot;

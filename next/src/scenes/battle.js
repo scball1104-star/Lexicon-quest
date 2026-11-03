@@ -1,10 +1,4 @@
 // Battle scene (W2-battle-scene): FF6 / Chrono Trigger staging over the pure rules in src/battle/rules.js.
-//   const r = await engine.pushAwait('battle', { encounterId, start: 'normal'|'preemptive'|'ambush', canFlee, gameover });
-//   r === 'win' | 'lose' | 'flee'
-// Flow: snapshot, transition, stage, CTB loop (event arrays -> battle/scene/animator.js ops), then victory (rewards.js
-// applies them when the rules end the battle) | defeat (gameover unless { gameover: false }) | flee.
-// Debug: LQ_DEBUG.battle(encId, { start, level, seed, auto, fresh }), battleWait(), battleResult(), battleAct(action),
-// battleUntil(cond: 'hero' | 'mira' | 'bram' | 'telegraph' | 'kept' | 'mirror' | 'phase2' | 'phase3' | 'over').
 
 import { createEncounterBattle, memberStats } from '../battle/rules.js';
 import { partyAction } from '../battle/ai.js';
@@ -13,7 +7,7 @@ import { CONSUMABLES } from '../data/items.js';
 import { describeItem } from '../battle/loot.js';
 import { SKILLS } from '../data/skills.js';
 import { newMember } from '../data/party.js';
-import { createGame } from '../game/state.js';
+import { createGame, newGameEp3 } from '../game/state.js';
 import { vowEvent, vowBattleEvents, vowForbids, activeVow } from '../game/vows.js';
 import { BattleFx, SliceTransition, C } from '../battle/fx.js';
 import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
@@ -34,7 +28,7 @@ const LOG_KEEP = 6;          // lines kept; the idle command window shows the la
 const LOG_SHOW = 3;
 
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
-  east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13 };
+  east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13, sand_road: 13, foundry_f1: 14, foundry_f2: 15, foundry_f3: 16, foundry_heart: 16 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
 // In-battle boss name card by leader id (the field scene shows its own card before the swirl).
 const BOSS_CARD = {
@@ -43,6 +37,8 @@ const BOSS_CARD = {
   archivore: { name: 'THE ARCHIVORE', sub: 'Eater of Names' },
   echo_warden: { name: 'ECHO WARDEN', sub: 'Knight of the Last Order' },
   briar_alpha: { name: 'BRIAR ALPHA', sub: 'Warden of the Lost Bridge' },
+  bellows_specter: { name: 'THE BELLOWS SPECTER', sub: 'Breath of the Foundry' },
+  cinder_warden: { name: 'THE CINDER WARDEN', sub: 'Keeper of the Heartforge' },
 };
 const BOSS_CARD_FRAMES = 120;
 const VICTORY_WAIT = 54;
@@ -56,9 +52,7 @@ function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 function titleCase(s) {
   return String(s).toLowerCase().split(' ').map((w, i) => (i > 0 && ['of', 'the', 'and', 'a'].includes(w) ? w : cap(w))).join(' ');
 }
-// Backdrop per zone. Preferred: the art agent's palette-quantized stage `assets/backdrops/<asset>.png` (384x216)
-// with its sidecar json { bandY, bandAlpha } (CRITIQUE C1/C3). Fallback when that file is not there: the
-// environments.webp cell, box-downscaled and posterized as before. `tint` and `bright` apply in both cases.
+// Backdrop per zone.
 const BACKDROPS = {
   valley: { asset: 'battle_valley', cell: 0, bright: 1.0, tint: null },
   archive: { asset: 'battle_archive', cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
@@ -83,6 +77,11 @@ const BACKDROPS = {
   cave_cellars: { asset: 'cave_battle_cellars', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)' },
   cave_ember: { asset: 'cave_battle_ember', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
   cave_forge: { asset: 'cave_battle_forge', cell: 7, bright: 0.66, tint: 'rgba(90,30,30,0.35)' },
+  // Episode 3 (E3-tiles; the grade is baked in, the manifest loads them)
+  ash_road: { asset: 'battle_ash_road', cell: 2, bright: 1.0, tint: null },
+  foundry: { asset: 'battle_foundry', cell: 2, bright: 0.8, tint: null },
+  crucible: { asset: 'battle_crucible', cell: 2, bright: 0.55, tint: null },
+  heartforge: { asset: 'battle_heartforge', cell: 2, bright: 0.7, tint: null },
 };
 const BACKDROP_ASSETS = ['battle_valley', 'battle_archive', 'battle_boss', 'battle_hollow',
   'battle_east_road', 'battle_court', 'battle_court_deep', 'battle_throne',
@@ -104,10 +103,7 @@ function loadImageUrl(href) {
     img.src = href;
   });
 }
-/**
- * Start loading the battle art that lives outside the manifest (assets/backdrops/*). Called at install and again
- * on every battle entry; each asset loads once. Missing files are tolerated (the fallback backdrop is used).
- */
+/** Start loading the battle art that lives outside the manifest (assets/backdrops/*). */
 export function preloadBattleArt(engine) {
   const assets = engine && engine.assets;
   if (!assets || typeof Image === 'undefined') return;
@@ -126,11 +122,7 @@ export function preloadBattleArt(engine) {
     })();
   }
 }
-/**
- * The stage art for an asset id, or null. The manifest lists the backdrops as atlases (their json carries "image"
- * plus bandY / bandAlpha in the same object), so the image is atlas.image and the band values atlas.meta; a
- * path-loaded backdrop (preloadBattleArt) is a plain image with its sidecar under `<id>_band`.
- */
+/** The stage art for an asset id, or null. */
 function backdropArt(assets, id) {
   if (!id || !assets.has(id) || artLoads.get(id) === 'missing') return null;
   if (assets.ids('atlas').includes(id)) {
@@ -155,10 +147,7 @@ export function backdropKey(zoneId, isBoss, stage = null) {
   return zone && zone.backdrop ? zone.backdrop : zoneId === 'valley' ? 'valley' : 'archive';
 }
 
-/**
- * Build the stage layer (CRITIQUE C3): the backdrop, then the indigo band from bandY down (2 px dithered top
- * edge) under everything that stands on it. Returns { ...layer, usedAsset, band: { y, alpha } }.
- */
+/** Build the stage layer (CRITIQUE C3): */
 export function buildBackdrop(engine, zoneId, isBoss, stage = null) {
   const r = engine.renderer;
   const layer = r.createLayer(W, H);
@@ -562,7 +551,7 @@ export class BattleScene {
       case 'mp': if (a) { a.mp = op.mp; if (op.maxMp) a.maxMp = op.maxMp; } return false;
       case 'fury': if (a) { a.fury = op.fury; } return false;
       case 'shield': if (a) { a.shields = op.shields; a.shieldFlash = 20; this.rowShow.set(op.uid, 120); } return false;
-      case 'break': if (a) { a.broken = true; a.shields = 0; a.shieldFlash = 30; this.rowShow.set(op.uid, 180); this.telegraphs.delete(op.uid); } return false;
+      case 'break': if (a) { a.broken = true; a.flare = false; a.shields = 0; a.shieldFlash = 30; this.rowShow.set(op.uid, 180); this.telegraphs.delete(op.uid); } return false;
       case 'shieldRestore': if (a) { a.broken = false; a.shields = op.shields; a.maxShields = Math.max(a.maxShields, op.shields); } return false;
       case 'status': if (a) { if (op.clear) a.statuses = {}; else if (op.on) a.statuses[op.status] = op.turns || 1; else delete a.statuses[op.status]; } return false;
       case 'defendPose': if (a) { a.defending = !!op.on; if (!op.on && a.pose === 'defend') a.setPose('idle'); } return false;
@@ -582,9 +571,12 @@ export class BattleScene {
       case 'timeline': this.timeline = op.order || []; return false;
       case 'telegraph': {
         this.telegraphs.set(op.actor, { skill: op.skill, name: op.name, text: op.text, target: op.target, targets: op.targets, nextTurn: op.nextTurn, partner: op.partner || null, mirrorCombo: !!op.mirrorCombo });
+        if (op.flare && this.actor(op.actor)) this.actor(op.actor).flare = true;
         return false;
       }
-      case 'telegraphCancel': this.telegraphs.delete(op.actor); return false;
+      case 'telegraphCancel': { this.telegraphs.delete(op.actor); const t = this.actor(op.actor); if (t) t.flare = false; return false; }
+      case 'heat': if (a) { if (op.heat > a.heat) a.heatFlash = 24; a.heat = op.heat; this.rowShow.set(op.uid, 90); } return false;
+      case 'ward': if (a) a.ward = !!op.on; return false;
       case 'reveal': if (a) { a.rowFlash = 24; this.rowShow.set(op.uid, 150); } return false;
       case 'summon': {
         const u = this.unit(op.uid);
@@ -598,7 +590,7 @@ export class BattleScene {
       }
       case 'split': return false;
       case 'ko': if (a && a.side === 'party') vowEvent(e.game, { type: 'fell', member: a.id }, e);   // H3: "Mira stands"
-        if (a) { a.ko = true; a.telegraph = null; this.telegraphs.delete(op.uid); if (a.side === 'enemy') { a.statuses = {}; } } return false;
+        if (a) { a.ko = true; a.flare = false; this.telegraphs.delete(op.uid); if (a.side === 'enemy') { a.statuses = {}; } } return false;
       case 'revive': if (a) { a.ko = false; a.dead = false; a.koLabel = false; a.hp = op.hp; a.shownHp = 0; a.lagHp = 0; a.setPose('idle'); } return false;
       case 'start': return false;
       case 'escape': if (op.success) { vowEvent(e.game, { type: 'flee' }, e); this.result = 'flee'; this.beginFlee(); } return false;   // H3: "No fleeing"
@@ -769,7 +761,9 @@ export class BattleScene {
     this.fx.drawUnder(r);
     const list = sortedActors(this.actors);
     const targetIds = this.menu.state === 'target' ? this.menu.highlightedIds() : [];
+    for (const a of list) if (a.alive) { if (a.ward && a.id === 'cinder_warden') HUD.drawHalo(r, a, this.frame); if (a.flare) HUD.drawHalo(r, a, this.frame, 1); }
     for (const a of list) a.draw(r);
+    for (const a of this.party()) if (a.statuses.oath && a.alive) HUD.drawOath(r, a, this.party(), this.telegraphs.size > 0, this.frame);
     if (this.phase === 'intro') { if (kicked) r.popCamera(); this.shard.draw(r); return; }
     for (const d of this.drops) this.drawDrop(r, d);
     this.fx.drawOver(r);
@@ -780,10 +774,7 @@ export class BattleScene {
     const frame = this.frame;
     const hv = this.phase !== 'rewards' ? this.helpView(r) : null;
     const helpBottom = hv ? 4 + HUD.helpHeight(r, hv.text, hv.color, { rightW: hv.rightW }) : 23;
-    // Enemy rows: the targeted foe, the acting foe and anything hit recently. Placed first (drawn below) so the
-    // telegraph "!" and the name tag can stand clear of a row that sits above a head (touch layout).
-    // W15 (PLAYTEST_REVIEW_4 fix 6): while a party member chooses a command, every living foe shows its shields and
-    // weak points (Octopath), so the plan is made with them in view; during the actions today's rule stands.
+    // Enemy rows:
     const choosing = this.phase !== 'rewards' && this.menu.state !== 'closed' && this.currentUid
       ? [...this.actors.values()].filter((a) => a.side === 'enemy' && !a.dead && a.visible !== false).map((a) => a.uid) : [];
     const rows = new Set([...targetIds.filter((u) => this.actor(u) && this.actor(u).side === 'enemy'), ...this.rowShow.keys(), ...choosing]);
@@ -830,12 +821,7 @@ export class BattleScene {
     void e;
   }
 
-  /**
-   * Where each shown enemy row goes this frame: Map uid -> { know, at, lift, rect, place, badges }. Desktop keeps
-   * the W5 rule (under the feet, lifted clear of the command window, stacked by rowLift). Touch uses
-   * layout.touchRowSpot (W11, CRITIQUE_4 item 1): under the feet, above the head or beside the sprite, whichever
-   * covers no window, no other row and no sprite (its own or the party's heavily, another foe's lightly).
-   */
+  /** Where each shown enemy row goes this frame: */
   planEnemyRows(uids, touch, cwNow, helpBottom, scoreAll = false) {
     const plan = new Map();
     const list = uids.map((uid) => this.actor(uid)).filter((a) => a && !a.dead && a.side === 'enemy').sort((p, q) => p.x - q.x);
@@ -865,11 +851,7 @@ export class BattleScene {
     return plan;
   }
 
-  /**
-   * The battle log (W7, CRITIQUE_3 item 5): while nobody is choosing a command (enemy turns, the victory and
-   * level-up pages) the command window shows the last three things the help window said, newest at the bottom
-   * and the older ones dimmer. Nothing is drawn until there is a first line, so there is no blank box.
-   */
+  /** The battle log (W7, CRITIQUE_3 item 5): */
   drawLog(r) {
     if (!this.log.length) return;
     const cw = cmdWin(touchUi(this.engine));
@@ -891,11 +873,7 @@ export class BattleScene {
     return this.phase === 'play' && touchUi(this.engine) ? HELP_TOUCH_BTNS : null;
   }
 
-  /**
-   * Help window. Keyboard / pad: while the command menu waits at its root with no telegraph pending, the right
-   * side names the two global toggles with device glyphs ("[Enter] Auto [E] Speed", or the gold x2 when fast).
-   * Touch: two small AUTO / x2 buttons sit there throughout the fight (touchButtons), lit when on.
-   */
+  /** Help window. */
   helpView(r) {
     let text = this.help.text, color = this.help.color;
     const tele = this.telegraphs.size ? [...this.telegraphs.values()][0] : null;
@@ -1035,7 +1013,7 @@ export class BattleScene {
       phase: this.phase, result: this.result, menu: this.menu.state, current: this.currentUid, fast: this.fast || null,
       opsLeft: this.ops.length - this.opIndex, waitLeft: this.waitLeft, auto: this.auto, speed: this.speed,
       telegraphs: [...this.telegraphs.keys()], timeline: this.timeline.map((t) => t.uid),
-      units: [...this.actors.values()].map((a) => ({ uid: a.uid, hp: a.hp, maxHp: a.maxHp, shields: a.shields, broken: a.broken, ko: a.ko, dead: a.dead, x: Math.round(a.x), y: Math.round(a.y), pose: a.pose })),
+      units: [...this.actors.values()].map((a) => ({ uid: a.uid, id: a.id, hp: a.hp, maxHp: a.maxHp, shields: a.shields, broken: a.broken, ko: a.ko, dead: a.dead, x: Math.round(a.x), y: Math.round(a.y), pose: a.pose, heat: a.heat, flare: a.flare, ward: a.ward, art: a.stem || null, statuses: Object.keys(a.statuses) })),
       log: this.log.slice(), target: this.menu.currentTarget ? this.menu.currentTarget() : null, preview: this.menu.preview ? this.menu.preview.landing : null,
       rewards: this.rewards ? { page: this.rewards.pages[this.rewards.index].kind, index: this.rewards.index, pages: this.rewards.pages.length } : null,
       over: this.b ? this.b.isOver() : null, round: this.b ? Math.floor(this.b.state.partyTurns / this.b.state.partySize) + 1 : 0,
@@ -1103,6 +1081,13 @@ export function makeDebugGame(encounterId, opts = {}) {
   LOAD.court_throne = { hero: { equip: { ...C3.hero.equip, charm: 'twinfold_charm' }, mastery: { sword: 420, axe: 150 } }, mira: { equip: { ...C3.mira.equip }, mastery: { staff: 320, bow: 130 } },
     bram: { equip: { ...C3.bram.equip }, mastery: { spear: 420, axe: 150 } },
     items: { potion: 5, hi_potion: 5, ether: 3, hi_ether: 3, antidote: 1, eye_drops: 2, echo_herb: 3, phoenix_feather: 3, silver_salve: 2 } };
+  if (ZONES[zone] && ZONES[zone].episode === 3) {
+    // Episode 3: the quick start's party (state.js EP3_START) at the zone's level; the Foundry knows Tempered Oath
+    const e3 = newGameEp3(g.heroName);
+    for (const m of e3.party) { m.level = level; m.exp = Math.max(m.exp, newMember(m.id, { level }).exp); const s = memberStats(m); m.hp = s.maxHp; m.mp = s.maxMp; }
+    if (zone !== 'sand_road') e3.flags.bram_memory_3 = true;
+    return e3;
+  }
   const load = LOAD[zone] || LOAD.valley;
   const members = (opts.party || ['hero', 'mira', 'bram']).map((id) => {
     const m = newMember(id, { level, name: id === 'hero' ? g.heroName : undefined });

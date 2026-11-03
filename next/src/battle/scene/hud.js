@@ -1,6 +1,4 @@
 // Battle HUD: help/telegraph window (top left), the CTB timeline (top right), the party status window
-// (bottom right), the enemy shield + weakness row, reticle, turn marker, telegraph marker, elite tags and
-// the big banners (combo names, boss phases). All positions come from layout.js; art from assets/ui.
 
 import { drawWindow, drawSelBar, drawGauge, drawLabel, drawIcon, uiAtlas } from '../../ui/window.js';
 import { animFrameAt } from '../../core/assets.js';
@@ -33,11 +31,7 @@ export function helpLines(r, text, color, opts = {}) {
   }
   return out;
 }
-/**
- * How far the help window reaches down the top-left band, below its 4 px margin: its height, or 0 while it is docked
- * under the timeline (W13, layout.helpDock), when the band holds no window. The scene adds the margin for the bottom
- * that the "!", the rows and the name tag keep clear of.
- */
+/** How far the help window reaches down the top-left band, below its 4 px margin: */
 export function helpHeight(r, text, color, opts = {}) {
   if (helpDock()) return 0;
   return HELP_WIN.h + Math.max(0, helpLines(r, text, color, opts).length - 1) * HELP_LINE_H;
@@ -75,9 +69,7 @@ function drawFace(r, face, x, y, alpha = 1) {
   r.image(face.image, x, y, { sx: face.x, sy: face.y, sw: 14, sh: 14, alpha, tint: face.tint || null, tintAmount: face.tint ? 0.35 : 0 });
 }
 
-// Timeline heads (CRITIQUE C4): 12x12 `head_<id>` icons from assets/ui/heads.json (the art agent's atlas, listed in
-// the manifest as "heads"). Fallback when the atlas is missing: the party's portrait face crop, and for enemies a
-// smooth 12x12 thumbnail of the whole battle sprite (a colored silhouette reads better than an eyebrow crop).
+// Timeline heads (CRITIQUE C4):
 const thumbs = new Map();
 function headsAtlas(r) { const a = r && r.assets; return a && a.has('heads') ? a.atlas('heads') : null; }
 function thumbnail(actor) {
@@ -175,11 +167,7 @@ function dashedRect(r, x, y, w, h, color, phase = 0) {
   pts.forEach(([px, py], i) => { if ((((i + phase) >> 1) & 1) === 0) r.pixel(px, py, color); });
 }
 
-/**
- * Timeline: order = [{uid, at, skip?, charging?}], actors map, preview = { landing, uid } | null.
- * Party slots blue, enemy slots red (elite/boss gold-orange), the current slot gold with a pulse, the preview
- * landing slot dashed. The next 8 actors are shown; the preview slot sits below the rail.
- */
+/** Timeline: */
 export function drawTimeline(r, order, actors, preview, frame) {
   const ui = uiAtlas(r);
   if (!ui) return;
@@ -272,10 +260,7 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
   });
 }
 
-/**
- * Enemy row under a foe: shield badge (count, or broken) + weakness slots (known icons, '?' for unknown,
- * resist frames) + status badges. know = b.knowledge(uid), unit = live rules unit.
- */
+/** Enemy row under a foe: */
 export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = {}) {
   const ui = uiAtlas(r);
   if (!ui) return null;
@@ -316,6 +301,14 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
     if (s.nullified && ui.frames.weak_null) r.sprite(ui, ui.frames.weak_null, ex + 1, y, { topLeft: true });
     ex += 15;
   }
+  // Episode 3 Heat: one flame pip per level, lit from the left, white-hot while the flare is announced
+  const hm = (know && know.heatMax) || 0;
+  if (hm) {
+    const pw = 3 + hm * 6;
+    r.rect(ex, y - 1, pw, 14, actor.flare ? '#8a2a2a' : '#4b2a2a'); r.rect(ex + 1, y, pw - 2, 12, '#14101e');
+    for (let i = 0; i < hm; i++) drawPip(r, ex + 2 + i * 6, y + 2, i < actor.heat, actor.flare, actor.heatFlash > 0 && i === actor.heat - 1, frame);
+    ex += pw + 1;
+  }
   // Status badges above the row (W11: below it when the row is tucked under the help window, opts.top, as the King's
   // row on the phone is, so the window never hides them).
   const by = opts.top != null && y - 10 < opts.top ? y + 15 : y - 10;
@@ -324,13 +317,18 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
     const f = ui.frames[`st8_${s}`];
     if (f) { r.sprite(ui, f, sx, by, { topLeft: true }); sx += 9; }
   }
-  // W11 (PLAYTEST_REVIEW_3 fixes 6 and 8): the Episode 2 snowballs on screen. After the status badges, one red Fury
-  // badge per stack the foe holds for the rest of the fight: each Kept for the Nameless King, each landed Mirrored
-  // Combo for the reflections.
+  // W11 (PLAYTEST_REVIEW_3 fixes 6 and 8):
   const grown = Math.min(empowerStacks(unit), EMPOWER_SHOWN);
   const fb = grown && ui.frames.st8_fury;
   if (fb) for (let i = 0; i < grown; i++) { r.sprite(ui, fb, sx, by, { topLeft: true }); sx += 9; }
   return { x, y, w: ex - x };
+}
+const PIP = ['..o..', '..oo.', '.oao.', '.oaao', 'oabao', 'oabbo', 'oabbo', '.ooo.'];
+function drawPip(r, x, y, lit, hot, pop, frame) {
+  const w = hot && (frame >> 2) % 2;
+  const col = lit ? { o: hot ? '#ffcf5a' : '#e06b39', a: hot || pop ? '#fff1a8' : '#ffcf5a', b: w || pop ? '#ffffff' : '#fff1a8' } : { o: '#6a4450', a: '#2a1c26', b: '#2a1c26' };
+  const fl = lit && (frame >> 3) % 2 ? 1 : 0;
+  PIP.forEach((row, j) => { for (let i = 0; i < 5; i++) if (row[i] !== '.') r.rect(x + i - (j < 2 ? fl : 0), y + j, 1, 1, col[row[i]]); });
 }
 /** Stacks of a lasting Episode 2 buff on a foe: the King's Kept (`keep<n>`) and the reflections' combos (`mirror<n>`). */
 export const EMPOWER_SHOWN = 4;
@@ -351,7 +349,33 @@ export function rowLift(anchor, w, placed) {
 export function enemyRowWidth(know) {
   const weak = (know && know.weak) || [], resist = ((know && know.resist) || []).filter((t) => WEAK_TYPES.includes(t));
   const slots = Math.min(4, weak.length + ((know && know.unknown) || 0) + resist.length);
-  return 15 + (know && know.reflect ? 15 : 0) + slots * 15;
+  return 15 + (know && know.reflect ? 15 : 0) + slots * 15 + (know && know.heatMax ? 4 + know.heatMax * 6 : 0);
+}
+/** Episode 3 glows behind a foe: the Molten Shell's heat halo round the Warden (o = 0), a flare's white heat (o = 1). */
+const HALO = [['#eba14d', '#ffcf5a', '#fff1a8'], ['#fff7d6', '#ffffff', '#ffffff']];
+export function drawHalo(r, a, frame, o = 0) {
+  const cx = a.cx, cy = a.cy, p = (frame >> 3) % 2, c = HALO[o], hw = Math.round(a.w / 2), hh = Math.round(a.h / 2);
+  r.withAlpha(0.22 + p * 0.08, () => r.ditherEllipse(cx, cy, hw + 8, hh + 6, c[0], 0.5));
+  if (!o) r.withAlpha(0.5, () => r.ellipse(cx, cy, hw + 6 + p, hh + 4, c[1], false));
+  else r.withAlpha(0.3 + p * 0.15, () => r.ditherEllipse(cx, cy, hw, hh, c[1], 0.25));
+  for (let i = 0; i < 6; i++) { const t = (frame + i * 23) % 60; r.withAlpha(1 - t / 60, () => r.rect(cx - hw + ((i * 37) % a.w), a.y - 8 - t * hh / 40, 1, 3, c[2])); }
+}
+/** Tempered Oath (Episode 3): a ring of light at Bram's feet; with a blow announced, arrows from each ally to him. */
+export function drawOath(r, a, allies, arrows, frame) {
+  const rw = Math.round(a.w / 2) + 6 + ((frame >> 4) % 2);
+  r.withAlpha(0.85, () => { r.ellipse(a.cx, Math.round(a.y), rw, 4, '#f9d77a', false); r.ellipse(a.cx, Math.round(a.y), rw - 3, 2, '#fff7d6', false); });
+  for (let i = 0; i < 4; i++) { const t = (frame + i * 15) % 40; r.withAlpha(0.8 - t / 50, () => r.rect(a.cx - rw + 3 + ((i * 11) % (rw * 2 - 6)), Math.round(a.y) - 2 - t, 1, 2, '#fff7d6')); }
+  if (!arrows) return;
+  for (const b of allies) {
+    if (b === a || !b.alive) continue;
+    const x0 = b.cx, x1 = a.cx, y0 = b.top - 4, peak = Math.min(y0, a.top - 4) - 12, n = 14, k = (frame >> 3) % 2;
+    for (let i = 1; i < n; i++) {
+      const u = i / n, x = Math.round(x0 + (x1 - x0) * u), y = Math.round(y0 + (a.top - 4 - y0) * u - Math.sin(Math.PI * u) * (y0 - peak));
+      if (i % 2 === k) { r.rect(x - 2, y - 2, 4, 4, '#14101e'); r.rect(x - 1, y - 1, 2, 2, '#f9d77a'); }
+    }
+    const ty = a.top - 4;
+    r.rect(x1 - 3, ty - 2, 7, 2, '#14101e'); r.rect(x1 - 2, ty, 5, 2, '#14101e'); r.rect(x1 - 2, ty - 1, 5, 1, '#f9d77a'); r.rect(x1 - 1, ty, 3, 1, '#f9d77a'); r.rect(x1, ty + 1, 1, 1, '#f9d77a');
+  }
 }
 
 /** Name tab near the reticle: enemy name (gold + crown for elites), HP when appraised. */
@@ -420,9 +444,7 @@ export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28, row = 
   const top = row && row.y < actor.top + 4 ? Math.min(actor.top, row.y - 1) : actor.top;
   let y = Math.max(minY, top - 14) - bob;
   let x = actor.cx + 4;
-  // W13: never on the face. The bubble (16 px, its tail at the bottom-left: x - 4 .. x + 12) may touch the head by
-  // the 2 px of its tail; when the help window or a row above leaves no room over the head (the Nameless King, the
-  // Echo Warden under a two-line help), it stands beside the head on the party's side, its tail toward the head.
+  // W13:
   const head = headBox(actor, false);
   const over = (bx, by) => Math.min(bx + 12, head.x + head.w) - Math.max(bx - 4, head.x) > 0 && Math.min(by + 16, head.y + head.h) - Math.max(by, head.y) > 2;
   if (over(x, y)) {
@@ -521,10 +543,7 @@ export function bossCardY(rects, sub = true) {
   return spots[0];
 }
 
-/**
- * In-battle boss name card (the W5 cutscene title card, laid on the battlefield as the party enters): the boss
- * name in the large font over a darkened gold-ruled band, with its subtitle. card = { name, sub, t, frames }.
- */
+/** In-battle boss name card (the W5 cutscene title card, laid on the battlefield as the party enters): */
 export function drawBossCard(r, card) {
   if (!card) return;
   const { name, sub, t, frames } = card;

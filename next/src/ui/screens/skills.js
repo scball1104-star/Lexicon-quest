@@ -24,7 +24,7 @@ export class SkillsScreen {
   get title() { return this.kind === 'magic' ? 'Magic' : 'Tech'; }
   refresh(keep = true) {
     const m = this.member;
-    const known = knownSkills(m);
+    const known = knownSkills(m, this.g.flags);   // flag-learned skills (Bram's Tempered Oath) need the story flags
     const list = [];
     for (const id of known) {
       const s = SKILLS[id];
