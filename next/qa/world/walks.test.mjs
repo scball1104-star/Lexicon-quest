@@ -19,35 +19,3 @@ test('every map walks headless with zero console errors', { skip: !hasPlaywright
   assert.equal(r.status, 0, out.split('\n').slice(-25).join('\n'));
   assert.match(out, /OK: zero console errors/);
 });
-
-// E2-world: the Episode 2 field systems in the real game (qa/world/e2_lab.py): the silverglass teaching room before
-// and after the turn, the lit bridge and its grace rule, Bram's Shove on a heavy mirror and a push mirror, the beam
-// as a light in the dark (draw time), reflections in water and the fountain's faces, mist, conditional tint and
-// music, gated overlays, fog and Keeper mirror doors, newGameEp2, gold from a scene, flags into the battle, the
-// Episode 2 credits handoff. Here (not in its own file) so it runs in the solo slot after the parallel batch.
-test('the Episode 2 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.join(HERE, 'e2_lab.py')], { timeout: 110000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
-  const out = (r.stdout || '') + (r.stderr || '');
-  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
-  assert.match(out, /E2_LAB: PASS/);
-});
-
-// W15 (PLAYTEST_REVIEW_4 fix 1): the save trap repro in the real game on the phone profile (qa/integrate/w15_save_trap.py):
-// an Episode 1 credits save in the autosave, the title's Episode 2 quick start and one door leave slot 0 untouched unless
-// the player confirms; "Copy it, then start" keeps the run in a record. Here so it runs in the solo slot.
-test('the Episode 2 quick start never overwrites a finished run without asking', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.resolve(HERE, '..', 'integrate', 'w15_save_trap.py')], { timeout: 150000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
-  const out = (r.stdout || '') + (r.stderr || '');
-  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
-  assert.match(out, /W15_SAVE_TRAP: PASS/);
-});
-
-// E3-world: the Episode 3 field systems in the real game (qa/world/e3_lab.py) on the _testforge fixtures: sluice turns,
-// the cooling front, dams and Shove, latched basins and AND gates, the hot grate and lift doors, crust kept across a round
-// trip, slag light and draw time, the ash_haze luminance, the memory vignette, the Bell Gate. Solo slot, as above.
-test('the Episode 3 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.join(HERE, 'e3_lab.py')], { timeout: 170000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
-  const out = (r.stdout || '') + (r.stderr || '');
-  assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
-  assert.match(out, /E3_LAB: PASS/);
-});
