@@ -529,7 +529,12 @@ Round hall; `heartforge` (9..14, 4; banked after the win), `cinder_warden` actor
 ### 8.3 Open items
 
 - The Bell House mirror leads to the Hollow square; the square's one mirror door still leads to the Court (a return
-  door is the integrator's call). Wren cannot pathfind from the taproom to `wren_wake` in the guest room.
+  door is the integrator's call). E3-integrate (2026-11-02): `ep3_morning` now spawns a scene Wren (`wren_up`) at
+  `inn_door`, the head of the stair, so the map's Wren keeps the counter; the pack adds the enter trigger `ep3_wake`
+  (nh_inn) and `ep3_wake_nh` (nameless_hollow, with its own `smith_seat`, `wren_wake`, `inn_door` by the inn door) that
+  run `ep3_morning`; `pk_bellhouse` gained `bellhouse_door`, and emberpeak's `bell_tower` mark moved to (4,13), in front
+  of the tower, so the courier can walk to it.
 - The bell tower's ringing frames and the smithy's chimney smoke after `forge_relit` are decor states the maps cannot
-  switch; the memorial plates use overhead `dx`/`dy` (pixel offsets) that the field must honour.
+  switch. The overhead `dx`/`dy` pixel offsets (the memorial plates) and object decals with a `state` frame
+  (`furnace_glow`) are honoured by `world/tilemap.js` since E3-integrate.
 - No Keeper note line exists for the Home cache; only the chest is there.

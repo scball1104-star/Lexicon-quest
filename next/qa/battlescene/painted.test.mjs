@@ -39,7 +39,7 @@ test('the battle scene prefers the painting once loaded and keeps the composed s
 
 test('painted stages are lazy: out of the precache shell list and inside the runtime pattern', () => {
   const py = rd('tools/pwa/build_pwa.py');
-  assert.match(py, /LAZY_PREFIXES = \('assets\/backdrops\/paint_',\)/);
+  assert.match(py, /LAZY_PREFIXES = \('assets\/backdrops\/paint_',[^)]*\)/);   // E3-world added src/world/ep3/ after it
   assert.match(py, /and not is_lazy\(p\.relative_to\(NEXT\)\.as_posix\(\)\)/, 'shell_files skips them');
   assert.match(py, /alts \+= \[re\.escape\(pre\) for pre in LAZY_PREFIXES\]/, 'PACK_PATTERN caches them at runtime');
   const sw = rd('sw.js');

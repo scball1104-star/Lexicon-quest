@@ -29,6 +29,9 @@ export function withEastGate(base) {
     { id: 'sand_chain', type: 'object', x: 42, y: 26, h: 2, sprite: 'fence_iron', text: 'sand_chain', ifNot: 'sand_gate_open' },
     { id: 'sand_gate_trig', type: 'trigger', x: 40, y: 26, w: 1, h: 2, script: 'sand_gate', if: 'ep3_started' },
     { id: 'sand_gate_exit', type: 'door', x: 43, y: 26, w: 1, h: 2, to: ['sand_road', 1, 22, 'right'], kind: 'door', if: 'sand_gate_open' },
+    // E3-integrate: a save that left the inn after the Episode 2 credits wakes Episode 3 here (scene guards: ep2_complete,
+    // not ep3_morning_done, EP3_LIVE). The scene's marks are at the inn door: Wren comes out, the Smith waits by the wall.
+    { id: 'ep3_wake_nh', type: 'trigger', x: 0, y: 0, w: 1, h: 1, script: 'ep3_morning', on: 'enter' },
   ];
   const overlays = [
     ...base.overlays.filter((o) => !(o.x >= 39 && o.x <= 43 && o.y >= 21 && o.y <= 27)),
@@ -41,7 +44,7 @@ export function withEastGate(base) {
     decor,
     overlays,
     events,
-    marks: { ...base.marks, sand_gate: [41, 26], vessa_gate: [39, 24], penny_cart_h: [39, 27] },
+    marks: { ...base.marks, sand_gate: [41, 26], vessa_gate: [39, 24], penny_cart_h: [39, 27], smith_seat: [10, 19], wren_wake: [7, 19], inn_door: [8, 18] },
   };
 }
 
@@ -52,7 +55,9 @@ export function withEastGate(base) {
  */
 export function withInnMarks(base) {
   if (!base || base.id !== 'nh_inn' || (base.marks && base.marks.smith_seat)) return base;
-  return { ...base, marks: { ...base.marks, smith_seat: [19, 8], wren_wake: [16, 7], inn_door: [15, 3] } };
+  // E3-integrate: the enter trigger that runs ep3_morning (the core inn has none; the scene's own guards gate it)
+  return { ...base, events: [...base.events, { id: 'ep3_wake', type: 'trigger', x: 0, y: 0, w: 1, h: 1, script: 'ep3_morning', on: 'enter' }],
+    marks: { ...base.marks, smith_seat: [19, 8], wren_wake: [16, 7], inn_door: [15, 3] } };
 }
 
 export default withEastGate;

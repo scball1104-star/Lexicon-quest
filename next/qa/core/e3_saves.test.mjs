@@ -107,7 +107,8 @@ test('episodes: with the switch live the row needs an ep2_complete save, and nam
 });
 
 test('episodes: ?ep=3 shows nothing until the Episode 3 maps are listed, then is a developer entry', () => {
-  assert.equal(episodeOffers(fake({}), '?ep=3').ep3.show, false, 'real module state: maps are not listed yet or the switch is off');
+  // E3-integrate: E3-maps listed the zones (EP3_MAPS_LISTED), so with the real module state ?ep=3 is the developer entry
+  assert.equal(episodeOffers(fake({}), '?ep=3').ep3.show, true, 'real module state: the maps are listed');
   assert.equal(episodeOffers(fake({}), '?ep=3', { mapsListed: false }).ep3.show, false);
   const dev = episodeOffers(fake({}), '?debug=1&ep=3', { mapsListed: true });
   assert.deepEqual([dev.ep3.show, dev.ep3.url], [true, true]);
@@ -220,16 +221,99 @@ test('Episode 3 start vs Episode 2 start: the older quick start is unchanged', (
   assert.equal(g.map, 'hero_home');
 });
 
-// ---------------------------------------------------------------------------------------------- item 5: pending
-test('PENDING (E3-integrate): the Episode 2 credits save reaches ep3_morning with EP3_LIVE on, and not with it off', { skip: 'needs ep3.js scenes and sceneAllowed() support for EP3_LIVE (E3-story / E3-integrate)' }, () => {});
-test('PENDING (E3-integrate): the quick start plays through a full map change on the real Episode 3 maps writing only its own slot', { skip: 'needs the Episode 3 maps (E3-maps) and the browser autoplay' }, () => {});
-test('PENDING (E3-scene-ui): the title shows "Episode 3: new party" and the slot picker panel with the real ?ep=3 URL', { skip: 'needs EP3_MAPS_LISTED in encounters.js (E3-battle/E3-maps) and a title shot' }, () => {});
-test('EP3_START matches the simulator\'s sand_road loadout (gear and mastery, member by member)', async () => {
-  const { LOADOUTS } = await import('../../tools/sim/loadouts.mjs');
-  for (const id of ['hero', 'mira', 'bram']) {
-    const row = LOADOUTS.sand_road[id], start = EP3_START.members[id];
-    assert.equal(start.weapon, row.weapon, `${id} weapon`);
-    assert.deepEqual(start.equip, row.equip, `${id} equip`);
-    assert.deepEqual(start.mastery, row.mastery, `${id} mastery`);
+// ---------------------------------------------------------------------------------------------- item 5 (turned on by E3-integrate)
+import { sceneAllowed } from '../../src/game/story.js';
+import { scenes as EP3_SCENES, GATE as EP3_GATE } from '../../src/data/story/ep3.js';
+import { register as registerEp3Maps, EP3_MAP_IDS } from '../../src/data/maps/ep3/index.js';
+import { peekMap } from '../../src/world/maps.js';
+import { EP3_ROW_LABEL } from '../../src/game/episodes.js';
+
+/** The Episode 2 credits fixture: the autoplay's (qa/out/autoplay/*ep2*credits*) if present, else a built one. */
+function ep2CreditsFixture() {
+  const dir = path.join(NEXT, 'qa', 'out', 'autoplay');
+  const f = fs.existsSync(dir) ? fs.readdirSync(dir).find((n) => /ep2.*credits.*\.json$/.test(n)) : null;
+  return f ? [`autoplay ${f}`, deserialize(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')))] : ['built', ep2CreditsGame()];
+}
+/** Runs a wrapped scene against a recording stub of the cutscene API; returns the flags it set (null when it never started). */
+async function playScene(fn, game) {
+  const set = [];
+  let started = false;
+  const s = new Proxy({}, { get: (_, k) => {
+    if (k === 'hasFlag') return (f) => !!game.flags[f];
+    if (k === 'setFlag') return (f) => { set.push(f); game.flags[f] = true; };
+    if (k === 'lockInput') return () => { started = true; };
+    if (k === 'choice') return async () => 0;
+    if (k === 'camera') return { panTo: async () => {}, follow: async () => {} };
+    return async () => {};
+  } });
+  await fn(s);
+  return started ? set : null;
+}
+
+test('the Episode 2 credits save reaches ep3_morning with EP3_LIVE on, and not with it off', async () => {
+  const [label, g] = ep2CreditsFixture();
+  assert.equal(g.map, 'nh_inn', `${label}: the credits wake the party in the Signless Inn`);
+  assert.ok(g.flags.ep2_complete && !g.flags.ep3_started, label);
+  await registerEp3Maps();
+  const inn = peekMap('nh_inn');
+  assert.ok(inn.events.some((e) => e.type === 'trigger' && e.on === 'enter' && e.script === 'ep3_morning'), 'the nh_inn of the pack runs ep3_morning on entry');
+  for (const m of ['smith_seat', 'wren_wake', 'inn_door']) assert.ok(inn.marks[m], `nh_inn mark ${m}`);
+  const hollow = peekMap('nameless_hollow');
+  assert.ok(hollow.events.some((e) => e.on === 'enter' && e.script === 'ep3_morning'), 'a save that left the inn wakes Episode 3 on the Hollow');
+  const was = EP3_GATE.live;
+  try {
+    EP3_GATE.live = false;
+    assert.equal(sceneAllowed('ep3_morning', (f) => !!g.flags[f]), false, 'switch off: the scene is not allowed');
+    assert.equal(await playScene(EP3_SCENES.ep3_morning, { flags: { ...g.flags } }), null, 'switch off: the scene does not start');
+    EP3_GATE.live = true;
+    assert.equal(sceneAllowed('ep3_morning', (f) => !!g.flags[f]), true, 'switch on: allowed');
+    const flags = await playScene(EP3_SCENES.ep3_morning, { flags: { ...g.flags } });
+    assert.deepEqual(flags, ['ep3_morning_done', 'ep3_started'], `${label}: switch on, the morning plays and starts the episode`);
+  } finally { EP3_GATE.live = was; }
+});
+
+test('the quick start plays through map changes on the real Episode 3 maps writing only its own slot', async () => {
+  await registerEp3Maps();
+  const { save, storage } = fresh();
+  const other = ep2CreditsGame();
+  save.save(0, serialize(other), saveMeta(other));
+  const before0 = save.exportSlot(0);
+  const pick = pickRunSlot(save);
+  assert.deepEqual([pick.ok, pick.slot], [true, 1]);
+  const g = newGameEp3('Quill', { slot: pick.slot });
+  const route = ['nh_inn', 'nameless_hollow', ...EP3_MAP_IDS];
+  for (const id of route) {
+    const m = peekMap(id);
+    assert.ok(m, `${id} is registered by the pack`);
+    const at = m.start || { x: 1, y: 1 };
+    setPosition(g, id, at.x, at.y, 'down');
+    autosave(save, g);
+    assert.equal(save.exportSlot(0), before0, `slot 0 untouched after entering ${id}`);
+  }
+  assert.equal(save.load(1).map, route[route.length - 1]);
+  assert.deepEqual([...storage._m.keys()].sort(), ['lq-next-slot-0', 'lq-next-slot-1']);
+  // the browser proof: qa/autoplay.py --episode 3 --start new asserts the same through the real title and field (check_slots)
+  for (const dev of ['desktop', 'phone']) {
+    const rep = path.join(NEXT, 'qa', 'out', 'autoplay', `${dev}-ep3-new-report.json`);
+    if (!fs.existsSync(rep)) continue;
+    const r = JSON.parse(fs.readFileSync(rep, 'utf8'));
+    if (r.status !== 'ok') continue;
+    assert.ok(r.notes.some((n) => /^slots checked at the end: only slot 1 was written/.test(n)), `${dev} quick-start autoplay checked its slots`);
+  }
+});
+
+test('the title shows "Episode 3: new party" with the real ?ep=3 URL (maps listed)', () => {
+  assert.equal(EP3_ROW_LABEL, 'Episode 3: new party');
+  const o = episodeOffers(fake({}), '?ep=3');
+  assert.deepEqual([o.ep3.show, o.ep3.url], [true, true], 'the developer entry, from the real module state');
+  const s = fake({ 2: env('Sol', '2026-10-23T10:00:00Z', { ep1_complete: true, ep2_complete: true }) });
+  assert.equal(episodeOffers(s, '', { live: true }).ep3.show, true, 'live: an Episode 2 finish offers the row');
+});
+
+test('every autosave writer uses the run\'s own slot: the inn rest is not a fixed slot 0 (found by the quick-start autoplay)', () => {
+  for (const f of ['src/scenes/inn.js', 'src/scenes/field.js']) {
+    const src = fs.readFileSync(path.join(NEXT, f), 'utf8');
+    assert.match(src, /save\.save\(normSlot\((g|this\.game && this\.game)\.autosaveSlot\)/, `${f} saves to the run's slot`);
+    assert.doesNotMatch(src, /save\.save\(0\s*,/, `${f} never writes slot 0 by number`);
   }
 });

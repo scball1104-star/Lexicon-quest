@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'ded590e0379d';
+const SHELL_VERSION = '8abfd910ec45';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -371,7 +371,7 @@ const PRECACHE = [
   'assets/audio/jingles/save.mp3',
   'assets/audio/jingles/victory_fanfare.mp3',
 ];
-const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|src/data/tier/|src/data/maps/tier_|assets/(tiles|sprites|ui|backdrops)/tier(_|\\.)|assets/tier_manifest\\.json|assets/pack_files\\.json|assets/backdrops/paint_)";
+const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|src/data/ep3/|src/data/maps/ep3/|assets/(tiles|sprites|ui|backdrops)/ep3(_|\\.)|assets/ep3_manifest\\.json|src/data/tier/|src/data/maps/tier_|assets/(tiles|sprites|ui|backdrops)/tier(_|\\.)|assets/tier_manifest\\.json|assets/pack_files\\.json|assets/backdrops/paint_|src/world/ep3/)";
 // build_pwa:end
 
 const SHELL_PREFIX = 'lq-next-shell-';

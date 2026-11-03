@@ -180,7 +180,7 @@ export class TileMap {
     }
     for (const d of mod.decor || []) this.placeDecor(d);
     for (const d of this.decorObjects) this.placeDecor(d);
-    this.overheadTiles = (mod.overhead || []).filter((o) => o && (TILES[o.t] || this.warn('overhead:' + o.t, `unknown overhead tile "${o.t}"`)));
+    this.overheadTiles = (mod.overhead || []).filter((o) => o && (TILES[o.t] || OBJS[o.t] || this.warn('overhead:' + o.t, `unknown overhead tile "${o.t}"`)));
     for (const o of this.overheadTiles) if (o.if != null || o.ifNot != null) this.gatedOverhead.push(o);
     for (const l of (mod.lighting && mod.lighting.lights) || []) this.lights.push({ x: l.x, y: l.y, r: l.r || 48, color: l.color || null, kind: l.kind || null });
   }
@@ -673,11 +673,11 @@ export class TileMap {
     g.restore();
   }
 
-  paintTile(g, id, x, y, phase) {
+  paintTile(g, id, x, y, phase, dx = 0, dy = 0) {
     const m = this.db.tiles[id];
     if (!m) return;
     const img = this.sheet(m.sheet);
-    const px = x * TILE, py = y * TILE;
+    const px = x * TILE + dx, py = y * TILE + dy;
     if (m.autotile === 'line16') {
       const sameAt = (xx, yy) => this.inBounds(xx, yy) && (this.ids[yy][xx] === id || (this.decorTiles[yy][xx] || []).includes(id) || (this.overlays[yy][xx] || []).includes(id));
       const i = line16Index(sameAt(x, y - 1), sameAt(x + 1, y), sameAt(x, y + 1), sameAt(x - 1, y));
@@ -703,7 +703,9 @@ export class TileMap {
     for (const s of this.statics) this.paintStatic(g, s, 'overhead');
     for (const o of this.overheadTiles) {
       if (o.if != null || o.ifNot != null) { o._on = gatedPresent(o, this.hasFlag); if (!o._on) continue; }
-      this.paintTile(g, o.t, o.x, o.y, 0);
+      const O = !this.db.tiles[o.t] && this.db.objects[o.t];   // an object decal: its frame `state` at its anchor
+      if (O) { const [fx, fy, fw, fh] = (O.frames || [])[o.state || 0] || O.rect; g.drawImage(this.sheet(O.sheet), fx, fy, fw, fh, (o.x - O.anchor[0]) * TILE, (o.y - O.anchor[1]) * TILE, fw, fh); }
+      else this.paintTile(g, o.t, o.x, o.y, 0, o.dx, o.dy);   // dx, dy: pixel offsets
     }
   }
 

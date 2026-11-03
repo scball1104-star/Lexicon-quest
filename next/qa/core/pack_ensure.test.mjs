@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  PACKS, ensurePack, packReady, onPackReady, packWanted, packsToAwait, packForMap, awaitPacks, mergeTileFragment,
+  PACKS, ensurePack, packReady, onPackReady, packWanted, packsToAwait, packForMap, packsForMap, awaitPacks, mergeTileFragment,
   resetPacks, setPackDefaults, packEnabled, FAIL_TOAST,
 } from '../../src/game/packs.js';
 
@@ -20,13 +20,18 @@ function mod() {
 }
 
 test('the real table: x1 and x2, the prefix rule, wanted(), the x1 switch is on and the x2 switch is off', () => {
-  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'tier']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28)
+  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'tier']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02)
   assert.equal(PACKS.x1.prefix, 'x1_');
   assert.equal(PACKS.x2.audioPack, 'ep2');
   assert.deepEqual(PACKS.x1.touches, ['valley', 'willowmere', 'archive_f1', 'archive_f2', 'archive_f3']);
   assert.deepEqual(PACKS.x2.touches, ['east_road', 'nameless_hollow', 'nh_chapel', 'court_f1', 'court_f2', 'court_f3']);
   assert.equal(PACKS.x1.enabled(), true, 'X1_LIVE is on since X1-integrate flipped it');
   assert.equal(PACKS.x2.enabled(), false, 'X2_LIVE is false until X2-integrate flips it');
+  // ep3 (E3-integrate): the maps folder, the two Hollowmere edits, the hard wait, wanted from Episode 2 on
+  assert.equal(PACKS.ep3.prefix, 'ep3/'); assert.equal(PACKS.ep3.entry, '../data/maps/ep3/index.js'); assert.equal(PACKS.ep3.hard, true);
+  assert.ok(PACKS.ep3.touches.includes('nameless_hollow') && PACKS.ep3.touches.includes('nh_inn') && PACKS.ep3.touches.includes('foundry_heart'));
+  assert.deepEqual([{}, { ep1_complete: true }, { ep2_started: true }, { ep2_complete: true }, { ep3_started: true }].map((f) => PACKS.ep3.wanted(f)), [false, false, true, true, true]);
+  assert.deepEqual(packsForMap('nameless_hollow').map((h) => h.id), ['x2', 'ep3'], 'both packs that edit the Hollow');
 });
 
 test('packWanted per flag set', () => {

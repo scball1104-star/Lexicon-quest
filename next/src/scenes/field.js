@@ -19,7 +19,7 @@ import { buildingFeatures, chimneyTops, drawLitWindows } from '../world/townlife
 import { Banner, transitionOpts } from '../world/transitions.js';
 import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
-import { packForMap, packEnabled, packReady, awaitPacks } from '../game/packs.js';
+import { PACKS, packForMap, packsForMap, packEnabled, packReady, awaitPacks } from '../game/packs.js';
 import { landing } from '../game/packFallback.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
@@ -142,6 +142,8 @@ export class FieldScene {
     const e = this.engine, g = this.game;
     this.loading = true;
     if (EP3_MAP.test(mapId)) await ep3(this);
+    const hard = packsForMap(mapId).map((h) => h.id).filter((p) => PACKS[p].hard && packEnabled(p) && !packReady(p));
+    if (hard.length) await awaitPacks(hard, 8000);
     let mod = await loadMap(mapId);
     // W7: a pack map not up yet: wait (bounded), else a real map, and back once the pack is up
     const hit = !mod && packForMap(mapId);

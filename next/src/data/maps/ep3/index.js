@@ -1,6 +1,6 @@
 // The Episode 3 maps as a lazy pack (E3-maps). Nothing here is in the first download: the core download has no room
 // left under the tap-prompt ratchet, so the ten maps live in this folder and register themselves when the ep3 pack
-// loads. The pack entry this module is written for (src/game/packs.js PACKS, owned by the integrator; see docs/MAPS.md 8):
+// loads. The pack entry (src/game/packs.js PACKS, added by E3-integrate as written here plus `hard: true` and ep2_started in wanted):
 //
 //   ep3: { entry: '../data/maps/ep3/index.js', prefix: 'ep3/', assets: null, audioPack: 'ep3',
 //          touches: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], wanted: (f) => !!(f.ep2_complete || f.ep3_started),
@@ -36,6 +36,17 @@ export function register() {
     for (const m of MAPS) registerMap(m);
     registerMap(withEastGate(nameless_hollow));
     registerMap(withInnMarks(nh_inn));
+    // The field code these maps need (src/world/ep3/, lazy, never precached) rides on the pack: it is imported here, and
+    // fetched again once the service worker controls the page (a first visit loads the pack before the worker takes over),
+    // so it sits in the worker's runtime cache with the maps and the episode plays offline after one visit even if the
+    // party has not reached its first Episode 3 map yet. Template URLs keep build_pwa.py from preloading it.
+    if (typeof document !== 'undefined') {
+      const files = ['index', 'flow', 'quench', 'fx'].map((n) => new URL(`../../../world/ep3/${n}.js`, import.meta.url).href);
+      import(files[0]).catch(() => {});
+      const warm = () => { for (const u of files) fetch(u).catch(() => {}); };
+      const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
+      if (sw && !sw.controller && sw.addEventListener) sw.addEventListener('controllerchange', warm, { once: true }); else warm();
+    }
     done = Promise.resolve({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] });
   }
   return done;

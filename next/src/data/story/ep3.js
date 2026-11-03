@@ -61,9 +61,10 @@ async function ep3_morning(s) {
   await s.fade('in', 60);
   await s.emote('hero', 'zzz');
   await s.wait(30);
-  await s.walk('wren', 'wren_wake');
-  await s.face('wren', 'hero');
-  await say(s, 'wren', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
+  await s.spawn('wren_up', { sprite: 'npc_wren', name: 'Wren', at: 'inn_door' });   // up the stair: the map's Wren keeps the counter
+  await s.walk('wren_up', 'wren_wake');
+  await s.face('wren_up', 'hero');
+  await say(s, 'wren_up', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
   await s.walk('hero', ['down']);
   await s.camera.panTo('smith_seat', 40);
   await narrate(s, 'By the hearth sits an old man grey with road dust, his hands open on his knees as if he has put something down.');
@@ -89,7 +90,9 @@ async function ep3_morning(s) {
   await s.camera.follow('hero');
   await s.walk('smith', 'inn_door');
   await s.despawn('smith');
-  await say(s, 'wren', "Three more eggs, then. I'll put them in his coat pocket. He won't notice.");
+  await say(s, 'wren_up', "Three more eggs, then. I'll put them in his coat pocket. He won't notice.");
+  await s.walk('wren_up', 'inn_door');
+  await s.despawn('wren_up');
   await s.setFlag('ep3_morning_done');
   await s.setFlag('ep3_started');
 }

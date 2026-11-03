@@ -2,7 +2,7 @@
 // autosave slot 0), false when declined or too poor. Draws nothing itself: the field stays visible under
 // the dialog boxes it pushes.
 
-import { heal, serialize, saveMeta } from '../game/state.js';
+import { heal, serialize, saveMeta, normSlot } from '../game/state.js';
 import { HELP } from '../data/text.js';
 import { NPCS } from '../data/npcs.js';
 
@@ -34,7 +34,7 @@ export class InnScene {
     await e.fadeTo(async () => {
       await e.audio.jingle('inn_rest', { duckMusic: false });
       heal(g, { full: true });
-      try { e.save.save(0, serialize(g), saveMeta(g)); } catch { /* autosave is best effort */ }
+      try { e.save.save(normSlot(g.autosaveSlot), serialize(g), saveMeta(g)); } catch { /* autosave is best effort */ }
     }, { duration: 1.2, hold: 0.2 });
     await e.pushAwait('dialog', { who: null, text: HELP.inn.rest });
     e.pop(true);

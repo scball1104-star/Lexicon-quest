@@ -72,7 +72,7 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
 | `pk_shop` | `taro` (shop `ventworks`) |
 | `pk_smithy` | `sella` at `anvil` (shop `pk_smithy`), `garrick_e` then `garrick_n` at `forge` (two records, same spot, mutually exclusive) |
 | `pk_bellhouse` | `ilya` at `ilya_spot` |
-| `nh_inn` | `wren` walks to `wren_wake` in `ep3_morning` |
+| `nh_inn` | `wren_up` (a scene Wren, spawned at `inn_door` at the head of the stair; the map's Wren stays at the counter) walks to `wren_wake` in `ep3_morning` and back |
 
 ---
 

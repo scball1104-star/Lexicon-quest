@@ -56,6 +56,6 @@ export default {
     mirrorDoor('mirror_pk_sq', 9, 3, ['nameless_hollow', 26, 19, 'down'], ['mirror_sigil_get', 'pk_arrived']),
   ],
   exits: [],
-  marks: { ilya_spot: [4, 5], bellhouse_in: [9, 11], workbench: [3, 4], mirror: [9, 4] },
+  marks: { ilya_spot: [4, 5], bellhouse_in: [9, 11], workbench: [3, 4], mirror: [9, 4], bellhouse_door: [9, 12] },   // bellhouse_door: where the Smith leaves in ilya_bellhouse (E3-integrate)
   start: { x: 9, y: 12, dir: 'up' },
 };

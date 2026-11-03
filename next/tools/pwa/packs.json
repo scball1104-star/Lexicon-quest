@@ -33,6 +33,26 @@
     "audioPack": null,
     "touches": []
   },
+  "ep3": {
+    "entry": "../data/maps/ep3/index.js",
+    "prefix": "ep3/",
+    "assets": null,
+    "audioPack": "ep3",
+    "touches": [
+      "sand_road",
+      "emberpeak",
+      "pk_inn",
+      "pk_shop",
+      "pk_smithy",
+      "pk_bellhouse",
+      "foundry_f1",
+      "foundry_f2",
+      "foundry_f3",
+      "foundry_heart",
+      "nameless_hollow",
+      "nh_inn"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

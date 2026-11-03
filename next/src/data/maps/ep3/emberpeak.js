@@ -131,7 +131,7 @@ export default {
   exits: [{ x: 19, y: 31, w: 2, h: 1, to: ['sand_road', 50, 7, 'left'] }],
   marks: {
     gate_in: [19, 30], gate_smith: [20, 29], square: [19, 17], coolant: [24, 17], memorial: [14, 15], memorial_smith: [16, 15],
-    bell_tower: [5, 8], bell_rope: [5, 12], bellhouse_door: [6, 21], inn_door: [34, 13], smithy_door: [9, 29],
+    bell_tower: [4, 13], bell_rope: [5, 12], bellhouse_door: [6, 21], inn_door: [34, 13], smithy_door: [9, 29],
     foundry_door: [19, 6], east_road: [37, 15],
     crowd_a: [13, 16], crowd_b: [18, 15], crowd_c: [21, 15], crowd_d: [23, 19],
     gather_veyra: [9, 13], gather_ilya: [8, 13], gather_rusk: [10, 14], gather_bess: [7, 14], gather_garrick: [6, 13],
