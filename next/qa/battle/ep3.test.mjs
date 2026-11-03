@@ -69,9 +69,9 @@ test('Episode 3 ids: enemies, encounters, zones, skills, items, uniques, set, sh
   assert.deepEqual([ZONE_LOOT.sand_road, ZONE_LOOT.foundry_f1, ZONE_LOOT.foundry_f2, ZONE_LOOT.foundry_f3].map((z) => z.ilvl), [13, 14, 15, 16]);
 });
 
-test('Episode 3 zones stay unlisted until E3-maps; Episode 1 and 2 orders are untouched', () => {
-  assert.equal(EP3_MAPS_LISTED, false);
-  for (const z of EP3_ZONE_ORDER) assert.ok(!Object.keys(ZONES).includes(z), `${z} is not enumerable yet`);
+test('Episode 3 zones are listed since E3-maps; Episode 1 and 2 orders are untouched', () => {
+  assert.equal(EP3_MAPS_LISTED, true);
+  for (const z of EP3_ZONE_ORDER) assert.ok(Object.keys(ZONES).includes(z), `${z} is enumerable`);
   assert.deepEqual(ZONE_ORDER, ['valley', 'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss']);
   assert.deepEqual(EP2_ZONE_ORDER, ['east_road', 'court_f1', 'court_f2', 'court_f3', 'court_throne']);
   assert.equal(zoneOrder(3), EP3_ZONE_ORDER);

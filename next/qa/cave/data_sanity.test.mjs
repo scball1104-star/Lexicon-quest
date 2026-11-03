@@ -27,7 +27,7 @@ test('B1 (Lv 1, empty hands), B10 and B30: careful play wins at least 85%, in a 
   }
 });
 
-test('B60 and B99 (EP3 fallback pools, every earlier group at its own level, an elite in three): careful play still wins 85%, attack-only loses more', () => {
+test('B60 and B99 (the Episode 3 pools, an elite in three): careful play still wins 85%, attack-only loses more', () => {
   for (const key of [60, 99]) {
     const c = checkpoint(key, { n: N });
     const cp = c.byPolicy.competent, nv = c.byPolicy.naive;

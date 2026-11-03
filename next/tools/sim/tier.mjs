@@ -6,9 +6,9 @@
 //                                                   tier economy); `--check` without --tier is unchanged
 //   node tools/sim/simulate.mjs --tier 1 --n 100 --json   fewer battles; also write tools/sim/out/tier.json
 //
-// The carried party is the simulator's Episode 2 finish: `sand_road`'s kit (the court_throne row plus the Kept Promise and tier 4
-// pieces; src/game/state.js EP3_START mirrors it) with the flag tier_1. Each zone is played at the level the tier's own progression
-// meets it at: the record's 3,335 EXP plus 1.5x the base EXP to that point (tierLevelFor). The same TARGETS hold (ordinary 3 to 5
+// The carried party is the simulator's Episode 3 finish (E3-switch, 2026-11-02: the unlock is ep3_complete now; it was the Episode 2
+// finish, sand_road's kit at 3,335 EXP): `foundry_heart`'s kit (tier 6 pieces, the Updraft Charm, Tempered Oath) with the flag tier_1. Each zone is played at the level the tier's own progression
+// meets it at: the record's 6,060 EXP plus 1.5x the base EXP to that point (tierLevelFor). The same TARGETS hold (ordinary 3 to 5
 // rounds, HP lost at most half, careful play wins, attack-only noticeably worse; Echo Warden 6 to 8, Archivore 8 to 12 and the
 // rest of the bosses their own bands); the main route's level bands do not apply on the tier (its levels are its own, printed).
 // This module never imports simulate.mjs (the CLI's top-level await would deadlock the cycle): simulate.mjs passes its functions in.
@@ -28,8 +28,9 @@ import { TIER_TABLE, TIER_FLAG, TIER_SHOP_ROWS, tierPrice, liftLevel, metLevel }
 register();   // the legendaries, the shop rows and globalThis.LQ_TIER (the hooks rules.js and loot.js read)
 
 export const T = TIER_TABLE[1];
-/** The carried kit: the Episode 2 finish (sand_road) with the tier's flag. */
-LOADOUTS.tier_carry = { ...LOADOUTS.sand_road, flags: [TIER_FLAG] };
+/** The carried kit: the Episode 3 finish (foundry_heart) with the tier's flag; not bram_memory_3 (story flags start over, so
+ * Tempered Oath waits for its scene again). */
+LOADOUTS.tier_carry = { ...LOADOUTS.foundry_heart, flags: [TIER_FLAG] };
 export const TIER_LOADOUT = 'tier_carry';
 /** The purse the record carries in: the Episode 3 quick start's (state.js EP3_START gold), an Episode 2 finisher's. */
 export const CARRY_GOLD = 1500;
@@ -82,8 +83,8 @@ export function tierSuite({ n = 400, zones, policies = ['competent', 'naive'], e
 }
 
 /**
- * The first fight on the tier: the bakery-yard slime (H1, encounters.js yard_slime) against the carried hero alone, Lv 13 in the
- * Episode 2 finish kit, careful play. Target: the hero wins every time in two to five rounds and loses some HP (the base game's
+ * The first fight on the tier: the bakery-yard slime (H1, encounters.js yard_slime) against the carried hero alone, Lv 18 in the
+ * Episode 3 finish kit, careful play. Target: the hero wins every time in two to five rounds and loses some HP (the base game's
  * Lv 1 hero takes a few rounds; at HP x1.6 without the lift it would fall to one swing).
  */
 export function firstFight({ n = 200, policy = 'competent' } = {}) {
@@ -159,8 +160,8 @@ export function checkTable(progression) {
   for (const [k, v] of Object.entries(want)) if (T.foe[k] !== v) fails.push(`tier table: foe ${k} is ${T.foe[k]}, the brief says ${v}`);
   if (T.exp !== 1.5) fails.push(`tier table: EXP x${T.exp}, the brief says x1.5`);
   if (T.ilvl !== 6 || T.ilvlCap !== 16) fails.push(`tier table: item level +${T.ilvl} capped at ${T.ilvlCap}, the brief says +6 capped at 16`);
-  const ep2 = progression(1, 2).slice(-1)[0].exp;
-  if (ep2 !== T.lift.carryExp) fails.push(`tier table: carryExp ${T.lift.carryExp} is not the simulator's Episode 2 finish (${ep2})`);
+  const fin = progression(1, 3).slice(-1)[0].exp;
+  if (fin !== T.lift.carryExp) fails.push(`tier table: carryExp ${T.lift.carryExp} is not the simulator's Episode 3 finish (${fin})`);
   for (const [shopId, ids] of Object.entries(TIER_SHOP_ROWS)) {
     for (const id of ids) {
       const row = SHOPS[shopId].stock.find((s) => s.item === id && s.ifFlag === TIER_FLAG);
@@ -188,7 +189,7 @@ export async function tierMain(args, deps) {
   const lag = T.lift.lag;
   console.log(`Fine Print (tier_1): foes HP x${T.foe.hp}, ATK and MAG x${T.foe.pow}, SPD +${T.foe.spd} after the lift (HP to the party's level less ${lag.hp}, `
     + `the hit less ${lag.pow}, the tempo less ${lag.spd}; ${Object.keys(T.terms).length} encounter terms); EXP x${T.exp}, gold x${T.gold}; drops item level +${T.ilvl} (cap ${T.ilvlCap})`);
-  console.log(`Carried kit: sand_road (the Episode 2 finish) from ${T.lift.carryExp} EXP. The party meets a foe of level `
+  console.log(`Carried kit: foundry_heart (the Episode 3 finish) from ${T.lift.carryExp} EXP. The party meets a foe of level `
     + `${[2, 3, 4, 6, 7, 8, 11, 13].map((L) => `${L} at Lv ${metLevel(L)} (its HP as Lv ${liftLevel(L, 'hp')})`).join(', ')}\n`);
   console.log(formatTable(rows));
   console.log('\nProgression on the tier (each zone plan once, from the record):');

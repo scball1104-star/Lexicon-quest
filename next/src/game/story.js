@@ -1,31 +1,26 @@
-// Story glue for the field (W2-world, E2-world): scene lookup across both episodes, inspect text, books, barks,
-// flag-driven visual states (conditional banners, music and tints) and the two episode-ending handoffs. Pure
-// except `takeBark` and the credits helpers, which read and write the game object they are given.
+// Story glue for the field: scenes, inspect text, books, barks, flag-driven banners/music/tints, credits handoffs.
 
 import { scenes as EP1_SCENES, lines as EP1_LINES } from '../data/story/ep1.js';
 import { scenes as EP2_SCENES, lines as EP2_LINES } from '../data/story/ep2.js';
-import { BOOKS, BANNERS, BARKS, CREDITS, CREDITS_EP2, END_CARD_EP2 } from '../data/text.js';
+import { scenes as EP3_SCENES, lines as EP3_LINES, SCENE_CONDITIONS as EP3_CONDITIONS, GATE as EP3_GATE } from '../data/story/ep3.js';
+import { BOOKS, BANNERS, BARKS, CREDITS, CREDITS_EP2, END_CARD_EP2, CREDITS_EP3, END_CARD_EP3, END_CARD_EP2_LIVE } from '../data/text.js';
+import { EP3_LIVE } from './episodes.js';
 import { SCENE_CONDITIONS as EP1_CONDITIONS } from '../data/story/ep1.js';
 import { SCENE_CONDITIONS as EP2_CONDITIONS } from '../data/story/ep2.js';
 import { resolve, pick, matches } from '../data/story/dialogue.js';
 import { speakerName } from '../data/npcs.js';
 
-export { CREDITS, CREDITS_EP2, BANNERS };
+export { CREDITS, CREDITS_EP2, CREDITS_EP3, BANNERS };
 
-/** Every scene of both episodes (ids never collide: qa/content and qa/world test it). */
-export const SCENES = { ...EP1_SCENES, ...EP2_SCENES };
-/** Every inspect line id of both episodes. */
-export const LINES = { ...EP1_LINES, ...EP2_LINES };
+/** Every scene and inspect line id of the three episodes (ids never collide: qa/content and qa/world test it). */
+export const SCENES = { ...EP1_SCENES, ...EP2_SCENES, ...EP3_SCENES };
+export const LINES = { ...EP1_LINES, ...EP2_LINES, ...EP3_LINES };
+const BASE_CONDITIONS = { ...EP1_CONDITIONS, ...EP2_CONDITIONS, ...EP3_CONDITIONS };
 // Pack scenes (XP-packs): a pack's story module calls registerStory({ scenes, lines, conditions }) from its register().
 const EXTRA_CONDITIONS = {};
 const registered = { scenes: [], lines: [] };   // ids a pack tried to register that already belonged to something else
 
-/**
- * Add a pack's scenes, inspect lines and scene guards to the shared tables (SCENES, LINES and the condition lookup that
- * sceneAllowed reads). An id that is already taken by a DIFFERENT value is never overwritten: it is reported in the result and
- * by storyCollisions(). Registering the same value again is a no-op, so register() may run twice.
- * Returns { scenes: [collided ids], lines: [collided ids], conditions: [collided ids] }.
- */
+/** Add a pack's scenes, lines and guards; a taken id is never overwritten (reported). Returns the collided ids. */
 export function registerStory({ scenes = {}, lines = {}, conditions = {} } = {}) {
   const out = { scenes: [], lines: [], conditions: [] };
   const put = (table, id, v, bucket) => {
@@ -35,7 +30,7 @@ export function registerStory({ scenes = {}, lines = {}, conditions = {} } = {})
   for (const [id, v] of Object.entries(scenes)) put(SCENES, id, v, out.scenes);
   for (const [id, v] of Object.entries(lines)) put(LINES, id, v, out.lines);
   for (const [id, c] of Object.entries(conditions)) {
-    if (id in EP1_CONDITIONS || id in EP2_CONDITIONS) { out.conditions.push(id); continue; }
+    if (id in BASE_CONDITIONS) { out.conditions.push(id); continue; }
     put(EXTRA_CONDITIONS, id, c, out.conditions);
   }
   for (const id of out.scenes) if (!registered.scenes.includes(id)) registered.scenes.push(id);
@@ -43,20 +38,18 @@ export function registerStory({ scenes = {}, lines = {}, conditions = {} } = {})
   return out;
 }
 
-/** Ids defined by both episodes, or registered by a pack over an existing id (should stay empty; a collision means one shadows the other). */
+/** Ids defined by two episodes, or registered by a pack over an existing id (should stay empty; a collision means one shadows the other). */
 export function storyCollisions() {
-  const sc = Object.keys(EP2_SCENES).filter((k) => k in EP1_SCENES);
-  const li = Object.keys(EP2_LINES).filter((k) => k in EP1_LINES);
+  const sc = [...Object.keys(EP2_SCENES).filter((k) => k in EP1_SCENES), ...Object.keys(EP3_SCENES).filter((k) => k in EP1_SCENES || k in EP2_SCENES)];
+  const li = [...Object.keys(EP2_LINES).filter((k) => k in EP1_LINES), ...Object.keys(EP3_LINES).filter((k) => k in EP1_LINES || k in EP2_LINES)];
   return { scenes: [...sc, ...registered.scenes], lines: [...li, ...registered.lines] };
 }
 
-/**
- * Would the scene's own guard let it run now ({ if, ifNot } in SCENE_CONDITIONS)? A scene with no conditions does.
- * The field asks before it holds an arrival scene for the location banner (W15).
- */
+/** Would the scene's own guard let it run now (SCENE_CONDITIONS)? */
 export function sceneAllowed(id, hasFlag) {
-  const c = EP1_CONDITIONS[id] || EP2_CONDITIONS[id] || EXTRA_CONDITIONS[id];
+  const c = BASE_CONDITIONS[id] || EXTRA_CONDITIONS[id];
   if (!c) return !!SCENES[id];
+  if (c.live && !EP3_GATE.live) return false;
   const list = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
   return list(c.if).every((f) => hasFlag(f)) && !list(c.ifNot).some((f) => hasFlag(f));
 }
@@ -72,11 +65,7 @@ export function inspectBoxes(lineId, hasFlag) {
   return resolve(v, hasFlag, null);
 }
 
-/**
- * A map field that may be a first-match conditional list (EPISODE2_PLAN 5.5): `music: [{ if: 'nh_restored', id:
- * 'hollowmere' }, { id: 'hollow' }]`, the same for `lighting.tint`. A plain value is returned as is; a list with no
- * match gives null.
- */
+/** A plain value, or the first matching entry of a conditional list [{ if, ifNot, id }] (null when none). */
 export function pickConditional(value, hasFlag) {
   if (!Array.isArray(value)) return value;
   for (const e of value) {
@@ -94,10 +83,7 @@ export function bookBoxes(bookId) {
   return [{ who: null, text: `{c:gold}${b.title}{/c}` }, ...b.pages.map((p) => ({ who: null, text: p }))];
 }
 
-/**
- * Banner text for a map: { title, sub } (falls back to the module's name). `BANNERS[id].states` (Episode 2) is a
- * first-match list of { if, ifNot, title, sub } checked before the base title (Nameless Hollow -> Hollowmere).
- */
+/** Banner { title, sub } for a map: BANNERS[id].states first match, else the base title or module name. */
 export function bannerFor(mapId, mod, hasFlag) {
   const b = BANNERS[mapId];
   if (b) {
@@ -109,10 +95,7 @@ export function bannerFor(mapId, mod, hasFlag) {
   return mod && mod.name ? { title: mod.name, sub: null } : null;
 }
 
-/**
- * A first-time companion remark. Returns the boxes to show (empty when none applies or it was shown before)
- * and records it in the save (counters) so it never repeats.
- */
+/** A first-time companion remark's boxes (once per save, recorded in counters). */
 export function takeBark(game, key, hasFlag) {
   const entries = BARKS[key];
   if (!entries) return [];
@@ -143,34 +126,26 @@ export function gateSignState(hasFlag) {
   return 'normal';
 }
 
-/**
- * The tint a map should show for the current flags. While the town's names are fading the outdoor town
- * maps take a faint ink cast; after the Archivore everything is back to its own colours.
- */
+/** The tint a map shows for the current flags (Willowmere's ink cast while names fade). */
 export function tintFor(mapId, baseTint, hasFlag) {
   const base = pickConditional(baseTint, hasFlag) || 'none';
   if (mapId === 'willowmere' && hasFlag('signs_fading') && !hasFlag('archivore_defeated')) return base === 'none' || base === 'day' ? 'ink_light' : base;
   return base;
 }
 
-/**
- * Which credits should roll now: 1 (ep1_complete set, Episode 1 credits not yet rolled in this save), 2 (the same
- * for ep2_complete and credits2_rolled), or 0. Truthy-compatible with the old boolean.
- */
+/** Which episode's credits should roll now (epN_complete and its counter not yet set), or 0. */
 export function creditsPending(game, hasFlag) {
   if (hasFlag('ep1_complete') && !game.counters.credits_rolled) return 1;
   if (hasFlag('ep2_complete') && !game.counters.credits2_rolled) return 2;
+  if (hasFlag('ep3_complete') && !game.counters.credits3_rolled) return 3;
   return 0;
 }
 export function markCreditsRolled(game, episode = 1) {
-  if (episode === 2) game.counters.credits2_rolled = 1; else game.counters.credits_rolled = 1;
+  game.counters[(CREDITS_HANDOFF[episode] || CREDITS_HANDOFF[1]).counter] = 1;
 }
-/**
- * The episode handoffs: the cards, the credits music and where the party wakes afterwards. Episode 1 wakes at home
- * (hero_home, bed); Episode 2 in Hollowmere's inn (nh_inn, inn_bed), after `endCard` (W15: "To be continued").
- * Both in day light.
- */
+/** Per episode: credits cards and music, the wake map and mark (day light), the counter, the end card. */
 export const CREDITS_HANDOFF = {
   1: { cards: CREDITS, music: null, map: 'hero_home', mark: 'bed', counter: 'credits_rolled' },
-  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled', endCard: END_CARD_EP2 },
+  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled', endCard: EP3_LIVE ? END_CARD_EP2_LIVE : END_CARD_EP2 },
+  3: { cards: CREDITS_EP3, music: 'first_bell', map: 'pk_inn', mark: 'inn_bed', counter: 'credits3_rolled', endCard: END_CARD_EP3 },
 };

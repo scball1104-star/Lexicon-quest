@@ -16,7 +16,7 @@
 // While a pack's switch is off (X1_LIVE / X2_LIVE false) the guard does nothing and loadMap behaves exactly as before.
 
 import { TEST_MAPS } from './_testmap.js';
-import { PACKS, packForMap, packEnabled, packReady, ensurePack, onPackReady, GUARD_MS } from '../game/packs.js';
+import { PACKS, packForMap, packsForMap, packEnabled, packReady, ensurePack, onPackReady, GUARD_MS } from '../game/packs.js';
 
 const cache = new Map();
 const extra = new Map();
@@ -36,15 +36,14 @@ function hook() {
   }
 }
 
-/** Wait (at most GUARD_MS) for the pack a map needs. Resolves immediately when no pack is involved or it is ready. */
+/** Wait (at most GUARD_MS) for every pack a map needs. */
 async function guard(id) {
-  const hit = packForMap(id);
-  if (!hit || !packEnabled(hit.id) || packReady(hit.id)) return hit;
+  const ids = packsForMap(id).map((h) => h.id).filter((p) => packEnabled(p) && !packReady(p));
+  if (!ids.length) return;
   await new Promise((resolve) => {
     const t = setTimeout(resolve, GUARD_MS);
-    ensurePack(hit.id).then(() => { clearTimeout(t); resolve(); });
+    Promise.all(ids.map((p) => ensurePack(p))).then(() => { clearTimeout(t); resolve(); });
   });
-  return hit;
 }
 
 export async function loadMap(id) {
@@ -52,8 +51,7 @@ export async function loadMap(id) {
   if (extra.has(id)) return extra.get(id);
   hook();
   const hit = packForMap(id);
-  const needs = hit && packEnabled(hit.id) && !packReady(hit.id);
-  if (needs) await guard(id);
+  if (packsForMap(id).some((h) => packEnabled(h.id) && !packReady(h.id))) await guard(id);
   if (extra.has(id)) return extra.get(id);                                             // registered by the pack's register() while we waited
   if (hit && hit.prefixed && packEnabled(hit.id) && !packReady(hit.id)) return null;   // the pack never arrived: no such place
   if (cache.has(id) && !stale.has(id)) return cache.get(id);

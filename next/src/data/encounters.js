@@ -190,19 +190,19 @@ for (const [id, z] of Object.entries(EP2_ZONES)) {
 // qa/maps iterates ZONES and wants a map per listed zone. Backdrops are the battle_<id> keys of the plan (E3-sprites).
 export const EP3_ZONES = {
   sand_road: { id: 'sand_road', name: 'The Old Sand Road', level: [13, 14], backdrop: 'ash_road', music: 'battle', episode: 3,
-    plan: [['sr_first', 1], ['sr_hounds', 1], ['sr_beetles', 1], ['sr_mixed', 1]] },
+    plan: [['sr_first', 1], ['sr_hounds', 1], ['sr_mixed', 1]] },
   foundry_f1: { id: 'foundry_f1', name: 'The Cinder Liftworks', level: [14, 15], backdrop: 'foundry', music: 'battle', episode: 3,
     plan: [['fo1_beetles', 2], ['fo1_slimes', 1], ['fo1_miners', 2], ['fo1_mixed', 1]] },
   foundry_f2: { id: 'foundry_f2', name: 'The Ventilation Galleries', level: [15, 16], backdrop: 'foundry', music: 'battle', episode: 3,
-    plan: [['fo2_phantoms', 2], ['fo2_constructs', 1], ['fo2_mixed', 2], ['bellows_specter', 1]] },
+    plan: [['fo2_phantoms', 1], ['fo2_constructs', 1], ['fo2_mixed', 1], ['bellows_specter', 1]] },
   foundry_f3: { id: 'foundry_f3', name: 'The Heartforge Crucible', level: [16, 16], backdrop: 'crucible', music: 'battle', episode: 3,
-    plan: [['fo3_defenders', 2], ['fo3_mixed', 2], ['fo3_furnace', 1]] },
+    plan: [['fo3_defenders', 2], ['fo3_mixed', 1], ['fo3_furnace', 1]] },
   foundry_heart: { id: 'foundry_heart', name: 'The Heartforge', level: [16, 17], backdrop: 'heartforge', music: 'boss_warden', episode: 3,
     plan: [['cinder_warden', 1]] },
 };
 export const EP3_ZONE_ORDER = ['sand_road', 'foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart'];
 /** E3-maps: set to true once the five Episode 3 maps are in src/data/maps (lists the zones for qa/maps and the quick start). */
-export const EP3_MAPS_LISTED = false;
+export const EP3_MAPS_LISTED = true;
 for (const [id, z] of Object.entries(EP3_ZONES)) {
   Object.defineProperty(ZONES, id, { value: z, enumerable: EP3_MAPS_LISTED, configurable: true, writable: true });
 }

@@ -38,9 +38,10 @@ PACKS_JS = NEXT / 'src' / 'game' / 'packs.js'
 PACKS_MIRROR = pathlib.Path(__file__).resolve().parent / 'packs.json'
 PACK_FILES = NEXT / 'assets' / 'pack_files.json'
 PACK_ASSET_DIRS = ('tiles', 'sprites', 'ui', 'backdrops')
-# Core files that load on first use, not at install (docs/MEDIA_BUILD.md 1): the painted battle stages. Left out of the shell
+# Core files that load on first use, not at install (docs/MEDIA_BUILD.md 1): the painted battle stages and the Episode 3
+# field systems (src/world/ep3/, imported lazily by field.js). Left out of the shell
 # list (so the first download does not move) and matched by PACK_PATTERN (so the service worker runtime-caches them).
-LAZY_PREFIXES = ('assets/backdrops/paint_',)
+LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/')
 
 
 def is_lazy(rel):
@@ -160,7 +161,7 @@ def shell_files():
     skip = audio_pack_files()
     packs = load_packs()
     out = [p for p in FIXED if (NEXT / p).is_file()]
-    out += sorted(r for r in (p.relative_to(NEXT).as_posix() for p in (NEXT / 'src').rglob('*.js')) if not pack_of(r, packs) and not is_dev(r))
+    out += sorted(r for r in (p.relative_to(NEXT).as_posix() for p in (NEXT / 'src').rglob('*.js')) if not pack_of(r, packs) and not is_dev(r) and not is_lazy(r))
     for folder, exts in FOLDERS.items():
         d = NEXT / folder
         if d.is_dir():
@@ -203,7 +204,7 @@ def module_graph(entry='src/main.js', packs=None):
         queue = [seed]
         while queue:
             rel = queue.pop(0)
-            if rel in seen or is_dev(rel) or (packs and pack_of(rel, packs)):
+            if rel in seen or is_dev(rel) or is_lazy(rel) or (packs and pack_of(rel, packs)):
                 continue                     # a pack file is never preloaded (it is fetched when the pack is wanted); nor a dev scene
             seen.add(rel)
             f = NEXT / rel

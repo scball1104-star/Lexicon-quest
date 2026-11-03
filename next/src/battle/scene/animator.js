@@ -1,21 +1,5 @@
-// Battle animator: turns the rules' event array (docs/BATTLE.md section 7) into a flat list of
-// presentation ops the scene runs frame by frame. Pure (no DOM, no engine): node tests check that every
-// event type produces ops, that unknown types never stall, and that the frame budget is bounded.
-//
-//   const ops = planEvents(events, { units });
-//
-// Op shapes (the scene's runner interprets them; see docs/BATTLE_SCENE.md):
-//   blocking:  { op:'wait', frames }  { op:'move', uid, to:'home'|'target'|'cover', target, frames }
-//              { op:'dissolve', uid, frames }  { op:'hitstop', frames, uid, crit }  { op:'fall', uid, frames }
-//   instant:   help, pose, flash, number, word, fx, sfx, shake, screenFlash, hp, mp, fury, shield, break,
-//              shieldRestore, status, telegraph, telegraphCancel, timeline, turn, reveal, summon, split,
-//              ko, revive, defendPose, swap, slow, banner, elite, knockback, cover, start, victory,
-//              defeat, escape, end
-// `frames` values are for battle speed 1x; the runner divides by the speed setting.
-// W6-anim frame selection (actors.js plays them, with a code fallback when a frame is missing): enemies take
-// pose 'attack' for a melee lunge, 'cast' for spells and telegraphs, 'devour' for the Archivore's devour / feast,
-// 'die' (die_0..2, FRAMES.dieSteps) before the white death flash, and 'stance_<name>' on a stance change; the
-// party takes 'crit' instead of 'windup' when the swing crits and 'combo' while a combo gathers.
+// Battle animator: rules events (docs/BATTLE.md 7) -> flat presentation ops (docs/BATTLE_SCENE.md), pure.
+// Blocking ops: wait, move, dissolve, hitstop, fall; the rest are instant. Frames are at 1x speed.
 
 export const FRAMES = Object.freeze({
   start: 30, ready: 6, stepIn: 8, windup: 6, strikeHold: 3, hitHold: 14, multiStagger: 5, randomStagger: 9,
@@ -36,11 +20,13 @@ const STATUS_SFX = { poison: 'poison', burn: 'fire', chill: 'ice', stun: 'stun',
   regen: 'buff', protect: 'buff', haste: 'buff', focus: 'buff', taunt: 'buff', nameless: 'name_devour' };
 const STATUS_TEXT = { poison: 'is poisoned', burn: 'is burning', chill: 'is chilled', stun: 'is stunned',
   silence: 'is silenced', blind: 'is blinded', regen: 'gains Regen', protect: 'gains Protect', haste: 'gains Haste',
-  focus: 'is focused', taunt: 'draws attention', nameless: 'has lost its name' };
+  focus: 'is focused', taunt: 'draws attention', nameless: 'has lost its name', oath: 'stands in front' };
 const STATUS_GONE = { poison: 'Poison fades', burn: 'the flames go out', chill: 'the chill thaws', stun: 'shakes off the stun',
   silence: 'can speak again', blind: 'can see again', regen: 'Regen fades', protect: 'Protect fades', haste: 'Haste fades',
   focus: 'loses focus', taunt: 'stops taunting', nameless: 'remembers its name' };
-const GOOD = new Set(['regen', 'protect', 'haste', 'focus', 'taunt']);
+const GOOD = new Set(['regen', 'protect', 'haste', 'focus', 'taunt', 'oath']);
+// Episode 3: the Warden's looks by phase id (its phase events carry no sprite)
+const PHASE_LOOK = { molten_shell: 'cinder_warden_molten', quenched_core: 'cinder_warden_quenched' };
 // Enemy skill fx hints (skills.js `fx`) -> presentation fx id + sound.
 const ENEMY_FX = {
   hit: ['claw', 'hit_light'], bump: ['bump', 'hit_light'], bite: ['bite', 'hit_light'], cut: ['cut', 'sword_slash'],
@@ -51,6 +37,7 @@ const ENEMY_FX = {
   drain: ['drain', 'poison'], shockwave: ['shockwave', 'thunder'], quake: ['quake', 'door_rumble'], bind: ['bind', 'debuff'],
   howl: ['howl', 'buff'], buff: ['buff', 'buff'], recite: ['recite', 'heal'], devour: ['devour', 'name_devour'],
   ink_storm: ['ink_storm', 'thunder'], summon: ['summon', 'summon'], feast: ['feast', 'page_flutter'],
+  fire: ['burst_fire', 'fire'], fire_big: ['fire_wave', 'fire'], light: ['burst_light', 'heal'],
 };
 // Party non-weapon fx hints -> [caster circle fx, target fx, sfx at release]
 const PARTY_FX = {
@@ -63,7 +50,7 @@ const PARTY_FX = {
   combo_ember: ['circle_fire', 'burst_fire', 'combo_start'], combo_cross: [null, 'cross', 'combo_start'],
   combo_thorn: ['circle_heal', 'thorns', 'combo_start'], combo_dawn: ['circle_light', 'burst_light', 'combo_start'],
 };
-const WIDE_FX = new Set(['ink_storm', 'quake', 'shockwave', 'ink_wave_big']);
+const WIDE_FX = new Set(['ink_storm', 'quake', 'shockwave', 'ink_wave_big', 'fire_wave']);
 const BOUNDARY = new Set(['turn_start', 'action_start', 'victory', 'defeat', 'battle_start']);
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -228,7 +215,7 @@ class Planner {
   }
 
   castOpen(actor, start, targets) {
-    const hint = PARTY_FX[start.fx] || PARTY_FX.light;
+    const hint = start.action && start.action.skill === 'tempered_oath' ? [null, 'oath', 'oath_ring'] : PARTY_FX[start.fx] || PARTY_FX.light;
     const [circle, burst, sfx] = hint;
     const buff = !circle;
     this.pose(actor, 'cast');
@@ -273,7 +260,8 @@ class Planner {
 
   enemyOpen(actor, start, rest, targets) {
     const mv = rest.find((e) => e.type === 'move_to' && e.actor === actor);
-    const [fxKind, sfx] = ENEMY_FX[start.fx] || ['claw', 'hit_light'];
+    const [fxKind, kitSfx] = ENEMY_FX[start.fx] || ['claw', 'hit_light'];
+    const sfx = start.sfx || kitSfx;
     this.pose(actor, mv ? 'attack' : (start.fx === 'devour' || start.fx === 'feast') ? 'devour' : 'cast');
     this.push({ op: 'flash', uid: actor, color: '#bc94e2', frames: FRAMES.enemyWindup + 2, soft: true });
     if (start.charged) {
@@ -503,9 +491,17 @@ class Planner {
   ev_phase(e) {
     this.push({ op: 'banner', text: e.name || `Phase ${e.phase}`, style: 'phase' });
     const sting = BINDER_STINGS[e.id];   // the Binder's own stings (media pack); every other boss keeps the kit's sounds
-    // A phase that carries a new sprite (the Nameless King's veil shattering to `nameless_king_unmasked`): the
-    // glass breaks, then the frames swap mid-flash (the swap op also white-flashes the actor).
-    if (e.sprite) {
+    const look = PHASE_LOOK[e.id];
+    if (look) {
+      // the Warden: its bronze cracks open (white-hot seams), then the next look swaps in mid-flash
+      this.push({ op: 'fx', kind: 'crack', uid: e.actor, big: e.phase > 2 });
+      this.push({ op: 'sfx', id: e.phase > 2 ? 'quench_hiss' : 'furnace_roar' });
+      this.push({ op: 'sfx', id: 'hit_heavy' });
+      this.push({ op: 'shake', mag: 4, frames: 20 });
+      this.wait(14);
+      this.push({ op: 'screenFlash', color: e.phase > 2 ? '#ffffff' : '#ffcf5a', frames: 10, alpha: 0.6 });
+      this.push({ op: 'swapSprite', uid: e.actor, sprite: look });
+    } else if (e.sprite) {   // a new sprite (the King's unmask): the glass breaks, the frames swap mid-flash
       this.push({ op: 'fx', kind: 'shatter', uid: e.actor, big: true });
       this.push({ op: 'sfx', id: sting || 'glass_break' });
       this.push({ op: 'screenFlash', color: '#ffffff', frames: 10, alpha: 0.7 });
@@ -522,9 +518,10 @@ class Planner {
     this.wait(FRAMES.phase);
   }
   ev_summon(e) {
+    const coil = /_coil$/.test(e.id);
     this.push({ op: 'summon', uid: e.enemy, id: e.id, name: e.name, variant: e.variant, tint: e.tint, hp: e.hp, by: e.by, split: !!e.split });
-    this.push({ op: 'fx', kind: e.split ? 'split_pop' : 'summon_pop', uid: e.enemy });
-    this.push({ op: 'sfx', id: e.split ? 'ink_gurgle' : 'page_flutter', volume: 0.7 });
+    this.push({ op: 'fx', kind: coil ? 'coil_rise' : e.split ? 'split_pop' : 'summon_pop', uid: e.enemy });
+    this.push({ op: 'sfx', id: coil ? 'furnace_roar' : e.split ? 'ink_gurgle' : 'page_flutter', volume: 0.7 });
     this.help(e.split ? `${e.name} splits apart!` : `${e.name} appears!`, 'violet');
     this.wait(e.split ? FRAMES.split : FRAMES.summon);
   }
@@ -602,15 +599,16 @@ class Planner {
     this.pose(e.actor, 'cast');
     // `partner` + `mirrorCombo` (the Other Selves' Mirrored Combo): the scene draws a silver bracket between the
     // two reflections' timeline slots (hud.drawMirrorBracket).
-    this.push({ op: 'telegraph', actor: e.actor, skill: e.skill, name: e.name, text: e.text, target: e.target, targets: e.targets || [], nextTurn: e.nextTurn, partner: e.partner || null, mirrorCombo: !!e.mirrorCombo });
-    this.push({ op: 'sfx', id: 'telegraph' });
-    this.push({ op: 'fx', kind: 'telegraph', uid: e.actor });
+    this.push({ op: 'telegraph', actor: e.actor, skill: e.skill, name: e.name, text: e.text, target: e.target, targets: e.targets || [], nextTurn: e.nextTurn, partner: e.partner || null, mirrorCombo: !!e.mirrorCombo, flare: !!e.flare });
+    this.push({ op: 'sfx', id: e.skill === 'last_hammer' ? 'hammer_charge' : 'telegraph' });
+    this.push({ op: 'fx', kind: e.flare ? 'flare' : 'telegraph', uid: e.actor });
+    if (e.flare) { this.push({ op: 'sfx', id: 'furnace_roar', volume: 0.6 }); this.push({ op: 'screenFlash', color: '#fff7d6', frames: 6, alpha: 0.35 }); }
     this.help(`{c:orange}${e.text}{/c}`);
     this.wait(FRAMES.telegraph);
   }
   ev_telegraph_cancel(e) {
     this.push({ op: 'telegraphCancel', actor: e.actor, reason: e.reason });
-    const why = { break: 'is broken: the charge fizzles!', stun: 'is stunned: the charge fizzles!', interrupt: 'is interrupted!', phase: 'loses its focus.' }[e.reason] || 'stops.';
+    const why = { break: 'is broken: the charge fizzles!', stun: 'is stunned: the charge fizzles!', interrupt: 'is interrupted!', phase: 'loses its focus.', quench: 'cools: the flare dies.' }[e.reason] || 'stops.';
     this.help(`{c:cyan}${this.name(e.actor)} ${why}{/c}`);
     this.wait(FRAMES.telegraphCancel);
   }
@@ -633,10 +631,30 @@ class Planner {
       this.wait(FRAMES.message);
       return;
     }
-    const col = e.kind === 'taunt' ? 'green' : e.kind === 'interrupt' ? 'cyan'
-      : e.kind === 'ward' || e.kind === 'ward_break' ? 'orange' : e.kind === 'kept' || e.kind === 'kept_hold' ? 'violet' : null;
+    if (e.kind === 'ward' || e.kind === 'ward_break') this.push({ op: 'ward', uid: e.target, on: e.kind === 'ward' });
+    if (e.kind === 'ward_break' && e.target) this.push({ op: 'fx', kind: 'crack', uid: e.target });
+    const col = { taunt: 'green', name_hold: 'green', oath_hold: 'green', interrupt: 'cyan', quench: 'cyan', ward: 'orange', ward_break: 'orange',
+      kept: 'violet', kept_hold: 'violet', name_struck: 'violet', oath_ring: 'gold', blessing: 'gold' }[e.kind] || null;
     this.help(e.text, col);
     this.wait(FRAMES.message);
+  }
+  // Episode 3 (docs/BATTLE.md 11.6): Heat pips, the quench steam, the Oath's bell
+  ev_heat(e) {
+    this.push({ op: 'heat', uid: e.target, heat: e.heat, max: e.max, delta: e.delta });
+    if (e.delta > 0 && e.reason !== 'stoke') { this.push({ op: 'fx', kind: 'embers', uid: e.target }); this.wait(FRAMES.statusQuiet); }
+  }
+  ev_quench(e) {
+    this.push({ op: 'fx', kind: 'steam', uid: e.target, big: !!e.cancelled });
+    this.push({ op: 'sfx', id: e.sfx || 'quench_hiss' });
+    this.push({ op: 'flash', uid: e.target, color: '#cfefff', frames: 12, soft: true });
+    this.wait(FRAMES.status);
+  }
+  ev_oath_ring(e) {
+    this.push({ op: 'fx', kind: 'oath_ring', uid: e.actor, from: e.target });
+    this.push({ op: 'sfx', id: e.sfx || 'oath_ring' });
+    this.push({ op: 'screenFlash', color: '#fff7d6', frames: 12, alpha: 0.6 });
+    this.push({ op: 'shake', mag: 3, frames: 16 });
+    this.wait(FRAMES.devour);
   }
   ev_escape(e) {
     this.push({ op: 'escape', success: !!e.success });

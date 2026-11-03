@@ -11,11 +11,16 @@ records (next/qa/out/autoplay/<prefix>-report.json and <prefix>-dialog.log, the 
   field      the run's field play time from the start (new game or loaded save) to the credits (walking, cutscene
              motion, menus; game seconds; battles are not counted there) with the bot's dialogue taken out, times 1.5
              to 2.0 for a first-time player who looks around and walks the long way
-  puzzles    1.5 to 3 minutes of thinking per beam puzzle the run solved (the bot solves them instantly)
+  puzzles    1.5 to 3 minutes of thinking per beam puzzle the run solved (the bot solves them instantly); a quench
+             puzzle by its actions: 0.5 to 1 min for one, 1 to 2 min for each further (E3-fixes-world)
   battles    each battle's game time at 1x battle speed (the bot ran 2x engine and 2x battle speed: wall s x 4),
              plus 1.5 s per party command (3 a round)
 
     python next/qa/integrate/story_time.py desktop-ep2-new
+    python next/qa/integrate/story_time.py desktop-ep3        Episode 3 (E3-integrate): quench puzzles count as puzzles, the
+                                                              end is the Episode 3 credits, and it also times the first
+                                                              fight after the morning scene (target under 5 minutes) and
+                                                              lists the biggest scenes (pages) and fights (minutes)
 """
 import json
 import pathlib
@@ -31,6 +36,10 @@ def last_run(lines):
     return lines[idx + 1:]
 
 
+def page_s(p):
+    return max(len(p) / READ_CPS, len(p) / TYPE_CPS) + PRESS_S
+
+
 def main(prefix):
     report = json.loads((OUT / f'{prefix}-report.json').read_text(encoding='utf-8'))
     dialog = last_run((OUT / f'{prefix}-dialog.log').read_text(encoding='utf-8').splitlines())
@@ -42,21 +51,72 @@ def main(prefix):
     chars = sum(len(p) for p in pages)
     dialogue_s = sum(max(len(p) / READ_CPS, len(p) / TYPE_CPS) + PRESS_S for p in pages)
     timing = [t for t in report.get('timing') or [] if t['step'] != 'boot']        # boot is before the save loads
-    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'epilogue')), timing[-1] if timing else None)
+    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'epilogue')), timing[-1] if timing else None)
     field_s = (end['game_s'] - timing[0]['game_s']) if len(timing) > 1 else 0
     # the bot's own pages pass in about 4 frames each (instant text): take them out of its field time
     field_s = max(0.0, field_s - len(pages) * 4 / 60)
-    puzzles = sum(1 for n in report.get('notes', []) if n.startswith('beam '))
+    # E3-fixes-world (PLAYTEST_REVIEW_5 section 1a): a puzzle costs by the actions it took. A beam note carries no count
+    # and stays 1.5 to 3 min; a quench note's "N turns" is N paddle turns (0 = one Shove), so actions = max(1, N):
+    # 0.5 to 1 min for one action, then 1 to 2 min more for each further action (2 actions = the old 1.5 to 3).
+    kinds = {}
+    for n in report.get('notes', []):
+        if n.startswith('beam ') or n.startswith('quench '):
+            m = re.search(r': (\d+) turns?', n)
+            kinds[n.split(':')[0]] = max(1, int(m.group(1))) if (m and n.startswith('quench ')) else None
+    puzzles = len(kinds)
+    p_lo = sum(90 if a is None else 30 + 60 * (a - 1) for a in kinds.values())
+    p_hi = sum(180 if a is None else 60 + 120 * (a - 1) for a in kinds.values())
     battles = report.get('battles') or []
     battle_s = sum(b['wall_s'] * 4 + (b.get('rounds') or 0) * 3 * 1.5 for b in battles)
-    lo = dialogue_s + field_s * 1.5 + puzzles * 90 + battle_s
-    hi = dialogue_s + field_s * 2.0 + puzzles * 180 + battle_s * 1.2
+    lo = dialogue_s + field_s * 1.5 + p_lo + battle_s
+    hi = dialogue_s + field_s * 2.0 + p_hi + battle_s * 1.2
     print(f'run {prefix}: status {report.get("status")}, {len(battles)} battles, {puzzles} beam puzzles, {len(pages)} pages ({chars} chars)')
     print(f'  bot clock: field {field_s / 60:.1f} min of game time, battles {sum(b["wall_s"] for b in battles) / 60:.1f} min wall at 2x/2x')
     print(f'  dialogue at normal text speed, read at {READ_CPS:.0f} cps: {dialogue_s / 60:.1f} min')
-    print(f'  field x1.5..2.0: {field_s * 1.5 / 60:.1f}..{field_s * 2 / 60:.1f} min; puzzles {puzzles * 1.5:.0f}..{puzzles * 3:.0f} min; battles at 1x with commands {battle_s / 60:.1f}..{battle_s * 1.2 / 60:.1f} min')
+    print(f'  field x1.5..2.0: {field_s * 1.5 / 60:.1f}..{field_s * 2 / 60:.1f} min; puzzles {p_lo / 60:.1f}..{p_hi / 60:.1f} min (by actions); battles at 1x with commands {battle_s / 60:.1f}..{battle_s * 1.2 / 60:.1f} min')
     print(f'  first-play estimate: {lo / 60:.0f} to {hi / 60:.0f} minutes')
+    if prefix.split('-')[1:2] == ['ep3']:
+        episode3(report, dialog, battles)
     return 0
+
+
+def episode3(report, dialog, battles):
+    """The first fight after ep3_morning (EPISODE3_PLAN 12: under 5 minutes) and the biggest scenes and fights (cut candidates)."""
+    marks = {}
+    for i, line in enumerate(dialog):
+        m = re.match(r'## mark (\S+) ([\d.]+)$', line)
+        if m and m.group(1) not in marks:
+            marks[m.group(1)] = (i, float(m.group(2)))
+    if 'ep3_morning' in marks and 'first_fight_done' in marks:
+        (i0, t0), (i1, t1) = marks['ep3_morning'], marks['first_fight_done']
+        span = [re.sub(r'\{[^}]*\}', '', re.match(r'\[[^\]]*\] [^:]*: (.*)$', l).group(1)) for l in dialog[i0:i1] if re.match(r'\[[^\]]*\] [^:]*: ', l)]
+        talk = sum(page_s(p) for p in span)
+        field = max(0.0, (t1 - t0) - len(span) * 4 / 60)
+        first = [b for b in battles if b.get('enc') == 'sr_first']
+        fight = sum(b['wall_s'] * 4 + (b.get('rounds') or 0) * 4.5 for b in first)
+        print(f'  first fight after the morning scene: {(talk + field * 1.5 + fight) / 60:.1f} to {(talk + field * 2 + fight * 1.2) / 60:.1f} minutes '
+              f'(the fight itself {fight / 60:.1f}; target under 5)')
+    else:
+        print('  first fight after the morning scene: not measured (no ep3_morning / first_fight_done marks in the log)')
+    # scenes: the pages between two consecutive marks, by where they were said (the longest blocks are the cut candidates)
+    blocks, cur, n = [], None, 0
+    for line in dialog:
+        m = re.match(r'\[([^\]]*)\] ([^:]*): (.*)$', line)
+        if not m:
+            continue
+        key = m.group(1)
+        if cur and cur[0] == key:
+            cur[1] += page_s(m.group(3)); cur[2] += 1
+        else:
+            cur = [key, page_s(m.group(3)), 1, m.group(3)[:60]]
+            blocks.append(cur)
+    blocks.sort(key=lambda b: -b[1])
+    print('  longest dialogue runs (map, minutes, pages, first line):')
+    for b in blocks[:5]:
+        print(f'    {b[0]:<16} {b[1] / 60:4.1f} min  {b[2]:3d} pages  "{b[3]}"')
+    print('  longest fights at 1x with commands (encounter, minutes, rounds):')
+    for b in sorted(battles, key=lambda b: -(b['wall_s'] * 4 + (b.get('rounds') or 0) * 4.5))[:5]:
+        print(f'    {str(b.get("enc")):<16} {(b["wall_s"] * 4 + (b.get("rounds") or 0) * 4.5) / 60:4.1f} min  {b.get("rounds")} rounds')
 
 
 if __name__ == '__main__':

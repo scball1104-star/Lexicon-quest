@@ -1,10 +1,10 @@
 // The episode switch and the quick-start slot choice (E3-saves, EPISODE3_PLAN section 10). Pure: no DOM, no engine.
 // `episodeOffers(save, search)` says which title rows to show; `pickRunSlot(save)` says where an Episode 3 quick start
-// may save without ever touching another run. E3-integrate flips EP3_LIVE; nothing a player can reach changes before.
+// may save without ever touching another run.
 import * as encounters from '../data/encounters.js';
 
 /** The master switch. While false: ep3_morning never runs, the sand gate stays chained, no Episode 3 row on the title. */
-export const EP3_LIVE = false;
+export const EP3_LIVE = true;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
@@ -12,7 +12,7 @@ export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 /** The title row and help for the Episode 3 quick start (shown by E3-scene-ui when `episodeOffers().ep3.show`). */
 export const EP3_ROW_LABEL = 'Episode 3: new party';
 export const EP3_ROW_HELP = 'A ready party at Lv 13. Your own save stays under Continue.';
-export const SLOTS_FULL_NOTICE = 'Every save slot holds a game. Free one on the Load page first.';
+export const SLOTS_FULL_NOTICE = 'Every save slot holds a game. Save over one you no longer need first.';
 
 function urlEp(search) {
   try { return new URLSearchParams(search || '').get('ep'); } catch (err) { return null; }
@@ -75,7 +75,7 @@ export function pickRunSlot(save) {
   if (!occupied(save, 0)) return { ok: true, slot: 0, notice: null };
   const n = Number.isFinite(save.slots) ? save.slots : 3;
   for (let i = 1; i <= n; i++) {
-    if (!occupied(save, i)) return { ok: true, slot: i, notice: `This party will save to slot ${i}.` };
+    if (!occupied(save, i)) return { ok: true, slot: i, notice: `This party will save to Record ${i}.` };
   }
   return { ok: false, slot: null, notice: SLOTS_FULL_NOTICE };
 }

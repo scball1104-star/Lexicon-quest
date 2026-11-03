@@ -3,7 +3,7 @@
 
 import { List, touchUi } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
-import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox } from './layout.js';
+import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox, helpDock } from './layout.js';
 import { SKILLS } from '../../data/skills.js';
 
 const ELEMS = ['fire', 'ice', 'thunder', 'light'], ARMS = ['sword', 'spear', 'staff', 'axe', 'bow'];
@@ -64,9 +64,8 @@ export class CommandMenu {
     this.state = 'root';
     this.base = null; this.tInfo = null; this.preview = null; this.fleeArmed = 0;
     this.syncLayout();
-    // Combo shows only when it is possible; Swap only when this member carries a second weapon (a greyed Swap
-    // on the hero, who starts with a sword alone, read as a broken command).
-    const all = this.b.commands(unit).filter((c) => (c.id !== 'combo' || c.visible) && (c.id !== 'swap' || c.enabled));
+    // fixed cells: Combo greys out, never hides
+    const all = this.b.commands(unit).filter((c) => c.id !== 'swap' || c.enabled);
     // Touch: Flee is the FLEE button in the help window, which keeps the grid at four rows (W7).
     this.fleeCmd = this.touch ? all.find((c) => c.id === 'flee') || null : null;
     const cmds = this.touch ? all.filter((c) => c.id !== 'flee') : all;
@@ -76,6 +75,8 @@ export class CommandMenu {
       help: c.id === 'swap' && c.enabled && c.weapon ? `Ready the ${cap(c.weapon)}.` : c.enabled ? CMD_HELP[c.id] : (c.reason || CMD_HELP[c.id]),
       icon: CMD_ICON[c.id] || null,
     }));
+    // touch: a blank keeps Magic's cell
+    if (this.touch && !cmds.some((c) => c.id === 'magic')) items.splice(2, 0, { id: '', label: '', disabled: true, blank: true });
     // Two columns of CMD_ROWS (a ninth command on the keyboard / pad grows the window by one row at the top).
     const rows = Math.max(CMD_ROWS, Math.ceil(items.length / CMD_COLS)), rowH = this.rowH;
     const base = cmdWin(this.touch);
@@ -83,10 +84,11 @@ export class CommandMenu {
     this.cmdRect = { ...base, y: base.y + base.h - h, h };
     const win = this.cmdRect;
     this.root = new List({ x: win.x + 18, y: win.y + (this.touch ? 4 : 6), w: CMD_COLS * CMD_COL_W, colW: CMD_COL_W, columns: CMD_COLS, columnMajor: true,
-      rows, rowH, items, bar: false, textX: 2, icons: false, confirmSfx: false, cancelSfx: false });
+      rows, rowH, items, bar: false, textX: 2, icons: false, confirmSfx: false, cancelSfx: false, tapMode: 'single' });
     // Cursor start (Config "Battle cursor"): Attack, or the command this character used last (Attack the first time).
     const lastId = this.scene.engine.settings.battleCursor === 'attack' ? 'attack' : (this.lastCmd.get(unit.uid) || 'attack');
-    const at = items.findIndex((x) => x.id === lastId && !x.disabled);
+    const want = unit.id === 'bram' && this.hammer() ? 'tech' : lastId;
+    const at = items.findIndex((x) => x.id === want && !x.disabled);
     this.root.moveTo(at >= 0 ? at : 0);
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
     this.syncHelp();
@@ -101,6 +103,7 @@ export class CommandMenu {
     this.showHelp = true; this.helpText = 'Tap FLEE again to run.'; this.helpColor = 'gold';
     return null;
   }
+  hammer() { const t = this.scene.telegraphs; return !!t && [...t.values()].some((t) => SKILLS[t.skill] && SKILLS[t.skill].turnable); }
   close() { this.fleeArmed = 0; this.state = 'closed'; this.root = null; this.sub = null; this.preview = null; this.tInfo = null; this.base = null; }
 
   syncHelp() {
@@ -130,10 +133,13 @@ export class CommandMenu {
       color: cmd.id === 'combo' ? 'cyan' : 'white', icon: e.skill ? hitIcon(SKILLS[e.skill], this.unit) : null,
     }));
     if (!list.length) return false;
+    const oi = cmd.id === 'tech' && this.hammer() ? list.findIndex((it) => it.id === 'tempered_oath') : -1;
+    if (oi >= 0) { list.unshift(...list.splice(oi, 1)); list[0].color = 'gold'; }
     const icons = list.some((it) => it.icon);
     this.subCmd = cmd;
     this.showHelp = true;
-    const win = this.subRect, rowH = this.rowH;
+    const d = this.touch && helpDock();
+    const win = this.subRect = d ? { ...this.subRect, w: d.x - 6 } : this.subRect, rowH = this.rowH;
     this.sub = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 24, rows: cmdRowsFor(win, rowH), rowH, items: list, bar: true,
       textX: icons ? 15 : 2, icons, iconX: 1, confirmSfx: false, cancelSfx: false, rightPad: 4 });
     this.state = 'sub';
@@ -217,7 +223,8 @@ export class CommandMenu {
     if (this.state === 'closed' || !this.unit) return null;
     if (this.fleeArmed > 0 && --this.fleeArmed === 0) this.syncHelp();
     if (this.state === 'root') {
-      const act = this.root.update(input, audio);
+      const was = this.root.index, act = this.root.update(input, audio);
+      if (this.root.item.blank) this.root.moveTo(this.root.index + (this.root.index > was ? 1 : -1));
       if (this.root.changed) { this.showHelp = true; this.fleeArmed = 0; this.syncHelp(); }
       if (act === 'confirm') {
         const it = this.root.item;

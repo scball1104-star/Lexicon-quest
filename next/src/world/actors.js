@@ -70,15 +70,15 @@ export function lookFrame(atlas, name, look) {
   const img = g.getImageData(0, 0, w, h), px = img.data;
   const op = (x, y) => x >= 0 && y >= 0 && x < w && y < h && px[(y * w + x) * 4 + 3] > 0;
   const hex = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
-  const ol = hex(look.outline);
+  const ol = hex(look.outline), rim = look.rim ? hex(look.rim) : ol;
   let top = h, left = w;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (op(x, y)) { if (y < top) top = y; if (x < left) left = x; }
   const add = [];
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     if (op(x, y)) continue;
-    if (op(x - 1, y) || op(x + 1, y) || op(x, y - 1) || op(x, y + 1)) add.push(x, y);
+    if (op(x - 1, y) || op(x + 1, y) || op(x, y - 1) || op(x, y + 1)) add.push(x, y, op(x, y + 1) ? rim : ol);   // rim: a lit top edge
   }
-  for (let i = 0; i < add.length; i += 2) { const j = (add[i + 1] * w + add[i]) * 4; px[j] = ol[0]; px[j + 1] = ol[1]; px[j + 2] = ol[2]; px[j + 3] = 255; }
+  for (let i = 0; i < add.length; i += 3) { const j = (add[i + 1] * w + add[i]) * 4, c = add[i + 2]; px[j] = c[0]; px[j + 1] = c[1]; px[j + 2] = c[2]; px[j + 3] = 255; }
   for (const [ax, ay, col] of look.accent || []) {
     const x = left + ax, y = top + ay;
     if (x < 0 || y < 0 || x >= w || y >= h) continue;

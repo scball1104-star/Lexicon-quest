@@ -87,3 +87,12 @@ Seams (everything else was already exported): `registerStory({ scenes, lines, co
 ## The cave pack (2026-10-27)
 
 `cave` (prefix `cave_`, entry `src/data/cave/index.js`, cap 0.8 MB) holds the Deep Stacks: generator, prefabs, data and later its sprites. It has no audio pack and touches no map at boot; `CAVE_LIVE` in `src/data/cave/live.js` gates it. Registered by the orchestrator so the precache never lists cave code.
+
+## The ep3 pack (2026-11-02, E3-integrate)
+
+`ep3` (prefix `ep3/`, entry `src/data/maps/ep3/index.js`, no asset manifest, audio pack `ep3`, cap 0.2 MB) holds Episode 3's
+ten maps and its edits to `nameless_hollow` and `nh_inn`. Its switch is `EP3_LIVE` in `src/game/episodes.js` (no `live.js`).
+`hard: true`: the field waits for it (8 s, like a prefixed map) before loading any map it touches, because those maps cannot be
+played unpatched; `packsForMap(id)` lists every pack a map belongs to (nameless_hollow has x2 and ep3) and `world/maps.js`
+guards on all of them. Wanted from `ep2_started`, so the chained east gate is drawn all through Episode 2. Its `register()`
+also imports `src/world/ep3/` (lazy, never precached) so the field code is runtime-cached with the maps.

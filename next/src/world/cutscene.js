@@ -204,6 +204,7 @@ export class Cutscene {
       async flash(color, frames) { E.renderer.flash(color || '#ffffff', frames || 8, 0.85); await self.frames(frames || 8); },
       async fade(dir, frames) { await F.fadeScreen(dir === 'out' ? 1 : 0, frames == null ? 30 : frames); },
       async tint(name, frames) { await F.lighting.setTint(name, frames || 0); },
+      warp(m, x, y, d) { if (!self.dead) F.warpTo(m, x, y, d, 'warp'); },
       /** W11: a framed close-up insert ('fountain'); closeup(null) closes it. See world/closeup.js. */
       async closeup(kind, o = {}) { if (self.dead) return; if (kind) await F.closeup.open(kind, o); else await F.closeup.close(); },
       async music(id) { if (id) E.audio.music(id); else E.audio.stopMusic(0.8); F.sceneMusic = id || null; },
@@ -226,6 +227,7 @@ export class Cutscene {
       },
       async setFlag(flag, value = true) { F.setFlag(flag, value); },
       async hasFlag(flag) { return stateHasFlag(F.game, flag); },
+      get mapId() { return F.mapId; },
       /**
        * give(itemId, qty); give('gold', n) adds n gold with the coin sound and the "Received n gold." toast;
        * give('exp', n) (X1) grants n EXP to every living party member: the toast "The party gains n EXP.", then the

@@ -14,6 +14,11 @@ const sw = parseSw();
 const lists = readJson('assets/pack_files.json');
 const ratchet = readJson('qa/pwa/budget_ratchet.json');
 const MB = 1048576;
+// A pack whose switch lives outside src/data/<id>/live.js (ep3: game/episodes.js EP3_LIVE) and whose entry is not
+// src/data/<id>/index.js (ep3: src/data/maps/ep3/index.js, the maps folder the prefix 'ep3/' names).
+const SWITCH = { ep3: 'src/game/episodes.js' };
+const switchOf = (id) => SWITCH[id] || `src/data/${id}/live.js`;
+const entryOf = (id) => path.posix.normalize(path.posix.join('src/game', PACKS[id].entry));
 const wire = (rel) => (/\.(js|json|html|webmanifest)$/.test(rel) ? zlib.gzipSync(fs.readFileSync(path.join(NEXT, rel)), { level: 6 }).length : sizeOf(rel));
 
 /** The prefix rule of XP-packs.md section 1, written independently of tools/pwa/build_pwa.py (the test checks the tool against it). */
@@ -36,12 +41,12 @@ function walk(dir, out = []) {
 }
 
 test('pack table: both packs, and the mirror tools/pwa/packs.json equals it', () => {
-  assert.deepEqual(Object.keys(PACKS).sort(), ['cave', 'tier', 'x1', 'x2']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28)
+  assert.deepEqual(Object.keys(PACKS).sort(), ['cave', 'ep3', 'tier', 'x1', 'x2']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02)
   const mirror = readJson('tools/pwa/packs.json');
   for (const [id, d] of Object.entries(PACKS)) {
     assert.deepEqual(mirror[id], { entry: d.entry, prefix: d.prefix, assets: d.assets, audioPack: d.audioPack, touches: d.touches }, `mirror of ${id}`);
     assert.ok(exists(path.posix.join('src/game', d.entry)), `${id} entry module exists`);
-    assert.ok(exists('src/data/' + id + '/live.js'), `${id} live.js exists (the switch is in the initial bundle)`);
+    assert.ok(exists(switchOf(id)), `${id} switch module exists (it is in the initial bundle)`);
   }
 });
 
@@ -51,7 +56,7 @@ test('no pack file is in the precache or the modulepreload block; live.js is', (
   for (const id of Object.keys(PACKS)) {
     for (const e of sw.entries) assert.ok(!ownedBy(e, id), `pack file in the precache: ${e}`);
     for (const m of block.matchAll(/href="([^"]+)"/g)) assert.ok(!ownedBy(m[1], id), `pack file preloaded: ${m[1]}`);
-    assert.ok(sw.entries.includes(`src/data/${id}/live.js`), `${id}/live.js is precached`);
+    assert.ok(sw.entries.includes(switchOf(id)), `${id} switch (${switchOf(id)}) is precached`);
     assert.ok(sw.entries.includes('src/game/packs.js'), 'packs.js is precached');
   }
 });
@@ -62,8 +67,8 @@ test('assets/pack_files.json: current, sorted, every file exists, covers the who
     assert.ok(Array.isArray(listed), `${id} is listed`);
     assert.deepEqual(listed, [...listed].sort(), `${id} list is sorted`);
     for (const f of listed) assert.ok(exists(f), `listed pack file exists: ${f}`);
-    assert.ok(listed.includes(`src/data/${id}/index.js`), `${id} entry is listed`);
-    assert.ok(listed.includes(`assets/${id}_manifest.json`), `${id} manifest is listed`);
+    assert.ok(listed.includes(entryOf(id)), `${id} entry is listed`);
+    if (PACKS[id].assets) assert.ok(listed.includes(`assets/${id}_manifest.json`), `${id} manifest is listed`);
     assert.ok(!listed.includes(`src/data/${id}/live.js`), 'live.js is not a pack file');
     // Currency follows the release-gate convention of precache.test.mjs: day to day (other agents add pack files all the time)
     // a stale list is a WARNING; LQ_RELEASE=1 (and the wave-close checklist) makes it a failure. Existence above is always hard.
@@ -76,6 +81,7 @@ test('assets/pack_files.json: current, sorted, every file exists, covers the who
 
 test('every file a pack manifest names exists and is in its pack list', () => {
   for (const [id, d] of Object.entries(PACKS)) {
+    if (!d.assets) continue;                 // ep3: maps only, its art is in the core sheets
     const m = readJson(d.assets);
     const named = [];
     for (const kind of ['images', 'json', 'atlases', 'fonts']) {
@@ -104,7 +110,7 @@ test('pack wire sizes are inside the caps (code, data and art; audio is budgeted
     lines.push(`${id} ${(total / MB).toFixed(3)} MB of ${cap}`);
     assert.ok(total < cap * MB, `pack ${id} is ${(total / MB).toFixed(2)} MB on the wire, cap ${cap} MB`);
   }
-  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8, cave: 0.8, tier: 0.3 }, 'the pack caps are fixed');
+  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8, cave: 0.8, tier: 0.3, ep3: 0.2 }, 'the pack caps are fixed');
   console.log(`# pack sizes: ${lines.join('; ')}`);
 });
 

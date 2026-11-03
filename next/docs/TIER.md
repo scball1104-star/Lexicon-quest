@@ -6,7 +6,7 @@ Scott's yes. Evidence tags: **Fact** read in code or run on 10/28, **Inference**
 
 ## For the player
 
-- **Unlock.** Once any save holds a finished Episode 2 (`ep2_complete`; `ep3_complete` once Episode 3 ships), the title shows
+- **Unlock.** Once any save holds a finished Episode 3 (`ep3_complete`; it was `ep2_complete` before Episode 3 shipped), the title shows
   a row **Fine Print** under Continue, with a note: "Episode 1 again with a finished party. Stronger foes, better pay. Your
   record stays safe."
 - **The ask.** "Carry which record into Fine Print?" lists every finished record (name, level, place), newest first, and Back.
@@ -42,10 +42,15 @@ bands), the hit at that level, and the tempo (SPD) along the party's own speed g
 SPR, shields and weaknesses stay the foe's own. Then the x1.6, x1.35 and +1. Twenty-seven encounters carry a small correction
 (`TIER_TABLE[1].terms`, HP or hit x0.66 to x1.57) the way `encounters.js` tunes a group with `hp` and `power`.
 
-**The record it is written for** is the simulator's Episode 2 finish (3,335 EXP, Lv 13; `qa/tier` pins the two). A carried
-completionist (Lv 14 or 15) finds Fine Print a little softer. **Inference:** when Episode 3 ships and the unlock moves to
-`ep3_complete` (a Lv 17 or 18 record), `carryExp` must move to the simulator's Episode 3 finish and the terms re-checked
-(`node tools/sim/simulate.mjs --tier 1 --check`).
+**The record it is written for** was the simulator's Episode 2 finish (3,335 EXP, Lv 13). **Since Episode 3 went live
+(E3-switch, 2026-11-02)** the unlock is `ep3_complete` and `carryExp` is the simulator's Episode 3 finish: 5,585 EXP, Lv 17 since E3-fixes-world cut four foes (was 6,060, Lv 18),
+`foundry_heart`'s kit (tier 6 pieces, the Updraft Charm; not Tempered Oath, whose flag starts over). Fact (`--tier 1 --check`,
+all targets met): a foe is now met at Lv 18 in the valley, Lv 19 at the Archivore, Lv 22 at the King; the yard slime takes 3.1
+rounds. Four boss terms moved (archivore hp 1.32 pow 1.95, other_selves hp 0.91 pow 1.34, nameless_king pow 1.3, a new
+whisperwood_alpha pow 1.15) so careless play still loses; the Other Selves sit at the edge of their 10% telegraph gap. Eight
+Episode 3 terms were added (a Fine Print run plays on into Episode 3); the check still covers Episodes 1 and 2 only, because on
+the tier the Warden's Tempered Oath share is 43 to 45% (want 50%: the foe SPD +1 lever puts it before Bram). The section
+above keeps the Episode 2 record's numbers for the record.
 
 ## Legendaries
 

@@ -21,6 +21,11 @@ the end) and nameless_king (the boss card, a Kept member with its timeline zoom,
 unmask filmstrip, then Auto to the end) and glass_reflect (the Glassback's mirror marker in its row), on desktop
 and phone:
   python next/qa/battlescene/autobattle.py --only other_selves,nameless_king,glass_reflect
+E3-scene-ui adds sr_first (Heat pips at command time, the white flare, the quench steam), bellows_specter (card, pips, the
+flare, the quench, the fans reversing), cinder_warden (card, the three looks with their cracks, the coils and the Molten
+Shell halo, Strike the Name, Tempered Oath raised with REAL key presses through Tech, the redirect arrows, the Last Hammer
+rung off Bram and the Break) on desktop, phone (844x390) and portrait:
+  python next/qa/battlescene/autobattle.py --only sr_first,bellows_specter,cinder_warden
 """
 import argparse
 import json
@@ -39,6 +44,7 @@ OUT = HERE / 'out'
 DEVICES = {
     'desktop': {'width': 1920, 'height': 1080, 'dpr': 1},
     'phone': {'width': 844, 'height': 390, 'dpr': 3, 'mobile': True, 'touch': True},
+    'portrait': {'width': 390, 'height': 844, 'dpr': 3, 'mobile': True, 'touch': True},
 }
 
 ADVANCE = 'LQ_DEBUG.advance({})'
@@ -867,6 +873,220 @@ def sc_glass_reflect(page, ctx):
     ctx['note'] = 'reflect marker shown'
 
 
+# ------------------------------------------------------------------------------------------ Episode 3 (E3-scene-ui)
+def _e3_start(page, ctx, enc, seed):
+    page.evaluate("LQ_DEBUG.setSpeed(0)")
+    page.evaluate(f"LQ_DEBUG.battle('{enc}', {{ fresh: true, seed: {seed}, canFlee: false }})")
+    advance_until(page, "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.phase !== 'intro'", max_frames=400, step=2)
+
+
+def _player(page, frames=20000):
+    """Run until a party member waits for a command (True) or the battle is over (False)."""
+    advance_until(page, WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=frames, step=5)
+    return page.evaluate('LQ_DEBUG.battleResult()') is None
+
+
+def _rows_all(page):
+    page.evaluate("(() => { const s = LQ_ENGINE.scene; for (const a of s.actors.values()) if (a.side === 'enemy') s.rowShow.set(a.uid, 999); })()")
+
+
+def _defend_until(page, js, turns=24):
+    """Defend on every party turn until the JS condition holds at a command; True when it did."""
+    for _ in range(turns):
+        if not _player(page):
+            return False
+        if page.evaluate(js):
+            return True
+        page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+    return _player(page) and page.evaluate(js)
+
+
+def _frost(page, ctx, target_js, name):
+    """Mira's Frost on the foe `target_js` picks (at Mira's next turn), filmed: the hit, the steam, Quenched!"""
+    assert _defend_until(page, "LQ_DEBUG.state().battle.current === 'mira'", turns=8), 'no Mira turn for the quench'
+    uid = page.evaluate(target_js)
+    page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'skill', skill: 'frost', target: '{uid}' }})")
+    filmstrip(page, ctx, name, 12, 6, full=True)
+    return page.evaluate(f"LQ_ENGINE.scene.b.unit('{uid}').heat")
+
+
+def _press(page, key, hold=2, gap=3):
+    page.keyboard.down(key)
+    page.evaluate(ADVANCE.format(hold))
+    page.keyboard.up(key)
+    page.evaluate(ADVANCE.format(gap))
+
+
+def _keys_to(page, want, rows):
+    """Real arrow keys from the root cursor to the command `want` (column-major grid, `rows` per column)."""
+    s = bstate(page)
+    items = s['menuItems']
+    assert want in items, (want, items)
+    cur, dst = s['menuIndex'], items.index(want)
+    for _ in range(abs(dst // rows - cur // rows)):
+        _press(page, 'ArrowRight' if dst // rows > cur // rows else 'ArrowLeft')
+    for _ in range(abs(dst % rows - cur % rows)):
+        _press(page, 'ArrowDown' if dst % rows > cur % rows else 'ArrowUp')
+    assert bstate(page)['menuIndex'] == dst, ('cursor', bstate(page)['menuIndex'], dst)
+
+
+def oath_by_keys(page, ctx):
+    """Bram raises Tempered Oath through the real menu: arrows to Tech, KeyZ, arrows to the Oath, KeyZ, KeyZ on himself.
+    LQ_DEBUG.battleAct closes the menu itself, so only this path proves the command does not stall the menu."""
+    s = bstate(page)
+    assert s['current'] == 'bram' and s['menu'] == 'root', (s['current'], s['menu'])
+    _keys_to(page, 'tech', s['menuRows'])
+    _press(page, 'KeyZ')
+    assert bstate(page)['menu'] == 'sub', bstate(page)['menu']
+    ids = page.evaluate("LQ_ENGINE.scene.menu.sub.items.map(i => i.id)")
+    assert 'tempered_oath' in ids, ids
+    for _ in range(ids.index('tempered_oath') - page.evaluate("LQ_ENGINE.scene.menu.sub.index")):
+        _press(page, 'ArrowDown')
+    page.evaluate(ADVANCE.format(2))
+    shot(page, ctx, 'oath_menu')
+    _press(page, 'KeyZ')
+    assert bstate(page)['menu'] == 'target', bstate(page)['menu']
+    _press(page, 'KeyZ')
+    s = bstate(page)
+    assert s['menu'] == 'closed' and s['actions'][-1].startswith('bram:skill:tempered_oath'), (s['menu'], s['actions'][-3:])
+    # the menu path must hand over to the animation: ops run and the next turn comes
+    advance_until(page, WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=3000, step=2)
+
+
+def sc_sr_first(page, ctx):
+    _e3_start(page, ctx, 'sr_first', 2)
+    page.evaluate(ADVANCE.format(40))
+    shot(page, ctx, 'stage')
+    hot = "LQ_ENGINE.scene.b.units().some(u => u.alive && u.heat >= 1)"
+    assert _defend_until(page, hot, turns=10), 'the beetle never stoked'
+    page.evaluate(ADVANCE.format(4))
+    shot(page, ctx, 'heat_command')
+    if ctx['device'] == 'desktop':
+        zoom(page, ctx, 'desktop_sr_first_rows', (0, 118, 260, 40), scale=4)
+    # the flare: the beetle's Heat set to 2 so the next Stoke flares and the shot does not wait on the dice
+    page.evaluate("(() => { const b = LQ_ENGINE.scene.b.units().find(u => u.id === 'cinder_beetle' && u.alive); if (b && b.heat < 2) b.heat = 2; })()")
+    flared = _defend_until(page, "LQ_ENGINE.scene.telegraphs.size > 0", turns=10)
+    if flared:
+        page.evaluate(ADVANCE.format(6))
+        shot(page, ctx, 'flare_command')
+        if ctx['device'] == 'desktop':
+            zoom(page, ctx, 'desktop_sr_first_flare', (0, 60, 260, 100), scale=4)
+        heat = _frost(page, ctx, "LQ_ENGINE.scene.b.units().find(u => u.charging && u.alive).uid", 'quench')
+        assert heat == 0, heat
+    result = _auto_to_end(page, ctx)
+    assert result == 'win', result
+    ctx['note'] = f"heat pips; flare {'shown, quenched' if flared else 'not reached'}; auto {result}"
+
+
+def sc_bellows_specter(page, ctx):
+    card = _card_shot(page, ctx, 'bellows_specter', 4)
+    assert card and card['name'] == 'THE BELLOWS SPECTER', card
+    sp = "LQ_ENGINE.scene.b.units().find(u => u.id === 'bellows_specter')"
+    assert _defend_until(page, f"{sp}.heat >= 2 && !LQ_ENGINE.scene.telegraphs.size", turns=8), 'no Heat'
+    page.evaluate(ADVANCE.format(4))
+    shot(page, ctx, 'heat_command')
+    assert _defend_until(page, "LQ_ENGINE.scene.telegraphs.size > 0", turns=8), 'the Specter never announced Furnace Breath'
+    page.evaluate(ADVANCE.format(6))
+    shot(page, ctx, 'flare_command')
+    heat = _frost(page, ctx, f"{sp}.uid", 'quench')
+    assert heat == 0, heat
+    page.evaluate(f"{sp}.hp = Math.floor({sp}.maxHp * 0.52)")
+    assert _player(page)
+    page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'attack', target: {sp}.uid }})")
+    advance_until(page, "!!(LQ_ENGINE.scene.banner && LQ_ENGINE.scene.banner.style === 'phase') || " + WAIT_PLAYER, max_frames=3000, step=1)
+    page.evaluate(ADVANCE.format(30))
+    shot(page, ctx, 'fans_reverse')
+    result = _auto_to_end(page, ctx)
+    assert result == 'win', result
+    ctx['note'] = f"card {card['name']} / {card['sub']}; flare quenched; auto {result}"
+
+
+def _phase_film(page, ctx, name):
+    advance_until(page, "!!(LQ_ENGINE.scene.banner && LQ_ENGINE.scene.banner.style === 'phase')", max_frames=3000, step=1)
+    filmstrip(page, ctx, name, 12, 5, full=True)
+
+
+def sc_cinder_warden(page, ctx):
+    d = ctx['device']
+    card = _card_shot(page, ctx, 'cinder_warden', 5)
+    assert card and card['name'] == 'THE CINDER WARDEN', card
+    W_ = "LQ_ENGINE.scene.b.units().find(u => u.id === 'cinder_warden')"
+    art = "[...LQ_ENGINE.scene.actors.values()].find(a => a.id === 'cinder_warden').stem"
+    assert _player(page)
+    _rows_all(page)
+    page.evaluate(ADVANCE.format(4))
+    shot(page, ctx, 'look1')
+    looks = [page.evaluate(art)]
+    # Strike the Name: its Heat flare (Heat set to 2 so the next Stoke flares and the shot does not wait on the dice)
+    page.evaluate(f"{W_}.heat = 2")
+    if _defend_until(page, "LQ_ENGINE.scene.telegraphs.size > 0", turns=8):
+        page.evaluate(ADVANCE.format(6))
+        shot(page, ctx, 'strike_the_name')
+    # Molten Shell: the hit that crosses 70% (HP set just above it), filmed: the crack, the swap, the coils rising
+    assert _player(page)
+    page.evaluate(f"(() => {{ const w = {W_}; w.hp = Math.floor(w.maxHp * 0.705); }})()")
+    page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'attack', target: {W_}.uid }})")
+    _phase_film(page, ctx, 'molten_crack')
+    assert _player(page)
+    _rows_all(page)
+    page.evaluate(ADVANCE.format(4))
+    shot(page, ctx, 'look2_shell')
+    looks.append(page.evaluate(art))
+    assert page.evaluate("[...LQ_ENGINE.scene.actors.values()].find(a => a.id === 'cinder_warden').ward"), 'no Molten Shell halo'
+    # Quenched Core: both coils cut to 1 HP and struck down by hand; the last one cracks the shell
+    coils = "LQ_ENGINE.scene.b.units().filter(u => u.alive && /_coil$/.test(u.id)).map(u => u.uid)"
+    page.evaluate(f"{coils}.forEach(uid => {{ LQ_ENGINE.scene.b.unit(uid).hp = 1; }})")
+    filmed = False
+    for _ in range(12):
+        left = page.evaluate(coils)
+        if not left or not _player(page):
+            break
+        left = page.evaluate(coils)
+        page.evaluate(f"LQ_DEBUG.battleAct({{ type: 'attack', target: '{left[0]}' }})")
+        if len(left) == 1:
+            _phase_film(page, ctx, 'quenched_crack')
+            filmed = True
+            break
+    assert filmed, 'never struck the last coil'
+    assert _player(page)
+    shot(page, ctx, 'look3_core')
+    looks.append(page.evaluate(art))
+    assert looks == ['cinder_warden', 'cinder_warden_molten', 'cinder_warden_quenched'], looks
+    # The Last Hammer: wait for it with Bram to move, raise Tempered Oath by real keys, then watch it ring off him
+    page.evaluate(f"{W_}.hp = {W_}.maxHp")
+    hammer = "[...LQ_ENGINE.scene.telegraphs.values()].some(t => t.skill === 'last_hammer') && LQ_DEBUG.state().battle.current === 'bram'"
+    assert _defend_until(page, hammer, turns=30), 'no Last Hammer with Bram to act'
+    page.evaluate("(() => { const b = LQ_ENGINE.scene.b.unit('bram'); b.mp = Math.max(b.mp, 20); })()")
+    oath_by_keys(page, ctx)
+    assert _player(page)
+    assert page.evaluate("!!LQ_ENGINE.scene.b.unit('bram').statuses.oath"), 'the Oath did not hold'
+    page.evaluate(ADVANCE.format(8))
+    shot(page, ctx, 'oath_turn')
+    if d == 'desktop':
+        zoom(page, ctx, 'desktop_oath_stage', (240, 56, 144, 100), scale=4)
+    # the hammer falls on the Warden's turn: everyone else Defends; film from "like a bell"
+    rung = False
+    bell = "LQ_ENGINE.scene.log.some(l => l.includes('like a bell'))"
+    for _ in range(6):
+        if not page.evaluate("[...LQ_ENGINE.scene.telegraphs.values()].some(t => t.skill === 'last_hammer')"):
+            break
+        page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+        advance_until(page, "LQ_ENGINE.scene.fx.items.some(it => it.layer === 'top' && it.frames === 44) || " + WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=4000, step=1)
+        if page.evaluate("LQ_ENGINE.scene.fx.items.some(it => it.layer === 'top' && it.frames === 44)"):
+            filmstrip(page, ctx, 'oath_ring', 12, 4, full=True)
+            rung = True
+            break
+        if not _player(page):
+            break
+    assert rung, 'the hammer never rang on Bram'
+    _player(page)
+    shot(page, ctx, 'after_ring')
+    broken = page.evaluate(f"{W_}.broken") or page.evaluate(bell)
+    result = _auto_to_end(page, ctx)
+    assert result == 'win', result
+    ctx['note'] = f"card {card['name']} / {card['sub']}; looks {','.join(looks)}; oath by keys; rung (broken {broken}); auto {result}"
+
+
 SCENARIOS = {
     'start': (sc_start, ['desktop', 'phone']),
     'stage': (sc_stage, ['desktop']),
@@ -900,6 +1120,9 @@ SCENARIOS = {
     'other_selves': (sc_other_selves, ['desktop', 'phone']),
     'nameless_king': (sc_nameless_king, ['desktop', 'phone']),
     'glass_reflect': (sc_glass_reflect, ['desktop', 'phone']),
+    'sr_first': (sc_sr_first, ['desktop', 'phone', 'portrait']),
+    'bellows_specter': (sc_bellows_specter, ['desktop', 'phone', 'portrait']),
+    'cinder_warden': (sc_cinder_warden, ['desktop', 'phone', 'portrait']),
 }
 
 

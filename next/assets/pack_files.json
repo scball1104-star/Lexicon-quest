@@ -82,6 +82,21 @@
   "src/data/cave/text.js",
   "src/data/cave/world.js"
  ],
+ "ep3": [
+  "src/data/maps/ep3/_quench.js",
+  "src/data/maps/ep3/emberpeak.js",
+  "src/data/maps/ep3/foundry_f1.js",
+  "src/data/maps/ep3/foundry_f2.js",
+  "src/data/maps/ep3/foundry_f3.js",
+  "src/data/maps/ep3/foundry_heart.js",
+  "src/data/maps/ep3/hollow_gate.js",
+  "src/data/maps/ep3/index.js",
+  "src/data/maps/ep3/pk_bellhouse.js",
+  "src/data/maps/ep3/pk_inn.js",
+  "src/data/maps/ep3/pk_shop.js",
+  "src/data/maps/ep3/pk_smithy.js",
+  "src/data/maps/ep3/sand_road.js"
+ ],
  "tier": [
   "assets/tier_manifest.json",
   "src/data/tier/index.js",

@@ -1,28 +1,18 @@
-// Lexicon Quest NEXT, Episode 3: "The Forge of Ash".
-// Every scripted scene, plus inspect text for signs, plaques, troughs, anvils and props.
-//
-// Scenes use ONLY the cutscene API (DESIGN 5.4; signatures in docs/story/STAGING.md section 1). Places and props
-// are map mark / event / actor names, never tile coordinates. Staging for every scene (who stands where, props,
-// camera, music, triggers) is in docs/story/STAGING_EP3.md. Beat sheet and canon: docs/story/EPISODE3.md.
-//
-// Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, ASCII only, {hero} = player name.
-// Scene ids and line ids never repeat an Episode 1 or Episode 2 id (qa/content/ep3.test.mjs checks it).
+// Lexicon Quest NEXT, Episode 3: "The Forge of Ash". Every scene and inspect text. Cutscene API only (docs/story/STAGING.md 1);
+// staging in docs/story/STAGING_EP3.md, canon in docs/story/EPISODE3.md. Writing rules as ep1.js (qa/content/ep3.test.mjs).
 //
 // THE TWO NAMES. Until `mara_read` nobody says Mara's name, and until `garrick_named` nobody says Garrick's: the
 // party calls him "the Smith" or "Dad" and the speaker tag reads "The Smith" (actor swapped under a name flash in
 // warden_after, the Aurel pattern). Mara speaks only in memory, tagged "A Voice" until she is read off the Bell Gate.
 // qa/content/ep3.test.mjs scans every box for both names before their reveal.
 //
-// THE SWITCH. `ep3_morning` and `sand_gate` also need EP3_LIVE (src/game/episodes.js). While it is false they do
-// nothing, no other scene can start (every other guard needs a flag only they set), and Episode 3 is unreachable.
+// THE SWITCH. `ep3_morning` and `sand_gate` also need EP3_LIVE (src/game/episodes.js); every other guard needs their flags.
 
 import { REWARDS_EP3 } from '../quests.js';
 import { CREDITS_EP3, EPISODE4_CARD } from '../text.js';
 import { EP3_LIVE } from '../../game/episodes.js';
 
-// Speakers with 48x48 portraits. Ilya borrows the built, unused `goggles_smith` painting (alias `ilya`); the Warden
-// uses a crop of its boss frame. A missing portrait simply draws no portrait (ui/window.js). Vex uses `silver_rogue`.
-// The Smith has Garrick's face: the party can see it, it is the word they cannot find.
+// Speakers with portraits (a missing one draws none). The Smith has Garrick's face: it is the word they cannot find.
 const PORTRAIT = {
   hero: 'hero', mira: 'mira', bram: 'bram', mael: 'mael', hazel: 'hazel',
   smith: 'garrick', smith_t: 'garrick', garrick_t: 'garrick', garrick_e: 'garrick',
@@ -61,12 +51,13 @@ async function ep3_morning(s) {
   await s.fade('in', 60);
   await s.emote('hero', 'zzz');
   await s.wait(30);
-  await s.walk('wren', 'wren_wake');
-  await s.face('wren', 'hero');
-  await say(s, 'wren', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
+  await s.spawn('wren_up', { sprite: 'npc_wren', name: 'Wren', at: 'inn_door' });   // up the stair: the map's Wren keeps the counter
+  await s.walk('wren_up', 'wren_wake');
+  await s.face('wren_up', 'hero');
+  await say(s, 'wren_up', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
   await s.walk('hero', ['down']);
   await s.camera.panTo('smith_seat', 40);
-  await narrate(s, 'By the hearth sits an old man grey with road dust, his hands open on his knees as if he has put something down.');
+  await narrate(s, `${s.mapId === 'nameless_hollow' ? 'Against the inn wall' : 'By the hearth'} sits an old man grey with road dust, his hands open on his knees as if he has put something down.`);
   await s.walk('bram', 'smith_seat');
   await s.face('bram', 'smith');
   await say(s, 'bram', '...Dad.');
@@ -89,9 +80,13 @@ async function ep3_morning(s) {
   await s.camera.follow('hero');
   await s.walk('smith', 'inn_door');
   await s.despawn('smith');
-  await say(s, 'wren', "Three more eggs, then. I'll put them in his coat pocket. He won't notice.");
+  await say(s, 'wren_up', "Three more eggs, then. I'll put them in his coat pocket. He won't notice.");
+  await s.walk('wren_up', 'inn_door');
+  await s.despawn('wren_up');
   await s.setFlag('ep3_morning_done');
   await s.setFlag('ep3_started');
+  await s.fade('out', 40);   // to the gate unwalked: sand_gate_trig runs on landing, after this scene
+  s.warp('nameless_hollow', 40, 26, 'right');
 }
 
 // 2. nameless_hollow, step trigger sand_gate_trig at the chained east gate. Vessa unchains the road; Penny's cart is
@@ -100,6 +95,7 @@ async function sand_gate(s) {
   await s.spawn('vessa_g', { sprite: 'npc_vessa', name: 'Vessa', at: 'vessa_gate', dir: 'right' });
   await s.spawn('penny_g', { sprite: 'npc_shopkeeper', name: 'Penny', at: 'penny_cart_h', dir: 'right' });
   await s.spawn('smith', { sprite: 'npc_smith', name: 'The Smith', at: 'penny_cart_h', dir: 'right' });
+  await s.fade('in', 40);
   await s.camera.panTo('sand_gate', 40);
   await narrate(s, 'At the east edge of town stands a stone arch with an iron chain across it. Beyond lies a road of pale grey sand.');
   await say(s, 'vessa_g', 'Emberpeak sand made the best silverglass. Made. The carts stopped twenty-five years ago.');
@@ -695,7 +691,7 @@ async function first_bell(s) {
   await s.tint('none', 120);
   await s.camera.panTo('memorial', 40);
   await narrate(s, 'On the memorial wall the plates fill with letters. MARA OF THE FIRST BELL. And beside it, deep and firm: GARRICK.');
-  await s.camera.follow('hero');
+  await s.camera.panTo('gather_view', 40);
   await s.walk('veyra', 'gather_veyra');
   await say(s, 'veyra', 'The furnaces are banked. For the first time in a month, nothing is feeding them.');
   await s.walk('rusk', 'gather_rusk', { speed: 'run' });

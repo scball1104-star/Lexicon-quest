@@ -787,7 +787,6 @@ export const MAIN_QUEST_EP2 = {
     },
     {
       id: 'epilogue2', title: 'Toward Emberpeak', aim: EP3_LIVE ? 'Take the old sand road east' : 'Rest in Hollowmere', done: null,
-      // while Episode 3 is off, the road is not open yet (placeholder wording, Scott's to choose); EP3_LIVE points east
       journal: EP3_LIVE ? EPILOGUE2_LIVE.journal : EPILOGUE2_WAIT.journal,
       chat: EP3_LIVE ? EPILOGUE2_LIVE.chat : EPILOGUE2_WAIT.chat,
     },

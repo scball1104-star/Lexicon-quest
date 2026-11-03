@@ -461,4 +461,7 @@ cluttered the bag are gone. Before, the party met the Binder with Mira near empt
    turn or two by hand, the lever is `BAND_ADJUST` 4 and 5 `hp` (1.3 put B60 to B99 at 63% deaths; 1.15 holds 22%).
 2. **Episode 3 switch** (unchanged from 7.8): when `EP3_LIVE` flips, bands 4 and 5 become cinder and forge pools with the old
    `elite: 2` templates and `BAND_ADJUST` 4 and 5 must be re-tuned; re-run the check then.
+   **Done (E3-switch, 2026-11-02):** `BAND_ADJUST` 4 is hp 1.3, power 1.2, speed 1.5 (5 unchanged); the Forge's fixed elite
+   templates are a third of its weight (elite_knights 2 -> 1.5) and roll nothing on top; band 4 rolls one in three. B60
+   checkpoint attack-only 97% -> 73% (B99 67%), Forge elites 51% -> 33%; descent deaths B60-B99 0% -> 8.9%; all cave targets met.
 3. **The resist over-count** (8.6) is still inventory.js's (game-wide, not changed here).

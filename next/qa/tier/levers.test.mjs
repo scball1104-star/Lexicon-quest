@@ -45,8 +45,8 @@ test('the table is the brief\'s: HP x1.6, ATK and MAG x1.35, SPD +1, EXP x1.5, i
   assert.equal(T.id, 'tier_1'); assert.equal(TIER_FLAG, 'tier_1');
   assert.equal(unlockFlag(false), 'ep2_complete', 'today the unlock is the Episode 2 finish');
   assert.equal(unlockFlag(true), 'ep3_complete', 'and the Episode 3 finish once Episode 3 ships');
-  // the record the tier is written for is the simulator's Episode 2 finish
-  assert.equal(T.lift.carryExp, progression(1, 2).slice(-1)[0].exp);
+  // the record the tier is written for is the simulator's Episode 3 finish (the unlock is ep3_complete since EP3_LIVE; was Episode 2's)
+  assert.equal(T.lift.carryExp, progression(1, 3).slice(-1)[0].exp);
   for (const [enc, t] of Object.entries(T.terms)) {
     assert.ok(ENCOUNTERS[enc], `a term names a real encounter: ${enc}`);
     for (const [k, v] of Object.entries(t)) assert.ok(['hp', 'pow'].includes(k) && v > 0.5 && v < 2, `${enc}.${k} = ${v} is a correction, not a rewrite`);
@@ -92,9 +92,10 @@ test('on the tier: each foe is lifted to the party, then HP x1.6, ATK and MAG x1
 });
 
 test('the lift: a foe is met at the carried party\'s level on the tier, and lifted toward it (never below its own level)', () => {
-  assert.equal(metLevel(1), 13, 'the record itself: Lv 13 (3,335 EXP, four short of 14)');
-  assert.equal(metLevel(2), 14, 'the valley: the party is Lv 14 a few fights in');
-  assert.ok(metLevel(8) >= 15 && metLevel(8) <= 16, 'the Archivore: Lv 15 or 16 on the tier');
+  // E3-fixes-world cut four Episode 3 foes: the finish is 5,585 EXP, Lv 17 (was 6,060, Lv 18); tier sim --check still holds
+  assert.equal(metLevel(1), 17, 'the record itself: Lv 17 (5,585 EXP, the Episode 3 finish)');
+  assert.equal(metLevel(2), 17, 'the valley: still Lv 17 (Lv 18 needs 6,038)');
+  assert.ok(metLevel(8) >= 19 && metLevel(8) <= 20, 'the Archivore: Lv 19 or 20 on the tier');
   for (let L = 1; L <= 18; L++) {
     for (const k of ['hp', 'pow', 'spd']) {
       const t = liftLevel(L, k);

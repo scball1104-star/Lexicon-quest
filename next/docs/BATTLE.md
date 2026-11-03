@@ -817,7 +817,7 @@ Final run, 400 battles per row (92,500 battles in 167 s), **all targets met for 
 | **cinder_warden** | 17 | 99% / 11.64 (9.0-14.7) / 21%; 1.68; Oath on 54% of hammers | 0% / 7.98 | - | - |
 
 Episode 3 level curve (all fights / 80%): road 13 to 14 / 13 to 13, F1 14 to 15 / 13 to 14, F2 15 to 16 / 14 to 15, F3 16 to 17 /
-15 to 16, the Warden at 17 (leaving at 18) / at 16 (leaving at 17), total EXP 6,060 / 5,584. The plan wanted a full clear to reach
+15 to 16, the Warden at 17 (leaving at 18) / at 16 (leaving at 17), total EXP 6,060 / 5,584 (before E3-fixes-world cut four field foes, 2026-11-03: the Warden is now met at Lv 16 and the full clear carries 5,585). The plan wanted a full clear to reach
 the Warden at 16 and the 80% route to be a level behind; with its own EXP column the full clear is a level above, which is why the
 Warden is measured at both 16 and 17.
 

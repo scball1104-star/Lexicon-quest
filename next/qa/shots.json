@@ -5829,6 +5829,593 @@
      "message": "Hollis answers across the desk"
     }
    ]
+  },
+  {
+   "name": "field_sand_road_slag",
+   "note": "E3: the Old Sand Road, the paddle turned: the stream crosses the slag river and the cooling front runs north and south",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "sand_road",
+      16,
+      21,
+      "left"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 240
+    },
+    {
+     "eval": "(async () => { const id = \"sl_road\"; const q = () => { const d = LQ_DEBUG.quench(); return d && d.sluices ? d.sluices.find((x) => x.startsWith(id + '@')) : null; }; const before = q(); LQ_DEBUG.turnSluice(id); let read = false; for (let i = 0; i < 150; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { read = true; LQ_DEBUG.press('confirm', 1); continue; } const now = q(); if (now && now !== before) return now; if (read && now) { read = false; LQ_DEBUG.turnSluice(id); } } throw new Error('the sluice never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "((LQ_ENGINE.game.quenched || {}).sand_road || []).length > 0",
+     "message": "the slag river is cooling"
+    }
+   ]
+  },
+  {
+   "name": "field_emberpeak_square",
+   "note": "E3: Emberpeak, Bellows Square under the ash: the memorial with its plates, the coolant station, the foundry face",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "emberpeak",
+      17,
+      17,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_emberpeak_square: the field is on top"
+    }
+   ]
+  },
+  {
+   "name": "field_foundry_f1_quench",
+   "note": "E3: F1 Slag Hall, sl_b turned: water down the trough, the east pool crusting (snap -start: the west pool cooled at load)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_f1",
+      20,
+      19,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "snap": "start"
+    },
+    {
+     "eval": "(async () => { const id = \"sl_b\"; const q = () => { const d = LQ_DEBUG.quench(); return d && d.sluices ? d.sluices.find((x) => x.startsWith(id + '@')) : null; }; const before = q(); LQ_DEBUG.turnSluice(id); let read = false; for (let i = 0; i < 150; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { read = true; LQ_DEBUG.press('confirm', 1); continue; } const now = q(); if (now && now !== before) return now; if (read && now) { read = false; LQ_DEBUG.turnSluice(id); } } throw new Error('the sluice never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 50
+    },
+    {
+     "assert": "((LQ_ENGINE.game.quenched || {}).foundry_f1 || []).length > 0",
+     "message": "crust on F1"
+    }
+   ]
+  },
+  {
+   "name": "field_foundry_f2_hot_gate",
+   "note": "E3: F2 Bell Gallery, sl_g turned: bs_b2 full and the hot grate hg_b2 opening in steam",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_f2",
+      8,
+      8,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "eval": "(async () => { const id = \"sl_g\"; const q = () => { const d = LQ_DEBUG.quench(); return d && d.sluices ? d.sluices.find((x) => x.startsWith(id + '@')) : null; }; const before = q(); LQ_DEBUG.turnSluice(id); let read = false; for (let i = 0; i < 150; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { read = true; LQ_DEBUG.press('confirm', 1); continue; } const now = q(); if (now && now !== before) return now; if (read && now) { read = false; LQ_DEBUG.turnSluice(id); } } throw new Error('the sluice never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 70
+    }
+   ]
+  },
+  {
+   "name": "field_foundry_f3_dark",
+   "note": "E3: F3 hub at dark 0.5, the slag the only light, the Bell Gate with no oath struck",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_f3",
+      21,
+      17,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_foundry_f3_dark: the field is on top"
+    }
+   ]
+  },
+  {
+   "name": "story_ep3_morning",
+   "note": "E3: ep3_morning, the Smith by the guest-room table, Bram reaching for the name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Dad, I can't\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep3_morning: Bram speaks"
+    }
+   ]
+  },
+  {
+   "name": "story_vex_furnace",
+   "note": "E3: vex_furnace, Vex unburned on the furnace ledge (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\", \"oath_heart\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_f3",
+      40,
+      6,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_furnace\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"I burn excuses\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_furnace: Vex speaks"
+    }
+   ]
+  },
+  {
+   "name": "story_bram_memory_3",
+   "note": "E3: bram_memory_3, the founder's stamp under the ash on the Bell Gate (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\", \"vex_furnace_met\", \"oath_hand\", \"oath_heart\", \"oath_home\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_f3",
+      21,
+      15,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"bram_memory_3\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Her name is Mara\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_bram_memory_3: Bram reads the name"
+    }
+   ]
+  },
+  {
+   "name": "battle_heat_pips",
+   "note": "E3: the sand road teaching fight, the Cinder Beetle stoked: its Heat pips on the foe row",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "sr_first",
+      {
+       "fresh": true,
+       "seed": 1,
+       "noElite": true
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.units().some((u) => u.side === 'enemy' && u.alive && u.heat > 0))) return i; if (open) { const u = s.b.current(); LQ_DEBUG.battleAct({ type: 'defend' }); } LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some((u) => u.side === 'enemy' && u.heat > 0)",
+     "message": "a foe has Heat"
+    }
+   ]
+  },
+  {
+   "name": "battle_bellows_specter",
+   "note": "E3: the Bellows Specter, stoked twice, its Heat showing",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "bellows_specter",
+      {
+       "fresh": true,
+       "seed": 2
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.units().some((u) => u.boss && u.alive && u.heat >= 2))) return i; if (open) { const u = s.b.current(); LQ_DEBUG.battleAct({ type: 'defend' }); } LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some((u) => u.boss && u.heat >= 2)",
+     "message": "the Specter is hot"
+    }
+   ]
+  },
+  {
+   "name": "battle_warden_oath",
+   "note": "E3: the Cinder Warden, Bram under Tempered Oath (the oath ring on his row)",
+   "steps": [
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "cinder_warden",
+      {
+       "fresh": true,
+       "seed": 3
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.units().some((u) => u.id === 'bram' && u.statuses && u.statuses.oath))) return i; if (open) { const u = s.b.current(); LQ_DEBUG.battleAct((u && u.id === 'bram' && !(u.statuses && u.statuses.oath)) ? { type: 'skill', skill: 'tempered_oath', target: u.uid } : { type: 'defend' }); } LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some((u) => u.id === 'bram' && u.statuses && u.statuses.oath)",
+     "message": "Bram holds the oath"
+    }
+   ]
+  },
+  {
+   "name": "story_warden_after",
+   "note": "E3: warden_after, the leaf reforged: Bram says his father's name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\", \"vex_furnace_met\", \"oath_hand\", \"oath_heart\", \"oath_home\", \"bram_memory_3\", \"mara_read\", \"bell_gate_open\", \"cinder_warden_tried\", \"cinder_warden_defeated\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "foundry_heart",
+      12,
+      12,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"^Garrick\\\\.$\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_warden_after: Bram says the name"
+    }
+   ]
+  },
+  {
+   "name": "story_first_bell",
+   "note": "E3: first_bell, the town gathered under the bell tower, Rusk calls the name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\", \"vex_furnace_met\", \"oath_hand\", \"oath_heart\", \"oath_home\", \"bram_memory_3\", \"mara_read\", \"bell_gate_open\", \"cinder_warden_tried\", \"cinder_warden_defeated\", \"clapper_get\", \"garrick_named\", \"mara_named\", \"leaf_get\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "emberpeak",
+      19,
+      8,
+      "down"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Watch of Emberpeak says\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_first_bell: Rusk speaks"
+    }
+   ]
+  },
+  {
+   "name": "story_ep3_ending",
+   "note": "E3: ep3_ending, Emberpeak at night, the courier with the running seal (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep3_morning_done\", \"ep3_started\", \"sand_gate_open\", \"sand_road_arrived\", \"sand_first_fight_done\", \"saw_slag\", \"carters_rested\", \"saw_emberpeak\", \"pk_arrived\", \"met_veyra\", \"saw_memorial\", \"met_ilya\", \"foundry_open\", \"forge_relit\", \"foundry_entered\", \"foundry_f1_arrived\", \"bram_memory_1\", \"lift_wheel_lit\", \"lift_wheel_seen\", \"crucible_hook_found\", \"ash_key_f1\", \"foundry_f1_done\", \"foundry_f2_arrived\", \"bram_memory_2\", \"bellows_specter_tried\", \"bellows_specter_defeated\", \"foundry_f2_done\", \"foundry_f3_arrived\", \"vex_furnace_met\", \"oath_hand\", \"oath_heart\", \"oath_home\", \"bram_memory_3\", \"mara_read\", \"bell_gate_open\", \"cinder_warden_tried\", \"cinder_warden_defeated\", \"clapper_get\", \"garrick_named\", \"mara_named\", \"leaf_get\", \"first_bell_rung\", \"pk_restored\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "emberpeak",
+      5,
+      13,
+      "down"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ep3_ending\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"The seal won\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep3_ending: the courier speaks"
+    }
+   ]
+  },
+  {
+   "name": "ui_title_ep3",
+   "note": "E3: the title with an Episode 2 finish in slot 0: the Episode 3 row offered (EP3_LIVE)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.newGameEp3('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 21600, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && ((LQ_DEBUG.state().sceneState || {}).items || []).includes('ep3')",
+     "timeout": 20000
+    },
+    {
+     "frames": 90
+    }
+   ]
   }
  ]
 }

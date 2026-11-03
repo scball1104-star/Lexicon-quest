@@ -98,9 +98,11 @@ FIELD_JS = """() => {
     fighting: !!(a.data && a.data.fighting), mode: a.brain && a.brain.mode || null }));
   // E2: glass bridges, lit (walkable) or dim (a pit) right now
   const bridges = f.glass && f.glass.bridges ? [...f.glass.bridges.values()].map(b => [b.x, b.y, !!b.lit]) : [];
+  // E3: crusted slag cells (walkable, whatever the static grid says) as [x, y]
+  const crust = f.quench && f.quench.crust ? [...f.quench.crust].map(i => [i % f.map.w, Math.floor(i / f.map.w)]) : [];
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, bridges, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    lantern: f.lantern, ents, actors, bridges, crust, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
     busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
@@ -117,10 +119,12 @@ class Softlock(Fail):
 
 # ================================================================================================ driver
 class Bot:
-    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag='', query='', x1=False):
+    def __init__(self, device='desktop', speed=2, keys=False, name='Arden', headless=True, resume=None, tag='', query='', x1=False, seed_slot=1, ep3=None):
         from playwright.sync_api import sync_playwright
         self.x1 = x1                        # X1 (The Wider Valley) switched on in a local copy: live.js served with X1_LIVE true, grids built in the ON state
         os.environ['LQ_X1_LIVE'] = '1' if x1 else '0'      # the page is served live.js forced on or off, whatever the file on disk says
+        if ep3 is not None:
+            os.environ['LQ_EP3_LIVE'] = '1' if ep3 else '0'  # Episode 3: episodes.js served with EP3_LIVE forced (a local copy of the switch)
         self.device = device + tag          # output prefix (the wrong-order sweep and Episode 2 keep their own files)
         self.query = query                  # extra URL params (Episode 2's title entry: &ep=2)
         self.speed = speed
@@ -139,11 +143,12 @@ class Bot:
             data = json.loads(pathlib.Path(resume).read_text(encoding='utf-8'))
             env = {'v': 1, 'savedAt': int(time.time() * 1000), 'meta': {'name': data.get('heroName'), 'level': data['party'][0]['level'], 'map': data['map'],
                    'playtime': data.get('playtime', 0), 'chapter': data.get('chapter', 1), 'gold': data.get('gold'), 'party': [m['id'] for m in data['party']]}, 'data': data}
-            seed = 'localStorage.setItem("lq-next-slot-1", ' + json.dumps(json.dumps(env)) + ');'
+            seed = f'localStorage.setItem("lq-next-slot-{int(seed_slot)}", ' + json.dumps(json.dumps(env)) + ');'
             name = data.get('heroName') or name
         self.resume = resume
         self.hero = name
-        self.page.add_init_script('(() => { try { localStorage.clear(); ' + seed + ' } catch (e) {} })()')
+        # once per tab: a quit to the title is in-app, but a reload must not wipe what the run saved (the slot checks read it)
+        self.page.add_init_script('(() => { try { if (sessionStorage.getItem("lq-bot-seeded")) return; sessionStorage.setItem("lq-bot-seeded", "1"); localStorage.clear(); ' + seed + ' } catch (e) {} })()')
         self.errors, self.warnings, self.console = [], [], []
         self.page.on('console', self._on_console)
         self.page.on('pageerror', lambda e: self.errors.append(f'pageerror: {e}'))
@@ -318,6 +323,10 @@ class Bot:
         g = self.game() or {}
         self.timing.append({'step': step, 'map': g.get('map'), 'game_s': round(g.get('playtime', 0), 1), 'wall_s': round(time.time() - self.t0, 1),
                             'level': (g.get('party') or [{}])[0].get('level'), 'gold': g.get('gold')})
+        try:
+            self.dialog_file.write(f'## mark {step} {round(g.get("playtime", 0), 1)}' + chr(10))     # story_time.py: pages between two marks
+        except Exception:
+            pass
         print(f'  == {step:<22} game {g.get("playtime", 0) / 60:5.1f} min  wall {(time.time() - self.t0) / 60:5.1f} min  Lv {(g.get("party") or [{}])[0].get("level")}  {g.get("gold")} G', flush=True)
 
     # ------------------------------------------------------------------ overlay scenes
@@ -488,6 +497,9 @@ class Bot:
             if e['type'] == 'door' or (e['type'] in ('gate', 'locked_door') and e['state'] == 'open' and e['to']) or e['type'] == 'ferry':
                 for c in cells:
                     avoid.add(c)
+            if e['type'] == 'pit' and not allow_pits:
+                for c in cells:
+                    avoid.add(c)            # E3: the fan shaft on F2 drops to F1
             if e['type'] == 'trigger' and e['on'] != 'enter' and e['script'] in ('south_gate',) and not fight:
                 pass
         for ex in g['exits']:
@@ -507,6 +519,7 @@ class Bot:
         # E2 glass bridges: a lit one is floor, a dim one is a pit, whatever the static grid says
         lit_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if lit}
         dim_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if not lit}
+        crust = {(x, y) for x, y in f.get('crust') or []}
 
         def passable(x, y, d):
             if not (0 <= x < W and 0 <= y < H):
@@ -517,7 +530,7 @@ class Bot:
                 return False
             if (x, y) in unblocked:
                 return True
-            if (x, y) in lit_bridges:
+            if (x, y) in lit_bridges or (x, y) in crust:
                 return True
             if (x, y) in dim_bridges:
                 return allow_pits or (x, y) == goal_t
@@ -2890,6 +2903,758 @@ class Episode2(Episode):
                 return
 
 
+# ================================================================================================ Episode 3
+EP3_MAIN_FLAGS = ['ep3_started', 'sand_gate_open', 'sand_road_arrived', 'sand_first_fight_done', 'pk_arrived', 'met_veyra', 'met_ilya',
+                  'foundry_entered', 'foundry_f1_done', 'bellows_specter_defeated', 'foundry_f2_done', 'vex_furnace_met', 'bell_gate_open',
+                  'cinder_warden_defeated', 'garrick_named', 'pk_restored', 'ep3_complete']
+EP3_SLOTS = (0, 1, 2, 3)
+SLOT_JS = "(n) => { try { return localStorage.getItem('lq-next-slot-' + n); } catch (e) { return null; } }"
+
+
+def ep3_fixture(device):
+    """The Episode 2 credits save (EPISODE3_PLAN 10.7): <device>-ep2-credits-save.json when an Episode 2 run left one, else built
+    from the newest finished Episode 2 game (<device>-ep2-last-game.json, else the desktop one) by putting the party where the
+    Episode 2 credits wake it: nh_inn, inn_bed, facing down. Returns the path."""
+    path = OUT / f'{device}-ep2-credits-save.json'
+    if path.exists():
+        return path
+    for src in (OUT / f'{device}-ep2-last-game.json', OUT / 'desktop-ep2-last-game.json'):
+        if src.exists():
+            g = json.loads(src.read_text(encoding='utf-8'))
+            if not (g.get('flags') or {}).get('ep2_complete') or not (g.get('counters') or {}).get('credits2_rolled'):
+                continue
+            g['map'] = 'nh_inn'
+            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['autosaveSlot'] = 0
+            path.write_text(json.dumps(g), encoding='utf-8')
+            return path
+    raise Fail('no finished Episode 2 game to build the credits save from: run python qa/autoplay.py --episode 2 first')
+
+
+class Episode3(Episode):
+    """Episode 3, "The Forge of Ash" (docs/story/EPISODE3.md, STAGING_EP3.md, MAPS.md section 8): from the morning after the
+    Episode 2 credits (Continue on the credits save, or the title's Episode 3 quick start) to the Episode 3 credits in the
+    Coal Lantern Inn. Quench puzzles use the maps' own solutions (tools/maps/mapcheck.mjs quench, Bot.solve_quench); fights are
+    Auto at 2x, every visible enemy on the way. The quick start is checked to write no save slot it does not own."""
+
+    TIER5 = [('ashsteel_helm', 1), ('cinder_boots', 1)]          # the simulator's foundry_f1 row; gold is kept for tier 6
+    TIER6 = [('tempered_sword', 1), ('forge_axe', 1), ('heartforge_pike', 1), ('founders_rod', 1), ('bellwire_bow', 1),
+             ('tempered_mail', 2), ('ashweave_robe', 1), ('forge_helm', 2)]
+
+    def __init__(self, bot, side=True, until=None, start='save'):
+        super().__init__(bot, side=side, until=until)
+        self.start = start
+        self.slots0 = {}            # slot -> raw localStorage value before the run (the quick start must not touch them)
+        self.run_slot = None        # the slot this run owns (its autosave)
+
+    def level(self):
+        return (self.b.game() or {}).get('party', [{}])[0].get('level')
+
+    # The level each zone is cleared at on the simulator's 80% route (tools/sim/simulate.mjs): the bot stops seeking out optional
+    # fights once the party is there, so it meets the Warden at the plan's Lv 16 (fights that come to it are still fought).
+    ZONE_LV = {'sand_road': 14, 'foundry_f1': 15, 'foundry_f2': 16, 'foundry_f3': 16}
+
+    def hunt(self, limit, label):
+        f = self.b.settle()
+        if (self.level() or 0) >= self.ZONE_LV.get(f['map'], 99):
+            return
+        self.b.hunt(limit=limit, label=label)
+
+    def slot_raw(self, n):
+        return self.b.page.evaluate(SLOT_JS, n)
+
+    # ---- quench
+    def quench_solutions(self, map_id):
+        b = self.b
+        key = ('quench', map_id)
+        if key not in b.grids:
+            r = subprocess.run(['node', str(NEXT / 'tools' / 'maps' / 'mapcheck.mjs'), 'quench', map_id], capture_output=True, text=True, timeout=180, cwd=str(NEXT))
+            if r.returncode != 0:
+                raise Fail(f'quench {map_id}: {r.stderr[-400:]}')
+            data = json.loads(r.stdout)
+            b.grids[key] = {s['label']: {'states': s.get('states') or {}, 'blocks': s.get('blocks') or {}} for s in data.get('solved') or []}
+        return b.grids[key]
+
+    def quench_done(self, f, goal):
+        """A basin goal ('basin bs_c') is done when the basin is full; a crust goal ('crust x,y') when that cell is crust."""
+        kind, what = goal.split(' ', 1)
+        if kind == 'basin':
+            e = self.b.ent(f, what)
+            return bool(e) and e.get('state') in ('on', 'full', 1, True)
+        x, y = (int(v) for v in what.split(','))
+        return [x, y] in (f.get('crust') or [])
+
+    def solve_quench(self, map_id, goal, blocks=True, label=''):
+        """Fill a basin or cool a pool with the map's solution: shove the crates to their cells (blocks=False: leave them),
+        then turn every sluice the party can reach to its state, nearest first, looking again after each turn (a fresh
+        crust can be the floor to the next paddle). Waits for the cooling front."""
+        b = self.b
+        f = b.settle()
+        if self.quench_done(f, goal):
+            return f
+        sol = self.quench_solutions(map_id).get(goal)
+        if not sol:
+            raise Fail(f'no quench solution for {goal} on {map_id}')
+        if blocks:
+            for bid, cell in sol['blocks'].items():
+                e = b.ent(b.settle(), bid)
+                if e and (e['x'], e['y']) != tuple(cell):
+                    b.shove_to(bid, tuple(cell), label=f'{label} {bid}')
+        turned = 0
+        for _ in range(4 * len(sol['states']) + 6):
+            f = b.settle()
+            todo = [m for m, s in sol['states'].items() if (b.ent(f, m) or {}).get('state') is not None and int(b.ent(f, m)['state'] or 0) != int(s)]
+            if not todo:
+                break
+            best = None
+            for m in todo:
+                e = b.ent(f, m)
+                r = b.reachable_spot(f, [(e['x'], e['y'])])
+                if r and (best is None or r[0] < best[0]):
+                    best = (r[0], m)
+            if best is None:
+                if not getattr(self, '_cleared', None) == (map_id, goal):
+                    self._cleared = (map_id, goal)              # a guard in the only corridor (a foe that never moves): fight it
+                    b.hunt(limit=3, label=f'clear the way to {todo}')
+                    continue
+                raise Fail(f'quench {goal} on {map_id}: no reachable sluice among {todo} ({label})')
+            b.interact(ent_id=best[1], label=f'turn {best[1]}')
+            turned += 1
+        for _ in range(30):                     # the cooling front: two frames a ring, then the basin's script
+            f = b.settle()
+            if self.quench_done(f, goal):
+                b.notes.append(f'quench {goal} on {map_id}: {turned} turns')
+                return f
+            b.frames(20)
+        raise Fail(f'quench {goal} on {map_id} did not happen after {turned} turns ({label})')
+
+    def strike(self, ent_id, flag):
+        b = self.b
+        if self.has(flag):
+            return
+        b.interact(ent_id=ent_id, label=f'strike {ent_id}')
+        b.settle()
+        if not self.has(flag):
+            raise Fail(f'{ent_id} did not set {flag}')
+
+    def trigger(self, cells, flag, label, max_s=600):
+        b = self.b
+        if self.has(flag):
+            return
+        b.walk_to(cells, label=label)
+        b.settle(max_s=max_s)
+        if not self.has(flag):
+            raise Fail(f'{label} did not set {flag}')
+
+    def inn_if_hurt(self, frac=0.7):
+        b = self.b
+        vit = b.party_vitals()
+        if not vit or min(v['hp'] / max(1, v['maxHp']) for v in vit) >= frac:
+            return
+        f = b.settle()
+        if f['map'] != 'emberpeak':
+            return
+        b.through('door_pk_inn')
+        self.ensure_map('pk_inn')
+        b.rest_at_inn('bess')
+        b.through('inn_exit')
+
+    def round_trip(self, label):
+        """Save to this run's own slot only, quit, load it back (Bot.round_trip), and check the Episode 3 world state came back."""
+        b = self.b
+        before = b.field() or {}
+        b.round_trip(self.run_slot or 1, label)
+        after = b.settle()
+        lost = sorted({tuple(c) for c in before.get('crust') or []} - {tuple(c) for c in after.get('crust') or []})
+        if lost:
+            raise Fail(f'after the reload at {label} {len(lost)} crust cells were gone (e.g. {lost[:3]})')
+        full = lambda f: sorted(e['id'] for e in f['ents'] if e['type'] == 'basin' and e.get('state') == 'on')
+        opened = lambda f: sorted(e['id'] for e in f['ents'] if e['type'] in ('gate', 'locked_door') and e.get('state') == 'open')
+        if full(before) != full(after) or not set(opened(before)) <= set(opened(after)):
+            raise Fail(f'after the reload at {label}: basins {full(before)} -> {full(after)}, gates {opened(before)} -> {opened(after)}')
+        b.notes.append(f'reload at {label}: {len(after.get("crust") or [])} crust cells, basins {full(after)}, gates {opened(after)} intact')
+
+    # ---- phases
+    def title_start(self):
+        """Title -> Continue on the Episode 2 credits save (record 1), or Title -> Episode 3 -> the slot notice -> Start ->
+        name -> the inn. The quick start's slot choice is answered with real key presses."""
+        b = self.b
+        if b.scene() != 'title':
+            return
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title' && !LQ_DEBUG.state().transition", timeout=30000, polling=30)
+        b.frames(10)
+        for n in EP3_SLOTS:
+            self.slots0[n] = self.slot_raw(n)
+        b.shot('title')
+        ss = b.scene_state()['ss'] or {}
+        items = ss.get('items') or []
+        if b.resume and self.start == 'save':
+            b.title_continue(1)
+            self.run_slot = 1
+            b.notes.append(f'resumed from {b.resume} (record 1)')
+            b.mark('resume')
+            return
+        if 'ep3' not in items:
+            raise Fail(f'the title does not offer Episode 3 (items {items})')
+        b.shot('title_ep3')
+        # real key presses all the way: the row, the slot notice (Back is the default), Start
+        idx = ss.get('index') or 0
+        want = items.index('ep3')
+        for _ in range(abs(want - idx)):
+            b.page.keyboard.press('ArrowDown' if want > idx else 'ArrowUp')
+            b.frames(4)
+        b.page.keyboard.press('KeyZ')
+        b.frames(10)
+        st = b.scene_state()['ss'] or {}
+        guard = st.get('guard')
+        if self.slots0.get(0) is not None:
+            if not guard or guard.get('options') != ['back', 'start']:
+                raise Fail(f'slot 0 is taken but the quick start showed no slot notice: {guard}')
+            b.notes.append(f'quick start notice: {guard.get("line")!r}')
+            b.shot('ep3_slot_notice')
+            b.page.keyboard.press('ArrowDown')
+            b.frames(4)
+            b.page.keyboard.press('KeyZ')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'nameEntryEp3' && !LQ_DEBUG.state().transition", timeout=20000, polling=30)
+        b.frames(10)
+        for _ in range(8):
+            b.page.keyboard.press('Backspace')
+        b.page.keyboard.type(b.hero, delay=30)
+        b.frames(6)
+        b.shot('name_entry_ep3')
+        b.page.keyboard.press('Enter')
+        b.page.wait_for_function("LQ_DEBUG.state().scenes.includes('field')", timeout=30000, polling=30)
+        b.frames(30)
+        g = b.game() or {}
+        if g.get('heroName') != b.hero:
+            raise Fail(f'hero name is {g.get("heroName")!r}, typed {b.hero!r}')
+        self.run_slot = g.get('autosaveSlot')
+        b.notes.append(f'quick start: the run saves to slot {self.run_slot} (slot 0 was {"taken" if self.slots0.get(0) else "empty"})')
+        if self.slots0.get(0) is not None and self.run_slot == 0:
+            raise Fail('the quick start took slot 0 although it holds another game')
+        b.mark('ep3_new_game')
+
+    def check_slots(self, label):
+        """The quick start never writes a slot it does not own (plan 10.3): every slot that held something before the run is
+        byte for byte what it was; every slot but the run's own is still empty if it was."""
+        if self.start != 'new':
+            return
+        for n in EP3_SLOTS:
+            if n == self.run_slot:
+                continue
+            now = self.slot_raw(n)
+            if now != self.slots0.get(n):
+                raise Fail(f'{label}: slot {n} changed during the Episode 3 quick-start run (the run owns slot {self.run_slot})')
+        self.b.notes.append(f'slots checked at {label}: only slot {self.run_slot} was written')
+
+    def morning(self):
+        b = self.b
+        if self.has('sand_gate_open'):
+            b.mark('ep3_morning')   # the morning now fades to the east gate and plays the gate scene
+            return
+        f = b.settle()
+        if not self.has('ep3_started'):
+            raise Fail(f'ep3_morning did not run (on {f["map"]})')
+        b.mark('ep3_morning')
+        b.shot('ep3_morning_after')
+        if f['map'] == 'nh_inn':
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            if self.side:
+                self.talk('wren')
+            b.through('inn_exit')
+        self.ensure_map('nameless_hollow')
+        if self.side:
+            self.talk('aurel')
+        b.menu_talk()
+        self.check_slots('the morning')
+
+    def sand_gate(self):
+        b = self.b
+        if self.has('sand_road_arrived'):
+            return
+        self.ensure_map('nameless_hollow')
+        self.trigger([(40, 26), (40, 27)], 'sand_gate_open', 'sand_gate_trig')
+        if b.items().get('quench_flask', 0) < 3:
+            raise Fail(f'sand_gate gave {b.items().get("quench_flask", 0)} Quench Flasks')
+        b.through('sand_gate_exit')
+        self.ensure_map('sand_road')
+        b.settle()
+        if not self.has('sand_road_arrived'):
+            raise Fail('sand_road_arrival did not run')
+        b.mark('sand_road')
+
+    def sand_road(self):
+        b = self.b
+        if self.has('pk_arrived'):
+            return
+        self.ensure_map('sand_road')
+        if not self.has('sand_first_fight_done'):
+            for attempt in range(4):
+                b.walk_to([(6, 22), (6, 23)], label='first_fight_trig')
+                b.settle()
+                if self.has('sand_first_fight_done'):
+                    break
+                b.notes.append(f'sand_first_fight attempt {attempt + 1}')
+                b.walk_to([(3, 22), (3, 23)], label='back from the column')
+            if not self.has('sand_first_fight_done'):
+                raise Fail('sand_first_fight did not resolve')
+            b.mark('first_fight_done')
+        if self.side:
+            self.sign('sand_milestone')
+            self.chest('chest_shore')
+        self.hunt(2, label='road west')
+        if not self.has('saw_slag'):
+            b.walk_to([(16, 21), (16, 20), (16, 22)], label='slag_trig')
+            b.settle()
+            if not self.has('saw_slag'):
+                raise Fail('slag_crossing did not run at the slag tongue')
+        self.solve_quench('sand_road', 'crust 18,20', label='the slag river')
+        if self.side and not b.opened('sand_road', 'chest_grotto'):
+            try:
+                if b.dash_break('crack_boulder', label='grotto'):
+                    self.chest('chest_grotto')
+                else:
+                    b.notes.append('the grotto boulder did not break')
+            except Fail as e:
+                b.notes.append(f'grotto skipped: {e}')
+        self.hunt(3, label='ash hills')
+        if not self.has('carters_rested'):
+            b.rest_at_fire('carters_fire', prefer=['What was she like?', 'Rest', 'Not now'])
+        b.visit_shop('penny_s', [('hi_potion', 2), ('quench_flask', 2)])
+        b.maintain('shelter')
+        self.hunt(3, label='the rise')
+        self.trigger([(44, 6), (44, 7)], 'saw_emberpeak', 'ash_view_trig')
+        if self.side:
+            self.sign('rise_sign')
+        b.exit_to((51, 6), label='to Emberpeak')
+        self.ensure_map('emberpeak')
+        b.settle()
+        if not self.has('pk_arrived'):
+            raise Fail('pk_arrival did not run')
+        b.mark('emberpeak')
+
+    def emberpeak(self):
+        b = self.b
+        if self.has('foundry_entered'):
+            return
+        self.ensure_map('emberpeak')
+        self.trigger([(x, 18) for x in range(13, 27)], 'met_veyra', 'veyra_trig')
+        if not self.has('saw_memorial'):
+            b.interact(ent_id='memorial', label='the memorial')
+        if not self.has('met_ilya'):
+            b.through('door_pk_bellhouse')
+            self.ensure_map('pk_bellhouse')
+            self.trigger([(8, 11), (9, 11), (10, 11)], 'met_ilya', 'ilya_trig')
+            if not b.items().get('lift_key'):
+                raise Fail('ilya_bellhouse did not give the lift key')
+            if self.side and not self.has('testimony_ilya'):
+                pass                                                 # Ilya's testimony waits for Veyra's ask (coolant_start)
+            b.interact_no_settle(ent_id='save_bell')
+            self.save_from_bell(self.run_slot or 1)
+            b.close_menu()
+            b.through('bellhouse_exit')
+        self.ensure_map('emberpeak')
+        if self.side:
+            self.coolant()
+        if not self.has('forge_relit'):
+            b.through('door_pk_smithy')
+            self.ensure_map('pk_smithy')
+            self.talk('garrick_e')
+            if not self.has('forge_relit'):
+                b.notes.append('garrick_forge did not set forge_relit')
+            if self.side and self.has('coolant_started') and not self.has('testimony_sella'):
+                self.talk('sella')
+            b.visit_shop('sella', self.TIER5)
+            b.through('smithy_exit')
+            b.menu_optimize_all()
+        self.ensure_map('emberpeak')
+        b.through('door_pk_shop')
+        self.ensure_map('pk_shop')
+        b.visit_shop('taro', [('hi_potion', 3), ('quench_flask', 2), ('hi_ether', 1)])
+        b.through('shop_exit')
+        if self.side and self.has('coolant_started') and not self.has('coolant_done'):
+            self.coolant()
+        self.inn_if_hurt(0.8)
+        self.ensure_map('emberpeak')
+        b.mark('foundry_gate')
+        b.interact(ent_id='foundry_door', label='the foundry gate')
+        if not self.has('foundry_entered'):
+            raise Fail('foundry_gate did not set foundry_entered')
+        f = b.settle()
+        if f['map'] == 'emberpeak':
+            b.through('foundry_lift', exact=False)
+        self.ensure_map('foundry_f1')
+        b.settle()
+        if not self.has('foundry_f1_arrived'):
+            raise Fail('foundry_f1_arrival did not run')
+        b.mark('foundry_f1')
+
+    def save_from_bell(self, slot):
+        """The save bell's prompt (the menu's Save page): this run's own slot."""
+        b = self.b
+        for _ in range(60):
+            st = b.scene_state()
+            sc, ss = st['scene'], st.get('ss') or {}
+            if sc == 'loadGame':
+                slots = [s['slot'] for s in ss.get('slots', [])]
+                if slot not in slots:
+                    raise Fail(f'the save page offers {slots}, not slot {slot}')
+                b.pick(slots.index(slot), ss.get('index') or 0)
+                for _ in range(40):
+                    st = b.scene_state()
+                    if st['scene'] == 'choice':
+                        b.pick(0, (st['ss'] or {}).get('index') or 0)
+                    elif st['scene'] != 'loadGame':
+                        break
+                    b.frames(6)
+                b.notes.append(f'saved at the bell to slot {slot}')
+                return
+            if sc == 'field' and not (b.field() or {}).get('locked'):
+                b.notes.append('the save bell asked nothing')
+                return
+            b.handle(prefer=['Save', 'Yes'])
+        raise Fail('the save bell never opened the save page')
+
+    def coolant(self):
+        """The Coolant Station: Veyra's ask, Ilya, Harl and Sella, the valve."""
+        b = self.b
+        if self.has('coolant_done'):
+            return
+        f = b.settle()
+        if f['map'] != 'emberpeak':
+            return
+        if not self.has('coolant_started'):
+            self.talk('veyra')
+        if not self.has('coolant_started'):
+            b.notes.append('Veyra did not start the Coolant Station')
+            return
+        if not self.has('testimony_harl'):
+            self.talk('harl')
+        if not self.has('testimony_ilya'):
+            b.through('door_pk_bellhouse')
+            self.talk('ilya')
+            b.through('bellhouse_exit')
+        if not self.has('testimony_sella'):
+            b.through('door_pk_smithy')
+            self.talk('sella')
+            b.through('smithy_exit')
+        self.ensure_map('emberpeak')
+        if all(self.has(t) for t in ('testimony_ilya', 'testimony_harl', 'testimony_sella')):
+            b.interact(ent_id='coolant_obj', label='the coolant station')
+            if not self.has('coolant_done'):
+                b.notes.append('the coolant station did not complete')
+
+    def foundry_f1(self):
+        b = self.b
+        if self.has('foundry_f1_done'):
+            return
+        self.ensure_map('foundry_f1')
+        b.mark('liftworks')
+        # B, the Slag Hall: the start '/' has cooled pool 1 (the ledge chest); '\' cools pool 2, the way east
+        if self.side:
+            try:
+                self.solve_quench('foundry_f1', 'crust 15,17', label='pool 1')
+                self.chest('chest_ledge')
+            except Fail as e:
+                b.notes.append(f'ledge chest skipped: {e}')
+        self.solve_quench('foundry_f1', 'crust 24,17', label='pool 2')
+        self.hunt(3, label='ore lines')
+        # C, the Ore Lines: the crate dams the cistern; shove it out of the trough, the basin cools the hot grate (Ash Key)
+        if not b.items().get('ash_key') and not self.has('ash_key_f1'):
+            self.solve_quench('foundry_f1', 'basin bs_c', label='ore lines')
+            self.hunt(2, label='key alcove')
+            self.chest('chest_key')
+        if self.side and self.has('sand_started'):
+            self.chest('chest_hopper')
+        b.maintain('ore lines')
+        # D, the old shaft: the Ash Key door, Bram's first memory, the span to the balcony
+        if not self.has('crucible_hook_found'):
+            f = b.settle()
+            if f['leader']['y'] > 18 or f['leader']['x'] > 9:
+                b.through('door_d')
+            if not self.has('bram_memory_1'):
+                self.trigger([(4, y) for y in range(12, 16)] + [(5, y) for y in range(12, 16)], 'bram_memory_1', 'shaft_trig')
+            self.hunt(3, label='shaft')
+            self.solve_quench('foundry_f1', 'crust 10,7', label='the span')
+            if self.side and not b.opened('foundry_f1', 'chest_boots'):
+                try:
+                    if b.dash_break('crack_d', label='shaft crack'):
+                        self.chest('chest_boots')
+                except Fail as e:
+                    b.notes.append(f'Ashwalker Boots skipped: {e}')
+            self.hunt(2, label='balcony')
+            self.chest('chest_hook')
+            if not self.has('crucible_hook_found'):
+                raise Fail('the balcony chest did not give the Crucible Hook')
+        # E to the wheel: '\' at the balcony spout, '\' at the east paddle, down column 36 to the waterwheel
+        self.solve_quench('foundry_f1', 'basin bs_wheel', blocks=False, label='the wheel')
+        b.settle()
+        if not self.has('lift_wheel_lit'):
+            raise Fail('the waterwheel did not latch lift_wheel_lit')
+        self.hunt(3, label='wheelhouse')
+        if self.side:
+            self.chest('chest_f')
+        b.maintain('end of F1')
+        self.trigger([(31, 23), (32, 23)], 'foundry_f1_done', 'lift_trig')
+        f = b.settle()
+        if f['map'] == 'foundry_f1':
+            b.through('gate_lift', exact=False)
+        self.ensure_map('foundry_f2')
+        b.settle()
+        if not self.has('foundry_f2_arrived'):
+            raise Fail('foundry_f2_arrival did not run')
+        b.mark('foundry_f2')
+
+    def foundry_f2(self):
+        b = self.b
+        if self.has('foundry_f2_done'):
+            return
+        self.ensure_map('foundry_f2')
+        if not self.has('bram_memory_2'):
+            self.trigger([(x, 14) for x in range(3, 12)], 'bram_memory_2', 'bell_trig2')
+        self.hunt(2, label='bell gallery')
+        if self.side:
+            try:
+                self.solve_quench('foundry_f2', 'basin bs_b1', label='alcove')
+                self.chest('chest_alcove')
+            except Fail as e:
+                b.notes.append(f'alcove skipped: {e}')
+        self.solve_quench('foundry_f2', 'basin bs_b2', label='the way to C')
+        self.hunt(2, label='records')
+        if self.side and not self.has('ledger_found'):
+            try:
+                f = b.settle()
+                e = b.ent(f, 'ledger_obj')
+                r = b.reachable_spot(f, [(e['x'], e['y'])])
+                if r:
+                    b.walk_to([r[1]], label='ledger')
+                    b.face(r[2])
+                    b.raise_lantern()
+                    b.settle()
+                if not self.has('ledger_found'):
+                    b.interact(ent_id='ledger_obj', label='ledger')
+                if self.has('ledger_found'):
+                    self.chest('chest_cache')
+                    f = b.settle()
+                    if b.ent(f, 'book_ledger'):
+                        b.interact(ent_id='book_ledger', label='foundry ledger')
+                else:
+                    b.notes.append('the ledger did not answer the Lantern')
+            except Fail as e:
+                b.notes.append(f'ledger skipped: {e}')
+        self.solve_quench('foundry_f2', 'basin bs_d', label='the long channel')
+        self.hunt(4, label='long channel')
+        self.chest('chest_key2')
+        self.chest('chest_d2')
+        b.maintain('long channel')
+        f = b.settle()
+        if b.ent(f, 'font_fo2b'):
+            try:
+                b.rest_at_font('font_fo2b', label='font F2')
+            except Fail as e:
+                b.notes.append(f'font F2 skipped: {e}')
+        self.round_trip('F2 font room')
+        self.ensure_map('foundry_f2')
+        self.check_slots('F2')
+        self.hunt(2, label='fan approach')
+        b.through('door_e')
+        for attempt in range(5):
+            if self.has('bellows_specter_defeated'):
+                break
+            if attempt:
+                b.notes.append(f'Bellows Specter attempt {attempt + 1} (Lv {self.level()})')
+                b.maintain('before the Specter again')
+            b.mark('bellows_specter')
+            b.walk_to([(x, 18) for x in range(14, 26)], label='specter_trig')
+            b.settle(max_s=900)
+        if not self.has('bellows_specter_defeated'):
+            raise Fail('the Bellows Specter did not fall in 5 attempts')
+        self.trigger([(18, 16), (19, 16), (20, 16)], 'foundry_f2_done', 'shaft_stairs_trig')
+        f = b.settle()
+        if f['map'] == 'foundry_f2':
+            b.through('stairs_f3')
+        self.ensure_map('foundry_f3')
+        b.settle()
+        if not self.has('foundry_f3_arrived'):
+            raise Fail('foundry_f3_arrival did not run')
+        b.mark('foundry_f3')
+
+    def town_trip(self):
+        """After the Galleries: the F3 lift up to the Liftworks, the ore lift home, Sella's tier 6 steel (the forge is lit), Taro,
+        the inn; then down again: the ore lift, the Liftworks lift to the Galleries and the shaft stair under the still fan."""
+        b = self.b
+        if not self.has('foundry_f3_arrived') or self.has('oath_hand') or self.has('oath_heart') or self.has('oath_home'):
+            return
+        if getattr(self, '_tripped', False):
+            return
+        self._tripped = True
+        f = b.settle()
+        self.ensure_map('foundry_f3')
+        b.through('lift_f3_short', exact=False)
+        self.ensure_map('foundry_f1')
+        b.through('lift_home', exact=False)
+        self.ensure_map('emberpeak')
+        b.mark('town_trip')
+        b.through('door_pk_smithy')
+        self.ensure_map('pk_smithy')
+        b.visit_shop('sella', [('heartforge_pike', 1), ('founders_rod', 1), ('soot_hood', 1)])     # the simulator's foundry_f3 row
+        b.through('smithy_exit')
+        b.menu_optimize_all()
+        b.through('door_pk_shop')
+        b.visit_shop('taro', [('hi_potion', 3), ('quench_flask', 3), ('phoenix_feather', 1)])
+        b.through('shop_exit')
+        self.inn_if_hurt(0.95)
+        self.ensure_map('emberpeak')
+        b.through('foundry_lift', exact=False)
+        self.ensure_map('foundry_f1')
+        b.through('gate_lift', exact=False)
+        self.ensure_map('foundry_f2')
+        b.through('stairs_f3', exact=False)
+        self.ensure_map('foundry_f3')
+
+    def foundry_f3(self):
+        b = self.b
+        if self.has('bell_gate_open'):
+            return
+        self.ensure_map('foundry_f3')
+        # The Heart (east): two hot gates, then the anvil and the furnace where Vex waits
+        if not self.has('oath_heart') or not self.has('vex_furnace_met'):
+            self.hunt(2, label='heart wing')
+            self.solve_quench('foundry_f3', 'basin bs_k1', blocks=False, label='heart gate 1')
+            self.hunt(2, label='heart wing 2')
+            self.solve_quench('foundry_f3', 'basin bs_k2', blocks=False, label='heart gate 2')
+            self.strike('anvil_heart', 'oath_heart')
+            if not self.has('vex_furnace_met'):
+                self.trigger([(39, 4), (40, 4), (41, 4)], 'vex_furnace_met', 'vex_trig')
+            if self.side:
+                self.sign('vex_feather')
+        b.maintain('after the heart')
+        # The Hand (west): pool 1, pool 3 (the chest), pool 2 (the anvil)
+        if not self.has('oath_hand'):
+            self.hunt(2, label='hand wing')
+            self.solve_quench('foundry_f3', 'crust 11,17', blocks=False, label='hand pool 1')
+            if self.side and not b.opened('foundry_f3', 'chest_hand'):
+                try:
+                    b.frames(80)                                     # the start '/' at sl_h2 runs on into pool 3, the south bank
+                    self.chest('chest_hand')
+                except Fail as e:
+                    b.notes.append(f'hand chest skipped: {e}')
+            self.solve_quench('foundry_f3', 'crust 8,11', blocks=False, label='hand pool 2')
+            self.hunt(2, label='hand bank')
+            self.strike('anvil_hand', 'oath_hand')
+        b.maintain('after the hand')
+        # The Home (south): the crate shoved west twice dams the short branch; the water runs round the anvil
+        if not self.has('oath_home'):
+            self.hunt(2, label='home wing')
+            self.solve_quench('foundry_f3', 'crust 28,27', label='home ring')
+            self.hunt(2, label='home ring')
+            self.strike('anvil_home', 'oath_home')
+            if self.side and not b.opened('foundry_f3', 'chest_blade'):
+                try:
+                    b.reveal_near([(9, 28)], label='home ink bridge')
+                    self.chest('chest_blade')
+                except Fail as e:
+                    b.notes.append(f'Tempered Lexicon Blade skipped: {e}')
+        self.hunt(3, label='hub sweep')
+        b.maintain('before the bell gate')
+        self.trigger([(20, 14), (21, 14), (22, 14)], 'bell_gate_open', 'gate_trig', max_s=900)
+        b.mark('bell_gate')
+
+    def warden(self):
+        b = self.b
+        if self.has('cinder_warden_defeated'):
+            return
+        f = b.settle()
+        self.ensure_map('foundry_f3')
+        self.hunt(2, label='antechamber')
+        self.chest('chest_ante')
+        b.maintain('antechamber')
+        b.rest_at_font('font_fo3', label='font F3')
+        self.round_trip('before the Warden')
+        self.ensure_map('foundry_f3')
+        for attempt in range(5):
+            f = b.settle()
+            if f['map'] == 'foundry_f3':
+                b.through('door_heart')
+            self.ensure_map('foundry_heart')
+            if attempt == 0:
+                b.mark('cinder_warden')
+            b.notes.append(f'Cinder Warden attempt {attempt + 1}: Lv {self.level()}')
+            b.walk_to([(x, 14) for x in range(2, 22)], label='warden_trig')
+            b.settle(max_s=1500)                                     # the scene, the fight, warden_after
+            if self.has('cinder_warden_defeated'):
+                break
+            f = b.settle()
+            if f['map'] == 'foundry_heart':
+                b.through('heart_exit')
+            self.ensure_map('foundry_f3')
+            b.rest_at_font('font_fo3', label='font before the Warden again')
+            b.maintain('before the Warden again')
+        if not self.has('cinder_warden_defeated'):
+            raise Fail('the Cinder Warden did not fall in 5 attempts')
+        b.settle(max_s=900)
+        if not self.has('garrick_named'):
+            raise Fail('warden_after did not set garrick_named')
+        b.mark('warden_after')
+
+    def first_bell(self):
+        b = self.b
+        if self.has('ep3_complete'):
+            return
+        f = b.settle()
+        if f['map'] == 'foundry_heart':
+            b.through('lift_heart_up', exact=False)
+        b.settle(max_s=900)                                          # first_bell, ep3_ending, the credits
+        if not self.has('ep3_complete'):
+            raise Fail(f'ep3_complete was not set (on {b.settle()["map"]})')
+        for _ in range(500):
+            sc = b.handle()
+            fs = b.field() or {}
+            if sc == 'field' and fs.get('map') == 'pk_inn' and not fs.get('locked'):
+                break
+        f = b.settle()
+        if f['map'] != 'pk_inn':
+            raise Fail(f'after the Episode 3 credits the party woke on {f["map"]}, not pk_inn')
+        if not (b.game() or {}).get('counters', {}).get('credits3_rolled'):
+            raise Fail('credits3_rolled was not counted')
+        b.mark('ep3_credits_done')
+        self.check_slots('the credits')
+
+    def epilogue3(self):
+        b = self.b
+        if not self.side or not self.has('ep3_complete'):
+            return
+        self.ensure_map('pk_inn')
+        f = b.settle()
+        if f['leader']['x'] >= 13:
+            b.through('inn_down')
+        self.talk('bess')
+        b.through('inn_exit')
+        self.ensure_map('emberpeak')
+        self.talk('rusk')
+        b.menu_talk()
+        b.mark('ep3_epilogue')
+
+    def run(self):
+        b = self.b
+        b.mark('boot')
+        phases = [('ep3_start', self.title_start), ('ep3_morning', self.morning), ('sand_gate', self.sand_gate), ('sand_road', self.sand_road),
+                  ('emberpeak', self.emberpeak), ('foundry_f1', self.foundry_f1), ('foundry_f2', self.foundry_f2), ('town_trip', self.town_trip), ('foundry_f3', self.foundry_f3),
+                  ('warden', self.warden), ('first_bell', self.first_bell), ('epilogue3', self.epilogue3)]
+        for step_id, fn in phases:
+            print(f'-- {step_id}', flush=True)
+            fn()
+            if b.resume and step_id == 'ep3_start':
+                b.resume = None
+                self.ensure_any()
+            b.check_errors()
+            if self.until == step_id:
+                print(f'stopping after {step_id} (--until)', flush=True)
+                return
+        self.check_slots('the end')
+
+
 # ================================================================================================ the Deep Stacks (C3-sim-bot)
 CAVE_OUT = HERE / 'cave' / 'out'
 CAVE_JS = 'LQ_DEBUG.state().cave'
@@ -3503,7 +4268,8 @@ def main(argv):
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
-    ap.add_argument('--episode', type=int, default=1, choices=[1, 2])
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3],
+                    help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0')
     ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
@@ -3540,7 +4306,18 @@ def main(argv):
             if not pathlib.Path(resume).exists():
                 print(f'no Episode 1 credits save at {resume}: run the Episode 1 autoplay first, or use --start new')
                 return 2
-    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=resume, tag=tag, query=query, x1=a.x1)
+    seed_slot, ep3 = 1, None
+    if a.episode == 3 and not a.tier:
+        tag, ep3 = '-ep3' + ('-new' if a.start == 'new' else ''), True
+        if not resume:
+            try:
+                resume = str(ep3_fixture(a.device))
+            except Fail as e:
+                print(e)
+                return 2
+        if a.start == 'new':
+            seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
+    bot = Bot(a.device, speed=a.speed, keys=a.keys, name=a.name, headless=not a.headed, resume=resume, tag=tag, query=query, x1=a.x1, seed_slot=seed_slot, ep3=ep3)
     status, detail, wrong = 'ok', '', []
     try:
         bot.open()
@@ -3550,6 +4327,8 @@ def main(argv):
             TierEpisode(bot, side=not a.no_side, until=a.until, hollow=a.hollow).run()
         elif a.episode == 2:
             Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
+        elif a.episode == 3:
+            Episode3(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.route == 'complete':
             sys.path.insert(0, str(HERE / 'integrate'))
             import autoplay_x1

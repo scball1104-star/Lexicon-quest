@@ -44,7 +44,7 @@ const PARTY = ['hero', 'mira', 'bram'];
 const ALL_MAPS = [...MAP_IDS, ...EP2_MAP_IDS, ...EP3_MAP_IDS];
 const ONLY_EP3 = Object.keys(EP3_FLAGS);
 
-GATE.live = true; // the playthrough tests run with the episode switch on; one test flips it off
+GATE.live = true; // the playthrough tests run with the episode switch on (it ships on); one test flips it off
 const RUNS = {};
 for (const [id, fn] of Object.entries(scenes)) RUNS[id] = await explore(fn, { flags: ['mira_joined', 'bram_joined'] });
 const allOps = (id) => RUNS[id].flatMap((r) => r.log);
@@ -315,7 +315,8 @@ test('box budgets: 12 per main scene (14 for the morning and the bell, 24 for wa
 });
 
 test('guards: nothing in Episode 3 is reachable with EP3_LIVE false, and nothing replays', async () => {
-  assert.equal(EP3_LIVE, false, 'this test describes the shipped state of the switch');
+  // E3-switch (2026-11-02): the switch ships on; the off world is simulated below through GATE.live, the scripts' own guard
+  assert.equal(EP3_LIVE, true, 'the shipped state of the switch');
   // Only two scenes need the switch; every other chain bottoms out at ep3_started, which only ep3_morning sets.
   const live = Object.keys(SCENE_CONDITIONS).filter((id) => SCENE_CONDITIONS[id]?.live);
   assert.deepEqual(live.sort(), ['ep3_morning', 'sand_gate']);
@@ -325,7 +326,7 @@ test('guards: nothing in Episode 3 is reachable with EP3_LIVE false, and nothing
     if (c.live) continue;
     assert.ok([c.if].flat().filter(Boolean).some((f) => ONLY_EP3.includes(f)), `${id}: not behind an Episode 3 flag`);
   }
-  // With the switch off (the module default), a finished Episode 2 plays nothing.
+  // With the switch off (simulated), a finished Episode 2 plays nothing.
   GATE.live = false;
   try {
     const off = await playthrough(scenes, Object.keys(scenes), { flags: EP2_DONE });
@@ -341,6 +342,17 @@ test('guards: nothing in Episode 3 is reachable with EP3_LIVE false, and nothing
   for (const [id, runs] of Object.entries(again.logs)) for (const log of runs) assert.equal(boxCount(log), 0, `${id} replayed`);
   // The shipped order of the switch: the counter check is the field's, the flag guard is the script's.
   assert.deepEqual(SCENE_CONDITIONS.ep3_morning, { if: 'ep2_complete', ifNot: 'ep3_morning_done', live: true });
+});
+
+test('ep3_morning words its first look at the Smith for where it plays: the inn by the hearth, the street by the inn wall', async () => {
+  const look = async (mapId) => (await runOnce(scenes.ep3_morning, { flags: EP2_DONE, branchFlags: false, mapId })).log
+    .filter((e) => e.op === 'say' && e.args[0] == null).map((e) => e.args[1]).find((t) => /old man grey with road dust/.test(t));
+  const inn = await look('nh_inn'), out = await look('nameless_hollow');
+  assert.match(inn, /^By the hearth sits/);
+  assert.match(out, /^Against the inn wall sits/);
+  assert.ok(!/hearth/.test(out), 'nothing indoors on the street');
+  const { wrap, BOX_COLS } = await import('../../src/data/story/dialogue.js');
+  for (const t of [inn, out]) { assert.ok(wrap(t, BOX_COLS).length <= 3, t); assert.ok(/^[ -~]+$/.test(t) && !t.includes(String.fromCharCode(0x2014))); }
 });
 
 test('the teaching fight: unavoidable, Heat cured by ice or Break without signage, a loss sets nothing', async () => {

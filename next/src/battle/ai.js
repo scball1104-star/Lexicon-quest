@@ -362,11 +362,9 @@ const mimic = {
 };
 
 // --- The Other Selves (ai 'reflections'): the Mirrored Combo --------------------------------------------------
-// At the end of a reflection's turn, if its next slot on the timeline is immediately followed by another living
-// reflection's (no party member between) and a party member acts first, it announces the reversed party combo of
-// that pair. On its next turn the combo fires (both spend their turn) unless since the announcement either member
-// was pushed back on the timeline or the partner lost or spent its turn (Break, Stun, KO): then "they fall out of
-// step" and it takes an ordinary turn. Answers: Pin Shot, Lunge, Break or Stun either one, Defend, or kill one.
+// Two reflections back to back on the timeline (a party member acting first) announce the pair's reversed combo; it
+// fires next turn unless either was pushed back or the partner lost its turn ("they fall out of step").
+// Answers: Pin Shot, Lunge, Break or Stun either one, Defend, or kill one.
 export const MIRROR_COMBOS = [
   ['refl_hero', 'refl_mira', 'mirror_cinder_edge'],
   ['refl_hero', 'refl_bram', 'mirror_cross_shatter'],
@@ -475,10 +473,7 @@ const reflections = {
 // and Pride and the Mirror Ward (25% damage, shields locked, HP stops at 34%); Mirror Rain every 3, Keeping every 5.
 // Both adds down: the ward shatters, he is Broken for a turn (every Kept member is freed) and 3 Aurel Unmasked
 // begins (Haste; Keeping and Last Decree alternate with ordinary turns between).
-// W11 (PLAYTEST_REVIEW_3 fix 6): +20% per Kept (was +25%), Devour Name's figure. The plan's +10% was tried: careful
-// play was unchanged, but ignoring telegraphs at the plan's Lv 13 then cost only 4 points of win rate (the King could
-// not be lost that way); at +20% it costs 16 there and 34 at Lv 12, where ignoring telegraphs still wins 62% (was 49%).
-// The battle HUD shows each stack as a badge over the King's weakness row, so the cost of a missed Defend is on screen.
+// W11: +20% per Kept (+10% let a player ignore telegraphs; the tuning is in PLAYTEST_REVIEW_3 fix 6).
 export const KEEP_EMPOWER = 0.20;    // ATK and MAG gained per member kept
 export const KEEP_MIRA_BIAS = 0.2;   // chance the King names Mira before the even pick (was 0.4: Mira about 60% of the time)
 export const WARD_MULT = 0.25;       // damage taken under the Mirror Ward
@@ -669,7 +664,7 @@ const coil = {
 //   Warden is Broken: rules.js useSkill `turnable`).
 export const SHELL_MULT = 0.25;        // damage taken under the Molten Shell
 export const HAMMER_EVERY = 3;
-export const NAME_EMPOWER = 0.2;       // ATK and MAG the Warden gains per name it strikes out         // the Warden's own turns between Last Hammers
+export const NAME_EMPOWER = 0.2;       // ATK and MAG the Warden gains per name it strikes out
 const WARDEN_COILS = ['bellows_coil', 'smelter_coil'];
 const coilsStanding = (ctx) => ctx.living('enemy').filter((e) => WARDEN_COILS.includes(e.id));
 function enterWardenPhase(ctx, u, idx) {

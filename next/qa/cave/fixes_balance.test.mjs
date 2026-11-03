@@ -30,20 +30,30 @@ test('issue 5: at most six foes a floor from B40, the generator and the data agr
 
 test('issue 7: the Root Cellars fight shorter and sharper (hp 1, power up a step), bands 4 and 5 carry their own correction', () => {
   assert.deepEqual(F.BAND_ADJUST[2], { hp: 1, power: 1.15, speed: 1 });
-  for (const k of [4, 5]) assert.ok(F.BAND_ADJUST[k].speed === 1 && F.BAND_ADJUST[k].hp > 1 && F.BAND_ADJUST[k].power < 1, `band ${k}`);
+  // E3-switch (EP3_LIVE on): the Ember Shelves' cinder kits are mild at parity, so band 4 is longer, harder and faster (attack-only
+  // won 97% at B60 at the fallback's correction); the Forge keeps the fallback's (its fixed elites carry its danger)
+  assert.deepEqual(F.BAND_ADJUST[4], { hp: 1.3, power: 1.2, speed: 1.5 });
+  assert.deepEqual(F.BAND_ADJUST[5], { hp: 1.15, power: 0.85, speed: 1 });
 });
 
-test('issue 6: until EP3_LIVE the deep bands mix all three earlier pools and one group in three leads with an elite', () => {
+test('issue 6: the deep bands lead one group in three with an elite; the fallback (EP3_LIVE off) still mixes all three earlier pools', () => {
+  const off = F.buildBands(false);
   for (const k of [3, 4]) {
-    const b = F.BANDS[k];
-    if (!b.fallback) continue;
-    const kinds = new Set(b.pool.map((t) => t.id.split('_')[0]));
+    const kinds = new Set(off[k].pool.map((t) => t.id.split('_')[0]));
     assert.deepEqual([...kinds].sort(), ['cat', 'cel', 'court']);
   }
-  // on a run of B70 floors the groups come from every pool, not only the Court's six foes
+  // on a run of B70 floors the fallback's groups come from every pool, not only the Court's six foes
   const seen = new Set();
-  for (let seed = 1; seed <= 30; seed++) for (const s of F.floorEncounters(seed, 71)) seen.add(s.template.split('_')[0]);
+  for (let seed = 1; seed <= 30; seed++) for (const s of F.floorEncounters(seed, 71, { bands: off })) seen.add(s.template.split('_')[0]);
   assert.deepEqual([...seen].sort(), ['cat', 'cel', 'court']);
+  // live: Episode 3 foes in both bands, and an elite (two mods) on about one group in three, never half of them
+  assert.ok(!F.BANDS[3].fallback && !F.BANDS[4].fallback, 'EP3_LIVE: bands 4 and 5 draw the Episode 3 pools');
+  for (const floor of [65, 75, 85, 95]) {
+    let elites = 0, two = 0, n = 0;
+    for (let seed = 1; seed <= 100; seed++) for (const s of F.floorEncounters(seed, floor)) { n++; if (s.elite) { elites++; if (s.elite.mods.length === 2) two++; } }
+    assert.ok(Math.abs(elites / n - F.FALLBACK_ELITE_RATE) < 0.06, `B${floor}: ${elites} elites in ${n}`);
+    assert.equal(two, elites, `B${floor}: every deep elite has two mods`);
+  }
 });
 
 test('issue 11: the Binder is shorter and its telegraphs bite: HP 3000, MAG 4000, SPD 66, on the Forge\'s stage', () => {

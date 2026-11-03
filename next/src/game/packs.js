@@ -5,6 +5,7 @@
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
 import { CAVE_LIVE } from '../data/cave/live.js';
+import { EP3_LIVE } from './episodes.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -18,6 +19,10 @@ export const PACKS = {
   cave: { entry: '../data/cave/index.js', prefix: 'cave_', assets: 'assets/cave_manifest.json', audioPack: null,
           touches: [],
           wanted: (flags) => !!flags.ep1_complete, enabled: () => CAVE_LIVE },
+  // Episode 3's maps (docs/MAPS.md 8). hard: unplayable unpatched, the field waits as for a prefixed map
+  ep3: { entry: '../data/maps/ep3/index.js', prefix: 'ep3/', assets: null, audioPack: 'ep3', hard: true,
+         touches: ['sand_road', 'emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse', 'foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart', 'nameless_hollow', 'nh_inn'],
+         wanted: (f) => !!(f.ep2_started || f.ep2_complete || f.ep3_started), enabled: () => EP3_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
 };
 
@@ -94,6 +99,12 @@ export function packForMap(mapId, opts) {
     if (def.touches.includes(m)) return { id, prefixed: false, touched: true };
   }
   return null;
+}
+
+/** Every pack a map id belongs to (nameless_hollow: x2 and ep3). */
+export function packsForMap(mapId, opts) {
+  const m = String(mapId || '');
+  return Object.entries(tableOf(opts)).filter(([, d]) => m.startsWith(d.prefix) || d.touches.includes(m)).map(([id]) => ({ id }));
 }
 
 /**
@@ -176,7 +187,8 @@ async function attempt(id, def, opts) {
     // a failed import() is cached for the page's life: fetch the code first so a network failure leaves the retry possible
     if (!opts.importer) {
       const lists0 = await filesP;
-      const code = lists0 && Array.isArray(lists0[id]) ? lists0[id].filter((f) => f.startsWith(`src/data/${id}/`) && f.endsWith('.js')) : [];
+      const dir = 'src/' + def.entry.slice(3).replace(/[^/]+$/, '');   // the entry's folder
+      const code = lists0 && Array.isArray(lists0[id]) ? lists0[id].filter((f) => f.startsWith(dir) && f.endsWith('.js')) : [];
       const base = engine && engine.assets ? engine.assets.base : new URL('../../', import.meta.url).href;
       if (code.length && /^https?:/.test(base)) {
         await Promise.all(code.map(async (f) => { const r = await fetch(new URL(f, base).href); if (!r.ok) throw new Error(`${f}: ${r.status}`); }));

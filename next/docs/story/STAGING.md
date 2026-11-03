@@ -34,6 +34,7 @@ Everything returns a promise (or a plain value) and every call is awaited.
 | `spawn(id, {sprite, name, at, dir})` | Add a temporary actor at a mark (`at`) or at `x, y`. `name` is its speech tag. |
 | `despawn(id)` | Remove an actor (spawned, NPC or map actor). |
 | `setFlag(flag, value=true)`, `hasFlag(flag)` | Story flags (all declared in `quests.js` FLAGS). `hasFlag` may be sync or async; the script awaits it. |
+| `mapId` | A read-only property: the id of the map the scene plays on (E3-switch: `ep3_morning` words its first line for the inn or the street). |
 | `give(itemId, qty=1)`, `take(itemId, qty=1)` | Inventory change with the standard "Received ..." window and jingle (`key_item` for key items). |
 | `battle(encounterId, {boss, canFlee})` | Runs an encounter from `encounters.js`. Resolves to `'win'`, `'lose'` or `'flee'`. On a boss loss the engine runs Game Over; the script simply returns. |
 | `addMember(id)` | Add `mira` or `bram` to the party (follower chain, `party_join` jingle). The script first walks the NPC to the hero and despawns it, then prints the "joined the party!" line itself. |

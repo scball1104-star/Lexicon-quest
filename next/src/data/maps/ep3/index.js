@@ -1,0 +1,55 @@
+// The Episode 3 maps as a lazy pack (E3-maps). Nothing here is in the first download: the core download has no room
+// left under the tap-prompt ratchet, so the ten maps live in this folder and register themselves when the ep3 pack
+// loads. The pack entry (src/game/packs.js PACKS, added by E3-integrate as written here plus `hard: true` and ep2_started in wanted):
+//
+//   ep3: { entry: '../data/maps/ep3/index.js', prefix: 'ep3/', assets: null, audioPack: 'ep3',
+//          touches: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], wanted: (f) => !!(f.ep2_complete || f.ep3_started),
+//          enabled: () => EP3_LIVE }
+//
+// With the prefix 'ep3/' tools/pwa/build_pwa.py counts every file of src/data/maps/ep3/ as the pack's (kept out of the
+// precache, runtime-cached), and the `touches` list makes src/world/maps.js wait for the pack before it resolves one of
+// these ids; registerMap() puts each module where loadMap() looks first. nameless_hollow and nh_inn resolve to their core
+// modules with the Episode 3 edits applied (hollow_gate.js): the east gate, the inn's marks.
+import { registerMap } from '../../../world/maps.js';
+import nameless_hollow from '../nameless_hollow.js';
+import nh_inn from '../nh_inn.js';
+import { withEastGate, withInnMarks } from './hollow_gate.js';
+import sand_road from './sand_road.js';
+import emberpeak from './emberpeak.js';
+import pk_inn from './pk_inn.js';
+import pk_shop from './pk_shop.js';
+import pk_smithy from './pk_smithy.js';
+import pk_bellhouse from './pk_bellhouse.js';
+import foundry_f1 from './foundry_f1.js';
+import foundry_f2 from './foundry_f2.js';
+import foundry_f3 from './foundry_f3.js';
+import foundry_heart from './foundry_heart.js';
+
+export const ID = 'ep3';
+export const MAPS = [sand_road, emberpeak, pk_inn, pk_shop, pk_smithy, pk_bellhouse, foundry_f1, foundry_f2, foundry_f3, foundry_heart];
+export const EP3_MAP_IDS = MAPS.map((m) => m.id);
+
+let done = null;
+/** Register the ten maps and the two edited core maps. Idempotent. Resolves { id, loaded, skipped }. */
+export function register() {
+  if (!done) {
+    for (const m of MAPS) registerMap(m);
+    registerMap(withEastGate(nameless_hollow));
+    registerMap(withInnMarks(nh_inn));
+    // The field code these maps need (src/world/ep3/, lazy, never precached) rides on the pack: it is imported here, and
+    // fetched again once the service worker controls the page (a first visit loads the pack before the worker takes over),
+    // so it sits in the worker's runtime cache with the maps and the episode plays offline after one visit even if the
+    // party has not reached its first Episode 3 map yet. Template URLs keep build_pwa.py from preloading it.
+    if (typeof document !== 'undefined') {
+      const files = ['index', 'flow', 'quench', 'fx'].map((n) => new URL(`../../../world/ep3/${n}.js`, import.meta.url).href);
+      import(files[0]).catch(() => {});
+      const warm = () => { for (const u of files) fetch(u).catch(() => {}); };
+      const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
+      if (sw && !sw.controller && sw.addEventListener) sw.addEventListener('controllerchange', warm, { once: true }); else warm();
+    }
+    done = Promise.resolve({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] });
+  }
+  return done;
+}
+
+export default register;

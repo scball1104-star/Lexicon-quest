@@ -22,10 +22,11 @@ export const TIER_FLAG = 'tier_1';
 
 /**
  * The tier's numbers. `foe` is HARD_ROAD's surcharge on every foe and boss: HP x1.6, ATK and MAG x1.35, SPD +1. `lift` first
- * raises each foe to the carried party (HARD_ROAD's table assumed a party of the foe's own level; a carried Lv 13 party walks
+ * raises each foe to the carried party (HARD_ROAD's table assumed a party of the foe's own level; a carried Lv 13 party walked
  * through Episode 1 in one to four rounds at x1.6 alone: docs/TIER.md "Why the lift"). The party meets a foe of level L at
  * levelForExp(carryExp + exp x expForLevel(L)); `carryExp` is the record the tier is written for, the simulator's Episode 2
- * finish (tools/sim progression(1, 2): 3,335 EXP, Lv 13; qa/tier pins the two together). `lag` says how many levels under that
+ * finish (tools/sim progression(1, 3): 5,585 EXP, Lv 17 since E3-fixes-world cut four foes (was 6,060, Lv 18), since Episode 3 went live and the unlock moved to ep3_complete; was
+ * the Episode 2 finish, 3,335 EXP, Lv 13; qa/tier pins the two together). `lag` says how many levels under that
  * each stat is lifted to: HP sits five under so the x1.6 lands the fights in DESIGN 7's bands, the hit (ATK and MAG) and the
  * tempo (SPD, against the party's own speed growth) at the party's level. DEF is not lifted. `terms` are the per-encounter
  * corrections the simulator needed, the way encounters.js tunes a group with `hp` and `power` (tools/sim/simulate.mjs
@@ -35,20 +36,23 @@ export const TIER_TABLE = {
   1: {
     id: TIER_FLAG,
     foe: { hp: 1.6, pow: 1.35, spd: 1 },
-    lift: { carryExp: 3335, lag: { hp: 5, pow: 0, spd: 0 } },
+    lift: { carryExp: 5585, lag: { hp: 5, pow: 0, spd: 0 } },
     terms: {
       // Episode 1, the main route
       valley_wolves: { hp: 1.5 }, valley_scarab: { hp: 1.11 }, f1_mites: { hp: 1.32 }, f1_mixed: { hp: 1.33 },
       echo_warden: { hp: 1.42 }, f3_ink: { hp: 1.3 }, f3_wraiths: { hp: 1.39 }, f3_mixed: { hp: 0.72 },
-      archivore: { hp: 1.29, pow: 1.57 },
+      archivore: { hp: 1.32, pow: 1.95 },
       // Whisperwood Hollow and the Wider Valley
-      hollow_wolves: { hp: 1.11 }, dn_scarab: { hp: 1.11 }, mo_wolves: { hp: 1.24 }, mo_scarabs: { hp: 0.79 },
+      hollow_wolves: { hp: 1.11 }, whisperwood_alpha: { pow: 1.15 }, dn_scarab: { hp: 1.11 }, mo_wolves: { hp: 1.24 }, mo_scarabs: { hp: 0.79 },
       mo_wraiths: { hp: 1.12 }, bw_shades: { hp: 1.38 }, bw_mixed: { hp: 1.29 }, barrow_reeve: { hp: 1.49, pow: 1.52 },
       lh_beetles: { hp: 0.81 }, mr_weevils: { hp: 0.86 }, cl_wraiths: { hp: 1.3 }, cv_blots: { hp: 1.13 },
       cv_wraith: { hp: 1.25 },
       // Episode 2
-      road_wolves: { hp: 1.22 }, c1_quick: { hp: 0.87 }, other_selves: { hp: 0.88, pow: 1.14 }, c3_mixed: { hp: 0.66 },
-      nameless_king: { hp: 0.72, pow: 1.13 },
+      road_wolves: { hp: 1.22 }, c1_quick: { hp: 0.87 }, other_selves: { hp: 0.91, pow: 1.34 }, c3_mixed: { hp: 0.66 },
+      nameless_king: { hp: 0.72, pow: 1.3 },
+      // Episode 3 (E3-switch: a Fine Print run plays on into it now that the unlock is ep3_complete)
+      fo1_beetles: { hp: 0.7 }, fo2_constructs: { hp: 0.85 }, fo2_mixed: { hp: 0.85 }, fo3_defenders: { pow: 0.8 },
+      fo3_mixed: { hp: 0.8, pow: 0.75 }, fo3_furnace: { hp: 0.65, pow: 0.75 }, bellows_specter: { hp: 0.85 }, cinder_warden: { hp: 0.72 },
     },
     exp: 1.5,                                      // EXP x1.5
     gold: 1.5,                                     // battle gold x1.5 (the economy check runs with it)

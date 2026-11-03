@@ -34,20 +34,32 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { traceBeams } from '../../src/world/beam.js';
 import { APPRAISE_RANGE } from '../../src/world/abilities.js';
+import { hasWater, quenchWalk } from './quench.mjs';
 
 export const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MAPS_DIR = path.join(NEXT, 'src', 'data', 'maps');
+// Episode 3 maps live in the ep3 pack folder (src/data/maps/ep3/, kept out of the precached core; docs/MAPS.md section 8).
+// Their ids are the plan's (sand_road, emberpeak ...). nameless_hollow resolves to the core module with the pack's east
+// gate patched in (ep3/hollow_gate.js), exactly as the pack registers it.
+const EP3_DIR = path.join(MAPS_DIR, 'ep3');
+const EP3_SKIP = new Set(['index.js', 'hollow_gate.js']);
+const ep3Ids = () => (fs.existsSync(EP3_DIR) ? fs.readdirSync(EP3_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !EP3_SKIP.has(f)).map((f) => f.slice(0, -3)) : []);
 
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 export function listMapIds() {
-  return fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_')).map((f) => f.slice(0, -3)).sort();
+  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_')).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
 }
 
-export async function loadMap(id) {
-  const file = path.join(MAPS_DIR, `${id}.js`);
+export async function loadMap(id, { unpatched = false } = {}) {
+  let file = path.join(MAPS_DIR, `${id}.js`);
+  if (!fs.existsSync(file)) file = path.join(EP3_DIR, `${id}.js`);
   if (!fs.existsSync(file)) throw new Error(`no map module ${id}`);
   const m = await import(pathToFileURL(file).href);
+  if ((id === 'nameless_hollow' || id === 'nh_inn') && !unpatched && fs.existsSync(path.join(EP3_DIR, 'hollow_gate.js'))) {
+    const g = await import(pathToFileURL(path.join(EP3_DIR, 'hollow_gate.js')).href);
+    return id === 'nh_inn' ? g.withInnMarks(m.default) : g.withEastGate(m.default);
+  }
   return m.default;
 }
 
@@ -79,6 +91,12 @@ export async function loadDb() {
   const gstory = await src('../game/story.js');          // X1: the live tables (a pack's register() adds to them)
   const text = await src('text.js');
   const items = await src('items.js');
+  // Episode 3 scenes and lines (src/data/story/ep3.js) until story.js merges them (E3-world): never overwrite an id
+  try {
+    const ep3 = await src('story/ep3.js');
+    for (const [k, v] of Object.entries(ep3.scenes || {})) if (!(k in gstory.SCENES)) gstory.SCENES[k] = v;
+    for (const [k, v] of Object.entries(ep3.lines || {})) if (!(k in gstory.LINES)) gstory.LINES[k] = v;
+  } catch (e) { /* no Episode 3 story yet */ }
   const quests = await src('quests.js');
   _db = {
     tiles, props, npcAtlas, enemiesField, partyField,
@@ -144,7 +162,7 @@ export function eventCells(e) {
 
 // Event types that block the walk when solid, and whether the walk may pass through them anyway.
 const SOLID_TYPES = new Set(['npc', 'actor', 'chest', 'object', 'block', 'pot', 'brazier', 'font', 'save', 'sign', 'book', 'ferry',
-  'beam', 'mirror', 'receptor']);
+  'beam', 'mirror', 'receptor', 'spout', 'sluice', 'basin']);
 const PASS_THROUGH = new Set(['actor', 'enemy', 'block', 'pot']);   // despawn, fight, push, break
 
 // ------------------------------------------------------------------------------------------------ flags
@@ -281,6 +299,7 @@ const hiddenByAppraise = (e, appraised) => typeof e.behind === 'string' && e.beh
 export function walk(map, db, opts = {}) {
   if (opts.flags) map = withFlags(map, new Set(opts.flags));
   if (hasBeams(map)) return beamWalk(map, db, opts);
+  if (hasWater(map) || (map.events || []).some((e) => e.type === 'gate' && e.flags)) return quenchWalk(map, db, opts, { buildGrid, eventCells, appraiseReach, tileCode });
   const grid = buildGrid(map, db);
   const { W, H, code, faint } = grid;
   const events = map.events || [];
@@ -844,10 +863,14 @@ export const MAP_IDS = ['hero_home', 'willowmere', 'inn', 'item_shop', 'smithy',
 /** Episode 2 maps (EPISODE2_PLAN 2.1). */
 export const MAP_IDS_EP2 = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chapel', 'nh_inn', 'nh_shop', 'nh_smithy',
   'court_f1', 'court_f2', 'court_f3', 'court_throne'];
+/** Episode 3 maps (EPISODE3_PLAN 2.1), in the ep3 pack folder. */
+export const MAP_IDS_EP3 = ['sand_road', 'emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse', 'foundry_f1', 'foundry_f2',
+  'foundry_f3', 'foundry_heart'];
 const EVENT_TYPES = new Set(['npc', 'actor', 'door', 'chest', 'sign', 'book', 'object', 'trigger', 'enemy', 'switch', 'plate',
-  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor']);
-const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne', 'x1_gate_culvert', 'x1_gate_barrow'];
-const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog']);
+  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor', 'spout', 'sluice', 'basin']);
+const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne', 'x1_gate_culvert', 'x1_gate_barrow',
+  'hot_grate', 'ore_lift', 'bell_gate', 'door_crucible'];
+const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog', 'lift']);
 const CHEST_TIERS = new Set(['wood', 'iron', 'gold', 'red', 'blue']);   // red and blue: the Deep Stacks (src/data/cave/world.js)
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 
@@ -943,6 +966,22 @@ export function validate(map, db, maps, { staging = null, links = loadPendingLin
         }
         break;
       }
+      case 'spout':
+        if (!DIR_NAMES.has(e.dir)) E(`spout ${e.id}: dir ${e.dir}`);
+        if (!['spout_wall', 'spout_cistern'].includes(e.sprite)) E(`spout ${e.id}: sprite ${e.sprite}`);
+        break;
+      case 'sluice':
+        if (e.state !== 0 && e.state !== 1) E(`sluice ${e.id}: state must be 0 ('/') or 1 (backslash)`);
+        if (e.sprite !== 'sluice') E(`sluice ${e.id}: sprite ${e.sprite}`);
+        break;
+      case 'basin':
+        for (const t of toList(e.target)) if (!(map.events || []).some((x) => x.id === t && x.type === 'gate')) E(`basin ${e.id}: target ${t} is not a gate`);
+        if (!['basin', 'waterwheel'].includes(e.sprite)) E(`basin ${e.id}: sprite ${e.sprite}`);
+        if (!e.latch) E(`basin ${e.id}: Episode 3 basins latch (the water walk assumes it)`);
+        if (e.face && !DIR_NAMES.has(e.face)) E(`basin ${e.id}: face ${e.face}`);
+        if (e.script && !db.scenes[e.script]) E(`basin ${e.id}: scene ${e.script} missing`);
+        if (e.flag && !db.FLAGS[e.flag]) E(`basin ${e.id}: flag ${e.flag} not declared`);
+        break;
       case 'beam':
         if (!DIR_NAMES.has(e.dir)) E(`beam ${e.id}: dir ${e.dir}`);
         if (!['beam_window', 'beam_lens'].includes(e.sprite)) E(`beam ${e.id}: sprite ${e.sprite}`);
@@ -956,6 +995,7 @@ export function validate(map, db, maps, { staging = null, links = loadPendingLin
         if (!GATE_SPRITE_IDS.includes(e.sprite)) E(`${e.type} ${e.id}: sprite ${e.sprite}`);
         if (e.to) T(e.to, `${e.type} ${e.id}`);
         if (e.type === 'locked_door' && !db.ITEMS[e.key]) E(`locked_door ${e.id}: key ${e.key} unknown`);
+        for (const f of toList(e.flags)) if (!db.FLAGS[f]) E(`gate ${e.id}: source flag ${f} not declared`);
         break;
       }
       case 'shelf': if (!Array.isArray(e.positions) || e.positions.length < 2) E(`shelf ${e.id}: needs 2+ positions`); break;
@@ -1063,7 +1103,9 @@ export function loadStaging() {
   const rd = (f) => fs.readFileSync(path.join(NEXT, 'docs', 'story', f), 'utf8');
   const ep1 = parseStagingChecklist(rd('STAGING.md'));
   const ep2 = parseStagingChecklist(rd('STAGING_EP2.md'), { section: /^## 4\. Marks and named events checklist/m, ep2: true });
-  for (const [id, e] of Object.entries(ep2)) {
+  let ep3 = {};
+  try { ep3 = parseStagingChecklist(rd('STAGING_EP3.md'), { section: /^## 4\. Marks and named events checklist/m, ep2: true }); } catch (e) { ep3 = {}; }
+  for (const add of [ep2, ep3]) for (const [id, e] of Object.entries(add)) {
     if (!ep1[id]) { ep1[id] = e; continue; }
     for (const k of Object.keys(e)) ep1[id][k] = [...ep1[id][k], ...e[k]];
   }
@@ -1133,7 +1175,21 @@ async function main() {
     process.stdout.write(JSON.stringify({ start: js(r.traceOf({})), solved, latched: r.latched, softlocks: r.softlocks, states: r.states, configs: r.configs }));
     return;
   }
-  console.log('usage: mapcheck.mjs list | dump <id> | walk <id> | beams <id> [flags] | check [ids]');
+  if (cmd === 'quench') {
+    // water traces for the preview: the start state, and every configuration the walk used to fill a basin or crust slag
+    const m = await loadMap(rest[0]);
+    const flags = rest[1] ? rest[1].split(',').filter(Boolean) : null;
+    const r = walk(m, db, { lantern: true, ...(flags ? { flags } : {}) });
+    if (!r.water) { process.stdout.write(JSON.stringify({ start: null, solved: [] })); return; }
+    const js = (t) => ({ streams: t.streams, wet: [...t.wet], crust: [...t.crust], filled: [...t.filled], splashes: t.splashes });
+    const seenCfg = new Set(), solved = [];
+    const add = (label, d) => { const k = JSON.stringify(d); if (seenCfg.has(k)) return; seenCfg.add(k); solved.push({ label, ...d, trace: js(r.traceOf(d)) }); };
+    for (const [b, d] of Object.entries(r.water.basinConfigs)) add(`basin ${b}`, d);
+    for (const c of r.water.crustConfigs) add(`crust ${c.cell}`, { states: c.states, blocks: c.blocks });
+    process.stdout.write(JSON.stringify({ start: r.water.start, solved, crust: r.water.crust, latched: r.water.latched, opened: r.opened, configs: r.water.configs }));
+    return;
+  }
+  console.log('usage: mapcheck.mjs list | dump <id> | walk <id> | beams <id> [flags] | quench <id> [flags] | check [ids]');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
