@@ -258,8 +258,24 @@ export class Quench {
       if (!o.quiet && g && g.state === 'open' && was !== 'open' && /grate/.test(g.ev.sprite || '') && f.ep3fx) {
         f.engine.audio.sfx('quench_hiss');
         for (const [cx, cy] of g.cells) f.ep3fx.steam(cx * TILE + 8, cy * TILE + 4, 5);
+        // E3-fixes-world (PLAYTEST_REVIEW_5 #7): a grate more than 6 tiles from its basin opens on camera
+        if (on && !ev.script && Math.abs(g.x - ent.x) + Math.abs(g.y - ent.y) > 6) this.reveal(g);
       }
     }
+  }
+
+  /** A receptor-to-door reveal: pan to the opened gate, hold, and back (input held; confirm or cancel skips the hold). */
+  async reveal(g) {
+    const f = this.f, e = f.engine, cam = f.camera;
+    if (!cam || !cam.panTo || !cam.returnTo || this.revealing) return;
+    this.revealing = true;
+    f.lockInput();
+    try {
+      await e.waitFrames(8);
+      await cam.panTo(g.x * TILE + 8, g.y * TILE + 8, 40);
+      for (let i = 0; i < 50 && !f.dead && !(e.input.pressed('confirm') || e.input.pressed('cancel')); i++) await e.waitFrames(1);
+      if (!f.dead) await cam.returnTo(f.leader, 40);
+    } finally { f.unlockInput(); this.revealing = false; }
   }
 
   /** Flag lists of gates: a set flag turns its source on and the gate re-checks (sockets light on the Bell Gate). */
@@ -375,13 +391,49 @@ export class Quench {
       if (horiz) { r.rect(x, y - 3, 1, 6, W_HI); r.rect(x - DIRV[d.dir][0], y - 2 + k, 1, 1, '#ffffff'); }
       else { r.rect(x - 3, y, 6, 1, W_HI); r.rect(x - 2 + k, y - DIRV[d.dir][1], 1, 1, '#ffffff'); }
     }
+    this.drawBellSockets(r);
+  }
+
+  /** The closed Bell Gates on this map, with their drawn rect (CRITIQUE_5 #6). */
+  bellGates() {
+    const out = [];
+    for (const e of this.f.entities.values()) if (e.present && e.type === 'gate' && e.state !== 'open' && e.prop && e.prop.draw && /^bell_gate/.test(e.prop.t)) out.push(e);
+    return out;
+  }
+
+  /**
+   * CRITIQUE_5 #6: the Bell Gate's three oath sockets read at phone scale in F3's dark. An unlit socket gets a bronze rim
+   * round a near-black well; a lit one a pulsing gold halo (and a light, below). Sockets sit 10 px apart in the 48 px frame.
+   */
+  drawBellSockets(r) {
+    const pulse = this.f.engine.settings && this.f.engine.settings.reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(this.frame / 12);
+    for (const g of this.bellGates()) {
+      const d = g.prop.draw, lit = g.prop.state | 0;
+      for (let i = 0; i < 3; i++) {
+        const x = d.dx + 10 + i * 10, y = d.dy + 6;
+        if (i < lit) {
+          r.withAlpha(0.35 + 0.35 * pulse, () => { r.rect(x - 1, y - 1, 12, 1, '#fff0b0'); r.rect(x - 1, y + 12, 12, 1, '#fff0b0'); r.rect(x - 1, y, 1, 12, '#fff0b0'); r.rect(x + 10, y, 1, 12, '#fff0b0'); });
+        } else {
+          r.rect(x, y, 10, 1, '#d89a52'); r.rect(x, y + 11, 10, 1, '#8a5a2c'); r.rect(x, y + 1, 1, 10, '#b87a3e'); r.rect(x + 9, y + 1, 1, 10, '#b87a3e');
+          r.withAlpha(0.4, () => r.rect(x + 1, y + 1, 8, 10, '#06040a'));
+          r.rect(x + 4, y + 8, 2, 1, '#d89a52');   // the empty clapper hook: a socket waiting for its bell
+        }
+      }
+    }
   }
 
   /** Dark maps: a warm light on every second molten slag cell (checkerboard), at most 24, nearest the view first. */
   lights() {
     const out = [];
     const f = this.f;
-    if (!this.active || !this.slagCells.length || !(f.lighting && f.lighting.dark > 0.01)) return out;
+    if (!this.active || !(f.lighting && f.lighting.dark > 0.01)) return out;
+    // the Bell Gate: a soft light on its socket row, and a gold one on each lit socket (CRITIQUE_5 #6)
+    for (const g of this.bellGates()) {
+      const d = g.prop.draw;
+      out.push({ x: d.dx + 24, y: d.dy + 12, r: 30, color: '#b08850', kind: 'warm' });
+      for (let i = 0; i < (g.prop.state | 0); i++) out.push({ x: d.dx + 15 + i * 10, y: d.dy + 12, r: 20, color: '#ffd27a', kind: 'warm' });
+    }
+    if (!this.slagCells.length) return out;
     const W = this.map.w, cam = f.camera, m = SLAG_LIGHT_R;
     const list = [];
     for (const i of this.slagCells) {
@@ -392,7 +444,7 @@ export class Quench {
     }
     // more than the budget in view: an even spread (a big lake stays lit edge to edge, not just near the middle)
     const n = list.length >> 1, step = Math.max(1, n / MAX_SLAG_LIGHTS);
-    for (let k = 0; k < n && out.length < MAX_SLAG_LIGHTS; k += step) {
+    for (let k = 0, o = out.length; k < n && out.length - o < MAX_SLAG_LIGHTS; k += step) {
       const j = (k | 0) << 1;
       out.push({ x: list[j], y: list[j + 1], r: SLAG_LIGHT_R, color: '#e06b39', kind: 'warm', slag: true });
     }

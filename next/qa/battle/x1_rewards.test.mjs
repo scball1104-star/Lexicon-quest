@@ -57,7 +57,7 @@ test('stored EXP, levels, the EXP table and the main route are untouched', () =>
   assert.deepEqual(EXP_TABLE, [0, 20, 68, 148, 266, 424, 623, 867, 1156, 1493, 1878, 2314, 2800, 3339, 3931]);
   assert.deepEqual(progression(1).map((p) => p.exp), [141, 335, 621, 1033, 1433]);
   assert.deepEqual(progression(1, 2).map((p) => p.exp), [1595, 1901, 2327, 2835, 3335]);
-  assert.deepEqual(progression(1, 3).map((p) => p.exp), [3345, 4070, 4760, 5440, 6060]);
+  assert.deepEqual(progression(1, 3).map((p) => p.exp), [3235, 3960, 4440, 4965, 5585]);   // E3-fixes-world: four road/F2/F3 foes cut
   assert.deepEqual(progression(0.8).map((p) => p.exp), [113, 268, 509, 839, 1239]);
   // the new zones never join the route
   for (const z of OPTIONAL_ZONES) assert.ok(!ZONE_ORDER.includes(z) && !EP2_ZONE_ORDER.includes(z) && !EP3_ZONE_ORDER.includes(z), z);

@@ -1,8 +1,6 @@
 // Save / Load slots. engine.pushAwait('loadGame', { mode: 'load' | 'save' }).
-//   load: picks a slot -> deserialize -> engine.game -> engine.reset('field') (or the UI stage), never resolves
-//         normally (the reset pops it); cancel resolves undefined.
-//   save: picks a slot (confirm overwrite), writes serialize(g) + saveMeta(g), save_chime, resolves true.
-// Slot 0 (autosave) is listed in load mode when it exists.
+//   load: deserialize -> engine.game -> reset('field'); cancel resolves undefined.
+//   save: confirm overwrite, write, save_chime, resolves true. Slot 0 is listed in load mode when it exists.
 
 import { List } from '../ui/list.js';
 import { drawWindow, drawPortrait, drawIcon, drawLabel, schemeColors } from '../ui/window.js';
@@ -73,6 +71,9 @@ export class LoadGameScene {
     const env = e.save.loadEnvelope(slot.slot);
     const g = env ? deserialize(env.data) : null;
     if (!g) { e.audio.sfx('buzzer'); this.note = 'This record cannot be read.'; this.noteT = 120; return; }
+    // Never autosave over another run (seed + name): else use the slot it came from.
+    const a = g.autosaveSlot, d = e.save.exists(a) && (e.save.load(a) || {});
+    if (d && (d.seed !== g.seed || d.heroName !== g.heroName)) g.autosaveSlot = slot.slot;
     this.busy = true;
     e.audio.sfx('confirm');
     e.fadeTo(() => {

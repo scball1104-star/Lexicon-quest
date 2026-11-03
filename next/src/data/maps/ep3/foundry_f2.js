@@ -91,7 +91,6 @@ const events = [
   hotGate('hg_b2', 9, 4),
   chest('chest_alcove', 3, 1, 'iron'),
   enemy('e_b_phantoms', 5, 12, 'soot_phantom', 'fo2_phantoms', 'wander', { radius: 2 }),
-  enemy('e_b_mixed', 9, 17, 'furnace_construct', 'fo2_mixed', 'patrol', { path: steps('left', 5, 'right', 5) }),
   // ---- C: the Records Cage
   object('ledger_obj', 18, 4, 'ledger_burned', { lantern: true, script: 'ledger_ash', text: 'ledger_burned' }),
   sign('records_cage', 15, 1, 'records_cage'),
@@ -103,7 +102,6 @@ const events = [
   sluice('sl_d2', 34, 5, 0),
   chest('chest_key2', 37, 3, 'wood', { item: 'ash_key', flag: 'ash_key_f2' }),
   chest('chest_d2', 26, 16, 'wood', { item: 'hi_potion', qty: 2 }),
-  enemy('e_d_phantoms', 31, 10, 'soot_phantom', 'fo2_phantoms', 'wander', { radius: 2 }),
   enemy('e_d_mixed', 37, 14, 'furnace_construct', 'fo2_mixed', 'patrol', { path: steps('up', 4, 'down', 4) }),
   // ---- the approach
   basin('bs_d', 34, 25, 'hg_d', { face: 'up' }),

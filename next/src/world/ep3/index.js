@@ -8,6 +8,7 @@
 import { EXT, GATE_SPRITES, COUNTING_GATES, INTERACT_TYPES } from '../events.js';
 import { inspectBoxes } from '../../game/story.js';
 import { registerMap } from '../maps.js';
+import { FIELD_LOOK } from '../actors.js';
 import { TILE } from '../tilemap.js';
 import { Quench, basinFrame } from './quench.js';
 import { Ep3Fx } from './fx.js';
@@ -19,6 +20,18 @@ Object.assign(GATE_SPRITES, {
   bell_gate: ['bell_gate_closed', 'bell_gate_open'],
 });
 COUNTING_GATES.add('bell_gate');
+// CRITIQUE_5 #2 (EPISODE3_PLAN 4, phone rule): Episode 3's field foes never camouflage on ash, steel or copper. A 1 px
+// outline in each material's darkest tone, lit warm along the top edge (the forge glow), on top of the ground shadow.
+const WARM = '#ffc477', HOT = '#ffe2a8';
+Object.assign(FIELD_LOOK, {
+  cinder_hound: { outline: '#0e0a12', rim: HOT },
+  cinder_beetle: { outline: '#1a0804', rim: WARM },
+  slag_slime: { outline: '#1e0a04', rim: HOT },
+  ashbound_miner: { outline: '#0c0a14', rim: HOT },
+  furnace_construct: { outline: '#1a0c04', rim: HOT },
+  soot_phantom: { outline: '#08060e', rim: HOT },
+  forge_defender: { outline: '#160a04', rim: HOT },
+});
 INTERACT_TYPES.add('sluice');
 registerMap(TEST_FORGE);
 registerMap(TEST_FORGE_DARK);

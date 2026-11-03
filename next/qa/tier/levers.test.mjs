@@ -92,8 +92,9 @@ test('on the tier: each foe is lifted to the party, then HP x1.6, ATK and MAG x1
 });
 
 test('the lift: a foe is met at the carried party\'s level on the tier, and lifted toward it (never below its own level)', () => {
-  assert.equal(metLevel(1), 18, 'the record itself: Lv 18 (6,060 EXP, the Episode 3 finish)');
-  assert.equal(metLevel(2), 18, 'the valley: still Lv 18 (Lv 19 needs 6,853)');
+  // E3-fixes-world cut four Episode 3 foes: the finish is 5,585 EXP, Lv 17 (was 6,060, Lv 18); tier sim --check still holds
+  assert.equal(metLevel(1), 17, 'the record itself: Lv 17 (5,585 EXP, the Episode 3 finish)');
+  assert.equal(metLevel(2), 17, 'the valley: still Lv 17 (Lv 18 needs 6,038)');
   assert.ok(metLevel(8) >= 19 && metLevel(8) <= 20, 'the Archivore: Lv 19 or 20 on the tier');
   for (let L = 1; L <= 18; L++) {
     for (const k of ['hp', 'pow', 'spd']) {

@@ -203,12 +203,13 @@ test('a basin with a script queues it on the first fill (run when the field is q
 
 test('dark rooms: molten slag is the light (warm, at most 24); cooled slag gives none', async () => {
   const f = makeField(TEST_FORGE_DARK);
-  const before = f.collectLights();
+  const slag = () => f.collectLights().filter((l) => l.slag);   // the Bell Gate's socket lights are not slag (CRITIQUE_5 #6)
+  const before = slag();
   assert.ok(before.length > 0 && before.length <= 24, `${before.length} slag lights`);
   assert.ok(before.every((l) => l.kind === 'warm' && l.color));
   await turnSluice(f, ent(f, 'sl_b'));
   frames(f, 300);
-  const after = f.collectLights();
+  const after = slag();
   assert.equal(after.length, 0, 'every slag body cooled: dark');
   const lit = makeField(TEST_FORGE);
   assert.equal(lit.collectLights().length, 0, 'no slag lights in a lit room');
@@ -222,7 +223,7 @@ test('the ash_haze tint, ash and steam budgets, memory actors', () => {
   const t0 = performance.now();
   for (let i = 0; i < 600; i++) f.ep3fx.update();
   const ms = (performance.now() - t0) / 600;
-  assert.ok(f.ep3fx.ash.length > 0 && f.ep3fx.ash.length <= 24, `${f.ep3fx.ash.length} flakes`);
+  assert.ok(f.ep3fx.ash.length > 24 && f.ep3fx.ash.length <= 64, `${f.ep3fx.ash.length} flakes (CRITIQUE_5 #3: 2 to 3 times the old 24)`);
   assert.ok(ms < 0.3, `ash update ${ms.toFixed(4)} ms a frame`);
   for (let i = 0; i < 30; i++) f.ep3fx.steam(100, 100, 5);
   assert.ok(f.ep3fx.puffs.length <= 40);

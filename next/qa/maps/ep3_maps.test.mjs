@@ -156,7 +156,7 @@ test('every Episode 3 chest is reachable (Lantern, Ash Keys, the sand side story
 test('enemy and chest tables match the plan', () => {
   const count = (id, type) => maps[id].events.filter((e) => e.type === type).length;
   assert.deepEqual(MAP_IDS_EP3.map((id) => [id, count(id, 'enemy')]).filter(([, n]) => n),
-    [['sand_road', 4], ['foundry_f1', 6], ['foundry_f2', 5], ['foundry_f3', 5]]);
+    [['sand_road', 3], ['foundry_f1', 6], ['foundry_f2', 3], ['foundry_f3', 4]]);   // E3-fixes-world: four foes cut (PLAYTEST_REVIEW_5 1d)
   const tiers = (id) => maps[id].events.filter((e) => e.type === 'chest').map((e) => e.tier).sort().join(',');
   assert.equal(tiers('sand_road'), 'iron,wood');
   assert.equal(tiers('foundry_f1'), 'gold,gold,iron,wood,wood,wood');

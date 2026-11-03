@@ -128,9 +128,9 @@ test('quick start slot: slot 0 empty -> slot 0, no notice', () => {
 test('quick start slot: slot 0 occupied -> the first empty manual slot with a one-line notice', () => {
   const { save } = fresh();
   save.save(0, { x: 1 }, {});
-  assert.deepEqual(pickRunSlot(save), { ok: true, slot: 1, notice: 'This party will save to slot 1.' });
+  assert.deepEqual(pickRunSlot(save), { ok: true, slot: 1, notice: 'This party will save to Record 1.' });
   save.save(1, { x: 1 }, {});
-  assert.deepEqual(pickRunSlot(save), { ok: true, slot: 2, notice: 'This party will save to slot 2.' });
+  assert.deepEqual(pickRunSlot(save), { ok: true, slot: 2, notice: 'This party will save to Record 2.' });
   save.save(3, { x: 1 }, {});
   assert.equal(pickRunSlot(save).slot, 2, 'the first EMPTY one, not the last');
 });
@@ -140,7 +140,7 @@ test('quick start slot: every slot full -> refusal, no slot, and the notice is t
   for (let n = 0; n <= 3; n++) save.save(n, { x: n }, {});
   const before = snapshot(storage);
   const p = pickRunSlot(save);
-  assert.deepEqual(p, { ok: false, slot: null, notice: 'Every save slot holds a game. Free one on the Load page first.' });
+  assert.deepEqual(p, { ok: false, slot: null, notice: 'Every save slot holds a game. Save over one you no longer need first.' });
   assert.equal(p.notice, SLOTS_FULL_NOTICE);
   assert.equal(snapshot(storage), before, 'choosing wrote nothing');
   assert.ok(/^[\x20-\x7e]+$/.test(p.notice));
@@ -319,4 +319,49 @@ test('every autosave writer uses the run\'s own slot: the inn rest is not a fixe
     assert.match(src, /save\.save\(normSlot\((g|this\.game && this\.game)\.autosaveSlot\)/, `${f} saves to the run's slot`);
     assert.doesNotMatch(src, /save\.save\(0\s*,/, `${f} never writes slot 0 by number`);
   }
+});
+
+// ---------------------------------------------------------------------------------------------- E3-fixes-world (PLAYTEST_REVIEW_5 #1)
+import { LoadGameScene } from '../../src/scenes/loadGame.js';
+/** Runs the real LoadGameScene.load against `save` (the Load page's confirm), with the fade done at once. */
+async function loadFromPage(save, slot) {
+  let p = null;
+  const e = { save, game: null, audio: { sfx() {} }, fadeTo(fn) { p = fn(); }, hasScene: () => true, reset() {} };
+  LoadGameScene.prototype.load.call({ engine: e }, { slot, exists: true });
+  await p;
+  return e.game;
+}
+
+test('Continue from an older Record never overwrites another run in the Autosave (review s1b repro)', async () => {
+  const { save } = fresh();
+  const cora = createGame('Cora'); setPosition(cora, 'hero_home', 4, 3, 'down'); cora.party[0].level = 9; cora.playtime = 1500;
+  save.save(0, serialize(cora), saveMeta(cora));                        // an Episode 1 game in the Autosave
+  const arden = ep2CreditsGame(); arden.heroName = 'Arden'; arden.party[0].level = 14;
+  save.save(1, serialize(arden), saveMeta(arden));                      // an Episode 2 finish in Record 1 (autosaveSlot 0)
+  const before0 = save.exportSlot(0);
+  const g = await loadFromPage(save, 1);
+  assert.ok(g && g.heroName === 'Arden');
+  assert.equal(g.autosaveSlot, 1, 'the loaded run autosaves to the Record it came from');
+  // the morning plays, then the party leaves the inn: every map change autosaves
+  g.flags.ep3_started = true;
+  for (const [map, x, y] of [['nh_inn', 17, 7], ['nameless_hollow', 20, 10], ['sand_road', 6, 8]]) { setPosition(g, map, x, y, 'down'); autosave(save, g); }
+  assert.equal(save.exportSlot(0), before0, 'the Autosave (Cora) is byte for byte intact');
+  assert.equal(save.load(1).heroName, 'Arden'); assert.equal(save.load(1).map, 'sand_road');
+  assert.equal(save.exportSlot(2), null); assert.equal(save.exportSlot(3), null);
+});
+
+test('Load: the same run keeps the Autosave; an empty Autosave stays the target; a record naming a taken slot moves', async () => {
+  const { save } = fresh();
+  const a = createGame('Arden', { seed: 7 });
+  save.save(0, serialize(a), saveMeta(a)); save.save(1, serialize(a), saveMeta(a));
+  assert.equal((await loadFromPage(save, 1)).autosaveSlot, 0, 'slot 0 holds this same run: Episode 1 and 2 behaviour unchanged');
+  const { save: s2 } = fresh();
+  s2.save(2, serialize(a), saveMeta(a));
+  assert.equal((await loadFromPage(s2, 2)).autosaveSlot, 0, 'an empty Autosave is still the run\'s autosave');
+  const q = newGameEp3('Quill', { slot: 2 });
+  const other = createGame('Cora', { seed: 9 });
+  s2.save(3, serialize(q), saveMeta(q)); s2.save(2, serialize(other), saveMeta(other));   // Quill saved to Record 3, Record 2 since reused
+  assert.equal((await loadFromPage(s2, 3)).autosaveSlot, 3, 'Quill no longer owns Record 2, so it autosaves to Record 3');
+  s2.save(0, serialize(other), saveMeta(other));
+  assert.equal((await loadFromPage(s2, 0)).autosaveSlot, 0, 'loading the Autosave keeps it');
 });

@@ -12,14 +12,15 @@ import { TINTS } from '../lighting.js';
 import { matches } from '../../data/story/dialogue.js';
 import { BAYER4 } from '../../core/renderer.js';
 
-// A warm grey multiply with most of the colour drained first, a faint orange lift in the light: the Ash Hills.
-// Measured by qa/world/e3_lab.py (tint): mean luminance at least 12% under 'none' on the same frame.
-TINTS.ash_haze = TINTS.ash_haze || { color: '#b4a496', alpha: 0.62, desat: 0.38, desatFirst: true, glow: '#ff8a3a', glowAlpha: 0.035 };
+// A cool ash-grey multiply with most of the colour drained first, a faint orange lift in the light: the Ash Hills.
+// CRITIQUE_5 #3: the old warm grey (11.9% darker, desat 0.38) left the square's crimson cobble reading as red clay. Cooler,
+// darker and more drained, so ash and a restored town differ at a glance. qa/world/e3_lab.py (tint) wants 20% or more.
+TINTS.ash_haze = TINTS.ash_haze || { color: '#a39d98', alpha: 0.72, desat: 0.6, desatFirst: true, glow: '#ff8a3a', glowAlpha: 0.03 };
 
 /** Scene spawns drawn as memories: warm sepia, a little translucent, with the screen's vignette while any is present. */
 export const MEMORY_IDS = new Set(['bram_m', 'mara_m', 'foreman_m']);
 export const MEMORY_TINT = { color: '#d9a066', amount: 0.55 };
-const ASH_CAP = 24;
+const ASH_CAP = 64;   // CRITIQUE_5 #3: two to three times the old 24, 2 px flakes, so the ash is seen falling
 const STEAM_CAP = 40;
 
 export class Ep3Fx {
@@ -35,7 +36,7 @@ export class Ep3Fx {
     const mod = (this.f.map && this.f.map.mod) || {};
     this.entries = (mod.ambientFx || []).filter((k) => k === 'ash' || (k && typeof k === 'object' && k.fx === 'ash'));
     this.refreshAsh();
-    if (this.ashOn) for (let i = 0; i < 40; i++) this.update(true);   // the air is already full on arrival
+    if (this.ashOn) for (let i = 0; i < 140; i++) this.update(true);   // the air is already full on arrival
   }
   refreshAsh() {
     const hf = this.f.hasFlag;
@@ -58,11 +59,11 @@ export class Ep3Fx {
     const f = this.f, cam = f.camera, rng = f.rng;
     this.frame++;
     if (!prewarm && this.frame % 30 === 0 && this.entries && this.entries.length) this.refreshAsh();
-    if (this.ashOn && cam && this.frame % 6 === 0 && this.ash.length < ASH_CAP) {
+    if (this.ashOn && cam && this.frame % 2 === 0 && this.ash.length < ASH_CAP) {
       const W = cam.W || 384, H = cam.H || 216;
       const x = cam.x + rng.int(-16, W), y = prewarm ? cam.y + rng.int(-8, H) : cam.y - 6;
       if (!this.areas || this.areas.some((a) => x >= a.x * 16 && x < (a.x + a.w) * 16 && y + 60 >= a.y * 16 && y < (a.y + a.h) * 16)) {
-        this.ash.push({ x, y, vx: rng.range(0.05, 0.2), vy: rng.range(0.12, 0.26), ph: rng.range(0, 6.28), t: 0, life: 420 + rng.int(0, 200), c: rng.int(0, 2) });
+        this.ash.push({ x, y, vx: rng.range(0.05, 0.2), vy: rng.range(0.1, 0.22), ph: rng.range(0, 6.28), t: 0, life: 420 + rng.int(0, 200), c: rng.int(0, 2) });
       }
     }
     if (this.ash.length) {
@@ -100,9 +101,10 @@ export class Ep3Fx {
       const x = Math.round(p.x), y = Math.round(p.y);
       if (x < cam.x - 4 || x > cam.x + r.W + 4 || y < cam.y - 4 || y > cam.y + r.H + 4) continue;
       const k = p.t / p.life, a = k < 0.1 ? k * 10 : k > 0.85 ? (1 - k) / 0.15 : 1;
-      r.withAlpha(0.8 * a, () => {
-        r.rect(x, y, p.c ? 2 : 1, 1, p.c === 2 ? '#d6d0c8' : '#9a948e');
-        if (p.c) r.rect(x + (Math.floor(p.t / 14) % 2), y + 1, 1, 1, '#6e6862');
+      // every flake 2 px wide (a pale top, a darker tumbling lower pixel), the big ones 2 x 2
+      r.withAlpha(0.9 * a, () => {
+        r.rect(x, y, 2, p.c === 2 ? 2 : 1, p.c ? '#e4dfd8' : '#b4aea6');
+        r.rect(x + (Math.floor(p.t / 14) % 2), y + (p.c === 2 ? 2 : 1), 1, 1, '#76706a');
       });
     }
     for (const p of this.puffs) {

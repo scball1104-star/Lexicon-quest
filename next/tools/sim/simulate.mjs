@@ -66,13 +66,14 @@ export const TARGETS = {
     court_f2: { start: [11, 11], end: [12, 12] },
     court_f3: { start: [12, 12], end: [13, 13] },
     court_throne: { start: [13, 13], end: [13, 14] },
-    // Episode 3 starts at the quick start's Lv 13 / 2,900 EXP (EP3_START_EXP) and climbs 13 -> 14 -> 15 -> 16 -> 17 -> 18 if
-    // every fight is fought, one level lower on the 80% route (the Warden is met at Lv 16 there, as the plan says).
-    sand_road: { start: [13, 13], end: [14, 14] },
-    foundry_f1: { start: [14, 14], end: [15, 15] },
-    foundry_f2: { start: [15, 15], end: [16, 16] },
-    foundry_f3: { start: [16, 16], end: [17, 17] },
-    foundry_heart: { start: [17, 17], end: [18, 18] },
+    // Episode 3 starts at the quick start's Lv 13 / 2,900 EXP (EP3_START_EXP). E3-fixes-world (PLAYTEST_REVIEW_5 1d) cut four
+    // ordinary field foes (road 4 -> 3, F2 5 -> 3, F3 5 -> 4): a full clear now meets the Specter at Lv 15 and the Warden at
+    // Lv 16, as the plan says (13 -> 13 -> 14 -> 15 -> 16 -> 17); the 80% route keeps its one-level allowance.
+    sand_road: { start: [13, 13], end: [13, 14] },
+    foundry_f1: { start: [13, 14], end: [14, 15] },
+    foundry_f2: { start: [14, 15], end: [15, 16] },
+    foundry_f3: { start: [15, 16], end: [16, 17] },
+    foundry_heart: { start: [16, 17], end: [17, 18] },
   },
 };
 /** The Episode 3 quick start's EXP (src/game/state.js EP3_START; the plan's figure between the Episode 2 80% and 100% routes). */

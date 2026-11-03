@@ -25,7 +25,7 @@ export const TIER_FLAG = 'tier_1';
  * raises each foe to the carried party (HARD_ROAD's table assumed a party of the foe's own level; a carried Lv 13 party walked
  * through Episode 1 in one to four rounds at x1.6 alone: docs/TIER.md "Why the lift"). The party meets a foe of level L at
  * levelForExp(carryExp + exp x expForLevel(L)); `carryExp` is the record the tier is written for, the simulator's Episode 2
- * finish (tools/sim progression(1, 3): 6,060 EXP, Lv 18, since Episode 3 went live and the unlock moved to ep3_complete; was
+ * finish (tools/sim progression(1, 3): 5,585 EXP, Lv 17 since E3-fixes-world cut four foes (was 6,060, Lv 18), since Episode 3 went live and the unlock moved to ep3_complete; was
  * the Episode 2 finish, 3,335 EXP, Lv 13; qa/tier pins the two together). `lag` says how many levels under that
  * each stat is lifted to: HP sits five under so the x1.6 lands the fights in DESIGN 7's bands, the hit (ATK and MAG) and the
  * tempo (SPD, against the party's own speed growth) at the party's level. DEF is not lifted. `terms` are the per-encounter
@@ -36,7 +36,7 @@ export const TIER_TABLE = {
   1: {
     id: TIER_FLAG,
     foe: { hp: 1.6, pow: 1.35, spd: 1 },
-    lift: { carryExp: 6060, lag: { hp: 5, pow: 0, spd: 0 } },
+    lift: { carryExp: 5585, lag: { hp: 5, pow: 0, spd: 0 } },
     terms: {
       // Episode 1, the main route
       valley_wolves: { hp: 1.5 }, valley_scarab: { hp: 1.11 }, f1_mites: { hp: 1.32 }, f1_mixed: { hp: 1.33 },

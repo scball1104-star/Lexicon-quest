@@ -9,7 +9,7 @@ Cases: hall (the Slag Hall before and after the sluice turn: pool 1 cools on arr
 the hot grate opens), dam (the ore crate dams spout B; Bram's Shove frees it; the latched basin and the AND gate), walk
 (a headless walk over every new event: confirm the sluice, cross the cooled moat, the grate door and the lift door
 between the rooms, crust kept across the round trip), dark (the dark room lit by its slag; field draw time with 24 slag
-lights, before and after cooling), tint (ash_haze against none: mean luminance on the same frame, at least 12% darker),
+lights, before and after cooling), tint (ash_haze against none: mean luminance on the same frame, at least 20% darker),
 memory (a memory spawn: sepia actor and the vignette), bell (the Bell Gate lights a socket per flag). Fails on any
 console error. qa/world/walks.test.mjs runs it (solo slot).
 """
@@ -214,7 +214,7 @@ def case_tint(lab):
     drop = 1 - b / a
     print(f'  luminance none {a:.3f}, ash_haze {b:.3f}: {drop * 100:.1f}% darker')
     RESULTS['tint'] = {'none': round(a, 3), 'ash_haze': round(b, 3), 'drop_pct': round(drop * 100, 1)}
-    check(drop >= 0.12, f'ash_haze is at least 12% darker than none ({drop * 100:.1f}%)')
+    check(drop >= 0.20, f'ash_haze is at least 20% darker than none ({drop * 100:.1f}%; CRITIQUE_5 #3)')
     lab.screenshot('e3_tint_ash_haze_page')
     lab.run(field_js('f.lighting.setTint("none", 0);'))
 

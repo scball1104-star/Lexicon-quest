@@ -43,7 +43,7 @@ SPR, shields and weaknesses stay the foe's own. Then the x1.6, x1.35 and +1. Twe
 (`TIER_TABLE[1].terms`, HP or hit x0.66 to x1.57) the way `encounters.js` tunes a group with `hp` and `power`.
 
 **The record it is written for** was the simulator's Episode 2 finish (3,335 EXP, Lv 13). **Since Episode 3 went live
-(E3-switch, 2026-11-02)** the unlock is `ep3_complete` and `carryExp` is the simulator's Episode 3 finish: 6,060 EXP, Lv 18,
+(E3-switch, 2026-11-02)** the unlock is `ep3_complete` and `carryExp` is the simulator's Episode 3 finish: 5,585 EXP, Lv 17 since E3-fixes-world cut four foes (was 6,060, Lv 18),
 `foundry_heart`'s kit (tier 6 pieces, the Updraft Charm; not Tempered Oath, whose flag starts over). Fact (`--tier 1 --check`,
 all targets met): a foe is now met at Lv 18 in the valley, Lv 19 at the Archivore, Lv 22 at the King; the yard slime takes 3.1
 rounds. Four boss terms moved (archivore hp 1.32 pow 1.95, other_selves hp 0.91 pow 1.34, nameless_king pow 1.3, a new

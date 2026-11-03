@@ -3,7 +3,7 @@
 import { drawWindow, drawSelBar, drawGauge, drawLabel, drawIcon, uiAtlas } from '../../ui/window.js';
 import { animFrameAt } from '../../core/assets.js';
 import { HELP_WIN, STATUS_WIN, TL, timelineSlotX, statusRow, enemyRowAnchor, PORTRAIT_FACE, enemyFaceRect, BANNER_Y, W, H,
-  HELP_LINE, HELP_LINES_MAX, helpDock, helpOrigin, headBox } from './layout.js';
+  HELP_LINE, HELP_LINES_MAX, helpDock, helpOrigin, headBox, spriteBox } from './layout.js';
 import { frameOrigin } from './actors.js';
 
 const PARTY_STATUS_ORDER = ['kept', 'poison', 'burn', 'chill', 'stun', 'silence', 'blind', 'nameless', 'regen', 'protect', 'haste', 'focus', 'taunt'];
@@ -404,6 +404,9 @@ export function drawNameTag(r, actor, know, unit, opts = {}) {
   const head = headBox(actor, false);
   const onHead = Math.min(x + w, head.x + head.w) - Math.max(x, head.x) > 0 && Math.min(y + 17, head.y + head.h) - Math.max(y, head.y) > 2;
   if (onHead) { y = Math.min(STATUS_WIN.y - 19, head.y + head.h + 2); x = Math.max(4, Math.min(W - w - 4, Math.round(head.x + head.w / 2 - w / 2))); }
+  // never on a boss's body
+  const b = spriteBox(actor, false);
+  if (actor.boss && x < b.x + b.w && x + w > b.x && y < b.y + b.h && y + 17 > b.y) { x = Math.min(W - w - 4, b.x + b.w + 3); y = Math.max(floor, b.y + 16); }
   drawWindow(r, x, y, w, 17, { kind: 'thin' });
   let tx = x + 7;
   if (actor.elite && ui && ui.frames.elite_mark) { r.sprite(ui, ui.frames.elite_mark, tx, y + 3, { topLeft: true }); tx += 14; }
@@ -459,15 +462,6 @@ export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28, row = 
   if (f) r.sprite(ui, f, x, y + 15, { tint: on ? '#ff8a2a' : '#e06b39', tintAmount: 0.6 });
   else r.text('!', x - 4, y - 4, { align: 'center', color: 'orange', outline: '#14101e' });
   void nextTurn;
-}
-
-/** Elite gold name over the sprite's head (shown on the elite intro and while targeted). */
-export function drawEliteTag(r, actor) {
-  const ui = uiAtlas(r);
-  const w = r.measure(actor.name) + 16;
-  const x = Math.round(actor.x - w / 2), y = actor.top - 12;
-  if (ui && ui.frames.elite_mark) r.sprite(ui, ui.frames.elite_mark, x, y, { topLeft: true });
-  r.text(actor.name, x + 14, y, { color: 'gold' });
 }
 
 /** Big centered banner (combo name, boss phase, stance). k = 0..1 progress for slide/fade. */
@@ -562,7 +556,7 @@ export function drawBossCard(r, card) {
 }
 
 /** Preview tooltip next to the target: expected damage range, WEAK/?/RESIST, shields after, KO. */
-export function drawPreviewTag(r, actor, eff, opts = {}) {
+export function drawPreviewTag(r, actor, eff, near = []) {
   if (!eff) return;
   const parts = [];
   if (eff.min != null && eff.max != null && (eff.min || eff.max)) parts.push(eff.min === eff.max ? `${eff.min}` : `${eff.min}-${eff.max}`);
@@ -579,12 +573,12 @@ export function drawPreviewTag(r, actor, eff, opts = {}) {
   if (!parts.length) return;
   const text = parts.join(' ');
   const w = r.measure(text) + 12;
-  let x = Math.round(actor.x + (actor.side === 'enemy' ? actor.w / 2 + 6 : -actor.w / 2 - 6 - w));
-  x = Math.max(4, Math.min(W - w - 4, x));
-  const y = Math.max(26, actor.cy - 8);
+  const d = actor.w / 2 + 6, cy = Math.max(26, actor.cy - 8);
+  // never on a face (near: the actors): beside, the far side, then by the feet
+  const at = (sx, y) => { const x = Math.max(4, Math.min(W - w - 4, Math.round(sx))); return near.some((o) => { const h = headBox(o, false); return o.alive && x < h.x + h.w && x + w > h.x && y < h.y + h.h && y + 17 > h.y; }) ? null : [x, y]; };
+  const [x, y] = (actor.side === 'enemy' && at(actor.x + d, cy)) || at(actor.x - d - w, cy) || at(actor.x + d, actor.y - 17) || [Math.max(4, Math.round(actor.x - d - w)), cy];
   drawWindow(r, x, y, w, 17, { kind: 'thin', alpha: 0.95 });
   r.text(text, x + 6, y + 3);
-  void opts;
 }
 
 export { drawIcon, frameOrigin };

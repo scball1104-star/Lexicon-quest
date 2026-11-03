@@ -123,7 +123,6 @@ const events = [
   object('carters_fire', 28, 18, 'carters_fire', { script: 'carters_rest', safe: true, rest: true }),
   npc('penny_s', 34, 20, 'down'),
   enemy('e_sr_hounds', 27, 24, 'cinder_hound', 'sr_hounds', 'wander', { radius: 2 }),
-  enemy('e_sr_beetles', 27, 12, 'cinder_beetle', 'sr_beetles', 'patrol', { path: steps('right', 3, 'left', 3) }),
   // ---- the rise
   enemy('e_sr_mixed', 43, 12, 'cinder_hound', 'sr_mixed', 'patrol', { path: steps('left', 3, 'right', 3) }),
   trigger('ash_view_trig', 44, 6, 1, 2, 'ash_view'),

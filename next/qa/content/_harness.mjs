@@ -12,7 +12,7 @@ export const NEXT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // The only methods a scene may call. camera is an object with panTo and follow.
 export const API = new Set(['say', 'choice', 'walk', 'face', 'jump', 'emote', 'wait', 'camera', 'shake', 'flash',
   'fade', 'tint', 'music', 'sfx', 'spawn', 'despawn', 'setFlag', 'hasFlag', 'give', 'take', 'battle', 'addMember',
-  'title', 'lockInput', 'unlockInput', 'closeup', 'mapId']);   // closeup: W11 (world/closeup.js); mapId: E3-switch (a getter)
+  'title', 'lockInput', 'unlockInput', 'closeup', 'mapId', 'warp']);   // closeup: W11 (world/closeup.js); mapId: E3-switch (a getter); warp: E3-fixes-world
 export const CAMERA_API = new Set(['panTo', 'follow']);
 
 // Canonical ids from COMMON.md / DESIGN.md.
@@ -125,7 +125,7 @@ export async function runOnce(sceneFn, { decisions = [], flags = [], branchFlags
     say: fn('say'), walk: fn('walk'), face: fn('face'), jump: fn('jump'), emote: fn('emote'), wait: fn('wait'),
     shake: fn('shake'), flash: fn('flash'), fade: fn('fade'), tint: fn('tint'), music: fn('music'), sfx: fn('sfx'),
     spawn: fn('spawn'), despawn: fn('despawn'), give: fn('give'), take: fn('take'), addMember: fn('addMember'),
-    title: fn('title'), lockInput: fn('lockInput'), unlockInput: fn('unlockInput'), closeup: fn('closeup'), mapId,
+    title: fn('title'), lockInput: fn('lockInput'), unlockInput: fn('unlockInput'), closeup: fn('closeup'), warp: fn('warp'), mapId,
     camera: new Proxy({ panTo: fn('camera.panTo'), follow: fn('camera.follow') }, {
       get(t, k) { if (!CAMERA_API.has(k)) throw new Error(`camera.${String(k)} is not part of the cutscene API`); return t[k]; },
     }),

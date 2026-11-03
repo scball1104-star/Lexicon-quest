@@ -3150,6 +3150,7 @@ class Episode3(Episode):
     def morning(self):
         b = self.b
         if self.has('sand_gate_open'):
+            b.mark('ep3_morning')   # the morning now fades to the east gate and plays the gate scene
             return
         f = b.settle()
         if not self.has('ep3_started'):

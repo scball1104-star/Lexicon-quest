@@ -56,7 +56,8 @@ export default {
   exits: [],
   marks: {
     warden: [12, 7], forge: [11, 5], anvil: [9, 9], party_stop: [12, 12], garrick_enter: [11, 18], garrick_anvil: [10, 9],
-    bram_anvil: [10, 10], leaf_spot: [11, 8], entry: [12, 18],
+    // CRITIQUE_5 #5: Bram across the anvil from his father (not behind him), the camera high so the forge sits under the window
+    bram_anvil: [8, 9], leaf_spot: [11, 6], entry: [12, 18],
   },
   start: { x: 12, y: 18, dir: 'up' },
 };

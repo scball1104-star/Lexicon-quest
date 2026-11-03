@@ -12,7 +12,7 @@ export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 /** The title row and help for the Episode 3 quick start (shown by E3-scene-ui when `episodeOffers().ep3.show`). */
 export const EP3_ROW_LABEL = 'Episode 3: new party';
 export const EP3_ROW_HELP = 'A ready party at Lv 13. Your own save stays under Continue.';
-export const SLOTS_FULL_NOTICE = 'Every save slot holds a game. Free one on the Load page first.';
+export const SLOTS_FULL_NOTICE = 'Every save slot holds a game. Save over one you no longer need first.';
 
 function urlEp(search) {
   try { return new URLSearchParams(search || '').get('ep'); } catch (err) { return null; }
@@ -75,7 +75,7 @@ export function pickRunSlot(save) {
   if (!occupied(save, 0)) return { ok: true, slot: 0, notice: null };
   const n = Number.isFinite(save.slots) ? save.slots : 3;
   for (let i = 1; i <= n; i++) {
-    if (!occupied(save, i)) return { ok: true, slot: i, notice: `This party will save to slot ${i}.` };
+    if (!occupied(save, i)) return { ok: true, slot: i, notice: `This party will save to Record ${i}.` };
   }
   return { ok: false, slot: null, notice: SLOTS_FULL_NOTICE };
 }

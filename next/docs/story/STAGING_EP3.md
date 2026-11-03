@@ -233,7 +233,7 @@ remind, deliver (takes `glass_sand`, gives `emberglass_charm`). Sets `sand_start
 | `nh_inn` | `inn_bed` (exists), `smith_seat` (new, by the hearth), `wren_wake` (new, beside the bed), `inn_door` (new, the door) |
 | `nameless_hollow` | `sand_gate`, `vessa_gate`, `penny_cart_h` |
 | `sand_road` | `slag`, `emberpeak_far`, `town_gate`, `smith_crate` (new, a crate at the shelter), `rise_smith` (new, a tile on the last rise); enemy `e_sr_first` |
-| `emberpeak` | `gate_in`, `gate_smith` (new, one tile inside the gate), `coolant`, `memorial`, `memorial_smith` (new, beside the wall), `bellhouse_door`, `bell_tower`, `bell_rope`, `east_road`, `night_view`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_veyra`, `gather_ilya`, `gather_rusk`, `gather_bess`, `gather_garrick` (new) |
+| `emberpeak` | `gate_in`, `gate_smith` (new, one tile inside the gate), `coolant`, `memorial`, `memorial_smith` (new, beside the wall), `bellhouse_door`, `bell_tower`, `bell_rope`, `east_road`, `night_view`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_veyra`, `gather_ilya`, `gather_rusk`, `gather_bess`, `gather_garrick` (new), `gather_view` (E3-fixes-world: the camera's frame of tower, town and memorial for the gathering lines) |
 | `pk_bellhouse` | `ilya_spot`, `bellhouse_in` (new, two tiles inside the door) |
 | `foundry_f1` | `shaft`, `shaft_bram` (new), `shaft_foreman` (new), `wheel`, `lift_down` |
 | `foundry_f2` | `bell`, `specter_spot` |

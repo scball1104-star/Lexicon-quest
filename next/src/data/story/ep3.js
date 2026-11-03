@@ -1,12 +1,5 @@
-// Lexicon Quest NEXT, Episode 3: "The Forge of Ash".
-// Every scripted scene, plus inspect text for signs, plaques, troughs, anvils and props.
-//
-// Scenes use ONLY the cutscene API (DESIGN 5.4; signatures in docs/story/STAGING.md section 1). Places and props
-// are map mark / event / actor names, never tile coordinates. Staging for every scene (who stands where, props,
-// camera, music, triggers) is in docs/story/STAGING_EP3.md. Beat sheet and canon: docs/story/EPISODE3.md.
-//
-// Writing rules: one idea per box, at most 3 lines of 42 characters, no em dashes, ASCII only, {hero} = player name.
-// Scene ids and line ids never repeat an Episode 1 or Episode 2 id (qa/content/ep3.test.mjs checks it).
+// Lexicon Quest NEXT, Episode 3: "The Forge of Ash". Every scene and inspect text. Cutscene API only (docs/story/STAGING.md 1);
+// staging in docs/story/STAGING_EP3.md, canon in docs/story/EPISODE3.md. Writing rules as ep1.js (qa/content/ep3.test.mjs).
 //
 // THE TWO NAMES. Until `mara_read` nobody says Mara's name, and until `garrick_named` nobody says Garrick's: the
 // party calls him "the Smith" or "Dad" and the speaker tag reads "The Smith" (actor swapped under a name flash in
@@ -92,6 +85,8 @@ async function ep3_morning(s) {
   await s.despawn('wren_up');
   await s.setFlag('ep3_morning_done');
   await s.setFlag('ep3_started');
+  await s.fade('out', 40);   // to the gate unwalked: sand_gate_trig runs on landing, after this scene
+  s.warp('nameless_hollow', 40, 26, 'right');
 }
 
 // 2. nameless_hollow, step trigger sand_gate_trig at the chained east gate. Vessa unchains the road; Penny's cart is
@@ -100,6 +95,7 @@ async function sand_gate(s) {
   await s.spawn('vessa_g', { sprite: 'npc_vessa', name: 'Vessa', at: 'vessa_gate', dir: 'right' });
   await s.spawn('penny_g', { sprite: 'npc_shopkeeper', name: 'Penny', at: 'penny_cart_h', dir: 'right' });
   await s.spawn('smith', { sprite: 'npc_smith', name: 'The Smith', at: 'penny_cart_h', dir: 'right' });
+  await s.fade('in', 40);
   await s.camera.panTo('sand_gate', 40);
   await narrate(s, 'At the east edge of town stands a stone arch with an iron chain across it. Beyond lies a road of pale grey sand.');
   await say(s, 'vessa_g', 'Emberpeak sand made the best silverglass. Made. The carts stopped twenty-five years ago.');
@@ -695,7 +691,7 @@ async function first_bell(s) {
   await s.tint('none', 120);
   await s.camera.panTo('memorial', 40);
   await narrate(s, 'On the memorial wall the plates fill with letters. MARA OF THE FIRST BELL. And beside it, deep and firm: GARRICK.');
-  await s.camera.follow('hero');
+  await s.camera.panTo('gather_view', 40);
   await s.walk('veyra', 'gather_veyra');
   await say(s, 'veyra', 'The furnaces are banked. For the first time in a month, nothing is feeding them.');
   await s.walk('rusk', 'gather_rusk', { speed: 'run' });

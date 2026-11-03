@@ -136,6 +136,7 @@ export default {
     crowd_a: [13, 16], crowd_b: [18, 15], crowd_c: [21, 15], crowd_d: [23, 19],
     gather_veyra: [9, 13], gather_ilya: [8, 13], gather_rusk: [10, 14], gather_bess: [7, 14], gather_garrick: [6, 13],
     restored_spot: [19, 16], night_view: [19, 11],
+    gather_view: [11, 13],   // CRITIQUE_5 #5: the tower, the gathered town and the memorial in one frame
   },
   start: { x: 19, y: 30, dir: 'up' },
 };

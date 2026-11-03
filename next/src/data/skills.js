@@ -494,7 +494,7 @@ foe('ember_spray', { name: 'Ember Spray', target: 'enemies', formula: 'mag', pow
 foe('strike_the_name', { name: 'Strike the Name', target: 'enemy', formula: 'mag', power: 60, effects: [{ nameStrike: true }],
   telegraph: '{name} raises its hammer over {target}...', help: 'Strikes a name out. Defend, or Bram.', fx: 'devour' });
 foe('last_hammer', { name: 'Last Hammer', target: 'enemies', formula: 'phys', power: 260, turnable: true,
-  telegraph: '{name} raises the Last Hammer. The whole forge holds its breath...', help: 'The last blow. Defend, Break, or Bram.',
+  telegraph: '{name} raises the Last Hammer! Bram, stand in front: Tempered Oath.', help: 'The last blow. Defend, Break, or Bram.',
   fx: 'shockwave', sfx: 'hammer_charge' });
 foe('stoke_warden', { name: 'Stoke the Warden', target: 'boss', formula: 'none', rank: 80, effects: [{ stoke: 1 }],
   help: 'Feeds the Warden. Break it first.', fx: 'buff', sfx: 'furnace_roar' });

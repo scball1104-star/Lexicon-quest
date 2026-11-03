@@ -4,7 +4,7 @@ With a finished Episode 2 in slot 0 and EP3_LIVE forced on for this page only (r
 production rule otherwise), on desktop, phone (844x390) and portrait:
   1. the row "Episode 3: new party" is listed, its help note shows when it is highlighted, and every row and the note sit
      inside the screen (the 4th load slot once hid under the help bar: rows are checked against the screen edge);
-  2. a free record: KeyZ on the row opens the notice "This party will save to slot 1." with Back highlighted, Start offered;
+  2. a free record: KeyZ on the row opens the notice "This party will save to Record N." with Back highlighted, Start offered;
   3. every record full: the refusal with only Back, and KeyZ on Back closes it with nothing written.
 PNGs in next/qa/ui/out/e3_title_*.png (3x).
 
@@ -99,7 +99,7 @@ def main():
             key(page, 'KeyZ')
             g = page.evaluate('LQ_DEBUG.state().sceneState.guard')
             check(g and g['options'] == ['back', 'start'] and g['index'] == 0, f'free slot: Back highlighted, Start offered ({g})')
-            check('slot 1' in g['line'], f"the notice names the record: {g['line']}")
+            check('Record ' in g['line'], f"the notice names the record: {g['line']}")
             adv(page, 8)
             shot(page, f'{dname}_free_slot')
             key(page, 'KeyX')

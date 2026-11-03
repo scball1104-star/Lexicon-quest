@@ -107,7 +107,6 @@ const events = [
   object('anvil_hand', 5, 6, 'anvil_oath', { script: 'oath_hand', state: 0 }),
   chest('chest_hand', 5, 22, 'iron'),
   enemy('e_h_defenders', 12, 21, 'forge_defender', 'fo3_defenders', 'guard'),
-  enemy('e_h_mixed', 5, 14, 'forge_defender', 'fo3_mixed', 'wander', { radius: 2 }),
   // ---- the Heart (the dark)
   spout('sp_k1', 32, 16, 'down'),
   sluice('sl_k1', 32, 21, 0),

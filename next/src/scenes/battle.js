@@ -366,6 +366,7 @@ export class BattleScene {
     this.fx.update();
     this.pops.update();
     for (const [uid, t] of this.rowShow) { if (t <= 1) this.rowShow.delete(uid); else this.rowShow.set(uid, t - 1); }
+    if (this.eliteTag && (this.menu.state !== 'closed' || --this.eliteTag.t <= 0)) this.eliteTag = null;
 
     switch (this.phase) {
       case 'intro': {
@@ -788,7 +789,7 @@ export class BattleScene {
       const a = this.actor(uid);
       if (a && !a.dead) { const p = rowPlan.get(uid); HUD.drawTelegraphMarker(r, a, frame, t.nextTurn, Math.max(28, helpBottom + 6), (touch || a.rowBeside || (p && p.at)) && p ? (p.badges ? { ...p.rect, y: p.rect.y - 10, h: p.rect.h + 10 } : p.rect) : null); }
     }
-    if (this.eliteTag) { const a = this.actor(this.eliteTag.uid); if (a && !a.dead) HUD.drawEliteTag(r, a); if (--this.eliteTag.t <= 0) this.eliteTag = null; }
+    if (this.eliteTag) { const a = this.actor(this.eliteTag.uid), p = rowPlan.get(this.eliteTag.uid); if (a && !a.dead) HUD.drawNameTag(r, a, null, null, { row: p && p.rect, minY: helpBottom + 2 }); }
     for (const uid of targetIds) { const a = this.actor(uid); if (a && !a.dead) HUD.drawReticle(r, a, frame); }
     if (this.menu.state !== 'closed' && this.currentUid) { const a = this.actor(this.currentUid); if (a && !a.dead) HUD.drawTurnMarker(r, a, frame); }
     for (const [uid, p] of rowPlan) {
@@ -801,7 +802,7 @@ export class BattleScene {
       const p = t ? rowPlan.get(t) : null;
       if (a && a.side === 'enemy') HUD.drawNameTag(r, a, this.b.knowledge(t), this.unit(t), { row: (touch || a.rowBeside || (p && p.at)) && p ? p.rect : null, minY: helpBottom + 2 });
       const prev = this.menu.preview;
-      if (prev) for (const ef of prev.effects || []) { const ta = this.actor(ef.target); if (ta && targetIds.includes(ef.target)) HUD.drawPreviewTag(r, ta, ef); }
+      if (prev) for (const ef of prev.effects || []) { const ta = this.actor(ef.target); if (ta && targetIds.includes(ef.target)) HUD.drawPreviewTag(r, ta, ef, list); }
     }
     this.pops.draw(r);
     // HUD windows. The help bar and the timeline make way for the rewards windows (they overlap them).
@@ -855,17 +856,16 @@ export class BattleScene {
   drawLog(r) {
     if (!this.log.length) return;
     const cw = cmdWin(touchUi(this.engine));
-    const rows = this.log.slice(-LOG_SHOW);
+    const rows = [];
+    for (let i = this.log.length - 1, age = 0; i >= 0 && age < LOG_SHOW; i--, age++) {
+      const w = r.wrap(this.log[i], cw.w - 16);
+      if (rows.length && rows.length + w.length > LOG_SHOW) break;
+      rows.unshift(...w.map((l) => [l, age]));
+    }
     const rowH = 12, h = rows.length * rowH + 10;
     const y = cw.y + cw.h - h;
     drawWindow(r, cw.x, y, cw.w, h);
-    const maxW = cw.w - 16;
-    rows.forEach((line, i) => {
-      let t = line;
-      if (r.measure(t) > maxW) { const lines = r.wrap(t, maxW); t = lines[0] + (lines.length > 1 ? '…' : ''); }
-      const age = rows.length - 1 - i;
-      r.text(t, cw.x + 8, y + 5 + i * rowH, { alpha: age === 0 ? 1 : age === 1 ? 0.75 : 0.5, shadow: age === 0 });
-    });
+    rows.forEach(([t, age], i) => r.text(t, cw.x + 8, y + 5 + i * rowH, { alpha: age === 0 ? 1 : age === 1 ? 0.75 : 0.5, shadow: age === 0 }));
   }
 
   /** The touch layout's FLEE, AUTO and x2 tap targets (null on keyboard / pad, or outside the play phase). */
