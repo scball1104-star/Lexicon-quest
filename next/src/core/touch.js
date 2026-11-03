@@ -1,13 +1,5 @@
-// Touch controls: a DOM overlay (the only UI outside the canvas), shown on touch devices only.
-// D-pad on the left, A and B on the right, Menu top-right, a Run toggle, and a fullscreen button where
-// the browser allows it. Placement follows renderer.view.touchMode:
-//   'bars'    in the pillarbox bars beside the game (landscape phones / tablets)
-//   'below'   under the game (portrait)
-//   'overlay' translucent over the bottom corners (screens with no room)
-// The placeholder skin is pixel art generated here at low resolution and scaled by whole device pixels.
-// input.setTouchSkin({dpad, dpad_up, dpad_down, dpad_left, dpad_right, a, a_pressed, b, b_pressed,
-//                     menu, menu_pressed, run, run_on, fullscreen}) swaps in real art: each value is a URL
-// or { src, rect: [x, y, w, h] } into a sheet.
+// Touch controls: a DOM overlay shown on touch devices only, placed per renderer.view.touchMode ('bars' | 'below' |
+// 'overlay'). Pixel-art placeholder skin; input.setTouchSkin({...}) swaps in real art (URL or { src, rect }).
 
 import { createFonts } from './font.js';
 
@@ -229,10 +221,7 @@ export class TouchControls {
     }
   }
 
-  /**
-   * Replace placeholder art. See the header comment for keys ("run_pressed" is accepted for "run_on").
-   * Images are loaded first so each control keeps a whole number of device pixels per art pixel.
-   */
+  /** Replace placeholder art ("run_pressed" = "run_on"); loaded first so pixels stay whole. */
   setSkin(map) {
     map = { ...map };
     if (map.run_pressed && !map.run_on) map.run_on = map.run_pressed;
@@ -339,27 +328,29 @@ export class TouchControls {
   }
 
   _bindFullscreen() {
-    const el = this.el.fullscreen;
+    const el = this.el.fullscreen, d = document;
+    const enter = (lock) => { try {
+      const p = d.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      if (lock && p && p.then) p.then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch { /* ignore */ } }).catch(() => {});
+    } catch { /* ignore */ } };
     el.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      const d = document;
-      try {
-        if (d.fullscreenElement) d.exitFullscreen();
-        else {
-          const p = d.documentElement.requestFullscreen({ navigationUI: 'hide' });
-          if (p && p.then) p.then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch { /* ignore */ } }).catch(() => {});
-        }
-      } catch { /* ignore */ }
+      this._fsAuto = false;
+      try { if (d.fullscreenElement) d.exitFullscreen(); else enter(true); } catch { /* ignore */ }
     }, { passive: false });
+    // Sideways: the first touch goes full screen (unlocked, so portrait leaves it); the button wins until the next turn.
+    let land; try { land = matchMedia('(orientation: landscape)'); } catch { return; }
+    this._fsAuto = true;
+    land.addEventListener?.('change', () => { this._fsAuto = true; if (!land.matches && d.fullscreenElement) d.exitFullscreen().catch(() => {}); });
+    addEventListener('pointerdown', (e) => {
+      if (this._fsAuto && this.visible && land.matches && e.pointerType !== 'mouse' && e.target !== el && d.fullscreenEnabled && !d.fullscreenElement) { this._fsAuto = false; enter(false); }
+    }, true);
   }
 
   update() { /* state is event-driven; nothing per frame */ }
 
   // --------------------------------------------------------------- layout
-  /**
-   * Size and place one control. cssSize is the wanted visual width; the art is scaled by a whole number of
-   * DEVICE pixels per art pixel (crisp). pad = invisible touch margin around the visual (css px).
-   */
+  /** Size and place one control: whole device pixels per art pixel; pad = invisible touch margin (css px). */
   _place(el, key, cx, cy, cssSize, alpha, pad = 0, round = Math.floor, minCssH = 0) {
     const v = this.renderer.view;
     const [aw, ah] = this.artSize[key];

@@ -531,7 +531,7 @@ export async function interact(field, ent) {
       engine.audio.sfx('brazier_light');
       if (ent.prop) map.setPropSprite(ent.prop, 'brazier_lit', 0);
       if (ev.flag) field.setFlag(ev.flag);
-      if (ev.persist) markOpened(g, map.id, ent.id);
+      if (ev.persist !== false) markOpened(g, map.id, ent.id);   // stays lit across a reload
       field.particles.burst('ember', ent.x * TILE + 8, ent.y * TILE + 2, 6, '#ffb060');
       for (const t of targetsOf(ev)) fireTarget(field, t);
       return;
