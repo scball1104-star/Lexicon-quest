@@ -1087,6 +1087,65 @@ def sc_cinder_warden(page, ctx):
     ctx['note'] = f"card {card['name']} / {card['sub']}; looks {','.join(looks)}; oath by keys; rung (broken {broken}); auto {result}"
 
 
+HINT = "window.__hint"
+# count every time the line reaches the log (the log keeps only its last lines); installed on the live scene per fight
+COUNT_HINT = ("(() => { const s = LQ_ENGINE.scene; window.__hint = 0; if (s.__hinted) return; s.__hinted = true; const f = s.logLine.bind(s);"
+              " s.logLine = (t, c) => { if (String(t).includes('too low for Tempered Oath')) window.__hint++; f(t, c); }; })()")
+
+
+def sc_oath_mp_hint(page, ctx):
+    """polish-battle (PLAYTEST_REVIEW_5 fix 2 and 9): the first time Bram drops under the Oath's MP in the Warden fight, one
+    system line, once per save. Bram (MP set to 10) spends a Tech by REAL keys (arrows, KeyZ); the line shows, never twice in
+    the fight, the save gets hint_oath_mp, and a second Warden fight on the same save stays quiet."""
+    _e3_start(page, ctx, 'cinder_warden', 5)
+    page.evaluate("delete LQ_ENGINE.game.flags.hint_oath_mp")
+    page.evaluate(COUNT_HINT)
+    assert _defend_until(page, "LQ_DEBUG.state().battle.current === 'bram'", turns=10), 'no Bram turn'
+    page.evaluate("LQ_ENGINE.scene.b.unit('bram').mp = 10")
+    s = bstate(page)
+    _keys_to(page, 'tech', s['menuRows'])
+    _press(page, 'KeyZ')
+    assert bstate(page)['menu'] == 'sub', bstate(page)['menu']
+    items = page.evaluate("LQ_ENGINE.scene.menu.sub.items.map(i => ({ id: i.id, mp: i.entry.mp || 0, ok: !i.disabled }))")
+    pick = next(i for i, it in enumerate(items) if it['ok'] and it['mp'] >= 3 and it['id'] != 'tempered_oath')
+    for _ in range(pick - page.evaluate("LQ_ENGINE.scene.menu.sub.index")):
+        _press(page, 'ArrowDown')
+    for _ in range(3):
+        _press(page, 'KeyZ')
+        if bstate(page)['menu'] == 'closed':
+            break
+    s = bstate(page)
+    assert s['menu'] == 'closed' and s['actions'][-1].startswith('bram:skill:' + items[pick]['id']), (s['menu'], s['actions'][-2:])
+    advance_until(page, HINT + " > 0 || " + WAIT_PLAYER + " || LQ_DEBUG.battleResult() !== null", max_frames=3000, step=1)
+    assert page.evaluate(HINT) == 1, page.evaluate("LQ_ENGINE.scene.log.slice(-6)")
+    page.evaluate(ADVANCE.format(10))
+    shot(page, ctx, 'hint')
+    _player(page)
+    shot(page, ctx, 'hint_command')
+    # never twice in the fight: Bram refilled and drained again
+    page.evaluate("LQ_ENGINE.scene.b.unit('bram').mp = 20")
+    for _ in range(3):
+        if not _defend_until(page, "LQ_DEBUG.state().battle.current === 'bram'", turns=8):
+            break
+        page.evaluate("LQ_ENGINE.scene.b.unit('bram').mp = 2")
+        page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+    _player(page)
+    assert page.evaluate(HINT) == 1, 'the hint showed twice in one fight'
+    result = _auto_to_end(page, ctx)
+    advance_until(page, "!!LQ_ENGINE.game.flags.hint_oath_mp", max_frames=4000, step=20)
+    # a second Warden fight on the same save: Bram under the cost again, no line
+    page.evaluate("LQ_DEBUG.battle('cinder_warden', { seed: 6, canFlee: false })")
+    advance_until(page, "LQ_DEBUG.state().battle && LQ_DEBUG.state().battle.phase !== 'intro'", max_frames=400, step=2)
+    page.evaluate(COUNT_HINT)
+    assert page.evaluate("!!LQ_ENGINE.game.flags.hint_oath_mp"), 'the flag did not carry into the second fight'
+    assert _defend_until(page, "LQ_DEBUG.state().battle.current === 'bram'", turns=10), 'no Bram turn (second fight)'
+    page.evaluate("LQ_ENGINE.scene.b.unit('bram').mp = 2")
+    page.evaluate("LQ_DEBUG.battleAct({ type: 'defend' })")
+    _player(page)
+    assert page.evaluate(HINT) == 0, 'the hint showed again on the same save'
+    ctx['note'] = f"hint once by keys ({items[pick]['id']}), flag saved, quiet in fight 2; first fight {result}"
+
+
 SCENARIOS = {
     'start': (sc_start, ['desktop', 'phone']),
     'stage': (sc_stage, ['desktop']),
@@ -1123,6 +1182,7 @@ SCENARIOS = {
     'sr_first': (sc_sr_first, ['desktop', 'phone', 'portrait']),
     'bellows_specter': (sc_bellows_specter, ['desktop', 'phone', 'portrait']),
     'cinder_warden': (sc_cinder_warden, ['desktop', 'phone', 'portrait']),
+    'oath_mp_hint': (sc_oath_mp_hint, ['phone']),
 }
 
 

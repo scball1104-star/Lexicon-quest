@@ -80,13 +80,15 @@ export const LEGENDARY_POOL = ['lanternheart', 'first_quill', 'pilgrim_reach', '
   'kept_promise', 'hollowcrown', 'first_bell_hammer', 'tempered_blade', 'warden_heart', 'updraft_charm',
   'codicil', 'marginalia', 'errata', 'countersign', 'strikethrough', 'witness_seal'];
 
-/** The tier rows: tier 4 and 5 at the Willowmere Forge, tier 5 and 6 at the Silverglass Smithy, at the tier's price. */
+/** The tier rows: tier 4 and 5 at the Willowmere Forge, tier 5 and 6 at the Silverglass Smithy, at the tier's price. Only
+ * rows that would be an upgrade for someone in the record the tier is written for (foundry_heart's kit, scored by
+ * game/inventory.js equipScore as the active weapon): no piece the record already wears unless another member gains from it
+ * (Cinder Boots for Mira, the Moonsteel Axe over Bram's hatchet), and no piece the kit outclasses. qa/tier/levers.test.mjs pins it. */
 export const TIER_SHOP_ROWS = {
-  willowmere_smithy: ['silverglass_blade', 'moonsteel_axe', 'mere_pike', 'mirror_rod', 'glasswing_bow', 'silver_mail', 'mirrorweave_robe',
-    'glass_helm', 'mirror_circlet', 'mere_boots', 'veil_mantle', 'ashsteel_cuirass', 'founders_robe', 'ashsteel_helm', 'soot_hood',
+  willowmere_smithy: ['silverglass_blade', 'moonsteel_axe', 'mirrorweave_robe', 'mere_boots', 'veil_mantle', 'founders_robe',
     'cinder_boots', 'carter_mantle'],
-  hollow_smithy: ['ashsteel_cuirass', 'founders_robe', 'ashsteel_helm', 'soot_hood', 'cinder_boots', 'carter_mantle',
-    'tempered_sword', 'forge_axe', 'heartforge_pike', 'founders_rod', 'bellwire_bow', 'tempered_mail', 'ashweave_robe', 'forge_helm'],
+  hollow_smithy: ['founders_robe', 'cinder_boots', 'carter_mantle', 'tempered_sword', 'forge_axe', 'tempered_mail', 'ashweave_robe',
+    'forge_helm'],
 };
 /** A list price at the tier's price, rounded to 10. */
 export function tierPrice(list, T = TIER_TABLE[1]) { return Math.round((list * T.price) / 10) * 10; }

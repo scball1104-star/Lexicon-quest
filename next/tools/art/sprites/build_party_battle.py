@@ -276,7 +276,7 @@ def build():
             else:
                 extra.append((f'{c}_{n}', f))
     import bram_grey as BG
-    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default OFF, Scott's decision pending)
+    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
         allf = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in allf]
         extra = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in extra]
     sheet, rects = pack_rows(allf + extra, CELL, cols)

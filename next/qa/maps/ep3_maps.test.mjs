@@ -182,7 +182,7 @@ const PUZZLES = [
   { map: 'foundry_f2', goal: (r) => reached(r, 'specter_trig'), solution: { sl_g: 1, sl_d1: 1, sl_d2: 1 }, name: 'F2 D, the series' },
   { map: 'foundry_f3', goal: (r) => reached(r, 'anvil_hand'), solution: { sl_h1: 0, sl_h2: 1 }, name: 'F3 the Hand' },
   { map: 'foundry_f3', goal: (r) => reached(r, 'anvil_heart'), solution: { sl_k1: 1, sl_k2: 1 }, name: 'F3 the Heart' },
-  { map: 'foundry_f3', goal: (r) => reached(r, 'anvil_home'), name: 'F3 the Home (the crate as a dam)' },
+  { map: 'foundry_f3', goal: (r) => reached(r, 'anvil_home'), solution: { sl_home: 0 }, name: 'F3 the Home (cool the plug, then dam the junction)' },
 ];
 for (const p of PUZZLES) {
   test(`${p.name}: the start state solves nothing, the intended solution does`, () => {
@@ -201,15 +201,34 @@ test('F1 B teaches permanence: the start state crusts pool 1 (the ledge) and not
   assert.ok(r.water.crust.includes('24,14') && r.water.crust.includes('14,14'), 'both pools end crusted');
 });
 
-test('F1 C and F3 Home: the crate dams the trough where it stands; shoved, the water goes on', () => {
+test('F1 C: the crate dams the trough where it stands; shoved, the water goes on', () => {
   const f1 = walkOf('foundry_f1');
   assert.ok(!f1.water.startFilled.includes('bs_c'), 'the crate dams bs_c');
   assert.ok(f1.water.basinConfigs.bs_c.blocks.ore_c, 'filled with the crate moved');
+});
+
+// F3 Home (PLAYTEST_REVIEW_5 #6): the order puzzle. Turn sl_home to cool the plug, then Shove the crate over it into the
+// junction's straight arm; the dammed water takes the south arm into the lake round the anvil.
+test('F3 Home: an order puzzle: the paddle alone cools only the plug, the crate alone moves nowhere, both in turn cool the lake', () => {
   const f3 = walkOf('foundry_f3');
-  assert.ok(!f3.water.startCrust.includes('28,27'), 'the anvil ring is molten at the start (the short branch takes the water)');
-  assert.ok(f3.water.crust.includes('28,27'), 'the ring cools once the crate dams the short branch');
-  const home = f3.water.crustConfigs.find((c) => c.cell === '28,27');
-  assert.deepEqual(home.blocks.ore_home, [14, 28], 'the crate stands in the short branch (14,28)');
+  const LAKE = '23,28', PLUG = '22,27';
+  assert.ok(!f3.water.startCrust.includes(PLUG) && !f3.water.startCrust.includes(LAKE), 'the start state cools nothing');
+  assert.deepEqual(f3.water.start.splashes.filter((s) => s.y >= 26).map((s) => [s.x, s.y, s.floor]), [[25, 26, true]], 'the start water puddles at the entrance');
+  const plug = f3.water.crustConfigs.find((c) => c.cell === PLUG);
+  assert.deepEqual(plug.states, { sl_home: 0 }, "the plug cools with the paddle turned '/'");
+  assert.deepEqual(plug.blocks.ore_home, [22, 29], 'with the crate where it stands');
+  const lake = f3.water.crustConfigs.find((c) => c.cell === LAKE);
+  assert.deepEqual(lake.states, { sl_home: 0 }, 'the lake needs the paddle turned too');
+  assert.deepEqual(lake.blocks.ore_home, [22, 26], 'and the crate in the corner (22,26), over the cooled plug');
+  // the paddle alone: the plug cools, the lake does not
+  const paddle = walk({ ...maps.foundry_f3, events: maps.foundry_f3.events.map((e) => (e.id === 'ore_home' ? { ...e, type: 'object', text: 'ore_crate' } : e)) }, db, PROGRESS.foundry_f3);
+  assert.ok(paddle.water.crust.includes(PLUG) && !paddle.water.crust.includes(LAKE), 'paddle only: plug crust, lake molten');
+  assert.equal(reached(paddle, 'anvil_home'), false);
+  // the crate alone (paddle fixed at its start): the plug never cools, so the crate never reaches the corner
+  const crate = walk(fix(maps.foundry_f3, { sl_home: 1 }), db, PROGRESS.foundry_f3);
+  assert.ok(!crate.water.crust.includes(PLUG) && !crate.water.crust.includes(LAKE), 'crate only: nothing cools');
+  assert.equal(reached(crate, 'anvil_home'), false);
+  assert.equal(reached(f3, 'anvil_home'), true, 'both, in turn: the anvil');
 });
 
 test('softlock rules (plan 5.1): basins latch, troughs are walkable, every sluice is reachable, systems stay small, slag pools are bodies of 96 or fewer', () => {

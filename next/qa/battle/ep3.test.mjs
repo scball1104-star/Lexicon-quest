@@ -544,3 +544,21 @@ test('the Warden fight is deterministic and its state survives a save/restore mi
   assert.equal(clone.unit('e0').heatMax, 3);
   assert.equal(clone.knowledge('e0').heatMax, 3);
 });
+
+test('polish-battle: Bram under the Oath MP in the Warden fight gets one hint line, once per save (flag in result)', () => {
+  const HINT = (evs) => evs.filter((e) => e.type === 'message' && /too low for Tempered Oath/.test(e.text)).length;
+  const run = (flags) => {
+    const b = sturdy(battle(['cinder_warden'], { rng: midRng, party: makeParty('foundry_heart', 16), options: { boss: true, flags } }));
+    const seen = untilTurn(b, 'bram');
+    b.unit('bram').mp = SKILLS.tempered_oath.mp + 1;
+    seen.push(...b.perform({ type: 'skill', skill: 'lunge', target: b.living('enemy')[0].uid }));
+    for (let i = 0; i < 12 && !b.isOver(); i++) { b.unit('bram').mp = 0; const u = b.current(); seen.push(...(u.side === 'party' ? b.perform({ type: 'defend' }) : b.runEnemyTurn())); }
+    return { b, n: HINT(seen) };
+  };
+  const first = run({ bram_memory_3: true });
+  assert.equal(first.n, 1, 'one line, never twice in the fight');
+  assert.equal(first.b.state.hint, 'hint_oath_mp');
+  assert.equal(run({ bram_memory_3: true, hint_oath_mp: true }).n, 0, 'quiet once the save holds the flag');
+  const other = sturdy(battle(['cinder_beetle'], { rng: midRng, party: makeParty('foundry_heart', 16), options: { flags: { bram_memory_3: true } } }));
+  for (let i = 0; i < 6 && !other.isOver(); i++) { other.unit('bram').mp = 0; const u = other.current(); assert.equal(HINT(u.side === 'party' ? other.perform({ type: 'defend' }) : other.runEnemyTurn()), 0, 'no Warden, no hint'); }
+});

@@ -97,6 +97,11 @@ export class Quench {
     this.wetArt = new Array(W * H).fill(null);
     this.slagCells = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) this.gridCell(x, y, db);
+    // a lone slag cell (F3 Home's plug) off the checkerboard still gets its light: the hazard is the lamp
+    for (let y = 0; y < H; y++) for (let x = (y + 1) & 1; x < W; x += 2) {
+      const i = y * W + x;
+      if (this.grid[i] === 2 && ![[0, -1], [1, 0], [0, 1], [-1, 0]].some(([dx, dy]) => this.slagAt(x + dx, y + dy))) this.slagCells.push(i);
+    }
   }
   gridCell(x, y, db = this.map.db) {
     const map = this.map, i = this.idx(x, y);

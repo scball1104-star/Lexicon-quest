@@ -31,7 +31,7 @@ Scott's yes. Evidence tags: **Fact** read in code or run on 10/28, **Inference**
 | EXP | x1 | **x1.5** (battle gold x1.5 with it) |
 | Drop item level | the zone's | **+6, capped at 16** (elite and boss drops too) |
 | Rarity | normal 70/25/5, elite 70/30 magic/rare, boss rare 100; no legendaries | **normal 50/35/15**, **elite magic 35 / rare 60 / legendary 5**, **boss rare 85 / legendary 15** |
-| Shops | the base stock | **tier 4 and 5 at the Willowmere Forge, tier 5 and 6 at the Silverglass Smithy**, at 1.25x list |
+| Shops | the base stock | **tier 4 and 5 at the Willowmere Forge, tier 5 and 6 at the Silverglass Smithy**, at 1.25x list; only rows that are an upgrade for someone in the Episode 3 record (8 and 8 since 11/3, were 17 and 14) |
 
 **Why the lift** (Fact, `tools/sim`, 10/28). HARD_ROAD's table was written as if the party met each foe at the foe's own
 level. A carried party is Lv 13 with tier 4 gear, and at HP x1.6 alone Episode 1 lasts 1.4 to 3.9 rounds a fight (the

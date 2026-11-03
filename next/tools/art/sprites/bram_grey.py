@@ -2,22 +2,24 @@
 grey to the beard and the temples, so the sprites match the grey-bearded `bram` portrait. A recolour, no redraw:
 every hair-brown pixel in two bands of the head turns to the matching step of a grey ramp.
 
-    ENABLED          the ONE flag. False by default (Scott's decision is pending); True when the environment
-                     variable LQ_BRAM_GREY=1 is set for the build:   LQ_BRAM_GREY=1 python build_all.py
-    apply(img)       -> img recoloured (always; callers check ENABLED)
+    ENABLED          the ONE flag. True by default (decision 2 shipped grey, E3-fixes-battle 11/2); a build with the
+                     environment variable LQ_BRAM_GREY=0 draws the old brown Bram:   LQ_BRAM_GREY=0 python build_all.py
+    apply(img)       -> img recoloured (always; callers check ENABLED): temples and beard to the grey ramp, then the
+                     crown a salt-and-pepper mix (CROWN_MIX), folded in from qa/battlescene/art/bram_grey_pass.py
     python bram_grey.py     writes out/bram_grey_before_after.png: the field and battle frames before and after, next
                             to the bram portrait (works with the flag off)
 
 The bands, measured from the top row of the hair (y0): the temples are y0+4 .. y0+8 within 2 px of the head's left and
-right edge; the beard is y0+9 .. y0+13 (everything hair-brown). The crown stays brown, so he reads as a brown-haired
-man gone grey at the jaw and sides (Chrono Trigger's Frog / FF6's Cyan manner: a few steps, not a wash).
+right edge; the beard is y0+9 .. y0+13 (everything hair-brown). The crown (the head's biggest hair blob in the 14 rows
+from y0) takes CROWN_MIX of the matching grey, so he reads as a man of about fifty, grey at the jaw and sides.
 """
 import os
 import numpy as np
 import pal as P
 from pix import hex2rgb
 
-ENABLED = os.environ.get('LQ_BRAM_GREY', '0') == '1'
+ENABLED = os.environ.get('LQ_BRAM_GREY', '1') != '0'
+CROWN_MIX = 0.45     # share of grey in the crown
 
 
 def _c(ref):
@@ -30,6 +32,23 @@ GREY = [_c('stone_cool:3'), _c('stone_cool:4'), _c('stone_cool:5'), _c('metal:3'
 
 
 def apply(img):
+    out = _bands(img)
+    from scipy import ndimage as ndi
+    op = img[..., 3] > 0.5
+    hair = op & np.any([np.all(np.abs(img[..., :3] - b) < 0.012, -1) for b in BROWN], 0)
+    if not hair.any():
+        return out
+    # the head's hair only: the biggest hair blob within 14 rows of the top hair row (not boots, belt or shaft)
+    y0 = np.nonzero(hair)[0].min(); hair[y0 + 14:] = False
+    lab, n = ndi.label(hair, np.ones((3, 3)))
+    head = lab == 1 + np.argmax(ndi.sum(hair, lab, range(1, n + 1)))
+    for b, g in zip(BROWN, GREY):
+        m = head & np.all(np.abs(img[..., :3] - b) < 0.012, -1) & np.all(out[..., :3] == img[..., :3], -1)
+        out[m, :3] = b * (1 - CROWN_MIX) + g * CROWN_MIX
+    return out
+
+
+def _bands(img):
     out = img.copy()
     op = img[..., 3] > 0.5
     hair = np.zeros(op.shape, bool)

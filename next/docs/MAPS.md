@@ -515,10 +515,22 @@ Hub (arrival (17,21), `bell_gate` (20..22, 13; `flags` the three oaths), `gate_t
 Hand: cistern `sp_h` (13,14) -> `sl_h1` (13,17; start '\' splashes in the passage) '/' cools pool 1 -> `sl_h2` (8,17):
 '/' pool 3 (south bank, iron chest), '\' pool 2 (north bank, `anvil_hand`). The Heart: H1 `sp_k1` -> `sl_k1` '\' ->
 `bs_k1` -> `hg_k1` (33,16); H2 `sp_k2` -> `sl_k2` '\' -> `bs_k2` -> `hg_k2` (38,10); H3 `anvil_heart` (33,5), the
-furnace (40,3), `vex_trig` (39..41, 4), `vex_feather`. The Home: `sp_home` (14,25) -> the junction (14,27): straight on
-into a pool that does nothing; `ore_home` (16,28) shoved west twice to (14,28) dams it and the water runs row 27 to the
-ring round `anvil_home` (30,28). Keeper ink (10,24) beside the hidden ink bridge (9,28) to the cache: Tempered Lexicon
-Blade. Antechamber: `door_heart` (20..22, 4, Crucible Hook), `font_fo3`, wood chest.
+furnace (40,3), `vex_trig` (39..41, 4), `vex_feather`. The Home (10..30, 26..30) is the episode's one order puzzle,
+"cool this, then redirect to that" (PLAYTEST_REVIEW_5 #6). `sp_home` (24,25) pours onto `sl_home` (24,26); its start '\'
+spills east onto the floor at the entrance (25,26), a puddle that does nothing. **Solution (4 actions):** (1) turn
+`sl_home` to '/': the water runs west through the junction (23,26), straight on into the corner (22,26) and down the
+crate's slot onto the slag plug (22,27), which cools; the water puddles in front of `ore_home` (22,29). (2 to 4) from
+(22,30) Shove the crate up three times, over the cooled plug into the corner: the junction's straight arm is dammed, so
+the water takes its south arm (23,27) into the lake (23..28, 27..29, 15 cells), which cools round the island and `anvil_home` (25,28;
+mark (26,28)). **Wrong order:** shoved first, the crate stops at the foot of the glowing plug and goes no further (Bram
+strains, nothing moves); turned back early, the puddle at the entrance comes back; on the plug, foam at the corner. Every
+wrong order recovers by doing the missing step. The floor cell (22,28) between plug and crate keeps the crate's top from
+hiding the plug at rest. **No softlock:** the slot (22, 26..30) runs between a wall spur (21, 26..28) and the
+junction's arm, and the corner, the junction and the plug are reached only through the crate's slot or the lake, so the
+crate can only ever move up and stops in the corner (`qa/world/e3_home.test.mjs` explores every turn, shove and reload).
+Plug and lake crust persist; the paddle and the crate reset on re-entry. The plug is a lone slag cell and is lit as one
+(`Quench.buildGrid`). Keeper ink (10,24) beside the hidden ink bridge (9,28) to the cache: Tempered Lexicon Blade.
+Antechamber: `door_heart` (20..22, 4, Crucible Hook), `font_fo3`, wood chest.
 
 ### foundry_heart (24 x 20, dark 0.2): The Heartforge
 ![foundry_heart](../tools/maps/previews/foundry_heart.png)

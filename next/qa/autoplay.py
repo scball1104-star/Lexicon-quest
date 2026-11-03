@@ -3544,10 +3544,12 @@ class Episode3(Episode):
             self.hunt(2, label='hand bank')
             self.strike('anvil_hand', 'oath_hand')
         b.maintain('after the hand')
-        # The Home (south): the crate shoved west twice dams the short branch; the water runs round the anvil
+        # The Home (south), an order puzzle: turn sl_home first (the water cools the plug in the crate's slot), then shove
+        # the crate up twice over the cooled plug into the corner; the dammed junction runs the water into the anvil's lake
         if not self.has('oath_home'):
             self.hunt(2, label='home wing')
-            self.solve_quench('foundry_f3', 'crust 28,27', label='home ring')
+            self.solve_quench('foundry_f3', 'crust 22,27', blocks=False, label='home plug')
+            self.solve_quench('foundry_f3', 'crust 23,28', label='home lake')
             self.hunt(2, label='home ring')
             self.strike('anvil_home', 'oath_home')
             if self.side and not b.opened('foundry_f3', 'chest_blade'):

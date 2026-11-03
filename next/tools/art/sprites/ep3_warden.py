@@ -12,8 +12,13 @@ for every look.
 Focal point (CRITIQUE_4 item 15): every look has ONE brightest place, the furnace grate in the chest (a lit,
 value-grouped disc, not speckle), and the body is held to four value groups per material.
 
+Value pass (CRITIQUE_5 item 1, folded in from qa/battlescene/art/warden_value_pass.py): every Tempered Iron and Molten
+Shell frame (not Quenched Core) gets value_pass() as its last step, so the body reads dark on the red forge backdrop:
+body plate about two steps darker, speckle merged by a 3x3 majority, a warm 1 px top light; grate, lamps, seams, rim kept.
+
     base()          -> {id: rgba}            facing RIGHT, origin bottom-centre
-    atlas_frames()  -> [(name, rgba, ox, oy)]
+    atlas_frames()  -> [(name, rgba, ox, oy)]  (value pass applied)
+    value_pass(u8)  -> u8 frame               (RGBA uint8 in, out)
 """
 import numpy as np
 from pix import *
@@ -278,13 +283,50 @@ def derived(bid, img):
     return pack3(bid, img, raw)
 
 
+RIM_TOP = (150, 78, 44)
+
+
+def value_pass(c):
+    rgb = c[..., :3].astype(float) / 255; m = c[..., 3] > 0
+    L = rgb @ np.array([0.2126, 0.7152, 0.0722]); mx = rgb.max(-1); mn = rgb.min(-1)
+    sat = np.where(mx > 0, (mx - mn) / np.maximum(mx, 1e-6), 0)
+    warm = rgb[..., 0] >= rgb[..., 2]
+    glow = m & ((warm & (mx > 0.8) & (sat > 0.4)) | (L > 0.75))     # lamps, seams, white heat
+    # the furnace grate: the largest red blob, filled, kept whole (the focal point)
+    lab, n = ndi.label(m & (rgb[..., 0] > 1.6 * rgb[..., 1]) & (rgb[..., 0] > 0.3))
+    if n:
+        big = lab == 1 + np.argmax(ndi.sum(np.ones_like(lab), lab, range(1, n + 1)))
+        glow |= ndi.binary_dilation(ndi.binary_fill_holes(big), iterations=1) & m
+    pad = np.pad(m, 1); edge = m & ~(pad[:-2, 1:-1] & pad[2:, 1:-1] & pad[1:-1, :-2] & pad[1:-1, 2:])
+    body = m & ~glow & ~edge
+    out = rgb.copy(); out[body] = (rgb * np.where(L < 0.3, 0.58, 0.72)[..., None])[body]
+    q = (out * 255).astype(int); key = (q[..., 0] << 16) | (q[..., 1] << 8) | q[..., 2]
+    res = key.copy(); H, W = key.shape
+    for y in range(1, H - 1):
+        for x in range(1, W - 1):
+            if not body[y, x]: continue
+            win = key[y - 1:y + 2, x - 1:x + 2][body[y - 1:y + 2, x - 1:x + 2]]
+            v, k = np.unique(win, return_counts=True)
+            if k.max() >= 5 and (key[y, x] == v).sum() == 1 and (win == key[y, x]).sum() <= 2: res[y, x] = v[k.argmax()]
+    q = np.stack([(res >> 16) & 255, (res >> 8) & 255, res & 255], -1)
+    q[body & np.pad(edge, ((1, 0), (0, 0)))[:-1] & ~np.pad(m, ((2, 0), (0, 0)))[:-2]] = RIM_TOP
+    c2 = c.copy(); c2[..., :3] = np.where(body[..., None], q, c[..., :3]); return c2
+
+
+def _passed(img):
+    u = (np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8); u[u[..., 3] == 0] = 0   # save_indexed's rounding
+    return value_pass(u).astype(np.float32) / 255
+
+
 def atlas_frames():
     out = []
     for bid, img in build().items():
         H, W = img.shape[:2]
-        out.append((bid, img, W // 2, H - 1))
         fr = derived(bid, img)
-        out += [(f'{bid}_{n}', *fr[n]) for n in AF.ORDER if n in fr]
+        fs = [(bid, img, W // 2, H - 1)] + [(f'{bid}_{n}', *fr[n]) for n in AF.ORDER if n in fr]
+        if bid != 'cinder_warden_quenched':
+            fs = [(n, _passed(f), ox, oy) for n, f, ox, oy in fs]
+        out += fs
     return out
 
 

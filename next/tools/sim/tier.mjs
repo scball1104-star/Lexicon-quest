@@ -21,6 +21,7 @@ import { ENCOUNTERS, ZONES, ZONE_ORDER, EP2_ZONE_ORDER, encounterExp } from '../
 import { ENEMIES } from '../../src/data/enemies.js';
 import { ITEMS } from '../../src/data/items.js';
 import { SHOPS, shopStock } from '../../src/data/shops.js';
+import { fits, equipScore } from '../../src/game/inventory.js';
 import { expForLevel, levelForExp, newMember } from '../../src/data/party.js';
 import { register } from '../../src/data/tier/index.js';
 import { TIER_TABLE, TIER_FLAG, TIER_SHOP_ROWS, tierPrice, liftLevel, metLevel } from '../../src/data/tier/tier.js';
@@ -32,7 +33,9 @@ export const T = TIER_TABLE[1];
  * Tempered Oath waits for its scene again). */
 LOADOUTS.tier_carry = { ...LOADOUTS.foundry_heart, flags: [TIER_FLAG] };
 export const TIER_LOADOUT = 'tier_carry';
-/** The purse the record carries in: the Episode 3 quick start's (state.js EP3_START gold), an Episode 2 finisher's. */
+/** The purse the record carries in: the Episode 3 quick start's (state.js EP3_START gold). Inference, 11/3: an Episode 3 floor
+ * finisher (economy3: 1,500 + 4,760 battle gold, no chests or sales) carries 4,460 after the town's two tier 5 pieces and less
+ * with each tier 6 buy (1,400 to 3,300), so 1,500 is a cautious middle; the check needs 1,060 for the first tier 5 buy. */
 export const CARRY_GOLD = 1500;
 
 /** The party's level on the tier at the point where the base game is at level L (the record's EXP plus the tier's pay). */
@@ -127,6 +130,15 @@ export function checkFirstFight(f = firstFight()) {
  * first morning, two more before the Rootbound Stacks, never the whole tier stock by the credits, so gold keeps a use from
  * the first morning to the end.
  */
+/** How many of the carried record's members gain from wearing `id` (equipScore over what each wears, as the active weapon). */
+export function gainers(id, kit = LOADOUTS.tier_carry) {
+  const it = ITEMS[id], key = it.slot === 'weapon' ? it.type : it.slot;
+  return ['hero', 'mira', 'bram'].filter((c) => {
+    const m = newMember(c, { level: levelForExp(T.lift.carryExp) });
+    m.equip = { ...m.equip, ...kit[c].equip }; m.weapon = it.slot === 'weapon' ? key : kit[c].weapon;
+    return fits(m, key, id) && equipScore(m, key, id) - it.ilvl * 0.01 > 0;
+  }).length;
+}
 export function economyTier({ startGold = CARRY_GOLD } = {}) {
   const rows = [];
   let gold = startGold;
@@ -138,7 +150,8 @@ export function economyTier({ startGold = CARRY_GOLD } = {}) {
   const flags = { [TIER_FLAG]: true };
   const stock = shopStock('willowmere_smithy', flags).filter((s) => s.ifFlag === TIER_FLAG);
   const price = (s) => s.price ?? ITEMS[s.item].price;
-  const t5 = stock.filter((s) => ITEMS[s.item].ilvl >= 14).map(price).sort((a, b) => a - b);
+  // a piece per member it upgrades (the rows are only upgrades for the record: TIER_SHOP_ROWS): three mantles are three buys
+  const t5 = stock.filter((s) => ITEMS[s.item].ilvl >= 14).flatMap((s) => Array(gainers(s.item)).fill(price(s))).sort((a, b) => a - b);
   const everything = stock.reduce((n, s) => n + price(s), 0);
   const beforeF3 = rows.find((r) => r.zone === 'archive_f3').arrive;
   return { rows, start: startGold, end: gold, beforeF3, cheapestT5: t5[0] || 0, threeT5: (t5[0] || 0) + (t5[1] || 0) + (t5[2] || 0), everything,
@@ -164,6 +177,7 @@ export function checkTable(progression) {
   if (fin !== T.lift.carryExp) fails.push(`tier table: carryExp ${T.lift.carryExp} is not the simulator's Episode 3 finish (${fin})`);
   for (const [shopId, ids] of Object.entries(TIER_SHOP_ROWS)) {
     for (const id of ids) {
+      if (!gainers(id)) fails.push(`tier rows: ${shopId} ${id} is no upgrade for anyone in the carried record`);
       const row = SHOPS[shopId].stock.find((s) => s.item === id && s.ifFlag === TIER_FLAG);
       if (!row) fails.push(`tier rows: ${shopId} lacks ${id}`);
       else if (row.price !== tierPrice(ITEMS[id].price)) fails.push(`tier rows: ${shopId} ${id} at ${row.price}, the tier price is ${tierPrice(ITEMS[id].price)}`);
