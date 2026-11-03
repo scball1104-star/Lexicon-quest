@@ -209,7 +209,7 @@ starts it on the field.
 `reflections()`, `newGameEp2(name)`; `fieldState().glass`. Fixtures: `_testcourt`, `_testcourt_dark`, `_testmere` in
 `world/_testmap.js`. Tests: `qa/world/beam.test.mjs` (tracing), `e2_field.test.mjs` (receptors, gates, latch, scripts,
 bridges, grace, inlays, sliding mirrors, the vow door, gated overlays, reflection budget on a headless field),
-`e2_plumbing.test.mjs`, and `walks.test.mjs` (solo slot) which also runs `python qa/world/e2_lab.py [beam bridge shove dark mere doors
+`e2_plumbing.test.mjs`, and `labs_walks.test.mjs` (solo slot) which runs `python qa/world/e2_lab.py [beam bridge shove dark mere doors
 plumbing] [--device phone]` (asserted walks; shots `qa/world/out/e2_*.png`). `walks.py` walks Episode 2 maps with the
 Episode 2 story flags set (no scene fires mid-walk).
 
@@ -326,7 +326,7 @@ spawns `garrick_t` named "Garrick" under the flash (`ep3.js warden_after`), and 
 **Debug.** `LQ_DEBUG.quench()` (streams, wet cells, basins, crust count, front), `turnSluice(id)`, `fieldState().quench`.
 Fixtures `_testforge` (a Slag Hall: spout, sluice, two pools, a dam, basins, a hot grate, a flag gate, a lift) and
 `_testforge_dark` (dark 0.5, lit by its slag). Tests: `qa/world/e3_flow.test.mjs` (tracing), `e3_field.test.mjs`
-(headless field), `walks.test.mjs` (solo slot) runs `python qa/world/e3_lab.py` (browser walk and shots `qa/world/out/e3_*.png`).
+(headless field), `labs_walks.test.mjs` (solo slot) runs `python qa/world/e3_lab.py` (browser walk and shots `qa/world/out/e3_*.png`).
 
 ## 2. Map module vocabulary (DESIGN 5.1 plus)
 

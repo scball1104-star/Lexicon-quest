@@ -1,6 +1,8 @@
 # Episode 3 trim proposal: Emberpeak arrival, pre-Warden, and the "hearth" line
 
-Status: PROPOSAL for Scott. Nothing in `ep3.js` has been changed. Drafted 2026-11-03.
+Status: APPLIED 2026-11-03 on Scott's "go with your recommendations": cut Veyra 4 and 5, memorial 3, Ilya 1, pre-Warden 1 and 3;
+hearth option 2. KEPT (likely missed later): memorial 7 (Mira's only reaction at the wall), Ilya 10 (the valley bell),
+Warden box 4 (the founder named), and the optional Rusk cut. Drafted 2026-11-03.
 Source of the ask: `docs/PLAYTEST_REVIEW_5.md` section 1, trims e and f (target: first play under 90 minutes, now
 estimated 75 to 97).
 

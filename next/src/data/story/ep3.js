@@ -57,7 +57,7 @@ async function ep3_morning(s) {
   await say(s, 'wren_up', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
   await s.walk('hero', ['down']);
   await s.camera.panTo('smith_seat', 40);
-  await narrate(s, `${s.mapId === 'nameless_hollow' ? 'Against the inn wall' : 'By the hearth'} sits an old man grey with road dust, his hands open on his knees as if he has put something down.`);
+  await narrate(s, `${s.mapId === 'nameless_hollow' ? 'Against the inn wall' : 'By the guest-room wall'} sits an old man grey with road dust, his hands open on his knees as if he has put something down.`);
   await s.walk('bram', 'smith_seat');
   await s.face('bram', 'smith');
   await say(s, 'bram', '...Dad.');
@@ -230,8 +230,6 @@ async function veyra_square(s) {
   await s.face('veyra', 'hero');
   await say(s, 'veyra', "Foreman Veyra. You're not shift, you're not Watch. Can you carry a crate?");
   await say(s, 'veyra', 'The furnaces woke a month ago with nobody feeding them. The Warden runs the lifts now.');
-  await say(s, 'veyra', 'The mine gates are shut from inside. Names come off the memorial wall about one a week.');
-  await say(s, 'veyra', "We sand the plates and pretend it's soot.");
   await say(s, 'veyra', "The foundry gate answers to one key. The founder's apprentice keeps it. Ilya, in the Bell House.");
   await s.face('veyra', 'bram');
   await say(s, 'veyra', "You've got a guard's back and a smith's hands. Which are you?");
@@ -258,7 +256,6 @@ async function memorial_wall(s) {
   await narrate(s, 'Names Etched in Iron. Rows of plates bolted to the wall, each stamped with a name. One plate has been hammered flat.');
   await narrate(s, 'Below it hangs a newer plate. Its letters are going soft, like wax near a fire.');
   await s.walk('smith', 'memorial');
-  await narrate(s, 'The Smith lays his hand on the flat place.');
   await say(s, 'smith', "That's hers.");
   await say(s, 'bram', 'What was it?');
   await say(s, 'smith', "I'd tell you if I had it.");
@@ -274,7 +271,6 @@ async function memorial_wall(s) {
 // The key's display name must not carry the founder's name (see EPISODE3.md build notes).
 async function ilya_bellhouse(s) {
   await s.spawn('smith', { sprite: 'npc_smith', name: 'The Smith', at: 'bellhouse_in', dir: 'up' });
-  await narrate(s, 'A workshop kept exactly as it was left. Bell molds on the shelves, and a practice bell over a bench with no dust.');
   await s.face('ilya', 'hero');
   await say(s, 'ilya', 'Veyra sent you. She sends everyone she cannot use herself. Mind the molds.');
   await s.camera.panTo('ilya_spot', 30);
@@ -567,9 +563,7 @@ async function cinder_warden(s) {
   await s.music(null);
   await s.camera.panTo('warden', 40);
   await s.wait(40);
-  await narrate(s, 'A round crucible hall. A furnace the size of a house, and before it a bronze guardian with a molten hammer.');
   await say(s, 'cinder_warden', 'THE FIRE MUST NOT GO OUT.');
-  await say(s, 'cinder_warden', 'ASH IS CLEAN. ASH FORGETS.');
   await s.shake(2, 30);
   await say(s, 'cinder_warden', 'THE ORE COUNTER. YOU AND THE FOUNDER STOPPED MY FIRE.');
   const c = await s.choice(['Put it out.', 'We came for two names.']);

@@ -28,7 +28,7 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
 - Usage guard (Scott): check `mcp__ccd_session_mgmt__get_usage`. Weekly (all models) under 75% = up to 3 agents at
   once; 75 to 85% = one at a time; over 85% = none. Weekly resets Tuesdays 9am ET. Fable may be capped; use Opus or
   Sonnet. Leave room for Scott's scheduled loops and the teams' schedule generators.
-- Flaky-test note: `qa/world/walks.test.mjs` and `abilities_walks` run Chromium; if one fails in the full run, rerun
+- Flaky-test note: `qa/world/walks.test.mjs`, `labs_walks` and `abilities_walks` run Chromium; if one fails in the full run, rerun
   it alone before treating it as real.
 
 ## Status at handoff
