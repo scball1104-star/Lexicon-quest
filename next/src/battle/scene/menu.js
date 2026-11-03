@@ -1,22 +1,19 @@
-// Battle command menu and targeting (W2-battle-scene), built on W2-ui's List.
-//
-//   const menu = new CommandMenu(scene);
-//   menu.open(unit)                       // b.commands(unit) -> root list (Attack, Tech, Magic, Fury, Combo, Item, Defend, Swap, Flee)
-//                                         // laid out in two columns of four (W7): left column first, then the right
-//                                         // one; on the touch layout Flee is the FLEE button in the help window
-//                                         // (menu.fleeTap: first tap arms, second runs).
-//   const action = menu.update(input, audio);   // the chosen action { type, skill|item, target } or null
-//   menu.draw(r); menu.close(); menu.state ('closed' | 'root' | 'sub' | 'target'); menu.preview; menu.helpText
-//   menu.cmdRect / menu.subRect           // the windows for the current layout (layout.cmdWin / subWin)
-//
-// Targeting: left/right cycle the targets by x, up/down by y; `all`/`random` highlight every target;
-// `self` shows the reticle on the actor. Touch: tap a command row, tap it again to confirm (List's tap model),
-// tap a target, tap it again to confirm; rows are TOUCH_ROW_H tall while the touch controls show (W5), so
-// the command window grows upward (layout.CMD_WIN_TOUCH) and the sub-list window moves up with it.
+// Battle command menu and targeting on W2-ui's List: menu.open(unit) -> root (two columns of four, W7); menu.update
+// returns { type, skill|item, target } or null. Touch: tap a row or target, tap again to confirm; FLEE arms then runs.
 
 import { List, touchUi } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
 import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox } from './layout.js';
+import { SKILLS } from '../../data/skills.js';
+
+const ELEMS = ['fire', 'ice', 'thunder', 'light'], ARMS = ['sword', 'spear', 'staff', 'axe', 'bow'];
+/** The foe row's icon_<type> a skill hits with: its element first, else its weapon type ($weapon = the user's). */
+function hitIcon(sk, u) {
+  if (!sk) return null;
+  const w = u && u.weapon;
+  const ts = [...(sk.types || []), ...(sk.parts || []).flatMap((p) => p.types || [])].map((t) => (t === '$weapon' ? w : t));
+  return ts.find((t) => ELEMS.includes(t)) || (sk.weaponTyped && ts.includes(w) ? w : ts.find((t) => ARMS.includes(t))) || null;
+}
 
 // One short line each (at most 111 px): the help window shares its width with the Auto / Speed hint (W5).
 const CMD_HELP = {
@@ -130,14 +127,15 @@ export class CommandMenu {
       id: e.skill || e.item, entry: e, label: e.name, disabled: !e.enabled,
       right: e.skill ? (e.mp ? `${e.mp} MP` : (cmd.id === 'fury' ? 'FURY' : '')) : `x${e.qty}`,
       rightColor: e.skill ? 'blue' : 'gray', help: e.enabled ? e.help : (e.reason || e.help),
-      color: cmd.id === 'combo' ? 'cyan' : 'white',
+      color: cmd.id === 'combo' ? 'cyan' : 'white', icon: e.skill ? hitIcon(SKILLS[e.skill], this.unit) : null,
     }));
     if (!list.length) return false;
+    const icons = list.some((it) => it.icon);
     this.subCmd = cmd;
     this.showHelp = true;
     const win = this.subRect, rowH = this.rowH;
     this.sub = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 24, rows: cmdRowsFor(win, rowH), rowH, items: list, bar: true,
-      textX: 2, icons: false, confirmSfx: false, cancelSfx: false, rightPad: 4 });
+      textX: icons ? 15 : 2, icons, iconX: 1, confirmSfx: false, cancelSfx: false, rightPad: 4 });
     this.state = 'sub';
     this.syncHelp();
     return true;
