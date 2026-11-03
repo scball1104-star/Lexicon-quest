@@ -51,10 +51,11 @@ def build():
             anims[f'{c}_walk_{d}'] = {'frames': [f'{c}_{d}_1', f'{c}_{d}_0', f'{c}_{d}_2', f'{c}_{d}_0'], 'fps': 8, 'loop': True}
             anims[f'{c}_idle_{d}'] = {'frames': [f'{c}_{d}_0'] * 22 + [f'{c}_{d}_blink'] + [f'{c}_{d}_0'], 'fps': 8, 'loop': True}
     import bram_grey as BG
-    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default OFF, Scott's decision pending)
+    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
         frames = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in frames]
     sheet, rects = pack_rows(frames, CELL, 4)
-    save_png(sheet, os.path.join(DST, 'party_field.png'))
+    import anim_atlas as AA
+    AA.save_indexed(sheet, os.path.join(DST, 'party_field.png'))   # paletted: about half the RGBA bytes
     meta = {'image': 'party_field.png', 'cell': list(CELL), 'origin': [12, 31],
             'layout': 'per character a 4-row block (down, left, right, up); columns stand, stepA, stepB, blink',
             'frames': rects, 'anims': anims}

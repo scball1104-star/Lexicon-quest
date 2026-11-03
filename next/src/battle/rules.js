@@ -174,10 +174,7 @@ export function hasFlag(flags, flag) {
  * Convenience for the field/battle scenes: build a battle from an encounter id (rolls elites,
  * applies boss/flee/zone/music rules). opts: { party, rng, inventory, bestiary, start, eliteRate,
  * forceElite, noElite, flags, startFury }. Returns { battle, encounter } where encounter = { id, zone, music, boss,
- * enemies, flag, startFury }.
- * `flags` (Set, array, {flag: true} or a has(flag) function) is read for the encounter's `startFury: { flag, amount }`
- * (the Nameless King: +25 Fury with `fountain_done`, the Cinder Warden with `coolant_done`); `startFury` (a number) overrides
- * it. The same `flags` decide the skills learned by a story flag (Bram's Tempered Oath, `bram_memory_3`).
+ * enemies, flag, startFury }. `flags` (see hasFlag) gate the encounter's startFury and flag-learned skills.
  */
 export function createEncounterBattle(encounterId, opts = {}) {
   const e = ENCOUNTERS[encounterId];
@@ -1201,6 +1198,11 @@ export function createBattle(cfg = {}) {
       state.turn++;
       if (u.side === 'party') state.partyTurns++; else state.enemyTurns++;
     }
+    // once per save: Bram under the Oath's MP in a fight a Last Hammer can come (the Warden)
+    const o = SKILLS.tempered_oath, br = living('party').find((x) => x.id === 'bram');
+    if (br && !state.hint && br.mp < o.mp && br.skills.includes(o.id) && !hasFlag(storyFlags, 'hint_oath_mp') && living('enemy').some((f) => f.id === 'cinder_warden')) {
+      state.hint = 'hint_oath_mp'; emit({ type: 'message', text: `Bram is under ${o.mp} MP: too low for ${o.name}.` });
+    }
   }
 
   function checkEnd() {
@@ -1474,7 +1476,7 @@ export function createBattle(cfg = {}) {
           fury: u.fury, weapon: u.weapon })),
         revealed: JSON.parse(JSON.stringify(state.revealed)),
         turns: state.turn, partyTurns: state.partyTurns, enemyTurns: state.enemyTurns,
-        rounds: state.partyTurns / state.partySize, time: state.now,
+        rounds: state.partyTurns / state.partySize, time: state.now, hint: state.hint,
       };
     },
   };

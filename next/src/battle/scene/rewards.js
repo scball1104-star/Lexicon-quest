@@ -84,6 +84,7 @@ export function applyBattleOutcome(game, result, encounter = {}, opts = {}) {
   summary.mastery = ups.mastery || {};
   // Consumables used in battle leave the bag even on a loss or escape.
   for (const [id, n] of Object.entries(result.itemsUsed || {})) take(game, id, n);
+  if (result.hint) setFlag(game, result.hint);
   if (result.outcome === 'victory') {
     summary.exp = result.exp || 0;
     summary.gold = result.gold || 0;

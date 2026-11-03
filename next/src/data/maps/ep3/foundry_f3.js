@@ -16,18 +16,25 @@
 //      sl_k2 (31,13); '\' crosses the slag band (35..37) into bs_k2 (39,13), cooling hg_k2 (38,10). H3 (rows 4..7): the
 //      hottest furnace's mouth in the north face (40,3) with vex_trig in front of it and the feather, and anvil_heart.
 //      Two groups.
-//   South, the Home (10..33, 26..30): the spout (14,25) pours into the junction (14,27). Its short branch runs straight on
-//      into a pool that does nothing (13..15, 30). Bram shoves the ore crate (16,28) west twice into that branch (14,28):
-//      dammed, the water turns east and runs the long way along row 27 to the slag ring round the anvil island (28..32,
-//      26..30), which cools: anvil_home. Lantern secret: Keeper ink on the north face (10,24) beside a hidden ink bridge
-//      (9,28) west into the Keeper's cache: the gold chest with the Tempered Lexicon Blade. One group.
+//   South, the Home (10..30, 26..30): an order puzzle, "cool this, then redirect to that". The spout (24,25) pours onto
+//      sl_home (24,26). Start '\': east, onto the floor at the entrance (25,26), a puddle that does nothing. Turned '/': west
+//      into the junction (23,26) and straight on to the corner (22,26), down the crate's slot onto the slag plug (22,27),
+//      which cools; the water runs on into the slot and puddles in front of ore_home (22,29). The slot (22, 26..30) runs
+//      between a wall spur (21, 26..28) and the junction's south arm (23,27) with the slag lake (23..28, 27..29) round the
+//      anvil island: from (22,30) Bram shoves the crate up three times, over the cooled plug into the corner (a cell of
+//      floor below the plug keeps the crate's top from hiding it at rest), and the dammed junction turns the
+//      water south down the arm into the lake, which cools: anvil_home. Shoved first, the crate will not go onto molten
+//      slag; the slot lets it move only up, so no shove ever strands it. Lantern secret: Keeper ink on the north face
+//      (10,24) beside a hidden ink bridge (9,28) west into the Keeper's cache: the gold chest with the Tempered Lexicon
+//      Blade. One group.
 //   The Gate Antechamber (17..26, 5..10): behind the Bell Gate. bram_memory_3 runs on gate_trig (the cells in front of
 //      the gate, once all three oaths are struck), the cistern font, the Crucible Hook door door_heart (20..22, 4) up to
 //      the Heartforge, a wood chest (Quench Flasks).
 // Solution for the bot: Hand: turn sl_h1 ('/'), cross to the island, turn sl_h2 ('\'), cross north, strike anvil_hand
 // (south bank chest: before turning sl_h2). Heart: turn sl_k1 ('\'), through hg_k1, turn sl_k2 ('\'), through hg_k2,
-// strike anvil_heart (vex_trig fires at the furnace mouth). Home: stand at (17,28) facing left, Shove ore_home twice
-// (it ends at (14,28)), cross the cooled ring, strike anvil_home. Hub: gate_trig, through the Bell Gate, unlock door_heart.
+// strike anvil_heart (vex_trig fires at the furnace mouth). Home: turn sl_home ('/'), wait for the plug to cool, stand
+// at (22,30) facing up and Shove ore_home three times (it ends at (22,26)), cross the cooled lake, strike anvil_home. Hub:
+// gate_trig, through the Bell Gate, unlock door_heart.
 import { grid, box, put, rows, wallDepth, door, sign, object, trigger, enemy, chest, gate, lockedDoor, steps, enter } from '../_kit.js';
 import { spout, sluice, basin, hotGate, cisternFont, oreCrate, layTroughs, TROUGH_LEGEND } from './_quench.js';
 
@@ -40,7 +47,7 @@ room(3, 4, 13, 22);                         // the Hand
 room(30, 17, 41, 23);                       // the Heart, H1
 room(30, 11, 41, 14, 2);                    // H2
 room(30, 4, 41, 7);                         // H3
-room(10, 26, 33, 30);                       // the Home
+room(10, 26, 30, 30);                       // the Home
 room(6, 27, 8, 29, 1);                      // the Keeper's cache
 // passages and notches
 box(g, 14, 17, 15, 18, '.');                // Hub -> Hand
@@ -59,20 +66,21 @@ for (const y of [4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 22]) put(g, 9, y, '#');
 // the Heart: H1's pool, H2's band
 box(g, 37, 19, 38, 23, 'S');
 box(g, 35, 11, 37, 14, 'S');
-// the Home: the useless pool, the ring round the anvil island
-box(g, 13, 30, 15, 30, 'S');
-box(g, 28, 26, 32, 30, 'S'); box(g, 29, 27, 31, 29, '.');
+// the Home: the wall spur beside the crate's slot, the slag plug in it, the lake round the anvil island
+box(g, 21, 26, 21, 28, '#');
+put(g, 22, 27, 'S');
+box(g, 23, 27, 28, 29, 'S'); box(g, 25, 28, 26, 28, '.');
 // troughs
 layTroughs(g, [
   [[13, 15], [13, 17]], [[12, 17], [14, 17]], [[8, 17], [9, 17]], [[8, 12], [8, 19]],
   [[32, 17], [32, 21]], [[30, 21], [36, 21]], [[39, 21], [39, 21]],
   [[31, 11], [31, 13]], [[30, 13], [34, 13]], [[38, 13], [38, 13]],
-  [[14, 26], [14, 29]], [[14, 27], [27, 27]],
+  [[24, 26], [22, 26]], [[23, 26], [23, 27]],
 ], {
   '13,15': 'N', '12,17': 'W', '14,17': 'E', '9,17': 'E', '8,12': 'N', '8,19': 'S',
   '32,17': 'N', '30,21': 'W', '36,21': 'E', '39,21': 'WE',
   '31,11': 'N', '30,13': 'W', '34,13': 'E', '38,13': 'WE',
-  '14,26': 'N', '14,29': 'S', '27,27': 'E',
+  '24,26': 'NE', '22,26': 'S', '23,27': 'S',
 });
 put(g, 13, 17, '7'); put(g, 32, 21, '7'); put(g, 31, 13, '7');   // T junctions under sl_h1, sl_k1, sl_k2 (arms N, W, E)
 const ground = rows(wallDepth(g.map((r) => r)));
@@ -88,7 +96,7 @@ const decor = [
   // Heart
   { t: 'pipes_v', x: 36, y: 16 }, { t: 'pipes_v', x: 33, y: 10 }, { t: 'furnace_mouth', x: 31, y: 3 },
   // Home
-  { t: 'pipes_h', x: 17, y: 25 }, { t: 'pipes_valve', x: 22, y: 25 }, { t: 'bellows_decor', x: 11, y: 30 }, { t: 'tool_rack', x: 23, y: 30 },
+  { t: 'pipes_h', x: 17, y: 25 }, { t: 'pipes_valve', x: 23, y: 25 }, { t: 'bellows_decor', x: 11, y: 30 }, { t: 'tool_rack', x: 18, y: 26 },
 ];
 
 const OATHS = ['oath_hand', 'oath_heart', 'oath_home'];
@@ -122,12 +130,13 @@ const events = [
   object('anvil_heart', 33, 5, 'anvil_oath', { script: 'oath_heart', state: 0 }),
   enemy('e_k_defenders', 33, 19, 'forge_defender', 'fo3_defenders', 'wander', { radius: 2 }),
   enemy('e_k_mixed', 33, 12, 'forge_defender', 'fo3_mixed', 'guard'),
-  // ---- the Home (the dam)
-  spout('sp_home', 14, 25, 'down'),
-  oreCrate('ore_home', 16, 28),
-  object('anvil_home', 30, 28, 'anvil_oath', { script: 'oath_home', state: 0 }),
+  // ---- the Home (the order: cool the plug, then dam the junction)
+  spout('sp_home', 24, 25, 'down'),
+  sluice('sl_home', 24, 26, 1),
+  oreCrate('ore_home', 22, 29),
+  object('anvil_home', 25, 28, 'anvil_oath', { script: 'oath_home', state: 0 }),
   chest('chest_blade', 7, 28, 'gold', { item: 'tempered_blade' }),
-  enemy('e_home_furnace', 21, 29, 'furnace_construct', 'fo3_furnace', 'patrol', { path: steps('right', 4, 'left', 4) }),
+  enemy('e_home_furnace', 26, 30, 'furnace_construct', 'fo3_furnace', 'patrol', { path: steps('left', 4, 'right', 4) }),
   // ---- the Gate Antechamber
   lockedDoor('door_heart', 20, 4, 'crucible_hook', ['foundry_heart', 12, 18, 'up'], { w: 3, sprite: 'door_crucible' }),
   cisternFont('font_fo3', 24, 7),
@@ -156,7 +165,7 @@ export default {
   events,
   exits: [],
   marks: {
-    arrival: [17, 21], hub: [21, 17], gate_spot: [21, 14], anvil_hand: [5, 7], anvil_heart: [33, 6], anvil_home: [30, 29],
+    arrival: [17, 21], hub: [21, 17], gate_spot: [21, 14], anvil_hand: [5, 7], anvil_heart: [33, 6], anvil_home: [26, 28],
     furnace_mouth: [40, 4], vex_ledge: [41, 3], font: [24, 8], heart_door: [21, 5],
   },
   start: { x: 17, y: 21, dir: 'up' },

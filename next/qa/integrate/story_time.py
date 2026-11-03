@@ -12,7 +12,8 @@ records (next/qa/out/autoplay/<prefix>-report.json and <prefix>-dialog.log, the 
              motion, menus; game seconds; battles are not counted there) with the bot's dialogue taken out, times 1.5
              to 2.0 for a first-time player who looks around and walks the long way
   puzzles    1.5 to 3 minutes of thinking per beam puzzle the run solved (the bot solves them instantly); a quench
-             puzzle by its actions: 0.5 to 1 min for one, 1 to 2 min for each further (E3-fixes-world)
+             puzzle by its actions: 0.5 to 1 min for one, 1 to 2 min for each further (E3-fixes-world); the F3 Home
+             order puzzle is 4 actions (a turn and three Shoves, QUENCH_PUZZLES)
   battles    each battle's game time at 1x battle speed (the bot ran 2x engine and 2x battle speed: wall s x 4),
              plus 1.5 s per party command (3 a round)
 
@@ -29,6 +30,10 @@ import sys
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / 'out' / 'autoplay'
 READ_CPS, TYPE_CPS, PRESS_S = 15.0, 60.0, 0.6
+# note keys -> one puzzle and its player actions (paddle turns plus Shoves)
+QUENCH_PUZZLES = {
+    'quench F3 Home': (('quench crust 22,27 on foundry_f3', 'quench crust 23,28 on foundry_f3'), 4),
+}
 
 
 def last_run(lines):
@@ -63,6 +68,13 @@ def main(prefix):
         if n.startswith('beam ') or n.startswith('quench '):
             m = re.search(r': (\d+) turns?', n)
             kinds[n.split(':')[0]] = max(1, int(m.group(1))) if (m and n.startswith('quench ')) else None
+    # polish-world: puzzles the bot solves in two notes whose shoves its turn count leaves out are one puzzle of their
+    # real action count (F3 Home: turn sl_home, then three Shoves)
+    for name, (parts, actions) in QUENCH_PUZZLES.items():
+        if any(p in kinds for p in parts):
+            for p in parts:
+                kinds.pop(p, None)
+            kinds[name] = actions
     puzzles = len(kinds)
     p_lo = sum(90 if a is None else 30 + 60 * (a - 1) for a in kinds.values())
     p_hi = sum(180 if a is None else 60 + 120 * (a - 1) for a in kinds.values())
