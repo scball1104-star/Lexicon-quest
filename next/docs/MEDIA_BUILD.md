@@ -101,6 +101,62 @@ slowly across the meadow, the moon's reflection trembles on the lake, camera sti
 (`quantize_still.py` on each frame, then ffmpeg VP9 at 12 fps) -> sent to Scott. Then the brief with three stills
 (opening frame, key moment, closing frame) per `Routines/_visual_brief_template.md`, and his OK before any more credits.
 
+### What shipped (2026-11-03, media-video)
+
+Scott approved in-game video on 2026-11-03 after the Downs test ("Looks like weather"). Five Runway Gen-4.5 clips ship (image
+to video from each painting, locked-off camera prompt, 1280 x 720, 24 fps, 5 s), one per painting the four places draw:
+
+| asset id | where it plays | shipped bytes | crf | changed px / frame |
+|---|---|---|---|---|
+| paint_card_bell_tower | prologue card (ep1.js), title attract loop, Episode 1 credits | 366,390 | 29 | 4.2% |
+| paint_card_bells | End of Episode 1 card | 376,321 | 37 | 10.0% |
+| paint_card_hollowmere | Episode 2 start/end cards, END_CARD_EP2/_LIVE, title Episode 2 card, Episode 2 credits | 182,226 | 28 | 1.9% |
+| paint_card_binder_spine | Deep Stacks binder card and B100 clear card (cave/story.js) | 393,998 | 32 | 5.4% |
+| paint_battle_valley | valley battle stage | still only | | |
+| paint_battle_hollow | Whisperwood Hollow battle stage | 379,968 | 28 | 4.1% |
+| paint_battle_east_road | Fading Road battle stage | still only | | |
+
+1.70 MB in all, every byte lazy: nothing moved in the precache or before the tap prompt.
+
+**Valley and Fading Road keep their stills.** Both stages were made twice in Runway (the second time with a tripod,
+no zoom, no pan, no push-in prompt) and both times the camera pushed in, so the ground slid under the party. Scott chose
+to ship the five that hold still (2026-11-03). Image-to-video models hold the camera on the cards but not on a stage with
+open foreground ground; try another model, or a crop of the first second, before spending again.
+
+**Build.** `python tools/art/backdrops/build_clips.py` (one command; processes whatever is in
+`tools/art/backdrops/out/clips_raw/<asset id>.mp4`, or name ids; `--src` for a test clip). Per clip: the palette is
+exactly the shipped still's own colours (master palette plus that painting's extras, as the still uses them); every
+frame takes the still's path (16:9 crop, box downscale, unsharp, OKLab pair, Bayer 4x4 fixed to the pixel grid) after
+a 3-tap temporal blur of the source, with hysteresis (a pixel within 0.2 of its dither threshold keeps last frame's
+colour) so Runway's own noise does not make the dither boil; frame 1 is the still byte for byte, then a 6-frame Bayer
+dissolve into the clip. **Loop:** an eased ping-pong (index = (1 - cos) / 2 over the forward frames, the middle at the
+clip's own speed): the motion slows to a stop at both ends and turns, and the loop ends on the frame before the
+still, so there is no jump anywhere. 188 frames, 15.7 s at 12 fps. VP9 384 x 216, yuv420p tagged BT.709, one keyframe,
+crf searched to land under 390 KB. Writes `assets/clips/<id>.webm`, `assets/clips/clips.json` (the ids that exist),
+and for review `out/clips/<id>_3x.mp4` (phone), `<id>_sheet.png`, `contact_sheet.png`, `summary.json`; the previews
+are decoded and re-dithered exactly as the game does, so they show what a player sees.
+
+**Runtime.** `src/ui/keyart.js` holds `CLIP_IDS` and `clipUrl(id)` and imports `src/ui/clips/player.js` the first time
+one of those paintings is drawn (never for reduce motion). The player plays a detached `<video muted playsinline loop>`
+from a fetched blob (no Range requests; the service worker caches the file like any lazy file), reads each new frame
+back and re-dithers it to the still's colours (6-bit RGB cells, nearest pair in OKLab, the pixel's projection, the
+Bayer grid, the same hysteresis), which undoes VP9's chroma smear, then composes it through `composeFrame`, so drift,
+darkening and the vignette are exactly the still's. The first 8 frames dissolve from the still. Drawn 1:1, no
+smoothing. The battle redraws its stage layer (clip frame plus band) when the clip's frame changes. The still is the
+first frame and the fallback: missing from `clips.json`, a failed fetch or decode, no VP9 (`canPlayType`), reduce
+motion on, or not yet loaded: the still draws and nothing logs. A clip not drawn for 0.4 s pauses, after 10 s it is
+unloaded; a hidden tab pauses all. Field scenes never draw these ids. Cost (desktop Chromium): about 2.3 ms per new
+video frame (12 a second), read-back 0.3, re-dither 2.0.
+
+**Tests.** `qa/ui/clips.test.mjs` (the map, the build mirror, clips.json and sizes, the fallbacks, the re-dither and
+dissolve, the lazy rules); `python qa/ui/clips_headless.py` (desktop and phone: the valley battle and the End of
+Episode 1 card draw the clip with zero console errors and every stage pixel on the still's colours; with every clip
+404 the stage is the still pixel for pixel; reduce motion requests nothing; the field requests nothing); shots
+`battle_clip_valley`, `ui_end_card_clip`.
+
+**Safari.** iPhone Safari's VP9 support is partial (Reported): where `canPlayType` says no, the still shows. No H.264
+twin ships today.
+
 ## 6. Title trailer (store page and social, not in the game)
 
 In scope per Scott. 30 to 45 seconds, 1080p, built on the PKA Python plus ffmpeg frame renderer (no Remotion), from

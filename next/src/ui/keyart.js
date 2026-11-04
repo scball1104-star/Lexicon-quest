@@ -1,9 +1,8 @@
 // Key art backdrops for the title, name entry, prologue, title cards and credits.
 //
-// Source: the palette-quantized 384x216 stages in assets/backdrops (manifest atlases `title`, `dialog_keyart`, and the
-// paintings battle.js path-loads: `paint_*`, docs/MEDIA_BUILD.md). Drawn 1:1, nearest-neighbor, never scaled; a slow
-// drift of at most 2 px slides the image by whole pixels and replicates its edge into the strip that opens. Fallback
-// when the atlas is missing: the old runtime crop of ../assets/art/environments.webp (2 x 4 cells; cell 0 = Willowmere).
+// Source: the quantized 384x216 stages in assets/backdrops (atlases `title`, `dialog_keyart`; `paint_*` path-loaded by
+// battle.js). Drawn 1:1, never scaled; a drift of at most 2 whole px replicates the edge. Fallback: the old crop of
+// ../assets/art/environments.webp (2 x 4 cells; cell 0 = Willowmere).
 //
 // Darkening (CRITIQUE_2 D1) never alpha blends (that multiplied 78 colours into thousands): every pixel maps to one of
 // the backdrop's OWN colours. Each colour gets a ladder of darker colours (DARK_LEVELS steps, nearest strictly darker
@@ -28,6 +27,20 @@ export const DARK_LEVELS = [1, 0.78, 0.6, 0.45, 0.32, 0.2];
 export const DARK = { none: 0, one: 0.22, two: 0.4, three: 0.55, four: 0.68, five: 0.8 };
 
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+
+// Paintings with a clip (MEDIA_BUILD 5), played by the lazy ./clips/player.js; the still is the fallback.
+export const CLIP_IDS = 'card_bell_tower card_bells card_hollowmere card_binder_spine battle_hollow'.split(' ').map((s) => 'paint_' + s);
+export const clipUrl = (id) => (CLIP_IDS.includes(id) ? `assets/clips/${id}.webm` : null);
+let clips, asked;
+function clipLayer(r, id, prep, o) {
+  if (clips) return clips.layer(r, id, prep, o);
+  if (!asked && clipUrl(id) && !r.settings?.reduceMotion) { asked = 1; import('./clips/player.js').then((m) => { clips = m; }, () => {}); }
+  return null;
+}
+export function backdropClip(r, id) {
+  const p = clipUrl(id) && prepare(r, id);
+  return p && !p.failed ? clipLayer(r, id, p, {}) : null;
+}
 
 /** Darkening alpha (0..1) -> rung units (0..DARK_LEVELS.length - 1, fractional between rungs). */
 export function darkUnits(alpha) {
@@ -245,7 +258,7 @@ export function drawBackdrop(r, id, o = {}) {
   if (!img) return false;
   const prep = prepare(r, id);
   if (prep && !prep.failed) {
-    const layer = composedLayer(r, id, prep, o);
+    const layer = clipLayer(r, id, prep, o) || composedLayer(r, id, prep, o);
     if (o.alpha != null && o.alpha < 1) r.withAlpha(o.alpha, () => r.drawLayer(layer, 0, 0, prep.W, prep.H, 0, 0));
     else r.drawLayer(layer, 0, 0, prep.W, prep.H, 0, 0);
     return true;

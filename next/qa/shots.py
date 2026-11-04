@@ -53,7 +53,7 @@ SPEC = QA / 'shots.json'
 MIME = {
     '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp',
     '.png': 'image/png', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.html': 'text/html',
-    '.css': 'text/css', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json',
+    '.css': 'text/css', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.webm': 'video/webm',
 }
 
 
