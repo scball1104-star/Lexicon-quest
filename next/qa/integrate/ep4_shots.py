@@ -140,7 +140,7 @@ SHOTS = [
                until_line('Four lists. One hand'), on_top('dialog', 'story_vex_archive: Vex speaks')]},
     {'name': 'story_witness_book', 'note': 'E4: witness_book, the hero signs the drowned Witness Book and the name holds (story)',
      'steps': [READY, NEW, flags(GATE, CRANK), warp('ep4_keep_f3', 22, 8, 'up'), {'frames': 160}, scene('witness_book'),
-               until_line('It held. Under water'), on_top('dialog', 'story_witness_book: Mira reads the signature')]},
+               until_line('It held. Down here'), on_top('dialog', 'story_witness_book: Mira reads the signature')]},
     {'name': 'battle_decree_pips', 'note': 'E4: the Flood Road teaching fight, the Ink Bloom stamped: its seal pips on the foe row',
      'steps': [READY, NEW, {'eval': 'LQ_DEBUG.setSpeed(0)'}, {'call': 'battle', 'args': ['e4r_first', {'seed': 1, 'noElite': True, 'canFlee': False}]}, {'advance': 60},
                battle_until("s.b.units().some((u) => u.side === 'enemy' && u.alive && u.heat > 0)"), {'advance': 4},
