@@ -158,7 +158,7 @@ Flood Road: `ep4_broken_cart`, `ep4_farm_roof`, `ep4_valewyn_far`, `ep4_ferry_po
 Tide kit (any map): `ep4_tide_post`, `ep4_lock_wheel`, `ep4_pontoon`, `ep4_book_crate`, `ep4_papered_door`,
 `ep4_washed_door`, `ep4_floodgate`, `ep4_font_tide`, `ep4_lantern_chain`, `ep4_keeper_marks`.
 Valewyn: `ep4_statue`, `ep4_inscription`, `ep4_flood_board` (three states), `ep4_sandbags`, `ep4_great_lock`,
-`ep4_drowned_roofs`, `ep4_canal`, `ep4_drowned_bell`, `ep4_council_switches`, `sign_ep4_inn`, `sign_ep4_shop`,
+`ep4_drowned_roofs`, `ep4_canal`, `ep4_drowned_bell`, `ep4_council_switches`, `ep4_shelter`, `sign_ep4_inn`, `sign_ep4_shop`,
 `sign_ep4_forge`, `sign_ep4_palace`. The Hall: `ep4_decree_table`, `ep4_archive_shelf`.
 Keep: `ep4_glass_dome`, `ep4_vex_feather`, `ep4_scriptorium`, `ep4_court_bench`, `ep4_principles`, `ep4_petition_gate`,
 `ep4_stone_voice`, `ep4_stone_truth`, `ep4_stone_mercy`, `ep4_keeper_note` (the Mercy wing's Lantern note),

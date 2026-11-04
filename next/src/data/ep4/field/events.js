@@ -11,7 +11,8 @@
 // attach(field) is idempotent per field instance: it adds field.tide and wraps this field's glass.reset / update /
 // markDirty / drawBeams / drawFlares, collectLights, useDoor, hasFlag and debugState, the way Episode 3's quench attaches
 // (src/world/ep3/index.js). Every create() of the types above attaches first, and ../world.js attaches every field the
-// engine enters, so boat doors work on maps without a wheel.
+// engine enters, so boat doors work on maps without a wheel. ./seams.js adds two more per field (E4-seamfix): compound
+// flags (`all:a,!b`) in the same hasFlag wrap, and the map's `weatherIf` read from the wrapped glass.update.
 
 import { EXT, INTERACT_TYPES, GATE_SPRITES, COUNTING_GATES } from '../../../world/events.js';
 import { FIELD_LOOK } from '../../../world/actors.js';
@@ -19,6 +20,7 @@ import { TINTS } from '../../../world/lighting.js';
 import { inspectBoxes } from '../../../game/story.js';
 import { Tide, closedSprite, openSprite } from './system.js';
 import { tideFlag, isTideFlag, levelsOf } from './tide.js';
+import { isCompoundFlag, compoundFlag, syncWeather } from './seams.js';
 
 // E4-tiles' door pairs (assets/tiles/ep4_tiles.json): the canal door a seal covers, the floodgate as an ordinary gate,
 // the Sunken Seal door to the Drowned Throne, the Petition Gate with its three sockets (frames 0 to 3).
@@ -136,7 +138,7 @@ export function attach(field) {
     obj[name] = w;
   };
   wrap(field.glass, 'reset', (o) => { o(); t.reset(); if (field.map && field.entities) dressBoats(field); });
-  wrap(field.glass, 'update', (o) => { o(); t.update(); bobBoats(field); });
+  wrap(field.glass, 'update', (o) => { o(); t.update(); bobBoats(field); syncWeather(field); });
   wrap(field.glass, 'markDirty', (o) => { o(); t.markDirty(); });
   wrap(field.glass, 'drawBeams', (o, r, tm) => { t.drawLow(r, tm); o(r, tm); });
   wrap(field.glass, 'drawFlares', (o, r, tm) => { o(r, tm); t.drawHigh(r, tm); });
@@ -144,7 +146,9 @@ export function attach(field) {
   wrap(field, 'useDoor', (o, ent) => (ent && ent.ev.kind === 'boat' && ent.ev.to ? boatDoor(field, ent) : o(ent)));
   wrap(field, 'debugState', (o) => ({ ...o(), tide: t.debugState() }));
   // the virtual tide flags: `if: 'tide:c>=2'` follows basin c (start levels until this map's tide has reset)
+  // and the compound flags (`all:charter_restored,!ep4_complete`, ./seams.js), whose terms may be tide flags too
   wrap(field, 'hasFlag', (o, k) => {
+    if (isCompoundFlag(k)) return compoundFlag(k, field.hasFlag);
     if (!isTideFlag(k)) return o(k);
     const mod = field.map && field.map.mod;
     const lv = t.active && t.m && mod && t.m.src === mod.tide ? t.levels : levelsOf(mod, {});

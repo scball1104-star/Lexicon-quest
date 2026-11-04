@@ -80,6 +80,11 @@ export const EP4_LINES = {
     { lines: 'A board of flood notices. The rain has got into all of them.' },
   ],
   ep4_sandbags: 'Sandbags, three high. Someone has written names on them in tar, so they come back.',
+  ep4_shelter: [
+    { if: 'vw_restored', lines: 'The council shelter, half packed. Nobody needs it now. Nobody wants to be the one who takes it down.' },
+    { lines: ['The council shelter: oiled canvas, dry cots, and a kettle that has not been off the boil in a week.',
+      'A board at the flap says RIVER QUARTER FIRST. Under it, smaller: WIPE YOUR FEET. PLEASE.'] },
+  ],
   ep4_great_lock: [
     { if: 'vw_restored', lines: 'The great lock stands open. Its wheel has been turned, and greased, and turned again.' },
     { lines: "The city's great lock wheel, as tall as a door. Its pointer sits at SHUT. It has not moved in a long time." },

@@ -136,7 +136,7 @@ const events = [
   object('switch_shelter_on', 16, 24, 'switch_on', { script: 'council_choice', text: 'ep4_council_switches', if: 'council_shelter' }),
   object('switch_records', 26, 24, 'switch_off', { script: 'council_choice', text: 'ep4_council_switches', if: 'witnesses_started', ifNot: 'council_records' }),
   object('switch_records_on', 26, 24, 'switch_on', { script: 'council_choice', text: 'ep4_council_switches', if: 'council_records' }),
-  object('vw_shelter', 14, 21, 'market_stall_cloth', { safe: true, rest: true, if: 'council_shelter' }),
+  object('vw_shelter', 14, 21, 'market_stall_cloth', { text: 'ep4_shelter', safe: true, rest: true, if: 'council_shelter' }),
   sign('sandbags_sign', 15, 25, 'ep4_sandbags'),
   sign('canal_sign', 22, 25, 'ep4_canal', { solid: false }),
   // the canal works

@@ -19,6 +19,10 @@ const F2 = 'keep_f2_done';
 const RES = 'vw_restored';
 const END = 'ep4_complete';
 const E4 = 'ep4_started';
+// The scene-twin window (E4-seamfix): from charter_restored, crown_remembers and ep4_ending spawn joss_t and ada_t on
+// ep4_valewyn, so the map NPCs Joss and Ada stand down until ep4_complete brings them back. One conjunction of flags
+// cannot say "from A until B", so this is a compound flag (`all:`, src/data/ep4/field/seams.js, read by the field).
+export const SCENE_TWIN = 'all:charter_restored,!ep4_complete';
 
 const m = (text) => ({ who: 'mira', text });
 const b = (text) => ({ who: 'bram', text });
@@ -97,6 +101,7 @@ export const EP4_NPCS = {
   },
   joss: {
     name: 'Joss', sprite: 'npc_joss', map: 'ep4_valewyn', spot: 'At the canal works by the great lock wheel (mark canal_works)', move: 'turn',
+    show: { ifNot: SCENE_TWIN },
     about: "Joss the Lockwright, forties, big forearms, keys and the Lockwright's Crank. Did not turn the locks for twelve years.",
     talk: [
       { if: 'met_regent', ifNot: 'met_joss', scene: 'joss_locks' },
@@ -112,7 +117,7 @@ export const EP4_NPCS = {
   },
   ada: {
     name: 'Ada', sprite: 'npc_courier_v', map: 'ep4_valewyn', spot: 'Under the flood board awning, wringing out her coat (mark board)',
-    move: 'turn', show: { if: ARR },
+    move: 'turn', show: { if: ARR, ifNot: SCENE_TWIN },
     about: 'Ada the Courier, the Episode 3 courier with her canon name. Soaked to the knees in every scene but the last.',
     talk: [
       { if: END, lines: [
