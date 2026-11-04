@@ -99,7 +99,7 @@ also imports `src/world/ep3/` (lazy, never precached) so the field code is runti
 
 ## Moving paintings (2026-11-03, media-video)
 
-`tools/pwa/build_pwa.py` `LAZY_PREFIXES` gains `assets/clips/` (the seven WebM clips and `clips.json`) and `src/ui/clips/`
+`tools/pwa/build_pwa.py` `LAZY_PREFIXES` gains `assets/clips/` (the five WebM clips and `clips.json`) and `src/ui/clips/`
 (the player, imported by `ui/keyart.js` with `import()` the first time a painting with a clip is drawn). Both are left out
 of the precache and the modulepreload block and matched by `PACK_PATTERN`, so the service worker runtime-caches them on
 first use (stale-while-revalidate into `lq-next-runtime-v1`). The clip is fetched whole with `fetch` (no Range request).

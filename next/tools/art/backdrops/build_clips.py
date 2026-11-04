@@ -34,7 +34,7 @@ STILLS = os.path.join(B.NEXT, 'assets', 'backdrops')
 SHIP = os.path.join(B.NEXT, 'assets', 'clips')
 # The four places of MEDIA_BUILD 5, by the painting each one draws. Mirrors CLIP_IDS in src/ui/keyart.js.
 CLIP_IDS = ['paint_card_bell_tower', 'paint_card_bells', 'paint_card_hollowmere', 'paint_card_binder_spine',
-            'paint_battle_valley', 'paint_battle_hollow', 'paint_battle_east_road']
+            'paint_battle_hollow']
 HEAD = 6            # frames of dissolve from the still into the clip
 MAX_PAIR = 0.14     # as quantize_still.py
 HOLD = 0.2          # temporal hysteresis: a pixel this close to its dither threshold keeps last frame's colour

@@ -103,7 +103,7 @@ slowly across the meadow, the moon's reflection trembles on the lake, camera sti
 
 ### What shipped (2026-11-03, media-video)
 
-Scott approved in-game video on 2026-11-03 after the Downs test ("Looks like weather"). Seven Runway Gen-4.5 clips (image
+Scott approved in-game video on 2026-11-03 after the Downs test ("Looks like weather"). Five Runway Gen-4.5 clips ship (image
 to video from each painting, locked-off camera prompt, 1280 x 720, 24 fps, 5 s), one per painting the four places draw:
 
 | asset id | where it plays | shipped bytes | crf | changed px / frame |
@@ -112,11 +112,16 @@ to video from each painting, locked-off camera prompt, 1280 x 720, 24 fps, 5 s),
 | paint_card_bells | End of Episode 1 card | 376,321 | 37 | 10.0% |
 | paint_card_hollowmere | Episode 2 start/end cards, END_CARD_EP2/_LIVE, title Episode 2 card, Episode 2 credits | 182,226 | 28 | 1.9% |
 | paint_card_binder_spine | Deep Stacks binder card and B100 clear card (cave/story.js) | 393,998 | 32 | 5.4% |
-| paint_battle_valley | valley battle stage | 371,831 | 41 | 17.5% |
+| paint_battle_valley | valley battle stage | still only | | |
 | paint_battle_hollow | Whisperwood Hollow battle stage | 379,968 | 28 | 4.1% |
-| paint_battle_east_road | Fading Road battle stage | 346,957 | 38 | 17.0% |
+| paint_battle_east_road | Fading Road battle stage | still only | | |
 
-2.42 MB in all, every byte lazy: nothing moved in the precache or before the tap prompt.
+1.70 MB in all, every byte lazy: nothing moved in the precache or before the tap prompt.
+
+**Valley and Fading Road keep their stills.** Both stages were made twice in Runway (the second time with a tripod,
+no zoom, no pan, no push-in prompt) and both times the camera pushed in, so the ground slid under the party. Scott chose
+to ship the five that hold still (2026-11-03). Image-to-video models hold the camera on the cards but not on a stage with
+open foreground ground; try another model, or a crop of the first second, before spending again.
 
 **Build.** `python tools/art/backdrops/build_clips.py` (one command; processes whatever is in
 `tools/art/backdrops/out/clips_raw/<asset id>.mp4`, or name ids; `--src` for a test clip). Per clip: the palette is

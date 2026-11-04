@@ -10,20 +10,21 @@ import { layer, buildLut, redither, dissolve, oklab, clipState } from '../../src
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (rel) => fs.readFileSync(path.join(NEXT, rel), 'utf8');
-const SEVEN = ['paint_card_bell_tower', 'paint_card_bells', 'paint_card_hollowmere', 'paint_card_binder_spine',
-  'paint_battle_valley', 'paint_battle_hollow', 'paint_battle_east_road'];
+// Valley and Fading Road keep their stills: two rounds of Runway clips both pushed in (Scott, 2026-11-03).
+const FIVE = ['paint_card_bell_tower', 'paint_card_bells', 'paint_card_hollowmere', 'paint_card_binder_spine',
+  'paint_battle_hollow'];
 
-test('clip map: exactly the seven approved paintings, each with its still, mirrored by the build tool', () => {
-  assert.deepEqual([...CLIP_IDS].sort(), [...SEVEN].sort());
-  for (const id of SEVEN) {
+test('clip map: exactly the five approved paintings, each with its still, mirrored by the build tool', () => {
+  assert.deepEqual([...CLIP_IDS].sort(), [...FIVE].sort());
+  for (const id of FIVE) {
     assert.equal(clipUrl(id), `assets/clips/${id}.webm`);
     assert.ok(fs.existsSync(path.join(NEXT, 'assets', 'backdrops', `${id}.png`)), `${id}: the still (first frame and fallback) exists`);
   }
-  for (const id of ['paint_card_stacks_hall', 'paint_battle_valley_dusk', 'battle_valley', 'title', 'dialog_keyart', '', null, undefined]) assert.equal(clipUrl(id), null, `${id} has no clip`);
+  for (const id of ['paint_card_stacks_hall', 'paint_battle_valley', 'paint_battle_east_road', 'paint_battle_valley_dusk', 'battle_valley', 'title', 'dialog_keyart', '', null, undefined]) assert.equal(clipUrl(id), null, `${id} has no clip`);
   const py = read('tools/art/backdrops/build_clips.py');
   const m = /CLIP_IDS = \[([^\]]+)\]/.exec(py);
   assert.ok(m, 'build_clips.py names its ids');
-  assert.deepEqual([...m[1].matchAll(/'([a-z_]+)'/g)].map((x) => x[1]).sort(), [...SEVEN].sort(), 'build_clips.py CLIP_IDS = keyart.js CLIP_IDS');
+  assert.deepEqual([...m[1].matchAll(/'([a-z_]+)'/g)].map((x) => x[1]).sort(), [...FIVE].sort(), 'build_clips.py CLIP_IDS = keyart.js CLIP_IDS');
 });
 
 test('the four places draw those paintings (and no field code names a clip)', () => {
@@ -41,7 +42,7 @@ test('shipped clips: listed in clips.json, on disk, VP9 WebM, inside the size ta
   const m = JSON.parse(fs.readFileSync(p, 'utf8'));
   assert.equal(m.fps, 12);
   for (const [id, e] of Object.entries(m.clips)) {
-    assert.ok(SEVEN.includes(id), `${id} is one of the seven`);
+    assert.ok(FIVE.includes(id), `${id} is one of the seven`);
     const f = path.join(NEXT, 'assets', 'clips', `${id}.webm`);
     const b = fs.readFileSync(f);
     assert.equal(b.readUInt32BE(0), 0x1a45dfa3, `${id}: an EBML (WebM) file`);

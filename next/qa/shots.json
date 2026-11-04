@@ -6418,13 +6418,13 @@
    ]
   },
   {
-   "name": "battle_clip_valley",
-   "note": "MEDIA_BUILD 5: the valley stage plays its clip (paint_battle_valley.webm, re-dithered to the still's colours); qa/ui/clips_headless.py checks it moves and the 404 fallback",
+   "name": "battle_clip_hollow",
+   "note": "MEDIA_BUILD 5: the Whisperwood Hollow stage plays its clip (paint_battle_hollow.webm, re-dithered to the still's colours); qa/ui/clips_headless.py checks it moves and the 404 fallback",
    "steps": [
     {
      "call": "battle",
      "args": [
-      "valley_wolves",
+      "hollow_wolves",
       {
        "fresh": true,
        "seed": 3

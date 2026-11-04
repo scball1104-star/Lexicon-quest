@@ -1,13 +1,13 @@
 """Moving paintings in the browser (docs/MEDIA_BUILD.md 5), desktop and phone (844x390), headless Chromium:
 
-  1. a valley battle (paint_battle_valley) draws its clip: the player reaches 'ready', the stage layer keeps changing,
+  1. a hollow battle (paint_battle_hollow) draws its clip: the player reaches 'ready', the stage layer keeps changing,
      every stage pixel above the ground band is one of the still's own colours, zero console errors;
   2. the End of Episode 1 card (paint_card_bells) plays its clip under the text, zero console errors;
   3. with every clip answering 404, the same battle and card keep the still: the player says 'failed', the stage is
      pixel-identical to the still painting and does not change, nothing throws;
   4. reduce motion on: the player module and the clips are never requested; the still shows;
   5. a field scene requests no clip.
-PNGs (3x) in next/qa/ui/out/clips_<device>_*.png. Needs assets/clips/paint_battle_valley.webm and paint_card_bells.webm
+PNGs (3x) in next/qa/ui/out/clips_<device>_*.png. Needs assets/clips/paint_battle_hollow.webm and paint_card_bells.webm
 (python tools/art/backdrops/build_clips.py).
 
     python next/qa/ui/clips_headless.py
@@ -33,7 +33,7 @@ STAGE_COLOURS = """(async () => {
   const s = LQ_ENGINE.scene, L = s.backdropLayer, by = L.band.y - 3;
   const d = L.ctx.getImageData(0, 0, 384, by).data, got = new Set();
   for (let i = 0; i < d.length; i += 4) got.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
-  const img = LQ_ENGINE.assets.img('paint_battle_valley');
+  const img = LQ_ENGINE.assets.img('paint_battle_hollow');
   const c = document.createElement('canvas'); c.width = 384; c.height = 216; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
   const all = g.getImageData(0, 0, 384, 216).data, still = new Set();
   for (let i = 0; i < all.length; i += 4) still.add((all[i] << 16) | (all[i + 1] << 8) | all[i + 2]);
@@ -94,7 +94,7 @@ def wait_clip(page, cid, cond, timeout=20000):
 
 
 def battle(page):
-    page.evaluate("LQ_DEBUG.battle('valley_wolves', { fresh: true, seed: 3 })")
+    page.evaluate("LQ_DEBUG.battle('hollow_wolves', { fresh: true, seed: 3 })")
     page.wait_for_function("LQ_ENGINE.scene && LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer && LQ_ENGINE.scene.backdropLayer.painted", timeout=20000)
 
 
@@ -119,34 +119,34 @@ def main():
             ctx, page, asked = boot(browser, dev, errors, dname)
             check(page.evaluate("document.createElement('video').canPlayType('video/webm; codecs=\"vp9\"')") != '', 'this Chromium plays VP9')
             battle(page)
-            wait_clip(page, 'paint_battle_valley', lambda st: st['state'] == 'ready' and st['n'] > 24)
+            wait_clip(page, 'paint_battle_hollow', lambda st: st['state'] == 'ready' and st['n'] > 24)
             a = page.evaluate(STAGE_COLOURS)
-            check(a['painted'] and a['clipN'] > 12, f"the valley stage draws the clip ({a['clipN']} frames composed, {a['phase']})")
+            check(a['painted'] and a['clipN'] > 12, f"the hollow stage draws the clip ({a['clipN']} frames composed, {a['phase']})")
             check(a['off'] == 0, f"every stage pixel is one of the still's colours ({a['colours']} colours, {a['off']} off)")
             h1 = page.evaluate(HASH); page.wait_for_timeout(700); h2 = page.evaluate(HASH)
             check(h1 != h2, 'the stage moves')
-            s = page.evaluate(f"{STATE}('paint_battle_valley')")
+            s = page.evaluate(f"{STATE}('paint_battle_hollow')")
             check(s['playing'], f'the clip is playing ({s})')
-            shot(page, f'{dname}_battle_valley')
+            shot(page, f'{dname}_battle_hollow')
             card(page)
             wait_clip(page, 'paint_card_bells', lambda st: st['state'] == 'ready' and st['n'] > 24)
             c1 = page.evaluate(CANVAS_HASH); page.wait_for_timeout(700); c2 = page.evaluate(CANVAS_HASH)
             check(c1 != c2, 'the End of Episode 1 card moves under its text')
             shot(page, f'{dname}_end_card_bells')
             page.wait_for_timeout(700)
-            s = page.evaluate(f"{STATE}('paint_battle_valley')")
+            s = page.evaluate(f"{STATE}('paint_battle_hollow')")
             check(s is None or not s['playing'], f'the battle clip paused once its scene stopped drawing it ({s})')
-            check(all(u.endswith(('paint_battle_valley.webm', 'paint_card_bells.webm', 'clips.json', 'player.js')) for u in asked), f'only the clips in use were requested ({len(asked)} requests)')
+            check(all(u.endswith(('paint_battle_hollow.webm', 'paint_card_bells.webm', 'clips.json', 'player.js')) for u in asked), f'only the clips in use were requested ({len(asked)} requests)')
             ctx.close()
             # 3: every clip 404s -> the still
             ctx, page, asked = boot(browser, dev, errors, dname, block=True)
             battle(page)
-            wait_clip(page, 'paint_battle_valley', lambda st: st['state'] == 'failed')
+            wait_clip(page, 'paint_battle_hollow', lambda st: st['state'] == 'failed')
             a = page.evaluate(STAGE_COLOURS)
             check(a['same'] == 1.0 and a['clipN'] == 0, f"404: the stage is the still, pixel for pixel ({a['same']:.4f})")
             h1 = page.evaluate(HASH); page.wait_for_timeout(500); h2 = page.evaluate(HASH)
             check(h1 == h2, '404: the stage holds still')
-            shot(page, f'{dname}_battle_valley_404')
+            shot(page, f'{dname}_battle_hollow_404')
             card(page)
             wait_clip(page, 'paint_card_bells', lambda st: st['state'] == 'failed')
             page.wait_for_timeout(300)

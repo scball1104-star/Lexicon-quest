@@ -29,7 +29,7 @@ export const DARK = { none: 0, one: 0.22, two: 0.4, three: 0.55, four: 0.68, fiv
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 
 // Paintings with a clip (MEDIA_BUILD 5), played by the lazy ./clips/player.js; the still is the fallback.
-export const CLIP_IDS = 'card_bell_tower card_bells card_hollowmere card_binder_spine battle_valley battle_hollow battle_east_road'.split(' ').map((s) => 'paint_' + s);
+export const CLIP_IDS = 'card_bell_tower card_bells card_hollowmere card_binder_spine battle_hollow'.split(' ').map((s) => 'paint_' + s);
 export const clipUrl = (id) => (CLIP_IDS.includes(id) ? `assets/clips/${id}.webm` : null);
 let clips, asked;
 function clipLayer(r, id, prep, o) {
