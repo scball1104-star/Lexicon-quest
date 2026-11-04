@@ -1,0 +1,1043 @@
+{
+ "image": "ep4_enemies_battle.png",
+ "frames": {
+  "barrister_cast": [
+   0,
+   0,
+   87,
+   102
+  ],
+  "drowned_watch_idle_1": [
+   89,
+   0,
+   97,
+   99
+  ],
+  "drowned_watch_die_0": [
+   0,
+   104,
+   97,
+   99
+  ],
+  "drowned_watch": [
+   99,
+   104,
+   97,
+   98
+  ],
+  "drowned_watch_attack": [
+   0,
+   205,
+   127,
+   98
+  ],
+  "drowned_watch_hurt": [
+   129,
+   205,
+   99,
+   96
+  ],
+  "gutter_phantom_cast": [
+   0,
+   305,
+   87,
+   95
+  ],
+  "waterlogged_sentinel_die_0": [
+   89,
+   305,
+   91,
+   93
+  ],
+  "waterlogged_sentinel_attack": [
+   0,
+   402,
+   115,
+   92
+  ],
+  "barrister": [
+   117,
+   402,
+   87,
+   92
+  ],
+  "barrister_idle_1": [
+   0,
+   496,
+   87,
+   92
+  ],
+  "barrister_die_0": [
+   89,
+   496,
+   87,
+   92
+  ],
+  "drowned_watch_die_1": [
+   0,
+   590,
+   97,
+   91
+  ],
+  "waterlogged_sentinel_idle_1": [
+   99,
+   590,
+   91,
+   91
+  ],
+  "barrister_attack": [
+   0,
+   683,
+   111,
+   91
+  ],
+  "waterlogged_sentinel": [
+   113,
+   683,
+   91,
+   90
+  ],
+  "barrister_hurt": [
+   0,
+   776,
+   103,
+   90
+  ],
+  "waterlogged_sentinel_hurt": [
+   105,
+   776,
+   97,
+   88
+  ],
+  "waterlogged_sentinel_die_1": [
+   0,
+   868,
+   91,
+   88
+  ],
+  "barrister_die_1": [
+   93,
+   868,
+   87,
+   86
+  ],
+  "gutter_phantom": [
+   0,
+   958,
+   83,
+   83
+  ],
+  "gutter_phantom_idle_1": [
+   85,
+   958,
+   85,
+   83
+  ],
+  "gutter_phantom_die_0": [
+   172,
+   958,
+   83,
+   83
+  ],
+  "gutter_phantom_attack": [
+   0,
+   1043,
+   103,
+   82
+  ],
+  "gutter_phantom_hurt": [
+   105,
+   1043,
+   91,
+   82
+  ],
+  "blank_decree_cast": [
+   0,
+   1127,
+   77,
+   76
+  ],
+  "blank_decree_die_0": [
+   79,
+   1127,
+   71,
+   76
+  ],
+  "blank_decree_attack": [
+   152,
+   1127,
+   79,
+   75
+  ],
+  "gutter_phantom_die_1": [
+   0,
+   1205,
+   83,
+   73
+  ],
+  "blank_decree": [
+   85,
+   1205,
+   71,
+   72
+  ],
+  "blank_decree_idle_1": [
+   158,
+   1205,
+   73,
+   72
+  ],
+  "blank_decree_hurt": [
+   0,
+   1280,
+   79,
+   70
+  ],
+  "blank_decree_die_1": [
+   81,
+   1280,
+   69,
+   69
+  ],
+  "drowned_watch_die_2": [
+   152,
+   1280,
+   97,
+   68
+  ],
+  "waterlogged_sentinel_die_2": [
+   0,
+   1352,
+   89,
+   65
+  ],
+  "barrister_die_2": [
+   91,
+   1352,
+   85,
+   65
+  ],
+  "flood_hound_die_0": [
+   178,
+   1352,
+   63,
+   62
+  ],
+  "flood_hound_idle_1": [
+   0,
+   1419,
+   63,
+   60
+  ],
+  "flood_hound": [
+   65,
+   1419,
+   63,
+   59
+  ],
+  "flood_hound_attack": [
+   130,
+   1419,
+   67,
+   59
+  ],
+  "flood_hound_hurt": [
+   0,
+   1481,
+   69,
+   57
+  ],
+  "flood_hound_die_1": [
+   71,
+   1481,
+   63,
+   55
+  ],
+  "gutter_phantom_die_2": [
+   136,
+   1481,
+   83,
+   55
+  ],
+  "lockjaw_crab_die_0": [
+   0,
+   1540,
+   57,
+   54
+  ],
+  "writ_silence_cast": [
+   59,
+   1540,
+   31,
+   54
+  ],
+  "writ_oblivion_cast": [
+   92,
+   1540,
+   31,
+   54
+  ],
+  "blank_decree_die_2": [
+   125,
+   1540,
+   67,
+   53
+  ],
+  "lockjaw_crab_idle_1": [
+   194,
+   1540,
+   57,
+   52
+  ],
+  "lockjaw_crab": [
+   0,
+   1596,
+   57,
+   51
+  ],
+  "lockjaw_crab_attack": [
+   59,
+   1596,
+   69,
+   50
+  ],
+  "ink_bloom_cast": [
+   130,
+   1596,
+   49,
+   50
+  ],
+  "lockjaw_crab_hurt": [
+   181,
+   1596,
+   59,
+   49
+  ],
+  "writ_silence_die_0": [
+   0,
+   1649,
+   31,
+   49
+  ],
+  "ink_bloom_idle_1": [
+   33,
+   1649,
+   47,
+   47
+  ],
+  "writ_oblivion_die_0": [
+   82,
+   1649,
+   31,
+   47
+  ],
+  "barrister_witness_cast": [
+   115,
+   1649,
+   43,
+   46
+  ],
+  "lockjaw_crab_die_1": [
+   160,
+   1649,
+   57,
+   45
+  ],
+  "ink_bloom": [
+   0,
+   1700,
+   49,
+   45
+  ],
+  "ink_bloom_hurt": [
+   51,
+   1700,
+   51,
+   45
+  ],
+  "ink_bloom_die_0": [
+   104,
+   1700,
+   49,
+   45
+  ],
+  "barrister_witness_die_0": [
+   155,
+   1700,
+   41,
+   45
+  ],
+  "writ_silence": [
+   198,
+   1700,
+   31,
+   45
+  ],
+  "writ_silence_idle_1": [
+   0,
+   1747,
+   31,
+   45
+  ],
+  "writ_silence_attack": [
+   33,
+   1747,
+   31,
+   45
+  ],
+  "writ_silence_hurt": [
+   66,
+   1747,
+   31,
+   45
+  ],
+  "writ_oblivion": [
+   99,
+   1747,
+   31,
+   45
+  ],
+  "writ_oblivion_idle_1": [
+   132,
+   1747,
+   31,
+   45
+  ],
+  "writ_oblivion_attack": [
+   165,
+   1747,
+   31,
+   45
+  ],
+  "writ_oblivion_hurt": [
+   198,
+   1747,
+   31,
+   45
+  ],
+  "flood_hound_die_2": [
+   0,
+   1794,
+   63,
+   44
+  ],
+  "barrister_witness_attack": [
+   65,
+   1794,
+   47,
+   43
+  ],
+  "writ_silence_die_1": [
+   114,
+   1794,
+   25,
+   43
+  ],
+  "writ_oblivion_die_1": [
+   141,
+   1794,
+   25,
+   43
+  ],
+  "barrister_witness": [
+   168,
+   1794,
+   41,
+   42
+  ],
+  "barrister_witness_idle_1": [
+   211,
+   1794,
+   43,
+   42
+  ],
+  "ink_bloom_attack": [
+   0,
+   1840,
+   57,
+   41
+  ],
+  "ink_bloom_die_1": [
+   59,
+   1840,
+   49,
+   40
+  ],
+  "barrister_witness_hurt": [
+   110,
+   1840,
+   49,
+   40
+  ],
+  "barrister_witness_die_1": [
+   161,
+   1840,
+   39,
+   40
+  ],
+  "lockjaw_crab_die_2": [
+   0,
+   1883,
+   57,
+   36
+  ],
+  "ink_bloom_die_2": [
+   59,
+   1883,
+   49,
+   33
+  ],
+  "writ_oblivion_die_2": [
+   110,
+   1883,
+   25,
+   33
+  ],
+  "barrister_witness_die_2": [
+   137,
+   1883,
+   37,
+   30
+  ],
+  "writ_silence_die_2": [
+   176,
+   1883,
+   25,
+   30
+  ]
+ },
+ "origin": {
+  "flood_hound": [
+   31,
+   58
+  ],
+  "flood_hound_idle_1": [
+   31,
+   59
+  ],
+  "flood_hound_attack": [
+   33,
+   58
+  ],
+  "flood_hound_hurt": [
+   34,
+   56
+  ],
+  "flood_hound_die_0": [
+   31,
+   61
+  ],
+  "flood_hound_die_1": [
+   31,
+   54
+  ],
+  "flood_hound_die_2": [
+   31,
+   43
+  ],
+  "lockjaw_crab": [
+   28,
+   50
+  ],
+  "lockjaw_crab_idle_1": [
+   28,
+   51
+  ],
+  "lockjaw_crab_attack": [
+   34,
+   49
+  ],
+  "lockjaw_crab_hurt": [
+   29,
+   48
+  ],
+  "lockjaw_crab_die_0": [
+   28,
+   53
+  ],
+  "lockjaw_crab_die_1": [
+   28,
+   44
+  ],
+  "lockjaw_crab_die_2": [
+   28,
+   35
+  ],
+  "ink_bloom": [
+   24,
+   44
+  ],
+  "ink_bloom_idle_1": [
+   23,
+   46
+  ],
+  "ink_bloom_attack": [
+   28,
+   40
+  ],
+  "ink_bloom_hurt": [
+   25,
+   44
+  ],
+  "ink_bloom_cast": [
+   24,
+   49
+  ],
+  "ink_bloom_die_0": [
+   24,
+   44
+  ],
+  "ink_bloom_die_1": [
+   24,
+   39
+  ],
+  "ink_bloom_die_2": [
+   24,
+   32
+  ],
+  "drowned_watch": [
+   48,
+   97
+  ],
+  "drowned_watch_idle_1": [
+   48,
+   98
+  ],
+  "drowned_watch_attack": [
+   63,
+   97
+  ],
+  "drowned_watch_hurt": [
+   49,
+   95
+  ],
+  "drowned_watch_die_0": [
+   48,
+   98
+  ],
+  "drowned_watch_die_1": [
+   48,
+   90
+  ],
+  "drowned_watch_die_2": [
+   48,
+   67
+  ],
+  "gutter_phantom": [
+   41,
+   82
+  ],
+  "gutter_phantom_idle_1": [
+   42,
+   82
+  ],
+  "gutter_phantom_attack": [
+   51,
+   81
+  ],
+  "gutter_phantom_hurt": [
+   45,
+   81
+  ],
+  "gutter_phantom_cast": [
+   43,
+   94
+  ],
+  "gutter_phantom_die_0": [
+   41,
+   82
+  ],
+  "gutter_phantom_die_1": [
+   41,
+   72
+  ],
+  "gutter_phantom_die_2": [
+   41,
+   54
+  ],
+  "blank_decree": [
+   35,
+   71
+  ],
+  "blank_decree_idle_1": [
+   36,
+   71
+  ],
+  "blank_decree_attack": [
+   39,
+   74
+  ],
+  "blank_decree_hurt": [
+   39,
+   69
+  ],
+  "blank_decree_cast": [
+   38,
+   75
+  ],
+  "blank_decree_die_0": [
+   35,
+   75
+  ],
+  "blank_decree_die_1": [
+   34,
+   68
+  ],
+  "blank_decree_die_2": [
+   33,
+   52
+  ],
+  "waterlogged_sentinel": [
+   45,
+   89
+  ],
+  "waterlogged_sentinel_idle_1": [
+   45,
+   90
+  ],
+  "waterlogged_sentinel_attack": [
+   57,
+   91
+  ],
+  "waterlogged_sentinel_hurt": [
+   48,
+   87
+  ],
+  "waterlogged_sentinel_die_0": [
+   45,
+   92
+  ],
+  "waterlogged_sentinel_die_1": [
+   45,
+   87
+  ],
+  "waterlogged_sentinel_die_2": [
+   44,
+   64
+  ],
+  "barrister": [
+   43,
+   91
+  ],
+  "barrister_idle_1": [
+   43,
+   91
+  ],
+  "barrister_attack": [
+   55,
+   90
+  ],
+  "barrister_hurt": [
+   51,
+   89
+  ],
+  "barrister_cast": [
+   43,
+   101
+  ],
+  "barrister_die_0": [
+   43,
+   91
+  ],
+  "barrister_die_1": [
+   43,
+   85
+  ],
+  "barrister_die_2": [
+   42,
+   64
+  ],
+  "barrister_witness": [
+   20,
+   41
+  ],
+  "barrister_witness_idle_1": [
+   21,
+   41
+  ],
+  "barrister_witness_attack": [
+   23,
+   42
+  ],
+  "barrister_witness_hurt": [
+   24,
+   39
+  ],
+  "barrister_witness_cast": [
+   21,
+   45
+  ],
+  "barrister_witness_die_0": [
+   20,
+   44
+  ],
+  "barrister_witness_die_1": [
+   19,
+   39
+  ],
+  "barrister_witness_die_2": [
+   18,
+   29
+  ],
+  "writ_silence": [
+   15,
+   44
+  ],
+  "writ_silence_idle_1": [
+   15,
+   44
+  ],
+  "writ_silence_attack": [
+   15,
+   44
+  ],
+  "writ_silence_hurt": [
+   15,
+   44
+  ],
+  "writ_silence_cast": [
+   15,
+   53
+  ],
+  "writ_silence_die_0": [
+   15,
+   48
+  ],
+  "writ_silence_die_1": [
+   12,
+   42
+  ],
+  "writ_silence_die_2": [
+   12,
+   29
+  ],
+  "writ_oblivion": [
+   15,
+   44
+  ],
+  "writ_oblivion_idle_1": [
+   15,
+   44
+  ],
+  "writ_oblivion_attack": [
+   15,
+   44
+  ],
+  "writ_oblivion_hurt": [
+   15,
+   44
+  ],
+  "writ_oblivion_cast": [
+   15,
+   53
+  ],
+  "writ_oblivion_die_0": [
+   15,
+   46
+  ],
+  "writ_oblivion_die_1": [
+   12,
+   42
+  ],
+  "writ_oblivion_die_2": [
+   12,
+   32
+  ]
+ },
+ "anims": {
+  "flood_hound_idle": {
+   "frames": [
+    "flood_hound",
+    "flood_hound_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "flood_hound_die": {
+   "frames": [
+    "flood_hound_die_0",
+    "flood_hound_die_1",
+    "flood_hound_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "lockjaw_crab_idle": {
+   "frames": [
+    "lockjaw_crab",
+    "lockjaw_crab_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "lockjaw_crab_die": {
+   "frames": [
+    "lockjaw_crab_die_0",
+    "lockjaw_crab_die_1",
+    "lockjaw_crab_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "ink_bloom_idle": {
+   "frames": [
+    "ink_bloom",
+    "ink_bloom_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ink_bloom_die": {
+   "frames": [
+    "ink_bloom_die_0",
+    "ink_bloom_die_1",
+    "ink_bloom_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "drowned_watch_idle": {
+   "frames": [
+    "drowned_watch",
+    "drowned_watch_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "drowned_watch_die": {
+   "frames": [
+    "drowned_watch_die_0",
+    "drowned_watch_die_1",
+    "drowned_watch_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "gutter_phantom_idle": {
+   "frames": [
+    "gutter_phantom",
+    "gutter_phantom_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "gutter_phantom_die": {
+   "frames": [
+    "gutter_phantom_die_0",
+    "gutter_phantom_die_1",
+    "gutter_phantom_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "blank_decree_idle": {
+   "frames": [
+    "blank_decree",
+    "blank_decree_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "blank_decree_die": {
+   "frames": [
+    "blank_decree_die_0",
+    "blank_decree_die_1",
+    "blank_decree_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "waterlogged_sentinel_idle": {
+   "frames": [
+    "waterlogged_sentinel",
+    "waterlogged_sentinel_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "waterlogged_sentinel_die": {
+   "frames": [
+    "waterlogged_sentinel_die_0",
+    "waterlogged_sentinel_die_1",
+    "waterlogged_sentinel_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "barrister_idle": {
+   "frames": [
+    "barrister",
+    "barrister_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "barrister_die": {
+   "frames": [
+    "barrister_die_0",
+    "barrister_die_1",
+    "barrister_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "barrister_witness_idle": {
+   "frames": [
+    "barrister_witness",
+    "barrister_witness_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "barrister_witness_die": {
+   "frames": [
+    "barrister_witness_die_0",
+    "barrister_witness_die_1",
+    "barrister_witness_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "writ_silence_idle": {
+   "frames": [
+    "writ_silence",
+    "writ_silence_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "writ_silence_die": {
+   "frames": [
+    "writ_silence_die_0",
+    "writ_silence_die_1",
+    "writ_silence_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "writ_oblivion_idle": {
+   "frames": [
+    "writ_oblivion",
+    "writ_oblivion_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "writ_oblivion_die": {
+   "frames": [
+    "writ_oblivion_die_0",
+    "writ_oblivion_die_1",
+    "writ_oblivion_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "paper_regent": "bosses_battle",
+  "paper_regent_ward": "bosses_battle",
+  "paper_regent_charter": "bosses_battle"
+ },
+ "notes": "Episode 4 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin bottom-centre (the default; the `origin` table agrees). Derived <id>_idle_1 (breathe), _attack, _hurt, _die_0..2 for every id, _cast for ink_bloom, gutter_phantom, blank_decree, barrister, barrister_witness, writ_silence, writ_oblivion; anims <id>_idle and <id>_die. Draw 1x, untinted. flood_hound, lockjaw_crab, ink_bloom, drowned_watch, gutter_phantom, blank_decree, waterlogged_sentinel (enemies.png cells 2, 3, 0, 5, 7, 6, 4), barrister (cell 1, the 96 px mini-boss cell), barrister_witness (cell 6, small), writ_silence and writ_oblivion (drawn in code). The Paper Regent lives in bosses_battle (see `external`)."
+}

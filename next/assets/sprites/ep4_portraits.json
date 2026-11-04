@@ -1,0 +1,27 @@
+{
+ "image": "ep4_portraits.png",
+ "frames": {
+  "paper_regent_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "paper_regent_32": [
+   48,
+   0,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "paper_regent": {
+   "48": "paper_regent_48",
+   "32": "paper_regent_32"
+  }
+ },
+ "sources": {
+  "paper_regent": "battle frame paper_regent (1x crop, E4-sprites)"
+ },
+ "notes": "Episode 4 pack atlas, merged into portraits. paper_regent: the crown, the hood and its two cyan eyes, cropped at 1x from the Forged Edicts battle frame. Lyra (regent_e, lyra_n and every Regent tag) speaks with the base noble_lady portrait (portraits.webp cell 4), so she needs no frames here."
+}

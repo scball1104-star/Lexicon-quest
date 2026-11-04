@@ -1,0 +1,311 @@
+{
+ "image": "ep4_enemies_field.png",
+ "frames": {
+  "flood_hound_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "flood_hound_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "lockjaw_crab_0": [
+   50,
+   0,
+   16,
+   16
+  ],
+  "lockjaw_crab_1": [
+   67,
+   0,
+   16,
+   16
+  ],
+  "ink_bloom_0": [
+   84,
+   0,
+   16,
+   16
+  ],
+  "ink_bloom_1": [
+   101,
+   0,
+   16,
+   16
+  ],
+  "drowned_watch_0": [
+   118,
+   0,
+   24,
+   32
+  ],
+  "drowned_watch_1": [
+   143,
+   0,
+   24,
+   32
+  ],
+  "gutter_phantom_0": [
+   168,
+   0,
+   24,
+   24
+  ],
+  "gutter_phantom_1": [
+   193,
+   0,
+   24,
+   24
+  ],
+  "blank_decree_0": [
+   218,
+   0,
+   16,
+   16
+  ],
+  "blank_decree_1": [
+   235,
+   0,
+   16,
+   16
+  ],
+  "waterlogged_sentinel_0": [
+   0,
+   33,
+   24,
+   24
+  ],
+  "waterlogged_sentinel_1": [
+   25,
+   33,
+   24,
+   24
+  ],
+  "barrister_0": [
+   50,
+   33,
+   24,
+   24
+  ],
+  "barrister_1": [
+   75,
+   33,
+   24,
+   24
+  ],
+  "paper_regent_avatar_0": [
+   100,
+   33,
+   40,
+   54
+  ],
+  "paper_regent_avatar_1": [
+   141,
+   33,
+   40,
+   54
+  ],
+  "paper_regent_avatar_back_0": [
+   182,
+   33,
+   40,
+   54
+  ],
+  "paper_regent_avatar_back_1": [
+   0,
+   88,
+   40,
+   54
+  ]
+ },
+ "anims": {
+  "flood_hound_idle": {
+   "frames": [
+    "flood_hound_0",
+    "flood_hound_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "lockjaw_crab_idle": {
+   "frames": [
+    "lockjaw_crab_0",
+    "lockjaw_crab_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ink_bloom_idle": {
+   "frames": [
+    "ink_bloom_0",
+    "ink_bloom_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "drowned_watch_idle": {
+   "frames": [
+    "drowned_watch_0",
+    "drowned_watch_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "gutter_phantom_idle": {
+   "frames": [
+    "gutter_phantom_0",
+    "gutter_phantom_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "blank_decree_idle": {
+   "frames": [
+    "blank_decree_0",
+    "blank_decree_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "waterlogged_sentinel_idle": {
+   "frames": [
+    "waterlogged_sentinel_0",
+    "waterlogged_sentinel_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "barrister_idle": {
+   "frames": [
+    "barrister_0",
+    "barrister_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "paper_regent_avatar_idle": {
+   "frames": [
+    "paper_regent_avatar_0",
+    "paper_regent_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "paper_regent_avatar_back_idle": {
+   "frames": [
+    "paper_regent_avatar_back_0",
+    "paper_regent_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "flood_hound": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "lockjaw_crab": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "ink_bloom": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "drowned_watch": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "gutter_phantom": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "blank_decree": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "waterlogged_sentinel": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "barrister": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "paper_regent_avatar": {
+   "size": [
+    40,
+    54
+   ],
+   "origin": [
+    20,
+    53
+   ]
+  },
+  "paper_regent_avatar_back": {
+   "size": [
+    40,
+    54
+   ],
+   "origin": [
+    20,
+    53
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Episode 4 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin bottom-centre. Each foe carries a 1 px rim light on the upper-left edge. paper_regent_avatar (40x54, frontal) and paper_regent_avatar_back (seen from behind) are the boss on the Drowned Throne map."
+}
