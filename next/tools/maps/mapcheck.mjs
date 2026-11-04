@@ -873,6 +873,8 @@ const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', '
 const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog', 'lift']);
 const CHEST_TIERS = new Set(['wood', 'iron', 'gold', 'red', 'blue']);   // red and blue: the Deep Stacks (src/data/cave/world.js)
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
+// E4-world: Episode 4 tide locks (tools/maps/ep4_check.mjs) take over walk/buildGrid/loadDb for maps with a `tide` block
+({ walk, loadDb, buildGrid } = (await import('./ep4_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));
 
 /**
  * Validate one map. `maps` = { id: module } for door/exit targets (grids built lazily).
