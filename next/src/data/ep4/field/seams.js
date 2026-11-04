@@ -9,7 +9,8 @@
 // 2. weatherIf. A map with `weather: 'rain'` and `weatherIf: { if, ifNot }` rains only while the condition matches
 //    (Valewyn: `weatherIf: { ifNot: 'vw_restored' }`). The core field sets rain from `weather` once per load; the pack
 //    re-reads the condition every frame (cheap, like the core's weather zone), so the rain eases off the moment the
-//    flag is set mid-scene and a later arrival is dry from the first frame.
+//    flag is set mid-scene and a later arrival is dry from the first frame. The map's ambience (canal_rain) follows the
+//    same condition (E4-integrate).
 import { matches } from '../../story/dialogue.js';
 
 const ALL = 'all:';
@@ -59,4 +60,10 @@ export function syncWeather(field) {
   if (want === null) return;
   p.setRain(want);
   if (fresh && !want && typeof p.rainIntensity === 'number') p.rainIntensity = 0;
+  // the map's ambience (canal_rain) follows the same condition: it eases out with the rain, and a dry arrival is quiet
+  const amb = map.mod.ambience, audio = field.engine && field.engine.audio;
+  if (!amb || !audio || typeof audio.ambience !== 'function' || (!fresh && field.ep4AmbWant === want)) return;
+  field.ep4AmbWant = want;
+  if (want) audio.ambience(amb, { fade: 1.2 });
+  else audio.ambience(null, { fade: fresh ? 0.3 : 2.5 });
 }

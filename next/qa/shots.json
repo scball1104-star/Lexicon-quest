@@ -6472,6 +6472,801 @@
      "wait": 3000
     }
    ]
+  },
+  {
+   "name": "field_ep4_flood_lane_mid",
+   "note": "E4: the Flood Road, the drowned lane at mid: the road under water, the punt floating by the sluice wheel",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_flood_road",
+      13,
+      13,
+      "right"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep4_flood_lane_mid: the field is on top"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_flood_lane_low",
+   "note": "E4: the drowned lane drained (wh_lane to low): the road walks on east, the punt sits in the ditch",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_flood_road",
+      13,
+      13,
+      "right"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const id = \"wh_lane\"; const lv = () => { const t = LQ_DEBUG.tide(); return t && t.active ? JSON.stringify(t.levels) : null; }; const before = lv(); LQ_DEBUG.turnWheel(id); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing) LQ_DEBUG.press('confirm', 1); continue; } const t = LQ_DEBUG.tide(); if (t && lv() !== before && !t.busy && t.anim == null) return t.levels; } throw new Error('the wheel never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.tide().levels.l === 0",
+     "message": "the lane is low"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_valewyn_plaza",
+   "note": "E4: Valewyn, the Drowned Crown Plaza in the rain: the faceless statue, the flood board, the canals",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_valewyn",
+      21,
+      22,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep4_valewyn_plaza: the field is on top"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_keep_f1_papered_high",
+   "note": "E4: F1 Tidegate Causeway, basin a at high: the water over the papered door, the forged seal washing off in red",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f1",
+      16,
+      17,
+      "left"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const id = \"wh_a\"; const lv = () => { const t = LQ_DEBUG.tide(); return t && t.active ? JSON.stringify(t.levels) : null; }; const before = lv(); LQ_DEBUG.turnWheel(id); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing) LQ_DEBUG.press('confirm', 1); continue; } const t = LQ_DEBUG.tide(); if (t && lv() !== before && !t.busy && t.anim == null) return t.levels; } throw new Error('the wheel never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const id = \"wh_a\"; const lv = () => { const t = LQ_DEBUG.tide(); return t && t.active ? JSON.stringify(t.levels) : null; }; const before = lv(); LQ_DEBUG.turnWheel(id); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing) LQ_DEBUG.press('confirm', 1); continue; } const t = LQ_DEBUG.tide(); if (t && lv() !== before && !t.busy && t.anim == null) return t.levels; } throw new Error('the wheel never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 30
+    },
+    {
+     "assert": "LQ_DEBUG.tide().levels.a === 2",
+     "message": "basin a is high"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_keep_f1_pontoons_mid",
+   "note": "E4: F1 the Pontoons at mid: the moored pontoons floating level with the walkways",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f1",
+      29,
+      13,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const id = \"wh_b\"; const lv = () => { const t = LQ_DEBUG.tide(); return t && t.active ? JSON.stringify(t.levels) : null; }; const before = lv(); LQ_DEBUG.turnWheel(id); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing) LQ_DEBUG.press('confirm', 1); continue; } const t = LQ_DEBUG.tide(); if (t && lv() !== before && !t.busy && t.anim == null) return t.levels; } throw new Error('the wheel never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.tide().levels.b === 1",
+     "message": "basin b is mid"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_keep_f2_stacks_high",
+   "note": "E4: F2 Archives Below Water, the Stacks at high: book crates up to the gallery, lanterns on chains",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f2",
+      10,
+      16,
+      "down"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const id = \"wh_a\"; const lv = () => { const t = LQ_DEBUG.tide(); return t && t.active ? JSON.stringify(t.levels) : null; }; const before = lv(); LQ_DEBUG.turnWheel(id); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing) LQ_DEBUG.press('confirm', 1); continue; } const t = LQ_DEBUG.tide(); if (t && lv() !== before && !t.busy && t.anim == null) return t.levels; } throw new Error('the wheel never turned: ' + id); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.tide().levels.a === 2",
+     "message": "the Stacks are high"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "field_ep4_keep_f3_dark",
+   "note": "E4: F3 Court of Witnesses, the hub at dark 0.3: the Petition Gate with no stone rung",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\", \"vex_archive_met\", \"barrister_tried\", \"barrister_defeated\", \"keep_f2_done\", \"keep_f3_arrived\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f3",
+      22,
+      15,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep4_keep_f3_dark: the field is on top"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_ep4_morning",
+   "note": "E4: ep4_morning, Ada at the Coal Lantern hearth with the decree that will not dry (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Three days on the road\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep4_morning: Ada speaks"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_regent_hall",
+   "note": "E4: regent_hall, the Regent at the long table, her ink sliding off the page (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_vw_palace",
+      9,
+      12,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"regent_hall\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"I write OPEN\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_regent_hall: the Regent speaks"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_vex_archive",
+   "note": "E4: vex_archive, Vex in the dry chair under the glass dome (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f2",
+      29,
+      3,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_archive\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Four lists. One hand\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_archive: Vex speaks"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_witness_book",
+   "note": "E4: witness_book, the hero signs the drowned Witness Book and the name holds (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\", \"vex_archive_met\", \"barrister_tried\", \"barrister_defeated\", \"keep_f2_done\", \"keep_f3_arrived\", \"principle_voice\", \"principle_truth\", \"principle_mercy\", \"lyra_memory_3\", \"petition_gate_open\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_f3",
+      22,
+      8,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"witness_book\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"It held. Under water\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_witness_book: Mira reads the signature"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "battle_decree_pips",
+   "note": "E4: the Flood Road teaching fight, the Ink Bloom stamped: its seal pips on the foe row",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e4r_first",
+      {
+       "seed": 1,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.units().some((u) => u.side === 'enemy' && u.alive && u.heat > 0))) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some((u) => u.side === 'enemy' && u.heat > 0)",
+     "message": "a foe has stamped"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "battle_barrister",
+   "note": "E4: the Inkbound Barrister, two seals stamped toward its Objection",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "barrister",
+      {
+       "seed": 2,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.units().some((u) => u.boss && u.alive && u.heat >= 2))) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some((u) => u.boss && u.heat >= 2)",
+     "message": "the Barrister is stamping"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "battle_regent_answer",
+   "note": "E4: the Paper Regent, phase 3: Strike from the Roll announced on the hero, the hero Answers it",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"hero_signed\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 20; return true; })()"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "paper_regent",
+      {
+       "seed": 5,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { const s0 = LQ_ENGINE.scene; const R = () => s0.b.units().find(u => u.alive && u.id === 'paper_regent'); for (let i = 0; i < 12000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (!open) { LQ_DEBUG.advance(5); continue; } const r = R(); if (!r) return -3; const ph = r.ai.phase || 0; const writs = s.b.units().filter(u => u.alive && /^writ_/.test(u.id)); if (ph === 0) { r.hp = Math.floor(r.maxHp * 0.705); LQ_DEBUG.battleAct({ type: 'attack', target: r.uid }); } else if (writs.length) { writs.forEach(w => { w.hp = 1; }); LQ_DEBUG.battleAct({ type: 'attack', target: writs[0].uid }); } else if ([...s.telegraphs.values()].some(t => t.skill === 'strike_roll') && b.current === 'hero') {   const h = s.b.unit('hero'); h.mp = Math.max(h.mp, 30); r.hp = r.maxHp; LQ_DEBUG.battleAct({ type: 'skill', skill: 'answer', target: r.uid }); return i; } else LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'battle'",
+     "message": "still in the fight"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_regent_after",
+   "note": "E4: regent_after, the line under the counter-seal reads at last (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\", \"vex_archive_met\", \"barrister_tried\", \"barrister_defeated\", \"keep_f2_done\", \"keep_f3_arrived\", \"principle_voice\", \"principle_truth\", \"principle_mercy\", \"lyra_memory_3\", \"petition_gate_open\", \"hero_signed\", \"paper_regent_tried\", \"paper_regent_defeated\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_keep_crown",
+      11,
+      12,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"\\\"Keep this one\\\\.\\\"\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_regent_after: Mira reads the line"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_crown_remembers",
+   "note": "E4: crown_remembers, Lyra on the statue steps, the gates open (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\", \"vex_archive_met\", \"barrister_tried\", \"barrister_defeated\", \"keep_f2_done\", \"keep_f3_arrived\", \"principle_voice\", \"principle_truth\", \"principle_mercy\", \"lyra_memory_3\", \"petition_gate_open\", \"hero_signed\", \"paper_regent_tried\", \"paper_regent_defeated\", \"lyra_named\", \"charter_restored\", \"fragment4_get\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_valewyn",
+      29,
+      4,
+      "down"
+     ],
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"I am Lyra, Regent of Valewyn\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_crown_remembers: Lyra speaks"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_ep4_ending",
+   "note": "E4: ep4_ending, Valewyn at night, the letter in stars and the voice over the sand (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep4_morning_done\", \"ep4_started\", \"east_road_open\", \"flood_road_arrived\", \"flood_first_fight_done\", \"saw_flood_lane\", \"ferry_rested\", \"saw_valewyn\", \"vw_arrived\", \"saw_statue\", \"met_regent\", \"lyra_truth\", \"met_joss\", \"keep_ferry_open\", \"keep_entered\", \"keep_f1_arrived\", \"lyra_memory_1\", \"seal_key_found\", \"tidegate_open\", \"keep_f1_done\", \"keep_f2_arrived\", \"lyra_memory_2\", \"vex_archive_met\", \"barrister_tried\", \"barrister_defeated\", \"keep_f2_done\", \"keep_f3_arrived\", \"principle_voice\", \"principle_truth\", \"principle_mercy\", \"lyra_memory_3\", \"petition_gate_open\", \"hero_signed\", \"paper_regent_tried\", \"paper_regent_defeated\", \"lyra_named\", \"charter_restored\", \"fragment4_get\", \"tide_bell_rung\", \"vw_restored\"]) g.flags[f] = true; g.items[\"lock_crank\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep4_valewyn",
+      21,
+      22,
+      "up"
+     ],
+     "timeout": 20000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ep4_ending\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"That's not a bell\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep4_ending: Mira hears it"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "ui_title_ep4",
+   "note": "E4: the title with an Episode 3 finish in slot 0: the Episode 4 row offered, its help line beside it",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.newGameEp4('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 28800, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep4')",
+     "timeout": 20000
+    },
+    {
+     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep4'); return m.index; })()"
+    },
+    {
+     "frames": 90
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
   }
  ]
 }

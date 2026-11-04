@@ -39,6 +39,12 @@ Crowns and A Letter Answered on the way (not with --no-side).
     python next/qa/autoplay.py --tier 1                          Fine Print: Episode 1 from a carried Episode 2 record
                                                                  (the title's row; <device>-tier1-* files; docs/TIER.md)
 
+Episode 4 (E4-integrate, EPISODE4_PLAN 12): the same two starts from <device>-ep3-credits-save.json (built from the last finished
+Episode 3 game): Continue on it in record 1, or the title's "Episode 4: new party" with it in slot 0. Tide locks follow the map
+agents' solutions (docs/MAPS_EP4_A.md, MAPS_EP4_B.md) on the field's live water. Writes <device>-ep4-* files.
+
+    python next/qa/autoplay.py --episode 4 [--start new] [--device phone]
+
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
 Episode 2 runs write <device>-ep2-* files instead. Exit code 1 on any console error, page error, engine error,
@@ -100,9 +106,22 @@ FIELD_JS = """() => {
   const bridges = f.glass && f.glass.bridges ? [...f.glass.bridges.values()].map(b => [b.x, b.y, !!b.lit]) : [];
   // E3: crusted slag cells (walkable, whatever the static grid says) as [x, y]
   const crust = f.quench && f.quench.crust ? [...f.quench.crust].map(i => [i % f.map.w, Math.floor(i / f.map.w)]) : [];
+  // E4: the tide's live floor: every basin cell and every cell it overrides, with the collision it has now
+  let tide = null;
+  const T = f.tide;
+  if (T && T.active && T.m) {
+    const W = f.map.w, cells = [], seen = new Set();
+    const add = (i) => { if (seen.has(i)) return; seen.add(i); const x = i % W, y = Math.floor(i / W); cells.push([x, y, f.map.collisionAt(x, y)]); };
+    for (let i = 0; i < T.m.basinAt.length; i++) if (T.m.basinAt[i] >= 0) add(i);
+    for (const i of T.over.keys()) add(i);
+    const starts = {};
+    for (const id of T.m.ids) starts[id] = T.m.basins[id].start;
+    tide = { levels: { ...T.levels }, starts, wheels: Object.fromEntries(T.m.wheels.map(w => [w.id, w.b])), cells,
+      washed: [...T.washed].sort(), latched: [...T.latched].sort(), busy: !!T.busy || !!T.anim };
+  }
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, bridges, crust, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    lantern: f.lantern, ents, actors, bridges, crust, tide, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
     busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
@@ -443,7 +462,7 @@ class Bot:
                 calm = 0
                 continue
             f = self.field()
-            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14:
+            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy'):
                 calm += 1
                 if calm >= 2:
                     return f
@@ -520,6 +539,7 @@ class Bot:
         lit_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if lit}
         dim_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if not lit}
         crust = {(x, y) for x, y in f.get('crust') or []}
+        live = {(x, y): c for x, y, c in ((f.get('tide') or {}).get('cells') or [])}     # E4: water, floats, seals right now
 
         def passable(x, y, d):
             if not (0 <= x < W and 0 <= y < H):
@@ -534,7 +554,7 @@ class Bot:
                 return True
             if (x, y) in dim_bridges:
                 return allow_pits or (x, y) == goal_t
-            c = code[y][x]
+            c = live.get((x, y)) or code[y][x]
             if faint[y][x]:
                 return bool(opened.get(f'{f["map"]}:ink:{x},{y}'))
             if c == 'none':
@@ -3657,6 +3677,783 @@ class Episode3(Episode):
         self.check_slots('the end')
 
 
+def ep4_fixture(device):
+    """The Episode 3 credits save (EPISODE4_PLAN 10.2): built from the newest finished Episode 3 game (<device>-ep3-last-game.json,
+    else the desktop one) by putting the party where the Episode 3 credits wake it: pk_inn, inn_bed (17, 7), facing down.
+    Written to <device>-ep3-credits-save.json. Returns the path."""
+    path = OUT / f'{device}-ep3-credits-save.json'
+    if path.exists():
+        return path
+    for src in (OUT / f'{device}-ep3-last-game.json', OUT / 'desktop-ep3-last-game.json'):
+        if src.exists():
+            g = json.loads(src.read_text(encoding='utf-8'))
+            if not (g.get('flags') or {}).get('ep3_complete') or not (g.get('counters') or {}).get('credits3_rolled'):
+                continue
+            if any(k.startswith('ep4_') for k, v in (g.get('flags') or {}).items() if v):
+                continue
+            g['map'] = 'pk_inn'
+            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['autosaveSlot'] = 1
+            path.write_text(json.dumps(g), encoding='utf-8')
+            return path
+    raise Fail('no finished Episode 3 game to build the credits save from: run python qa/autoplay.py --episode 3 first')
+
+
+class Episode4(Episode3):
+    """Episode 4, "The Sunken Keep" (docs/story/EPISODE4.md, STAGING_EP4.md, MAPS_EP4_A.md, MAPS_EP4_B.md): from the morning after
+    the Episode 3 credits (Continue on the credits save, or the title's Episode 4 quick start) to the Episode 4 credits and the
+    wake in the Floodwatch Inn. Tide locks follow the map agents' reported solutions: a wheel is turned until its basin shows
+    the wanted level (Episode4.level_to), and the bot walks on the field's live collision (the tide's water, floats and seals,
+    FIELD_JS `tide`). Fights are Auto at 2x. The quick start is checked to write no save slot it does not own."""
+
+    # The level each zone is left at on the plan's route (EPISODE4_PLAN 6.1): optional fights stop once the party is there,
+    # so the Paper Regent is met at Lv 20 (fights that come to the party are still fought).
+    ZONE_LV = {'ep4_flood_road': 18, 'ep4_keep_f1': 19, 'ep4_keep_f2': 19, 'ep4_keep_f3': 20}
+    # ...by EXP, not level, so a Continue run (the Episode 3 bot finished about 750 EXP over the plan) and the quick start (5,600)
+    # both meet the Regent near the plan's 7,727 to 8,000: the simulator's zone ends (tools/sim/ep4.mjs, EPISODE4_PLAN 6.1)
+    ZONE_EXP = {'ep4_flood_road': 6038, 'ep4_keep_f1': 6853, 'ep4_keep_f2': 7500, 'ep4_keep_f3': 7900}
+
+    def hunt(self, limit, label):
+        f = self.b.settle()
+        exp = ((self.b.game() or {}).get('party') or [{}])[0].get('exp') or 0
+        if exp >= self.ZONE_EXP.get(f['map'], 10 ** 9):
+            return
+        self.b.hunt(limit=limit, label=label)
+
+    TIER7 = [('riverguard_plate', 2), ('scribes_robe', 1), ('riverguard_helm', 2), ('oilskin_hood', 1)]
+    TIER8 = [('crownguard_helm', 1), ('crownguard_sword', 1), ('riverguard_halberd', 1), ('charter_rod', 1), ('crownguard_mail', 1)]
+
+    def __init__(self, bot, side=True, until=None, start='save'):
+        super().__init__(bot, side=side, until=until, start=start)
+        self.turns = collections.Counter()     # puzzle label -> wheel turns (story_time.py reads the notes)
+
+    # ---- tide
+    def tide(self, f=None):
+        f = f or self.b.settle()
+        t = f.get('tide')
+        if not t:
+            raise Fail(f'no tide on {f["map"]}')
+        return t
+
+    def level_to(self, wheel, level, label=''):
+        """Turn `wheel` until its basin stands at `level` (low 0, mid 1, high 2), walking to it on the live floor."""
+        b = self.b
+        for _ in range(5):
+            f = b.settle()
+            t = self.tide(f)
+            basin = (t.get('wheels') or {}).get(wheel)
+            if basin is None:
+                raise Fail(f'no wheel {wheel} on {f["map"]} ({label})')
+            if int(t['levels'][basin]) == int(level):
+                return f
+            before = int(t['levels'][basin])
+            b.interact(ent_id=wheel, label=f'turn {wheel} ({label})')
+            after = int(self.tide()['levels'][basin])
+            if after == before:
+                raise Fail(f'{wheel} did not turn (basin {basin} still at {before}; {label})')
+            self.turns[label or wheel] += 1
+        raise Fail(f'{wheel}: basin did not reach level {level} ({label})')
+
+    def basin_to(self, basin, level, label=''):
+        """Turn whichever wheel of `basin` the party can reach (nearest first) until the basin stands at `level`."""
+        b = self.b
+        for _ in range(5):
+            f = b.settle()
+            t = self.tide(f)
+            if int(t['levels'][basin]) == int(level):
+                return f
+            best = None
+            for w, bb in (t.get('wheels') or {}).items():
+                e = b.ent(f, w)
+                if bb != basin or not e:
+                    continue
+                r = b.reachable_spot(f, [(e['x'], e['y'])])
+                if r and (best is None or r[0] < best[0]):
+                    best = (r[0], w)
+            if best is None:
+                raise Fail(f'no reachable wheel of basin {basin} on {f["map"]} ({label})')
+            self._turn_once(best[1], label)
+        f = b.settle()
+        if int(self.tide(f)['levels'][basin]) != int(level):
+            raise Fail(f'basin {basin} did not reach level {level} ({label})')
+        return f
+
+    def _turn_once(self, wheel, label):
+        b = self.b
+        b.interact(ent_id=wheel, label=f'turn {wheel} ({label})')
+        self.turns[label or wheel] += 1
+
+    TIDE_DRIVEN = ('pontoon', 'forgery', 'floodgate')
+
+    def plan_to(self, f, goals, label=''):
+        """The fewest-turn wheel plan from where the party stands to any of `goals` (qa/integrate/ep4_tideplan.mjs, the pure tide
+        rule over every level state), on the bot's live model of everything the tide does not drive."""
+        b = self.b
+        t = self.tide(f)
+        solid, opn, avoid = set(), set(), set()
+        for e in f['ents']:
+            cells = [tuple(c) for c in e['cells']]
+            if e['type'] in self.TIDE_DRIVEN:
+                continue
+            for c, bl in zip(cells, e['blocked']):
+                if bl:
+                    solid.add(c)
+                elif e['type'] in ('door', 'gate', 'locked_door'):
+                    opn.add(c)
+            if e.get('opens'):
+                opn.update(tuple(c) for c in e['opens'])
+            if e['type'] == 'door' or (e['type'] in ('gate', 'locked_door') and e['state'] == 'open' and e['to']) or e['type'] == 'pit':
+                avoid.update(cells)
+            if e['type'] == 'block':
+                solid.update(cells)
+        for a in f['actors']:
+            if a['kind'] not in ('party', 'enemy') and a['solid']:
+                solid.add((a['x'], a['y']))
+        g = b.grid(f['map'])
+        for ex in g['exits']:
+            for j in range(ex.get('h', 1)):
+                for i in range(ex.get('w', 1)):
+                    avoid.add((ex['x'] + i, ex['y'] + j))
+        dams = [tuple(e['cells'][0]) for e in f['ents'] if e['type'] == 'block']
+        flags = sorted(k for k, v in (b.flags() or {}).items() if v)
+        req = {'map': f['map'], 'levels': t['levels'], 'washed': t.get('washed') or [], 'latched': t.get('latched') or [], 'dams': dams,
+               'pos': [f['leader']['x'], f['leader']['y']], 'goals': [list(c) for c in goals], 'solid': [list(c) for c in solid],
+               'open': [list(c) for c in opn], 'avoid': [list(c) for c in avoid - set(goals)], 'flags': flags}
+        r = subprocess.run(['node', str(HERE / 'integrate' / 'ep4_tideplan.mjs')], input=json.dumps(req), capture_output=True, text=True, timeout=120, cwd=str(NEXT))
+        if r.returncode != 0:
+            raise Fail(f'tide plan {f["map"]}: {r.stderr[-400:]}')
+        out = json.loads(r.stdout)
+        if not out.get('ok'):
+            raise Fail(f'no tide plan on {f["map"]} to {sorted(goals)[:4]} from {req["pos"]} at {t["levels"]} ({label}): {out}')
+        return out['plan']
+
+    def reach(self, cells, label='', adjacent=False):
+        """Make `cells` reachable (or, adjacent=True, a cell beside them): turn the wheels the plan names, standing where it
+        says, then leave the walk to the caller."""
+        b = self.b
+        cells = [tuple(c) for c in cells]
+        goals = set(cells)
+        if adjacent:
+            goals = {(x + dx, y + dy) for x, y in cells for dx, dy in DIRS.values()} - set(cells)
+        for attempt in range(3):
+            f = b.settle()
+            passable, _ = b.model(f)
+            L = (f['leader']['x'], f['leader']['y'])
+            if L in goals or b.bfs(L, goals, passable) is not None:
+                return f
+            plan = self.plan_to(f, goals, label)
+            if not plan:
+                b.hunt(limit=3, label=f'clear the way ({label})')       # reachable by the tide rule: something on the field stands in the way
+                continue
+            for step in plan:
+                b.walk_to([tuple(step['stand'])], label=f'stand at {step["wheel"]} ({label})')
+                b.face(step['face'])
+                b.tap('confirm', 3)
+                b.settle()
+                self.turns[label or step['wheel']] += 1
+                lv = int(self.tide()['levels'][step['basin']])
+                if lv != int(step['level']):
+                    b.notes.append(f'tide plan {label}: {step["wheel"]} gave level {lv}, planned {step["level"]}')
+                    break
+        f = b.settle()
+        passable, _ = b.model(f)
+        if b.bfs((f['leader']['x'], f['leader']['y']), goals, passable) is None:
+            raise Fail(f'{label}: still cannot reach {sorted(goals)[:4]} on {f["map"]} after the tide plan')
+        return f
+
+    def reach_ent(self, ent_id, label=''):
+        f = self.b.settle()
+        e = self.b.ent(f, ent_id)
+        if not e:
+            raise Fail(f'no {ent_id} on {f["map"]} ({label})')
+        return self.reach([tuple(c) for c in e['cells']], label=label or ent_id, adjacent=True)
+
+    def try_sign(self, ent_id):
+        try:
+            self.sign(ent_id)
+        except Fail as e:
+            self.b.notes.append(f'sign {ent_id} skipped: {e}')
+
+    def puzzle_done(self, label):
+        n = self.turns.pop(label, 0)
+        if n:
+            self.b.notes.append(f'tide {label}: {n} turns')
+
+    def walk(self, cells, label):
+        return self.b.walk_to([tuple(c) for c in cells], label=label)
+
+    def round_trip(self, label):
+        """Save to this run's own slot only, quit, load it back, and check the Episode 4 world state came back: washed seals,
+        latched floodgates and opened doors kept, every basin at its start level (EPISODE4_PLAN 12, saves)."""
+        b = self.b
+        before = b.field() or {}
+        tb = before.get('tide') or {}
+        b.round_trip(self.run_slot or 1, label)
+        after = b.settle()
+        ta = after.get('tide') or {}
+        if sorted(tb.get('washed') or []) != sorted(ta.get('washed') or []):
+            raise Fail(f'after the reload at {label}: washed {tb.get("washed")} -> {ta.get("washed")}')
+        if not set(tb.get('latched') or []) <= set(ta.get('latched') or []):
+            raise Fail(f'after the reload at {label}: latched {tb.get("latched")} -> {ta.get("latched")}')
+        opened = lambda f: sorted(e['id'] for e in f['ents'] if e['type'] in ('gate', 'locked_door') and e.get('state') == 'open')
+        if not set(opened(before)) <= set(opened(after)):
+            raise Fail(f'after the reload at {label}: doors {opened(before)} -> {opened(after)}')
+        starts = ta.get('starts') or {}
+        if ta and any(int(ta['levels'][k]) != int(starts.get(k, ta['levels'][k])) for k in ta.get('levels') or {}):
+            raise Fail(f'after the reload at {label}: levels {ta.get("levels")} are not the start levels {starts}')
+        b.notes.append(f'reload at {label}: washed {ta.get("washed")}, latched {ta.get("latched")}, levels {ta.get("levels")}, doors {opened(after)}')
+
+    def inn_if_hurt(self, frac=0.7):
+        b = self.b
+        vit = b.party_vitals()
+        if not vit or min(v['hp'] / max(1, v['maxHp']) for v in vit) >= frac:
+            return
+        f = b.settle()
+        if f['map'] != 'ep4_valewyn':
+            return
+        b.through('door_vw_inn')
+        self.ensure_map('ep4_vw_inn')
+        b.rest_at_inn('ep4_innkeeper')
+        b.through('inn_exit', exact=False)
+
+    # ---- phases
+    def title_start(self):
+        """Title -> Continue on the Episode 3 credits save (record 1), or Title -> Episode 4: new party -> the slot notice ->
+        Start -> name -> the inn. The quick start's row and slot notice are answered with real key presses."""
+        b = self.b
+        if b.scene() != 'title':
+            return
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title' && !LQ_DEBUG.state().transition", timeout=30000, polling=30)
+        b.frames(10)
+        for n in EP3_SLOTS:
+            self.slots0[n] = self.slot_raw(n)
+        if b.resume and self.start == 'save':
+            b.shot('title')
+            b.title_continue(1)
+            self.run_slot = 1
+            b.notes.append(f'resumed from {b.resume} (record 1)')
+            b.mark('resume')
+            return
+        # the pack loads behind the title and adds its row (hooks.js HOOKS.title -> title.js offerRow)
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep4')); })()", timeout=30000, polling=50)
+        b.frames(6)
+        ss = b.scene_state()['ss'] or {}
+        items = ss.get('items') or [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
+        if 'ep4' not in items:
+            raise Fail(f'the title does not offer Episode 4 (items {items})')
+        b.shot('title_ep4')
+        idx = b.js('LQ_ENGINE.scene.menu.index') or 0
+        want = items.index('ep4')
+        cols = b.js('LQ_ENGINE.scene.menu.columns') or 1
+        rows = b.js('LQ_ENGINE.scene.menu.rows') or len(items)
+        for _ in range(12):
+            idx = b.js('LQ_ENGINE.scene.menu.index') or 0
+            if idx == want:
+                break
+            if cols > 1 and idx // rows != want // rows:
+                b.page.keyboard.press('ArrowRight' if want // rows > idx // rows else 'ArrowLeft')
+            else:
+                b.page.keyboard.press('ArrowDown' if want > idx else 'ArrowUp')
+            b.frames(4)
+        b.page.keyboard.press('KeyZ')
+        b.frames(10)
+        if self.slots0.get(0) is not None:
+            b.page.wait_for_function("LQ_DEBUG.scene() === 'ep4Ask'", timeout=10000, polling=30)
+            st = b.scene_state()['ss'] or {}
+            if st.get('options') != ['back', 'start']:
+                raise Fail(f'slot 0 is taken but the quick start showed no slot notice: {st}')
+            b.notes.append(f'quick start notice: {st.get("notice")!r}')
+            b.shot('ep4_slot_notice')
+            b.page.keyboard.press('ArrowDown')
+            b.frames(4)
+            b.page.keyboard.press('KeyZ')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'nameEntryEp4' && !LQ_DEBUG.state().transition", timeout=20000, polling=30)
+        b.frames(10)
+        for _ in range(8):
+            b.page.keyboard.press('Backspace')
+        b.page.keyboard.type(b.hero, delay=30)
+        b.frames(6)
+        b.shot('name_entry_ep4')
+        b.page.keyboard.press('Enter')
+        b.page.wait_for_function("LQ_DEBUG.state().scenes.includes('field')", timeout=30000, polling=30)
+        b.frames(30)
+        g = b.game() or {}
+        if g.get('heroName') != b.hero:
+            raise Fail(f'hero name is {g.get("heroName")!r}, typed {b.hero!r}')
+        self.run_slot = g.get('autosaveSlot')
+        b.notes.append(f'quick start: the run saves to slot {self.run_slot} (slot 0 was {"taken" if self.slots0.get(0) else "empty"})')
+        if self.slots0.get(0) is not None and self.run_slot == 0:
+            raise Fail('the quick start took slot 0 although it holds another game')
+        b.mark('ep4_new_game')
+
+    def morning(self):
+        b = self.b
+        f = b.settle()
+        if not self.has('ep4_started'):
+            raise Fail(f'ep4_morning did not run (on {f["map"]})')
+        b.mark('ep4_morning')
+        if not b.items().get('running_decree'):
+            raise Fail('ep4_morning did not give the Running Decree')
+        if f['map'] == 'pk_inn':
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            if self.side:
+                self.talk('bess')
+            b.through('inn_exit')
+        self.ensure_map('emberpeak')
+        if self.side:
+            self.talk('rusk')
+        b.menu_talk()
+        self.check_slots('the morning')
+
+    def east_road(self):
+        b = self.b
+        if self.has('flood_road_arrived'):
+            return
+        self.ensure_map('emberpeak')
+        self.trigger([(36, 14), (36, 15)], 'east_road_open', 'east_road_trig')
+        b.through('east_road_down')
+        self.ensure_map('ep4_flood_road')
+        b.settle()
+        if not self.has('flood_road_arrived'):
+            raise Fail('flood_road_arrival did not run')
+        b.mark('flood_road')
+
+    def flood_road(self):
+        b = self.b
+        if self.has('vw_arrived'):
+            return
+        self.ensure_map('ep4_flood_road')
+        if not self.has('flood_first_fight_done'):
+            for attempt in range(4):
+                b.walk_to([(7, y) for y in range(6, 18)], label='first_fight_trig')
+                b.settle()
+                if self.has('flood_first_fight_done'):
+                    break
+                b.notes.append(f'flood_first_fight attempt {attempt + 1}')
+                b.walk_to([(4, 15), (4, 14), (5, 15)], label='back from the column')
+            if not self.has('flood_first_fight_done'):
+                raise Fail('flood_first_fight did not resolve')
+            b.mark('first_fight_done')
+        if self.side:
+            self.try_sign('broken_cart')
+        self.trigger([(12, y) for y in range(13, 17)], 'saw_flood_lane', 'lane_trig')
+        # the drowned lane: wh_lane mid -> low (the road), then up to the stand, low -> mid (the punt to the chest), mid -> low
+        self.level_to('wh_lane', 0, label='the drowned lane')
+        if self.side and not b.opened('ep4_flood_road', 'chest_punt'):
+            try:
+                self.walk([(15, 13)], 'the sluice stand')                # up the canal stair (15, 14) while the lane is dry
+                self.level_to('wh_lane', 1, label='the drowned lane')
+                self.chest('chest_punt')
+                self.level_to('wh_lane', 0, label='the drowned lane')
+            except Fail as e:
+                b.notes.append(f'punt chest skipped: {e}')
+                self.level_to('wh_lane', 0, label='the drowned lane')
+        self.puzzle_done('the drowned lane')
+        self.walk([(27, 15), (27, 16), (28, 15)], 'east of the lane')
+        self.hunt(2, label='the dry banks')
+        if self.side and not b.opened('ep4_flood_road', 'chest_grotto_fr'):
+            try:
+                if b.dash_break('crack_boulder_fr', label='grotto'):
+                    self.chest('chest_grotto_fr')
+            except Fail as e:
+                b.notes.append(f'grotto skipped: {e}')
+        if not self.has('ferry_rested'):
+            b.rest_at_fire('ferry_fire', prefer=['What happened here?', 'Rest', 'Not now'])
+        b.visit_shop('hale', [('hi_potion', 2), ('lamp_oil', 2)])
+        b.maintain('the landing')
+        self.hunt(2, label='the bluff')
+        self.trigger([(44, y) for y in range(6, 9)], 'saw_valewyn', 'vw_view_trig')
+        if self.side:
+            try:
+                b.interact(ent_id='pot_bluff', label='pot on the bluff')
+            except Fail as e:
+                b.notes.append(f'bluff pot skipped: {e}')
+        b.through('ferry_vw', exact=False)
+        self.ensure_map('ep4_valewyn')
+        b.settle()
+        if not self.has('vw_arrived'):
+            raise Fail('vw_arrival did not run')
+        b.mark('valewyn')
+
+    def valewyn(self):
+        b = self.b
+        if self.has('keep_entered'):
+            return
+        self.ensure_map('ep4_valewyn')
+        if self.side and not self.has('saw_statue'):
+            b.interact(ent_id='statue', label='the statue')
+        if not self.has('met_regent'):
+            b.through('door_vw_palace')
+            self.ensure_map('ep4_vw_palace')
+            self.trigger([(x, 11) for x in range(1, 11)], 'met_regent', 'regent_trig')
+            b.mark('regent_hall')
+            b.interact_no_settle(ent_id='save_bell_vw')
+            self.save_from_bell(self.run_slot or 1)
+            b.close_menu()
+            b.through('palace_exit')
+        self.ensure_map('ep4_valewyn')
+        if not self.has('met_joss'):
+            self.talk('joss')
+            if not self.has('met_joss') or not b.items().get('lock_crank'):
+                raise Fail('joss_locks did not give the Lockwright\'s Crank')
+            b.mark('joss')
+        b.through('door_vw_forge')
+        self.ensure_map('ep4_vw_forge')
+        b.visit_shop('ep4_smith', self.TIER7)
+        b.through('forge_exit', exact=False) if b.ent(b.settle(), 'forge_exit') else b.exit_to((8, 10), label='forge door')
+        b.menu_optimize_all()
+        self.ensure_map('ep4_valewyn')
+        b.through('door_vw_shop')
+        self.ensure_map('ep4_vw_shop')
+        b.visit_shop('linn', [('hi_potion', 3), ('lamp_oil', 2), ('hi_ether', 1)])
+        b.through('shop_exit', exact=False) if b.ent(b.settle(), 'shop_exit') else b.exit_to((7, 10), label='shop door')
+        self.ensure_map('ep4_valewyn')
+        self.inn_if_hurt(0.8)
+        self.ensure_map('ep4_valewyn')
+        if not self.has('keep_ferry_open'):
+            b.interact(ent_id='keep_ferry_obj', label='the keep ferry')
+            if not self.has('keep_ferry_open'):
+                raise Fail('keep_ferry did not set keep_ferry_open')
+        b.mark('keep_ferry')
+        b.through('keep_boat', exact=False)
+        self.ensure_map('ep4_keep_f1')
+        b.settle()
+        if not self.has('keep_f1_arrived'):
+            raise Fail('keep_f1_arrival did not run')
+        b.mark('keep_f1')
+
+    def keep_f1(self):
+        b = self.b
+        if self.has('keep_f1_done'):
+            return
+        self.ensure_map('ep4_keep_f1')
+        # B, the Papered Door: high washes seal_b, low again to walk the canal floor through the door
+        if 'seal_b' not in (self.tide().get('washed') or []):
+            self.level_to('wh_a', 2, label='F1 papered door')
+            if 'seal_b' not in (self.tide().get('washed') or []):
+                raise Fail('high water in basin a did not wash seal_b')
+            self.level_to('wh_a', 0, label='F1 papered door')
+        self.puzzle_done('F1 papered door')
+        if self.side:
+            self.chest('chest_x')
+        # C, the Pontoons: mid floats them; the tide key
+        self.hunt(2, label='pontoons')
+        if not b.opened('ep4_keep_f1', 'chest_tide_key'):
+            self.level_to('wh_b', 1, label='F1 pontoons')
+            self.chest('chest_tide_key')
+        self.puzzle_done('F1 pontoons')
+        # E and F: high from the east bank lifts the tidegate (latched) and floats pt_e to the gallery: the Sunken Seal Key
+        if not self.has('tidegate_open') or not b.opened('ep4_keep_f1', 'chest_seal_key'):
+            self.level_to('wh_b2', 2, label='F1 gallery and tidegate')
+            if not self.has('tidegate_open'):
+                raise Fail('high water in basin b did not latch the tidegate')
+            self.hunt(2, label='gallery')
+            self.chest('chest_seal_key')
+            if not b.items().get('seal_key'):
+                raise Fail('the north gallery chest did not give the Sunken Seal Key')
+            self.level_to('wh_b2', 1, label='F1 gallery and tidegate')
+        self.puzzle_done('F1 gallery and tidegate')
+        b.maintain('F1 pontoons')
+        # D, the Audience Hall (the first memory) behind the tide key door: back west at mid, then b low for the channel later
+        if not self.has('lyra_memory_1'):
+            self.walk([(28, 15), (28, 14), (29, 15)], 'west bank')
+            self.level_to('wh_b', 0, label='F1 channel')
+            b.through('door_d')
+            self.trigger([(x, 14) for x in range(1, 9)], 'lyra_memory_1', 'memory1_trig')
+            self.hunt(3, label='audience hall')
+            if self.side and not b.opened('ep4_keep_f1', 'chest_boots'):
+                try:
+                    if b.dash_break('crack_d', label='audience crack'):
+                        self.chest('chest_boots')
+                except Fail as e:
+                    b.notes.append(f'Tidewalker Boots skipped: {e}')
+            b.maintain('audience hall')
+        f = b.settle()
+        if b.ent(f, 'font_k1'):
+            try:
+                b.rest_at_font('font_k1', label='font F1')
+            except Fail as e:
+                b.notes.append(f'font F1 skipped: {e}')
+        self.round_trip('F1 water gate')
+        self.ensure_map('ep4_keep_f1')
+        self.check_slots('F1')
+        # F: the channel floor at low, north through the latched tidegate to the lift
+        self.level_to('wh_b', 0, label='F1 channel')
+        self.puzzle_done('F1 channel')
+        self.hunt(2, label='lift landing')
+        if self.side:
+            self.chest('chest_f')
+        b.maintain('end of F1')
+        self.trigger([(33, 2), (34, 2)], 'keep_f1_done', 'lift_trig')
+        f = b.settle()
+        if f['map'] == 'ep4_keep_f1':
+            b.through('lift_f2', exact=False)
+        self.ensure_map('ep4_keep_f2')
+        b.settle()
+        if not self.has('keep_f2_arrived'):
+            raise Fail('keep_f2_arrival did not run')
+        b.mark('keep_f2')
+
+    def keep_f2(self):
+        b = self.b
+        if self.has('keep_f2_done'):
+            return
+        self.ensure_map('ep4_keep_f2')
+        # every goal by the tide plan from wherever the party stands (MAPS_EP4_B section 2 is the authored solution)
+        self.hunt(2, label='stacks')
+        if not self.has('lyra_memory_2'):
+            rail = [(16, y) for y in range(6, 12)]
+            self.reach(rail, label='F2 stacks')
+            self.trigger(rail, 'lyra_memory_2', 'memory2_trig')
+        self.puzzle_done('F2 stacks')
+        if self.side and not b.opened('ep4_keep_f2', 'chest_gallery'):
+            try:
+                self.reach_ent('chest_gallery', label='F2 stacks gallery')
+                self.chest('chest_gallery')
+            except Fail as e:
+                b.notes.append(f'stacks gallery skipped: {e}')
+            self.puzzle_done('F2 stacks gallery')
+        if not self.has('vex_archive_met'):
+            dome = [(x, 3) for x in range(27, 32)]
+            self.reach(dome, label='F2 two locks')
+            self.trigger(dome, 'vex_archive_met', 'vex_trig')
+            b.mark('vex_archive')
+        if not b.opened('ep4_keep_f2', 'chest_tide_key'):
+            self.reach_ent('chest_tide_key', label='F2 two locks')
+            self.chest('chest_tide_key')
+        if 'seal_d' not in (self.tide().get('washed') or []):
+            raise Fail('the key room was reached with seal_d unwashed')
+        self.puzzle_done('F2 two locks')
+        self.hunt(3, label='two locks')
+        b.maintain('two locks')
+        if self.side and not b.opened('ep4_keep_f2', 'chest_approach'):
+            try:
+                self.reach_ent('chest_approach', label='F2 approach')
+                self.chest('chest_approach')
+            except Fail as e:
+                b.notes.append(f'approach chest skipped: {e}')
+        self.reach_ent('door_e', label='F2 approach')
+        self.puzzle_done('F2 approach')
+        self.hunt(2, label='approach')
+        b.through('door_e')
+        f = b.settle()
+        if b.ent(f, 'font_k2b'):
+            try:
+                b.rest_at_font('font_k2b', label='font F2')
+            except Fail as e:
+                b.notes.append(f'font F2 skipped: {e}')
+        self.round_trip('F2 court approach')
+        self.ensure_map('ep4_keep_f2')
+        self.check_slots('F2')
+        for attempt in range(5):
+            if self.has('barrister_defeated'):
+                break
+            if attempt:
+                b.notes.append(f'Barrister attempt {attempt + 1} (Lv {self.level()})')
+                b.maintain('before the Barrister again')
+            b.mark('barrister')
+            arena = [(x, 20) for x in range(18, 24)]
+            self.reach(arena, label='F2 court')
+            b.walk_to(arena, label='barrister_trig')
+            b.settle(max_s=900)
+        if not self.has('barrister_defeated'):
+            raise Fail('the Inkbound Barrister did not fall in 5 attempts')
+        self.trigger([(20, 15), (21, 15)], 'keep_f2_done', 'stair_trig')
+        f = b.settle()
+        if f['map'] == 'ep4_keep_f2':
+            b.through('stairs_f3', exact=False)
+        self.ensure_map('ep4_keep_f3')
+        b.settle()
+        if not self.has('keep_f3_arrived'):
+            raise Fail('keep_f3_arrival did not run')
+        b.mark('keep_f3')
+
+    def town_trip(self):
+        """After the Archives: the F3 boat to F1's Water Gate, the boat to Valewyn, two tier 8 pieces at the forge (plan 7.6),
+        the Provisioner, the inn; then the Keep ferry and F1's boat... back: the F1 boat lands at the Water Gate, F3 is reached
+        again by F1's lift, F2's stair foot and F2's court stair (the boats only go one way)."""
+        b = self.b
+        if not self.has('keep_f3_arrived') or getattr(self, '_tripped', False) or self.has('lyra_memory_3'):
+            return
+        self._tripped = True
+        self.ensure_map('ep4_keep_f3')
+        b.through('boat_f3_short', exact=False)
+        self.ensure_map('ep4_keep_f1')
+        b.through('boat_vw', exact=False)
+        self.ensure_map('ep4_valewyn')
+        b.mark('town_trip')
+        b.through('door_vw_forge')
+        b.visit_shop('ep4_smith', self.TIER8)
+        b.through('forge_exit', exact=False) if b.ent(b.settle(), 'forge_exit') else b.exit_to((8, 10), label='forge door')
+        b.menu_optimize_all()
+        b.through('door_vw_shop')
+        b.visit_shop('linn', [('hi_potion', 3), ('lamp_oil', 2), ('phoenix_feather', 1)])
+        b.through('shop_exit', exact=False) if b.ent(b.settle(), 'shop_exit') else b.exit_to((7, 10), label='shop door')
+        self.inn_if_hurt(0.95)
+        self.ensure_map('ep4_valewyn')
+        b.through('keep_boat', exact=False)
+        self.ensure_map('ep4_keep_f1')
+        # back down: F1's channel at low through the latched tidegate to the lift, F2's stair foot to the court stair
+        self.level_to('wh_a', 0, label='return')
+        self.level_to('wh_b', 0, label='return')
+        self.turns.pop('return', None)
+        b.through('lift_f2', exact=False)
+        self.ensure_map('ep4_keep_f2')
+        b.through('stairs_f3', exact=False)
+        self.ensure_map('ep4_keep_f3')
+
+    def keep_f3(self):
+        b = self.b
+        if self.has('hero_signed'):
+            return
+        self.ensure_map('ep4_keep_f3')
+        if self.side:
+            self.try_sign('principles_sign')
+        # Voice (west): causeway at low, mid floats the pontoons to the island (the tide plan finds the turns)
+        if not self.has('principle_voice'):
+            self.hunt(2, label='voice wing')
+            self.reach_ent('stone_voice', label='F3 Voice')
+            self.strike('stone_voice', 'principle_voice')
+            self.puzzle_done('F3 Voice')
+        b.maintain('after the voice')
+        # Truth (east): Shove the dam out of the culvert (the water's only way in), then mid and high wash both seals
+        if not self.has('principle_truth'):
+            self.hunt(2, label='truth wing')
+            f = b.settle()
+            e = b.ent(f, 'dam_t')
+            if e and (e['x'], e['y']) == (38, 8):
+                self.reach([(39, 8)], label='F3 Truth')
+                b.shove_to('dam_t', (37, 8), label='the culvert dam')
+                self.turns['F3 Truth'] += 1
+            self.reach_ent('stone_truth', label='F3 Truth')
+            washed = self.tide().get('washed') or []
+            if 'seal_t1' not in washed or 'seal_t2' not in washed:
+                b.notes.append(f'Truth stone reached with washed {washed}')
+            self.strike('stone_truth', 'principle_truth')
+            if self.side and not b.opened('ep4_keep_f3', 'chest_alcove'):
+                try:
+                    self.reach_ent('chest_alcove', label='F3 Truth')
+                    self.chest('chest_alcove')
+                except Fail as e:
+                    b.notes.append(f'alcove chest skipped: {e}')
+            self.puzzle_done('F3 Truth')
+        b.maintain('after the truth')
+        # Mercy (south): high floats the boats to the island; the stone; the Lantern bridge to the spear (optional)
+        if not self.has('principle_mercy'):
+            self.hunt(2, label='mercy wing')
+            self.reach_ent('stone_mercy', label='F3 Mercy')
+            if self.side and not b.opened('ep4_keep_f3', 'chest_spear'):
+                try:
+                    b.reveal_near([(5, 28), (6, 28), (7, 28)], label='mercy ink bridge')
+                    self.chest('chest_spear')
+                except Fail as e:
+                    b.notes.append(f'Tidewarden Spear skipped: {e}')
+            self.strike('stone_mercy', 'principle_mercy')
+            self.puzzle_done('F3 Mercy')
+        b.maintain('before the petition gate')
+        self.reach([(22, 12)], label='F3 back to the hub')
+        self.turns.pop('F3 back to the hub', None)
+        self.hunt(3, label='hub sweep')
+        self.trigger([(22, 12)], 'hero_signed', 'gate_trig', max_s=900)
+        if not self.has('hero_signed'):
+            raise Fail('witness_book did not set hero_signed')
+        b.mark('witness_book')
+
+    def regent(self):
+        b = self.b
+        if self.has('paper_regent_defeated'):
+            return
+        self.ensure_map('ep4_keep_f3')
+        if self.side:
+            self.chest('chest_ante')
+        b.maintain('antechamber')
+        b.rest_at_font('font_k3', label='font F3')
+        self.round_trip('before the Paper Regent')
+        self.ensure_map('ep4_keep_f3')
+        for attempt in range(5):
+            f = b.settle()
+            if f['map'] == 'ep4_keep_f3':
+                b.through('door_throne', exact=False)
+            self.ensure_map('ep4_keep_crown')
+            if attempt == 0:
+                b.mark('paper_regent')
+            b.notes.append(f'Paper Regent attempt {attempt + 1}: Lv {self.level()}')
+            b.walk_to([(x, 14) for x in range(1, 23)], label='regent_trig')
+            b.settle(max_s=1500)                                     # the scene, the fight, regent_after
+            if self.has('paper_regent_defeated'):
+                break
+            f = b.settle()
+            if f['map'] == 'ep4_keep_crown':
+                b.through('crown_exit')
+            self.ensure_map('ep4_keep_f3')
+            b.rest_at_font('font_k3', label='font before the Regent again')
+            b.maintain('before the Regent again')
+        if not self.has('paper_regent_defeated'):
+            raise Fail('the Paper Regent did not fall in 5 attempts')
+        b.settle(max_s=900)
+        if not self.has('lyra_named') or not b.items().get('name_fragment_4'):
+            raise Fail('regent_after did not name Lyra and give the fourth fragment')
+        b.mark('regent_after')
+
+    def ending(self):
+        b = self.b
+        if self.has('ep4_complete') and (b.game() or {}).get('counters', {}).get('credits4_rolled'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep4_keep_crown':
+            b.through('boat_crown_out', exact=False)
+        b.settle(max_s=900)                                          # crown_remembers, ep4_ending, the credits
+        if not self.has('ep4_complete'):
+            raise Fail(f'ep4_complete was not set (on {b.settle()["map"]})')
+        for _ in range(500):
+            sc = b.handle()
+            fs = b.field() or {}
+            if sc == 'field' and fs.get('map') == 'ep4_vw_inn' and not fs.get('locked'):
+                break
+        f = b.settle()
+        if f['map'] != 'ep4_vw_inn':
+            raise Fail(f'after the Episode 4 credits the party woke on {f["map"]}, not ep4_vw_inn')
+        if not (b.game() or {}).get('counters', {}).get('credits4_rolled'):
+            raise Fail('credits4_rolled was not counted')
+        b.mark('ep4_credits_done')
+        self.check_slots('the credits')
+
+    def epilogue4(self):
+        b = self.b
+        if not self.side or not self.has('ep4_complete'):
+            return
+        f = self.ensure_map('ep4_vw_inn')
+        if f['leader']['x'] >= 13:
+            b.through('inn_down')
+        self.talk('ep4_innkeeper')
+        b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')
+        self.ensure_map('ep4_valewyn')
+        self.talk('vance')
+        b.menu_talk()
+        b.mark('ep4_epilogue')
+
+    def run(self):
+        b = self.b
+        b.mark('boot')
+        phases = [('ep4_start', self.title_start), ('ep4_morning', self.morning), ('east_road', self.east_road), ('flood_road', self.flood_road),
+                  ('valewyn', self.valewyn), ('keep_f1', self.keep_f1), ('keep_f2', self.keep_f2), ('town_trip', self.town_trip),
+                  ('keep_f3', self.keep_f3), ('regent', self.regent), ('ending', self.ending), ('epilogue4', self.epilogue4)]
+        for step_id, fn in phases:
+            print(f'-- {step_id}', flush=True)
+            if step_id == 'ep4_morning' and self.has('east_road_open'):
+                continue                                          # a resumed game past the morning
+            fn()
+            if b.resume and step_id == 'ep4_start':
+                b.resume = None
+                self.ensure_any()
+            b.check_errors()
+            if self.until == step_id:
+                print(f'stopping after {step_id} (--until)', flush=True)
+                return
+        self.check_slots('the end')
+
+
 # ================================================================================================ the Deep Stacks (C3-sim-bot)
 CAVE_OUT = HERE / 'cave' / 'out'
 CAVE_JS = 'LQ_DEBUG.state().cave'
@@ -4270,8 +5067,9 @@ def main(argv):
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
-    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3],
-                    help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0')
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4],
+                    help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0; '
+                         '4: Episode 4 (E4-integrate), the same two starts from the Episode 3 credits save')
     ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
@@ -4309,6 +5107,17 @@ def main(argv):
                 print(f'no Episode 1 credits save at {resume}: run the Episode 1 autoplay first, or use --start new')
                 return 2
     seed_slot, ep3 = 1, None
+    if a.episode == 4 and not a.tier:
+        tag, ep3 = '-ep4' + ('-new' if a.start == 'new' else ''), True
+        os.environ['LQ_EP4_LIVE'] = '1'      # episodes.js served with EP4_LIVE forced on (a local copy of the switch)
+        if not resume:
+            try:
+                resume = str(ep4_fixture(a.device))
+            except Fail as e:
+                print(e)
+                return 2
+        if a.start == 'new':
+            seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
     if a.episode == 3 and not a.tier:
         tag, ep3 = '-ep3' + ('-new' if a.start == 'new' else ''), True
         if not resume:
@@ -4331,6 +5140,8 @@ def main(argv):
             Episode2(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.episode == 3:
             Episode3(bot, side=not a.no_side, until=a.until, start=a.start).run()
+        elif a.episode == 4:
+            Episode4(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.route == 'complete':
             sys.path.insert(0, str(HERE / 'integrate'))
             import autoplay_x1

@@ -38,7 +38,22 @@ export function applyPatch(id, patch) {
   return true;
 }
 
+/**
+ * In the browser, fetch the map files before importing them (E4-integrate): a network failure then throws here, so the pack
+ * fails and ensurePack retries, instead of a failed import() that the page caches for its life and that reads as "missing"
+ * (a skipped map, or an unpatched Emberpeak with no way down the east road until a reload). Node and tests skip it.
+ */
+async function prefetch(opts) {
+  if (opts.importer || typeof fetch !== 'function' || !/^https?:/.test(import.meta.url)) return;
+  const files = [...EP4_MAP_IDS.map((id) => `../maps/${id}.js`), '../maps/ep4_patches.js'];
+  await Promise.all(files.map(async (f) => {
+    const r = await fetch(new URL(f, import.meta.url).href);
+    if (!r.ok) throw new Error(`[ep4] ${f}: ${r.status}`);
+  }));
+}
+
 async function run(opts) {
+  await prefetch(opts);
   const importer = opts.importer || ((p) => import(p));
   // 1. the ep3 pack first (it owns emberpeak and pk_inn): its register() is idempotent and imports nothing it has not got
   const ep3 = await importer('../maps/ep3/index.js');

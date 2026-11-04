@@ -55,8 +55,8 @@ test('Episode 4 ids are registered and Episodes 1 to 3 are untouched', () => {
   for (const id of ['e4r_first', 'e4r_hounds', 'e4r_crabs', 'e4r_mixed', 'e4k1_watch', 'e4k1_blooms', 'e4k1_crabs', 'e4k1_mixed',
     'e4k2_phantoms', 'e4k2_sentinel', 'e4k2_mixed', 'barrister', 'e4k3_decrees', 'e4k3_watch', 'e4k3_sentinels', 'paper_regent']) assert.ok(ENCOUNTERS[id], id);
   for (const z of EP4_ZONE_ORDER) { assert.ok(ZONES[z], z); assert.equal(ZONES[z].episode, 4); }
-  assert.equal(EP4_MAPS_LISTED, false);
-  assert.ok(!Object.keys(ZONES).some((z) => z.startsWith('ep4_')), 'the Episode 4 zones stay out of Object.keys(ZONES) until E4-maps-b lists them');
+  assert.equal(EP4_MAPS_LISTED, true);
+  for (const z of EP4_ZONE_ORDER) assert.ok(Object.keys(ZONES).includes(z), `${z} is listed in Object.keys(ZONES) (E4-integrate flipped EP4_MAPS_LISTED)`);
   for (const z of before.zones) assert.ok(ZONES[z], z);
   assert.equal(JSON.stringify([ZONE_ORDER, EP2_ZONE_ORDER, EP3_ZONE_ORDER]), before.orders);
   assert.equal(JSON.stringify(ENEMIES.cinder_beetle), before.beetle);

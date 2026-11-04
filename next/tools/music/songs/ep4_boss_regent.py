@@ -17,9 +17,19 @@ Form (bar: harmony)
   C    53-68  the motif climbs (Fm, Eb, Gb, Ab), a C7 hemiola (three stabs a bar), the motif fortissimo, Db, C7
   R    69-79  the ostinato creeps back (Fm, Db, Bbm, C7), the motif cut short, a timpani roll builds on C7
   M    80     F major: one bar of light, then the loop
+
+The intro plays once (E4-integrate, 2026-11-04): bars 1 to 4 are rendered as a head before loopStart and the loop body is
+bars 5 to 80 (a 76-bar Song, so the seam bar 80 -> bar 5 keeps the tracker's sample-continuous guard). Before, the loop
+restarted into bars 1 and 2, the harp alone under the decaying tail of bar 80: about 2.7 s at -23 to -31 dB RMS against a
+loop average of -18.4. loopStart is the bar line of bar 5 (4 bars of 3 beats at 132 = 5.454545 s).
 """
+import copy
+import math
+
+import numpy as np
+
 import synth
-from tracker import Song
+from tracker import Song, GUARD_SAMPLES
 import e3_theme as T
 import ep4_theme as V
 
@@ -44,11 +54,67 @@ def motif68(track, bar, start, vel, hold=4.5):
     track.add(t0 + 4.5, d, hold, vel=vel)
 
 
+INTRO_BARS = 4
+SONG_KW = dict(reverb_room=0.84, reverb_damp=0.4, reverb_len=3.0, reverb_level=-9.5, delay_beats=(0.75, 0.5),
+               delay_feedback=0.22, delay_level=-20.0)
+
+
+class IntroLoopSong(Song):
+    """The loop body (this Song: bars 5..80 shifted to start at beat 0) with a once-only intro (bars 1..4) placed before
+    loopStart. The intro is rendered at the body's own gain; its last 60 ms fade out under the body's ramped guard (the
+    copy of the loop end), so both the first entry and every loop seam are sample-continuous."""
+
+    def render(self, verbose=True):
+        Song.render(self, verbose)
+        body = self.audio
+        scale = 10.0 ** (self.stats['gain_db'] / 20.0)
+        intro = self.intro
+        intro.target_lufs = 0.0
+        intro.render(verbose=False)                                   # pass 1: measure the intro's own loudness
+        intro.target_lufs = intro.stats['pre_lufs'] + self.stats['gain_db']
+        head = intro.render(verbose=False)                            # pass 2: at the body's gain (soft: the limiter idles)
+        n = int(round(intro.beat_to_sec(INTRO_BARS * BPB) * self.sr))
+        g = GUARD_SAMPLES
+        fade = 0.5 + 0.5 * np.cos(np.linspace(0.0, math.pi, g))
+        joint = head[n - g:n] * fade[:, None] + body[:g]
+        self.audio = np.concatenate([head[:n - g], joint, body[g:]], axis=0)
+        self.loop_start_sample = n
+        self.loop_end_sample = n - g + self.loop_end_sample
+        self.stats['intro_s'] = n / self.sr
+        self.stats['intro_gain_db'] = intro.stats['gain_db']
+        self.stats['body_gain_db'] = 20.0 * math.log10(scale)
+        self.stats['duration'] = self.audio.shape[0] / self.sr
+        if verbose:
+            print('  intro once: %.3f s before loopStart, rendered at the body gain %.2f dB' % (n / self.sr, self.stats['body_gain_db']))
+        return self.audio
+
+
 def build():
+    """The piece is composed on its 80 written bars (compose), then split: bars 1..4 into the intro, 5..80 into the loop."""
+    src = compose()
+    off = INTRO_BARS * BPB
+    body = IntroLoopSong('ep4_boss_regent', bpm=132, beats_per_bar=BPB, bars=80 - INTRO_BARS, key='F minor',
+                         title='The Paper Regent', target_lufs=-16.0, true_peak_trim=True, intended_chords=BARS[INTRO_BARS:], **SONG_KW)
+    intro = Song('ep4_boss_regent_intro', bpm=132, beats_per_bar=BPB, bars=INTRO_BARS, key='F minor', title='The Paper Regent (intro)',
+                 ends=True, ring_out=1.0, target_lufs=-16.0, intended_chords=BARS[:INTRO_BARS], **SONG_KW)
+    for tr in src.tracks:
+        for dst, keep, shift in ((body, lambda n: n.t >= off, off), (intro, lambda n: n.t < off, 0.0)):
+            t = copy.copy(tr)
+            t.song = dst
+            t.notes = []
+            for n in tr.notes:
+                if keep(n):
+                    m = copy.copy(n)
+                    m.t = n.t - shift
+                    t.notes.append(m)
+            dst.tracks.append(t)
+    body.intro = intro
+    return body
+
+
+def compose():
     s = Song('ep4_boss_regent', bpm=132, beats_per_bar=BPB, bars=80, key='F minor', title='The Paper Regent',
-             reverb_room=0.84, reverb_damp=0.4, reverb_len=3.0, reverb_level=-9.5,
-             delay_beats=(0.75, 0.5), delay_feedback=0.22, delay_level=-20.0, target_lufs=-16.0, true_peak_trim=True,
-             intended_chords=BARS)
+             target_lufs=-16.0, true_peak_trim=True, intended_chords=BARS, **SONG_KW)
     bs = s.bar_start
 
     spicc = synth.StringsPad(attack=0.018, detune=6.0, dark=900.0, bright=2800.0, sub=0.15, release=0.14)

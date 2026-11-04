@@ -1,5 +1,5 @@
 // Episode 4 music (E4-audio, docs/EPISODE4_PLAN.md 8.1): the three tracker pieces exist as ep4_*.mp3 with a gapless LAME tag,
-// their sidecars agree with the decoded length, they loop on the 60 ms guard, and the pack fragment (src/data/ep4/audio.js)
+// their sidecars agree with the decoded length, they loop on the 60 ms guard (boss_regent after its once-only intro), and the pack fragment (src/data/ep4/audio.js)
 // carries the same loop points, a fallback that exists in the core manifest, and a volume near unity.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +14,7 @@ const core = JSON.parse(fs.readFileSync(path.join(NEXT, 'assets', 'audio', 'mani
 const TRACKS = {
   valewyn: { file: 'ep4_valewyn', minSec: 70, maxSec: 90, bpm: 90, fallback: 'hollowmere' },
   sunken_keep: { file: 'ep4_sunken_keep', minSec: 85, maxSec: 100, bpm: 80, fallback: 'court' },
-  boss_regent: { file: 'ep4_boss_regent', minSec: 100, maxSec: 120, bpm: 132, fallback: 'boss_warden' },
+  boss_regent: { file: 'ep4_boss_regent', minSec: 100, maxSec: 120, bpm: 132, fallback: 'boss_warden', introBars: 4, beatsPerBar: 3 },
 };
 const SR = 44100;
 
@@ -51,7 +51,9 @@ for (const [id, spec] of Object.entries(TRACKS)) {
   const sec = ((frames - 1) * 1152 - info.delay - info.padding) / SR;
   assert.ok(sec >= spec.minSec && sec <= spec.maxSec, `${id}: ${sec.toFixed(1)} s outside ${spec.minSec}..${spec.maxSec}`);
   assert.ok(Math.abs(meta.duration - sec) < 0.002, `${id}: sidecar duration ${meta.duration} vs decoded ${sec}`);
-  assert.ok(Math.abs(meta.loopStart - 0.06) < 1e-6, `${id}: loopStart is the 60 ms guard`);
+  // boss_regent plays its four intro bars once: its loop starts on the bar line of bar 5 (4 bars of 3 beats at 132 BPM)
+  const loopStart = spec.introBars ? spec.introBars * spec.beatsPerBar * 60 / spec.bpm : 0.06;
+  assert.ok(Math.abs(meta.loopStart - loopStart) < 1e-4, `${id}: loopStart ${meta.loopStart} (want ${loopStart.toFixed(6)})`);
   assert.equal(meta.bpm, spec.bpm, `${id}: bpm`);
   for (const k of ['loopStart', 'loopEnd', 'duration', 'bpm', 'key']) assert.equal(e[k], meta[k], `${id}: fragment ${k} matches the sidecar`);
   assert.ok(meta.loopEnd < meta.duration && meta.loopEnd - meta.loopStart > 60, `${id}: loop body`);

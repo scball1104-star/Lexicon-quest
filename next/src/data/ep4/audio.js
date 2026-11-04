@@ -11,8 +11,9 @@ export const music = {
     bpm: 90, key: 'A minor', measuredLufs: -16.44, duration: 85.493333 },
   sunken_keep: { src: 'assets/audio/music/ep4_sunken_keep.mp3', volume: 1.058, loopStart: 0.06, loopEnd: 96.06, fallback: 'court',
     bpm: 80, key: 'D dorian', measuredLufs: -16.49, duration: 96.16 },
-  boss_regent: { src: 'assets/audio/music/ep4_boss_regent.mp3', volume: 1.052, loopStart: 0.06, loopEnd: 109.150907,
-    fallback: 'boss_warden', bpm: 132, key: 'F minor', measuredLufs: -16.44, duration: 109.250907 },
+  // the intro (bars 1 to 4) plays once: the loop restarts at bar 5 (E4-integrate; tools/music/songs/ep4_boss_regent.py)
+  boss_regent: { src: 'assets/audio/music/ep4_boss_regent.mp3', volume: 1.052, loopStart: 5.454535, loopEnd: 109.090884,
+    fallback: 'boss_warden', bpm: 132, key: 'F minor', measuredLufs: -16.44, duration: 109.190884 },
 };
 
 const S = (file, duration, group, fallback) => ({ src: `assets/audio/sfx/ep4_${file}.wav`, volume: 1.0, duration, group, pack: 'ep4', fallback });

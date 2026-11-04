@@ -121,6 +121,34 @@ function dressBoats(field) {
     if (!ent.prop && field.map.db.objects && field.map.db.objects.boat) prop(field, ent, 'boat', 0, false);
   }
 }
+/**
+ * The Keep's boats are moored on water (E4-integrate seam fix): a door fires when the party steps onto it, so while a boat
+ * door is present its water cells walk ('none'), else they are the tile's own code again. Kept through map.recomputeCell
+ * (chained beside the tide's own override), re-checked every 20 frames because a boat can appear mid-map (boat_crown_out).
+ */
+export function moorBoats(field) {
+  const map = field.map;
+  if (!map || !map.base || !field.entities || typeof map.recomputeCell !== 'function') return;
+  const want = new Set();
+  for (const ent of field.entities.values()) {
+    if (ent.type !== 'door' || ent.ev.kind !== 'boat' || !ent.present) continue;
+    for (let j = 0; j < (ent.ev.h || 1); j++) for (let i = 0; i < (ent.ev.w || 1); i++) if (map.inBounds(ent.x + i, ent.y + j)) want.add((ent.y + j) * map.w + ent.x + i);
+  }
+  const had = map.ep4Moor;
+  if (had && had.size === want.size && [...want].every((i) => had.has(i))) return;
+  if (!map.recomputeCell.ep4moor) {
+    const orig = map.recomputeCell.bind(map), prev = map.recomputeCell;
+    const w = function (x, y) {
+      orig(x, y);
+      if (map.ep4Moor && map.ep4Moor.has(y * map.w + x) && map.base[y][x] === 'water') map.base[y][x] = 'none';
+    };
+    w.ep4moor = true;
+    w.ep4 = prev.ep4;
+    map.recomputeCell = w;
+  }
+  map.ep4Moor = want;
+  for (const i of new Set([...(had || []), ...want])) map.recomputeCell(i % map.w, (i / map.w) | 0);
+}
 function bobBoats(field) {
   if (field.frame % 30 !== 0 || (field.engine.settings && field.engine.settings.reduceMotion)) return;
   const k = (field.frame / 30) & 1;
@@ -137,8 +165,8 @@ export function attach(field) {
     w.ep4 = true;
     obj[name] = w;
   };
-  wrap(field.glass, 'reset', (o) => { o(); t.reset(); if (field.map && field.entities) dressBoats(field); });
-  wrap(field.glass, 'update', (o) => { o(); t.update(); bobBoats(field); syncWeather(field); });
+  wrap(field.glass, 'reset', (o) => { o(); t.reset(); if (field.map && field.entities) { dressBoats(field); moorBoats(field); } });
+  wrap(field.glass, 'update', (o) => { o(); t.update(); bobBoats(field); syncWeather(field); if (field.frame % 20 === 0) moorBoats(field); });
   wrap(field.glass, 'markDirty', (o) => { o(); t.markDirty(); });
   wrap(field.glass, 'drawBeams', (o, r, tm) => { t.drawLow(r, tm); o(r, tm); });
   wrap(field.glass, 'drawFlares', (o, r, tm) => { o(r, tm); t.drawHigh(r, tm); });

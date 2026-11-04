@@ -24,9 +24,8 @@
 // `decree: true` or `answerable: true` (telegraphSfx decree_unroll), messages of kind 'ward' | 'ward_break' | 'witness' |
 // 'name_struck' | 'name_hold' | 'answer'.
 //
-// One ward-break note: ai.js onDeath() only tells the Episode 1 to 3 scripts about a death, so the writs watch their own
-// killing blow in clampDamage (called by rules.js damage() just before the HP drops) and break the ward from there; the events
-// arrive before the writ's damage and ko. A seam that lets onDeath reach SCRIPTS would let this move (docs/BATTLE.md 12.7).
+// The ward breaks in the Regent's onDeath: ai.js onDeath() tells every script in SCRIPTS about a death (E4-scene-ui), so the
+// last writ's ko comes first and the ward break after it (E4-integrate removed the writs' clampDamage workaround).
 
 import { SCRIPTS, POLICY_EXT, competentPolicy } from '../../battle/ai.js';
 import { ENEMIES } from '../enemies.js';
@@ -181,7 +180,7 @@ const paperRegent = {
   },
   damageTakenMult(ctx, u) { return u.ai.ward ? WARD_MULT : 1; },
   shieldLocked(ctx, u) { return !!u.ai.ward; },
-  onDeath(ctx, dead) {   // not called by ai.js onDeath today (see the header); kept for the seam
+  onDeath(ctx, dead) {   // the last writ down breaks the ward (ai.js onDeath reaches every script)
     if (!WRITS.includes(dead.id)) return;
     const r = regentOf(ctx);
     if (r && r.ai.ward && !writsStanding(ctx).length) breakWard(ctx, r);
@@ -216,14 +215,6 @@ const writ = {
     return { skill: 'seal_hush', target: (mira || foes[Math.floor(ctx.R() * foes.length)]).uid };
   },
   afterTurn() {},
-  // the killing blow on the last writ breaks the Regent's ward (see the header: onDeath does not reach pack scripts)
-  clampDamage(ctx, u, amt) {
-    if (amt >= u.hp && u.hp > 0 && !writsStanding(ctx).some((w) => w.uid !== u.uid)) {
-      const r = regentOf(ctx);
-      if (r && r.ai.ward) breakWard(ctx, r);
-    }
-    return amt;
-  },
   reflect: answerHook,
 };
 

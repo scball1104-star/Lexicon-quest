@@ -31,7 +31,7 @@ test('pack table: the ep4 entry is exactly plan 13.2 seam 1, behind EP4_LIVE', (
   assert.equal(d.wanted({ ep4_started: true }), true);
   assert.equal(d.wanted({ ep2_complete: true, ep3_started: true }), false);
   assert.equal(d.enabled(), EP4_LIVE);
-  assert.equal(EP4_LIVE, false, 'the switch ships off; E4-integrate flips it on the branch');
+  assert.equal(EP4_LIVE, true, 'E4-integrate flipped the switch on the branch (shipping stays with Scott or Stephen)');
   assert.equal(EP3_LIVE, true);
   // the ep3 pack comes first in the table, so packForMap still names ep3 for the two shared maps; packsForMap names both
   assert.equal(packForMap('emberpeak').id, 'ep3');
@@ -47,11 +47,13 @@ test('pack table: the ep4 entry is exactly plan 13.2 seam 1, behind EP4_LIVE', (
 test('nothing is fetched while EP4_LIVE is false: ensurePack skips without importing, the watchers do not wait for it', async () => {
   resetPacks();
   let calls = 0;
-  const r = await ensurePack('ep4', { importer: async () => { calls++; return {}; }, quiet: true });
+  // the switch is on since E4-integrate: the off state is asserted through the `enabled` override the switch feeds
+  const r = await ensurePack('ep4', { importer: async () => { calls++; return {}; }, quiet: true, enabled: false });
   assert.equal(r.skipped, true);
   assert.equal(calls, 0, 'the entry was not imported');
-  assert.equal(packEnabled('ep4'), false);
-  assert.ok(!packsToAwait({ ep3_complete: true, ep2_complete: true }).includes('ep4'));
+  assert.equal(packEnabled('ep4', { enabled: false }), false);
+  assert.equal(packEnabled('ep4'), EP4_LIVE);
+  assert.equal(packsToAwait({ ep3_complete: true, ep2_complete: true }).includes('ep4'), EP4_LIVE, 'an Episode 3 finisher waits for the pack only while live');
   resetPacks();
 });
 
@@ -123,7 +125,12 @@ test('seam 3: the title hook line forces and loads the pack only when live with 
   assert.ok(line, 'the hook line');
   assert.match(line, /EP4_LIVE && this\.ep3\.slot != null/);
   assert.match(line, /ep=4/);
-  assert.match(line, /forcePack\('ep4'\); ensurePack\('ep4'\)\.then\(\(\) => globalThis\.LQ_EP4 && LQ_EP4\.title\(this\)\)/);
+  // E4-integrate: the ?ep=4 test once held a literal backspace (0x08) and never matched; and the pack loads with the engine
+  // (the title enters before main.js binds the packs, so without it the pack came up with no art, tiles or audio)
+  assert.ok(!/[\u0000-\u0008\u000b-\u001f]/.test(line), 'no control characters in the hook line');
+  const m = /\/(\[\?&\]ep=4[^/]*)\//.exec(line);
+  assert.ok(m && new RegExp(m[1]).test('?debug=1&ep=4') && !new RegExp(m[1]).test('?ep=3'), `the ?ep=4 test matches (${m && m[1]})`);
+  assert.match(line, /forcePack\('ep4'\); ensurePack\('ep4', \{ engine: e \}\)\.then\(\(\) => globalThis\.LQ_EP4 && LQ_EP4\.title\(this\)\)/);
 });
 
 test('pack entry: ORDER, missing modules skipped, idempotent, maps and hooks run, LQ_EP4 installed', async () => {
@@ -143,7 +150,8 @@ test('pack entry: ORDER, missing modules skipped, idempotent, maps and hooks run
   }
   assert.equal(ep4.EP4_READY, true);
   assert.ok(globalThis.LQ_EP4 && typeof globalThis.LQ_EP4.title === 'function');
-  assert.equal(CREDITS_HANDOFF[3].endCard, END_CARD_EP3, 'Episode 3 end card unchanged while EP4_LIVE is false');
+  if (!EP4_LIVE) assert.equal(CREDITS_HANDOFF[3].endCard, END_CARD_EP3, 'Episode 3 end card unchanged while EP4_LIVE is false');
+  else assert.equal(CREDITS_HANDOFF[3].endCard.sub, 'Episode 4 begins in the morning.', 'live: the Episode 3 end card points at the morning');
 });
 
 test('audio: mergeAudio adds ids, never overwrites one, and declares packs.ep4', () => {
@@ -178,7 +186,5 @@ test('start: the quick start party mirrors the simulator loadout (ep4_flood_road
   assert.equal(EP4_START.members.hero.equip.charm, 'warden_heart');
 });
 
-// The rest of plan 10.7 needs the maps, the story or a scene (E4-integrate turns these on once they exist).
-test('pending: an Episode 3 credits fixture reaches ep4_morning with EP4_LIVE on, and not with it off', { skip: 'needs src/data/ep4/story.js ep4_morning and the pk_inn wake patch (E4-story, E4-maps-a); E4-integrate turns it on' }, () => {});
-test('pending: with Episode 3 complete flags and EP4_LIVE off the washout is impassable; with east_road_open the exit is reachable', { skip: 'needs ep4_patches.js withEastRoad and ep4_flood_road (E4-maps-a); E4-integrate turns it on' }, () => {});
-test('pending: an Episode 4 save made mid-keep reloads with washed seals and latched floodgates', { skip: 'needs g.washed (E4-world) and the keep maps (E4-maps-b); E4-integrate turns it on' }, () => {});
+// The rest of plan 10.7 (the credits fixture and the switch, the washout, the mid-keep reload) is on in
+// qa/integrate/ep4_integrate.test.mjs (E4-integrate), with the real story, patches and keep maps.

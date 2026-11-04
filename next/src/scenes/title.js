@@ -61,8 +61,8 @@ export class TitleScene {
     this.win = { x: Math.round(192 - w / 2), y: bottom - h, w, h };
     this.guard = null;
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
-    if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print (data/tier)
-    if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4').then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4 (data/ep4)
+    if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print
+    if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4\b/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4', { engine: e }).then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);

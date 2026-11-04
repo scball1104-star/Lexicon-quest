@@ -7,7 +7,7 @@
 import { enc, ENCOUNTERS, ZONES } from '../encounters.js';
 
 /** E4-maps-b (wave 4c): set to true once the Keep maps exist (lists the five zones in ZONES for qa/maps). Mirrored by index.js. */
-export const EP4_MAPS_LISTED = false;
+export const EP4_MAPS_LISTED = true;
 
 export const EP4_ZONE_ORDER = ['ep4_flood_road', 'ep4_keep_f1', 'ep4_keep_f2', 'ep4_keep_f3', 'ep4_keep_crown'];
 

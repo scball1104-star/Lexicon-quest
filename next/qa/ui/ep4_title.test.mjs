@@ -6,6 +6,7 @@ import { createSave } from '../../src/core/save.js';
 import { serialize, saveMeta, newGameEp3 } from '../../src/game/state.js';
 import { CREDITS_HANDOFF } from '../../src/game/story.js';
 import { END_CARD_EP3 } from '../../src/data/text.js';
+import { EP4_LIVE } from '../../src/game/episodes.js';
 import { ep4Offer, HOOKS, END_CARD_EP3_LIVE, EP4_ROW_LABEL, EP4_ROW_HELP, register as registerHooks, unregister, handoff4 } from '../../src/data/ep4/hooks.js';
 import { EP3_DONE_FLAGS } from '../../src/data/ep4/start.js';
 
@@ -71,7 +72,7 @@ test('hooks: credits entry 4 only with text.js CREDITS_EP4; the Episode 3 end ca
     assert.ok(r.installed.includes('credits4'));
     assert.ok(r.waiting.some((w) => w.startsWith('quest')));
     assert.equal(CREDITS_HANDOFF[4].flag, 'ep4_complete');
-    assert.equal(CREDITS_HANDOFF[3].endCard, END_CARD_EP3, 'unchanged while off');
+    assert.equal(CREDITS_HANDOFF[3].endCard, EP4_LIVE ? END_CARD_EP3_LIVE : END_CARD_EP3, 'off: unchanged; live (E4-integrate): the morning card');
     assert.equal(globalThis.LQ_EP4, HOOKS);
   } finally { unregister(); delete CREDITS_HANDOFF[4]; }
   assert.equal(globalThis.LQ_EP4, undefined);

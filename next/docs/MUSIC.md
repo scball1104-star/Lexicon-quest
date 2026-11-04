@@ -428,7 +428,7 @@ Files are `assets/audio/music/ep4_<id>.mp3` (+ sidecar), songs `tools/music/song
 |---|---|---|---|---|---|---|---|
 | `valewyn` | The Drowned Crown | A minor to C major | 90, 4/4 | 32 | 0.060 s to 85.393 s | 85.49 s | `hollowmere` |
 | `sunken_keep` | The Sunken Keep | D Dorian | 80, 4/4 | 32 | 0.060 s to 96.060 s | 96.16 s | `court` |
-| `boss_regent` | The Paper Regent | F minor | 6/8, quarter = 132 (dotted quarter 88) | 80 | 0.060 s to 109.151 s | 109.25 s | `boss_warden` |
+| `boss_regent` | The Paper Regent | F minor | 6/8, quarter = 132 (dotted quarter 88) | 80 (4 intro + 76 loop) | 5.455 s to 109.091 s | 109.19 s | `boss_warden` |
 
 ### The Valewyn tune (`tools/music/songs/ep4_theme.py`)
 Eight bars of 4/4 in scale degrees: the complete motif (0 4 5 3), its fourth note held a whole bar across the bar line (the
@@ -465,7 +465,10 @@ strings and choir. A' (17-24): A with the reflection. C (25-32) Dm, Em7, Fmaj7, 
 arpeggio, the clarinet low. Instruments: clarinet, glasspad, harp, pizz, bass, bell (lowpassed), drop, strings_low, strings, choir.
 
 ### boss_regent: The Paper Regent (the Regent's battle; loops)
-6/8 written as three quarter beats a bar at 132. I (1-4) harp ostinato alone, then low brass and timpani. A (5-20) Fm, Db, Bbm, C,
+6/8 written as three quarter beats a bar at 132. I (1-4) harp ostinato alone, then low brass and timpani; played once (E4-integrate,
+2026-11-04: the loop used to restart into the harp alone under the dying tail of bar 80, about 2.7 s at -23 to -31 dB RMS; the song
+now renders bars 5 to 80 as the loop body and bars 1 to 4 as a head before loopStart, at the body's gain, its last 60 ms under the
+guard, so the seam stays the tracker's sample-continuous one). A (5-20) Fm, Db, Bbm, C,
 Fm, Db, Eb, C7 (two bars each): spiccato strings on the eighths, timpani and low brass on both pulses. A2 (21-36) Fm, Db, Bbm, C,
 Fm, Gb, Eb, C: choir up, motif doubled. B (37-52) the quote: Fm, Bbm/Db, Cm/Eb, Fm, Bbm, Fm/Ab, Gm7b5, Csus4-C (the raised leading
 tone E over the last C). C (53-68) Fm, Eb, Gb, Ab (the climb), C7 hemiola (three stabs against two pulses, timpani roll), the
