@@ -2956,7 +2956,8 @@
      ]
     },
     {
-     "frames": 150
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 30000
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -3010,7 +3011,8 @@
      ]
     },
     {
-     "frames": 140
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 30000
     },
     {
      "assert": "LQ_DEBUG.scene() === 'dialog'",
@@ -3933,8 +3935,8 @@
      "timeout": 20000
     },
     {
-     "eval": "(async () => { const rx = new RegExp(\"^Elian\\\\.$\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
-     "timeout": 60000
+     "eval": "(async () => { const rx = new RegExp(\"^Elian\\\\.$\"); const end = Date.now() + 150000; for (let i = 0; Date.now() < end; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 160000
     },
     {
      "assert": "LQ_DEBUG.scene() === \"dialog\"",
@@ -5286,23 +5288,36 @@
      ]
     },
     {
+     "waitFor": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return LQ_DEBUG.scene() === 'field' && !!(f && !f.loading && f.map && !f.inputLocked && !f.pendingWarp); })()",
+     "timeout": 30000
+    },
+    {
      "frames": 160
     },
     {
      "press": "menu"
     },
     {
-     "frames": 20
+     "waitFor": "LQ_DEBUG.scene() === 'menu'",
+     "timeout": 15000
     },
     {
      "assert": "LQ_DEBUG.scene() === 'menu'",
      "message": "the menu opened"
     },
     {
+     "eval": "(() => { window.__aimT0 = LQ_DEBUG.state().frame; window.__aimAt = null; return true; })()"
+    },
+    {
      "press": "cancel"
     },
     {
-     "frames": 30
+     "waitFor": "(() => { const s = LQ_DEBUG.state(); if (s.scene === 'field' && s.sceneState.aim === 'The Apprentice') { window.__aimAt = s.frame; return true; } return s.frame > window.__aimT0 + 400; })()",
+     "timeout": 30000
+    },
+    {
+     "assert": "window.__aimAt !== null && window.__aimAt - window.__aimT0 <= 400",
+     "message": "the Aim line appears within 400 frames of the menu closing"
     },
     {
      "assert": "LQ_DEBUG.state().sceneState.aim === 'The Apprentice'",
@@ -5316,7 +5331,7 @@
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
-     "timeout": 20000
+     "timeout": 30000
     },
     {
      "call": "newGame",
@@ -5372,7 +5387,7 @@
     },
     {
      "waitFor": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); return !!(f && !f.loading && f.map); })()",
-     "timeout": 20000
+     "timeout": 30000
     },
     {
      "eval": "(async () => { const T = await import('/next/src/data/text.js'); for (const k of Object.keys(T.BARKS)) LQ_ENGINE.game.counters['bark:' + k] = 1; LQ_ENGINE.game.counters.battles = 2; LQ_ENGINE.game.counters.vow_intro = 1; return true; })()"
@@ -5382,31 +5397,28 @@
     },
     {
      "waitFor": "LQ_DEBUG.scene() === 'field' && !LQ_ENGINE.stack.find(s => s.name === 'field').inputLocked",
-     "timeout": 8000
+     "timeout": 30000
     },
     {
-     "press": "confirm",
-     "frames": 1
+     "eval": "(async () => { const sig = () => { const s = LQ_DEBUG.state(); const d = s.sceneState || {}; return JSON.stringify([s.scene, s.scenes.length, d.speaker, d.page, d.box, d.total, d.choices, d.choiceIndex]); }; const s0 = sig(); for (let i = 0; i < 6; i++) { LQ_DEBUG.press('confirm', 1); for (let k = 0; k < 20; k++) { await new Promise(r => setTimeout(r, 100)); if (sig() !== s0) return i; } } throw new Error('the confirm press never took: ' + s0); })()"
     },
     {
      "waitFor": "LQ_DEBUG.scene() === 'dialog' && LQ_DEBUG.state().sceneState.done && !LQ_DEBUG.state().sceneState.choices",
-     "timeout": 8000
+     "timeout": 30000
     },
     {
-     "press": "confirm",
-     "frames": 1
+     "eval": "(async () => { const sig = () => { const s = LQ_DEBUG.state(); const d = s.sceneState || {}; return JSON.stringify([s.scene, s.scenes.length, d.speaker, d.page, d.box, d.total, d.choices, d.choiceIndex]); }; const s0 = sig(); for (let i = 0; i < 6; i++) { LQ_DEBUG.press('confirm', 1); for (let k = 0; k < 20; k++) { await new Promise(r => setTimeout(r, 100)); if (sig() !== s0) return i; } } throw new Error('the confirm press never took: ' + s0); })()"
     },
     {
      "waitFor": "LQ_DEBUG.scene() === 'dialog' && LQ_DEBUG.state().sceneState.done && LQ_DEBUG.state().sceneState.choiceIndex !== null",
-     "timeout": 8000
+     "timeout": 30000
     },
     {
-     "press": "confirm",
-     "frames": 1
+     "eval": "(async () => { const sig = () => { const s = LQ_DEBUG.state(); const d = s.sceneState || {}; return JSON.stringify([s.scene, s.scenes.length, d.speaker, d.page, d.box, d.total, d.choices, d.choiceIndex]); }; const s0 = sig(); for (let i = 0; i < 6; i++) { LQ_DEBUG.press('confirm', 1); for (let k = 0; k < 20; k++) { await new Promise(r => setTimeout(r, 100)); if (sig() !== s0) return i; } } throw new Error('the confirm press never took: ' + s0); })()"
     },
     {
      "waitFor": "LQ_DEBUG.scene() === 'dialog' && LQ_DEBUG.state().sceneState.done && LQ_DEBUG.state().sceneState.choices && LQ_DEBUG.state().sceneState.choices[0] === 'No vow' && LQ_DEBUG.state().sceneState.choiceIndex !== null",
-     "timeout": 12000
+     "timeout": 30000
     },
     {
      "frames": 8

@@ -155,10 +155,10 @@ page). Node: `qa/cave/fixes_world.test.mjs`, `qa/cave/fixes_balance.test.mjs`. N
 | 15 | yes | no gold in red chests (a gear chest may carry a supply); Kept Stores was C4-uniques' | data_loot |
 | 16 | yes | the Catalogue plays `orrery`; the Binder fights on the Forge's painted stage | fixes_world |
 | 17 | yes | the Binder's lent drops never prompt; "The Binder comes apart..." then the hall's lines, then the Quill's own prompt; the Quill chest gone; the B100 plaque in the antechamber | fixes_world (mapcheck); `*-fix-09` to `-11` |
-| 18 | no (art gap) | the page-burst fx and a paper-tear sound need a new fx kind in the precached animator and a new SFX; nothing in the sheets fits | |
+| 18 | yes (2026-11-03) | the Binder's phase changes play `page_burst` (src/data/cave/fx.js, installed on the battle fx table by the cave pack; the animator names the kind for a phase with a Binder sting): the spine tears, ruled leaves storm out (phase 2) or catch and burn to embers (phase 3); the sound is the Binder stings of the 11/2 media pass (binder_phase_2 pages tearing free, binder_phase_3 burning pages), no glass | `tools/art/sprites/out/polish/binder_burst_phase{2,3}_strip.png` |
 | 19 | yes | `newGameEp2` marks seven Episode 1 lesson barks seen | ep2 tests |
 | 20 | yes | B1 of a reading that brought the vault down asks "The vault came down with you. Put it on?", then Optimize for every member | fixes_world |
-| 21 | no (art gap) | Hollis's 48 px head: no existing portrait is his (npc_scholar has no head) | |
+| 21 | yes (2026-11-03) | Hollis's 48 and 32 px portrait, matched to npc_scholar (indigo top-knot, blue Keeper's robe, reading lenses), the W12 SDF renderer (`tools/art/sprites/chars/portrait_hollis.py`, `cave_portraits.py`), in the cave pack atlas `cave_portraits` | `phone-ui_stacks_hall` |
 | 22 | yes | five or more touch rows lift the logo (to 10 px) and then tighten the rows; the window never covers the subtitle | `phone-fix-04-title_resume` |
 | 23 | yes | the Equip slot names fit the panel (journal.js `fitLine`) | `phone-ui-equip_long_name` |
 | 24 | yes | the menu draws no help line under its own question box | `phone-ui-quit_question` |

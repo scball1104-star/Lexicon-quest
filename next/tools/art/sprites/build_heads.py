@@ -13,6 +13,7 @@ import numpy as np
 from PIL import Image
 from pix import parse_grid, grid_from_text, hex2rgb, blank, save_png, write_json, NEXT, OUT, upscale
 import pal as P
+from anim_atlas import save_indexed
 
 UI = os.path.join(NEXT, 'assets', 'ui')
 FRAME = '#14101e'
@@ -233,25 +234,45 @@ SIGNATURE = {
 }
 
 
+# Polish 2026-11-03 (HANDOFF small backlog: the heads still read as blobs at 12 px): the lightness ramp above put hair and
+# face in the same two glass values, so the silhouette was gone. Now each pixel keeps its ROLE in the owner's head grid:
+# hair in a violet glass ramp by its own step, the face one pale pane with its shade, dark eyes with a white catch-light
+# (the hero's face stays blank: his reflection has none), Bram's helm in silver, a white rim on the upper-left edge, the
+# whole head mirrored (it is a reflection), then the owner's signature (GLASS4 stays for the battle frames' notes).
+GLASS_HAIR = ['#3a2c7a', '#55449e', '#7462c4', '#9686de', '#bcb0f2']
+GLASS_FACE = {'u': '#c4ecf6', 't': '#6fb6d6'}
+GLASS_EYE = {'E': '#241a4a', 'F': '#ffffff'}
+GLASS_HELM = {'i': '#78cfe2', 'j': '#eef4ff'}
+RIM = '#d8e4ff'
+
+
 def glass_head(head, pid):
-    """a 10 x 10 party head -> its reflection's timeline head (see GLASS4 / SIGNATURE)"""
-    out = head.copy()
-    op = out[..., 3] > 0.5
-    L = 0.3 * out[..., 0] + 0.59 * out[..., 1] + 0.11 * out[..., 2]
-    vals = L[op]
-    if vals.size:
-        lo, hi = float(vals.min()), float(vals.max())
-        t = np.clip((L - lo) / max(1e-6, hi - lo), 0, 1)
-        idx = np.minimum(3, (t * 3.999).astype(int))
-        for i, hx in enumerate(GLASS4):
-            m = op & (idx == i)
-            out[m] = rgb(hx)
+    """a party head -> its reflection's timeline head (see GLASS_HAIR / SIGNATURE)"""
+    txt, leg = PARTY[pid]
+    rows = grid_from_text(txt)
+    hair = sorted(k for k, v in leg.items() if k not in GLASS_FACE and k not in GLASS_EYE and k not in GLASS_HELM)
+    out = blank(10, 10)
+    for y, row in enumerate(rows[:10]):
+        for x, ch in enumerate(row[:10]):
+            if ch == '.':
+                continue
+            if ch in GLASS_FACE:
+                hx = GLASS_FACE[ch]
+            elif ch in GLASS_EYE:
+                hx = GLASS_FACE['u'] if pid == 'hero' else GLASS_EYE[ch]
+            elif ch in GLASS_HELM:
+                hx = GLASS_HELM[ch]
+            else:
+                hx = GLASS_HAIR[min(len(GLASS_HAIR) - 1, hair.index(ch))]
+            out[y, x] = rgb(hx)
     if pid == 'hero':
-        # no face: the face area (the light middle rows) is one smooth pane of glass
-        for y in range(4, 8):
-            for x in range(2, 8):
-                if op[y, x]:
-                    out[y, x] = rgb(GLASS4[2])
+        out[5, 4] = rgb('#ffffff'); out[6, 5] = rgb('#ffffff')   # one glint across the blank pane
+    out = out[:, ::-1].copy()
+    op = out[..., 3] > 0.5
+    for y in range(10):
+        for x in range(10):
+            if op[y, x] and (y == 0 or not op[y - 1, x]) and x < 6:
+                out[y, x] = rgb(RIM)
     for (x, y, hx) in SIGNATURE.get(pid, []):
         out[y, x] = rgb(hx)
     return out
@@ -281,7 +302,7 @@ def build():
         sheet[y:y + 12, x:x + 12] = heads[eid]
         frames['head_' + eid] = [x, y, 12, 12]
     os.makedirs(UI, exist_ok=True)
-    save_png(sheet, os.path.join(UI, 'heads.png'))
+    save_indexed(sheet, os.path.join(UI, 'heads.png'))   # lossless indexed: the sheet is eager, half the bytes of RGBA
     meta = {'image': 'heads.png', 'cell': [12, 12], 'origin': [0, 0], 'frames': frames,
             'frameColor': FRAME, 'backColor': BACK, 'inner': [1, 1, 10, 10],
             'side': {('party' if k in PARTY else 'enemy'): None for k in ORDER},
