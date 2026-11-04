@@ -6954,7 +6954,7 @@
      "eval": "(() => { LQ_DEBUG.call('scene', \"witness_book\"); return true; })()"
     },
     {
-     "eval": "(async () => { const rx = new RegExp(\"It held. Under water\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "eval": "(async () => { const rx = new RegExp(\"It held. Down here\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
      "timeout": 60000
     },
     {
