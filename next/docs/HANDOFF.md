@@ -61,8 +61,10 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
     Known map nits (docs/MAPS.md section 6): Dash-broken F1 pane reads as a floor stripe; feather uses a stand-in sprite.
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
     and publish. Episode 2 shows on the title screen only after `ep1_complete` (or `?ep=2`).
-- Small backlog: Episode 2 reflection timeline heads read as blobs; drawn Episode 2 portraits are simpler than the
-  painted Episode 1 ones; a 2x Briar Alpha avatar; autoplay does not visit the Hollow.
+- Small backlog: drawn Episode 2 portraits are simpler than the painted Episode 1 ones; a 2x Briar Alpha avatar.
+  Done 2026-11-03 (scott/polish-nov3): the reflection timeline heads (build_heads.py glass_head, by role in the owner's
+  grid); the Stacks art gaps (the Binder's page burst, src/data/cave/fx.js; Hollis's portrait, cave_portraits.py).
+  The Hollow was already in autoplay: `python next/qa/autoplay.py --hollow` (W13).
 
 ## Hotfixing the live /next while overhaul carries unpublished work
 Whenever `overhaul` is ahead of `main` with unfinished work, `push overhaul:main` would publish it. For a bug Scott reports on the
