@@ -106,6 +106,7 @@ for (const x of EXTENSIONS) {
   for (const [z, at] of Object.entries(x.loadoutAt || {})) LOADOUT_AT[z] = at;
   for (const [ep, zs] of Object.entries(x.zones || {})) for (const z of zs) if (!EPISODES[ep].includes(z)) EPISODES[ep].push(z);
 }
+const EP4 = (await import('./ep4.mjs')).attach({ EPISODES, TARGETS, SUITE_LEVELS, BOSS_LEVELS, BOSS_TARGETS });   // Episode 4 (tools/sim/ep4.mjs): EPISODES[4], its levels and targets, progression and check hooks for the CLI
 
 export function makeParty(zone, level) {
   const L = LOADOUTS[zone];
@@ -462,9 +463,9 @@ if (isMain) {
     const zone = get('--zone', null);
     const episode = get('--episode', null);
     const t0 = Date.now();
-    const zones = zone ? [zone] : episode ? EPISODES[episode] : [...EPISODES[1], ...EPISODES[2], ...EPISODES[3]];
+    const zones = zone ? [zone] : episode ? EPISODES[episode] : [...EPISODES[1], ...EPISODES[2], ...EPISODES[3], ...EPISODES[4]];
     const rows = runSuite({ n, zones });
-    const prog = [...progression(1), ...progression(0.8), ...progression(1, 2), ...progression(0.8, 2), ...progression(1, 3), ...progression(0.8, 3)];
+    const prog = [...progression(1), ...progression(0.8), ...progression(1, 2), ...progression(0.8, 2), ...progression(1, 3), ...progression(0.8, 3), ...EP4.progression(1), ...EP4.progression(0.8)];
     console.log(formatTable(rows));
     console.log('\nProgression (fight each zone plan once, then 80% of it; Episode 2 continues from Episode 1, Episode 3 starts at 2,900 EXP):');
     for (const p of prog) console.log(`  ${pct(p.share).padStart(4)} ${p.zone.padEnd(13)} ${String(p.fights).padStart(4)} fights  Lv ${p.startLevel} -> ${p.endLevel}  (total EXP ${p.exp})`);
@@ -507,6 +508,7 @@ if (isMain) {
         + `(two tier 3: ${e2.typicalT3}), before F3 ${e2.beforeF3} (two tier 4: ${e2.typicalT4}), end ${e2.end} (the whole smithy: ${e2.everything})`);
       fails.push(...checkEconomy2(e2));
     }
+    fails.push(...EP4.check(rows, { runBattle, n, log: (s) => console.log(s) }));   // Episode 4: Keep F3 the tightest floor, Answer share
     console.log(`\n${fails.length ? 'TARGETS MISSED:\n  ' + fails.join('\n  ') : 'All targets met.'}`);
     console.log(`(${rows.reduce((s, r) => s + r.n, 0)} battles in ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
     if (args.includes('--json')) {
