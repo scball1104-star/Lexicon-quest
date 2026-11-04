@@ -356,8 +356,6 @@ async function vex_archive(s) {
   await say(s, 'vex', "Read the charter, {hero}. You'll want to sign something. Do.");
   await s.flash('#d8f4ff', 10);
   await s.despawn('vex');
-  await narrate(s, 'When the light settles, the chair is empty. A black feather lies on the table, dry as the day it fell.');
-  await say(s, 'bram', 'Every time. I want to thank him and hit him. Every single time.');
   await s.music('sunken_keep');
   await s.camera.follow('hero');
   await s.setFlag('vex_archive_met');
@@ -500,7 +498,7 @@ async function witness_book(s) {
   await s.sfx('name_restore');
   await s.flash('#ffffff', 12);
   await s.music('triumph');
-  await say(s, 'mira', 'It held. Under water. Yours held.');
+  await say(s, 'mira', 'It held. Down here. Yours held.');
   await say(s, 'bram', 'Now they know where you are.');
   await say(s, 'mira', "They always did. Now it's on the record.");
   await s.sfx('level_up_sparkle');
@@ -651,16 +649,12 @@ async function crown_remembers(s) {
   await s.tint('none', 120);
   await narrate(s, 'The note rolls out over the canals, and every door in Valewyn opens. On the flood board, the notices dry.');
   await s.camera.panTo('statue', 40);
-  await say(s, 'lyra_t', 'I am Lyra, Regent of Valewyn. Twelve years ago I closed the river gates.');
-  await say(s, 'lyra_t', 'They are open. They stay open.');
+  await say(s, 'lyra_t', 'I am Lyra, Regent of Valewyn. Twelve years ago I closed the river gates. They are open. They stay open.');
   if (await s.hasFlag('lyra_truth')) await say(s, 'lyra_t', 'Somebody told me plainly what I did. It made this easier to say.');
   else await say(s, 'lyra_t', "I've been telling myself the seal did it. I'm done telling myself that.");
   await say(s, 'hale_t', 'Lyra! Ferry captain Hale says: Lyra.');
   await say(s, 'lyra_t', 'You can stop shouting.');
   await say(s, 'hale_t', "Thirty years. I'll shout.");
-  await s.walk('vance', 'board');
-  await s.sfx('page_flutter');
-  await say(s, 'vance', "Last dry order on the board. Blank. Huh. Seal's gone too.");
   if (await s.hasFlag('council_shelter')) await say(s, 'lyra_t', 'The river quarter was sheltered first. The records are next. That is on the record.');
   else if (await s.hasFlag('council_records')) await say(s, 'lyra_t', 'The records were kept first. The river quarter is next. That is on the record.');
   await say(s, 'bram', 'Dad would like this town. Nobody here wastes water.');

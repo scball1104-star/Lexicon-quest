@@ -165,7 +165,7 @@ Keep: `ep4_glass_dome`, `ep4_vex_feather`, `ep4_scriptorium`, `ep4_court_bench`,
 `ep4_witness_lectern`, `ep4_throne`, `ep4_witness_page`.
 Books: `vw_records`, `keep_ledger`, `tide_log` (the Water Gate on F1).
 
-**PENDING Scott/Stephen (E4-fixes-A, PLAYTEST_REVIEW_6 fix 9; the shipped lines are unchanged).** In `witness_book`
+**APPLIED 2026-11-04 on Scott's word ("Follow your recommendations"): Mira now says "It held. Down here. Yours held." Trims in the same pass: `vex_archive` drops the closing feather narration and Bram's "thank him and hit him" (an Episode 3 echo); `crown_remembers` joins Lyra's two opening lines into one box and drops Vance's board line (the narration already dries the notices). The learn-line option below was not taken. Original note (E4-fixes-A, PLAYTEST_REVIEW_6 fix 9):** In `witness_book`
 (`src/data/ep4/story.js`) Mira says "It held. Under water. Yours held." while the antechamber around the lectern is a dry
 marble room, so "under water" is told, not shown. Smallest wording fix, same rhythm: "It held. Down here. Yours held."
 (the alternative is map art: a shallow basin under the lectern, E4-fixes-B's side). Optional, same scene: the learn line
