@@ -612,6 +612,32 @@ section 2.
 
 Reserved for E4-story (wave 4a): what the built script does beyond the beat sheet (deltas only, as EPISODE3 section 9).
 
+Built by E4-story, 2026-11-03 night (`src/data/ep4/{flags,npcs,quests,text,story,ledger}.js`, staging in
+`docs/story/STAGING_EP4.md`, tests `qa/content/ep4_story.test.mjs` and `ep4_data.test.mjs`). 37 scenes (30 main and
+chained, 7 side), 162 paths. Main path about 180 boxes (budget about 220). Deltas from section 1:
+
+- **Vex's count (scene 20).** The sample line "Twelve years between the first two" does not fit section 5's dates (25,
+  15, 12, a month). Built: "Twenty-five years ago, then fifteen, then twelve. Then a month. It's getting faster."
+- **Ada names herself** in `ep4_morning` ("Ada, by the way."): Episode 3 tagged her "Courier".
+- **Bram after the Barrister (scene 21):** "Twelve years." became "All the way down the stairs." (Bram has not been
+  practicing for twelve years; the joke now lands on the walk down).
+- **Bram calls Garrick "Dad"** wherever the bible wrote "Garrick would..." (his Episode 3 voice); others say Garrick.
+- **The hero rings the principle stones** (the bible says "the party"), and walks to the lectern to sign.
+- **Garrick's farewell** is one talk exchange after `ep4_started`; the "only if spoken to twice" needs a talk counter
+  the engine does not have.
+- **`witness_book`**: "Not yet." twice leaves the book open; the lectern object re-runs the scene (no loop, nothing lost).
+- **`council_choice`** is one scene for both switches (it asks); after `ep4_complete` the second switch gives the other
+  district's reward. The Tidewalker Mantle is given once.
+- **`ep4_morning`** also plays on `emberpeak` (Ada at `inn_door`, Garrick at `gather_garrick`), like `ep3_morning`.
+- **Two shop counters added** with names: Wenna (`ep4_innkeeper`, the Floodwatch Inn) and Corvel (`ep4_smith`, the Crown
+  Guard Forge); Linn holds the Provisioner's shop. Both are Ledger-excluded.
+- **Flags added:** `barrister_tried`, `paper_regent_tried` (short retries), and `tide_key_f1`, `tide_key_f2` declared
+  (the floor Talk reads them).
+- **The Episode 5 card sub** is "In the desert, the words change at night." (the placeholder's 44 characters did not
+  fit a 42-character card line). Still a placeholder (section 10.7).
+- **Name clash to know about:** the X1 placeholder stone name "Joss Harrow" (`src/data/x1/text.js`) shares a first name
+  with Joss the Lockwright. Not changed (not E4-story's file); one edit in X1_NAMES_TO_CONFIRM if Scott minds.
+
 ---
 
 ## 10. Choices made tonight that are Scott's or Stephen's (open for Scott and Stephen)
