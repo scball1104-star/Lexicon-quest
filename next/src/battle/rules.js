@@ -278,8 +278,9 @@ export function createBattle(cfg = {}) {
         masteryPts: Math.round(masteryPts * (extra.rewardScale ?? 1)) },
       lootZone: d.lootZone, ai: { turns: 0, used: {}, chargeAt: null },
       ...(expMul !== 1 ? { expMul } : {}),
-      // Episode 3 Heat: a counter on the foe (not a status). heatMax 0 = no Heat. heatStep is the ATK and MAG gain per level.
+      // Heat (Episode 3; Episode 4 Decrees: quench element, word, sfx). heatMax 0 = no Heat. heatStep: ATK and MAG per level.
       heat: 0, heatMax: d.heat ? d.heat.max : 0, heatStep: d.heat ? d.heat.step : 0, heatFlare: d.heat ? d.heat.flare : null,
+      heatQuench: (d.heat && d.heat.quench) || 'ice', heatWord: (d.heat && d.heat.word) || null, heatSfx: (d.heat && d.heat.sfx) || null,
     };
   }
 
@@ -551,9 +552,9 @@ export function createBattle(cfg = {}) {
     const pending = u.charging && u.heatFlare && u.charging.skill === u.heatFlare ? u.charging.skill : null;
     if (!had && !pending) return false;
     u.heat = 0;
-    emit({ type: 'quench', target: u.uid, reason, heat: had, cancelled: pending, sfx: 'quench_hiss' });
+    emit({ type: 'quench', target: u.uid, reason, heat: had, cancelled: pending, sfx: u.heatSfx || 'quench_hiss' });
     emit({ type: 'heat', target: u.uid, heat: 0, max: u.heatMax, delta: -had, reason: 'quench' });
-    emit({ type: 'message', text: 'Quenched!', kind: 'quench', target: u.uid });
+    emit({ type: 'message', text: u.heatWord || 'Quenched!', kind: 'quench', target: u.uid });
     if (pending) cancelCharge(u, 'quench');
     return true;
   }
@@ -685,8 +686,8 @@ export function createBattle(cfg = {}) {
       types, element: types[0] || null, shieldLost, shields: tgt.side === 'enemy' ? tgt.shields : null, broken: wasBroken });
     let broke = false;
     if (shieldLost && tgt.alive && tgt.shields <= 0 && !tgt.broken) { breakUnit(tgt); broke = true; }
-    // Episode 3: any ice damage quenches a foe's Heat (and cancels a pending flare)
-    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes('ice')) quench(tgt, quenchReason);
+    // Heat: damage of the foe's quench element (ice; fire for a Decree) resets it and cancels a pending flare
+    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes(tgt.heatQuench)) quench(tgt, quenchReason);
     // status interplay: fire thaws Chill, ice puts out Burn
     for (const t of types) for (const s of ST.CURED_BY_TYPE[t] || []) if (tgt.alive && has(tgt, s)) removeStatus(tgt, s, 'countered');
     // on-hit extras

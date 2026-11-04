@@ -54,7 +54,7 @@ function titleCase(s) {
   return String(s).toLowerCase().split(' ').map((w, i) => (i > 0 && ['of', 'the', 'and', 'a'].includes(w) ? w : cap(w))).join(' ');
 }
 // Backdrop per zone.
-const BACKDROPS = {
+export const BACKDROPS = {
   valley: { asset: 'battle_valley', cell: 0, bright: 1.0, tint: null },
   archive: { asset: 'battle_archive', cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
   archive_deep: { asset: 'battle_archive', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)', darken: 0.22 },

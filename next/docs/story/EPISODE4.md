@@ -553,7 +553,7 @@ brief (flowing harp, lyrical strings, soft flute, waterlike celesta, 90 BPM) as 
 tracker; the pumphouse trial's "lower the water to expose submerged stones" as the field mechanic's root.
 
 **Changed, with reasons.**
-- The Drowned Charter Crossword is gone (DESIGN hard rule 2). The Archive Floodlock opens on water level and the
+- The old Drowned Charter word grid is gone (DESIGN hard rule 2). The Archive Floodlock opens on water level and the
   floor's own puzzle.
 - The tidal plan and pump blueprint inscriptions that printed their answers ("WEST INTAKE = HIGH; NORTH DRAIN = LOW")
   are gone: water you can see standing at a striped post is the readout (DESIGN 5.3). The four-state sluices and

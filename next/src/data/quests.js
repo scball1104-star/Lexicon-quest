@@ -1331,7 +1331,10 @@ export const ALL_SIDE_QUESTS = [...SIDE_QUESTS, ...SIDE_QUESTS_EP2, ...SIDE_QUES
  * The main quest the journal and Talk follow: Episode 2's once Episode 1 is complete, Episode 3's once ep3_started is
  * set (only ep3_morning sets it, and that scene needs the episode switch).
  */
+/** [flag, quest] pairs a pack pushes (ep4: ['ep4_started', MAIN_QUEST_EP4]); the first whose flag is set wins. */
+export const QUEST_EXT = [];
 export function mainQuestFor(hasFlag) {
+  for (const [f, q] of QUEST_EXT) if (hasFlag(f)) return q;
   if (hasFlag('ep3_started')) return MAIN_QUEST_EP3;
   return hasFlag('ep1_complete') ? MAIN_QUEST_EP2 : MAIN_QUEST;
 }

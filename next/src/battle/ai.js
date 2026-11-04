@@ -371,9 +371,6 @@ export const MIRROR_COMBOS = [
   ['refl_mira', 'refl_bram', 'mirror_glass_bulwark'],
 ];
 const COMBO_REST = 1;   // each member's own turns before it can start another Mirrored Combo
-// W11 (PLAYTEST_REVIEW_3 fixes 1 and 8): 0.20 (was 0.15). The reflections' own ATK and MAG are 10% lower, so a careful
-// party at Lv 10 wins about 88% (was 81%); a landed combo costs more, now that the telegraph names the answer ("Break
-// their rhythm!"), Mira's tip says push one back, and the HUD badges each stack: ignoring it costs 13 points at Lv 11.
 export const MIRROR_EMPOWER = 0.20;   // ATK and MAG the reflections gain per Mirrored Combo that lands
 function mirrorComboFor(a, b) {
   const row = MIRROR_COMBOS.find(([x, y]) => (x === a && y === b) || (x === b && y === a));
@@ -473,7 +470,6 @@ const reflections = {
 // and Pride and the Mirror Ward (25% damage, shields locked, HP stops at 34%); Mirror Rain every 3, Keeping every 5.
 // Both adds down: the ward shatters, he is Broken for a turn (every Kept member is freed) and 3 Aurel Unmasked
 // begins (Haste; Keeping and Last Decree alternate with ordinary turns between).
-// W11: +20% per Kept (+10% let a player ignore telegraphs; the tuning is in PLAYTEST_REVIEW_3 fix 6).
 export const KEEP_EMPOWER = 0.20;    // ATK and MAG gained per member kept
 export const KEEP_MIRA_BIAS = 0.2;   // chance the King names Mira before the even pick (was 0.4: Mira about 60% of the time)
 export const WARD_MULT = 0.25;       // damage taken under the Mirror Ward
@@ -752,7 +748,8 @@ const cinderWarden = {
   },
 };
 
-const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased, mimic, reflections,
+/** Enemy scripts by `ai` id; packs add theirs (ep4: barrister, paper_regent). */
+export const SCRIPTS = { basic, echo_warden: echoWarden, archivore, lost_page: lostPage, phased, mimic, reflections,
   nameless_king: namelessKing, specter, coil, cinder_warden: cinderWarden };
 function scriptOf(u) {
   const d = ENEMIES[u.id];
@@ -967,13 +964,12 @@ function finishingBlow(b, me, foes) {
   return !!(est && est.kills && (est.hit ?? 1) >= 0.85);
 }
 
-/**
- * Auto-battle brain (PLAYTEST 7): heals at 55% when three or more foes are up (40% otherwise, 50% in boss
- * fights), revives before attacking, prefers a Break (or a shield chip toward one) while a telegraph is pending,
- * and Defends when a member is under 35% with no potion in hand and the healer not ready.
- */
+/** Pack rules (ep4: void a Decree, Answer) asked first: (b, me, opts) => action or null. */
+export const POLICY_EXT = [];
+/** The Auto-battle brain (and the simulator's careful player). */
 export function competentPolicy(b, me, opts = {}) {
   heatAware = !opts.ignoreTelegraphs;   // reckless play does not read Heat either (scoreHit)
+  for (const f of POLICY_EXT) { const a = f(b, me, opts); if (a) return a; }
   const cmds = b.commands(me);
   const foes = b.living('enemy');
   const isKept = (u) => !!(u.statuses && u.statuses.kept && u.statuses.kept.turns > 0);
@@ -1223,9 +1219,7 @@ function damageOptions(b, me, cmds, canSkill, reserve = 0) {
     if (cost && reserve && me.mp - cost < reserve) continue;
     // Mira keeps MP for healing; everyone saves a little in long fights
     const mpWeight = me.id === 'mira' ? (mpFrac < 0.35 ? 6 : 2.2) : (mpFrac < 0.25 ? 3 : 1.2);
-    // W10: MP the action gives back (Mira's Channel) is worth what the same MP costs. The field has no MP
-    // regeneration, so an Auto party that never Channels walks into the next fight dry (PLAYTEST_REVIEW_2 3, the
-    // route simulator tools/sim/route.mjs). Boss fights spend everything anyway (and keep their tuning).
+    // MP an action gives back (Channel) is worth what it costs: the field has no MP regeneration
     const gain = !boss && me.maxMp ? Math.min(mpGainOf(sk), me.maxMp - me.mp) * mpWeight : 0;
     if (sk.target === 'enemy') {
       for (const f of foes) {

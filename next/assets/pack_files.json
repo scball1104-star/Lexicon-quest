@@ -97,6 +97,19 @@
   "src/data/maps/ep3/pk_smithy.js",
   "src/data/maps/ep3/sand_road.js"
  ],
+ "ep4": [
+  "assets/ep4_manifest.json",
+  "src/data/ep4/flags.js",
+  "src/data/ep4/hooks.js",
+  "src/data/ep4/index.js",
+  "src/data/ep4/ledger.js",
+  "src/data/ep4/maps.js",
+  "src/data/ep4/npcs.js",
+  "src/data/ep4/quests.js",
+  "src/data/ep4/start.js",
+  "src/data/ep4/story.js",
+  "src/data/ep4/text.js"
+ ],
  "tier": [
   "assets/tier_manifest.json",
   "src/data/tier/index.js",
