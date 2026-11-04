@@ -4,6 +4,7 @@
   "atlases": {
     "cave_bosses_battle": "assets/sprites/cave_bosses_battle.json",
     "cave_enemies_field": "assets/sprites/cave_enemies_field.json",
+    "cave_portraits": "assets/sprites/cave_portraits.json",
     "cave_props": "assets/sprites/cave_props.json"
   },
   "json": {},

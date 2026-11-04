@@ -1000,8 +1000,9 @@ async function run() {
   mods.bands345 = await optional('./bands345.js', 'bands345');
   mods.hall = await optional('./maps/cave_landing0.js', 'cave_landing0');
   mods.b100 = await optional('./maps/cave_b100.js', 'cave_b100');
+  mods.fx = await optional('./fx.js', 'fx');   // the Binder's page burst (CRITIQUE_STACKS 18)
   TEXT = mods.text;
-  for (const m of [mods.bands345]) {
+  for (const m of [mods.bands345, mods.fx]) {
     if (!m) continue;
     const fn = typeof m.register === 'function' ? m.register : typeof m.default === 'function' ? m.default : null;
     if (fn) await fn();

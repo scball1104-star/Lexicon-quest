@@ -385,8 +385,7 @@ class Planner {
     this.wait(FRAMES.miss);
   }
   ev_status_add(e) {
-    // Kept (the Nameless King): the member is sealed in a mirror shard on the stage. The shard seals over it, a
-    // glassy freeze plays, and the party-status window shows the icon_kept badge (hud PARTY_STATUS_ORDER).
+    // Kept: a mirror shard seals the member; the status window shows icon_kept (hud PARTY_STATUS_ORDER).
     if (e.status === 'kept') {
       this.push({ op: 'status', uid: e.target, status: 'kept', on: true, turns: e.turns });
       this.push({ op: 'pose', uid: e.target, pose: 'hurt' });
@@ -490,7 +489,7 @@ class Planner {
   }
   ev_phase(e) {
     this.push({ op: 'banner', text: e.name || `Phase ${e.phase}`, style: 'phase' });
-    const sting = BINDER_STINGS[e.id];   // the Binder's own stings (media pack); every other boss keeps the kit's sounds
+    const sting = BINDER_STINGS[e.id];   // the Binder's stings (media pack) and its page burst (cave/fx.js)
     const look = PHASE_LOOK[e.id];
     if (look) {
       // the Warden: its bronze cracks open (white-hot seams), then the next look swaps in mid-flash
@@ -501,8 +500,8 @@ class Planner {
       this.wait(14);
       this.push({ op: 'screenFlash', color: e.phase > 2 ? '#ffffff' : '#ffcf5a', frames: 10, alpha: 0.6 });
       this.push({ op: 'swapSprite', uid: e.actor, sprite: look });
-    } else if (e.sprite) {   // a new sprite (the King's unmask): the glass breaks, the frames swap mid-flash
-      this.push({ op: 'fx', kind: 'shatter', uid: e.actor, big: true });
+    } else if (e.sprite) {   // a new look: the King's glass breaks, the frames swap mid-flash
+      this.push({ op: 'fx', kind: sting ? 'page_burst' : 'shatter', uid: e.actor, big: sting ? e.phase : true });
       this.push({ op: 'sfx', id: sting || 'glass_break' });
       this.push({ op: 'screenFlash', color: '#ffffff', frames: 10, alpha: 0.7 });
       this.push({ op: 'shake', mag: 4, frames: 20 });

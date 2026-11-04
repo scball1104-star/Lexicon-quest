@@ -1,0 +1,27 @@
+{
+ "image": "cave_portraits.png",
+ "frames": {
+  "hollis_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "hollis_32": [
+   48,
+   0,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "hollis": {
+   "48": "hollis_48",
+   "32": "hollis_32"
+  }
+ },
+ "sources": {
+  "hollis": "SDF render (chars/portrait_hollis.py, the W12 renderer)"
+ },
+ "notes": "Deep Stacks pack portraits, merged into portraits by the pack loader. Same shape as portraits.json."
+}
