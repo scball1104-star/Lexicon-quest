@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-11-02, 14:50 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-11-04, 05:00 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -32,6 +32,15 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   it alone before treating it as real.
 
 ## Status at handoff
+- **Episode 4 "The Sunken Keep": BUILT 2026-11-04 overnight on `scott/ep4-build`, PR #37 into overhaul. NOT shipped.** All of it
+  is in the lazy `ep4` pack (`src/data/ep4/`), behind `EP4_LIVE` in `src/game/episodes.js` (true on the branch; it rides to
+  overhaul on). Waves: pack, story, battle, tiles, sprites, world, maps A and B, audio, scene-ui, integrate, critique 6 and
+  playtest review 6 (`docs/CRITIQUE_6.md`, `docs/PLAYTEST_REVIEW_6.md`), fixes A and B (brief `docs/briefs/E4-fixes.md`).
+  Autoplay clears it (desktop and phone, from an Episode 3 save and the quick start, 0 game overs). Open for Scott and
+  Stephen: the story cuts and the Witness Book wording (STAGING_EP4.md section 4, PENDING), the three close-up inserts
+  (C3), new keep battle backdrops (C5), party staging over Vex (C11), the Barrister look (C12), the off-screen seal wash
+  pan (P6). TRAPS: `qa/integrate/out/` scratch got committed in 1360c02 (harmless; removal was declined); agents flip line
+  endings, so diff each file against HEAD's style before committing; `build_pwa.py` lives in `tools/pwa/`.
 - **Shipped 2026-11-02 14:38 ET on Scott's word: live main = 9c1b2de (sw ded590e0379d).** The five painted story cards and the SFX dozen (#21), sw.js rebuilt from an LF checkout (#23). TRAP: this Windows checkout has core.autocrlf on, so `build_pwa.py` hashes a different sw.js version and the pwa load-budget test over-measures; before a ship, rebuild and run `LQ_RELEASE=1 node next/qa/run.mjs pwa` in an LF checkout (`git worktree add`, then inside it `git -c core.autocrlf=false rm --cached -r -q . && git -c core.autocrlf=false reset --hard`). `shots.py` needs `--timeout 3000` here (212 shots take about 950 s). Stephen shipped 0bca403 on 10/29 (the Kids Edition under /kids/). Open on #9: Scott's answers on the video test and the trailer brief, a bells retake, November's nine Suno themes.
 - **Shipped 2026-10-28 15:58 ET on Scott's word: live main = d77f904 (sw ebb3d0b4b07b).** What went out, all of it through pull
   request #11 (merged into overhaul, then `push overhaul:main`): the responsibility arc (cold open "The Thirteenth Toll", vows,
