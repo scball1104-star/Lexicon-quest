@@ -248,9 +248,9 @@ export function touchRowSpot(unit, w, ctx = {}) {
     { place: 'right', x: clampX(own.x + own.w + 3), y: midY },
     { place: 'left', x: clampX(own.x - 3 - w), y: midY },
     { place: 'above', x: cx, y: Math.max(top - h - 2, bandBottom(cx) + 1) },
-    // W13: a tall foe under a grown help window: beside the sprite just below the band, rather than on its face
-    ...(tall ? [{ place: 'right', x: clampX(own.x + own.w + 3), y: Math.max(midY, bandBottom(clampX(own.x + own.w + 3)) + 1) },
-      { place: 'left', x: clampX(own.x - 3 - w), y: Math.max(midY, bandBottom(clampX(own.x - 3 - w)) + 1) }] : []),
+    // W13: under a grown help window: beside the sprite just below the band, rather than on its face
+    { place: 'right', x: clampX(own.x + own.w + 3), y: Math.max(midY, bandBottom(clampX(own.x + own.w + 3)) + 1) },
+    { place: 'left', x: clampX(own.x - 3 - w), y: Math.max(midY, bandBottom(clampX(own.x - 3 - w)) + 1) },
   ];
   let best = null;
   for (const c of cands) {

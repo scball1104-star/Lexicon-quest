@@ -54,7 +54,9 @@ INK = lambda i: C('ink', i)
 # (reported by E4-tiles; ep4.py snaps the sheet to palette.json PLUS these): a deep and a mid turquoise for the tide
 # water (magic_cyan jumps from #1d3775 navy to #2ec4d0 bright with nothing between) and the sealing-wax reds of the
 # forged notices (roof_red is brick orange; a wax seal must read crimson against white paper at phone scale).
-EXTRA = ['#123f4c', '#1a6f7a', '#a3202c', '#d8434a']
+EXTRA = ['#123f4c', '#1a6f7a', '#a3202c', '#d8434a',
+         # E4-fixes-B (CRITIQUE_6 items 6 and 7): a cool grey-green stone ramp, the Keep's own (not Episode 3's lilac).
+         '#1c261f', '#28342a', '#3e4b40', '#566555', '#7c8a78', '#909d8c', '#a6b3a0', '#c6cfc0']
 TQ = lambda i: hexc(EXTRA[max(0, min(1, i))])          # 0 deep turquoise, 1 mid turquoise
 WX = lambda i: hexc(EXTRA[2 + max(0, min(1, i))])      # 0 wax red, 1 wax highlight
 
@@ -90,7 +92,7 @@ class CausewayFloor(FloorBase):
     cracked slab."""
     id = 'causeway_floor'
     nvariants = 7
-    weights = [64, 4, 2, 1, 3, 2, 2]
+    weights = [40, 6, 2, 1, 7, 3, 4]      # E4-fixes-B: more puddles, moss and cracked slabs (CRITIQUE_6 item 7)
     edge = GR(0)
     SLABS = [(0, 7, [(0, 9), (9, 7)]), (7, 9, [(4, 6), (10, 10)])]
 
@@ -257,7 +259,7 @@ class WitnessFloor(FloorBase):
     verdigris where water stood, a crack, the open-book seal in gold, a damp sheen, a gold ring."""
     id = 'witness_floor'
     nvariants = 7
-    weights = [60, 2, 4, 2, 1, 3, 1]
+    weights = [44, 2, 14, 2, 1, 4, 1]     # E4-fixes-B: verdigris where water stood is common now (CRITIQUE_6 item 6)
     edge = K(3)
 
     def make_texture(self, frame, variant):
@@ -1231,6 +1233,28 @@ MARBLE = _tbl({'#584951': '#4c445c', '#7e6d6e': '#66637f', '#a18f85': '#8e8997',
 # white marble for walls (prefabs): one step lighter than the pavement so buildings stand off the ground
 WALL_MARBLE = _tbl({'#584951': '#66637f', '#7e6d6e': '#8e8997', '#a18f85': '#b3b6c4', '#cfb89c': '#e2e0de',
                     '#ebdfc8': '#f6f4ee', '#c3a57c': '#e2e0de', '#ae8458': '#b3b6c4', '#e4cb96': '#f6f4ee'})
+
+
+# E4-fixes-B: per-floor stone. F1's causeway kit (floor, band, faces, the deep, its own kerbs) moves from the master
+# palette's violet stone_cool ramp onto the grey-green ramp above; F3's white marble greys one step toward the same
+# green, so the descent reads one drowned keep (CRITIQUE_6: "grey rain on turquoise water, white marble going green").
+# Applied by ep4.py to the finished rects, so the drawing code above stays one ramp. The ramp leans a little warm and
+# green on purpose: the keep's dark ambient (src/world/lighting.js ambientFor) pushes blue, so on screen it lands grey-green.
+CAUSEWAY_STONE = _tbl({'#251d34': '#1c261f', '#2e2b4c': '#28342a', '#4c445c': '#3e4b40', '#66637f': '#566555',
+                       '#8e8997': '#7c8a78', '#b3b6c4': '#a6b3a0'})
+WITNESS_STONE = _tbl({'#f6f4ee': '#c6cfc0', '#e2e0de': '#a6b3a0', '#b3b6c4': '#909d8c', '#8e8997': '#7c8a78',
+                      '#66637f': '#566555', '#4c445c': '#3e4b40'})
+
+
+def remap_rect(cv, x, y, w, h, table):
+    """remap exact colours inside one rect of the sheet (numpy, alpha kept)"""
+    import numpy as np
+    a = cv.a[y:y + h, x:x + w]
+    rgb = a[..., :3].astype(np.int32)
+    key = (rgb[..., 0] << 16) | (rgb[..., 1] << 8) | rgb[..., 2]
+    for (r, g, b), c in table.items():
+        m = (key == ((r << 16) | (g << 8) | b)) & (a[..., 3] > 0)
+        a[m, 0], a[m, 1], a[m, 2] = c[0], c[1], c[2]
 
 
 def _puddle(cv, cx, cy, rx, ry, seed=0):

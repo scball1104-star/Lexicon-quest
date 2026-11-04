@@ -66,7 +66,8 @@ export const EP4_ZONES = {
   ep4_keep_f2: { id: 'ep4_keep_f2', name: 'Archives Below Water', level: [19, 19], backdrop: 'ep4_archive_deep', music: 'battle', episode: 4,
     plan: [['e4k2_phantoms', 2], ['e4k2_sentinel', 1], ['e4k2_mixed', 2], ['barrister', 1]] },
   ep4_keep_f3: { id: 'ep4_keep_f3', name: 'The Court of Witnesses', level: [19, 20], backdrop: 'ep4_keep', music: 'battle', episode: 4,
-    plan: [['e4k3_decrees', 2], ['e4k3_watch', 2], ['e4k3_sentinels', 1]] },
+    // E4-fixes-A (PLAYTEST_REVIEW_6 fixes 5 and 7): one Watch (West) and one Decrees (East) cut so the Regent is met at Lv 20
+    plan: [['e4k3_decrees', 1], ['e4k3_watch', 1], ['e4k3_sentinels', 1]] },
   ep4_keep_crown: { id: 'ep4_keep_crown', name: 'The Drowned Throne', level: [20, 21], backdrop: 'ep4_throne', music: 'boss_regent', episode: 4,
     plan: [['paper_regent', 1]] },
 };

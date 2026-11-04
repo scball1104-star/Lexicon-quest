@@ -68,9 +68,11 @@ export function keepLegend(sys, floor, extra = {}) {
   const marble = sys === 'witness';
   return {
     '#': `${sys}_top`, '|': `${sys}_face`, 'o': `${sys}_out_face`, 'v': `${sys}_out_top`, '.': floor,
-    'c': 'canal_floor', '~': 'tide_water',
-    'L': marble ? 'ledge_lip_marble' : 'ledge_lip', 'F': marble ? 'ledge_face_marble' : 'ledge_face',
-    'N': 'canal_stair_n', 'S': 'canal_stair_s', 'E': 'canal_stair_e', 'W': 'canal_stair_w',
+    'c': sys === 'causeway' ? 'canal_floor_causeway' : 'canal_floor', '~': 'tide_water',
+    // E4-fixes-B: F1 has its own grey-green kerbs (ledge_*_causeway); F2 keeps the shared stone, F3 the marble
+    'L': marble ? 'ledge_lip_marble' : sys === 'causeway' ? 'ledge_lip_causeway' : 'ledge_lip',
+    'F': marble ? 'ledge_face_marble' : sys === 'causeway' ? 'ledge_face_causeway' : 'ledge_face',
+    ...Object.fromEntries(['n', 's', 'e', 'w'].map((d) => [d.toUpperCase(), `canal_stair_${d}${sys === 'causeway' ? '_causeway' : ''}`])),
     ...extra,
   };
 }
@@ -152,6 +154,19 @@ const decor = [
   { t: 'candelabra', x: 2, y: 5 }, { t: 'candelabra', x: 7, y: 5 },
   { t: 'bench_iron', x: 3, y: 18 }, { t: 'bench_iron', x: 5, y: 18 },
   { t: 'lantern_chain', x: 2, y: 10 }, { t: 'lantern_chain', x: 7, y: 10 },
+  // E4-fixes-B (CRITIQUE_6 item 7): what the flood left. The audience carpet sodden in the aisle, wrack against the walls,
+  // more ledgers in the Notice Hall. Every piece sits off a path the bot or the tide report walks.
+  { t: 'rug_round', x: 3, y: 11 },
+  { t: 'floodwrack', x: 21, y: 19 }, { t: 'floodwrack', x: 36, y: 20 }, { t: 'floodwrack', x: 29, y: 19 },
+  { t: 'book_stack', x: 25, y: 6 }, { t: 'book_stack', x: 12, y: 6 }, { t: 'book_stack', x: 2, y: 19 },
+];
+
+// silt, weed and broken stone on the floors (overlays: no collision)
+const overlays = [
+  ...[[11, 17], [18, 19], [23, 18], [12, 18], [25, 18], [17, 17]].map(([x, y], k) => ({ t: `pebbles_${k % 3}`, x, y })),
+  ...[[13, 19], [20, 17], [22, 17], [11, 19], [28, 9], [30, 19], [37, 13], [2, 7], [7, 19], [16, 26], [23, 26]]
+    .map(([x, y], k) => ({ t: `tuft_${k % 2}`, x, y })),
+  ...[[14, 5], [22, 6], [4, 20], [6, 6], [28, 13], [38, 17]].map(([x, y], k) => ({ t: `pebbles_${(k + 1) % 3}`, x, y })),
 ];
 
 const events = [
@@ -212,7 +227,7 @@ export default {
     basin: R.basin,
     height: R.height,
   },
-  overlays: [],
+  overlays,
   decor,
   overhead: [],
   events,

@@ -78,7 +78,7 @@ stand with the Lantern.
 Enemies: `e_b_phantoms` e4k2_phantoms (4,17) patrol; `e_b_sentinel` e4k2_sentinel (10,5) guard; `e_d_phantoms`
 e4k2_phantoms (26,15) wander; `e_d_mixed` e4k2_mixed (32,16) patrol; `e_ap_mixed` e4k2_mixed (30,26) patrol.
 
-## 3. `ep4_keep_f3` The Court of Witnesses (44 x 32, `mystery`, dark 0.3)
+## 3. `ep4_keep_f3` The Court of Witnesses (44 x 32, `mystery`, dark 0.7, tint `#4e686c`)
 
 Basins: `v` (Voice), `t` (Truth, inlet (38,7)), `m` (Mercy), all start 0. Arrival (17,12) down; `stairs_f2` (17..18,11)
 to F2 (20,15). `pitTo` (21,24): an unrevealed ink bridge drops the party into Mercy's landing.
@@ -96,8 +96,8 @@ wh_v3 x2 (high, low), back. Truth: down the causeway to (39,8), Shove west; wh_t
 x1 (low); stair (31,10), walkway, (31,7), stone_truth. Mercy: wh_m x2 (high), the boats to IS, stone_mercy (Lantern at
 (12,28) and (6,28) for the spear); back over the boats while high. Then gate_spot, "Sign.", door_throne.
 
-Enemies: `e_v_watch` e4k3_watch (11,17); `e_v_decrees` e4k3_decrees (6,9); `e_t_watch` e4k3_watch (39,18);
-`e_t_decrees` e4k3_decrees (41,12); `e_m_sentinels` e4k3_sentinels (33,24).
+Enemies: `e_v_watch` e4k3_watch (11,17); `e_t_decrees` e4k3_decrees (41,12); `e_m_sentinels` e4k3_sentinels (33,24). (`e_v_decrees` and `e_t_watch` were cut in E4-fixes so the Regent
+is met at Lv 20.)
 
 ## 4. `ep4_keep_crown` The Drowned Throne (24 x 20, music none, dark 0.15)
 
@@ -108,6 +108,21 @@ defeated; `regent_trig` row 14 (x 1..22); `witness_page` sign (16,8) and `feathe
 Marks: `throne` (11,6), `party_stop` (11,12), `table` (16,9), `lyra_enter` (11,17), `lyra_sign` (12,10),
 `charter_spot` (11,9), `entry` (11,18). The scene spawns `regent_t`, `hale_t`, `joss_t` itself, so the map places no
 actors for them (plan 4.8 listed them as map actors; a placed actor would clash with the spawn ids).
+
+## 4b. Dressing pass (E4-fixes-B, CRITIQUE_6 items 6 and 7)
+
+Dressing only: no cell's walkability, event, warp or basin changed (`ep4_check`, `mapcheck` and
+`qa/maps/ep4_b_maps.test.mjs` unchanged and clean).
+
+- **F1 has its own stone.** The causeway kit (floor, band, faces, the deep, and F1's own kerbs, drop faces, stairs and
+  channel floor: `ledge_lip_causeway`, `ledge_face_causeway`, `canal_stair_*_causeway`, `canal_floor_causeway`) is a cool
+  grey-green ramp (eight pack colours in `ep4_kit.EXTRA`), not the master violet `stone_cool`. `keepLegend('causeway')`
+  names the causeway ids; F2 keeps the shared ones. More puddles, moss and cracked slabs in the floor's variant weights.
+  Props: the sodden audience carpet in D's aisle, flood wrack in B, C and the stand, ledgers in the Notice Hall; overlays
+  of silt and weed (no collision).
+- **F3 is the darkest floor.** Dark 0.3 -> 0.7 with a cold grey-green tint; the white marble greys one step toward the
+  same green, and verdigris where water stood is common in the floor. Phone luma (qa/out/fixes6): hub 0.52 -> 0.25,
+  Mercy 0.45 -> 0.20, against F2 0.17 to 0.19 and F1 0.26 to 0.28. The lanterns and candelabra are the light.
 
 ## 5. Differences from the plan
 

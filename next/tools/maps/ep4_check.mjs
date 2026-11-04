@@ -431,6 +431,7 @@ async function main() {
   let map;
   if (id === 'ep4_testtide') map = (await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep4', 'field', '_testtide.js')).href)).default;
   else map = await mc.loadMap(id);
+  if (!map.tide) { console.log(`${id}: no tide block, nothing to check`); return; }
   const a = analyse(map, db, fl ? { flags: fl.split(',').filter(Boolean) } : {});
   const r = a.report;
   console.log(`${id}: ${a.errors.length} errors, ${r.tide.states} level states, ${r.tide.nodes} nodes, unreached: ${r.unreached.join(' ') || 'none'}`);

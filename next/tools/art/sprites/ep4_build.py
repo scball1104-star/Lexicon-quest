@@ -96,17 +96,23 @@ def portraits(regent):
     import build_portraits as BP
     p48 = BP.make_from_frame(regent, *PORTRAIT_CROP[48], 48)
     p32 = BP.make_from_frame(regent, *PORTRAIT_CROP[32], 32)
+    import ep4_lyra
+    ly = {k: v.astype(np.float32) / 255 for k, v in ep4_lyra.lyra_frames().items()}
     sh = Shelf(128, pad=0)
     sh.add('paper_regent_48', p48)
     sh.add('paper_regent_32', p32)
+    sh.add('lyra_48', ly['lyra_48'])
+    sh.add('lyra_32', ly['lyra_32'])
     sheet, rects = sh.render()
     save_png(sheet, os.path.join(DST, 'ep4_portraits.png'))
     meta = {'image': 'ep4_portraits.png', 'frames': rects,
-            'portraits': {'paper_regent': {'48': 'paper_regent_48', '32': 'paper_regent_32'}},
-            'sources': {'paper_regent': 'battle frame paper_regent (1x crop, E4-sprites)'},
+            'portraits': {'paper_regent': {'48': 'paper_regent_48', '32': 'paper_regent_32'},
+                          'lyra': {'48': 'lyra_48', '32': 'lyra_32'}},
+            'sources': {'paper_regent': 'battle frame paper_regent (1x crop, E4-sprites)',
+                        'lyra': 'noble_lady (portraits.webp cell 4) aged by hand: grey at the temples, age lines (ep4_lyra.py, E4-fixes-B)'},
             'notes': 'Episode 4 pack atlas, merged into portraits. paper_regent: the crown, the hood and its two cyan eyes, cropped at 1x '
-                     'from the Forged Edicts battle frame. Lyra (regent_e, lyra_n and every Regent tag) speaks with the base noble_lady '
-                     'portrait (portraits.webp cell 4), so she needs no frames here.'}
+                     'from the Forged Edicts battle frame. lyra: the noble_lady face aged to her fifties (CRITIQUE_6 item 10); her '
+                     'speaker tags and npcs name it as portrait id `lyra` (until they do, they still show noble_lady).'}
     write_json(os.path.join(DST, 'ep4_portraits.json'), meta)
     return meta, p48, p32
 

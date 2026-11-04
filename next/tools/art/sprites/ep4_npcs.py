@@ -91,8 +91,41 @@ EP4_NPCS = {
 }
 
 
+def temple_grey(f):
+    """E4-fixes-B (CRITIQUE_6 item 10): Lyra's grey read as one or two pixels. A 2 px grey band at each temple: the
+    black hair pixels beside the face (left and right of a skin pixel, head rows only) go grey, the outer one lighter."""
+    f = f.copy()
+    H, W = f.shape[:2]
+    rgb = (np.clip(f[..., :3], 0, 1) * 255).round().astype(int)
+    def is_(refs):
+        m = np.zeros((H, W), bool)
+        for r in refs:
+            c = np.array(hex2rgb(P.color(r)))
+            m |= (np.abs(rgb - c).sum(-1) <= 3) & (f[..., 3] > 0.5)
+        return m
+    skin = is_(SKIN_DARK)
+    hair = is_(HAIR_GREYBLACK[:2])
+    lt = np.array(hex2rgb(P.color('stone_cool:4')), np.float32) / 255
+    mid = np.array(hex2rgb(P.color('stone_cool:3')), np.float32) / 255
+    rows = [y for y in range(H) if skin[y].any()]
+    if not rows:
+        return f
+    top = rows[0]
+    for y in range(top, min(H, top + 6)):
+        xs = np.nonzero(skin[y])[0]
+        if not len(xs):
+            continue
+        for x0, step in ((xs.min(), -1), (xs.max(), 1)):
+            for k, c in ((1, mid), (2, lt)):
+                x = x0 + step * k
+                if 0 <= x < W and hair[y, x]:
+                    f[y, x, :3] = c
+    return f
+
+
 def build(write=True):
     blocks = {nid: BN.npc_frames(nid, spec) for nid, spec in EP4_NPCS.items()}
+    blocks['npc_lyra'] = {d: [temple_grey(f) for f in fr] for d, fr in blocks['npc_lyra'].items()}
     rects, anims = {}, {}
     per = 3
     rows = (len(blocks) + per - 1) // per

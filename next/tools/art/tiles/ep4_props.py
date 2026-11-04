@@ -109,10 +109,25 @@ def tide_wheel(level):
             x = int(round(cx - 0.5 + math.cos(a) * r))
             y = int(round(cy - 0.5 + math.sin(a) * r))
             if k == 0:
-                cv.set(x, y, GD(4) if r < 4 else GD(3))
+                cv.set(x, y, GD(5) if r < 4 else GD(4))
+                # E4-fixes-B (CRITIQUE_6 item 4): a thick bright needle, two pixels wide
+                px_, py_ = int(round(cx - 0.5 + math.cos(a) * r - math.sin(a))), int(round(cy - 0.5 + math.sin(a) * r + math.cos(a)))
+                cv.set(px_, py_, GD(4) if r < 4 else GD(3))
             else:
                 cv.set(x, y, K(3) if (y < cy) else K(2))
     disc(cv, cx, cy, 1.6, lambda x, y, d: GD(4) if (x < cx and y < cy) else GD(2))
+    # E4-fixes-B (CRITIQUE_6 item 4): the dial face names its three marks. A notch at 9, 12 and 3 o'clock (low, mid,
+    # high): the two the wheel is not at are pale stone studs, the current one wears the red knob ringed in bright
+    # turquoise, so the level reads from the top half of the wheel even when the party stands at the stand.
+    for lv, ang in ((0, math.pi), (1, -math.pi / 2), (2, 0.0)):
+        nx = int(round(cx - 0.5 + math.cos(ang) * 6.0))
+        ny = int(round(cy - 0.5 + math.sin(ang) * 6.0))
+        if lv == level:
+            for (dx, dy) in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -2), (1, -2), (-2, -1), (2, -1), (-2, 1), (2, 1), (-1, 2), (1, 2)):
+                if 0 <= nx + dx < 16 and 0 <= ny + dy < 32:
+                    cv.set(nx + dx, ny + dy, CY(4) if dy <= 0 else CY(3))
+        else:
+            cv.set(nx, ny, MT(4)); cv.set(nx - 1, ny, MT(3)); cv.set(nx, ny - 1, MT(3)); cv.set(nx - 1, ny - 1, MT(4))
     # the knob (wax red handle) on the rim
     kx = int(round(cx - 0.5 + math.cos(ang_knob) * 6.0))
     ky = int(round(cy - 0.5 + math.sin(ang_knob) * 6.0))
@@ -122,9 +137,6 @@ def tide_wheel(level):
     cv.set(kx - 1, ky - 1, WX(1))
     cv.set(kx, ky - 1, WX(1))
     cv.set(kx + 1, ky + 1, RR(1))
-    for (dx, dy) in ((-2, 0), (2, 0), (0, -2), (0, 2)):
-        if cv.get(kx + dx, ky + dy)[3] == 0:
-            cv.set(kx + dx, ky + dy, OUT)
     return cv
 
 
@@ -164,16 +176,17 @@ def tide_post(level):
             cv.set(x, 30, GR(1) if x % 2 else GR(2))
         shadow(cv, 9, 13, 31, 70)
     else:
-        # the waterline: a foam ring round the post, ripples
-        for x in range(2, 14):
+        # the waterline: E4-fixes-B (CRITIQUE_6 item 4) a 2 px bright foam ring right across the post where the water
+        # meets it (it was one pale dash), a dark line under it so it reads on pale stone too, ripples to the sides
+        for x in range(1, 15):
             d = abs(x - 7.5)
-            if d > 2.0:
-                cv.set(x, wl, CY(4) if (x + level) % 3 else CY(3))
-                if d > 3.5:
-                    cv.set(x, wl + 1, CY(2))
-        cv.set(3, wl - 1, CY(3))
-        cv.set(12, wl - 1, CY(3))
-        cv.set(6, wl, CY(4)); cv.set(9, wl, CY(3))
+            cv.set(x, wl, CY(4) if (d < 3.0 or (x + level) % 3) else MT(4))
+            cv.set(x, wl + 1, CY(3) if d < 4.5 else CY(2))
+            if d < 5.5:
+                cv.set(x, wl + 2, TQ(0))
+        for x in (1, 14):
+            cv.set(x, wl - 1, CY(3))
+        cv.set(0, wl, CY(3)); cv.set(15, wl, CY(3))
     return cv
 
 

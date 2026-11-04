@@ -70,7 +70,7 @@ test('the Valewyn cast: records, sprites, stages, the Regent as two records, sce
   assert.equal(NPCS.ada.sprite, 'npc_courier_v');
   assert.equal(NPCS.regent_e.name, 'The Regent');
   assert.equal(NPCS.lyra_n.name, 'Lyra');
-  for (const id of ['regent_e', 'lyra_n']) assert.equal(NPCS[id].portrait, 'noble_lady');
+  for (const id of ['regent_e', 'lyra_n']) assert.equal(NPCS[id].portrait, 'lyra');   // E4-fixes-B's aged portrait (ep4_portraits.json)
   assert.deepEqual(NPCS.regent_e.show, { if: 'vw_arrived', ifNot: 'lyra_named' });
   assert.deepEqual(NPCS.lyra_n.show, { if: 'lyra_named' });
   for (const [id, rec] of Object.entries(EP4_NPCS)) {

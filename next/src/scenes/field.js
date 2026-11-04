@@ -20,7 +20,7 @@ import { Banner, transitionOpts } from '../world/transitions.js';
 import { Cutscene } from '../world/cutscene.js';
 import { loadMap } from '../world/maps.js';
 import { PACKS, packForMap, packsForMap, packEnabled, packReady, awaitPacks } from '../game/packs.js';
-import { landing } from '../game/packFallback.js';
+import { landing, ROOT } from '../game/packFallback.js';
 import * as EV from '../world/events.js';
 import { DIRS, OPPOSITE, trailingTiles } from '../world/pathfind.js';
 import { bannerFor, takeBark, signState, gateSignState, tintFor, creditsPending, markCreditsRolled, pickConditional, CREDITS_HANDOFF, sceneAllowed } from '../game/story.js';
@@ -150,8 +150,9 @@ export class FieldScene {
     if (hit && hit.prefixed && packEnabled(hit.id)) {
       await awaitPacks([hit.id], 8000);
       mod = await loadMap(mapId);
-      const l = !mod && landing(mapId), back = l && await loadMap(l[0]);
-      if (back) { if (!packReady(hit.id)) this.packReturn = { pack: hit.id, map: mapId, x, y, dir, via: l[0] }; mod = back; [mapId, x, y, dir] = l; o = { ...o, mark: undefined }; }
+      let l = !mod && landing(mapId), back = l && await loadMap(l[0]);
+      if (l && !back) back = await loadMap((l = ROOT)[0]);
+      if (back) { if (!packReady(hit.id)) this.packReturn = { pack: hit.id, map: mapId, x, y, dir, via: l[0] }; mod = back; [mapId, x, y, dir] = l; o = { ...o, mark: undefined }; if (EP3_MAP.test(mapId)) await ep3(this); }
     }
     if (!mod) {
       this.warnOnce('map:' + mapId, `map "${mapId}" not found; using the test town`);
@@ -296,6 +297,8 @@ export class FieldScene {
   }
 
   autosave() {
+    // never over a run's real place: not the test town, not a landing waiting for its pack
+    if (this.packReturn || (this.game && this.game.map === '_testtown')) return;
     if (this.engine.cave && this.engine.cave.autosave(this)) return;   // the Deep Stacks: the suspend save instead (src/data/cave/world.js)
     try { this.engine.save.save(normSlot(this.game && this.game.autosaveSlot), serialize(this.game), saveMeta(this.game)); } catch (err) { this.warnOnce('autosave', `autosave failed: ${err && err.message}`); }
   }

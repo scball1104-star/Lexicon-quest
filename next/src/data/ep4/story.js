@@ -16,10 +16,10 @@ import * as STORY from '../../game/story.js';
 import { REWARDS_EP4 } from './quests.js';
 import { EPISODE5_CARD } from './text.js';
 
-// Speakers with portraits (a missing one draws none). Every tag of the Regent speaks with the noble_lady portrait.
+// Speakers with portraits (a missing one draws none). Every tag of the Regent speaks with Lyra's own portrait (`lyra`, ep4_portraits.json: noble_lady aged, E4-fixes-B).
 const PORTRAIT = {
   hero: 'hero', mira: 'mira', bram: 'bram', vex: 'silver_rogue', paper_regent: 'paper_regent',
-  regent_e: 'noble_lady', regent_m: 'noble_lady', regent_t: 'noble_lady', lyra_t: 'noble_lady', lyra_n: 'noble_lady',
+  regent_e: 'lyra', regent_m: 'lyra', regent_t: 'lyra', lyra_t: 'lyra', lyra_n: 'lyra',
   garrick_t: 'garrick',
 };
 

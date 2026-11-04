@@ -23,6 +23,7 @@ import { BACKDROPS, BOSS_CARD } from '../../scenes/battle.js';
 import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor } from '../../battle/scene/actors.js';
 import { PIPS } from '../../battle/scene/hud.js';
+import { SIGNATURE_TECHS } from '../../battle/scene/menu.js';
 import { BattleFx, C } from '../../battle/fx.js';
 import { RARE_NAME_EXT } from '../../battle/loot.js';
 import { ZONES } from '../encounters.js';
@@ -53,12 +54,15 @@ export const REGENT_LOOK = { royal_ward: 'paper_regent_ward', true_charter: 'pap
 const PAPER_ADDS = new Set(['writ_silence', 'writ_oblivion', 'barrister_witness']);
 
 // ---------------------------------------------------------------------------------------------------- the seal pip
-// 5 x 8 like the flame: a round wax seal with its ribbon tails. o rim, a wax, b the stamped mark.
-const SEAL = ['.ooo.', 'oaaao', 'oabao', 'oaaao', '.ooo.', '.o.o.', 'o...o', '.....'];
+// 5 x 8 like the flame: a round wax seal with its ribbon tails. o rim, a wax, b the stamped mark, h a highlight.
+// Phone legibility (CRITIQUE_6 item 1): each seal sits on its own slate tile a step lighter than the box; a lit seal is a
+// bright red disc with a white highlight, an unlit one a pale grey ring, so the count reads at a glance.
+const SEAL = ['.ooo.', 'ohaao', 'oabao', 'oaaao', '.ooo.', '.o.o.', 'o...o', '.....'];
 export function drawSealPip(r, x, y, lit, hot, pop, frame) {
   const w = hot && (frame >> 2) % 2;
-  const col = lit ? { o: hot ? '#e04848' : '#8a1c2a', a: w || pop ? '#ff6a5a' : '#c42c34', b: hot || pop ? '#fff1d6' : '#ff9a86' }
-    : { o: '#5a3440', a: '#2a1c26', b: '#3a2430' };
+  const col = lit ? { o: hot ? '#ff5a4a' : '#b01c28', a: w || pop ? '#ff7a6a' : '#f0343a', b: '#fff6ea', h: '#ffffff' }
+    : { o: '#b8b2c6', a: '#2a2634', b: '#57516a', h: '#2a2634' };
+  r.rect(x, y - 1, 5, 9, '#3a3648');
   SEAL.forEach((row, j) => { for (let i = 0; i < 5; i++) if (row[i] !== '.') r.rect(x + i, y + j, 1, 1, col[row[i]]); });
 }
 
@@ -227,7 +231,8 @@ export function drawNamed(r, a, frame) {
 const sealed = (P, uid) => { const u = P.units[uid]; return !!(u && isDecree(u.id)); };
 const partyUids = (P) => Object.values(P.units).filter((u) => u.side === 'party').map((u) => u.uid);
 function unname(P) { for (const uid of partyUids(P)) P.push({ op: 'status', uid, status: 'named', on: false }); }
-const VOID_WHY = { quench: 'its decree is voided!', answer: 'its decree will not stand.', break: 'is broken: the decree falls apart!' };
+// the line after the foe's name; Answer's own message already said the plan's line (6.5), so it adds none (PLAYTEST_REVIEW_6 fix 10)
+const VOID_WHY = { quench: ': its decree is voided!', answer: '', break: ' is broken: the decree falls apart!' };
 
 function wrapPlanner(P) {
   const base = { battle_start: P.ev_battle_start, heat: P.ev_heat, quench: P.ev_quench, telegraph: P.ev_telegraph,
@@ -276,9 +281,9 @@ function wrapPlanner(P) {
   P.ev_telegraph_cancel = function (e) {
     if (SKILLS[e.skill] && SKILLS[e.skill].answerable) unname(this);
     const why = VOID_WHY[e.reason];
-    if (!why || !(sealed(this, e.actor) || e.reason === 'answer')) return base.telegraph_cancel.call(this, e);
+    if (why == null || !(sealed(this, e.actor) || e.reason === 'answer')) return base.telegraph_cancel.call(this, e);
     this.push({ op: 'telegraphCancel', actor: e.actor, reason: e.reason });
-    this.help(`{c:cyan}${this.name(e.actor)}: ${why}{/c}`);
+    if (why) this.help(`{c:cyan}${this.name(e.actor)}${why}{/c}`);
     this.wait(FRAMES.telegraphCancel);
   };
   P.ev_phase = function (e) {
@@ -374,11 +379,13 @@ export function register() {
   if (f3 && f3.backdrop === 'ep4_keep') f3.backdrop = 'ep4_witness';
   if (!RARE_NAME_EXT.some(([, w]) => w === RARE_NAME_A_EP4)) RARE_NAME_EXT.push([18, RARE_NAME_A_EP4]);
   PIPS.fire = drawSealPip;
+  // Strike from the Roll: the hero's Tech list opens with Answer first, in gold (PLAYTEST_REVIEW_6 fix 2; Bram's Oath rule)
+  if (!SIGNATURE_TECHS.some((t) => t.skill === 'answer')) SIGNATURE_TECHS.push({ unit: 'hero', flag: 'answerable', skill: 'answer' });
   for (const [k, fn] of Object.entries(EP4_FX)) if (!BattleFx.prototype[k]) BattleFx.prototype[k] = fn;
   wrapPlanner(Planner.prototype);
   wrapActor(Actor.prototype);
   if (typeof location !== 'undefined' && /[?&]ep=4(&|$)/.test(location.search || '') && mapsListed()) GATE.live = true;
   done = true;
-  return ['backdrops', 'cards', 'rare_names', 'pips', 'fx', 'planner', 'actor'];
+  return ['backdrops', 'cards', 'rare_names', 'pips', 'signature', 'fx', 'planner', 'actor'];
 }
 export default register;

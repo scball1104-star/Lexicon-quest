@@ -7,13 +7,22 @@
   "#123f4c",
   "#1a6f7a",
   "#a3202c",
-  "#d8434a"
+  "#d8434a",
+  "#1c261f",
+  "#28342a",
+  "#3e4b40",
+  "#566555",
+  "#7c8a78",
+  "#909d8c",
+  "#a6b3a0",
+  "#c6cfc0"
  ],
  "terrainOrder": [
   "causeway_floor",
   "keep_archive_floor",
   "witness_floor",
   "canal_floor",
+  "canal_floor_causeway",
   "mud_path",
   "flood_grass",
   "marble_walk",
@@ -26,7 +35,8 @@
   "canal_floor": "stone_floor",
   "flood_grass": "moss",
   "mud_path": "grass",
-  "marble_walk": "plaza"
+  "marble_walk": "plaza",
+  "canal_floor_causeway": "stone_floor"
  },
  "terrains": {
   "causeway_floor": {
@@ -68,13 +78,13 @@
     ]
    ],
    "variantWeights": [
-    64,
-    4,
+    40,
+    6,
     2,
     1,
+    7,
     3,
-    2,
-    2
+    4
    ],
    "sheet": "ep4.png",
    "order": 10
@@ -168,12 +178,12 @@
     ]
    ],
    "variantWeights": [
-    60,
+    44,
     2,
-    4,
+    14,
     2,
     1,
-    3,
+    4,
     1
    ],
    "sheet": "ep4.png",
@@ -242,7 +252,7 @@
    "flow": "tide",
    "note": "turquoise flood water (A1, 3 frames): drawn over every flooded cell; dark band under a north bank, foam rim on the other edges",
    "sheet": "ep4.png",
-   "order": 35
+   "order": 36
   },
   "flood_grass": {
    "x": 0,
@@ -287,7 +297,7 @@
     2
    ],
    "sheet": "ep4.png",
-   "order": 22
+   "order": 23
   },
   "mud_path": {
    "x": 128,
@@ -322,7 +332,7 @@
     2
    ],
    "sheet": "ep4.png",
-   "order": 20
+   "order": 21
   },
   "marble_walk": {
    "x": 224,
@@ -367,7 +377,48 @@
     1
    ],
    "sheet": "ep4.png",
-   "order": 25
+   "order": 26
+  },
+  "canal_floor_causeway": {
+   "x": 0,
+   "y": 1168,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     1168
+    ],
+    [
+     48,
+     1168
+    ],
+    [
+     64,
+     1168
+    ],
+    [
+     80,
+     1168
+    ],
+    [
+     96,
+     1168
+    ]
+   ],
+   "variantWeights": [
+    24,
+    3,
+    3,
+    1,
+    2
+   ],
+   "note": "F1 drained channel floor in the causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png",
+   "order": 14
   }
  },
  "walls": {
@@ -1051,6 +1102,62 @@
    "h": 96,
    "collision": "none",
    "note": "160 x 96 decal of Valewyn from environments cell 3 (transparent sky) for the overhead layer at the bluff (mark valewyn_far)",
+   "sheet": "ep4.png"
+  },
+  "ledge_face_causeway": {
+   "x": 0,
+   "y": 1136,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "the 1-tile drop face between two floor heights, the high floor to the NORTH (solid); line16 index N*1+E*2+S*4+W*8, only E and W change the art; F1 causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png"
+  },
+  "ledge_lip_causeway": {
+   "x": 128,
+   "y": 1136,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a solid stone kerb seen from above, for a height step facing north, east or west (no face visible); line16 index N*1+E*2+S*4+W*8, runs join toward set bits; F1 causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_s_causeway": {
+   "x": 256,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the south (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_n_causeway": {
+   "x": 272,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the north (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_e_causeway": {
+   "x": 288,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the east (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_w_causeway": {
+   "x": 304,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the west (connects two heights of a basin)",
    "sheet": "ep4.png"
   }
  },

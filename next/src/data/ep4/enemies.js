@@ -95,7 +95,7 @@ export const EP4_ENEMIES = {
   barrister: {
     name: 'The Inkbound Barrister', family: 'spirit', level: 19, size: 'large', boss: true, ai: 'barrister',
     hp: 2500, atk: 300, def: 26, mag: 320, spr: 28, spd: 13, luk: 8,
-    shields: 8, weak: ['light', 'spear', 'bow'], resist: ['fire', 'ice', 'thunder'], statusImmune: ['silence'],
+    shields: 8, weak: ['fire', 'light', 'spear'], resist: ['ice', 'thunder'], statusImmune: ['silence'],
     heat: decree('objection'),
     exp: 220, gold: 800, masteryPts: 18,
     moves: [{ skill: 'rebuttal', weight: 55 }, { skill: 'cross_examine', weight: 45 }],

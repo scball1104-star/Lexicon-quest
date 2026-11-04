@@ -165,6 +165,13 @@ Keep: `ep4_glass_dome`, `ep4_vex_feather`, `ep4_scriptorium`, `ep4_court_bench`,
 `ep4_witness_lectern`, `ep4_throne`, `ep4_witness_page`.
 Books: `vw_records`, `keep_ledger`, `tide_log` (the Water Gate on F1).
 
+**PENDING Scott/Stephen (E4-fixes-A, PLAYTEST_REVIEW_6 fix 9; the shipped lines are unchanged).** In `witness_book`
+(`src/data/ep4/story.js`) Mira says "It held. Under water. Yours held." while the antechamber around the lectern is a dry
+marble room, so "under water" is told, not shown. Smallest wording fix, same rhythm: "It held. Down here. Yours held."
+(the alternative is map art: a shallow basin under the lectern, E4-fixes-B's side). Optional, same scene: the learn line
+"{hero} learned Answer." could say what it is for: "{hero} learned Answer. It voids a decree." (the battle help line
+already says "Answer to your name. Voids a decree.").
+
 ## 5. NPCs
 
 `regent_e` / `lyra_n`, `dorian` (`ep4_vw_palace`), `hale`, `nilo` (`ep4_flood_road`), `joss`, `ada`, `vance`, `sori`

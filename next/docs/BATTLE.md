@@ -860,7 +860,7 @@ each an idempotent `register()` the pack entry calls); no core data file changed
 | Gutter Phantom | 18 | 560 | 60/104 | 16/30 | 15 | 3 | light, fire | ice | 50 / 130 | Murk (party Blind 15%), Drag Under (Silence 25%), Cold Touch; flying, evade 20% |
 | Blank Decree | 19 | 520 | 70/110 | 18/34 | 16 | 3 | fire, bow | thunder | 55 / 150 | Paper Cut, Stamp, **Edict** (single mag 220%, Silence 30%); Decree; flying |
 | Waterlogged Sentinel | 19 | 620 | 120/30 | 32/22 | 8 | 5 | thunder, axe | sword, spear, ice | 65 / 170 | Slam, Floodfist (Chill 20%), **Breach** (party phys 150%, a charge) |
-| The Inkbound Barrister | 19 | 2500 | 300/320 | 26/28 | 13 + Haste | 8 | light, spear, bow | fire, ice, thunder | 220 / 800 | Rebuttal, Cross-Examine; 2 Seals at the end of every turn; **Objection** (party mag 200%, Silence 40%); a witness at 50%; immune Silence |
+| The Inkbound Barrister | 19 | 2500 | 300/320 | 26/28 | 13 + Haste | 8 | fire, light, spear | ice, thunder | 220 / 800 | Rebuttal, Cross-Examine; 2 Seals at the end of every turn; **Objection** (party mag 200%, Silence 40%); a witness at 50%; immune Silence |
 | Paper Witness | 19 | 300 | 50/60 | 14/20 | 12 | 2 | fire | thunder | 0 / 0 | **Stamp the Brief** (+1 Seal to the Barrister) every turn |
 | The Paper Regent | 20 | 2950 | 330/300 | 26 (x1.4 in phases 1 and 2)/24 | 13 (+ Haste from 70%) | 7 / 7 / 8 | by phase | ice, thunder (phases 1 and 2) | 800 / 1100 | Trident Sweep, Wet Seal (Chill 30%), Stamp; **Flood Decree** (party mag 220%, Chill 30%); **Strike from the Roll** (the hero, mag 300%); immune Stun, Poison, Blind |
 | Forged Writ of Silence | 20 | 600 | 60/90 | 16/22 | 12 | 3 | fire | ice | 0 / 0 | Mend the Seal (the Regent +6%); every 2nd turn Hush (Silence 35%, also mends) |
@@ -874,7 +874,9 @@ Keep F3 (the tightest ordinary floor, as Foundry F3): `encounters.js` `K3_POWER`
 finisher's party (the road's fights took 2.4 rounds and lost 5%), so HP rose about 40% and the bosses' ATK and MAG nearly doubled
 (the Barrister 110/120 to 300/320, the Regent 180/175 to 330/300). **The Barrister resists fire** (plan: weak) and has Haste and 2
 Seals a turn: weak to fire, Ember Edge voided every Objection by accident and ignoring the telegraph cost 0 points; now fire still
-voids (a Decree's void is any fire damage, resisted or not) but it is a choice. **The Regent is Hasted from the Royal Ward on**
+voids (a Decree's void is any fire damage, resisted or not) but it is a choice. (E4-fixes-A, PLAYTEST_REVIEW_6 fix 8: back to the
+plan's weak fire, light, spear and resist ice, thunder, so the row agrees with Mira's "Burn the paper"; HP 2500, 8 shields, Haste and 2
+Seals stay. `--zone ep4_keep_f2`: careful 7.3 rounds, 100%; reckless 72%; naive 0%. All targets met.) **The Regent is Hasted from the Royal Ward on**
 (plan: phase 3 only), its Strike from the Roll is mag 300% (plan 200%) and its Flood Decree 220% (plan 140%): before that,
 ignoring telegraphs cost 0 to 4 points. The Regent's HP is 2950 (plan 3800) to keep careful play in 10 to 14 rounds; the writs are
 600 and 650 (plan 420 and 460) so the ward lasts long enough to choose a writ. Strike from the Roll empowers +30% (plan 20%).
@@ -898,6 +900,13 @@ Until the hero's next turn the hero cannot be made Nameless (`hero.answerGuard`;
 `answer` { actor, target, voided (skill id or null), seals, broke, guarded }. Implementation: no rules.js hook exists for a party
 skill's custom effect, so each Episode 4 script's `reflect(ctx, tgt, part)` (called by strike() with the hit's part, `part.id ===
 'answer'`, before the damage) runs `answerHook` in `src/data/ep4/ai.js` and returns null. Against other foes it is a plain light hit.
+
+Menu (E4-fixes-A, PLAYTEST_REVIEW_6 fix 2): `SIGNATURE_TECHS` in `src/battle/scene/menu.js` lists { unit, flag, skill }: while a
+foe's telegraph skill has `flag`, that unit's menu opens on Tech with `skill` first, in gold. Core holds Bram's Tempered Oath
+(`turnable`); the ep4 pack's `scene.js` register() adds the hero's Answer (`answerable`, Strike from the Roll).
+
+Keyboard (fix 4): Enter is both `confirm` and `start` (DESIGN 3). In a battle the help bar and Config name Enter as Auto, so there
+Enter is Auto alone: `updatePlay` consumes `confirm` with `start`, and Z or Space confirm. Outside battle Enter confirms as before.
 
 ### 12.4 The Inkbound Barrister (ai `barrister`) and the Paper Regent (ai `paper_regent`)
 

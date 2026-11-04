@@ -33,10 +33,10 @@ SHEET = 'ep4.png'
 FRAGMENT = 'ep4_tiles.json'
 INSERT_BEFORE = {
     'causeway_floor': 'stone_floor', 'keep_archive_floor': 'stone_floor', 'witness_floor': 'stone_floor',
-    'canal_floor': 'stone_floor',
+    'canal_floor': 'stone_floor', 'canal_floor_causeway': 'stone_floor',
     'mud_path': 'grass', 'flood_grass': 'moss', 'marble_walk': 'plaza',
 }
-SLOT_RANK = ['causeway_floor', 'keep_archive_floor', 'witness_floor', 'canal_floor', 'mud_path', 'flood_grass', 'marble_walk']
+SLOT_RANK = ['causeway_floor', 'keep_archive_floor', 'witness_floor', 'canal_floor', 'canal_floor_causeway', 'mud_path', 'flood_grass', 'marble_walk']
 MODULES = ['ep4_props', 'ep4_town']
 
 
@@ -97,8 +97,16 @@ def build():
     sh.meta.setdefault('terrains', {})
     sh.meta.setdefault('walls', {})
     sh.meta.setdefault('overlays', {})
+    STONE = {'causeway': ep4_kit.CAUSEWAY_STONE, 'witness': ep4_kit.WITNESS_STONE}
+    FLOOR_STONE = {'causeway_floor': 'causeway', 'witness_floor': 'witness'}
+
+    def restone(sys_id, *rects):
+        if sys_id in STONE:
+            for (x, y, w, h) in rects:
+                ep4_kit.remap_rect(sh.cv, x, y, w, h, STONE[sys_id])
     for fl in ep4_kit.FLOORS:
-        terrain_block(sh, fl, sh.meta)
+        m = terrain_block(sh, fl, sh.meta)
+        restone(FLOOR_STONE.get(fl.id), (m['x'], m['y'], 32, 48), *[(vx, vy, 16, 16) for vx, vy in m['variants']])
     sh.newline()
     walls = sh.meta['walls']
     for sys_id, band, face, deep, out in ep4_kit.WALLS:
@@ -120,6 +128,8 @@ def build():
             vx, vy = sh.alloc(16, 16)
             sh.cv.paste(deep.variant_tile(v), vx, vy)
             dv.append([vx, vy])
+        restone(sys_id, (tx, ty, 32, 48), (fx, fy, 32, 32), (dx, dy, 32, 48), (ox, oy, 32, 32),
+                *[(vx, vy, 16, 16) for vx, vy in tv + dv])
         walls[sys_id] = {'top': [tx, ty], 'face': [fx, fy], 'collision': 'solid',
                          'topVariants': tv, 'topVariantWeights': list(band.weights),
                          'note': 'E4 keep wall band (%s_top) and inner face (%s_face); tide marks at face rows 18 '
@@ -140,6 +150,7 @@ def build():
             for face in st:
                 x, y = sh.alloc(32, 32)
                 sh.cv.paste(face.block(), x, y)
+                restone(sys_id, (x, y, 32, 32))
                 blocks.append([x, y])
             out.append(blocks)
         meta['faceStyles'] = out
@@ -165,6 +176,8 @@ def build():
             strip.paste(fn(i, marble), (i % 8) * 16, (i // 8) * 16)
         x, y = sh.alloc(128, 32)
         sh.cv.paste(strip, x, y)
+        if marble:
+            restone('witness', (x, y, 128, 32))
         sh.meta['tiles'][tid] = {'x': x, 'y': y, 'w': 128, 'h': 32, 'collision': 'solid', 'autotile': 'line16',
                                  'note': ('the 1-tile drop face between two floor heights, the high floor to the NORTH '
                                           '(solid); line16 index N*1+E*2+S*4+W*8, only E and W change the art' if 'face' in tid
@@ -185,6 +198,27 @@ def build():
             continue
         mod.build_into(sh)
         sh.newline()
+    # E4-fixes-B: F1's own kerbs and drop faces, the shared ledge strips in the causeway's grey-green stone (appended
+    # last, so no earlier rect moves). ep4_keep_f1's legend names them.
+    for tid, src in (('ledge_face_causeway', 'ledge_face'), ('ledge_lip_causeway', 'ledge_lip')):
+        m = dict(sh.meta['tiles'][src])
+        x, y = sh.alloc(128, 32)
+        sh.cv.a[y:y + 32, x:x + 128] = sh.cv.a[m['y']:m['y'] + 32, m['x']:m['x'] + 128]
+        restone('causeway', (x, y, 128, 32))
+        m.update(x=x, y=y, note=m['note'] + '; F1 causeway stone (E4-fixes-B)')
+        sh.meta['tiles'][tid] = m
+    for d in ('s', 'n', 'e', 'w'):
+        m = dict(sh.meta['tiles']['canal_stair_' + d])
+        x, y = sh.alloc(16, 16)
+        sh.cv.a[y:y + 16, x:x + 16] = sh.cv.a[m['y']:m['y'] + 16, m['x']:m['x'] + 16]
+        restone('causeway', (x, y, 16, 16))
+        m.update(x=x, y=y)
+        sh.meta['tiles']['canal_stair_%s_causeway' % d] = m
+    sh.newline()
+    cf = type('CanalFloorCauseway', (type(ep4_kit.CANAL_TERRAINS[0]),), {'id': 'canal_floor_causeway'})()
+    m = terrain_block(sh, cf, sh.meta, extra={'note': 'F1 drained channel floor in the causeway stone (E4-fixes-B)'})
+    restone('causeway', (m['x'], m['y'], 32, 48), *[(vx, vy, 16, 16) for vx, vy in m['variants']])
+    sh.newline()
     return sh.cv.crop(0, 0, 512, sh.y), sh.meta
 
 

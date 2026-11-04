@@ -23,6 +23,8 @@ const CMD_HELP = {
 };
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const FLEE_ARM_FRAMES = 72;
+/** While a telegraph's skill has `flag`, `unit` opens on Tech with `skill` first, in gold (packs add theirs). */
+export const SIGNATURE_TECHS = [{ unit: 'bram', flag: 'turnable', skill: 'tempered_oath' }];
 const CMD_ICON = { attack: 'sword', tech: 'scroll', magic: 'magic', fury: 'fury', combo: 'combo', item: 'bag', defend: 'shield', swap: 'swap', flee: 'flee' };
 
 export class CommandMenu {
@@ -87,7 +89,7 @@ export class CommandMenu {
       rows, rowH, items, bar: false, textX: 2, icons: false, confirmSfx: false, cancelSfx: false, tapMode: 'single' });
     // Cursor start (Config "Battle cursor"): Attack, or the command this character used last (Attack the first time).
     const lastId = this.scene.engine.settings.battleCursor === 'attack' ? 'attack' : (this.lastCmd.get(unit.uid) || 'attack');
-    const want = unit.id === 'bram' && this.hammer() ? 'tech' : lastId;
+    const want = this.sig(unit) ? 'tech' : lastId;
     const at = items.findIndex((x) => x.id === want && !x.disabled);
     this.root.moveTo(at >= 0 ? at : 0);
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
@@ -103,7 +105,7 @@ export class CommandMenu {
     this.showHelp = true; this.helpText = 'Tap FLEE again to run.'; this.helpColor = 'gold';
     return null;
   }
-  hammer() { const t = this.scene.telegraphs; return !!t && [...t.values()].some((t) => SKILLS[t.skill] && SKILLS[t.skill].turnable); }
+  sig(u) { const t = this.scene.telegraphs; return (t && u && SIGNATURE_TECHS.find((s) => s.unit === u.id && [...t.values()].some((x) => SKILLS[x.skill] && SKILLS[x.skill][s.flag]))) || null; }
   close() { this.fleeArmed = 0; this.state = 'closed'; this.root = null; this.sub = null; this.preview = null; this.tInfo = null; this.base = null; }
 
   syncHelp() {
@@ -133,7 +135,7 @@ export class CommandMenu {
       color: cmd.id === 'combo' ? 'cyan' : 'white', icon: e.skill ? hitIcon(SKILLS[e.skill], this.unit) : null,
     }));
     if (!list.length) return false;
-    const oi = cmd.id === 'tech' && this.hammer() ? list.findIndex((it) => it.id === 'tempered_oath') : -1;
+    const g = cmd.id === 'tech' && this.sig(this.unit), oi = g ? list.findIndex((it) => it.id === g.skill) : -1;
     if (oi >= 0) { list.unshift(...list.splice(oi, 1)); list[0].color = 'gold'; }
     const icons = list.some((it) => it.icon);
     this.subCmd = cmd;

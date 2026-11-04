@@ -1,4 +1,4 @@
-// The Sunken Keep, III: The Court of Witnesses (44 x 32, dungeon, dark 0.3). EPISODE4_PLAN 4.7; exact cells in
+// The Sunken Keep, III: The Court of Witnesses (44 x 32, dungeon, dark 0.7). EPISODE4_PLAN 4.7; exact cells in
 // docs/MAPS_EP4_B.md. White marble going green at every tide mark. A hub before the Petition Gate, three wings, three
 // principle stones (any order), one gate. The floor tests everything F1 taught and F2 combined, one wing at a time.
 //
@@ -148,7 +148,6 @@ const events = [
   pontoon('pt_v2', 9, 9, 'v', { rides: [1] }),
   ...stone('stone_voice', 11, 6, 'voice'),
   enemy('e_v_watch', 11, 17, 'drowned_watch', 'e4k3_watch', 'wander', { radius: 1 }),
-  enemy('e_v_decrees', 6, 9, 'blank_decree', 'e4k3_decrees', 'guard'),
   // ---- East: Truth
   wheel('wh_t', 33, 18, 't'),
   wheel('wh_t2', 34, 4, 't'),
@@ -160,7 +159,6 @@ const events = [
   forgery('seal_t2', 31, 7, 't', 1, 'door_t2'),
   ...stone('stone_truth', 30, 4, 'truth'),
   chest('chest_alcove', 37, 3, 'iron'),
-  enemy('e_t_watch', 39, 18, 'drowned_watch', 'e4k3_watch', 'patrol', { path: steps('left', 3, 'right', 3) }),
   enemy('e_t_decrees', 41, 12, 'blank_decree', 'e4k3_decrees', 'patrol', { path: steps('up', 3, 'down', 3) }),
   // ---- South: Mercy
   wheel('wh_m', 19, 23, 'm'),
@@ -180,7 +178,9 @@ const events = [
 export default {
   id: 'ep4_keep_f3', name: 'The Court of Witnesses', area: 'dungeon',
   music: 'mystery', ambience: 'keep_drip', tileset: 'ep4',
-  lighting: { tint: 'none', dark: 0.3, lights: [] },
+  // E4-fixes-B (CRITIQUE_6 item 6): a drowned court, not a palace. Darker than F2 (0.45) with a cold grey-green cast, so
+  // the lanterns and candelabra are the light and the descent reads dim, darker, darkest.
+  lighting: { tint: '#4e686c', dark: 0.7, lights: [] },
   floorShade: { color: '#14101e', alpha: 0.4, rows: 8, side: 3 },
   pitTo: ['ep4_keep_f3', 21, 24, 'up'],
   under: 'witness_floor',

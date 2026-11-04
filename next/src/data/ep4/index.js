@@ -85,7 +85,8 @@ export function mergeAudio(manifest, frag, packId = ID) {
 }
 
 function mergeInto(engine) {
-  const man = engine && engine.audio && engine.audio.manifest;
+  // the engine wraps the runtime (core/engine.js safeAudio): its manifest is on `.real` (PLAYTEST_REVIEW_6 fix 3: the quick start was silent)
+  const a = engine && engine.audio, man = a && (a.manifest || (a.real && a.real.manifest));
   if (!man || audioMerged === man) return null;
   const r = mergeAudio(man, audioFragment(mods.audio));
   audioMerged = man;

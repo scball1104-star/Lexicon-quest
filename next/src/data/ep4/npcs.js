@@ -4,7 +4,7 @@
 //
 // Record shape is src/data/npcs.js's. Stages: vw_arrived, keep_f2_done, vw_restored, ep4_complete.
 // THE NAME. The Regent is two records: regent_e (tag "The Regent") until lyra_named, then lyra_n (tag "Lyra"), both at
-// regent_spot in the Hall, both with the noble_lady portrait (plan 2.6: the `lyra` alias). Nobody says Lyra before then.
+// regent_spot in the Hall, both with the `lyra` portrait (ep4_portraits.json, the noble_lady face aged). Nobody says Lyra before then.
 //
 // Never hide an old scene. A returning-cast entry is put in front of the NPC's list, so for every scene entry already in
 // that list it is split into variants that cannot match while the scene entry would (guardAgainst below): a save with an
@@ -29,7 +29,7 @@ const b = (text) => ({ who: 'bram', text });
 
 export const EP4_NPCS = {
   regent_e: {
-    name: 'The Regent', sprite: 'npc_lyra', portrait: 'noble_lady', map: 'ep4_vw_palace',
+    name: 'The Regent', sprite: 'npc_lyra', portrait: 'lyra', map: 'ep4_vw_palace',
     spot: 'At the long table of decrees (mark regent_spot)', move: 'stand', show: { if: ARR, ifNot: 'lyra_named' },
     about: 'Regent of Valewyn with her name struck: tag "The Regent" until lyra_named, then the lyra_n record. Fifties, exact, ashamed.',
     talk: [
@@ -43,7 +43,7 @@ export const EP4_NPCS = {
     ],
   },
   lyra_n: {
-    name: 'Lyra', sprite: 'npc_lyra', portrait: 'noble_lady', map: 'ep4_vw_palace',
+    name: 'Lyra', sprite: 'npc_lyra', portrait: 'lyra', map: 'ep4_vw_palace',
     spot: 'At the long table of decrees (mark regent_spot)', move: 'stand', show: { if: 'lyra_named' },
     about: 'Lyra, named. Same spot as regent_e; takes over when lyra_named is set. Signs OPEN and it stays.',
     talk: [

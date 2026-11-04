@@ -263,6 +263,75 @@ def crab_paint(a):
     return a
 
 
+def crab_claws(a):
+    """E4-fixes-B (CRITIQUE_6 item 9): the scarab's two curled horns read as antennae. Cut them off and give the crab what
+    its name and its Clamp promise: two big rust pincers held low and forward (the near one the brightest rust on the
+    sprite, its jaw open), the far one a step darker behind it, and two eye stalks on the shell's front edge."""
+    from PIL import Image, ImageDraw
+    H, W = a.shape[:2]
+    ys, xs = np.mgrid[0:H, 0:W]
+    cut = (a[..., 3] > 0.5) & (((ys < 14) & (xs >= 31)) | ((xs >= 45) & (ys <= 26)))
+    a = a.copy()
+    a[cut] = 0
+    PADR = 14
+    out = np.zeros((H, W + PADR, 4), a.dtype)
+    out[:, :W] = a
+    a = out
+    H, W = a.shape[:2]
+    al = a[..., 3] > 0.5
+    p = np.pad(al, 1)
+    exposed = al & ~(p[:-2, 1:-1] & p[2:, 1:-1] & p[1:-1, :-2] & p[1:-1, 2:])
+    cw = np.zeros((H, W), bool)
+    cw[:, :W - PADR] = cut
+    cp = np.pad(cw, 1)
+    near_cut = cp[:-2, 1:-1] | cp[2:, 1:-1] | cp[1:-1, :-2] | cp[1:-1, 2:]
+    a[exposed & near_cut, :3] = col('shadow:0')
+
+    def mask(draw_fn):
+        im = Image.new('L', (W, H), 0)
+        draw_fn(ImageDraw.Draw(im))
+        return np.asarray(im) > 0
+
+    def claw(cx, cy, rx, ry, arm, ramp, behind):
+        body = a[..., 3] > 0.5
+        m_arm = mask(lambda d: d.line(arm, fill=1, width=4))
+        m_p = mask(lambda d: d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=1))
+        # the open jaw: a wedge from the tip back toward the hinge, a little above centre
+        jaw = mask(lambda d: d.polygon([(cx + rx + 2, cy - 3.5), (cx + rx + 2, cy + 2.5), (cx - 2, cy)], fill=1))
+        m = (m_arm | m_p) & ~jaw
+        if behind:
+            m &= ~body
+        Y, X = np.nonzero(m)
+        for y, x in zip(Y, X):
+            lam = ((cy - y) / max(ry, 1)) * 0.8 + ((cx - x) / max(rx, 1)) * 0.3
+            ref = ramp[3] if lam > 0.45 else ramp[2] if lam > -0.1 else ramp[1] if lam > -0.6 else ramp[0]
+            a[y, x, :3] = col(ref); a[y, x, 3] = 1
+        # a hot highlight along the upper jaw, the dark of the jaw's inside
+        for x in range(int(cx - rx * 0.4), int(cx + rx * 0.8)):
+            y = int(round(cy - ry + 1 + abs(x - cx) * 0.15))
+            if 0 <= y < H and 0 <= x < W and m[y, x]:
+                a[y, x, :3] = col(ramp[4])
+        ring = np.zeros_like(m)
+        mm = np.pad(m, 1)
+        ring = (mm[:-2, 1:-1] | mm[2:, 1:-1] | mm[1:-1, :-2] | mm[1:-1, 2:]) & ~m
+        ring &= ~(a[..., 3] > 0.5) | jaw
+        a[ring, :3] = col('shadow:0'); a[ring, 3] = 1
+        a[jaw & ~ring & (a[..., 3] > 0.5), 3] = 0
+
+    claw(57, 21, 6.5, 4.5, [(44, 25), (52, 22)], ('wood:0', 'roof_red:1', 'roof_red:2', 'roof_red:3', 'roof_red:3'), True)
+    claw(61, 32, 8.5, 6, [(45, 33), (54, 32)], ('roof_red:1', 'roof_red:2', 'roof_red:3', 'roof_red:4', 'fire:3'), False)
+    # eye stalks on the shell's front edge, each a pale bead with a dark pupil
+    for (x, y0) in ((36, 11), (41, 12)):
+        for y in range(y0 - 5, y0 + 1):
+            put(a, x, y, 'roof_red:2'); put(a, x - 1, y, 'shadow:0'); put(a, x + 1, y, 'shadow:0')
+        for (dx, dy, ref) in ((-1, -7, 'shadow:0'), (0, -7, 'shadow:0'), (1, -7, 'shadow:0'), (-2, -6, 'shadow:0'),
+                              (2, -6, 'shadow:0'), (-1, -6, 'stone_warm:5'), (0, -6, 'stone_warm:5'), (1, -6, 'shadow:0'),
+                              (-2, -5, 'shadow:0'), (-1, -5, 'stone_warm:4'), (0, -5, 'stone_warm:4'), (1, -5, 'shadow:0'),
+                              (2, -5, 'shadow:0')):
+            put(a, x + dx, y0 + dy, ref)
+    return a
+
+
 def edge_mask(a):
     al = a[..., 3] > 0.5
     p = np.pad(al, 1)
@@ -368,6 +437,7 @@ def finish(eid, a):
     if eid == 'lockjaw_crab':
         a = crab_paint(a)
         a = barnacles(a)
+        a = crab_claws(a)
     if eid == 'waterlogged_sentinel':
         a = core_disc(a, 53, 27)
         a = kelp(a, [(int(W * 0.18), int(H * 0.18), 18), (int(W * 0.24), int(H * 0.2), 12), (int(W * 0.78), int(H * 0.2), 16),
@@ -465,7 +535,8 @@ def derived(eid, img):
         from hollow_enemies import f_wolf
         raw = f_wolf(img, 1.0, 0, 0, prefer=('shadow', 'stone_cool', 'roof_green', 'foliage_dark', 'gold'))
     elif eid == 'lockjaw_crab':
-        raw = AF.f_moss_scarab(img, prefer=('shadow', 'ink', 'stone_cool', 'roof_red', 'wood'))
+        raw = AF.f_moss_scarab(img, horn_rect=(44, 12, 71, 40), pivot=(47, 31), seam=36, eyes=None,   # the pincers swing
+                              prefer=('shadow', 'ink', 'stone_cool', 'roof_red', 'wood'))
     elif eid == 'ink_bloom':
         raw = f_mercury(img, img.shape[0] / 50.0)
         raw['hurt'] = AF.edge_lift(AF.lean(AF.canvas(img), 38, -2, taper=14), 2, prefer=('ink', 'water', 'shadow', 'roof_red'))
@@ -482,8 +553,17 @@ def derived(eid, img):
         if 'cast' in raw:
             c = raw['cast']
             c, dox = (c if isinstance(c, tuple) else (c, 0))
+            # E4-fixes-B (CRITIQUE_6 item 14): the ink wraith's cast recipe lays a violet halo and violet sparkles; the
+            # phantom's are its two drowned lanterns flaring gold. Re-map every violet pixel onto the gold ramp, then glow
+            # from the eye cluster itself (finish() stamps it at 46..53, 8..9 of the base).
             m, L, C, h = lch_img(c)
-            raw['cast'] = (AF.glow(c, m & (h > 60) & (h < 120) & (C > 0.08) & (L > 0.6), 'gold', 0.55, 2), dox)
+            vio = m & (h > 240) & (h < 345) & (C > 0.04) & (L > 0.55)      # the halo is light; the shroud's dark is not
+            c = gmap(c, vio, [(0.0, 'gold:3'), (0.5, 'gold:4'), (1.0, 'gold:5')])
+            H, W = c.shape[:2]
+            ys, xs = np.mgrid[0:H, 0:W]
+            m, L, C, h = lch_img(c)
+            eyes = m & (xs >= 44 + dox) & (xs <= 56 + dox) & (ys >= 6) & (ys <= 11) & (((h > 50) & (h < 120) & (C > 0.06)) | (L > 0.8))
+            raw['cast'] = (AF.glow(c, eyes, 'gold', 0.7, 3), dox)
     elif eid in ('blank_decree', 'barrister_witness'):
         raw = E3.f_specter(img)
         c = raw['cast']
@@ -515,8 +595,12 @@ def atlas_frames(ids=None):
     return out
 
 
-FIELD_RIM = {'flood_hound': RIVER, 'lockjaw_crab': RUST, 'ink_bloom': INK, 'drowned_watch': WEED,
-             'gutter_phantom': WEED, 'blank_decree': PAPER, 'waterlogged_sentinel': RIVER, 'barrister': INK}
+# E4-fixes-B (CRITIQUE_6 item 8): on the keep floors a rim in the body's own hue vanishes (the green phantom on F2's teal,
+# the green-black watch and the grey crab on F1's grey-green stone). The keep foes take a pale warm rim, never their
+# body colour, inside the dark outline the field adds (src/data/ep4/field/events.js FIELD_LOOK).
+PALE = dict(left='stone_warm:4', top='stone_warm:5', max_L=0.5)
+FIELD_RIM = {'flood_hound': RIVER, 'lockjaw_crab': PALE, 'ink_bloom': INK, 'drowned_watch': PALE,
+             'gutter_phantom': PALE, 'blank_decree': PAPER, 'waterlogged_sentinel': PALE, 'barrister': INK}
 
 
 if __name__ == '__main__':

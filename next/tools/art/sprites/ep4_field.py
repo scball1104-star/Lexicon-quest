@@ -31,7 +31,7 @@ VARIANTS = {
         'g': 'foliage_dark:1', 'G': 'roof_green:2', 'H': 'roof_green:3', 'Y': 'gold:4', 'w': 'stone_cool:5', 'n': 'ink:1'}),
     'lockjaw_crab': ('moss_scarab', {
         '0': 'shadow:0', 'a': 'shadow:2', 'b': 'stone_cool:2', 'c': 'stone_cool:3', 'd': 'stone_cool:4', 'W': 'stone_warm:5',
-        'g': 'roof_red:1', 'G': 'roof_red:2', 'H': 'roof_red:3', 'Y': 'stone_warm:4'}),
+        'g': 'roof_red:1', 'G': 'roof_red:3', 'H': 'roof_red:4', 'Y': 'stone_warm:4'}),
     'ink_bloom': ('ink_slime', {
         '0': 'shadow:0', 'a': 'ink:1', 'b': 'ink:2', 'c': 'ink:3', 'd': 'roof_blue:3', 'W': 'water:4',
         'Y': 'ice:2', 'y': 'water:3'}),
@@ -54,17 +54,80 @@ VARIANTS = {
 }
 
 
+# E4-fixes-B (CRITIQUE_6 item 9): the crab is no longer the scarab's grid with a horn. Its own 16 x 16, seen from the
+# front: two big rust pincers raised either side (the near jaw open), eye stalks with pale beads, a wide flat barnacled
+# shell, legs splayed. Same keys as the scarab palette (a..d shell, W light, g/G/H rust, Y barnacle).
+CRAB = [
+    ['................',
+     '.000........000.',
+     '0HHG0......0GHH0',
+     '0H00G0....0G00H0',
+     '0HGGG0W00W0GGGH0',
+     '.0GGg0a00a0gGG0.',
+     '...0g0000000g0..',
+     '..00dWWdddddc00.',
+     '.0dWddYdddcccc0.',
+     '0cddddddcccccbb0',
+     '0bccYcccccbbbba0',
+     '.0bbbbbbbbbbaa0.',
+     '..0aaa0000aaa0..',
+     '.0G0G0....0G0G0.',
+     '0G.0G0....0G0.G0',
+     '0..0........0..0'],
+    ['................',
+     '................',
+     '.000........000.',
+     '0HHG0......0GHH0',
+     '0HHGG0W00W0GGHH0',
+     '.0GGg0a00a0gGG0.',
+     '...0g0000000g0..',
+     '..00dWWdddddc00.',
+     '.0dWddYdddcccc0.',
+     '0cddddddcccccbb0',
+     '0bccYcccccbbbba0',
+     '.0bbbbbbbbbbaa0.',
+     '..0aaa0000aaa0..',
+     '..0G0G0..0G0G0..',
+     '.0G.0G0..0G0.G0.',
+     '.0..0......0..0.'],
+]
+# the eyes of the phantom: a 2 x 2 gold cluster (CRITIQUE_6 item 8 asks for an accent of at least 2 x 2)
+PHANTOM_EYES = [(9, 5), (11, 5)]
+
+
 def foe_frames():
     out = {}
     for vid, (src, pal) in VARIANTS.items():
         d = EF.FIELD[src]
+        if vid == 'lockjaw_crab':
+            d = {'size': (16, 16), 'frames': [chr(10).join(g) for g in CRAB]}
         leg = P.resolve(pal, 'field_' + vid)
         w, h = d['size']
         imgs = [parse_grid(grid_from_text(g), leg, w=w, h=h) for g in d['frames']]
         if vid == 'ink_bloom':
             imgs = [seal(im) for im in imgs]
+        if vid == 'gutter_phantom':
+            imgs = [eyes2(im) for im in imgs]
         out[vid] = [rim(im, {'rim': E4.FIELD_RIM[vid]}) for im in imgs]
     return out
+
+
+def eyes2(im):
+    """the phantom's two lantern eyes as 2 x 2 gold clusters with a hot top pixel (frame-independent: found as the
+    gold pixels of the grid)"""
+    im = im.copy()
+    g4 = np.array(hex2rgb(P.color('gold:4')), np.float32) / 255
+    g5 = np.array(hex2rgb(P.color('gold:5')), np.float32) / 255
+    g3 = np.array(hex2rgb(P.color('gold:3')), np.float32) / 255
+    ys, xs = np.nonzero((np.abs(im[..., :3] - g4).sum(-1) < 0.02) & (im[..., 3] > 0.5))
+    for y, x in zip(ys, xs):
+        im[y, x, :3] = g5
+        sx = -1 if x == xs.min() else 1
+        for (dx, dy) in ((sx, 0), (0, 1), (sx, 1)):
+            if 0 <= y + dy < im.shape[0] and 0 <= x + dx < im.shape[1]:
+                im[y + dy, x + dx, :3] = g4 if dy == 0 else g3
+                im[y + dy, x + dx, 3] = 1
+    return im
 
 
 def seal(im):
