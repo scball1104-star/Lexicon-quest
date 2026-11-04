@@ -644,6 +644,9 @@ chained, 7 side), 162 paths. Main path about 180 boxes (budget about 220). Delta
 
 None of these blocks the build; the default is what the build agents use.
 
+**2026-11-04: Scott took the defaults for 1 to 7 ("Follow your recommendations"). They stand as decided unless Stephen
+wants a change. 7 stays a placeholder until Episode 5 is written. 8 is unchanged: shipping needs an explicit ship word.**
+
 1. **Lyra's name is struck** (tag "The Regent" until the boss), where root canon names her openly. [default: struck]
    (open for Scott and Stephen)
 2. **The hero's episode**: the hero signs the Witness Book and learns Answer; no new companion. [default: yes]
