@@ -1,0 +1,19 @@
+{
+ "image": "ep4_battle_throne.png",
+ "w": 384,
+ "h": 216,
+ "cell": 3,
+ "note": "the Paper Regent: a tight crop on the crowned statue, a gold rim",
+ "extraColors": [
+  "#1e415d",
+  "#01294d",
+  "#355875",
+  "#384143"
+ ],
+ "colors": 51,
+ "bandY": 118,
+ "bandAlpha": 0.48,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep4_throne",
+ "fallback": "boss"
+}

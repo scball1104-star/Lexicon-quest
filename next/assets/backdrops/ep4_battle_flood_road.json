@@ -1,0 +1,15 @@
+{
+ "image": "ep4_battle_flood_road.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Flood Road: rain over drowned fields, hedgerows, a drowned farm roof, the far Keep on the horizon (composed)",
+ "extraColors": [],
+ "colors": 26,
+ "composed": "tools/art/backdrops/ep4_build.py (flood_road)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep4_flood_road",
+ "fallback": "valley"
+}

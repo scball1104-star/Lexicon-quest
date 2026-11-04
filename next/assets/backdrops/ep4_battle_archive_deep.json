@@ -1,0 +1,19 @@
+{
+ "image": "ep4_battle_archive_deep.png",
+ "w": 384,
+ "h": 216,
+ "cell": 3,
+ "note": "Archives Below Water and the Inkbound Barrister: cell 3 on the arcade, brightness 0.55, deep green-blue grade",
+ "extraColors": [
+  "#15445c",
+  "#22281d",
+  "#00294e",
+  "#453605"
+ ],
+ "colors": 28,
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep4_archive_deep",
+ "fallback": "archive_deep"
+}
