@@ -1,0 +1,15 @@
+{
+ "image": "ep4_dialog_keyart.png",
+ "w": 384,
+ "h": 216,
+ "cell": 3,
+ "note": "Episode 4 title cards and CREDITS_EP4: cell 3 darkened, vignette",
+ "extraColors": [
+  "#1a3c50",
+  "#03294a",
+  "#2c556e",
+  "#473e2a"
+ ],
+ "colors": 40,
+ "fallback": "dialog_keyart_ep3"
+}

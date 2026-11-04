@@ -53,6 +53,16 @@
       "nh_inn"
     ]
   },
+  "ep4": {
+    "entry": "../data/ep4/index.js",
+    "prefix": "ep4_",
+    "assets": "assets/ep4_manifest.json",
+    "audioPack": "ep4",
+    "touches": [
+      "emberpeak",
+      "pk_inn"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

@@ -842,3 +842,135 @@ Tuning notes (what moved from the plan's first pass, and why):
 Known gaps: no Episode 3 route simulation (`route.mjs` is Episode 1 only). The Tempered Lexicon Blade, the Emberglass Charm, the
 Ashwalker pieces and the Dash and Lantern secrets are not in any `LOADOUTS` row (placed, optional). The menus do not know the flag-learned
 Oath yet (see 11.4).
+
+## 12. Episode 4: The Sunken Keep (E4-battle, wave 4a)
+
+Design: `docs/EPISODE4_PLAN.md` sections 6 and 7. Everything is pack data (`src/data/ep4/{enemies,encounters,items,loot,shops,skills,ai}.js`,
+each an idempotent `register()` the pack entry calls); no core data file changed. Nothing in Episodes 1 to 3 moved:
+`simulate.mjs --check` passes all four episodes ("All targets met").
+
+### 12.1 Enemies (final numbers after tuning)
+
+| Enemy | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold), trait |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Floodhound | 17 | 620 | 110/16 | 24/16 | 18 | 2 | thunder, spear | ice | 65 / 110 | Bite, Undertow (Chill 20%); evade 10% |
+| Lockjaw Crab | 17 | 360 | 105/12 | 40/18 | 9 | 4 | thunder, axe | ice, sword, bow | 55 / 120 | Claw, Clamp (Stun 15%), Shell Up |
+| Ink Bloom | 17 | 520 | 60/100 | 14/24 | 11 | 2 | fire, light | ice | 55 / 110 | Stamp (forced opener), Blot (Blind 25%), **Runoff** (party mag 110%); Decree |
+| Drowned Watch | 18 | 700 | 100/30 | 30/22 | 12 | 4 | light, thunder | ice | 62 / 140 | Halberd, Cover, Shield Wall |
+| Gutter Phantom | 18 | 560 | 60/104 | 16/30 | 15 | 3 | light, fire | ice | 50 / 130 | Murk (party Blind 15%), Drag Under (Silence 25%), Cold Touch; flying, evade 20% |
+| Blank Decree | 19 | 520 | 70/110 | 18/34 | 16 | 3 | fire, bow | thunder | 55 / 150 | Paper Cut, Stamp, **Edict** (single mag 220%, Silence 30%); Decree; flying |
+| Waterlogged Sentinel | 19 | 620 | 120/30 | 32/22 | 8 | 5 | thunder, axe | sword, spear, ice | 65 / 170 | Slam, Floodfist (Chill 20%), **Breach** (party phys 150%, a charge) |
+| The Inkbound Barrister | 19 | 2500 | 300/320 | 26/28 | 13 + Haste | 8 | fire, light, spear | ice, thunder | 220 / 800 | Rebuttal, Cross-Examine; 2 Seals at the end of every turn; **Objection** (party mag 200%, Silence 40%); a witness at 50%; immune Silence |
+| Paper Witness | 19 | 300 | 50/60 | 14/20 | 12 | 2 | fire | thunder | 0 / 0 | **Stamp the Brief** (+1 Seal to the Barrister) every turn |
+| The Paper Regent | 20 | 2950 | 330/300 | 26 (x1.4 in phases 1 and 2)/24 | 13 (+ Haste from 70%) | 7 / 7 / 8 | by phase | ice, thunder (phases 1 and 2) | 800 / 1100 | Trident Sweep, Wet Seal (Chill 30%), Stamp; **Flood Decree** (party mag 220%, Chill 30%); **Strike from the Roll** (the hero, mag 300%); immune Stun, Poison, Blind |
+| Forged Writ of Silence | 20 | 600 | 60/90 | 16/22 | 12 | 3 | fire | ice | 0 / 0 | Mend the Seal (the Regent +6%); every 2nd turn Hush (Silence 35%, also mends) |
+| Forged Writ of Oblivion | 20 | 650 | 60/80 | 18/20 | 11 | 4 | spear, fire | ice | 0 / 0 | **Stamp the Regent** (+1 Seal) every turn |
+
+Keep F3 (the tightest ordinary floor, as Foundry F3): `encounters.js` `K3_POWER` decrees 2.25, watch 1.6, sentinels 1.2; `K3_SPEED`
+1.5; `K3_HP` decrees 0.85, watch 0.7, sentinels 0.68 (the encounter's `hp`).
+
+**What moved from the plan, and why.** EXP per foe is about half the plan's first pass (50 to 65, not 95 to 140): the plan's own
+6.1 asks for about 120 EXP a fight, and the 6.2 numbers paid 190 to 375. The plan's HP and ATK were far under an Episode 3
+finisher's party (the road's fights took 2.4 rounds and lost 5%), so HP rose about 40% and the bosses' ATK and MAG nearly doubled
+(the Barrister 110/120 to 300/320, the Regent 180/175 to 330/300). **The Barrister resists fire** (plan: weak) and has Haste and 2
+Seals a turn: weak to fire, Ember Edge voided every Objection by accident and ignoring the telegraph cost 0 points; now fire still
+voids (a Decree's void is any fire damage, resisted or not) but it is a choice. (E4-fixes-A, PLAYTEST_REVIEW_6 fix 8: back to the
+plan's weak fire, light, spear and resist ice, thunder, so the row agrees with Mira's "Burn the paper"; HP 2500, 8 shields, Haste and 2
+Seals stay. `--zone ep4_keep_f2`: careful 7.3 rounds, 100%; reckless 72%; naive 0%. All targets met.) **The Regent is Hasted from the Royal Ward on**
+(plan: phase 3 only), its Strike from the Roll is mag 300% (plan 200%) and its Flood Decree 220% (plan 140%): before that,
+ignoring telegraphs cost 0 to 4 points. The Regent's HP is 2950 (plan 3800) to keep careful play in 10 to 14 rounds; the writs are
+600 and 650 (plan 420 and 460) so the ward lasts long enough to choose a writ. Strike from the Roll empowers +30% (plan 20%).
+
+### 12.2 Decrees (on the Heat counter)
+
+- A Decree foe carries `heat: { max: 3, step: 0.15, flare, quench: 'fire', word: 'Voided!', sfx: 'decree_void' }` (rules.js seam 6
+  reads `quench`, `word`, `sfx`). `stamp` is Stoke renamed (`stokeSelf: 1`, sfx `seal_stamp`); each Seal is +15% ATK and MAG.
+- At 3 Seals the foe announces its decree (`telegraph` with `flare: true`; the skill has `decree: true` and `telegraphSfx:
+  'decree_unroll'`) and fires it next turn. Any fire damage, **Lamp Oil**, a Break or **Answer** voids it: `quench` (sfx
+  `decree_void`), `heat` to 0, `message` "Voided!" kind `quench`, `telegraph_cancel` reason `quench`.
+- Lamp Oil (`lamp_oil`, 110): thrown like the Quench Flask, `effect.throw = { fixed: 90, power: 130, types: ['fire'] }`, always voids.
+- The Barrister's end-of-turn stamps are `heat` events with reason `stamp`; the witness's and the Writ of Oblivion's are reason `coil`.
+
+### 12.3 Answer (`answer`, the hero)
+
+10 MP tech, one foe, a small light hit (mag 60), `learn: { flag: 'hero_signed' }` (`fallbackLevel: 19` recorded, unused: knownSkills
+reads the flag). It voids the target's Seals and pending decree or Strike from the Roll; if something was pending the target is
+Broken (not through the Royal Ward), with the message "{hero} answers to their name. The decree will not stand." (kind `answer`).
+Until the hero's next turn the hero cannot be made Nameless (`hero.answerGuard`; a Strike then posts kind `name_hold`). Event:
+`answer` { actor, target, voided (skill id or null), seals, broke, guarded }. Implementation: no rules.js hook exists for a party
+skill's custom effect, so each Episode 4 script's `reflect(ctx, tgt, part)` (called by strike() with the hit's part, `part.id ===
+'answer'`, before the damage) runs `answerHook` in `src/data/ep4/ai.js` and returns null. Against other foes it is a plain light hit.
+
+Menu (E4-fixes-A, PLAYTEST_REVIEW_6 fix 2): `SIGNATURE_TECHS` in `src/battle/scene/menu.js` lists { unit, flag, skill }: while a
+foe's telegraph skill has `flag`, that unit's menu opens on Tech with `skill` first, in gold. Core holds Bram's Tempered Oath
+(`turnable`); the ep4 pack's `scene.js` register() adds the hero's Answer (`answerable`, Strike from the Roll).
+
+Keyboard (fix 4): Enter is both `confirm` and `start` (DESIGN 3). In a battle the help bar and Config name Enter as Auto, so there
+Enter is Auto alone: `updatePlay` consumes `confirm` with `start`, and Z or Space confirm. Outside battle Enter confirms as before.
+
+### 12.4 The Inkbound Barrister (ai `barrister`) and the Paper Regent (ai `paper_regent`)
+
+- **Barrister**: Haste for the fight; an attack, then 2 Seals at the end of each turn, so Objection is announced at the end of its
+  second turn. At 50% HP, once: "The Barrister calls a witness!" (kind `witness`) and `summon` `barrister_witness`. Loot: Barrister's
+  Quill, 1 rare (ilvl 18), 2 Hi-Potions. Encounter: no flee, flag `barrister_defeated`, backdrop key `ep4_archive_deep`.
+- **Regent 1 Forged Edicts** (100 to 70%, HP locked at 70%, DEF x1.4 as a `stat_mod` source `regent_armor`). **2 Royal Ward** (from
+  70%; Haste): `summon` both writs, kind `ward`; while either stands it takes 25% damage, its shields cannot be chipped and its HP
+  stops at 31%. The killing blow on the last writ breaks the ward (kind `ward_break`, `phase` 3, `break`, +25 `fury_gain` reason
+  `ward_break` to each member). **3 The True Charter**: weak fire, spear, light; 8 shields; DEF normal; Strike from the Roll
+  announced on the hero on every 3rd turn (the first a turn early), a charge, not a Decree (fire does not void it). If it lands:
+  Nameless and 3 turns of Silence (kind `name_struck`), and the Regent +30% ATK and MAG. Encounter: no flee, flag
+  `paper_regent_defeated`, music `boss_regent`, backdrop key `ep4_throne`, `startFury` +25 with `council_records`. Loot: The Broken
+  Seal, 2 rares (ilvl 20), a Phoenix Feather, 2 Hi-Ethers.
+- Ward-break timing: ai.js `onDeath()` only reaches the Episode 1 to 3 scripts, so the writs break the ward from their own
+  `clampDamage` on the lethal hit; the ward events come just before that writ's `damage` and `ko`.
+
+### 12.5 Auto (`POLICY_EXT`, careful play only)
+
+`ep4Policy` returns null at once unless a living foe carries a fire Decree counter, has Strike from the Roll pending, or is the
+Regent, so Episodes 1 to 3 play as before (a test pins it). 1. The hero Answers an announced Strike. 2. An announced decree, then any
+foe at 2 Seals or more, is voided: Mira's fire (the others wait when she acts before the foe), the hero's Answer on a boss or an
+announced decree, then Lamp Oil. 3. Against the Regent the hero keeps 10 MP for Answer (an MP action that would spend it becomes an
+Attack; under 10 MP from the ward on, an Ether). The reckless policy skips all of it.
+
+### 12.6 Items, loot, shops
+
+Tier 7 bases are ilvl 18 (plan 17), tier 8 ilvl 20 (plan 19), and the road's loot ilvl is 18 (plan 17): Episode 3 rolls loot up to
+ilvl 17, so no Episode 4 base enters an Episode 3 pool once the pack loads. "Ice resist" in the plan has no rule (rules.js resists
+ink and fire damage only), so Wader Boots and Tidewalker Boots carry Chill resist (25 and 20). New stat label `resNameless` (the
+Regent's Pardon: Nameless resist 50, read by addStatus). Affixes: a sixth tier at ilvl 18 for every five-tier affix. Shops:
+`ferry_peddler` (Hale, road prices), `riverbank` (Linn), `vw_forge` (keeper `ep4_smith`; tier 8 after `keep_f2_done`); `pk_smithy`
+gains the Riverguard Halberd and the Crownguard Sword after `ep4_complete`. `RARE_NAME_A_EP4` (Drowned, Sealed, Riverborn, Witnessed,
+Tidal) is exported, but loot.js reads only the Episode 1 to 3 lists (12.7).
+
+### 12.7 Seams this pack would like (none blocks Episode 4)
+
+- `src/battle/rules.js` strike(): the void passes `quenchReason`, which is 'ice' for any damage hit, so a fire void reports
+  `reason: 'ice'`. Suggested: `quench(tgt, quenchReason === 'ice' ? tgt.heatQuench : quenchReason)`.
+- `src/battle/ai.js` scoreHit(): the Heat bonus reads `sk.types.includes('ice')`; for a Decree foe it should read the foe's
+  `heatQuench` (`sk.types.includes(f.heatQuench || 'ice')`). Today `ep4Policy` voids first, so it rarely matters.
+- `src/battle/ai.js` onDeath(): also call `onDeath` of the `SCRIPTS` a pack added (the writs' ward break could then move there).
+- `src/battle/loot.js` rareName(): `if (ilvl >= 18) pool = pool.concat(RARE_NAME_A_EP4)` from a mutable list.
+
+### 12.8 Simulator and the final table
+
+`node tools/sim/simulate.mjs --check` (400 a cell; the CLI registers the pack's battle data through `tools/sim/ep4.mjs` `attach`, the tests
+through `registerData()`, so the Episode 1 to 3 suites never see it). Levels: road [17, 18], F1 [18, 19], F2 [19, 20], F3 [19, 20], the
+Barrister [19, 20], the Regent [20, 21] (reckless at the first). Progression from the quick start's 5,600 EXP, every fight: road 17 -> 18,
+F1 -> 19, F2 19 (7,695), F3 -> 20, the Regent at 20 -> 21; at 80%: 17, 18, 19, 20, 21. Keep F3: careful HP lost 19%, attack-only wins 73%.
+Careful play Answers 63% of the Strikes from the Roll (Nameless 0.06 a fight). Battle gold: 2,400 in, about 8,000 earned, 10,380 out.
+
+Ordinary zones (careful, averaged over the plan, both levels): win / rounds / HP lost; attack-only win / rounds.
+
+| Zone | Careful | Attack-only |
+|---|---|---|
+| ep4_flood_road | 100% / 3.59 / 9% | 100% / 8.18 |
+| ep4_keep_f1 | 100% / 4.26 / 6% | 100% / 9.63 |
+| ep4_keep_f2 | 100% / 4.08 / 7% | 100% / 9.45 |
+| ep4_keep_f3 | 100% / 4.27 / 17% | 82% / 9.24 |
+
+| Boss | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only | Ignoring telegraphs |
+|---|---|---|---|---|
+| **barrister** | 19 | 100% / 8.32 (7.3-9.3) / 14% | 0% / 3.12 | 65% / 7.69 |
+| **barrister** | 20 | 100% / 8.29 (7.0-9.7) / 16% | 0% / 3.45 | - |
+| **paper_regent** | 20 | 99% / 13.52 (10.3-16.7) / 16% | 0% / 6.95 | 74% / 11.70 |
+| **paper_regent** | 21 | 100% / 12.53 (10.0-15.3) / 15% | 0% / 7.16 | - |

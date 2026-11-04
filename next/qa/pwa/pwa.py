@@ -312,15 +312,18 @@ def check_packoffline(browser, base, report):
     page = ctx.new_page()
     errors = []
     page.on('pageerror', lambda e: errors.append(f'pageerror: {e}'))
-    url = base + '/next/index.html?pack=x1,x2'
     lists = json.loads((NEXT / 'assets' / 'pack_files.json').read_text(encoding='utf-8'))
-    want = sorted({f for k, v in lists.items() if not k.startswith('$') for f in v})
+    # every pack in the list (x1, x2, cave, tier, ep3, ep4 ...), forced on (E4-integrate: it was ?pack=x1,x2 while the list grew)
+    ids = [k for k in lists if not k.startswith('$')]
+    url = base + '/next/index.html?pack=' + ','.join(ids)
+    want = sorted({f for k, v in lists.items() if not k.startswith('$') for f in v if not f.endswith(('.mp3', '.wav'))})
+    ready_js = "() => !!(window.LQ_PACKS && %s)" % ' && '.join(f"window.LQ_PACKS.packReady('{i}')" for i in ids)
     page.goto(url, wait_until='load')
     page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
     page.keyboard.press('Enter')
     page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
-    ready = poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('x1') && window.LQ_PACKS.packReady('x2'))", timeout=60)
-    online_state = page.evaluate("() => ({ x1: window.LQ_PACKS.packState('x1'), x2: window.LQ_PACKS.packState('x2') })")
+    ready = poll(page, ready_js, timeout=60)
+    online_state = page.evaluate("() => ({ x1: window.LQ_PACKS.packState('x1'), x2: window.LQ_PACKS.packState('x2'), ep4: window.LQ_PACKS.packState('ep4') })")
     # the worker installs, takes control, and the idle warm fetches every pack file through it into the runtime cache
     js = ("async () => { const c = await caches.open('lq-next-runtime-v1'); const keys = (await c.keys()).map(r => new URL(r.url).pathname);"
           " const want = %s; const have = want.filter(w => keys.some(k => k.endsWith('/next/' + w))); return have.length === want.length ? have.length : 0; }" % json.dumps(want))
@@ -337,9 +340,9 @@ def check_packoffline(browser, base, report):
         page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
         page.keyboard.press('Enter')
         page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
-        poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('x1') && window.LQ_PACKS.packReady('x2'))", timeout=30)
-        info = page.evaluate("() => ({ x1: window.LQ_PACKS.packState('x1'), x2: window.LQ_PACKS.packState('x2'), controlled: !!navigator.serviceWorker.controller })")
-        ok = ok and info['controlled'] and info['x1']['ready'] and info['x2']['ready']
+        poll(page, ready_js, timeout=30)
+        info = page.evaluate("(ids) => ({ ready: ids.every((i) => window.LQ_PACKS.packReady(i)), controlled: !!navigator.serviceWorker.controller })", ids)
+        ok = ok and info['controlled'] and info['ready']
     except Exception as e:  # noqa: BLE001
         ok = False
         info = {'error': str(e)}

@@ -20,7 +20,7 @@ function mod() {
 }
 
 test('the real table: x1 and x2, the prefix rule, wanted(), the x1 switch is on and the x2 switch is off', () => {
-  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'tier']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02)
+  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'ep4', 'tier']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03)
   assert.equal(PACKS.x1.prefix, 'x1_');
   assert.equal(PACKS.x2.audioPack, 'ep2');
   assert.deepEqual(PACKS.x1.touches, ['valley', 'willowmere', 'archive_f1', 'archive_f2', 'archive_f3']);

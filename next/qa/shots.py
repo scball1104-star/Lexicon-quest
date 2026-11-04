@@ -77,14 +77,17 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         # LQ_X1_LIVE=1 / 0: serve src/data/x1/live.js with the switch forced on / off (a local copy, in memory; the file on disk is untouched)
         # LQ_EP3_LIVE=1 / 0: the same for src/game/episodes.js EP3_LIVE (E3-integrate plays Episode 3 before the flip)
-        hit = None
-        for env, rel, const in (('LQ_X1_LIVE', 'src/data/x1/live.js', 'X1_LIVE'), ('LQ_EP3_LIVE', 'src/game/episodes.js', 'EP3_LIVE')):
+        # LQ_EP4_LIVE=1 / 0: the same for EP4_LIVE in that file (E4-integrate)
+        hits = []
+        for env, rel, const in (('LQ_X1_LIVE', 'src/data/x1/live.js', 'X1_LIVE'), ('LQ_EP3_LIVE', 'src/game/episodes.js', 'EP3_LIVE'),
+                                ('LQ_EP4_LIVE', 'src/game/episodes.js', 'EP4_LIVE')):
             if os.environ.get(env) and self.path.split('?')[0].endswith('/next/' + rel):
-                hit = (os.environ[env] != '0', rel, const)
-        if hit:
-            on, rel, const = hit
-            src = (NEXT / rel).read_text(encoding='utf-8')
-            body = src.replace(const + ' = ' + ('false' if on else 'true') + ';', const + ' = ' + ('true' if on else 'false') + ';').encode('utf-8')
+                hits.append((os.environ[env] != '0', rel, const))
+        if hits:
+            body = (NEXT / hits[0][1]).read_text(encoding='utf-8')
+            for on, rel, const in hits:
+                body = body.replace(const + ' = ' + ('false' if on else 'true') + ';', const + ' = ' + ('true' if on else 'false') + ';')
+            body = body.encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'text/javascript')
             self.send_header('Content-Length', str(len(body)))

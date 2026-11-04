@@ -1,18 +1,10 @@
-// Battle scene layout: every rectangle and anchor the battle draws, as pure data and pure functions
-// (node tests import this). Internal resolution 384x216 (DESIGN 3). Positions follow the mocks in
-// tools/art/ui/out/mock_battle_*.png: enemies left in a diagonal, party right in a diagonal, command
-// window bottom-left, party status bottom-right, help window top-left, timeline top-right.
+// Battle scene layout: every rect and anchor the battle draws, pure (node tests import it). 384x216 (DESIGN 3).
 
 export const W = 384;
 export const H = 216;
 
-// Windows (x, y, w, h).
-//
-// W7 (CRITIQUE_3 item 2): the command window is TWO columns of four rows (column major: Attack, Tech, Magic,
-// Fury | Combo, Item, Defend, Swap / Flee), so every command is on screen with no scroll arrow. It is 126 px wide
-// and the party status window gives up the 34 px (statusRow() packs its gauges a little tighter). On the touch
-// layout the rows are TOUCH_CMD_ROW_H tall (18 px = 30 css px) and Flee moves out of the grid into a FLEE button
-// in the help window (HELP_TOUCH_BTNS.flee: tap once to arm, again to run), which keeps the grid at 4 rows.
+// Windows (x, y, w, h). W7: the command window is 2 columns x 4 rows (column major), no scroll; on touch Flee is a
+// help-window button (HELP_TOUCH_BTNS.flee) and rows are TOUCH_CMD_ROW_H tall.
 export const HELP_WIN = { x: 4, y: 4, w: 218, h: 19 };
 export const CMD_WIN = { x: 4, y: 152, w: 126, h: 60 };
 export const STATUS_WIN = { x: 132, y: 152, w: 248, h: 60 };
@@ -22,9 +14,7 @@ export const CMD_ROW_H = 11;
 export const CMD_COL_W = 52;          // glove (16) + the longest label ("Attack", "Defend") + air
 export const TOUCH_CMD_ROW_H = 18;
 export const STATUS_ROW_H = 17;
-// Touch layouts (W5, DESIGN 3): rows grow to TOUCH_CMD_ROW_H, so the command window grows upward to keep four
-// rows and the sub-list window moves up with it (both still above / beside the bottom band; the enemy row anchor
-// is clamped above STATUS_WIN either way).
+// Touch (W5): the command window grows upward to keep four rows; the sub-list moves up with it.
 export const CMD_WIN_TOUCH = { x: 4, y: 132, w: 126, h: 80 };
 export const SUB_WIN_TOUCH = { x: 4, y: 46, w: 188, h: 84 };
 /** Command window rect for a layout. */
@@ -41,13 +31,9 @@ export function timelineSlotX(i) { return TL.x + 2 + (i === 0 ? 0 : 19 + (i - 1)
 // The help window grows down by HELP_LINE px per extra line, up to HELP_LINES_MAX lines (hud.helpLines).
 export const HELP_LINE = 11;
 export const HELP_LINES_MAX = 3;
-// W13 (the King fight's HUD): the help window's dock. On a stage where a foe's head (headBox) would sit under a
-// two-line help window (the Nameless King: crown at y 27, a second line reaches y 34), the help window, with the
-// touch FLEE / AUTO / x1 buttons in it, stands under the timeline instead: right-aligned with the rail, below the
-// landing slot and arrow that hang from it while targeting (to y 42). The top-left band is then the boss's own: its
-// weakness row and name tag stand there beside the crown. createActors() plans the tall foes once per battle
-// (planStage); the dock holds while no other living foe has its head under it (the King's Sorrow and Pride do, so in
-// phase 2 the help window is back in its corner and returns to the dock when they fall).
+// W13: when a tall foe's head (headBox) would sit under a two-line help window, the help window (with its touch
+// buttons) docks under the timeline and the top-left band is the boss's; planStage() marks the tall foes per battle,
+// and the dock holds while no other living foe's head is under it.
 export const HELP_DOCK = { x: W - 4 - HELP_WIN.w, y: TL.y + 38 };
 /** The dock at its tallest (three lines), with a 2 px margin: what it blocks for rows and heads. */
 export const HELP_DOCK_MAX = { x: HELP_DOCK.x - 2, y: HELP_DOCK.y - 2, w: HELP_WIN.w + 4, h: HELP_WIN.h + (HELP_LINES_MAX - 1) * HELP_LINE + 4 };
@@ -262,9 +248,9 @@ export function touchRowSpot(unit, w, ctx = {}) {
     { place: 'right', x: clampX(own.x + own.w + 3), y: midY },
     { place: 'left', x: clampX(own.x - 3 - w), y: midY },
     { place: 'above', x: cx, y: Math.max(top - h - 2, bandBottom(cx) + 1) },
-    // W13: a tall foe under a grown help window: beside the sprite just below the band, rather than on its face
-    ...(tall ? [{ place: 'right', x: clampX(own.x + own.w + 3), y: Math.max(midY, bandBottom(clampX(own.x + own.w + 3)) + 1) },
-      { place: 'left', x: clampX(own.x - 3 - w), y: Math.max(midY, bandBottom(clampX(own.x - 3 - w)) + 1) }] : []),
+    // W13: under a grown help window: beside the sprite just below the band, rather than on its face
+    { place: 'right', x: clampX(own.x + own.w + 3), y: Math.max(midY, bandBottom(clampX(own.x + own.w + 3)) + 1) },
+    { place: 'left', x: clampX(own.x - 3 - w), y: Math.max(midY, bandBottom(clampX(own.x - 3 - w)) + 1) },
   ];
   let best = null;
   for (const c of cands) {

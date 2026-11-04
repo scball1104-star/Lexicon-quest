@@ -5,6 +5,8 @@ import * as encounters from '../data/encounters.js';
 
 /** The master switch. While false: ep3_morning never runs, the sand gate stays chained, no Episode 3 row on the title. */
 export const EP3_LIVE = true;
+/** Episode 4 (EPISODE4_PLAN 10.5): the ep4 pack is not fetched and nothing of it shows while false (`?ep=4` aside). */
+export const EP4_LIVE = true;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }

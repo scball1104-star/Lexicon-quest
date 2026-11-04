@@ -15,7 +15,7 @@ import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/s
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
 import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, enemyRowAnchor,
-  touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H } from '../battle/scene/layout.js';
+  touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H, helpDock } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
 import * as HUD from '../battle/scene/hud.js';
@@ -31,8 +31,8 @@ const LOG_SHOW = 3;
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
   east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13, sand_road: 13, foundry_f1: 14, foundry_f2: 15, foundry_f3: 16, foundry_heart: 16 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
-// In-battle boss name card by leader id (the field scene shows its own card before the swirl).
-const BOSS_CARD = {
+// In-battle boss name card by leader id (packs add theirs).
+export const BOSS_CARD = {
   refl_hero: { name: 'THE OTHER SELVES', sub: 'Hall of Reflections' },
   nameless_king: { name: 'THE NAMELESS KING', sub: 'Keeper of the Court' },
   archivore: { name: 'THE ARCHIVORE', sub: 'Eater of Names' },
@@ -54,7 +54,7 @@ function titleCase(s) {
   return String(s).toLowerCase().split(' ').map((w, i) => (i > 0 && ['of', 'the', 'and', 'a'].includes(w) ? w : cap(w))).join(' ');
 }
 // Backdrop per zone.
-const BACKDROPS = {
+export const BACKDROPS = {
   valley: { asset: 'battle_valley', cell: 0, bright: 1.0, tint: null },
   archive: { asset: 'battle_archive', cell: 7, bright: 0.82, tint: 'rgba(60,50,120,0.22)' },
   archive_deep: { asset: 'battle_archive', cell: 7, bright: 0.66, tint: 'rgba(40,30,90,0.35)', darken: 0.22 },
@@ -396,9 +396,9 @@ export class BattleScene {
     const e = this.engine;
     const { input, audio } = e;
     if (this.below) { this.runOps(); return; }
-    // Global toggles: start = Auto, pageR = speed (both persisted settings).
+    // Global toggles: start = Auto, pageR = speed (both persisted settings). Enter (confirm too) is Auto alone here.
     const tb = this.touchButtons();
-    if (input.pressed('start') || (tb && input.tapIn(tb.auto.x, tb.auto.y, tb.auto.w, tb.auto.h))) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
+    if (input.pressed('start') || (tb && input.tapIn(tb.auto.x, tb.auto.y, tb.auto.w, tb.auto.h))) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); input.consume('confirm'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
     if (input.pressed('pageR') || input.pressed('pageL') || (tb && input.tapIn(tb.speed.x, tb.speed.y, tb.speed.w, tb.speed.h))) { e.setSetting('battleSpeed', this.speed === 1 ? 2 : 1); audio.sfx('cursor'); }
     if (this.menu.state !== 'closed') {
       if (this.auto) { this.menu.close(); }
@@ -887,6 +887,8 @@ export class BattleScene {
       else { const a = this.actor(this.currentUid); text = a ? `${a.name}'s turn.` : ''; color = null; }
     } else if (this.phase === 'play' && tele && !text) { text = tele.text; color = 'orange'; }
     const tb = this.touchButtons();
+    // phone, docked help: an action line shows once, in the log
+    if (tb && helpDock() && this.menu.state === 'closed' && text && this.log.at(-1) === (color ? `{c:${color}}${text}{/c}` : text)) text = '';
     const idle = this.menu.state === 'root' && !tele && !this.auto;
     let right = this.auto ? 'AUTO' : this.speed > 1 ? 'x2' : null;
     let rightColor = this.auto ? 'cyan' : 'gold';

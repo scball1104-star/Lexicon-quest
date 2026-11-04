@@ -133,11 +133,9 @@ export function tintFor(mapId, baseTint, hasFlag) {
   return base;
 }
 
-/** Which episode's credits should roll now (epN_complete and its counter not yet set), or 0. */
+/** Which episode's credits should roll now (its handoff `flag` set, its counter not), or 0. Packs add entries. */
 export function creditsPending(game, hasFlag) {
-  if (hasFlag('ep1_complete') && !game.counters.credits_rolled) return 1;
-  if (hasFlag('ep2_complete') && !game.counters.credits2_rolled) return 2;
-  if (hasFlag('ep3_complete') && !game.counters.credits3_rolled) return 3;
+  for (const [n, h] of Object.entries(CREDITS_HANDOFF)) if (h.flag && hasFlag(h.flag) && !game.counters[h.counter]) return +n;
   return 0;
 }
 export function markCreditsRolled(game, episode = 1) {
@@ -145,7 +143,7 @@ export function markCreditsRolled(game, episode = 1) {
 }
 /** Per episode: credits cards and music, the wake map and mark (day light), the counter, the end card. */
 export const CREDITS_HANDOFF = {
-  1: { cards: CREDITS, music: null, map: 'hero_home', mark: 'bed', counter: 'credits_rolled' },
-  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled', endCard: EP3_LIVE ? END_CARD_EP2_LIVE : END_CARD_EP2 },
-  3: { cards: CREDITS_EP3, music: 'first_bell', map: 'pk_inn', mark: 'inn_bed', counter: 'credits3_rolled', endCard: END_CARD_EP3 },
+  1: { cards: CREDITS, music: null, map: 'hero_home', mark: 'bed', counter: 'credits_rolled', flag: 'ep1_complete' },
+  2: { cards: CREDITS_EP2, music: 'hollowmere', map: 'nh_inn', mark: 'inn_bed', counter: 'credits2_rolled', flag: 'ep2_complete', endCard: EP3_LIVE ? END_CARD_EP2_LIVE : END_CARD_EP2 },
+  3: { cards: CREDITS_EP3, music: 'first_bell', map: 'pk_inn', mark: 'inn_bed', counter: 'credits3_rolled', flag: 'ep3_complete', endCard: END_CARD_EP3 },
 };

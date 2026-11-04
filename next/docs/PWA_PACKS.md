@@ -106,3 +106,32 @@ first use (stale-while-revalidate into `lq-next-runtime-v1`). The clip is fetche
 Nothing moved before the tap prompt (net core JS +372 gzip bytes, the hook in `keyart.js`, `battle.js` and `prologue.js`).
 See docs/MEDIA_BUILD.md 5.
 
+
+## The ep4 pack (2026-11-03, E4-pack)
+
+`ep4` (prefix `ep4_`, entry `src/data/ep4/index.js`, asset fragment `assets/ep4_manifest.json`, audio pack `ep4`, cap 1.0 MB)
+holds all of Episode 4 (`docs/EPISODE4_PLAN.md` 13): every file under `src/data/ep4/`, `src/data/maps/ep4_*.js` (the ten maps
+and `ep4_patches.js`), `assets/{tiles,sprites,ui,backdrops}/ep4_*` and `assets/tiles/ep4.png`. Its switch is `EP4_LIVE` in
+`src/game/episodes.js` (no `live.js`, so nothing of the pack is precached). `hard: true`, `touches: ['emberpeak', 'pk_inn']`:
+the field waits for both ep3 and ep4 before loading either map (`packsForMap`). Wanted from `ep3_complete` or `ep4_started`.
+While `EP4_LIVE` is false nothing is fetched, except with `?pack=ep4` or `?ep=4` (the title hook forces it on; the pack adds
+its row only once its `EP4_MAPS_LISTED` is true).
+
+- **`register(engine)`.** `ensurePack` now passes the engine to every entry's `register` (the other packs ignore it). The ep4
+  entry calls each module's `register(engine, modules())` in the order `flags, enemies, items, skills, loot, encounters, shops,
+  ai, npcs, quests, text, story, ledger, audio, world, maps, hooks, start` (`title` is loaded on first use by `hooks.js`);
+  a missing module is skipped and reported, as in x1.
+- **Audio.** `src/data/ep4/audio.js` exports the fragment `{ music, sfx, ambience, jingles, pack }` in the
+  `assets/audio/manifest.json` entry shape; the entry merges it into `engine.audio.manifest` (never overwriting an id, `pack`
+  as `manifest.packs.ep4`) before `ensurePack` calls `audio.loadPack('ep4')`. The main audio manifest is never edited.
+  `build_pwa.py` `LAZY_PREFIXES` gains `assets/audio/sfx/ep4_` and `assets/audio/ambience/ep4_` (runtime-cached, not
+  precached); `qa/pwa/precache.test.mjs` resolves sfx ids named under `src/data/ep4/` against the fragment.
+- **Maps and the order trap.** `src/data/ep4/maps.js` awaits the ep3 pack's `register()` first, then registers the ten
+  maps by a guarded list and patches the registered `emberpeak` / `pk_inn` (`peekMap`, then `registerMap`) with
+  `ep4_patches.js` `withEastRoad` / `withEp4Wake` (identity until that file exists). `qa/core/ep4_maps_order.test.mjs`.
+- **Hooks** (`src/data/ep4/hooks.js`): `CREDITS_HANDOFF[4]` (from text.js `CREDITS_EP4`), `CREDITS_HANDOFF[3].endCard`
+  = `END_CARD_EP3_LIVE` while live, `QUEST_EXT`, `globalThis.LQ_EP4` (`title`, `offer`, `start`), `LQ_DEBUG.newGameEp4`.
+- **Core seams** (plan 13.2): the table entry; `EP4_LIVE`; one title line; `creditsPending` reads each handoff's `flag`;
+  `QUEST_EXT` in `mainQuestFor`; Heat `heatQuench` / `heatWord` / `heatSfx`; `export const SCRIPTS`, `POLICY_EXT` (asked
+  first by `competentPolicy`), `export const BACKDROPS`. Paid for by comment trims in `ai.js` and `title.js`: the pre-tap load
+  went from 2,446,541 to 2,446,134 wire bytes (seams +426, trims -833, gzipped).

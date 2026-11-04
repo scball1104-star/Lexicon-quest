@@ -71,6 +71,7 @@ def main(argv):
     print('tiles.json: %d terrains, %d walls, %d tiles, %d objects' % (
         len(db['terrains']), len(db['walls']), len(db['tiles']), len(db['objects'])))
     __import__('x1').write() if (not argv[1:] or 'x1' in argv[1:]) else None   # X1 pack sheet: x1.png + x1_tiles.json (never tiles.json)
+    __import__('ep4').write() if (not argv[1:] or 'ep4' in argv[1:]) else None   # E4 pack sheet: ep4.png + ep4_tiles.json (never tiles.json)
 
 
 if __name__ == '__main__':

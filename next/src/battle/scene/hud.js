@@ -185,6 +185,7 @@ export function drawTimeline(r, order, actors, preview, frame) {
     r.rect(sx + 2, sy + 2, 14, 14, '#14101e');       // ink backing: heads have transparent corners, the rail must not show through
     if (f) r.sprite(ui, f, sx, sy, { topLeft: true, tint: i === 0 && pulse ? '#fff7d6' : null, tintAmount: i === 0 && pulse ? 0.35 : 0 });
     drawHead(r, a, sx + 3, sy + 3, row.skip === 'kept' ? { alpha: 0.95, tint: '#b8c2e8', tintAmount: 0.5 } : row.skip ? 0.45 : 1);
+    if (a && a.tlMark) a.tlMark(r, sx, sy, frame);
     if (i === 0 && pulse) r.strokeRect(sx - 1, sy - 1, 20, 20, '#f9d77a');
     if (row.skip) {
       // Kept turns (the Nameless King) grey the head and carry the icon_kept shard marker; stun / break keep theirs.
@@ -301,12 +302,12 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
     if (s.nullified && ui.frames.weak_null) r.sprite(ui, ui.frames.weak_null, ex + 1, y, { topLeft: true });
     ex += 15;
   }
-  // Episode 3 Heat: one flame pip per level, lit from the left, white-hot while the flare is announced
+  // Heat pips (flames; a pack's PIPS[heatQuench]), lit from the left
   const hm = (know && know.heatMax) || 0;
   if (hm) {
-    const pw = 3 + hm * 6;
+    const pw = 3 + hm * 6, pip = PIPS[unit && unit.heatQuench] || drawPip;
     r.rect(ex, y - 1, pw, 14, actor.flare ? '#8a2a2a' : '#4b2a2a'); r.rect(ex + 1, y, pw - 2, 12, '#14101e');
-    for (let i = 0; i < hm; i++) drawPip(r, ex + 2 + i * 6, y + 2, i < actor.heat, actor.flare, actor.heatFlash > 0 && i === actor.heat - 1, frame);
+    for (let i = 0; i < hm; i++) pip(r, ex + 2 + i * 6, y + 2, i < actor.heat, actor.flare, actor.heatFlash > 0 && i === actor.heat - 1, frame);
     ex += pw + 1;
   }
   // Status badges above the row (W11: below it when the row is tucked under the help window, opts.top, as the King's
@@ -323,6 +324,7 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
   if (fb) for (let i = 0; i < grown; i++) { r.sprite(ui, fb, sx, by, { topLeft: true }); sx += 9; }
   return { x, y, w: ex - x };
 }
+export const PIPS = {};
 const PIP = ['..o..', '..oo.', '.oao.', '.oaao', 'oabao', 'oabbo', 'oabbo', '.ooo.'];
 function drawPip(r, x, y, lit, hot, pop, frame) {
   const w = hot && (frame >> 2) % 2;

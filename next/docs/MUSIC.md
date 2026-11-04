@@ -415,6 +415,88 @@ breath), accordion (two reeds a few cents apart plus one an octave down, a hollo
 woodblock (a dry clack, no ring), grind (rubbed band noise in pulses over a stone thud; the pitch moves the band), bowbass (a dark saw with bow scrape).
 `python tools/music/preview_instruments.py` includes them.
 
+## Episode 4: three more tracks (E4-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops, 0-sample decode lag in headless Chromium for all three, `verify_decode.py`). Plan: `docs/EPISODE4_PLAN.md` 8.
+Files are `assets/audio/music/ep4_<id>.mp3` (+ sidecar), songs `tools/music/songs/ep4_*.py`; render with
+`python tools/music/render.py ep4_valewyn ep4_sunken_keep ep4_boss_regent --wav`. They are NOT in `render.py`'s `ALL`, in
+`build.py`'s `MUSIC_IDS` or in `assets/audio/manifest.json`: Episode 4 audio reaches the game only through the pack fragment
+`src/data/ep4/audio.js` (plan 13.3), which also carries `volume` from the decoded loudness (-16.44 to -16.49 LUFS measured).
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `valewyn` | The Drowned Crown | A minor to C major | 90, 4/4 | 32 | 0.060 s to 85.393 s | 85.49 s | `hollowmere` |
+| `sunken_keep` | The Sunken Keep | D Dorian | 80, 4/4 | 32 | 0.060 s to 96.060 s | 96.16 s | `court` |
+| `boss_regent` | The Paper Regent | F minor | 6/8, quarter = 132 (dotted quarter 88) | 80 (4 intro + 76 loop) | 5.455 s to 109.091 s | 109.19 s | `boss_warden` |
+
+### The Valewyn tune (`tools/music/songs/ep4_theme.py`)
+Eight bars of 4/4 in scale degrees: the complete motif (0 4 5 3), its fourth note held a whole bar across the bar line (the
+held breath), then the flute's answer. `valewyn` plays it in C major in its B section; `boss_regent` quotes it in F minor,
+re-barred to 6/8 by `swing68` (each quarter a dotted quarter, each off-beat eighth the last eighth of its group).
+`python tools/music/songs/ep4_theme.py` checks the bars and the 6/8 re-barring.
+
+### How Episode 4 wears the name motif
+- **valewyn**: the celesta, C5 G5 A5 F5, the F held four beats across the bar line into the next chord, where it becomes the root
+  (Fmaj7 in A minor, bars 1-2 and 5-6; F/A in C major, bars 17-18). The same four pitches are b3 b7 1 b6 in A minor and 1 5 6 4 in
+  C major: the motif does not change between the sections, the city around it does. Once more in bar 29 over Dm7, the held F
+  sinking to E in the flute.
+- **sunken_keep**: the clarinet, augmented, a bar a note, D4 A4 B4 G4 (the B the Dorian sixth, sung over G/D), bars 1-4 and 17-20;
+  in 17-20 a glass pad plays it back an octave up, two beats late (the reflection on the water). In C the harp states it plainly
+  in quarter notes (D A B G, then C G A F over Fmaj7).
+- **boss_regent**: the brass, from the third of F minor, Ab4 Eb5 F5 Db5, the same shape as the celesta's in `valewyn`, the Db held
+  across the bar line and ended by a wax-stamp thud (timpani and woodblock), bars 5, 9, 13, 17 (A) and 21-33 (A2, doubled by
+  horn and high strings). In B the Valewyn tune in minor (F C Db Bb, the Bb held, then the answer; horn and strings, then brass),
+  the city's song turned into law. In C the motif climbs from Ab, Bb, Db and Eb. Bar 80, the last before the loop, is F major:
+  the motif in its tonic guise F C D Bb on the celesta (the city's instrument) and the horn.
+
+### valewyn: The Drowned Crown (ep4_valewyn and ep4_vw_*, crown_remembers, the Episode 4 credits; loops)
+The root region-4 brief for the tracker: flowing harp, lyrical strings, soft flute, a celesta like water. A (1-8) Am, Fmaj7, C,
+Gsus4-G, Am, Fmaj7, Dm7, E7sus4-E7: celesta motif, flute answers. A' (9-16) Am, Fmaj7, C/G, D/F#, Fmaj7, C/E, Dm7, E7: high strings
+sing, glass drops of rain. B (17-24) C, F/A, G/B, C, F, C/E, Dm7, Gsus4-G: the lift into C major, the theme, faint choir. B' (25-28)
+C, G/B, Am7, Fmaj7: flute and strings in octaves, harp in sixteenths. T (29-32) Dm7, Am/C, Bbmaj7, E7sus4-E7 back to Am.
+Instruments: celesta, flute, strings_high, harp, glass, strings, strings_low, choir, bass. Reverb room 0.88, 4.0 s.
+
+### sunken_keep: The Sunken Keep (ep4_keep_f1, ep4_keep_f2; loops)
+A slow pulse of plucked low strings (pizzicato on beats 1 and 3), the Keep's drowned bell (D3 through a 650 Hz lowpass, very wet)
+every four bars, water drops (a small song-local `Drop` instrument: a sine that bends up as it pops), a clarinet line.
+A (1-8) Dm, Am7/D, G/D, C/D, Dm, C/D, G/D, Dm over a D pedal. B (9-16) F, C/E, Dm, Am, F, G, Em7, A7sus4-A7: the bass moves,
+strings and choir. A' (17-24): A with the reflection. C (25-32) Dm, Em7, Fmaj7, G, Dm, Em7, Fmaj7, A7sus4-A7: more drops, a slow harp
+arpeggio, the clarinet low. Instruments: clarinet, glasspad, harp, pizz, bass, bell (lowpassed), drop, strings_low, strings, choir.
+
+### boss_regent: The Paper Regent (the Regent's battle; loops)
+6/8 written as three quarter beats a bar at 132. I (1-4) harp ostinato alone, then low brass and timpani; played once (E4-integrate,
+2026-11-04: the loop used to restart into the harp alone under the dying tail of bar 80, about 2.7 s at -23 to -31 dB RMS; the song
+now renders bars 5 to 80 as the loop body and bars 1 to 4 as a head before loopStart, at the body's gain, its last 60 ms under the
+guard, so the seam stays the tracker's sample-continuous one). A (5-20) Fm, Db, Bbm, C,
+Fm, Db, Eb, C7 (two bars each): spiccato strings on the eighths, timpani and low brass on both pulses. A2 (21-36) Fm, Db, Bbm, C,
+Fm, Gb, Eb, C: choir up, motif doubled. B (37-52) the quote: Fm, Bbm/Db, Cm/Eb, Fm, Bbm, Fm/Ab, Gm7b5, Csus4-C (the raised leading
+tone E over the last C). C (53-68) Fm, Eb, Gb, Ab (the climb), C7 hemiola (three stabs against two pulses, timpani roll), the
+motif fortissimo, Db, C7. R (69-79) the ostinato creeps back, the motif cut short in the strings, a C7 build. M (80) F major.
+Instruments: spiccato strings (strings_low, fast attack), harp, brass (melody, stabs, pedal), horn, strings_high, choir, celesta,
+lowdrum, woodblock (the stamp), bass.
+
+### Sounds (plan 8.4), `tools/audio/ep4_sfx.py`
+Not registered in `sfx_defs.REG` on purpose: `build.py` would write them unprefixed (precached) and into the core manifest. The
+script masters with `build.master` and writes `assets/audio/sfx/ep4_<id>.wav` (22.05 kHz mono) and `assets/audio/ambience/ep4_<id>.wav`
+(16 kHz mono, 10 s, seamless); `--review` draws waveform and spectrogram sheets into `tools/audio/out/ep4/`. All pack `ep4`, lazy.
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `tide_wheel` | 0.89 s | `block_push` | an iron axle creak, three ratchet clicks, a heavy clunk |
+| `water_rise` | 1.02 s | `splash` | a deep gulp, then water swelling up the walls |
+| `water_drain` | 0.93 s | `splash` | a falling rush to a trickle and a last drip |
+| `seal_wash` | 1.24 s | `ink_gurgle` | a wet paper tear and a low sinking bloom (wet and dark, no shimmer) |
+| `seal_stamp` | 0.30 s | `hit_heavy` | a padded wax-stamp thunk with a wooden knock and a paper slap |
+| `decree_void` | 1.03 s | `page_flutter` | a dry crisp tear and a bright rising glass shimmer, D6 A6 D7 F#7 |
+| `decree_unroll` | 1.48 s | `telegraph` | a scroll unrolling in two rolls over a low tone rising a fourth |
+| `bell_drowned` | 4.40 s | `bell_toll` | a bronze bell about D3 through water: a drifting lowpass near 600 Hz, a slow wobble, long dark decay |
+| `bell_clear` | 4.78 s | `bell_toll` | the clear variant (E3, open and bright) for the principle stones; an extra id no script names yet |
+
+Ambience: `canal_rain` (fallback `river_birds`): steady rain on water, countless tiny plinks, a gutter trickle, slow gusts, a few
+eave drips. `keep_drip` (fallback `archive_hush`): a still flooded hall, low hum, slow lapping, near and far drips, one far groan of
+a lock gear.
+
 ## Instruments (tools/music/synth.py)
 All oscillators are band-limited wavetables (additive, Lanczos-smoothed), so nothing aliases.
 strings (five unevenly detuned saws with independent vibrato, dark-to-bright filter morph, slow attack;

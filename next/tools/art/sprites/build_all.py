@@ -32,6 +32,7 @@ def main():
         ('misc', build_misc.build),
         ('heads', build_heads.build),
         ('x1', lambda: __import__('x1_build').build()),
+        ('ep4', lambda: __import__('ep4_build').build()),
     ]
     for name, fn in steps:
         t = time.time()

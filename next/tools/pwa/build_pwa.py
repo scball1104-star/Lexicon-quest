@@ -42,7 +42,10 @@ PACK_ASSET_DIRS = ('tiles', 'sprites', 'ui', 'backdrops')
 # field systems (src/world/ep3/, imported lazily by field.js), and the moving paintings (docs/MEDIA_BUILD.md 5: the clips,
 # their list and src/ui/clips/player.js, imported by ui/keyart.js the first time a painting with a clip is drawn). Left out of the shell
 # list (so the first download does not move) and matched by PACK_PATTERN (so the service worker runtime-caches them).
-LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/', 'assets/clips/', 'src/ui/clips/')
+# Episode 4's sounds (EPISODE4_PLAN 13.1): its sfx and ambience ride the ep4 pack's audio fragment (src/data/ep4/audio.js), not
+# assets/audio/manifest.json, so audio_pack_files() cannot see them; the prefixes keep them out of the precache instead.
+LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/', 'assets/clips/', 'src/ui/clips/',
+                 'assets/audio/sfx/ep4_', 'assets/audio/ambience/ep4_')
 
 
 def is_lazy(rel):

@@ -11,23 +11,23 @@ export class CreditsScene {
   constructor(engine) { this.engine = engine; this.name = 'credits'; }
   enter(data = {}) {
     const e = this.engine;
-    const ep = data.episode === 3 || data.cards === CREDITS_EP3 ? 3 : data.episode === 2 || data.cards === CREDITS_EP2 ? 2 : 1;
+    const ep = data.episode || (data.cards === CREDITS_EP3 ? 3 : data.cards === CREDITS_EP2 ? 2 : 1);
     const ep2 = ep === 2;
     this.episode = ep;
-    const cards = data.cards || [CREDITS, CREDITS_EP2, CREDITS_EP3][ep - 1];
+    const cards = data.cards || [CREDITS, CREDITS_EP2, CREDITS_EP3][ep - 1] || CREDITS;
     const r = e.renderer;
     const fit = (line) => (r && r.measure && r.measure(line) > r.W - 16 ? r.wrap(line, r.W - 16) : [line]);
     this.cards = cards.map((c) => ({ heading: fillHero(c.heading || '', e.game), lines: (c.lines || []).flatMap((l) => fit(fillHero(l, e.game))) }));
-    const own = ep > 1 ? `dialog_keyart_ep${ep}` : null;
+    const own = ep > 3 ? `ep${ep}_dialog_keyart` : ep > 1 ? `dialog_keyart_ep${ep}` : null;
     const backdrop = data.backdrop || (own && e.assets && e.assets.has && e.assets.has(own) ? own : 'dialog_keyart');
-    const card = data.card || (ep === 3 ? null : ep2 ? 'paint_card_hollowmere' : 'paint_card_bell_tower');   // the painted story cards, lazy
+    const card = data.card || (ep > 2 ? null : ep2 ? 'paint_card_hollowmere' : 'paint_card_bell_tower');   // the painted story cards, lazy
     this.art = new KeyArt(e, { backdrop, card, cell: data.cell ?? 0, drift: 1.2, range: 12 });
     this.y = 0; this.t = 0; this.done = false; this.holdT = 0;
     // Pre-compute card heights.
     let y = e.renderer.H + 10;
     this.layout = this.cards.map((c) => { const h = (c.heading ? 20 : 0) + c.lines.length * 12; const at = y; y += h + GAP; return { at, h }; });
     this.endY = y;
-    e.audio.music(data.music || [null, 'triumph', 'hollowmere', 'first_bell'][ep]);
+    e.audio.music(data.music || [null, 'triumph', 'hollowmere', 'first_bell'][ep] || 'triumph');
     e.renderer.setBackdrop(null);
   }
   finish() {

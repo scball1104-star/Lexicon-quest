@@ -278,8 +278,9 @@ export function createBattle(cfg = {}) {
         masteryPts: Math.round(masteryPts * (extra.rewardScale ?? 1)) },
       lootZone: d.lootZone, ai: { turns: 0, used: {}, chargeAt: null },
       ...(expMul !== 1 ? { expMul } : {}),
-      // Episode 3 Heat: a counter on the foe (not a status). heatMax 0 = no Heat. heatStep is the ATK and MAG gain per level.
+      // Heat (Episode 3; Episode 4 Decrees: quench element, word, sfx). heatMax 0 = no Heat. heatStep: ATK and MAG per level.
       heat: 0, heatMax: d.heat ? d.heat.max : 0, heatStep: d.heat ? d.heat.step : 0, heatFlare: d.heat ? d.heat.flare : null,
+      heatQuench: (d.heat && d.heat.quench) || 'ice', heatWord: (d.heat && d.heat.word) || null, heatSfx: (d.heat && d.heat.sfx) || null,
     };
   }
 
@@ -526,11 +527,9 @@ export function createBattle(cfg = {}) {
     u.delayed = (u.delayed || 0) + 1;   // pushes taken (a Mirrored Combo falls apart when either member is pushed)
     emit({ type: 'delay', target: u.uid, amount, reason });
   }
-  // ---- Heat (Episode 3, EPISODE3_PLAN.md 6.3) -------------------------------------------------------
-  // A foe with a Heat counter gains a level per Stoke; at its maximum it announces its flare (a telegraph one turn early,
-  // `telegraph.flare: true`) and fires it on its next turn, which resets Heat. Ice damage, a Quench Flask or a Break sets
-  // Heat to 0 and cancels a pending flare. Events: `heat` { target, heat, max, delta, reason } and `quench`.
-  let quenchReason = 'ice';
+  // ---- Heat (EPISODE3_PLAN 6.3): a level per Stoke; at max a flare is announced (`telegraph.flare`) and fires next turn.
+  // Its quench element (heatQuench), a flask or a Break resets it. Events `heat` { target, heat, max, delta, reason }, `quench`.
+  let quenchReason = null;   // 'flask' while an item throws; else the hit's own element (heatQuench)
   function stoke(u, n = 1, info = {}) {
     if (!u || !u.alive || !u.heatMax) return 0;
     const before = u.heat;
@@ -551,9 +550,9 @@ export function createBattle(cfg = {}) {
     const pending = u.charging && u.heatFlare && u.charging.skill === u.heatFlare ? u.charging.skill : null;
     if (!had && !pending) return false;
     u.heat = 0;
-    emit({ type: 'quench', target: u.uid, reason, heat: had, cancelled: pending, sfx: 'quench_hiss' });
+    emit({ type: 'quench', target: u.uid, reason, heat: had, cancelled: pending, sfx: u.heatSfx || 'quench_hiss' });
     emit({ type: 'heat', target: u.uid, heat: 0, max: u.heatMax, delta: -had, reason: 'quench' });
-    emit({ type: 'message', text: 'Quenched!', kind: 'quench', target: u.uid });
+    emit({ type: 'message', text: u.heatWord || 'Quenched!', kind: 'quench', target: u.uid });
     if (pending) cancelCharge(u, 'quench');
     return true;
   }
@@ -685,8 +684,7 @@ export function createBattle(cfg = {}) {
       types, element: types[0] || null, shieldLost, shields: tgt.side === 'enemy' ? tgt.shields : null, broken: wasBroken });
     let broke = false;
     if (shieldLost && tgt.alive && tgt.shields <= 0 && !tgt.broken) { breakUnit(tgt); broke = true; }
-    // Episode 3: any ice damage quenches a foe's Heat (and cancels a pending flare)
-    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes('ice')) quench(tgt, quenchReason);
+    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes(tgt.heatQuench)) quench(tgt, quenchReason || tgt.heatQuench);
     // status interplay: fire thaws Chill, ice puts out Burn
     for (const t of types) for (const s of ST.CURED_BY_TYPE[t] || []) if (tgt.alive && has(tgt, s)) removeStatus(tgt, s, 'countered');
     // on-hit extras
@@ -1171,7 +1169,7 @@ export function createBattle(cfg = {}) {
       quenchReason = 'flask';
       if (t.alive) strike(u, t, part, null);
       if (t.alive) quench(t, 'flask');
-      quenchReason = 'ice';
+      quenchReason = null;
       return [u, ITEM_RANK];
     }
     if (e.revive) {

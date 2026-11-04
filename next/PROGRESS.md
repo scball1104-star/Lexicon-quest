@@ -510,3 +510,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   console errors, and all five card files download at the title. Not checked from here: an offline reload.
 - Still with you: the video test and the trailer brief (in your inbox since Saturday), whether the bells card should be
   repainted with exactly twelve bells, and the four swapped sounds by ear. November's nine Suno themes wait for the 27th.
+
+## 2026-11-04 (Wed) overnight: Episode 4 built, not shipped
+- Episode 4 "The Sunken Keep" plays start to finish on the branch: the flooded canal town of Valewyn, the Flood Road and
+  three keep floors where lock wheels raise and lower the water, the Inkbound Barrister, and the Paper Regent in three
+  looks. New battle rule (Decrees) and a new hero skill (Answer). Its own music, rain and drip ambience, and 9 sounds.
+- The autoplay bot cleared it on desktop and phone, from an Episode 3 save and from a new-party quick start, with no game
+  overs. The balance sim meets every target; the Regent is met at Lv 20.
+- An art critic and a playtest critic each reviewed it; two fix passes followed. The biggest fixes: an Episode 4 save can
+  no longer be lost if the episode fails to download, the Answer skill now opens first when it matters, quick-start
+  players now hear Episode 4's audio, and the keep floors and several monsters read better on a phone.
+- All of it is pull request #37 into overhaul. Shipping waits for your word, or Stephen's. The story choices still open
+  for the two of you are in the morning email.
+

@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import zlib from 'node:zlib';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { NEXT, read, exists, readJson, parseSw, manifestFiles, sizeOf } from './_lib.mjs';
 
 const sw = parseSw();
@@ -12,6 +13,11 @@ const files = manifestFiles();
 const gz = (rel) => zlib.gzipSync(fs.readFileSync(path.join(NEXT, rel)), { level: 6 }).length;
 const isText = (rel) => /\.(js|json|html|webmanifest)$/.test(rel);
 const wire = (rel) => (isText(rel) ? gz(rel) : sizeOf(rel));   // GitHub Pages gzips text, not pngs or audio
+// Episode 4's audio rides its pack, not assets/audio/manifest.json (EPISODE4_PLAN 13.3): src/data/ep4/audio.js (E4-audio, wave 4c)
+// exports the fragment { music, sfx, ambience, jingles, pack } that the pack merges into the live manifest. null until it exists.
+const EP4_AUDIO = exists('src/data/ep4/audio.js')
+  ? await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep4', 'audio.js')).href).then((m) => m.AUDIO || m.default || m)
+  : null;
 
 test('precache: built (not the placeholder), unique, and every entry exists', () => {
   assert.match(sw.version, /^[0-9a-f]{12}$/, 'SHELL_VERSION is a build hash (run python tools/pwa/build_pwa.py)');
@@ -55,6 +61,14 @@ test('audio manifest: core sfx and jingles are precached, pack sfx and music are
     assert.ok(!sw.entries.includes(s), `episode pack sfx must not be precached (lazy, runtime-cached): ${s}`);
   }
   for (const s of srcs(Object.values(a.music || {}))) assert.ok(s.startsWith('..') || !sw.entries.includes(s), `music must not be precached: ${s}`);
+  // the ep4 fragment: every file exists and none of it is precached (build_pwa.py LAZY_PREFIXES covers sfx/ep4_, ambience/ep4_)
+  if (EP4_AUDIO) for (const kind of ['sfx', 'ambience', 'music', 'jingles']) {
+    for (const s of srcs(Object.values(EP4_AUDIO[kind] || {}))) {
+      if (s.startsWith('..')) continue;
+      assert.ok(exists(s), `ep4 ${kind} file exists: ${s}`);
+      assert.ok(!sw.entries.includes(s), `ep4 ${kind} must not be precached (the pack's, runtime-cached): ${s}`);
+    }
+  }
 });
 
 test('sfx packs: every pack is declared, loadable by the engine, and every sfx id the code references resolves', () => {
@@ -70,17 +84,28 @@ test('sfx packs: every pack is declared, loadable by the engine, and every sfx i
   assert.ok(read('src/main.js').includes('pack:'), 'src/main.js asks for the packs when an episode is entered');
   // Every sfx id named in src/ must exist and sit in core or in a declared pack (a missing one would be silent).
   const ids = new Set();
+  const ep4Ids = new Set();   // ids named under src/data/ep4/: they may resolve in the ep4 pack's audio fragment instead
   const walk = (dir) => { for (const f of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
     const rel = path.posix.join(dir, f.name);
     if (f.isDirectory()) walk(rel);
     else if (f.name.endsWith('.js')) {
       const t = read(rel);
-      for (const m of t.matchAll(/sfx\(\s*['"]([a-z0-9_]+)['"]/g)) ids.add(m[1]);
-      for (const m of t.matchAll(/op:\s*'sfx',\s*id:\s*'([a-z0-9_]+)'/g)) ids.add(m[1]);
-      for (const m of t.matchAll(/sfx:\s*'([a-z0-9_]+)'/g)) ids.add(m[1]);
+      const into = rel.startsWith('src/data/ep4/') ? ep4Ids : ids;
+      for (const m of t.matchAll(/sfx\(\s*['"]([a-z0-9_]+)['"]/g)) into.add(m[1]);
+      for (const m of t.matchAll(/op:\s*'sfx',\s*id:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
+      for (const m of t.matchAll(/sfx:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
     }
   } };
   walk('src');
+  const pending = [];
+  for (const id of ep4Ids) {
+    if (id === 'sfx' || id.endsWith('_') || a.sfx[id]) { if (a.sfx[id]) ids.add(id); continue; }
+    let e = EP4_AUDIO && EP4_AUDIO.sfx && EP4_AUDIO.sfx[id];
+    if (e && e.alias) e = EP4_AUDIO.sfx[e.alias] || a.sfx[e.alias];
+    if (EP4_AUDIO) assert.ok(e && (e.src || e.srcs || e.variants), `ep4 sfx id ${id} has no entry in src/data/ep4/audio.js or the manifest`);
+    else pending.push(id);
+  }
+  if (pending.length) console.log(`# ep4 sfx ids waiting for src/data/ep4/audio.js (E4-audio): ${pending.join(', ')}`);
   assert.ok(ids.size > 40, `found ${ids.size} referenced sfx ids`);
   const missing = [];
   for (const id of ids) {

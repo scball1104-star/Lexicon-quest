@@ -1,0 +1,302 @@
+{
+ "image": "ep4_bosses_battle.png",
+ "frames": {
+  "paper_regent_cast": [
+   0,
+   0,
+   129,
+   148
+  ],
+  "paper_regent_ward_cast": [
+   131,
+   0,
+   133,
+   148
+  ],
+  "paper_regent_charter_cast": [
+   266,
+   0,
+   133,
+   148
+  ],
+  "paper_regent_ward_die_0": [
+   0,
+   150,
+   133,
+   138
+  ],
+  "paper_regent_ward_idle_1": [
+   135,
+   150,
+   133,
+   136
+  ],
+  "paper_regent_ward": [
+   270,
+   150,
+   133,
+   135
+  ],
+  "paper_regent_ward_attack": [
+   0,
+   290,
+   137,
+   135
+  ],
+  "paper_regent_idle_1": [
+   139,
+   290,
+   129,
+   133
+  ],
+  "paper_regent_ward_hurt": [
+   270,
+   290,
+   137,
+   133
+  ],
+  "paper_regent": [
+   0,
+   427,
+   129,
+   132
+  ],
+  "paper_regent_attack": [
+   131,
+   427,
+   131,
+   132
+  ],
+  "paper_regent_die_0": [
+   264,
+   427,
+   129,
+   132
+  ],
+  "paper_regent_ward_die_1": [
+   0,
+   561,
+   133,
+   132
+  ],
+  "paper_regent_hurt": [
+   135,
+   561,
+   131,
+   130
+  ],
+  "paper_regent_charter_die_0": [
+   268,
+   561,
+   133,
+   127
+  ],
+  "paper_regent_charter_idle_1": [
+   0,
+   695,
+   133,
+   125
+  ],
+  "paper_regent_charter": [
+   135,
+   695,
+   133,
+   124
+  ],
+  "paper_regent_charter_attack": [
+   270,
+   695,
+   133,
+   124
+  ],
+  "paper_regent_charter_hurt": [
+   0,
+   822,
+   135,
+   122
+  ],
+  "paper_regent_die_1": [
+   137,
+   822,
+   129,
+   119
+  ],
+  "paper_regent_charter_die_1": [
+   268,
+   822,
+   133,
+   117
+  ],
+  "paper_regent_ward_die_2": [
+   0,
+   946,
+   133,
+   97
+  ],
+  "paper_regent_die_2": [
+   135,
+   946,
+   129,
+   87
+  ],
+  "paper_regent_charter_die_2": [
+   266,
+   946,
+   133,
+   87
+  ]
+ },
+ "origin": {
+  "paper_regent": [
+   64,
+   131
+  ],
+  "paper_regent_idle_1": [
+   64,
+   132
+  ],
+  "paper_regent_attack": [
+   65,
+   131
+  ],
+  "paper_regent_hurt": [
+   65,
+   129
+  ],
+  "paper_regent_cast": [
+   64,
+   147
+  ],
+  "paper_regent_die_0": [
+   64,
+   131
+  ],
+  "paper_regent_die_1": [
+   64,
+   118
+  ],
+  "paper_regent_die_2": [
+   64,
+   86
+  ],
+  "paper_regent_ward": [
+   66,
+   134
+  ],
+  "paper_regent_ward_idle_1": [
+   66,
+   135
+  ],
+  "paper_regent_ward_attack": [
+   68,
+   134
+  ],
+  "paper_regent_ward_hurt": [
+   68,
+   132
+  ],
+  "paper_regent_ward_cast": [
+   66,
+   147
+  ],
+  "paper_regent_ward_die_0": [
+   66,
+   137
+  ],
+  "paper_regent_ward_die_1": [
+   66,
+   131
+  ],
+  "paper_regent_ward_die_2": [
+   66,
+   96
+  ],
+  "paper_regent_charter": [
+   66,
+   123
+  ],
+  "paper_regent_charter_idle_1": [
+   66,
+   124
+  ],
+  "paper_regent_charter_attack": [
+   66,
+   123
+  ],
+  "paper_regent_charter_hurt": [
+   67,
+   121
+  ],
+  "paper_regent_charter_cast": [
+   66,
+   147
+  ],
+  "paper_regent_charter_die_0": [
+   66,
+   126
+  ],
+  "paper_regent_charter_die_1": [
+   66,
+   116
+  ],
+  "paper_regent_charter_die_2": [
+   66,
+   86
+  ]
+ },
+ "anims": {
+  "paper_regent_idle": {
+   "frames": [
+    "paper_regent",
+    "paper_regent_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "paper_regent_die": {
+   "frames": [
+    "paper_regent_die_0",
+    "paper_regent_die_1",
+    "paper_regent_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "paper_regent_ward_idle": {
+   "frames": [
+    "paper_regent_ward",
+    "paper_regent_ward_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "paper_regent_ward_die": {
+   "frames": [
+    "paper_regent_ward_die_0",
+    "paper_regent_ward_die_1",
+    "paper_regent_ward_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "paper_regent_charter_idle": {
+   "frames": [
+    "paper_regent_charter",
+    "paper_regent_charter_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "paper_regent_charter_die": {
+   "frames": [
+    "paper_regent_charter_die_0",
+    "paper_regent_charter_die_1",
+    "paper_regent_charter_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "notes": "Episode 4 pack atlas, merged into bosses_battle. The Paper Regent (bosses.png cell 3, 1x, flipped so the trident is on the party's side) in three looks: paper_regent (Forged Edicts), paper_regent_ward (Royal Ward: the halo of floating writs), paper_regent_charter (The True Charter: bare vellum, a paper crown, the trident a pen). Each has _idle_1, _attack, _hurt, _cast, _die_0..2. A phase that wants its look names it: royal_ward -> paper_regent_ward, true_charter -> paper_regent_charter."
+}

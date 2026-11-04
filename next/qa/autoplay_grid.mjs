@@ -29,6 +29,12 @@ if (caveArg) {
   const n = W.floorOfMapId(id);
   map = n >= 1 && n <= 99 ? W.buildFloor(seed, n, vault) : (await import(`../src/data/cave/maps/${id}.js`)).default;
 } else map = await loadMap(id);
+// Episode 4 (E4-integrate): the ep4 pack patches two Episode 3 maps (the east road, the inn's wake trigger); the bot walks the
+// patched ones, as the game does once the pack is in
+if (id === 'emberpeak' || id === 'pk_inn') {
+  const P = await import('../src/data/maps/ep4_patches.js');
+  map = id === 'emberpeak' ? P.withEastRoad(map) : P.withEp4Wake(map);
+}
 const gated = new Set();
 for (const o of [...(map.overlays || []), ...(map.overhead || [])]) {
   for (const k of ['if', 'ifNot']) for (const f of [].concat(o[k] || [])) gated.add(f);

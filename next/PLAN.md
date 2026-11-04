@@ -227,3 +227,21 @@ Then: flip CAVE_LIVE, the full publish gate list (EXPANSION_SCHEDULE 4) on a qui
   - Fixed by the orchestrator 10/28 11:50 (its gap 5, seed 311 B92): gen.js dressing now skips a chest spot that would cut the stair off and places foes on the walk WITH the chests in it, so the proof cannot fail on either; unchanged floors identical
   - C4-uniques leftovers for C4-fixes: resist stacking past 100 in inventory.js scoring (deep Named heads and charms lose to rolled rares), the Journal line's missing total, the "n of 61" plaque wording; Scott's answer to open call E (10/27, verbatim in DEEP_STACKS_PLAN 13): sixty uniques in three grades with the odds turning over with depth, enough to equip the party in uniques several times over (`docs/briefs/C4-uniques.md`); launch after the Wednesday 10/28 reset, after C3-critic, one agent at a time
 - [~] C4-fixes: LAUNCHED 10/28 12:45 on Opus (`docs/briefs/C4-fixes.md`); then flip CAVE_LIVE, the publish gate list on a quiet machine, Scott's explicit yes
+
+## Episode 4: The Sunken Keep (status: designed tonight 2026-11-03, building behind `EP4_LIVE` on `scott/ep4-build`)
+Scott asked for a major overnight push after Episode 3 shipped on 11/3. Design by ep4-designer: `docs/story/EPISODE4.md`
+(story bible: the hero's episode; the Regent of Valewyn's name struck, her seal ruling without her; one forged word,
+OPEN into CLOSE; the hero signs the Witness Book and learns Answer; the Paper Regent; the fourth fragment; "Keep this
+one.") and `docs/EPISODE4_PLAN.md` (the contract). New field mechanic: tide locks (wheels raise and lower water through
+three marks; pontoons float; high water washes forged seals off for good). One battle rule: Decrees (on the Heat
+counter). Lv 17 to 21, planned at 75 minutes. Everything lives in the lazy `ep4` pack; core changes are the seams of
+plan 13.2, each paid by a core-JS trim. No Suno or Runway tonight. Up to three agents at once, disjoint paths (plan 11).
+- [ ] Wave 4a: E4-pack, E4-story, E4-battle
+- [ ] Wave 4b: E4-tiles, E4-sprites, E4-world
+- [ ] Wave 4c: E4-maps-a, E4-maps-b, E4-audio
+- [ ] Wave 4d: E4-scene-ui, then E4-integrate (flips `EP4_LIVE` on the branch after the full gate list; shipping stays Scott's or Stephen's word)
+- [ ] Wave 4e: critic-6 and play-critic-6 (`docs/briefs/E4-review.md`, read-only), then E4-fixes
+- Open for Scott and Stephen (defaults in EPISODE4.md section 10): Lyra's name struck [yes]; the hero's episode with
+  Answer [yes]; "Keep this one." [yes]; Vex keeps the Valewyn list and signs "V." [yes]; collision renames (Nessa to
+  Hale, Orel to Joss, floor III to The Court of Witnesses) [yes]; Fine Print stays out of Episode 4 for now [yes];
+  Episode 5 card wording [placeholder].

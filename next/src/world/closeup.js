@@ -1,10 +1,4 @@
-// Close-up inserts (W11, CRITIQUE_4 item 2): "the faces in the water do not read". On a phone the party stands
-// between the camera and the Fountain of Faces, and a face drawn into the field's 20 px of water is a smudge
-// whatever it holds. So the three fountain beats (fountain_faces, fountain_check, the Episode 2 ending, and Mira's
-// beat in hollowmere_restored) cut to a framed close-up of the basin, the way Chrono Trigger and FF6 put the
-// camera on the thing that matters: an oval of still water inside the stone rim, the sky in it, and whole
-// upright faces looking back (the 48 px dialogue portraits, keyed, masked to an oval and tinted by the water).
-// Everything is drawn at the game's own pixel density (no zoomed crop), with ordered dithering, no smoothing.
+// Close-up inserts (W11, CRITIQUE_4 item 2): the fountain beats cut to a framed close-up of the basin with whole upright faces in the water.
 //
 //   field.closeup.open('fountain', { faces, strangers, mode })   resolves when the insert has opened
 //   field.closeup.close()                                         resolves when it has closed
@@ -135,8 +129,7 @@ export class Closeup {
     const { w, h } = INSERT, mode = this.opts.mode;
     const mk = () => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
     this.base = this.base || mk(); this.rim = this.rim || mk(); this.work = this.work || mk();
-    // Three ellipses: the rim's outer edge, the lip's inner edge (the rim's flat top lies between them), and the
-    // water, set 3 px lower so the far inner wall of the basin shows between lip and water (we look down at an angle).
+    // Three ellipses: rim edge, lip edge, water 3 px lower (the far inner wall shows).
     const cx = w / 2 - 0.5, cy = h / 2 - 0.5;
     const orx = w / 2 - 1, ory = h / 2 - 1, lrx = orx - RIM - 3, lry = ory - RIM - 1;
     const wcy = cy + 2, wrx = lrx - 1, wry = lry - 3;
@@ -150,8 +143,7 @@ export class Closeup {
       const dw = ell(x, y, cx, wcy, wrx, wry), dl = ell(x, y, cx, cy, lrx, lry), d = ell(x, y, cx, cy, orx, ory);
       const i = (y * w + x) * 4;
       if (dw < 1) {
-        // Water: the sky, lighter on the far side; the inner wall's shadow along the far-left edge (light from the
-        // upper left); a dark line where the water meets the stone.
+        // Water: the sky, lighter far; the inner wall's shadow far left; a dark line at the stone.
         let v = (y - (wcy - wry)) / (2 * wry) * (water.length - 1) * 0.92;
         const nx = (x - cx) / wrx, ny = (y - wcy) / wry;
         if (dw > 0.86 && (nx * -0.6 + ny * -0.8) > 0.1) v += 1.2 * (dw - 0.86) / 0.14 + 0.3;
@@ -162,8 +154,7 @@ export class Closeup {
         const k = Math.max(0, Math.min(1, (y - (cy - lry)) / Math.max(1, (wcy - wry) - (cy - lry) + 6)));
         put(rimg, i, dithered(stone, 2.2 - k * 1.6, x, y));
       } else if (d < 1) {
-        // The rim's top: a rounded lip (lighter along its crest), the outer slope lit on the upper left, the inner
-        // edge lit on the lower right, cut into dressed blocks by dark seams; outlined in ink.
+        // The rim's top: a lit lip, the outer slope lit upper left, dressed blocks, inked.
         const ring = Math.max(0, Math.min(1, (dl - 1) / (dl / d - 1)));   // 0 at the lip's inner edge, 1 at the outside
         const nx = (x - cx) / orx, ny = (y - cy) / ory, nl = Math.hypot(nx, ny) || 1;
         const lit = (nx / nl) * -0.6 + (ny / nl) * -0.8;

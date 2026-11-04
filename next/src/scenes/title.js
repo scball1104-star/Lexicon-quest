@@ -1,13 +1,5 @@
-// Title screen: logo with sparkles over the quantized `title` backdrop (assets/backdrops, 2 px drift; the
-// painted crop is the fallback), New Game / Continue / [Episode 2] / Config, version string, attract mode after
-// 20 s idle (prologue cards, then back). Also the UI module's install(): toasts, the 'choice', '_uiStage' and
-// 'nameEntryEp2' scenes, the stats provider, and LQ_DEBUG.newGame / give / uiStage.
-// Episode 2 shows once any slot has `ep1_complete` (or ?ep=2): a ready-made party, its note says the player's own game
-// stays under Continue. Fresh starts share the autosave (slot 0), so over a game they ask first (the save guard: what
-// would be replaced; "Keep my save" is the default and the cancel answer, a free record can take a copy first).
-// Held upright on a phone the game is a 384 px strip, so the title first shows a one-time card that says to turn the
-// phone (W15, PLAYTEST_REVIEW_4 fix 5): any tap or key dismisses it, settings.rotateHintSeen remembers it, landscape
-// never shows it and turning the phone counts as reading it. The portrait layout stays for players who keep it.
+// Title screen: logo, menu (episode rows, the save guard, the slot picker), attract mode, the one-time turn-the-phone
+// card. Also the UI install(): toasts, the 'choice', '_uiStage' and name entry scenes, LQ_DEBUG.newGame / give / uiStage.
 
 import { List, rowHeightFor, tapRowHeight } from '../ui/list.js';
 import { drawWindow, installToasts, ChoiceScene, ChoiceBox, uiAudit } from '../ui/index.js';
@@ -16,9 +8,9 @@ import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
 import { animFrameAt } from '../core/assets.js';
 import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, newGameEp3, cleanName, EP2_START, EP3_START } from '../game/state.js';
-import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP } from '../game/episodes.js';
+import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP, EP4_LIVE } from '../game/episodes.js';
 import { NameEntryScene } from './nameEntry.js';
-import { packsToAwait, awaitPacks, packEnabled, ensurePack } from '../game/packs.js';
+import { packsToAwait, awaitPacks, packEnabled, ensurePack, forcePack } from '../game/packs.js';
 import { memberStats } from '../battle/rules.js';
 import { ITEMS, CONSUMABLES, KEY_ITEMS } from '../data/items.js';
 import { BANNERS } from '../data/text.js';
@@ -69,7 +61,8 @@ export class TitleScene {
     this.win = { x: Math.round(192 - w / 2), y: bottom - h, w, h };
     this.guard = null;
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
-    if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print (data/tier)
+    if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print
+    if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4\b/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4', { engine: e }).then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);

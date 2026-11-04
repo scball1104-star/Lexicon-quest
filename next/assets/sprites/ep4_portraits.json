@@ -1,0 +1,44 @@
+{
+ "image": "ep4_portraits.png",
+ "frames": {
+  "paper_regent_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "paper_regent_32": [
+   48,
+   0,
+   32,
+   32
+  ],
+  "lyra_48": [
+   80,
+   0,
+   48,
+   48
+  ],
+  "lyra_32": [
+   0,
+   48,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "paper_regent": {
+   "48": "paper_regent_48",
+   "32": "paper_regent_32"
+  },
+  "lyra": {
+   "48": "lyra_48",
+   "32": "lyra_32"
+  }
+ },
+ "sources": {
+  "paper_regent": "battle frame paper_regent (1x crop, E4-sprites)",
+  "lyra": "noble_lady (portraits.webp cell 4) aged by hand: grey at the temples, age lines (ep4_lyra.py, E4-fixes-B)"
+ },
+ "notes": "Episode 4 pack atlas, merged into portraits. paper_regent: the crown, the hood and its two cyan eyes, cropped at 1x from the Forged Edicts battle frame. lyra: the noble_lady face aged to her fifties (CRITIQUE_6 item 10); her speaker tags and npcs name it as portrait id `lyra` (until they do, they still show noble_lady)."
+}

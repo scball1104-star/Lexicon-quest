@@ -1,0 +1,3313 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/ep4.py (python build_tiles.py ep4)",
+ "note": "Episode 4 (ep4 pack) tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each ep4 terrain is drawn below.",
+ "extraColors": [
+  "#123f4c",
+  "#1a6f7a",
+  "#a3202c",
+  "#d8434a",
+  "#1c261f",
+  "#28342a",
+  "#3e4b40",
+  "#566555",
+  "#7c8a78",
+  "#909d8c",
+  "#a6b3a0",
+  "#c6cfc0"
+ ],
+ "terrainOrder": [
+  "causeway_floor",
+  "keep_archive_floor",
+  "witness_floor",
+  "canal_floor",
+  "canal_floor_causeway",
+  "mud_path",
+  "flood_grass",
+  "marble_walk",
+  "tide_water"
+ ],
+ "terrainInsertBefore": {
+  "causeway_floor": "stone_floor",
+  "keep_archive_floor": "stone_floor",
+  "witness_floor": "stone_floor",
+  "canal_floor": "stone_floor",
+  "flood_grass": "moss",
+  "mud_path": "grass",
+  "marble_walk": "plaza",
+  "canal_floor_causeway": "stone_floor"
+ },
+ "terrains": {
+  "causeway_floor": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ],
+    [
+     128,
+     0
+    ]
+   ],
+   "variantWeights": [
+    40,
+    6,
+    2,
+    1,
+    7,
+    3,
+    4
+   ],
+   "sheet": "ep4.png",
+   "order": 10
+  },
+  "keep_archive_floor": {
+   "x": 144,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ],
+    [
+     224,
+     0
+    ],
+    [
+     240,
+     0
+    ],
+    [
+     256,
+     0
+    ],
+    [
+     272,
+     0
+    ]
+   ],
+   "variantWeights": [
+    56,
+    4,
+    3,
+    2,
+    2,
+    2,
+    1
+   ],
+   "sheet": "ep4.png",
+   "order": 11
+  },
+  "witness_floor": {
+   "x": 288,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     320,
+     0
+    ],
+    [
+     336,
+     0
+    ],
+    [
+     352,
+     0
+    ],
+    [
+     368,
+     0
+    ],
+    [
+     384,
+     0
+    ],
+    [
+     400,
+     0
+    ],
+    [
+     416,
+     0
+    ]
+   ],
+   "variantWeights": [
+    44,
+    2,
+    14,
+    2,
+    1,
+    4,
+    1
+   ],
+   "sheet": "ep4.png",
+   "order": 12
+  },
+  "canal_floor": {
+   "x": 0,
+   "y": 256,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     256
+    ],
+    [
+     48,
+     256
+    ],
+    [
+     64,
+     256
+    ],
+    [
+     80,
+     256
+    ],
+    [
+     96,
+     256
+    ]
+   ],
+   "variantWeights": [
+    24,
+    3,
+    3,
+    1,
+    2
+   ],
+   "note": "drained channel floor (height 0): pale wet stone, a weed line along its edge; draw tide_water over it when flooded",
+   "sheet": "ep4.png",
+   "order": 13
+  },
+  "tide_water": {
+   "x": 112,
+   "y": 256,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 240
+   },
+   "flow": "tide",
+   "note": "turquoise flood water (A1, 3 frames): drawn over every flooded cell; dark band under a north bank, foam rim on the other edges",
+   "sheet": "ep4.png",
+   "order": 36
+  },
+  "flood_grass": {
+   "x": 0,
+   "y": 368,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     368
+    ],
+    [
+     48,
+     368
+    ],
+    [
+     64,
+     368
+    ],
+    [
+     80,
+     368
+    ],
+    [
+     96,
+     368
+    ],
+    [
+     112,
+     368
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    2,
+    3,
+    2
+   ],
+   "sheet": "ep4.png",
+   "order": 23
+  },
+  "mud_path": {
+   "x": 128,
+   "y": 368,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     160,
+     368
+    ],
+    [
+     176,
+     368
+    ],
+    [
+     192,
+     368
+    ],
+    [
+     208,
+     368
+    ]
+   ],
+   "variantWeights": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "sheet": "ep4.png",
+   "order": 21
+  },
+  "marble_walk": {
+   "x": 224,
+   "y": 368,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     256,
+     368
+    ],
+    [
+     272,
+     368
+    ],
+    [
+     288,
+     368
+    ],
+    [
+     304,
+     368
+    ],
+    [
+     320,
+     368
+    ],
+    [
+     336,
+     368
+    ]
+   ],
+   "variantWeights": [
+    18,
+    1,
+    2,
+    2,
+    1,
+    1
+   ],
+   "sheet": "ep4.png",
+   "order": 26
+  },
+  "canal_floor_causeway": {
+   "x": 0,
+   "y": 1168,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     1168
+    ],
+    [
+     48,
+     1168
+    ],
+    [
+     64,
+     1168
+    ],
+    [
+     80,
+     1168
+    ],
+    [
+     96,
+     1168
+    ]
+   ],
+   "variantWeights": [
+    24,
+    3,
+    3,
+    1,
+    2
+   ],
+   "note": "F1 drained channel floor in the causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png",
+   "order": 14
+  }
+ },
+ "walls": {
+  "causeway": {
+   "top": [
+    0,
+    48
+   ],
+   "face": [
+    32,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    7,
+    2,
+    2,
+    2
+   ],
+   "note": "E4 keep wall band (causeway_top) and inner face (causeway_face); tide marks at face rows 18 (mark 2) and 26 (mark 1) of a 2-row face; faceStyles per room (tools/art/tiles/ep4_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      48
+     ]
+    ],
+    [
+     [
+      0,
+      192
+     ],
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      64,
+      192
+     ],
+     [
+      96,
+      192
+     ],
+     [
+      128,
+      192
+     ]
+    ],
+    [
+     [
+      160,
+      192
+     ],
+     [
+      192,
+      192
+     ]
+    ],
+    [
+     [
+      224,
+      192
+     ],
+     [
+      256,
+      192
+     ],
+     [
+      288,
+      192
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep4_keep_f1": {
+     "cycle": [
+      0,
+      2,
+      3,
+      1,
+      0,
+      4
+     ]
+    }
+   },
+   "sheet": "ep4.png"
+  },
+  "causeway_out": {
+   "top": [
+    64,
+    48
+   ],
+   "face": [
+    96,
+    48
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ],
+    [
+     224,
+     48
+    ],
+    [
+     240,
+     48
+    ],
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (causeway_out_top, no edges) and the outer face under a band's south lip (causeway_out_face)",
+   "sheet": "ep4.png"
+  },
+  "archive_stacks": {
+   "top": [
+    0,
+    96
+   ],
+   "face": [
+    32,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     96
+    ],
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    6,
+    2,
+    2,
+    1
+   ],
+   "note": "E4 keep wall band (archive_stacks_top) and inner face (archive_stacks_face); tide marks at face rows 18 (mark 2) and 26 (mark 1) of a 2-row face; faceStyles per room (tools/art/tiles/ep4_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      96
+     ]
+    ],
+    [
+     [
+      320,
+      192
+     ],
+     [
+      352,
+      192
+     ],
+     [
+      384,
+      192
+     ]
+    ],
+    [
+     [
+      416,
+      192
+     ],
+     [
+      448,
+      192
+     ]
+    ],
+    [
+     [
+      480,
+      192
+     ],
+     [
+      0,
+      224
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep4_keep_f2": {
+     "cycle": [
+      0,
+      1,
+      3,
+      2,
+      0
+     ]
+    }
+   },
+   "sheet": "ep4.png"
+  },
+  "archive_stacks_out": {
+   "top": [
+    64,
+    96
+   ],
+   "face": [
+    96,
+    96
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ],
+    [
+     240,
+     96
+    ],
+    [
+     256,
+     96
+    ],
+    [
+     272,
+     96
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (archive_stacks_out_top, no edges) and the outer face under a band's south lip (archive_stacks_out_face)",
+   "sheet": "ep4.png"
+  },
+  "witness": {
+   "top": [
+    0,
+    144
+   ],
+   "face": [
+    32,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     144
+    ],
+    [
+     144,
+     144
+    ],
+    [
+     160,
+     144
+    ],
+    [
+     176,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2
+   ],
+   "note": "E4 keep wall band (witness_top) and inner face (witness_face); tide marks at face rows 18 (mark 2) and 26 (mark 1) of a 2-row face; faceStyles per room (tools/art/tiles/ep4_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      144
+     ]
+    ],
+    [
+     [
+      32,
+      224
+     ],
+     [
+      64,
+      224
+     ]
+    ],
+    [
+     [
+      96,
+      224
+     ],
+     [
+      128,
+      224
+     ]
+    ],
+    [
+     [
+      160,
+      224
+     ],
+     [
+      192,
+      224
+     ],
+     [
+      224,
+      224
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep4_keep_f3": {
+     "cycle": [
+      0,
+      2,
+      1,
+      3,
+      2
+     ]
+    },
+    "ep4_keep_crown": {
+     "cycle": [
+      2,
+      3,
+      2
+     ]
+    }
+   },
+   "sheet": "ep4.png"
+  },
+  "witness_out": {
+   "top": [
+    64,
+    144
+   ],
+   "face": [
+    96,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     144
+    ],
+    [
+     208,
+     144
+    ],
+    [
+     224,
+     144
+    ],
+    [
+     240,
+     144
+    ],
+    [
+     256,
+     144
+    ],
+    [
+     272,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the deep beyond the walls (witness_out_top, no edges) and the outer face under a band's south lip (witness_out_face)",
+   "sheet": "ep4.png"
+  }
+ },
+ "tiles": {
+  "canal_stair_s": {
+   "x": 0,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the south (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_n": {
+   "x": 16,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the north (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_e": {
+   "x": 32,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the east (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_w": {
+   "x": 48,
+   "y": 304,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the west (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "ledge_face": {
+   "x": 64,
+   "y": 304,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "the 1-tile drop face between two floor heights, the high floor to the NORTH (solid); line16 index N*1+E*2+S*4+W*8, only E and W change the art",
+   "sheet": "ep4.png"
+  },
+  "ledge_face_marble": {
+   "x": 192,
+   "y": 304,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "the 1-tile drop face between two floor heights, the high floor to the NORTH (solid); line16 index N*1+E*2+S*4+W*8, only E and W change the art; marble for F3",
+   "sheet": "ep4.png"
+  },
+  "ledge_lip": {
+   "x": 320,
+   "y": 304,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a solid stone kerb seen from above, for a height step facing north, east or west (no face visible); line16 index N*1+E*2+S*4+W*8, runs join toward set bits",
+   "sheet": "ep4.png"
+  },
+  "ledge_lip_marble": {
+   "x": 0,
+   "y": 336,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a solid stone kerb seen from above, for a height step facing north, east or west (no face visible); line16 index N*1+E*2+S*4+W*8, runs join toward set bits; marble for F3",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_arch_l": {
+   "x": 0,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "bridge_stone_h_arch_l in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_arch_m": {
+   "x": 16,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "bridge_stone_h_arch_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_arch_r": {
+   "x": 32,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "bridge_stone_h_arch_r in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_n_l": {
+   "x": 48,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_n_l in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_n_m": {
+   "x": 64,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_n_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_n_r": {
+   "x": 80,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_n_r in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_s_l": {
+   "x": 96,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_s_l in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_s_m": {
+   "x": 112,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_s_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_h_s_r": {
+   "x": 128,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_h_s_r in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_m_e": {
+   "x": 144,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_m_e in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_m_m": {
+   "x": 160,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_m_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_m_w": {
+   "x": 176,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_m_w in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_n_e": {
+   "x": 192,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_n_e in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_n_m": {
+   "x": 208,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_n_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_n_w": {
+   "x": 224,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_n_w in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_s_e": {
+   "x": 240,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_s_e in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_s_m": {
+   "x": 256,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_s_m in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "bridge_marble_v_s_w": {
+   "x": 272,
+   "y": 1024,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "bridge_stone_v_s_w in Valewyn marble",
+   "sheet": "ep4.png"
+  },
+  "valewyn_far": {
+   "x": 0,
+   "y": 1040,
+   "w": 160,
+   "h": 96,
+   "collision": "none",
+   "note": "160 x 96 decal of Valewyn from environments cell 3 (transparent sky) for the overhead layer at the bluff (mark valewyn_far)",
+   "sheet": "ep4.png"
+  },
+  "ledge_face_causeway": {
+   "x": 0,
+   "y": 1136,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "the 1-tile drop face between two floor heights, the high floor to the NORTH (solid); line16 index N*1+E*2+S*4+W*8, only E and W change the art; F1 causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png"
+  },
+  "ledge_lip_causeway": {
+   "x": 128,
+   "y": 1136,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a solid stone kerb seen from above, for a height step facing north, east or west (no face visible); line16 index N*1+E*2+S*4+W*8, runs join toward set bits; F1 causeway stone (E4-fixes-B)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_s_causeway": {
+   "x": 256,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the south (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_n_causeway": {
+   "x": 272,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the north (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_e_causeway": {
+   "x": 288,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the east (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  },
+  "canal_stair_w_causeway": {
+   "x": 304,
+   "y": 1136,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "three treads going down toward the west (connects two heights of a basin)",
+   "sheet": "ep4.png"
+  }
+ },
+ "objects": {
+  "tide_wheel": {
+   "rect": [
+    0,
+    432,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     432,
+     16,
+     32
+    ],
+    [
+     16,
+     432,
+     16,
+     32
+    ],
+    [
+     32,
+     432,
+     16,
+     32
+    ]
+   ],
+   "note": "lock wheel on a stand (event tidewheel); frames by level: 0 = low (knob left, left lamp), 1 = mid (knob up, middle lamp), 2 = high (knob right, right lamp). A 2-level basin uses 0 and 1",
+   "sheet": "ep4.png"
+  },
+  "tide_post": {
+   "rect": [
+    48,
+    432,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     48,
+     432,
+     16,
+     32
+    ],
+    [
+     64,
+     432,
+     16,
+     32
+    ],
+    [
+     80,
+     432,
+     16,
+     32
+    ]
+   ],
+   "note": "striped tide post (event tidepost); frames by level: 0 dry, 1 water at the mark-1 ring, 2 water at the mark-2 ring. Stands on a basin cell; draw it over the tide water",
+   "sheet": "ep4.png"
+  },
+  "pontoon": {
+   "rect": [
+    96,
+    432,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     432,
+     16,
+     16
+    ],
+    [
+     112,
+     432,
+     16,
+     16
+    ],
+    [
+     128,
+     432,
+     16,
+     16
+    ],
+    [
+     144,
+     432,
+     16,
+     16
+    ]
+   ],
+   "note": "moored float (event pontoon); frames: 0 grounded (solid), 1 and 2 afloat (bob between them, 1 only under reduceMotion), 3 submerged (drawn over the water, cell flooded)",
+   "bob": [
+    1,
+    2
+   ],
+   "sheet": "ep4.png"
+  },
+  "book_crate": {
+   "rect": [
+    160,
+    432,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     160,
+     432,
+     16,
+     16
+    ],
+    [
+     176,
+     432,
+     16,
+     16
+    ],
+    [
+     192,
+     432,
+     16,
+     16
+    ],
+    [
+     208,
+     432,
+     16,
+     16
+    ]
+   ],
+   "note": "F2 pontoon skin: a lashed crate of books; frames as pontoon",
+   "bob": [
+    1,
+    2
+   ],
+   "sheet": "ep4.png"
+  },
+  "seal_paper": {
+   "rect": [
+    224,
+    432,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     224,
+     432,
+     16,
+     32
+    ],
+    [
+     240,
+     432,
+     16,
+     32
+    ],
+    [
+     256,
+     432,
+     16,
+     32
+    ]
+   ],
+   "note": "forged notice over a doorway (event forgery): 0 sealed (solid), 1 washing (red ink cloud, show for the wash), 2 washed (stubs and stain; the doorway is open)",
+   "sheet": "ep4.png"
+  },
+  "seal_wash": {
+   "rect": [
+    272,
+    432,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 140
+   },
+   "note": "translucent red ink cloud for the wash effect (collision none)",
+   "sheet": "ep4.png"
+  },
+  "door_canal_closed": {
+   "rect": [
+    0,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "a sluice door in a 2-row face (16 wide); cell (0,0) is the doorway",
+   "sheet": "ep4.png"
+  },
+  "door_canal_open": {
+   "rect": [
+    16,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the open arched doorway (the cell a washed forgery leaves); walkable at (0,0)",
+   "sheet": "ep4.png"
+  },
+  "floodgate_closed": {
+   "rect": [
+    32,
+    464,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "sluice gate set in a 2-row face with its counterweight float low; cells (0,0) and (1,0)",
+   "sheet": "ep4.png"
+  },
+  "floodgate_open": {
+   "rect": [
+    64,
+    464,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the same gate lifted, the float high; cells (0,0) and (1,0) are the doorway",
+   "sheet": "ep4.png"
+  },
+  "principle_stone_voice": {
+   "rect": [
+    0,
+    496,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     496,
+     32,
+     32
+    ],
+    [
+     32,
+     496,
+     32,
+     32
+    ]
+   ],
+   "note": "principle stone (voice): frames 0 = unstruck, 1 = struck (the bell blazes, blue glow)",
+   "sheet": "ep4.png"
+  },
+  "principle_stone_truth": {
+   "rect": [
+    64,
+    496,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     496,
+     32,
+     32
+    ],
+    [
+     96,
+     496,
+     32,
+     32
+    ]
+   ],
+   "note": "principle stone (truth): frames 0 = unstruck, 1 = struck (the bell blazes, gold glow)",
+   "sheet": "ep4.png"
+  },
+  "principle_stone_mercy": {
+   "rect": [
+    128,
+    496,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     496,
+     32,
+     32
+    ],
+    [
+     160,
+     496,
+     32,
+     32
+    ]
+   ],
+   "note": "principle stone (mercy): frames 0 = unstruck, 1 = struck (the bell blazes, green glow)",
+   "sheet": "ep4.png"
+  },
+  "petition_gate_closed": {
+   "rect": [
+    0,
+    528,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     528,
+     48,
+     48
+    ],
+    [
+     48,
+     528,
+     48,
+     48
+    ],
+    [
+     96,
+     528,
+     48,
+     48
+    ],
+    [
+     144,
+     528,
+     48,
+     48
+    ]
+   ],
+   "note": "the Petition Gate in a 3-wide face; frames by state: 0..3 = sockets lit (count, left to right). Add to COUNTING_GATES so the frame follows the source count",
+   "sheet": "ep4.png"
+  },
+  "petition_gate_open": {
+   "rect": [
+    192,
+    528,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the gate open: cell (1,0) is the doorway",
+   "sheet": "ep4.png"
+  },
+  "door_seal_closed": {
+   "rect": [
+    240,
+    528,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Sunken Seal door to the Drowned Throne (needs seal_key), door_boss style, 3 wide",
+   "sheet": "ep4.png"
+  },
+  "door_seal_open": {
+   "rect": [
+    288,
+    528,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "open: cell (1,0) is the doorway",
+   "sheet": "ep4.png"
+  },
+  "witness_lectern": {
+   "rect": [
+    0,
+    576,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     576,
+     16,
+     32
+    ],
+    [
+     16,
+     576,
+     16,
+     32
+    ]
+   ],
+   "note": "the Witness Book on its lectern: 0 = unsigned, 1 = signed (after hero_signed)",
+   "sheet": "ep4.png"
+  },
+  "boat": {
+   "rect": [
+    32,
+    576,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     32,
+     576,
+     32,
+     32
+    ],
+    [
+     64,
+     576,
+     32,
+     32
+    ]
+   ],
+   "note": "boat-door sprite (door kind boat): Hale's punt; frames 0, 1 = bob (anim between them); the door cell is the anchor cell (0, 0)",
+   "bob": [
+    0,
+    1
+   ],
+   "sheet": "ep4.png"
+  },
+  "font_tide": {
+   "rect": [
+    96,
+    576,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "light": {
+    "color": "#2ec4d0",
+    "radius": 2.6
+   },
+   "note": "the tide font (rest and save)",
+   "sheet": "ep4.png"
+  },
+  "lantern_chain": {
+   "rect": [
+    192,
+    576,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 150
+   },
+   "light": {
+    "color": "#eba14d",
+    "radius": 3.6
+   },
+   "note": "a lantern hung on a chain (overhead, collision none)",
+   "sheet": "ep4.png"
+  },
+  "lantern_reflection": {
+   "rect": [
+    240,
+    576,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 180
+   },
+   "note": "translucent warm reflection drawn on high water under a lantern_chain (Mercy wing)",
+   "sheet": "ep4.png"
+  },
+  "throne_paper": {
+   "rect": [
+    0,
+    608,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     3,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     608,
+     64,
+     64
+    ],
+    [
+     64,
+     608,
+     64,
+     64
+    ]
+   ],
+   "note": "the Drowned Throne (4 x 4): 0 = occupied (draped in sealed decrees), 1 = empty (after paper_regent_defeated)",
+   "sheet": "ep4.png"
+  },
+  "glass_dome": {
+   "rect": [
+    128,
+    608,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the dry room's glass dome, all overhead (collision none); centre it over the chair",
+   "sheet": "ep4.png"
+  },
+  "regent_hall": {
+   "rect": [
+    0,
+    688,
+    160,
+    128
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    7
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     8,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     8,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     8,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     8,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     8,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     8,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "inn_flood": {
+   "rect": [
+    160,
+    688,
+    144,
+    112
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     5,
+     -5
+    ],
+    [
+     6,
+     -5
+    ],
+    [
+     7,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "forge_crown": {
+   "rect": [
+    304,
+    688,
+    112,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    4,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "house_vw_b": {
+   "rect": [
+    416,
+    688,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "shop_river": {
+   "rect": [
+    0,
+    816,
+    96,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "house_vw_a": {
+   "rect": [
+    96,
+    816,
+    80,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep4.png"
+  },
+  "statue_faceless": {
+   "rect": [
+    0,
+    912,
+    48,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the coronation statue with no face carved (object statue, script vw_statue); 3 x 4 tiles, the bottom two rows solid",
+   "sheet": "ep4.png"
+  },
+  "flood_board": {
+   "rect": [
+    48,
+    912,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     48,
+     912,
+     32,
+     32
+    ],
+    [
+     80,
+     912,
+     32,
+     32
+    ],
+    [
+     112,
+     912,
+     32,
+     32
+    ]
+   ],
+   "note": "the flood emergency orders board (sign flood_board): 0 = running notices, 1 = plus the dry forged order with a red seal (from vw_arrived), 2 = blank and dry (after vw_restored)",
+   "sheet": "ep4.png"
+  },
+  "great_lock": {
+   "rect": [
+    144,
+    912,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     144,
+     912,
+     48,
+     48
+    ],
+    [
+     192,
+     912,
+     48,
+     48
+    ]
+   ],
+   "note": "the city's great lock wheel (decor until crown_remembers): 0 = shut, 1 = open",
+   "sheet": "ep4.png"
+  },
+  "sluice_farm": {
+   "rect": [
+    240,
+    912,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     240,
+     912,
+     32,
+     32
+    ]
+   ],
+   "note": "the Flood Road farm sluice housing (the tide_wheel wh_lane stands beside it)",
+   "sheet": "ep4.png"
+  },
+  "sandbags": {
+   "rect": [
+    0,
+    976,
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a low wall of sandbags, 2 cells",
+   "sheet": "ep4.png"
+  },
+  "sandbag": {
+   "rect": [
+    32,
+    976,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "sandbags, 1 cell",
+   "sheet": "ep4.png"
+  },
+  "mooring_post": {
+   "rect": [
+    48,
+    976,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a timber mooring post with a brass band",
+   "sheet": "ep4.png"
+  },
+  "roof_drowned_a": {
+   "rect": [
+    64,
+    976,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a gable roof in the flood (river quarter overlay; place on tide_water cells)",
+   "sheet": "ep4.png"
+  },
+  "roof_drowned_b": {
+   "rect": [
+    96,
+    976,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a roof with a chimney in the flood (river quarter overlay)",
+   "sheet": "ep4.png"
+  },
+  "chimney_drowned": {
+   "rect": [
+    144,
+    976,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a chimney in the flood",
+   "sheet": "ep4.png"
+  },
+  "rope_ladder": {
+   "rect": [
+    160,
+    976,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the Emberpeak washout rope ladder (if east_road_open); 1 x 3, walkable (collision none)",
+   "sheet": "ep4.png"
+  }
+ },
+ "overlays": {}
+}
