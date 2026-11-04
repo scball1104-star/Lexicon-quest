@@ -8,6 +8,7 @@
 //   globalThis.LQ_EP4         { title(scene), offer(save, search), start(engine, name, slot) }: scenes/title.js calls
 //                             LQ_EP4.title(this); the row, picker and name entry are ./title.js (E4-scene-ui), loaded on first use
 //   LQ_DEBUG.newGameEp4       (name, { slot, scene: 'field' | 'none' }) -> { map, slot } | null when every slot is full
+//   ./scene.js                the battle presentation and shell tables (E4-scene-ui)
 import { CREDITS_HANDOFF } from '../../game/story.js';
 import { QUEST_EXT } from '../quests.js';
 import { EP4_LIVE, pickRunSlot } from '../../game/episodes.js';
@@ -16,6 +17,7 @@ import { cleanName } from '../../game/state.js';
 import { END_CARD_EP3 } from '../text.js';
 import { newGameEp4, EP4_START } from './start.js';
 import { mapsListed } from './index.js';
+import { register as registerScene } from './scene.js';
 
 /** The Episode 3 end card once Episode 4 is live (EPISODE4_PLAN 5.3). */
 export const END_CARD_EP3_LIVE = { ...END_CARD_EP3, sub: 'Episode 4 begins in the morning.' };
@@ -124,6 +126,8 @@ export function register(engine, mods = {}) {
   else waiting.push('quest (quests.js MAIN_QUEST_EP4)');
   globalThis.LQ_EP4 = HOOKS;
   installed.push('title');
+  registerScene();   // the battle stage, cards, backdrops, rare names, ?ep=4 GATE (./scene.js, E4-scene-ui)
+  installed.push('scene');
   installDebug(engine);
   done = true;
   return { installed, waiting };

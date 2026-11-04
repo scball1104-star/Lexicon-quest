@@ -527,11 +527,9 @@ export function createBattle(cfg = {}) {
     u.delayed = (u.delayed || 0) + 1;   // pushes taken (a Mirrored Combo falls apart when either member is pushed)
     emit({ type: 'delay', target: u.uid, amount, reason });
   }
-  // ---- Heat (Episode 3, EPISODE3_PLAN.md 6.3) -------------------------------------------------------
-  // A foe with a Heat counter gains a level per Stoke; at its maximum it announces its flare (a telegraph one turn early,
-  // `telegraph.flare: true`) and fires it on its next turn, which resets Heat. Ice damage, a Quench Flask or a Break sets
-  // Heat to 0 and cancels a pending flare. Events: `heat` { target, heat, max, delta, reason } and `quench`.
-  let quenchReason = 'ice';
+  // ---- Heat (EPISODE3_PLAN 6.3): a level per Stoke; at max a flare is announced (`telegraph.flare`) and fires next turn.
+  // Its quench element (heatQuench), a flask or a Break resets it. Events `heat` { target, heat, max, delta, reason }, `quench`.
+  let quenchReason = null;   // 'flask' while an item throws; else the hit's own element (heatQuench)
   function stoke(u, n = 1, info = {}) {
     if (!u || !u.alive || !u.heatMax) return 0;
     const before = u.heat;
@@ -686,8 +684,7 @@ export function createBattle(cfg = {}) {
       types, element: types[0] || null, shieldLost, shields: tgt.side === 'enemy' ? tgt.shields : null, broken: wasBroken });
     let broke = false;
     if (shieldLost && tgt.alive && tgt.shields <= 0 && !tgt.broken) { breakUnit(tgt); broke = true; }
-    // Heat: damage of the foe's quench element (ice; fire for a Decree) resets it and cancels a pending flare
-    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes(tgt.heatQuench)) quench(tgt, quenchReason);
+    if (tgt.side === 'enemy' && tgt.alive && tgt.heat && dealt > 0 && types.includes(tgt.heatQuench)) quench(tgt, quenchReason || tgt.heatQuench);
     // status interplay: fire thaws Chill, ice puts out Burn
     for (const t of types) for (const s of ST.CURED_BY_TYPE[t] || []) if (tgt.alive && has(tgt, s)) removeStatus(tgt, s, 'countered');
     // on-hit extras
@@ -1172,7 +1169,7 @@ export function createBattle(cfg = {}) {
       quenchReason = 'flask';
       if (t.alive) strike(u, t, part, null);
       if (t.alive) quench(t, 'flask');
-      quenchReason = 'ice';
+      quenchReason = null;
       return [u, ITEM_RANK];
     }
     if (e.revive) {

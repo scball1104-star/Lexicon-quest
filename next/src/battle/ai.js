@@ -784,9 +784,9 @@ export function onChargeCancelled(ctx, u, reason, skillId) {
 }
 export function onBreak(ctx, u) { const s = scriptOf(u); if (s.onBreak) s.onBreak(ctx, u); }
 export function onRecover(ctx, u) { const s = scriptOf(u); if (s.onRecover) s.onRecover(ctx, u); }
-/** A unit died: every script that watches deaths hears it (the Archivore's pages, the Nameless King's court). */
+/** A unit died: every script with onDeath hears it (the Archivore's pages, the King's court, pack scripts). */
 export function onDeath(ctx, u) {
-  for (const s of [archivore, namelessKing, cinderWarden]) s.onDeath(ctx, u);
+  for (const s of new Set(Object.values(SCRIPTS))) if (s.onDeath) s.onDeath(ctx, u);
 }
 /** An enemy was hit (after the damage): the Borrowed Shadow learns the type. */
 export function onHit(ctx, u, src, types, weakHit) {
@@ -1277,8 +1277,8 @@ function scoreHit(b, me, f, est, sk) {
   if (f.id === 'bellows_coil' || f.id === 'smelter_coil') s *= 1.6;   // Episode 3: the coils hold the shell up; the Bellows Coil first
   if (f.charging && f.charging.skill === 'feast') s *= 1.5;
   if (f.elite) s *= 1.1;
-  // Episode 3: ice on a foe at Heat 2 or more quenches it before it flares
-  if (heatAware && f.heatMax && f.heat >= 2 && sk.types && sk.types.includes('ice') && (est.hit ?? 1) > 0) s += 30 + f.maxHp * 0.06;
+  // Heat 2+: its quench element (ice; fire for a Decree) voids it before it flares
+  if (heatAware && f.heatMax && f.heat >= 2 && sk.types && sk.types.includes(f.heatQuench) && (est.hit ?? 1) > 0) s += 30 + f.maxHp * 0.06;
   return s;
 }
 

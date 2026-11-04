@@ -82,7 +82,7 @@ export function totalFrames(ops) {
 /** True when this action's hits include a critical (the party swings with the bigger crit wind-up). */
 const critIn = (rest) => (rest || []).some((e) => e && e.type === 'damage' && e.crit);
 
-class Planner {
+export class Planner {
   constructor(info) {
     this.units = info.units || {};
     this.ops = [];

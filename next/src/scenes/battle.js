@@ -31,8 +31,8 @@ const LOG_SHOW = 3;
 const ZONE_LEVEL = { valley: 2, archive_f1: 4, archive_f2: 5, archive_f3: 7, archive_boss: 8,
   east_road: 9, court_f1: 10, court_f2: 11, court_f3: 12, court_throne: 13, sand_road: 13, foundry_f1: 14, foundry_f2: 15, foundry_f3: 16, foundry_heart: 16 };
 const WEAPON_ICON = { sword: 'sword', axe: 'axe', spear: 'spear', staff: 'staff', bow: 'bow' };
-// In-battle boss name card by leader id (the field scene shows its own card before the swirl).
-const BOSS_CARD = {
+// In-battle boss name card by leader id (packs add theirs).
+export const BOSS_CARD = {
   refl_hero: { name: 'THE OTHER SELVES', sub: 'Hall of Reflections' },
   nameless_king: { name: 'THE NAMELESS KING', sub: 'Keeper of the Court' },
   archivore: { name: 'THE ARCHIVORE', sub: 'Eater of Names' },

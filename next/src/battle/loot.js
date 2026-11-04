@@ -63,9 +63,12 @@ export function rollBase(rng, { slot, ilvl = 1, type } = {}) {
 // Item level 9 and up (Episode 2) also draws the Episode 2 words; below it the Episode 1 pool rolls exactly as before.
 const EP2_NAME_ILVL = 9;
 const EP3_NAME_ILVL = 14;   // item level 14 and up (Episode 3) also draws the Episode 3 words
+/** [ilvl, words] from packs. */
+export const RARE_NAME_EXT = [];
 function rareName(rng, base, ilvl = 1) {
   let pool = ilvl >= EP2_NAME_ILVL ? RARE_NAME_A.concat(RARE_NAME_A_EP2) : RARE_NAME_A;
   if (ilvl >= EP3_NAME_ILVL) pool = pool.concat(RARE_NAME_A_EP3);
+  for (const [l, w] of RARE_NAME_EXT) if (ilvl >= l) pool = pool.concat(w);
   const a = pool[int(rng, 0, pool.length - 1)];
   const list = RARE_NAME_B[base.slot] || RARE_NAME_B.weapon;
   const b = list[int(rng, 0, list.length - 1)];
