@@ -758,19 +758,7 @@ export class FieldScene {
     if (r && this.mapId !== r.via) this.packReturn = null;
     else if (r && packReady(r.pack) && canControl && !L.moving && e.scene === this && !this.cutscene.running) { this.packReturn = null; this.warpTo(r.map, r.x, r.y, r.dir, 'door'); }
 
-    // player input
-    if (canControl && !L.moving && !this.pendingWarp) {
-      const running = (input.held('run') || (input.lastDevice === 'keyboard' && input.held('cancel'))) !== !!e.settings.alwaysRun;
-      const dur = running ? RUN_FRAMES : WALK_FRAMES;
-      const dir = input.heldDir();
-      if (dir) {
-        if (this.tryLeaderStep(dir, dur) && !leaderArrived) for (const a of this.actors) if (a.kind === 'party') a.update();
-      } else if (input.pressed('confirm')) this.interact();
-      else if (input.pressed('menu')) this.openMenu();
-      else if (input.pressed('pageR')) this.abilities.usePressed();
-      else if (input.pressed('pageL')) this.abilities.cycle(1);
-      else this.abilities.handleTouch(input, true);
-    }
+    this.playerInput(canControl, leaderArrived);
     this.abilities.update(canControl && !L.moving && e.scene === this);
     this.tickAim(canControl && !L.moving);
 
@@ -813,6 +801,25 @@ export class FieldScene {
     EV.tickGlints(this);
     this.banner.update();
     if (!this.inputLocked && !this.pendingWarp) { const ep = creditsPending(this.game, this.hasFlag); if (ep) this.rollCredits(ep); }
+  }
+
+  /** One frame of field input. A MENU press mid-step waits for the step to end. */
+  playerInput(canControl, leaderArrived) {
+    const e = this.engine, { input } = e, L = this.leader;
+    this.menuAsked = canControl && (this.menuAsked || input.pressed('menu'));
+    if (canControl && !L.moving && !this.pendingWarp) {
+      const running = (input.held('run') || (input.lastDevice === 'keyboard' && input.held('cancel'))) !== !!e.settings.alwaysRun;
+      const dur = running ? RUN_FRAMES : WALK_FRAMES;
+      const dir = input.heldDir();
+      // leaning on the pad against a wall, a person or a chest must not eat the buttons: only a step that starts does
+      if (dir && !this.menuAsked && this.tryLeaderStep(dir, dur)) {
+        if (!leaderArrived) for (const a of this.actors) if (a.kind === 'party') a.update();
+      } else if (this.menuAsked) { if (!this.inputLocked) { this.menuAsked = false; this.openMenu(); } }
+      else if (input.pressed('confirm')) this.interact();
+      else if (input.pressed('pageR')) this.abilities.usePressed();
+      else if (input.pressed('pageL')) this.abilities.cycle(1);
+      else this.abilities.handleTouch(input, true);
+    }
   }
 
   tryLeaderStep(dir, dur) {

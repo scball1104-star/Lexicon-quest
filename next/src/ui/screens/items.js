@@ -72,6 +72,8 @@ export class ItemsScreen {
     }
     if (this.busy) return null;
     const act = this.list.update(input, audio);
+    // the tab strip by finger (no page buttons on touch), as the Journal's
+    if (input.tapIn(0, 0, 384, 30)) { this.list._drag = null; this.switchTab(input.pointer.x < 192 ? -1 : 1); return null; }
     if (act === 'cancel') return 'back';
     if (act === 'pageL' || act === 'pageR') { this.switchTab(act === 'pageL' ? -1 : 1); return null; }
     if (act === 'confirm') {
