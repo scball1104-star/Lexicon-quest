@@ -23,7 +23,7 @@ const CMD_HELP = {
 };
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const FLEE_ARM_FRAMES = 72;
-/** While a telegraph's skill has `flag`, `unit` opens on Tech with `skill` first, in gold (packs add theirs). */
+/** While a telegraph's skill has `flag`, `unit` opens on Tech with `skill` first, in gold (packs add theirs; see sig). */
 export const SIGNATURE_TECHS = [{ unit: 'bram', flag: 'turnable', skill: 'tempered_oath' }];
 const CMD_ICON = { attack: 'sword', tech: 'scroll', magic: 'magic', fury: 'fury', combo: 'combo', item: 'bag', defend: 'shield', swap: 'swap', flee: 'flee' };
 
@@ -105,7 +105,14 @@ export class CommandMenu {
     this.showHelp = true; this.helpText = 'Tap FLEE again to run.'; this.helpColor = 'gold';
     return null;
   }
-  sig(u) { const t = this.scene.telegraphs; return (t && u && SIGNATURE_TECHS.find((s) => s.unit === u.id && [...t.values()].some((x) => SKILLS[x.skill] && SKILLS[x.skill][s.flag]))) || null; }
+  sig(u) {
+    const t = this.scene.telegraphs;
+    if (!t || !u) return null;
+    const hit = SIGNATURE_TECHS.find((s) => s.unit === u.id && [...t.values()].some((x) => SKILLS[x.skill] && SKILLS[x.skill][s.flag]));
+    // a tech not learned yet is no hint; a `usable` entry also needs the MP, the others show gold and greyed to say why
+    const e = hit && this.b.commands(u).find((c) => c.id === 'tech')?.list?.find((it) => it.skill === hit.skill);
+    return e && (e.enabled || !hit.usable) ? hit : null;
+  }
   close() { this.fleeArmed = 0; this.state = 'closed'; this.root = null; this.sub = null; this.preview = null; this.tInfo = null; this.base = null; }
 
   syncHelp() {
