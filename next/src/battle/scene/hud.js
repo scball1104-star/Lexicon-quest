@@ -41,7 +41,9 @@ export function drawHelp(r, text, color, opts = {}) {
   const hw = { ...HELP_WIN, ...helpOrigin() };
   const lines = helpLines(r, text, color, opts);
   const h = hw.h + Math.max(0, lines.length - 1) * HELP_LINE_H;
-  drawWindow(r, hw.x, hw.y, hw.w, h, { kind: 'thin', alpha: opts.alpha ?? 0.96 });
+  // docked with nothing to say (an action playing, phone): no empty bar in mid-screen, only its buttons (CRITIQUE_6 item 13)
+  const cut = !lines.length && opts.rightW && helpDock() ? hw.w - opts.rightW - 12 : 0;
+  drawWindow(r, hw.x + cut, hw.y, hw.w - cut, h, { kind: 'thin', alpha: opts.alpha ?? 0.96 });
   lines.forEach((line, i) => r.text(line, hw.x + 6, hw.y + 4 + i * HELP_LINE_H));
   if (opts.right) r.text(opts.right, hw.x + hw.w - 6, hw.y + 4, { align: 'right', color: opts.rightColor || 'gold' });
   return h;

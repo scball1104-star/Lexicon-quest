@@ -8,7 +8,9 @@ Serves the REPO ROOT (so ../assets/... resolves) on a free port and drives headl
   2. offline   one online visit (service worker installs and precaches), then the context goes offline and the
                page is reloaded: the shell, scenes and art must come from the worker and reach the title.
   3. retry     a blocked critical asset shows the retry prompt (qa/pwa/out/desktop-loading-error.png); a press recovers.
-  4. update    a changed sw.js installs beside the old one, waits, and the game shows the "Update ready" toast.
+  4. update    the update flow with two versions of a generated sw.js (src/core/swUpdate.js): an idle title applies and reloads once;
+               a game in progress never reloads and its saves do not change, the title applies it later; a refresh hands over at
+               the loading screen; two tabs never reload, closing one lets the title apply; the loop guard holds; stills in qa/out/polish.
   5. debug     ?debug=1 runs must never install a worker (shots.py and every QA harness rely on this).
   6. packoffline  XP-packs: a visit with ?pack=x1,x2 loads both expansion packs (forced on while their switches are off), the
                worker's runtime cache ends up holding every file in assets/pack_files.json, and after going offline a
@@ -36,6 +38,7 @@ from urllib.parse import urlparse
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 NEXT = ROOT / 'next'
 OUT = pathlib.Path(__file__).resolve().parent / 'out'
+POLISH = NEXT / 'qa' / 'out' / 'polish'
 
 MIME = {
     '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.webp': 'image/webp',
@@ -55,11 +58,15 @@ _gz = {}
 class Handler(http.server.SimpleHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     sw_version = None        # when set, /next/sw.js is served with this SHELL_VERSION (simulates a new deploy)
+    sw_text = None           # the generated worker to serve instead of the file on disk
+    sw_strip = False         # serve it without the update handler (a build from before the update flow)
 
     def do_GET(self):
         if Handler.sw_version and urlparse(self.path).path.endswith('/next/sw.js'):
             import re
-            src = (NEXT / 'sw.js').read_text(encoding='utf-8')
+            src = Handler.sw_text or (NEXT / 'sw.js').read_text(encoding='utf-8')
+            if Handler.sw_strip:
+                src = src.replace("self.addEventListener('message'", "self.addEventListener('nomessage'")
             body = re.sub(r"const SHELL_VERSION = '[^']*';", f"const SHELL_VERSION = '{Handler.sw_version}';", src).encode()
             self.send_response(200)
             self.send_header('Content-Type', 'text/javascript')
@@ -389,34 +396,234 @@ def check_retry(browser, base, report):
     return ok
 
 
-def check_update(browser, base, report):
-    """A changed sw.js installs next to the old one, waits, and the game says so ("Update ready, restart to apply")."""
+TOAST_JS = "() => { const t = window.LQ_ENGINE.toasts; const c = t && (t.current || (t.queue || [])[0]); return c ? c.text : null; }"
+SAVES_JS = "() => JSON.stringify(Object.keys(localStorage).sort().filter((k) => k.startsWith('lq-next-slot')).map((k) => [k, localStorage.getItem(k)]))"
+READY_COPY = 'Update ready. It applies at the title screen or next launch.'
+TABS_COPY = 'Update ready. Close other game tabs to apply it.'
+
+
+class Tab:
+    """One page of the game, past the tap prompt, counting its own document loads."""
+
+    def __init__(self, ctx, base, name):
+        self.page = ctx.new_page()
+        self.name = name
+        self.loads = 0
+        self.errors = []
+        self.page.on('load', self._load)
+        self.page.on('pageerror', lambda e: self.errors.append(str(e)))
+        self.page.goto(base + '/next/index.html', wait_until='load')
+        self.tap()
+        poll(self.page, 'async () => { const r = await navigator.serviceWorker.getRegistration(); return !!(r && r.active && navigator.serviceWorker.controller); }')
+
+    def _load(self, _page):
+        self.loads += 1
+
+    def tap(self):
+        self.page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
+        self.page.keyboard.press('z')
+        self.page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name === "title"', timeout=60000)
+
+    def to_field(self):
+        self.page.evaluate("LQ_DEBUG.newGame('Keep', { scene: 'field', level: 3 })")
+        self.page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name === "field"', timeout=30000)
+        self.page.evaluate('LQ_ENGINE.scene.autosave()')
+
+    def worker(self):
+        return self.page.evaluate("""async () => { const r = await navigator.serviceWorker.getRegistration();
+          const keys = (await caches.keys()).filter((k) => k.startsWith('lq-next-shell-'));
+          return { waiting: !!r.waiting, active: !!r.active, controlled: !!navigator.serviceWorker.controller, shells: keys }; }""")
+
+    def scene(self):
+        return self.page.evaluate('() => window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name')
+
+    def toast(self, text, timeout=15):
+        poll(self.page, TOAST_JS.replace('return c ? c.text : null', 'return !!c && c.text === ' + json.dumps(text)), timeout=timeout)
+
+    def shot(self, name):
+        POLISH.mkdir(parents=True, exist_ok=True)
+        self.page.screenshot(path=str(POLISH / name))
+
+
+def wait_loads(tab, cond, timeout, what):
+    """Playwright delivers page events only inside its own calls, so wait with wait_for_timeout, never time.sleep."""
+    end = time.time() + timeout
+    while time.time() < end:
+        if cond():
+            return
+        tab.page.wait_for_timeout(200)
+    raise TimeoutError('timed out waiting for: ' + what)
+
+
+def deploy(tab, version, strip=False):
+    """Put a new sw.js on the server and let the page find it; returns when it waits (or has already been applied)."""
+    Handler.sw_version = version
+    Handler.sw_strip = strip
+    tab.page.evaluate('navigator.serviceWorker.getRegistration().then((r) => r.update())')
+
+
+def settle(*tabs, seconds=7):
+    for t in tabs:
+        t.page.wait_for_timeout(int(seconds * 1000 / len(tabs)))
+
+
+def shell(version):
+    return ['lq-next-shell-' + version]
+
+
+def scenario_title(browser, base, out):
+    """Idle title: applies, reloads exactly once, the new shell alone is left; the loop guard holds a second deploy back."""
     ctx = new_context(browser, DEVICES['desktop'])
-    page = ctx.new_page()
-    page.goto(base + '/next/index.html', wait_until='load')
-    page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
-    page.keyboard.press('Enter')
-    page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
-    poll(page, 'async () => { const r = await navigator.serviceWorker.getRegistration(); return !!(r && r.active && navigator.serviceWorker.controller); }')
-    Handler.sw_version = 'test-update'
+    tab = Tab(ctx, base, 'title')
+    start = tab.worker()['shells']
+    before = tab.loads
+    deploy(tab, 'v2')
+    wait_loads(tab, lambda: tab.loads == before + 1, 45, 'reload after the deploy')
+    tab.tap()
+    w = tab.worker()
+    assert w['shells'] == shell('v2') and not w['waiting'] and w['controlled'], w
+    tab.toast('Game updated.')
+    tab.shot('update-1-title-after-reload.png')
+    settle(tab)
+    assert tab.loads == before + 1, f'one reload only, saw {tab.loads - before}'
+    out['title'] = {'loads': tab.loads - before, 'shells_before': start, 'shells_after': w['shells']}
+    # Loop guard: a second build inside ten minutes waits; the title stays up and says so.
+    deploy(tab, 'v3')
+    poll(tab.page, 'async () => !!(await navigator.serviceWorker.getRegistration()).waiting', timeout=60)
+    tab.toast(READY_COPY)
+    settle(tab)
+    assert tab.loads == before + 1, 'guard held'
+    # ...and once the window has passed, it applies (a key press first: 20 idle seconds start the attract mode, which is not quiet).
+    tab.page.keyboard.press('ArrowDown')
+    tab.page.evaluate("sessionStorage.setItem('lq-update-reload', '1')")
+    wait_loads(tab, lambda: tab.loads == before + 2, 30, 'reload after the guard window')
+    tab.tap()
+    w = tab.worker()
+    assert w['shells'] == shell('v3'), w
+    out['guard'] = {'held_inside_window': True, 'applied_after_window': w['shells']}
+    assert not tab.errors, tab.errors
+    ctx.close()
+
+
+def scenario_mid_game(browser, base, out):
+    """In a game: no reload, the save untouched, the toast. Back at the title it applies. A refresh mid-game applies at the loading screen."""
+    ctx = new_context(browser, DEVICES['desktop'])
+    tab = Tab(ctx, base, 'mid')
+    tab.to_field()
+    saves = tab.page.evaluate(SAVES_JS)
+    assert 'Keep' in saves, 'the real autosave is on disk'
+    n = tab.loads
+    deploy(tab, 'v2')
+    poll(tab.page, 'async () => !!(await navigator.serviceWorker.getRegistration()).waiting', timeout=60)
+    tab.toast(READY_COPY)
+    tab.page.wait_for_timeout(600)
+    tab.shot('update-2-mid-game-toast.png')
+    tab.page.evaluate('window.__same = window.LQ_ENGINE.game')
+    settle(tab)
+    assert tab.loads == n, f'no reload mid-game, saw {tab.loads - n}'
+    assert tab.page.evaluate("LQ_ENGINE.scenes.some((s) => s.name === 'field')"), f'the field is still there under {tab.scene()}'
+    assert tab.page.evaluate('window.__same === window.LQ_ENGINE.game'), 'the game object lives'
+    assert tab.page.evaluate(SAVES_JS) == saves, 'saves untouched while waiting'
+    assert tab.worker()['waiting'], 'still waiting'
+    tab.page.evaluate("LQ_ENGINE.fadeTo(() => LQ_ENGINE.reset('title'), { duration: 0.3 })")
+    wait_loads(tab, lambda: tab.loads == n + 1, 30, 'reload at the title')
+    tab.tap()
+    w = tab.worker()
+    assert w['shells'] == shell('v2'), w
+    assert tab.page.evaluate(SAVES_JS) == saves, 'saves identical after the update'
+    out['mid_game'] = {'reloads_in_game': 0, 'reloads_at_title': 1, 'saves_identical': True, 'shells': w['shells']}
+    assert not tab.errors, tab.errors
+    ctx.close()
+
+
+def scenario_refresh(browser, base, out):
+    """The reported bug: a refresh with a worker waiting kept the old build. Now the loading screen hands over, with one more load."""
+    ctx = new_context(browser, DEVICES['desktop'])
+    tab = Tab(ctx, base, 'refresh')
+    tab.to_field()
+    deploy(tab, 'v2')
+    poll(tab.page, 'async () => !!(await navigator.serviceWorker.getRegistration()).waiting', timeout=60)
+    n = tab.loads
+    tab.page.reload(wait_until='load')
+    wait_loads(tab, lambda: tab.loads == n + 2, 30, 'refresh plus one reload')
+    tab.tap()
+    w = tab.worker()
+    assert w['shells'] == shell('v2') and not w['waiting'], w
+    settle(tab, seconds=4)
+    assert tab.loads == n + 2, 'no third load'
+    out['refresh'] = {'loads_after_player_refresh': tab.loads - n, 'shells': w['shells']}
+    ctx.close()
+
+
+def scenario_two_tabs(browser, base, out):
+    """Two tabs: neither reloads, nothing is switched under the running game. Closing the other tab lets the title apply it."""
+    ctx = new_context(browser, DEVICES['desktop'])
+    a = Tab(ctx, base, 'a')
+    b = Tab(ctx, base, 'b')
+    na, nb = a.loads, b.loads
+    deploy(a, 'v2')
+    poll(a.page, 'async () => !!(await navigator.serviceWorker.getRegistration()).waiting', timeout=60)
+    a.toast(TABS_COPY)
+    a.shot('update-3-two-tabs-toast.png')
+    settle(a, b)
+    assert a.loads == na and b.loads == nb, 'both at the title: no reload'
+    b.to_field()
+    settle(a, b)
+    w = a.worker()
+    assert a.loads == na and b.loads == nb and w['waiting'] and len(w['shells']) == 2, (a.loads, b.loads, w)
+    assert a.page.evaluate('!LQ_ENGINE.scene.busy'), 'the refused title takes input again'
+    saves = b.page.evaluate(SAVES_JS)
+    a.page.keyboard.press('ArrowDown')
+    b.page.close()
+    wait_loads(a, lambda: a.loads == na + 1, 30, 'the last tab applies')
+    a.tap()
+    w = a.worker()
+    assert w['shells'] == shell('v2'), w
+    assert a.page.evaluate(SAVES_JS) == saves, 'saves identical'
+    settle(a, seconds=4)
+    assert a.loads == na + 1, 'one reload only'
+    out['two_tabs'] = {'reloads_while_two_open': 0, 'reloads_after_close': 1, 'shells': w['shells']}
+    ctx.close()
+
+
+def scenario_no_handler(browser, base, out):
+    """A waiting worker that cannot answer (a rollback to a build before this one): the title frees itself, no reload."""
+    ctx = new_context(browser, DEVICES['desktop'])
+    tab = Tab(ctx, base, 'nohandler')
+    n = tab.loads
+    deploy(tab, 'old', strip=True)
+    poll(tab.page, 'async () => !!(await navigator.serviceWorker.getRegistration()).waiting', timeout=60)
+    tab.toast(READY_COPY, timeout=20)
+    assert tab.page.evaluate('!LQ_ENGINE.scene.busy'), 'title free'
+    assert tab.loads == n, 'no reload'
+    out['no_handler'] = {'reloads': 0, 'title_free': True}
+    ctx.close()
+
+
+def check_update(browser, base, report):
+    """Two versions of a freshly generated sw.js (tools/pwa/build_pwa.py --out, the repo's copy is only rebuilt at ship)."""
+    import subprocess
+    import tempfile
     ok = True
     info = {}
-    try:
-        page.evaluate('navigator.serviceWorker.getRegistration().then((r) => r.update())')
-        poll(page, 'async () => { const r = await navigator.serviceWorker.getRegistration(); return !!r.waiting; }', timeout=60)
-        poll(page, '() => { const t = window.LQ_ENGINE.toasts; const c = t && (t.current || (t.queue || [])[0]); return !!(c && /Update ready, restart to apply/.test(c.text)); }', timeout=15)
-        page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / 'desktop-update-toast.png'))
-        info['caches'] = page.evaluate('caches.keys()')
-        info['toast'] = True
-    except Exception as e:  # noqa: BLE001
-        ok = False
-        info['error'] = str(e)
-    finally:
-        Handler.sw_version = None
-    ctx.close()
+    with tempfile.TemporaryDirectory() as d:
+        gen = pathlib.Path(d) / 'sw.js'
+        subprocess.run([sys.executable, str(NEXT / 'tools' / 'pwa' / 'build_pwa.py'), '--out', str(gen)], check=True, timeout=60, capture_output=True)
+        Handler.sw_text = gen.read_text(encoding='utf-8')
+    for fn in (scenario_title, scenario_mid_game, scenario_refresh, scenario_two_tabs, scenario_no_handler):
+        Handler.sw_version = 'v1'
+        Handler.sw_strip = False
+        try:
+            fn(browser, base, info)
+            print(f'[update] {fn.__name__} ok', flush=True)
+        except Exception as e:  # noqa: BLE001
+            ok = False
+            info[fn.__name__] = repr(e)
+            print(f'[update] {fn.__name__} FAIL {e!r}', flush=True)
+    Handler.sw_version = None
+    Handler.sw_text = None
     report['update'] = {'ok': ok, 'info': info}
-    print(f"[update] new sw waits, toast shown -> {info} {'ok' if ok else 'FAIL'}")
+    print(f"[update] {json.dumps(info)} {'ok' if ok else 'FAIL'}")
     return ok
 
 

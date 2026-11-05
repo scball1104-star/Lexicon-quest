@@ -12,6 +12,16 @@ export const EP4_LIVE = true;
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 
 /** The title row and help for the Episode 3 quick start (shown by E3-scene-ui when `episodeOffers().ep3.show`). */
+/**
+ * The title menu folded into two columns (the phone, with many rows): Config moves up in front of the episode rows, so those
+ * stay together in one column. In place, idempotent, and only with two or more episode rows.
+ */
+export function foldTitleRows(items) {
+  const ep = items.findIndex((it) => /^ep\d$/.test(it.id)), at = items.findIndex((it) => it.id === 'config');
+  if (ep >= 0 && at > ep && items.filter((it) => /^ep\d$/.test(it.id)).length > 1) items.splice(ep, 0, ...items.splice(at, 1));
+  return items;
+}
+
 export const EP3_ROW_LABEL = 'Episode 3: new party';
 export const EP3_ROW_HELP = 'A ready party at Lv 13. Your own save stays under Continue.';
 export const SLOTS_FULL_NOTICE = 'Every save slot holds a game. Save over one you no longer need first.';

@@ -94,7 +94,8 @@ test('title.js: the row sits under Continue, confirm routes to resumeStacks, wor
   assert.ok(!/^import .*data\/cave\//m.test(src), 'no static import of a pack file in the precached title');
   assert.match(src, /if \(this\.stacks && this\.stacks\.cleared\) drawStacksMark\(r/);
   assert.match(src, /noteId === 'stacks' \? STACKS_RESUME_HELP/);
-  assert.match(src, /r\.text\(VERSION, 4, 205, \{ color: 'gray' \}\);\r?\n\s*if \(this\.stacks/, 'the mark is drawn right after the version line, nothing moved');
+  assert.match(src, /r\.text\(VERSION, 4, vy, \{ color: 'gray' \}\);\r?\n\s*if \(this\.stacks/, 'the mark is drawn right after the version line, on its row');
+  assert.match(src, /\? 4 : 205;/, 'the version line stays at 205 unless a two-column menu reaches its corner');
 });
 
 test('the Journal line: hidden until deep_stacks_open, then the deepest floor and the vault count', () => {

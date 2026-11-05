@@ -17,6 +17,7 @@
 import { Engine } from './core/engine.js';
 import { installDebug } from './core/debug.js';
 import { startPackWatch } from './game/packs.js';
+import { makeUpdater } from './core/swUpdate.js';
 
 const params = new URLSearchParams(location.search);
 const debug = params.get('debug') === '1';
@@ -59,30 +60,21 @@ async function loadRegistry() {
 }
 
 // ---------------------------------------------------------------- service worker (installable PWA)
-function showUpdateToast() {
-  // The toast strip is installed by the title scene's install(); wait for it (up to ~60 s), then show once.
-  let tries = 0;
-  const tick = () => {
-    if (engine.toasts && typeof engine.toasts.flash === 'function') {
-      engine.toasts.flash('Update ready, restart to apply', { frames: 240 });
-    } else if (++tries < 120) setTimeout(tick, 500);
-  };
-  tick();
-}
+const workerOn = !debug && 'serviceWorker' in navigator && window.isSecureContext;
+const trackUpdate = workerOn ? makeUpdater(engine) : null;   // src/core/swUpdate.js: when a waiting worker may take over
 
 function registerWorker() {
-  if (debug || !('serviceWorker' in navigator) || !window.isSecureContext) return;
+  if (!workerOn) return;
   const url = new URL('../sw.js', import.meta.url);
   const scope = new URL('../', import.meta.url).pathname;     // the next/ folder: /Lexicon-quest/next/
   const watch = (reg) => {
-    let told = false;
-    const tell = () => { if (!told && navigator.serviceWorker.controller) { told = true; showUpdateToast(); } };
-    if (reg.waiting) tell();
+    if (reg.waiting) trackUpdate(reg);
     reg.addEventListener('updatefound', () => {
       const w = reg.installing;
-      if (w) w.addEventListener('statechange', () => { if (w.state === 'installed') tell(); });
+      if (w) w.addEventListener('statechange', () => { if (w.state === 'installed') trackUpdate(reg); });
     });
   };
+  trackUpdate.greet();
   // Register after the game is playable so the precache download never competes with the first frame.
   navigator.serviceWorker.register(url, { scope }).then(watch, (e) => console.warn('[pwa] service worker not registered', e));
 }
@@ -118,6 +110,8 @@ function watchEpisodePacks() {
 }
 
 async function main() {
+  // A worker left waiting by the last session takes over now, on the loading screen, before any save is opened.
+  if (workerOn) navigator.serviceWorker.getRegistration().then((r) => { if (r && r.waiting) trackUpdate(r); }, () => {});
   if (params.get('touch') === 'on' || params.get('touch') === 'off') {
     engine.settings.touchControls = params.get('touch');
     if (engine.touch) engine.touch.refresh();

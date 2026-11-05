@@ -16,9 +16,12 @@ runs, and the old game is untouched.
   `#14101e` from the palette ink ramp). iOS: `apple-touch-icon` (180 px) and the `apple-mobile-web-app-*` tags give a
   full-screen game from "Add to Home Screen". Android/desktop Chrome offer "Install" from the manifest.
 * **Offline**: after one visit the whole game runs without a network (music plays once it has been heard).
-* **Updates**: a new deploy installs quietly in the background. The game then shows the toast "Update ready,
-  restart to apply"; the new version takes over the next time the game is closed and reopened (all tabs closed).
-  Nobody is ever switched to new code in the middle of a battle, and the shell is never half old, half new.
+* **Updates**: a new deploy installs quietly in the background and waits. On the loading screen or an idle title it takes
+  over and the page reloads once (one more tap on the prompt, then "Game updated."). Anywhere else the toast says "Update
+  ready. It applies at the title screen or next launch.", and nothing else happens: no reload, no save touched. With a second
+  game tab open it never takes over ("Update ready. Close other game tabs to apply it."); closing the tab lets the title
+  apply it. A refresh applies a waiting update too. The first build with this flow still arrives the old way (all tabs closed):
+  an older page does not know how to ask.
 
 ## How caching works (`sw.js`)
 
@@ -33,11 +36,30 @@ Install details: files are fetched with `cache: 'no-cache'` (a 304 costs no body
 land in a new version's cache); 16 at a time; one missing non-critical file is skipped with a warning, but if
 `index.html`, `src/main.js` or `src/core/engine.js` fail the install fails and the old version keeps running. The
 first-ever install calls `skipWaiting()` and `clients.claim()` so offline works in the same session; later versions
-wait. Activation deletes old `lq-next-shell-*` caches; the runtime cache is kept.
+wait until the page asks. Activation deletes old `lq-next-shell-*` caches; the runtime cache is kept.
 
 Registration (`src/main.js`): 2.5 s after the game is playable, with `scope` = the `next/` folder, so the 5 MB
-precache never competes with the first frame. `reg.waiting` or a worker reaching `installed` while a controller
-exists shows the toast (`engine.toasts.flash`, from `src/ui/toast.js`).
+precache never competes with the first frame.
+
+The update flow (`src/core/swUpdate.js`, tests in `qa/pwa/update.test.mjs`, browser proof in `qa/pwa/pwa.py --only update`):
+
+1. `main.js` calls `track(reg)` at launch if a worker already waits, and whenever one reaches `installed` under a controller.
+2. Every 2 s while a worker waits, `quiet(engine)` asks: loading screen, or the title alone on the stack, not busy, no save
+   guard open, at least 1 s with no input. If not, the toast says when it will land.
+3. If quiet, the page locks the title (`busy`) and posts `lq-apply-update` to the waiting worker. The worker counts every
+   window in scope, controlled or not. One tab: `skipWaiting()`. More: it answers `lq-update-refused`, the title is freed and
+   the page asks again 2 s later. The rule is the worker's on purpose: `clients.claim()` would put another tab's running game
+   on the new shell and activation would delete the old shell under it.
+4. On `controllerchange` only the tab that asked reloads. Loop guard: one reload per tab per 10 minutes, stamped in
+   `sessionStorage` before the reload. If `sessionStorage` is blocked there is no reload at all; next launch applies it.
+5. No answer in 4 s (a worker from before this flow, after a rollback): the title is freed and the flow stops until next launch.
+
+Known limit: pack and runtime files are not versioned with the shell. An old shell that stays running (a long session, or two
+tabs) can still fetch a newer pack file. This flow shrinks that window, since a waiting worker now lands at launch before any
+save is opened; it does not close it.
+
+The handler lives in `UPDATE_HANDLER` in `tools/pwa/build_pwa.py` and lands in the generated block of `sw.js`, so a change needs a
+rebuild. `build_pwa.py --out <file>` writes the worker elsewhere and changes nothing (tests, `pwa.py`).
 
 ## How to bump the version
 

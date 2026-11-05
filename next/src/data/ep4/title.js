@@ -12,7 +12,7 @@ import { tapRowHeight } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
 import { ChoiceBox } from '../../ui/choice.js';
 import { NameEntryScene } from '../../scenes/nameEntry.js';
-import { pickRunSlot } from '../../game/episodes.js';
+import { pickRunSlot, foldTitleRows } from '../../game/episodes.js';
 import { EP4_ROW_LABEL, EP4_ROW_HELP } from './hooks.js';
 
 export const ROW_ID = 'ep4';
@@ -38,15 +38,18 @@ export function offerRow(scene, offer = {}, hooks = {}) {
   scene.ep4 = offer;
   const m = scene.menu;
   if (!m.items.some((it) => it.id === ROW_ID)) {
-    const at = m.items.findIndex((it) => it.id === 'config');
-    const index = m.index;
-    m.items.splice(at < 0 ? m.items.length : at, 0, { id: ROW_ID, label: EP4_ROW_LABEL });
+    // after the other episode rows: Config may already stand in front of them (a two-column menu, foldTitleRows)
+    const last = m.items.findLastIndex((it) => /^ep\d$/.test(it.id)), cfg = m.items.findIndex((it) => it.id === 'config');
+    const at = last >= 0 ? last + 1 : cfg < 0 ? m.items.length : cfg;
+    const cur = m.items[m.index];
+    m.items.splice(at, 0, { id: ROW_ID, label: EP4_ROW_LABEL });
     const measure = (s) => (e.renderer && e.renderer.measure ? e.renderer.measure(s) : String(s).length * 5);
     const L = layoutRows(m.items, m.rowH, measure);
+    if (L.columns > 1) foldTitleRows(m.items);
     scene.win = L.win;
     Object.assign(m, { x: L.win.x + 6, y: L.win.y + 7, w: L.win.w - 12, rows: L.rows, columns: L.columns, columnMajor: L.columns > 1,
       colW: L.columns > 1 ? L.colW : Math.floor((L.win.w - 12)) });
-    m.index = Math.min(index, m.items.length - 1);
+    m.index = Math.max(0, m.items.indexOf(cur));
     if (typeof m.ensureVisible === 'function') m.ensureVisible();
   }
   if (!scene.__ep4) {
