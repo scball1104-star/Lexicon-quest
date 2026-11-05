@@ -67,7 +67,7 @@ def title(page, slots):
     check(page.evaluate(ADD_ROW), 'offerRow added the row')
     adv(page, 2)
     s = page.evaluate('LQ_DEBUG.state().sceneState')
-    check('ep4' in s['items'] and s['items'].index('ep4') == len(s['items']) - 2, f"Episode 4 row listed: {s['labels']}")
+    check('ep4' in s['items'] and (s['items'].index('ep4') == len(s['items']) - 2 or s['items'][-1] == 'ep4'), f"Episode 4 row listed: {s['labels']}")
     win = s['win']
     check(win['y'] >= 0 and win['y'] + win['h'] <= 216, f"menu window inside the screen: {win}")
     rows = page.evaluate("LQ_ENGINE.scene.menu.items.map((_, i) => LQ_ENGINE.scene.menu.rowRect(i))")

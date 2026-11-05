@@ -827,8 +827,10 @@ def glass_dome():
 
 def lantern_chain(f):
     cv = Canvas(16, 32)
+    # alternating links, a dark side and a lit side, so the chain reads on the bright water (CRITIQUE_6 below the line)
     for y in range(0, 16):
-        cv.set(7 + (y % 2), y, MT(1) if y % 2 else K(2))
+        cv.set(7, y, OUT if y % 2 else MT(4))
+        cv.set(8, y, MT(4) if y % 2 else OUT)
     for y in range(16, 27):
         for x in range(4, 12):
             c = K(1)

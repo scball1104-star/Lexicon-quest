@@ -236,7 +236,10 @@ export class Tide {
       ent.data.concealed = washed;            // a washed seal no longer answers confirm (the doorway is just a doorway)
       if (washed && was !== 'on') {
         if (o.quiet || !fresh.includes(r.id)) { if (ent.prop) map.setPropState(ent.prop, 2); }
-        else this.washFx.push({ id: r.id, x: r.x, y: r.y, t: -this.delayFor(r.wet, o) });
+        else {
+          this.washFx.push({ id: r.id, x: r.x, y: r.y, t: -this.delayFor(r.wet, o) });
+          if (o.origin && Math.abs(r.x - o.origin[0]) + Math.abs(r.y - o.origin[1]) > 6) this.reveal(r, true);
+        }
         for (const t of targetsOf(r.ev)) fireTarget(f, t, { quiet: !!o.quiet });
       } else if (!washed && ent.prop && ent.prop.state !== 0) map.setPropState(ent.prop, 0);
     }
@@ -299,16 +302,19 @@ export class Tide {
     else if (o.origin && Math.abs(fg.x - o.origin[0]) + Math.abs(fg.y - o.origin[1]) > 6) this.reveal(fg);
   }
 
-  /** A floodgate far from its wheel opens on camera: pan, hold (confirm skips), back. */
-  async reveal(fg) {
+  /**
+   * A floodgate far from its wheel opens on camera: pan, hold (confirm skips), back. A far seal the same way (wash true), except
+   * the camera goes at once, to be there when the water arrives, and holds until the wash has run. The field queues Mira's line until input is back, so it plays with the party in frame.
+   */
+  async reveal(fg, wash = false) {
     const f = this.f, e = f.engine, cam = f.camera;
     if (!cam || !cam.panTo || !cam.returnTo || this.revealing) return;
     this.revealing = true;
     f.lockInput();
     try {
-      await this.settled();
-      await cam.panTo(fg.x * TILE + 16, fg.y * TILE, 40);
-      for (let i = 0; i < 50 && !f.dead && !(e.input.pressed('confirm') || e.input.pressed('cancel')); i++) await e.waitFrames(1);
+      if (!wash) await this.settled();
+      await cam.panTo(fg.x * TILE + (wash ? 8 : 16), fg.y * TILE, wash ? 24 : 40);
+      for (let i = 0; (wash ? i < 150 && this.washFx.length : i < 50) && !f.dead && !(e.input.pressed('confirm') || e.input.pressed('cancel')); i++) await e.waitFrames(1);
       if (!f.dead) await cam.returnTo(f.leader, 40);
     } finally { f.unlockInput(); this.revealing = false; }
   }

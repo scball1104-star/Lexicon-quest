@@ -62,13 +62,14 @@ test('index.html: manifest link, iOS full-screen tags, icons', () => {
   assert.doesNotMatch(html, /\.\.\/icon-/, 'no link to the old root game icons');
 });
 
-test('main.js registers the worker with the right scope, never on ?debug=1, and shows the update toast', () => {
+test('main.js registers the worker with the right scope, never on ?debug=1, and hands updates to swUpdate.js', () => {
   const main = read('src/main.js');
-  assert.match(main, /function registerWorker\(\) \{\s*if \(debug \|\|/, 'registerWorker returns early for debug runs');
+  assert.match(main, /const workerOn = !debug &&/, 'no worker for debug runs');
+  assert.match(main, /function registerWorker\(\) \{\s*if \(!workerOn\) return;/, 'registerWorker returns early for debug runs');
   assert.match(main, /new URL\('\.\.\/sw\.js', import\.meta\.url\)/);
   assert.match(main, /new URL\('\.\.\/', import\.meta\.url\)\.pathname/, 'scope is the next/ folder');
   assert.match(main, /if \(!debug\) setTimeout\(registerWorker/);
-  assert.match(main, /Update ready, restart to apply/);
+  assert.match(main, /makeUpdater\(engine\)/);
 });
 
 test('sw.js: debug bypass, range support, versioned shell cache', () => {

@@ -4,11 +4,12 @@
   python next/tools/pwa/build_pwa.py            rewrite next/sw.js (PRECACHE + SHELL_VERSION) and next/index.html
   python next/tools/pwa/build_pwa.py --check    change nothing; exit 1 when either file is stale (release gate)
   python next/tools/pwa/build_pwa.py --sizes    print the precache size table (raw and gzip -6, as GitHub Pages serves text)
+  python next/tools/pwa/build_pwa.py --out F    write what sw.js would be to F, changing nothing in the repo (tests)
 
 Run it after ANY change to the shell (a module, a sprite sheet, an sfx, the manifest...) and before deploying.
 SHELL_VERSION is a hash of every precached file's path and bytes, so browsers see a different sw.js, install the
-new shell next to the old one and show "Update ready, restart to apply". Forget to run it and returning players
-keep the old shell: `node next/qa/run.mjs` prints a warning, and `LQ_RELEASE=1 node next/qa/run.mjs pwa` fails.
+new shell next to the old one, and the page applies it at the title or the toast says when it will land
+(src/core/swUpdate.js). Forget to run it and returning players keep the old shell: `node next/qa/run.mjs` prints a warning, and `LQ_RELEASE=1 node next/qa/run.mjs pwa` fails.
 
 What is precached: index.html, manifest.webmanifest, every src/**/*.js, assets/manifest.json, palette.json, the
 sprites, tiles, ui, backdrops and icons folders (png and json), and the core sfx and the jingles. NOT precached
@@ -63,6 +64,17 @@ FOLDERS = {                                   # folder -> allowed suffixes
     'assets/audio/jingles': {'.wav', '.mp3', '.ogg'},
 }
 SW_BEGIN, SW_END = '// build_pwa:begin', '// build_pwa:end'
+# The other half of src/core/swUpdate.js. A waiting worker takes over only when the asking page is the one tab open: skipWaiting
+# plus clients.claim would otherwise put a second tab's running game on the new shell, and delete the old shell under it.
+UPDATE_HANDLER = """self.addEventListener('message', (event) => {
+  if (event.data !== 'lq-apply-update') return;
+  event.waitUntil((async () => {
+    const tabs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (tabs.length === 1) await self.skipWaiting();
+    else if (event.source) event.source.postMessage('lq-update-refused');
+  })());
+});
+"""
 HTML_BEGIN = '<!-- modulepreload:begin'
 HTML_END = '<!-- modulepreload:end -->'
 LITERAL = re.compile(r"""['"](\.{1,2}/[^'"\n]+?\.js)['"]""")
@@ -228,7 +240,7 @@ def render_sw(text, files, version, pattern=None):
     a, b = text.index(SW_BEGIN), text.index(SW_END)
     lines = [SW_BEGIN, f"const SHELL_VERSION = '{version}';", 'const PRECACHE = [']
     lines += [f"  '{p}'," for p in files]
-    lines += ['];', 'const PACK_PATTERN = ' + json.dumps(pattern or '^$') + ';', '']
+    lines += ['];', 'const PACK_PATTERN = ' + json.dumps(pattern or '^$') + ';', '', UPDATE_HANDLER]
     return text[:a] + '\n'.join(lines) + text[b:]
 
 
@@ -262,8 +274,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--check', action='store_true')
     ap.add_argument('--sizes', action='store_true')
+    ap.add_argument('--out')
     args = ap.parse_args()
-    packs = load_packs(write=not args.check and not args.sizes)
+    packs = load_packs(write=not args.check and not args.sizes and not args.out)
     files = shell_files()
     version = shell_version(files)
     mods = module_graph(packs=packs)
@@ -271,6 +284,10 @@ def main():
     sw_new, html_new = render_sw(sw_old, files, version, pack_pattern(packs)), render_index(html_old, mods)
     pf_old = PACK_FILES.read_text(encoding='utf-8') if PACK_FILES.is_file() else ''
     pf_new = render_pack_files(packs)
+    if args.out:
+        pathlib.Path(args.out).write_text(sw_new, encoding='utf-8', newline='\n')
+        print(f'version {version}: wrote {args.out}')
+        return 0
     if args.sizes:
         g = sizes(files)
         print(f'{"group":<16}{"files":>6}{"raw KB":>10}{"gzip KB":>10}')
