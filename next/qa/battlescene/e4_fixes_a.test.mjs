@@ -11,8 +11,8 @@ import { battle } from '../battle/_helpers.mjs';
 (await import('../../tools/sim/ep4.mjs')).registerData();
 (await import('../../src/data/ep4/scene.js')).register();
 
-function rig(who, telegraph, level = 20) {
-  const b = battle([{ id: 'ink_slime' }], { level, options: { flags: { hero_signed: true } } });
+function rig(who, telegraph, level = 20, flags = { hero_signed: true }) {
+  const b = battle([{ id: 'ink_slime' }], { level, options: { flags } });
   while (b.current().uid !== who) b.current().side === 'party' ? b.perform({ type: 'defend' }) : b.runEnemyTurn();
   const pressed = new Set(), consumed = new Set(), settings = {};
   const base = { pressed: (k) => pressed.has(k) && !consumed.has(k), consume: (k) => consumed.add(k), tapIn: () => false, repeatDir: () => null, pointer: null };
@@ -32,8 +32,10 @@ function rig(who, telegraph, level = 20) {
 
 test('the signature table: Bram\'s Oath is core, the ep4 pack adds the hero\'s Answer once', () => {
   assert.deepEqual(SIGNATURE_TECHS[0], { unit: 'bram', flag: 'turnable', skill: 'tempered_oath' });
-  assert.equal(SIGNATURE_TECHS.filter((t) => t.skill === 'answer').length, 1);
-  assert.deepEqual(SIGNATURE_TECHS.find((t) => t.skill === 'answer'), { unit: 'hero', flag: 'answerable', skill: 'answer' });
+  assert.deepEqual(SIGNATURE_TECHS.filter((t) => t.skill === 'answer'), [
+    { unit: 'hero', flag: 'answerable', skill: 'answer' },
+    { unit: 'hero', flag: 'decree', skill: 'answer', usable: true },
+  ]);
 });
 
 test('Strike from the Roll pending: the hero opens on Tech and Answer is the first row, in gold', () => {
@@ -46,6 +48,41 @@ test('Strike from the Roll pending: the hero opens on Tech and Answer is the fir
   assert.equal(m.sub.items[0].id, 'answer');
   assert.equal(m.sub.items[0].color, 'gold');
   assert.equal(m.sub.index, 0, 'the cursor is on Answer');
+});
+
+test('an ordinary decree pending: the hero opens on Tech with Answer first, in gold, and Mira is not pulled', () => {
+  for (const skill of ['runoff', 'edict', 'objection', 'flood_decree']) {
+    const m = rig('hero', skill).scene.menu;
+    assert.equal(m.root.item.id, 'tech', skill);
+    m.openSub(m.root.items.find((i) => i.id === 'tech').cmd);
+    assert.equal(m.sub.items[0].id, 'answer', skill);
+    assert.equal(m.sub.items[0].color, 'gold', skill);
+  }
+  assert.equal(rig('mira', 'runoff').scene.menu.root.item.id, 'attack');
+});
+
+test('a decree before the hero has signed: no hint, the menu opens as usual', () => {
+  const m = rig('hero', 'runoff', 15, {}).scene.menu;
+  assert.equal(m.root.item.id, 'attack');
+  m.openSub(m.root.items.find((i) => i.id === 'tech').cmd);
+  assert.ok(!m.sub.items.some((i) => i.id === 'answer'), 'Answer is not learned yet');
+  assert.ok(!m.sub.items.some((i) => i.color === 'gold'));
+});
+
+test('out of MP: an ordinary decree does not pull the hero to Tech, Strike from the Roll still shows why', () => {
+  const low = (skill) => {
+    const r = rig('hero', skill);
+    r.scene.b.current().mp = 0;
+    r.scene.menu.open(r.scene.b.current());
+    return r.scene.menu;
+  };
+  assert.equal(low('runoff').root.item.id, 'attack');
+  const m = low('strike_roll');
+  m.root.moveTo(m.root.items.findIndex((i) => i.id === 'tech'));
+  m.openSub(m.root.item.cmd);
+  assert.equal(m.sub.items[0].id, 'answer');
+  assert.equal(m.sub.items[0].color, 'gold');
+  assert.ok(m.sub.items[0].disabled, 'greyed: not enough MP');
 });
 
 test('no Strike pending: the hero opens where the setting says and Answer stays last; Mira is never pulled to Tech', () => {

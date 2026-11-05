@@ -379,8 +379,9 @@ export function register() {
   if (f3 && f3.backdrop === 'ep4_keep') f3.backdrop = 'ep4_witness';
   if (!RARE_NAME_EXT.some(([, w]) => w === RARE_NAME_A_EP4)) RARE_NAME_EXT.push([18, RARE_NAME_A_EP4]);
   PIPS.fire = drawSealPip;
-  // Strike from the Roll: the hero's Tech list opens with Answer first, in gold (PLAYTEST_REVIEW_6 fix 2; Bram's Oath rule)
-  if (!SIGNATURE_TECHS.some((t) => t.skill === 'answer')) SIGNATURE_TECHS.push({ unit: 'hero', flag: 'answerable', skill: 'answer' });
+  // Strike from the Roll and every ordinary decree: the hero's Tech list opens with Answer first, in gold
+  // (PLAYTEST_REVIEW_6 fix 2; Bram's Oath rule; Scott 11/5 for the ordinary decrees)
+  if (!SIGNATURE_TECHS.some((t) => t.skill === 'answer')) SIGNATURE_TECHS.push({ unit: 'hero', flag: 'answerable', skill: 'answer' }, { unit: 'hero', flag: 'decree', skill: 'answer', usable: true });
   for (const [k, fn] of Object.entries(EP4_FX)) if (!BattleFx.prototype[k]) BattleFx.prototype[k] = fn;
   wrapPlanner(Planner.prototype);
   wrapActor(Actor.prototype);
