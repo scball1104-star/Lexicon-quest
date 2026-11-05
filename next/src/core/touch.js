@@ -109,7 +109,7 @@ export class TouchControls {
     this._detect();
     renderer.onLayout(() => this.layout());
     input.onDevice((d) => {
-      if ((this.settings.touchControls || 'auto') !== 'auto') return;
+      if (this.settings.touchControls === 'on') return;
       if (d === 'touch') this.setVisible(true);
       else if (d === 'keyboard' || d === 'gamepad') this.setVisible(false);
     });
@@ -170,9 +170,8 @@ export class TouchControls {
       if (coarse) this.input._setDevice('touch'); // prompts show touch glyphs from the first frame
     }
     if (!this._touchListener) {
-      this._touchListener = () => {
-        if ((this.settings.touchControls || 'auto') === 'auto' && !this.visible) this.setVisible(true);
-      };
+      // Off hides them for a keyboard or pad, but a finger on the glass has no other way back: it shows them again.
+      this._touchListener = () => { if (!this.visible) this.setVisible(true); };
       window.addEventListener('touchstart', this._touchListener, { passive: true });
     }
   }
