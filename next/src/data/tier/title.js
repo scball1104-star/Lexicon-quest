@@ -11,7 +11,7 @@ import { List, tapRowHeight } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
 import { ChoiceBox } from '../../ui/choice.js';
 import { BANNERS } from '../text.js';
-import { pickRunSlot, SLOTS_FULL_NOTICE } from '../../game/episodes.js';
+import { pickRunSlot, SLOTS_FULL_NOTICE, foldTitleRows } from '../../game/episodes.js';
 import { packsToAwait, awaitPacks } from '../../game/packs.js';
 import { TIER } from './text.js';
 import { carryRecord, tierRecords } from './tier.js';
@@ -58,7 +58,9 @@ export function offerRow(scene) {
   const measure = (s) => (e.renderer && e.renderer.measure ? e.renderer.measure(s) : String(s).length * 5);
   const L = layoutRows(items, old.rowH, measure);
   scene.win = L.win;
-  const index = old.index >= at ? old.index + 1 : old.index;
+  const cur = old.items[old.index];
+  if (L.columns > 1) foldTitleRows(items);
+  const index = Math.max(0, items.indexOf(cur));
   const menu = new List({ x: L.win.x + 6, y: L.win.y + 7, w: L.win.w - 12, rowH: old.rowH, rows: L.rows, columns: L.columns, columnMajor: L.columns > 1,
     colW: L.columns > 1 ? L.colW : undefined, items, textX: 18, index, confirmSfx: true });
   const update = menu.update.bind(menu);

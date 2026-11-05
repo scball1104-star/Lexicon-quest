@@ -3,8 +3,8 @@
  * Three kinds of request (full write-up in docs/PWA.md):
  *   shell    the game itself (html, modules, fonts, ui, tiles, sprites, backdrops, sfx, jingles). Listed in PRECACHE,
  *            downloaded at install into a cache named after SHELL_VERSION, served cache-first. A new version
- *            installs next to the old one and waits; the page shows "Update ready, restart to apply" and the new
- *            shell takes over the next time every tab is closed. Never half old, half new.
+ *            installs next to the old one and waits; the page asks it to take over at the title or the loading screen
+ *            when only one tab is open (src/core/swUpdate.js), or it takes over when every tab is closed. Never half old, half new.
  *   runtime  music and the big painted sheets (../assets/audio, ../assets/art, ambience). Stale-while-revalidate
  *            into one long-lived cache, so a returning player hears and sees the cached copy at once and the
  *            copy is refreshed in the background. Range requests (the <audio> element) are answered with 206s

@@ -265,8 +265,10 @@ export class TitleScene {
       // Only the page on top shows a finger: under Load Game or Config the title's would read as a second cursor.
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
     }
-    r.text(VERSION, 4, 205, { color: 'gray' });
-    if (this.stacks && this.stacks.cleared) drawStacksMark(r, 4 + r.measure(VERSION) + 7, 205);
+    // A two-column menu reaches the bottom left corner: the version line moves to the top left (the Ledger line's rule, on its side).
+    const vy = this.win.x < 60 && this.win.y + this.win.h > 203 ? 4 : 205;
+    r.text(VERSION, 4, vy, { color: 'gray' });
+    if (this.stacks && this.stacks.cleared) drawStacksMark(r, 4 + r.measure(VERSION) + 7, vy);
     this.drawLedgerCount(r);
     const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
     const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP : null;
