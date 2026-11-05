@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = '1be702e7b494';
+const SHELL_VERSION = 'ff66536b9a9a';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -50,6 +50,7 @@ const PRECACHE = [
   'src/core/renderer.js',
   'src/core/rng.js',
   'src/core/save.js',
+  'src/core/swUpdate.js',
   'src/core/touch.js',
   'src/core/tween.js',
   'src/data/cave/live.js',
@@ -372,6 +373,15 @@ const PRECACHE = [
   'assets/audio/jingles/victory_fanfare.mp3',
 ];
 const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|src/data/ep3/|src/data/maps/ep3/|assets/(tiles|sprites|ui|backdrops)/ep3(_|\\.)|assets/ep3_manifest\\.json|src/data/ep4/|src/data/maps/ep4_|assets/(tiles|sprites|ui|backdrops)/ep4(_|\\.)|assets/ep4_manifest\\.json|src/data/tier/|src/data/maps/tier_|assets/(tiles|sprites|ui|backdrops)/tier(_|\\.)|assets/tier_manifest\\.json|assets/pack_files\\.json|assets/backdrops/paint_|src/world/ep3/|assets/clips/|src/ui/clips/|assets/audio/sfx/ep4_|assets/audio/ambience/ep4_)";
+
+self.addEventListener('message', (event) => {
+  if (event.data !== 'lq-apply-update') return;
+  event.waitUntil((async () => {
+    const tabs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (tabs.length === 1) await self.skipWaiting();
+    else if (event.source) event.source.postMessage('lq-update-refused');
+  })());
+});
 // build_pwa:end
 
 const SHELL_PREFIX = 'lq-next-shell-';
