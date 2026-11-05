@@ -308,6 +308,7 @@ def config_page(p):
     p.shot('config-bottom')
     p.act('confirm')
     p.until("LQ_DEBUG.scene() === 'choice'", 'Reset asks', 5)
+    p.frames(8)   # the box takes no press during its 5-frame opening (ui/choice.js)
     p.act('cancel')
     p.until("LQ_DEBUG.scene() === 'config'", 'Reset cancel', 5)
     p.act('cancel')
