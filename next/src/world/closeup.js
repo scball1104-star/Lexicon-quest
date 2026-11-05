@@ -15,6 +15,8 @@ import { BAYER4 } from '../core/renderer.js';
 export const INSERT = { w: 208, h: 96 };            // the framed basin on the 384 x 216 screen
 export const INSERT_Y = 16;                         // clear of the bottom dialogue window and its name tab
 export const OPEN_FRAMES = 12;
+/** Page inserts a pack adds: kind -> (mk, r, opts) => { base, over?, drip?, how?: 'run' | 'wipe', frames? }; `mk()` is a blank INSERT canvas. */
+export const PAGE_KINDS = {};
 const RIM = 7;                                      // stone rim thickness (px)
 
 // Water ramps, far side (top) to near side (bottom): the sky the water holds.
@@ -82,6 +84,7 @@ export class Closeup {
 
   open(kind, opts = {}) {
     if (typeof document === 'undefined') return Promise.resolve();
+    if (PAGE_KINDS[kind]) return this.openPage(kind, opts);
     const f = this.f;
     const restored = !!(f.hasFlag && f.hasFlag('nh_restored'));
     const tint = f.lighting && f.lighting.tintName;
@@ -91,6 +94,17 @@ export class Closeup {
     this.opts = { ...opts, mode, faces, restored };
     this.layout = faceLayout(faces, !!opts.strangers);
     this.build();
+    this.t = 0;
+    this.dir = 1;
+    if (this.reduceMotion()) { this.k = 1; this.dir = 0; return Promise.resolve(); }
+    return new Promise((res) => this.waiters.push(res));
+  }
+
+  /** A page insert; asked again while it is open, the same frame takes the new opts (the next beat of the page). */
+  openPage(kind, opts) {
+    const held = this.kind === kind && this.dir === 0 && this.k > 0;
+    this.page = null; this.pageT = 0; this.opts = opts; this.kind = kind;
+    if (held) return Promise.resolve();
     this.t = 0;
     this.dir = 1;
     if (this.reduceMotion()) { this.k = 1; this.dir = 0; return Promise.resolve(); }
@@ -250,7 +264,9 @@ export class Closeup {
 
   // ------------------------------------------------------------------------------------------------ draw
   draw(r) {
-    if (!this.kind || this.k <= 0 || !this.base) return;
+    if (!this.kind || this.k <= 0) return;
+    if (PAGE_KINDS[this.kind]) { this.drawPage(r); return; }
+    if (!this.base) return;
     const { w, h } = INSERT;
     const x0 = Math.round((r.W - w) / 2), y0 = INSERT_Y;
     const k = this.dir === 0 ? this.k : this.k * this.k * (3 - 2 * this.k);
@@ -307,6 +323,38 @@ export class Closeup {
     g.globalAlpha = 1;
     g.imageSmoothingEnabled = false;
     g.drawImage(this.work, 0, sy, w, vis, x0, y0 + sy, w, vis);
+    g.restore();
+  }
+
+  /** A pack's page: built on first draw (the fonts are needed), its `over` layer runs off or is written in, then presented like the water. */
+  drawPage(r) {
+    const { w, h } = INSERT;
+    const mk = () => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+    if (!this.page) this.page = PAGE_KINDS[this.kind](mk, r, { name: this.f.game && this.f.game.heroName, ...this.opts });
+    this.work = this.work || mk();
+    const P = this.page, W = this.work.getContext('2d');
+    const p = !P.over || this.reduceMotion() ? 1 : Math.min(1, (this.pageT = (this.pageT || 0) + 1) / (P.frames || 60));
+    W.setTransform(1, 0, 0, 1, 0, 0);
+    W.globalAlpha = 1; W.globalCompositeOperation = 'source-over';
+    W.clearRect(0, 0, w, h);
+    W.drawImage(P.base, 0, 0);
+    if (P.over && P.how === 'run' && p < 1) {
+      W.globalAlpha = 1 - p;
+      W.drawImage(P.over, 0, 0);
+      if (P.drip) W.drawImage(P.drip, 0, Math.round(p * 18));
+      W.globalAlpha = 1;
+    } else if (P.over && P.how === 'wipe') {
+      const cut = Math.max(1, Math.round(w * p));
+      W.drawImage(P.over, 0, 0, cut, h, 0, 0, cut, h);
+    }
+    const k = this.dir === 0 ? this.k : this.k * this.k * (3 - 2 * this.k);
+    const x0 = Math.round((r.W - w) / 2), vis = Math.max(2, Math.round(h * k)), sy = Math.round((h - vis) / 2);
+    const g = r.ctx;
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalAlpha = 0.42 * k; g.fillStyle = '#0c0a18'; g.fillRect(0, 0, r.W, r.H);
+    g.globalAlpha = 1;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(this.work, 0, sy, w, vis, x0, INSERT_Y + sy, w, vis);
     g.restore();
   }
 

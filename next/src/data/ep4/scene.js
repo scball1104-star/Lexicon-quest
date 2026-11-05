@@ -24,6 +24,8 @@ import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor } from '../../battle/scene/actors.js';
 import { PIPS } from '../../battle/scene/hud.js';
 import { SIGNATURE_TECHS } from '../../battle/scene/menu.js';
+import { PAGE_KINDS } from '../../world/closeup.js';
+import { EP4_PAGES } from './pages.js';
 import { BattleFx, C } from '../../battle/fx.js';
 import { RARE_NAME_EXT } from '../../battle/loot.js';
 import { ZONES } from '../encounters.js';
@@ -379,6 +381,7 @@ export function register() {
   if (f3 && f3.backdrop === 'ep4_keep') f3.backdrop = 'ep4_witness';
   if (!RARE_NAME_EXT.some(([, w]) => w === RARE_NAME_A_EP4)) RARE_NAME_EXT.push([18, RARE_NAME_A_EP4]);
   PIPS.fire = drawSealPip;
+  Object.assign(PAGE_KINDS, EP4_PAGES);
   // Strike from the Roll and every ordinary decree: the hero's Tech list opens with Answer first, in gold
   // (PLAYTEST_REVIEW_6 fix 2; Bram's Oath rule; Scott 11/5 for the ordinary decrees)
   if (!SIGNATURE_TECHS.some((t) => t.skill === 'answer')) SIGNATURE_TECHS.push({ unit: 'hero', flag: 'answerable', skill: 'answer' }, { unit: 'hero', flag: 'decree', skill: 'answer', usable: true });
@@ -387,6 +390,6 @@ export function register() {
   wrapActor(Actor.prototype);
   if (typeof location !== 'undefined' && /[?&]ep=4(&|$)/.test(location.search || '') && mapsListed()) GATE.live = true;
   done = true;
-  return ['backdrops', 'cards', 'rare_names', 'pips', 'signature', 'fx', 'planner', 'actor'];
+  return ['backdrops', 'cards', 'rare_names', 'pips', 'pages', 'signature', 'fx', 'planner', 'actor'];
 }
 export default register;
