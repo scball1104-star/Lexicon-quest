@@ -40,6 +40,7 @@ ending "open flat ground across the whole foreground third."
 | cave band 2 (root_cellars) | reuses hollow | the Root Cellars: shelves grown through with roots, earth floor, lamplight | in the game 10/28 as `cave_battle_cellars` (BACKDROPS key cave_cellars) |
 | cave band 4 (ember_shelves) | reuses archive_deep | the Ember Shelves: scorched shelving, embers in the gaps, red light from below | in the game 10/28 as `cave_battle_ember` (cave_ember) |
 | cave band 5 (forge_of_names) | reuses boss | the Forge of Names: a forge hall of iron shelving and molten script | in the game 10/28 as `cave_battle_forge` (cave_forge) |
+| ep4_battle_keep, ep4_battle_archive_deep, ep4_battle_witness, ep4_battle_throne, ep4_battle_flood_road | crops of environments cell 3, composed Flood Road | Episode 4: Tidegate Causeway, drowned archive (kept mid-dark for the Barrister), Court of Witnesses, Drowned Throne, the Flood Road. Same file names, so the pack and BACKDROPS keys do not change; `ep4_build.py` skips them unless named | in overhaul 11/5, 20 credits, first takes |
 
 **Bytes.** Core backdrops are precached (17 today). A painted stage is 78 to 165 KB against 6 to 35 KB composed, and the
 initial download has 8 KB of room under Scott's 6.5 MB cap. So the painted core stages are NOT precached: `build_pwa.py`

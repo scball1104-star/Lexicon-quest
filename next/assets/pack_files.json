@@ -145,6 +145,7 @@
   "src/data/ep4/loot.js",
   "src/data/ep4/maps.js",
   "src/data/ep4/npcs.js",
+  "src/data/ep4/pages.js",
   "src/data/ep4/quests.js",
   "src/data/ep4/scene.js",
   "src/data/ep4/shops.js",

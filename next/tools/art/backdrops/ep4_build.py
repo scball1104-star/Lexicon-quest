@@ -1,6 +1,6 @@
 """Episode 4 battle stages and key art (E4-tiles, EPISODE4_PLAN 9.3) -> assets/backdrops/ep4_<id>.png + .json.
 
-    python ep4_build.py                 # all six
+    python ep4_build.py                 # the recipes not replaced by a painting (PAINTED)
     python ep4_build.py ep4_battle_keep # one
     python ep4_build.py --mock          # also the 3x stage mocks with real sprites (out/mock_stage_ep4_*_3x.png)
 
@@ -23,6 +23,9 @@ from compose_valley import W, H, HORIZON, hx, mix, Layer, smooth_profile
 
 DST, OUT = B.DST, B.OUT
 CELL = 3
+# Runway paintings since 2026-11-05 (quantize_still.py, sources in reports/lexicon_quest_ep4/art_source of the PKA repo):
+# a bare run must not overwrite them; name one to rebuild its old recipe on purpose
+PAINTED = {'ep4_battle_flood_road', 'ep4_battle_keep', 'ep4_battle_archive_deep', 'ep4_battle_witness', 'ep4_battle_throne'}
 
 # file id -> recipe (build.py keys) + backdropId (the BACKDROPS key in src/data/ep4/encounters.js) + fallback
 RECIPES = {
@@ -266,7 +269,7 @@ def mocks():
 
 
 def main(argv):
-    want = [a for a in argv[1:] if not a.startswith('-')] or list(RECIPES)
+    want = [a for a in argv[1:] if not a.startswith('-')] or [f for f in RECIPES if f not in PAINTED]
     for fid in want:
         build_one(fid)
     if '--mock' in argv:

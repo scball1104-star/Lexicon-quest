@@ -88,5 +88,6 @@ test('ep4 art belongs to the ep4 pack, never the main manifest', () => {
     const m = read(`assets/backdrops/${b}.json`);
     assert.equal(m.image, b + '.png');
     if (b.includes('battle')) assert.ok(m.bandY > 0 && m.bandAlpha > 0, b);
+    if (b.includes('battle')) assert.equal(m.source, 'runway', b + ' is a painting: quantize_still.py, not an ep4_build.py recipe');
   }
 });
