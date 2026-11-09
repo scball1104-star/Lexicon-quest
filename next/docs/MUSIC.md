@@ -497,6 +497,99 @@ Ambience: `canal_rain` (fallback `river_birds`): steady rain on water, countless
 eave drips. `keep_drip` (fallback `archive_hush`): a still flooded hall, low hum, slow lapping, near and far drips, one far groan of
 a lock gear.
 
+## Episode 5: three more tracks (E5-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops). Plan: `docs/EPISODE5_PLAN.md` 8. Files are `assets/audio/music/ep5_<id>.mp3` (+ sidecar), songs
+`tools/music/songs/ep5_*.py`; render with `python tools/music/render.py ep5_saffron ep5_labyrinth ep5_boss_oracle --wav`. Like
+Episode 4's, they are NOT in `render.py`'s `ALL`, in `build.py`'s `MUSIC_IDS` or in `assets/audio/manifest.json`: Episode 5 audio
+reaches the game only through the pack fragment `src/data/ep5/audio.js` (plan 13.3), whose `volume` brings each decoded MP3 to -16
+LUFS (measured -16.44 to -16.65, the same spread as the Episode 4 and Expansion 1 tracker pieces in `tools/audio/music_levels.json`).
+`python tools/audio/ep5_review.py` decodes each MP3 and draws the loop seam, the three sound pairs and the oud's bend
+(`tools/audio/out/ep5/seams.png`, `pairs.png`, `bend.png`).
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `saffron` | The Moonwell Caravanserai | D minor (harmonic minor dominant) | 92, 4/4 | 32 | 0.060 s to 83.538 s | 83.64 s | `orrery` |
+| `labyrinth` | The Shifting Dunes | E Dorian | 84, 4/4 | 32 | 0.060 s to 91.489 s | 91.59 s | `court` |
+| `boss_oracle` | The Sand Oracle | C minor | 12/8, quarter = 132 (dotted quarter 88) | 42 (2 intro + 40 loop) | 5.455 s to 114.545 s | 114.65 s | `boss_king` |
+
+### The Saffron tune and the oud (`tools/music/songs/ep5_theme.py`)
+Eight bars of 4/4 in scale degrees, opening with the complete motif (0 4 5 3), its fourth note held into the next bar. `saffron`
+plays it in F major in its B section; `boss_oracle` quotes it in C minor, re-barred to 12/8 by `swing128`. The module also holds
+two song-local instruments (synth.py is untouched): `Oud`, two Karplus-Strong courses plucked near the bridge, a woody body, a
+tamed pick spike, and an optional `bend` (semitones, after `bend_delay` seconds, read back through a time-varying resampler so
+the pitch moves while the string rings); and `Tar`, a finger frame drum whose pitch picks the stroke (below C4 the open dum,
+above it the rim tek). `python tools/music/songs/ep5_theme.py` checks the bars, the motif's intervals and the 12/8 re-barring.
+
+### How Episode 5 wears the name motif
+- **saffron**: the oud, F4 C5 D5 Bb4, from the third of D minor (the same four pitches are 1 5 6 4 in F major). The Bb rings
+  across the bar line and is bent down a half step onto A, the fifth of the key, as the harmony moves to Bbmaj7 (bars 1-2, 5-6
+  and 29-30); the high strings sigh F to E with it. In B the tune in F major has the same four notes on the oud, held, not bent.
+  The harmonic minor's C# only appears inside A7 (no Bb to C# step in any melody): the desert is in the oud, the frame drum and
+  the breathy flute, not in a scale.
+- **labyrinth**: the bone flute, augmented to six beats a note, E4 B4 C#5 A4 (the C# the Dorian sixth): the notes change in the
+  middle of bars as often as on them, a dune drifting against the path (bars 1-6, 17-22). In A' the high strings answer two beats
+  late with the inverted guise E5 A4 G4 B4 (the motif read in a mirror: the Gallery of False Horizons). In C only the last three
+  notes come back.
+- **boss_oracle**: the brass, Eb4 Bb4 C5 Ab4, one note on each pulse of a 12/8 bar, the Ab held across the bar line into the Ab
+  chord (bars 3 and 7; doubled by high strings and horn in 11 and 15, fortissimo in 33). In B the Saffron tune in C minor: its
+  motif notes on the oud (the town's instrument, C5 G5 Ab5 F5), the rest on horn and strings, then on the brass. In C the motif
+  climbs from Eb, F, G and Ab. Bar 42, the last before the loop, is C major: the oud plays C G A F and bends the F down onto E,
+  the major third, the town's sigh landing in the light for one bar.
+
+### saffron: The Moonwell Caravanserai (ep5_saffron and ep5_sh_*, haven_arrival, every_road, the Episode 5 credits; loops)
+The root region-5 brief for the tracker: plucked oud-like strings, hand percussion, a breathy flute, spacious string pads. A (1-8)
+Dm, Bbmaj7, Gm, A7sus4-A7, Dm, Bbmaj7, Gm7-Em7b5, A7sus4-A7: night; the oud motif and its bend, the flute answers, a D/A drone,
+a frame-drum dum on the downbeat, a few glass stars. A' (9-16) Dm, Gm/D, Bb, A7, Dm, F/C, Gm, Gm7-C7: the flute's long night
+melody, the oud walks in eighths. B (17-24) F, Gm7, Bbmaj7, C, Dm7, Gm, F-Gm7, Csus4-C: the caravans, the tune in F major, the
+strings an octave under from bar 19, the drum's walking figure and a shaker. B' (25-28) Bb, F/A, Gm, A7: flute and strings in
+octaves. T (29-32) Dm, Bbmaj7, Gm6, A7sus4-A7: the motif once more, bent; the A7 falls into bar 1. Instruments: oud (melody, bent
+note, walk), bone flute, strings_high, strings, strings_low, bass, tar, shaker, glass. Reverb room 0.9, 4.2 s.
+
+### labyrinth: The Shifting Dunes (ep5_lab_f1, ep5_lab_f2; loops)
+The plan's brief: a slow frame-drum pulse, a sustained low drone, a breathy flute with the motif in long notes, a bright bell tick
+every 8 bars. A (1-8) Em, Em, A/E, A/E, D/E, D/E, Em, Em over an E2-B2 drone. B (9-16) G, D/F#, Em7, A, G, D/F#, C#m7b5, Bm7: the
+bass leaves the pedal (a low bowed bass), an oud figure, the flute's slow line, a glass pad. A' (17-24): the motif and its mirror,
+a faint choir, the drum busier. C (25-32) A/E, G/E, D/E, Em, A/E, G/E, Bm7/E, Bm7: a harp arpeggio, the motif's last three
+notes, the oud and choir back for the last four bars. The sundial: a glockenspiel tick and a dry knock on the downbeat of bars 1, 9,
+17 and 25, a step lower each time (B6, A6, F#6, E6), with a faint repeat a bar later. Instruments: bone flute, strings_high,
+strings_low (drone), bowbass, glasspad, choir, oud, harp, tar, framedrum, glock, woodblock.
+
+### boss_oracle: The Sand Oracle (the Oracle's battle; loops)
+12/8 written as six quarter beats a bar at 132 (pulses on 0, 1.5, 3, 4.5). I (1-2) Cm: frame drums and low brass, the ostinato
+from bar 2; played once, rendered as a head before loopStart at the body's gain (the boss_regent construction, here from the
+start), so the seam bar 42 -> bar 3 is the tracker's sample-continuous one. A (3-10) Cm, Ab, Fm, G, Cm, Ab, Db, G7. A2 (11-18) Cm,
+Ab, Fm, G, Cm, Eb, Db, G7: choir up, the motif doubled, a second frame drum on the off-eighths. B (19-26) the quote: Cm, Eb,
+Abmaj7, G, Fm7, Fm6, Cm-G7, Gsus4-G (the raised B over the last G). C (27-34) the climb (Cm, Fm, Gm, Ab), a G7 hemiola (six
+quarter stabs against four pulses, timpani roll), the motif fortissimo, G7. R (35-41) the ostinato creeps back, the motif cut
+short, a G7 build. M (42) C major. Instruments: oud (ostinato in eighths, the quote's motif, the bent last note), pizz, brass
+(melody, stabs, low pedal), horn, strings_high, choir, tar (two), lowdrum, bass.
+
+### Sounds (plan 8.4), `tools/audio/ep5_sfx.py`
+Not registered in `sfx_defs.REG`, as Episode 4's: the script masters with `build.master` and writes `assets/audio/sfx/ep5_<id>.wav`
+(22.05 kHz mono) and `assets/audio/ambience/ep5_<id>.wav` (16 kHz mono, 10 s, seamless); `--review` draws waveform and spectrogram
+sheets into `tools/audio/out/ep5/`. All pack `ep5`, lazy (`LAZY_PREFIXES`).
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `sun_dial` | 1.22 s | `switch_on` | stone grinding a quarter turn on its pivot, a seat-clunk, a small E6/B6 chime |
+| `sand_run` | 0.75 s | `shelf_move` | a dry hiss of grains rising into a soft pour |
+| `sand_hold` | 0.47 s | `land` | a soft settling crunch thinning to silence |
+| `lamp_roll` | 0.95 s | `block_push` | iron wheels rolling on a stone rail, two clunks at the rail joints |
+| `sky_turn` | 2.39 s | `combo_start` | Night: a bronze gong swell about A2 that blooms, glass points falling on top |
+| `sky_turn_day` | 1.78 s | `combo_start` | Day: a warm brass swell, F#3 major opening dark to bright, a rising fifth (an extra id) |
+| `prophecy_read` | 2.27 s | `telegraph` | two star-bells a tritone apart (F#7, C7) over a C2 drone that swells and does not resolve |
+| `prophecy_break` | 1.08 s | `glass_break` | glass stars cracking and scattering, then pings that glide upward out of hearing |
+| `caravan_bell` | 3.80 s | `crystal_hit` | a small copper bell at D6, harmonic and beat-free partials, a long clean decay |
+
+`sky_turn_night` is an alias of `sky_turn` (a caller that knows the new sky plays `sky_turn_${sky}`). Told apart on purpose
+(`pairs.png`): sky_turn against sky_turn_day by pitch and timbre (gong A2 and glass against brass F#3); prophecy_break against
+Episode 4's `decree_void` (no paper tear, no fixed arpeggio: rising glides); caravan_bell against `bell_drowned` (centroid 1158 Hz
+against 129 Hz, harmonic against beating bronze, dry against underwater). Ambience: `desert_wind` (fallback `ash_wind`): a low
+steady wind over open sand, a constant faint grain-hiss, and twice in the loop a gust lifting a sheet of sand off a crest.
+`well_hush` is an alias of the core `archive_hush` (plan 2.7).
+
 ## Instruments (tools/music/synth.py)
 All oscillators are band-limited wavetables (additive, Lanczos-smoothed), so nothing aliases.
 strings (five unevenly detuned saws with independent vibrato, dark-to-bright filter morph, slow attack;
