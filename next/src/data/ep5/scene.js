@@ -44,8 +44,17 @@ export const EP5_BACKDROPS = {
   ep5_well: { asset: 'ep5_battle_well', cell: 4, bright: 0.6, tint: null },
   ep5_oracle: { asset: 'ep5_battle_oracle', cell: 4, bright: 0.8, tint: null },
 };
-/** E5-tiles' Day grade (tools/art/backdrops/ep5_build.py DAY); each backdrop json's grades.day overrides it. */
-export const DAY_GRADE = { multiply: '#ffcf8a', multiplyAlpha: 0.5, screen: '#ffe2a6', screenAlpha: 0.56 };
+/**
+ * The Day light. `tone` is the pixel path (paintDay): clear desert daylight in OKLab (E5-finish; the old pale-gold screen at 0.56
+ * was a flat veil, qa/battlescene/out/e5fix/day_sheet.png): lightness lifted on a curve, 1 - (1 - L)^lift (darks lift most,
+ * the light and dark of the painting kept), the night's cool hues (violet mesas, lilac stone) turned toward sun-warm rock by
+ * `warm` x their coolness (violet to magenta only: a blue sea, a painted window's water and pale haze keep their colour), chroma
+ * kept x `chroma`, a small warm `cast` on everything; `hue` the warm direction (radians in the
+ * a/b plane, 1.0 = terracotta to ochre). multiply/screen are E5-tiles' recipe (tools/art/backdrops/ep5_build.py DAY, each
+ * backdrop json's grades.day): only the fallback when the stage's pixels cannot be read.
+ */
+export const DAY_TONE = { lift: 1.55, warm: 0.6, chroma: 1.0, cast: 0.008, hue: 1.0 };
+export const DAY_GRADE = { multiply: '#ffcf8a', multiplyAlpha: 0.5, screen: '#ffe2a6', screenAlpha: 0.56, tone: DAY_TONE };
 export const FADE_FRAMES = 20;
 export const MARK_UID = '_sky5_turn';
 export const FORETELL = '#foretell';         // the scene's telegraph key for a foretelling: `${source}#foretell`
@@ -466,14 +475,14 @@ function initSky(scene) {
     if (a && u.side === 'enemy') { a.skySide = !!(u.skySide || (ENEMIES[u.id] && ENEMIES[u.id].sky)); a.skyExposed = !!u.exposed; }
   }
 }
-/** The Day grade of a backdrop: its json's grades.day, else E5-tiles' recipe. */
+/** The Day grade of a backdrop: its json's grades.day (the fallback blend), else E5-tiles' recipe; the pixel path's tone always. */
 function gradeOf(engine, key) {
   const rec = BACKDROPS[key];
   const assets = engine.assets;
   let meta = null;
   try { if (rec && assets.has(rec.asset)) { const a = assets.atlas(rec.asset); meta = a && a.meta; } } catch (e) { meta = null; }
   const d = meta && meta.grades && meta.grades.day;
-  return d && d.multiply ? d : DAY_GRADE;
+  return d && d.multiply ? { ...d, tone: d.tone || DAY_TONE } : DAY_GRADE;
 }
 // ---- the Day sky (CRITIQUE_7 item 1): Day is not the night brightened. Over each stage's sky the stars and the moon come down
 // (a small bright speck on a cool ground takes its ground's colour; a moon circle takes its row's sky) and the sky is repainted
@@ -515,9 +524,47 @@ function boxPass(src, w, n, k, op) {
   for (let x = 0; x < w; x++) line(tmp, out, x, w, n);
   return out;
 }
+// OKLab (Ottosson), for the Day tone
+const toLin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const toSrgb = (c) => { c = Math.max(0, c); return Math.min(1, c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055); };
+function oklab(r, g, b, o) {
+  r = toLin(r); g = toLin(g); b = toLin(b);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  o[0] = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+  o[1] = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  o[2] = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+}
+function fromOklab(L, a, b, o) {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3, m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  o[0] = toSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s);
+  o[1] = toSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s);
+  o[2] = toSrgb(-0.0041960863 * l - 0.5136630259 * m + 1.0006933788 * s);
+}
+const LAB = [0, 0, 0];
+/** 1 for violet to magenta (HSV hue 265 and up), 0 for blue and cyan (235 and under). */
+function violet(r, g, b) {
+  const mx = Math.max(r, g, b), d = mx - Math.min(r, g, b);
+  if (!d) return 0;
+  const h = 60 * (mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4);
+  return h < 90 ? 1 : smooth(235, 265, h);
+}
+/** One pixel (0 to 1) in the Day tone t, into o. */
+export function dayTone(r, g, b, t, o) {
+  oklab(r, g, b, LAB);
+  const C = Math.hypot(LAB[1], LAB[2]), wa = Math.cos(t.hue), wb = Math.sin(t.hue);
+  const c = C ? coolness(r, g, b) * violet(r, g, b) * (1 - smooth(0.62, 0.82, LAB[0])) * t.warm : 0;
+  let ua = C ? LAB[1] / C : 0, ub = C ? LAB[2] / C : 0;
+  if (c > 0) { ua = ua * (1 - c) + wa * c; ub = ub * (1 - c) + wb * c; const n = Math.hypot(ua, ub) || 1; ua /= n; ub /= n; }
+  const L = 1 - (1 - Math.max(0, LAB[0])) ** t.lift, k = C * t.chroma * (1 - 0.45 * c);   // turned rock is sunlit, not neon
+  fromOklab(L, ua * k + wa * t.cast, ub * k + wb * t.cast, o);
+  return o;
+}
 /**
- * The Day copy of a stage, in place on its RGBA pixels (w x h): the warm grade over rows 0 to y1 (multiply, then screen, as
- * E5-tiles' recipe), and with a DAY_SKY spec the sky and the sea repainted as above. Pure (no canvas), so node can test it.
+ * The Day copy of a stage, in place on its RGBA pixels (w x h): the Day light over rows 0 to y1 (grade.tone, else E5-tiles'
+ * multiply then screen), and with a DAY_SKY spec the sky and the sea repainted as above. Pure (no canvas), so node can test it.
  */
 export function paintDay(px, w, h, y1, grade, spec) {
   const N = new Float32Array(px.length);
@@ -571,11 +618,12 @@ export function paintDay(px, w, h, y1, grade, spec) {
     if (cnt) mean = sum / cnt;
   }
   // 3. the warm grade, then the day sky and the day sea over it
-  const m = hexRgb(grade.multiply), s = hexRgb(grade.screen), ma = grade.multiplyAlpha, sa = grade.screenAlpha;
+  const m = hexRgb(grade.multiply), s = hexRgb(grade.screen), ma = grade.multiplyAlpha, sa = grade.screenAlpha, tone = grade.tone || null;
   const out = [0, 0, 0], d = [0, 0, 0];
   for (let y = 0; y < Math.min(h, y1); y++) for (let x = 0; x < w; x++) {
     const i = (y * w + x) * 4;
-    for (let c = 0; c < 3; c++) { let v = N[i + c]; v = lerp(v, v * m[c], ma); out[c] = lerp(v, 1 - (1 - v) * (1 - s[c]), sa); }
+    if (tone) dayTone(N[i], N[i + 1], N[i + 2], tone, out);
+    else for (let c = 0; c < 3; c++) { let v = N[i + c]; v = lerp(v, v * m[c], ma); out[c] = lerp(v, 1 - (1 - v) * (1 - s[c]), sa); }
     const q = y * w + x;
     const sea = spec && spec.sea && y >= spec.sea[0] && y < spec.sea[1];
     const wt = !k || y >= n ? 0 : sea ? 0.8 * k[q] : y < spec.hz ? k[q] * (1 - smooth(spec.hz * 0.6, spec.hz, y)) : 0;

@@ -1107,6 +1107,20 @@ Battle gold: 3,200 in, 8,930 earned, 12,130 out.
   painting's light and dark kept; the deck's sea turns turquoise. The gallery is indoors: the grade alone. About 30 ms once a battle.
 - **Turn the Sky's icon** (CRITIQUE_7 item 10): a 12 x 12 sun and crescent drawn by scene.js on its Tech row (the core's hitIcon has
   none for a skill with no target).
+- **Day is clear daylight, not a veil** (E5-finish): the warm grade (multiply `#ffcf8a`, then screen `#ffe2a6` at 0.56) lifted
+  every dark to about 0.55 and read as a milky wash over the dunes and the Oracle's city. The pixel path is now `DAY_TONE` in OKLab:
+  lightness 1 - (1 - L)^1.55 (darks lift, the painting's light and dark kept), violet to magenta (not blue) turned toward warm rock
+  by 0.6 of its coolness with its chroma muted up to 45%, everything else at its own chroma, a small warm cast. Blue water and
+  painted windows stay blue. The multiply and screen stay only as the fallback when the stage's pixels cannot be read. Foes still
+  read: E5-tiles' check (share of a foe's body more than 0.12 OKLab from the ring round it) is 0.611 at worst by Day (the Well's
+  husk; aim 0.6), the dunes' reaver 0.775 -> 0.749, the Oracle 0.95 -> 0.877 (its night value).
+- **The Oracle with every optional fight** (E5-finish, PLAYTEST_REVIEW_7 item 3): no data change. The Lv 26 Continue run had
+  fought 23 ordinary fights against 17 placed foes: its own save-and-reload check at F1 brings a dungeon floor's beaten foes back
+  (field.js keeps them gone for the scene's life), and `--all-fights` hunted them again. Every placed foe once from the Episode 4
+  save is 9,746 + 3,829 = 13,575 EXP before elites (Lv 25 spans 12,989 to 14,224). `qa/autoplay.py --all-fights` now hunts each
+  placed foe once (foes back after its reload are not hunted); the run met the Oracle at Lv 25 (14,021 EXP, 21 battles, 2 elites).
+  A data cut cannot cover the reload case: it needs about 240 EXP off the run, and the quick start's 80% route has 194 EXP over
+  Lv 24 at the Oracle. Oracle by level (200 fights): Lv 25 careful 100% / 13.05 rounds, ignoring telegraphs 92%; Lv 26 98%.
 
 ### 13.8 Seams this pack would like (none blocks Episode 5)
 

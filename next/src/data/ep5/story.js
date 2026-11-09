@@ -467,19 +467,21 @@ async function sel_memory_2(s) {
 // main truth choice. Vex is a scene spawn; he never fights; the feather prop feather_glass stays. 10 boxes on each path, with the
 // choice and the list's toast 12 on screen (PLAYTEST_REVIEW_7 item 8: cut, not rewritten). He is spawned as vex_k, not vex:
 // `vex` is Episode 2's mirror-glass id (world/reflections.js IN_GLASS), drawn as a pale image in the glass (CRITIQUE_7 item 8).
-// He kneels at the star floor with his back to the party (vex_spot, facing up) and turns to the hero to speak; the party
-// stands on party_stop, two clear rows below him.
+// He kneels at the star floor with his back to the party (vex_spot, facing up; npc_vex_kneel, the ep5_npcs kneel frame,
+// E5-finish), turns to the hero still kneeling, and stands (npc_vex) only to hold out the list; the party stands on
+// party_stop, two clear rows below him.
 // Gives fifth_list. Sets fifth_list_get, vex_gallery_met, and star_restored or star_hidden.
 async function vex_gallery(s) {
   await s.music(null);
   await s.camera.panTo('star_floor', 40);
-  await s.spawn('vex_k', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_spot', dir: 'up' });
+  await s.spawn('vex_k', { sprite: 'npc_vex_kneel', name: 'Vex Quill', at: 'vex_spot', dir: 'up' });
   await stage(s, 'party_stop');
   await narrate(s, 'A floor of dark star-glass. Vex Quill kneels on it, lifts one small star from its socket, and sets it in a painted sky.');
   await s.music('mystery');
   await s.face('vex_k', 'hero');
   await say(s, 'vex_k', 'Every night it looks for you. Every night I move you. Months now. My knees hate this floor.');
   await say(s, 'vex_k', 'A lie that saves lives is still a lie. Decide whether that matters.');
+  await s.spawn('vex_k', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_spot', dir: 'down' });   // he gets up off the glass
   await narrate(s, 'He holds out a list: cheap paper, a cold hand, the seal of an empty book. At the bottom, one line in fresh ink.');
   await say(s, 'vex_k', "Five lists. This one's old. Somebody added a line last week. I don't keep lists with your name on them.");
   await s.give(REWARDS_EP5.fifth_list.item, REWARDS_EP5.fifth_list.qty);

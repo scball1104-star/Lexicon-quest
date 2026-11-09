@@ -195,3 +195,17 @@ test('A3: the Day sky takes down the stars and the moon and warms the sky; warm 
   const dome = at(9, 25);
   assert.ok(dome[0] > dome[2] + 40, `the gold dome stays warm (${dome})`);
 });
+
+test('E5-finish: Day is clear daylight, not a veil: the painting keeps its light and dark, violet rock warms, blue water stays blue', () => {
+  const lum = ([r, g, b]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const tone = (rgb) => scene5.dayTone(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, scene5.DAY_TONE, [0, 0, 0]);
+  const rock = [74, 58, 102], sand = [214, 168, 96], sea = [36, 72, 150];   // a violet mesa in shade, lit sand, a painted window's water
+  const [r, s, w] = [rock, sand, sea].map(tone);
+  const before = Math.abs(lum(sand) / 255 - lum(rock) / 255), after = Math.abs(lum(s) - lum(r));
+  assert.ok(after >= 0.85 * before, `contrast kept (${before.toFixed(3)} -> ${after.toFixed(3)})`);
+  assert.ok(lum(r) > lum(rock) / 255 && lum(r) < 0.45, `the shade lifts but stays shade (${lum(r).toFixed(3)})`);
+  assert.ok(r[0] > r[2], `the violet rock turns warm (${r.map((v) => v.toFixed(2))})`);
+  assert.ok(w[2] > w[0] + 0.15, `the blue water keeps its blue (${w.map((v) => v.toFixed(2))})`);
+  const veil = scene5.DAY_GRADE.tone === scene5.DAY_TONE;
+  assert.ok(veil, 'the pixel path uses the tone, not the multiply and screen fallback');
+});

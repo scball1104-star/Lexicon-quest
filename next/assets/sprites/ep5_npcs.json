@@ -4,7 +4,7 @@
   24,
   32
  ],
- "layout": "Episode 5 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_dune_host is npc_innkeeper recoloured for the Dune Lantern Rest; npc_traveler_b is the second traveler recolour.",
+ "layout": "Episode 5 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_dune_host is npc_innkeeper recoloured for the Dune Lantern Rest; npc_traveler_b is the second traveler recolour; npc_vex_kneel is npc_vex (core npcs atlas) kneeling, every slot the kneel.",
  "sprites": {
   "npc_sel": {
    "name": "Sel",
@@ -229,6 +229,23 @@
   },
   "npc_dune_host": {
    "name": "The Dune Host",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_vex_kneel": {
+   "name": "Vex Quill",
    "cell": [
     24,
     32
@@ -1586,6 +1603,102 @@
   ],
   "npc_dune_host_up_blink": [
    168,
+   608,
+   24,
+   32
+  ],
+  "npc_vex_kneel_down_0": [
+   192,
+   512,
+   24,
+   32
+  ],
+  "npc_vex_kneel_down_1": [
+   216,
+   512,
+   24,
+   32
+  ],
+  "npc_vex_kneel_down_2": [
+   240,
+   512,
+   24,
+   32
+  ],
+  "npc_vex_kneel_down_blink": [
+   264,
+   512,
+   24,
+   32
+  ],
+  "npc_vex_kneel_left_0": [
+   192,
+   544,
+   24,
+   32
+  ],
+  "npc_vex_kneel_left_1": [
+   216,
+   544,
+   24,
+   32
+  ],
+  "npc_vex_kneel_left_2": [
+   240,
+   544,
+   24,
+   32
+  ],
+  "npc_vex_kneel_left_blink": [
+   264,
+   544,
+   24,
+   32
+  ],
+  "npc_vex_kneel_right_0": [
+   192,
+   576,
+   24,
+   32
+  ],
+  "npc_vex_kneel_right_1": [
+   216,
+   576,
+   24,
+   32
+  ],
+  "npc_vex_kneel_right_2": [
+   240,
+   576,
+   24,
+   32
+  ],
+  "npc_vex_kneel_right_blink": [
+   264,
+   576,
+   24,
+   32
+  ],
+  "npc_vex_kneel_up_0": [
+   192,
+   608,
+   24,
+   32
+  ],
+  "npc_vex_kneel_up_1": [
+   216,
+   608,
+   24,
+   32
+  ],
+  "npc_vex_kneel_up_2": [
+   240,
+   608,
+   24,
+   32
+  ],
+  "npc_vex_kneel_up_blink": [
+   264,
    608,
    24,
    32
@@ -4052,6 +4165,182 @@
     "npc_dune_host_up_0",
     "npc_dune_host_up_blink",
     "npc_dune_host_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_kneel_walk_down": {
+   "frames": [
+    "npc_vex_kneel_down_1",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_2",
+    "npc_vex_kneel_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_kneel_idle_down": {
+   "frames": [
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_0",
+    "npc_vex_kneel_down_blink",
+    "npc_vex_kneel_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_kneel_walk_left": {
+   "frames": [
+    "npc_vex_kneel_left_1",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_2",
+    "npc_vex_kneel_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_kneel_idle_left": {
+   "frames": [
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_0",
+    "npc_vex_kneel_left_blink",
+    "npc_vex_kneel_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_kneel_walk_right": {
+   "frames": [
+    "npc_vex_kneel_right_1",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_2",
+    "npc_vex_kneel_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_kneel_idle_right": {
+   "frames": [
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_0",
+    "npc_vex_kneel_right_blink",
+    "npc_vex_kneel_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_vex_kneel_walk_up": {
+   "frames": [
+    "npc_vex_kneel_up_1",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_2",
+    "npc_vex_kneel_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_vex_kneel_idle_up": {
+   "frames": [
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_0",
+    "npc_vex_kneel_up_blink",
+    "npc_vex_kneel_up_0"
    ],
    "fps": 8,
    "loop": true

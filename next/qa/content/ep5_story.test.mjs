@@ -37,7 +37,7 @@ const MAP_ACTORS = ['oracle'];   // the Oracle's map actor in ep5_lab_oracle (sp
 const EP5_MUSIC = ['saffron', 'labyrinth', 'boss_oracle', 'valewyn'];   // plan 2.7 (valewyn rides the ep4 fragment)
 const EP5_SFX = ['sun_dial', 'sand_run', 'sand_hold', 'sky_turn', 'prophecy_read', 'prophecy_break', 'lamp_roll', 'caravan_bell'];
 const EP5_SPRITES = ['npc_sel', 'npc_yara', 'npc_kamal', 'npc_nasrin', 'npc_laleh', 'npc_omar', 'npc_yasmin', 'npc_hassan',
-  'npc_ishra', 'npc_tamir', 'npc_young_sel', 'npc_traveler', 'npc_traveler_b', 'npc_vex', 'npc_innkeeper', 'dust_harrier', 'dune_scarab'];
+  'npc_ishra', 'npc_tamir', 'npc_young_sel', 'npc_traveler', 'npc_traveler_b', 'npc_vex', 'npc_vex_kneel', 'npc_innkeeper', 'dust_harrier', 'dune_scarab'];
 const PAGE_IDS = ['ep5_letter', 'ep5_chart', 'ep5_page'];
 const TINTS = ['none', 'dawn', 'dusk', 'night'];
 const KNOWN = (f) => f in FLAGS || f === 'tier_1';   // tier_1: the Fine Print pack's flag (src/data/tier)
@@ -469,9 +469,16 @@ test('vex_gallery: Vex is no mirror image, the party on its marks, 10 lines a pa
   const runs = (await explore(scenes.vex_gallery, { flags: [...EP4_DONE, 'lab_f2_arrived'] })).filter((r) => ops(r.log, 'spawn').length);
   assert.ok(runs.length >= 2, 'both answers explored');
   for (const r of runs) {
-    const spawn = ops(r.log, 'spawn').find((e) => e.args[1] && e.args[1].sprite === 'npc_vex');
+    const vex = ops(r.log, 'spawn').filter((e) => e.args[1] && /^npc_vex/.test(e.args[1].sprite));
+    const spawn = vex[0];
     assert.ok(spawn && !IN_GLASS_IDS.includes(spawn.args[0]), `Vex spawns as ${spawn && spawn.args[0]}, not an in-glass id`);
     assert.equal(spawn.args[1].dir, 'up', 'he works at the star floor, his back to the party');
+    // E5-finish (CRITIQUE_7 item 8): he kneels at the star floor (the ep5_npcs kneel frame), and stands to hold out the list
+    assert.equal(spawn.args[1].sprite, 'npc_vex_kneel', 'Vex kneels on the star floor');
+    const stand = vex.find((e) => e.args[1].sprite === 'npc_vex');
+    assert.ok(stand && stand.args[0] === spawn.args[0], 'the same actor stands up');
+    const listAt = r.log.findIndex((e) => e.op === 'say' && /holds out a list/.test(e.args[1] || ''));
+    assert.ok(r.log.indexOf(stand) < listAt, 'he is on his feet before he holds out the list');
     assert.ok(says(r.log).length <= 10, `${says(r.log).length} lines`);
     const first = r.log.findIndex((e) => e.op === 'say');
     assert.ok(r.log.slice(0, first).some((e) => e.op === 'walk' && e.args[1] === 'party_stop'), 'the party is on party_stop first');

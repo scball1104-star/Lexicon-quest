@@ -1357,11 +1357,11 @@ class Bot:
         return self.js("(() => { const g = LQ_ENGINE.game; return g.party.map(m => { let mx = m.maxHp; try { const s = LQ_DEBUG.state(); } catch (e) {} return [m.id, m.hp, mx || m.hp, m.level]; }); })()")
 
     # ------------------------------------------------------------------ fighting
-    def hunt(self, limit=12, label=''):
-        """Fight every reachable visible enemy on the current map (walk into them)."""
+    def hunt(self, limit=12, label='', skip=()):
+        """Fight every reachable visible enemy on the current map (walk into them), except the ids in `skip`."""
         for _ in range(limit):
             f = self.settle()
-            enemies = [a for a in f['actors'] if a['kind'] == 'enemy' and not a['fighting']]
+            enemies = [a for a in f['actors'] if a['kind'] == 'enemy' and not a['fighting'] and a['id'] not in skip]
             if not enemies:
                 return
             passable, ecells = self.model(f, fight=True)
@@ -4550,6 +4550,18 @@ class Episode5(Episode4):
     def __init__(self, bot, side=True, until=None, start='save'):
         super().__init__(bot, side=side, until=until, start=start)
         self.decisions = collections.Counter()     # puzzle label -> hours chosen + Shove sequences (story_time.py reads the notes)
+        # --all-fights (E5-finish): every placed foe once. The bot's own save-and-reload check (round_trip) brings a floor's
+        # beaten foes back (field.js keeps them gone only for the scene's life); those are not hunted again, so the run measures
+        # a player who fights everything on the way down, not one who reloads mid-floor and fights the floor twice.
+        self.once = False
+        self.beaten = collections.defaultdict(set)   # map id -> enemy ids beaten before a reload
+
+    def hunt(self, limit, label):
+        f = self.b.settle()
+        exp = ((self.b.game() or {}).get('party') or [{}])[0].get('exp') or 0
+        if exp >= self.ZONE_EXP.get(f['map'], 10 ** 9):
+            return
+        self.b.hunt(limit=limit, label=label, skip=self.beaten[f['map']] if self.once else ())
 
     # ---- sun and shade
     def shade(self, f=None):
@@ -4623,6 +4635,11 @@ class Episode5(Episode4):
         sb = before.get('shade') or {}
         b.round_trip(self.run_slot or 1, label)
         after = b.settle()
+        foes = lambda f: {a['id'] for a in f.get('actors') or [] if a['kind'] == 'enemy'}
+        back = foes(after) - foes(before)
+        if back and after.get('map') == before.get('map'):
+            self.beaten[after['map']] |= back
+            b.notes.append(f'reload at {label}: {len(back)} beaten foes back on {after["map"]} ({sorted(back)})' + ('; not hunted again' if self.once else ''))
         sa = after.get('shade') or {}
         if not set(sb.get('latched') or []) <= set(sa.get('latched') or []):
             raise Fail(f'after the reload at {label}: latched {sb.get("latched")} -> {sa.get("latched")}')
@@ -5917,6 +5934,7 @@ def main(argv):
             ep = Episode5(bot, side=not a.no_side, until=a.until, start=a.start)
             if a.all_fights:
                 ep.ZONE_EXP = {}
+                ep.once = True
             ep.run()
         elif a.route == 'complete':
             sys.path.insert(0, str(HERE / 'integrate'))

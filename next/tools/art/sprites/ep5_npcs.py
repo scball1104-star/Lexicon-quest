@@ -117,9 +117,63 @@ def dune_host():
 EP5_NPCS['npc_dune_host'] = dune_host()
 ORDER = list(EP5_NPCS)
 
+# Vex Quill kneeling on the star floor (E5-finish; vex_gallery, CRITIQUE_7 item 8). Built from his OWN frames in the core
+# `npcs` atlas (read, never written), so the coat, scarf and hair are exactly the look players know: the body down to the
+# hands drops VEX_DROP px and the coat pools on the floor. Front: both knees under the coat; side: the knee forward, the
+# boot heel behind; back: both boot soles. No walk: frames 1 and 2 are the kneel itself. Packed in the 15th block (the
+# last free one of the fifth band), so no other rect moves.
+VEX_HIP, VEX_DROP = 24, 5
+VEX_COL = {'O': '#14101e', 'L': '#4c445c', 'M': '#2e2b4c', 'D': '#1a1334', 'R': '#b34532', 'r': '#87332e',
+           'K': '#331a1b', 'k': '#6e3d2c'}
+VEX_HEM = {
+    'down': """
+...OLLLMMMMrRMDDDDDDO...
+..OLLLMMMMMrRMDDDDDDDO..
+...OOOOOOOOOOOOOOOOOO...
+""",
+    'left': """
+..OLLLLMMMMMMDDDDDO.....
+.OLLLMMMMMMMMDDDDDDDOKk.
+..OOOOOOOOOOOOOOOOOOOKKO
+""",
+    'up': """
+...OLLMMMMMMMMMDDDDDO...
+..OLLMMMMMMMMMMMDDDDDO..
+...OKKkOOOOOOOOOOkKKO...
+""",
+}
+
+
+def vex_kneel():
+    """{dir: [stand, stand, stand, blink]} 24x32 kneeling frames for npc_vex_kneel, from npc_vex in the core npcs atlas."""
+    import json
+    from PIL import Image
+    meta = json.load(open(os.path.join(DST, 'npcs.json'), encoding='utf-8'))
+    sheet = np.asarray(Image.open(os.path.join(DST, 'npcs.png')).convert('RGBA'), np.float32) / 255.0
+
+    def core(name):
+        x, y, w, h = meta['frames'][name][:4]
+        return sheet[y:y + h, x:x + w].copy()
+
+    out = {}
+    for d in ('down', 'left', 'up'):
+        hem = parse_grid(grid_from_text(VEX_HEM[d]), VEX_COL, w=24)
+        fr = []
+        for slot in ('0', 'blink'):
+            src = core(f'npc_vex_{d}_{slot}')
+            k = blank(24, 32)
+            k[VEX_DROP:VEX_HIP + VEX_DROP] = src[:VEX_HIP]
+            n = hem.shape[0]
+            k[32 - n:] = np.where(hem[..., 3:4] > 0, hem, k[32 - n:])
+            fr.append(k)
+        out[d] = [fr[0], fr[0], fr[0], fr[1]]
+    out['right'] = [flip_x(f) for f in out['left']]
+    return out
+
 
 def build(write=True):
     blocks = {nid: BN.npc_frames(nid, spec) for nid, spec in EP5_NPCS.items()}
+    blocks['npc_vex_kneel'] = vex_kneel()
     rects, anims = {}, {}
     per = 3
     rows = (len(blocks) + per - 1) // per
@@ -136,11 +190,12 @@ def build(write=True):
             anims[f'{nid}_walk_{d}'] = {'frames': [f'{nid}_{d}_1', f'{nid}_{d}_0', f'{nid}_{d}_2', f'{nid}_{d}_0'], 'fps': 6, 'loop': True}
             anims[f'{nid}_idle_{d}'] = {'frames': [f'{nid}_{d}_0'] * 26 + [f'{nid}_{d}_blink'] + [f'{nid}_{d}_0'], 'fps': 8, 'loop': True}
     sprites = {nid: {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid, sp in EP5_NPCS.items()}
+    sprites['npc_vex_kneel'] = {'name': 'Vex Quill', 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS}
     meta = {'image': 'ep5_npcs.png', 'cell': [24, 32],
             'layout': 'Episode 5 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols '
                       'stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. '
                       'npc_dune_host is npc_innkeeper recoloured for the Dune Lantern Rest; npc_traveler_b is the second '
-                      'traveler recolour.',
+                      'traveler recolour; npc_vex_kneel is npc_vex (core npcs atlas) kneeling, every slot the kneel.',
             'sprites': sprites, 'frames': rects, 'anims': anims}
     if write:
         import anim_atlas as AA
