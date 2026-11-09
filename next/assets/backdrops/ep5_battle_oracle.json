@@ -1,0 +1,43 @@
+{
+ "image": "ep5_battle_oracle.png",
+ "w": 384,
+ "h": 216,
+ "cell": 4,
+ "note": "the Sand Oracle: a tight crop on the great armillary and the star sky (cell 4), the floor under the band calmed",
+ "extraColors": [
+  "#977973",
+  "#654888",
+  "#3f2f6b",
+  "#7d5691"
+ ],
+ "colors": 65,
+ "source": "environments.webp cell 4",
+ "bandY": 118,
+ "bandAlpha": 0.48,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep5_oracle",
+ "fallback": "boss",
+ "grades": {
+  "night": "as painted",
+  "day": {
+   "multiply": "#ffcf8a",
+   "multiplyAlpha": 0.5,
+   "screen": "#ffe2a6",
+   "screenAlpha": 0.56,
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "Day: over rows day.rows (0 to bandY: the sky and the far scene, never the floor the foes stand on) multiply by day.multiply at day.multiplyAlpha, then screen day.screen at day.screenAlpha; cross-fade over 20 frames on a Turn. Night: as painted.",
+  "meanLuma": {
+   "night": 0.3015,
+   "day": 0.4795
+  },
+  "skyLuma": {
+   "night": 0.3037,
+   "day": 0.6387
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ }
+}
