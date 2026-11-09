@@ -7267,6 +7267,110 @@
     }
    ],
    "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "battle_ep4_causeway",
+   "note": "E4: an F1 Tidegate Causeway fight on its painted stage: the party and the Watch read clearly",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e4k1_watch",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (true)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "waitFor": "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.usedAsset",
+     "timeout": 20000
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.key === 'ep4_keep' && LQ_ENGINE.scene.backdropLayer.usedAsset",
+     "message": "the Causeway stage is up"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "battle_ep4_witness",
+   "note": "E4: an F3 Court of Witnesses fight on its own painted stage, the Decrees pack stamping",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ]
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e4k3_decrees",
+      {
+       "seed": 4,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (true)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "waitFor": "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.usedAsset",
+     "timeout": 20000
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.key === 'ep4_witness' && LQ_ENGINE.scene.backdropLayer.usedAsset",
+     "message": "the Witness stage is up"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
   }
  ]
 }

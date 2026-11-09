@@ -155,6 +155,16 @@ SHOTS = [
                {'call': 'battle', 'args': ['paper_regent', {'seed': 5, 'canFlee': False}]}, {'advance': 60},
                {'eval': REGENT_TO_ANSWER}, {'advance': 30},
                {'assert': "LQ_DEBUG.scene() === 'battle'", 'message': 'still in the fight'}]},
+    # The two keep stages a real fight had not shown (stages_11_5.md: seen only in mock_stage): an ordinary F1 fight on the
+    # Tidegate Causeway and an F3 fight in the Court of Witnesses (scene.js moves the zone's backdrop to ep4_witness).
+    {'name': 'battle_ep4_causeway', 'note': 'E4: an F1 Tidegate Causeway fight on its painted stage: the party and the Watch read clearly',
+     'steps': [READY, NEW, {'eval': 'LQ_DEBUG.setSpeed(0)'}, {'call': 'battle', 'args': ['e4k1_watch', {'seed': 3, 'noElite': True, 'canFlee': False}]}, {'advance': 60},
+               battle_until('true'), {'waitFor': "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.usedAsset", 'timeout': 20000}, {'advance': 4},
+               {'assert': "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.key === 'ep4_keep' && LQ_ENGINE.scene.backdropLayer.usedAsset",'message': 'the Causeway stage is up'}]},
+    {'name': 'battle_ep4_witness', 'note': 'E4: an F3 Court of Witnesses fight on its own painted stage, the Decrees pack stamping',
+     'steps': [READY, NEW, {'eval': 'LQ_DEBUG.setSpeed(0)'}, {'call': 'battle', 'args': ['e4k3_decrees', {'seed': 4, 'noElite': True, 'canFlee': False}]}, {'advance': 60},
+               battle_until('true'), {'waitFor': "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.usedAsset", 'timeout': 20000}, {'advance': 4},
+               {'assert': "LQ_ENGINE.scene.name === 'battle' && LQ_ENGINE.scene.backdropLayer.key === 'ep4_witness' && LQ_ENGINE.scene.backdropLayer.usedAsset",'message': 'the Witness stage is up'}]},
     {'name': 'story_regent_after', 'note': 'E4: regent_after, the line under the counter-seal reads at last (story)',
      'steps': [READY, NEW, flags(WON, CRANK), warp('ep4_keep_crown', 11, 12, 'up'),             # regent_after runs on entry
                until_line('"Keep this one\\."'), on_top('dialog', 'story_regent_after: Mira reads the line')]},

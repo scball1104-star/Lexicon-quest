@@ -37,7 +37,7 @@ import { mapsListed } from './index.js';
 
 export const EP4_BACKDROPS = {
   ep4_flood_road: { asset: 'ep4_battle_flood_road', cell: 3, bright: 1.0, tint: null },
-  ep4_keep: { asset: 'ep4_battle_keep', cell: 3, bright: 0.8, tint: null },
+  ep4_keep: { asset: 'ep4_battle_keep', cell: 3, bright: 0.8, tint: null, darken: 0.25 },
   ep4_archive_deep: { asset: 'ep4_battle_archive_deep', cell: 3, bright: 0.55, tint: null },
   ep4_witness: { asset: 'ep4_battle_witness', cell: 3, bright: 0.7, tint: null },
   ep4_throne: { asset: 'ep4_battle_throne', cell: 3, bright: 0.8, tint: null },
