@@ -1,0 +1,43 @@
+{
+ "image": "ep5_battle_dunes.png",
+ "w": 384,
+ "h": 216,
+ "cell": 4,
+ "note": "the Caravan Road and the Shifting Dunes: environments cell 4, the right half (dunes, mesas, the aqueduct), no domes; the sand under the band flattened to a calm mid value",
+ "extraColors": [
+  "#957968",
+  "#7a5862",
+  "#8c628c",
+  "#654e6c"
+ ],
+ "colors": 60,
+ "source": "environments.webp cell 4",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep5_dunes",
+ "fallback": "valley",
+ "grades": {
+  "night": "as painted",
+  "day": {
+   "multiply": "#ffcf8a",
+   "multiplyAlpha": 0.5,
+   "screen": "#ffe2a6",
+   "screenAlpha": 0.56,
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "Day: over rows day.rows (0 to bandY: the sky and the far scene, never the floor the foes stand on) multiply by day.multiply at day.multiplyAlpha, then screen day.screen at day.screenAlpha; cross-fade over 20 frames on a Turn. Night: as painted.",
+  "meanLuma": {
+   "night": 0.3441,
+   "day": 0.5003
+  },
+  "skyLuma": {
+   "night": 0.3881,
+   "day": 0.6768
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ }
+}

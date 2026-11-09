@@ -5,7 +5,7 @@
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
 import { CAVE_LIVE } from '../data/cave/live.js';
-import { EP3_LIVE, EP4_LIVE } from './episodes.js';
+import { EP3_LIVE, EP4_LIVE, EP5_LIVE } from './episodes.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -25,6 +25,8 @@ export const PACKS = {
          wanted: (f) => !!(f.ep2_started || f.ep2_complete || f.ep3_started), enabled: () => EP3_LIVE },
   ep4: { entry: '../data/ep4/index.js', prefix: 'ep4_', assets: 'assets/ep4_manifest.json', audioPack: 'ep4', hard: true, touches: ['emberpeak', 'pk_inn'],
          wanted: (f) => !!(f.ep3_complete || f.ep4_started), enabled: () => EP4_LIVE },
+  ep5: { entry: '../data/ep5/index.js', prefix: 'ep5_', assets: 'assets/ep5_manifest.json', audioPack: 'ep5', hard: true, touches: ['ep4_vw_inn', 'ep4_valewyn'],
+         wanted: (f) => !!(f.ep4_complete || f.ep5_started), enabled: () => EP5_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
 };
 

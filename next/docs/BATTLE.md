@@ -974,3 +974,157 @@ Ordinary zones (careful, averaged over the plan, both levels): win / rounds / HP
 | **barrister** | 20 | 100% / 8.29 (7.0-9.7) / 16% | 0% / 3.45 | - |
 | **paper_regent** | 20 | 99% / 13.52 (10.3-16.7) / 16% | 0% / 6.95 | 74% / 11.70 |
 | **paper_regent** | 21 | 100% / 12.53 (10.0-15.3) / 15% | 0% / 7.16 | - |
+
+## 13. Episode 5: The Last Prophecy (E5-battle, wave 5a)
+
+Design: `docs/EPISODE5_PLAN.md` sections 6 and 7. Everything is pack data and pack code (`src/data/ep5/{enemies,encounters,items,loot,shops,
+skills,ai,sky}.js`, each an idempotent `register()` the pack entry calls in its ORDER); no core file changed (`rules.js` `RULE_EXT` is
+E5-pack's seam). `simulate.mjs --check` passes all five episodes ("All targets met"); `--cave --check` and `--tier 1 --check` unchanged.
+
+### 13.1 Enemies (final numbers after tuning)
+
+Every foe has a sky side (sun or star). Ordinary EXP: about 100 a head; the three-foe groups carry an encounter `expMul` (F1 stalkers 0.7,
+F2 mixed 0.65, F3 shades 0.6) so a fight pays about 200 and the Oracle is met at Lv 24 at 100% and at 80% of the fights.
+
+| Enemy | Side | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold), trait |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Dune Stalker | sun | 21 | 560 | 112/20 | 30/20 | 19 | 2 | ice, spear | fire | 100 / 140 | Bite, Sandkick (Blind 20%); evade 10% |
+| Dune Scarab | sun | 21 | 540 | 108/16 | 50/22 | 9 | 4 | ice, axe | fire, sword, bow | 105 / 150 | Mandible, Sunshell (fire), Burrow (Protect) |
+| Dust Harrier | sun | 22 | 520 | 118/30 | 24/24 | 21 | 3 | bow, thunder | fire | 80 / 150 | Talon, Dust Devil (party phys 70%, Blind 15%); flying, evade 15% |
+| Silt Reaver | star | 22 | 680 | 80/120 | 22/34 | 14 | 3 | light, fire | ice | 95 / 160 | Silt Lash, Bury (Silence 25%), Drain |
+| Starsilt | star | 22 | 580 | 70/115 | 18/30 | 11 | 2 | fire, light | ice, thunder | 105 / 150 | Glimmer (Blind 25%), Starfall (single mag 160%, ice) |
+| Horizon Shade | star | 23 | 700 | 76/130 | 20/38 | 16 | 3 | light, fire | ice | 100 / 170 | Cold Horizon (party mag 60%, Chill 25%), Mirage (Protect), **Eclipse** (party mag 100%) |
+| Tomorrow Husk | sun | 24 | 900 | 150/40 | 48/26 | 8 | 5 | ice, axe | fire, sword, spear | 125 / 200 | Ground Slam (party phys 65%), Sandglass (Haste), **Hour Crush** (party phys 110%, first turn 1, then every 2) |
+| The Mirage Knight | sun, mirrors | 23 | 2450 | 420/220 | 34/26 | 13 | 7 | ice, axe | fire, sword | 220 / 900 | Mirage Slash, Glare (party light 70%, Blind 20%); **Horizon Cleave** (party phys 400%) every 3rd turn; Double at 50%; immune Silence |
+| Mirage Double | opposite the Knight | 23 | 600 | 150/90 | 30/24 | 12 | 2 | ice | - | 0 / 0 | Mirror Copy: the Knight's last attack at half power |
+| The Sand Oracle | sun (phase 3 mirrors) | 24 | 4000 | 380/420 | 30/28 | 14 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | fire, thunder (phases 1, 2) | 1000 / 1400 | Stinger, Sandfall (party mag 100%, Blind 25%); **The Last Prophecy** (single mag 320%, Starless); **Unbound Sandstorm** (party mag 180%, Blind 30%); immune Stun, Poison, Blind |
+| False Future: Hunger | sun | 24 | 520 | 90/120 | 20/24 | 13 | 2 | ice | fire | 0 / 0 | Devour the Road (15 Fury from the member with most, the Oracle +5%) |
+| False Future: Fear | star | 24 | 560 | 80/120 | 20/26 | 13 | 3 | spear, light | ice | 0 / 0 | Dread (the soonest member half a turn back); Hush the Reader on Mira every 3rd turn (Silence 40%) |
+
+Well F3 (the tightest ordinary floor): `encounters.js` `L3_POWER` husks 1.6, shades 1.75, mixed 1.6; `L3_SPEED` 1.4, 1.2, 1.25; `L3_HP`
+1.0, 0.8, 0.9.
+
+**What moved from the plan, and why.** EXP per foe 80 to 125 (plan 125 to 180): plan 6.1 asks for about 180 a fight. The bosses' ATK
+and MAG nearly doubled (the Knight 150 to 420 with Horizon Cleave 400%, plan 150%; the Oracle 215/210 to 380/420, the Last Prophecy
+280%, plan 240%; the Sandstorm 180%, plan 160%): at the plan's numbers ignoring every telegraph cost 0 points. The Knight's HP is 2450
+(plan 2600) and its Cleave comes every 3rd turn (plan 4th) for the same reason; the Oracle's HP is 4000 (plan 4800) to keep careful play
+in 11 to 15 rounds. Star foes' HP rose about 17% (by Day they are Exposed and fell in 2.6 rounds). Careful play heals through any
+single-target pressure, so F3 could only be made the tightest floor with spread damage: Horizon Shade's Cold Horizon and the Husk's Slam
+became party-wide (60% and 65%), and Hour Crush and Eclipse dropped to 110% and 100% so attack-only play is not simply wiped.
+
+### 13.2 The Turning Sky (`src/data/ep5/sky.js` on `RULE_EXT`)
+
+- A battle has a sky only when a foe has a side (`state.sky`, saved with the battle state). Start: `SKY_START[encounter]` (`e5s_first`
+  Night with the Turn in 4; the Knight and the Oracle Day), else the field hour (`setFieldHour`: dawn, noon Day; dusk, night Night; Day if
+  unset).
+- The Turn falls after 6 actions (every ended turn; a combo is one). Under its own sky a foe is Ascendant (ATK and MAG x1.2: mods in
+  addMod's shape, source `sky`, written directly because addMod emits a `stat_mod` per stat with no source); under the other it is Exposed
+  (`u.exposed`: every hit a weakness hit, never learned). Broken stays Broken.
+- A natural Turn: "The sky turns. Night." (kind `sky`); `mirrorTurn` foes take the new sky's side ("{name} turns its mirror to the sky.",
+  kind `mirror_turn`); a Double takes the side opposite its Knight; then a pinned foretelling falls (a direct strike, no Taunt or Guard;
+  Starless is `nameless`, "{name} falls from the chart.", kind `starless`).
+- Turn the Sky (`turn_sky`, Mira, 12 MP, rank 80, `learn: { flag: 'sky_learned' }`, fallback 22): turns now, the Turn reset to 6, no
+  mirror; a pinned foretelling fails ("The words change.", sfx `prophecy_break`) and its owner is Broken. Hourglass Sand (`hourglass_sand`,
+  140): +3 actions to the Turn (sky.js reads `itemsUsed`; it targets an ally only because every non-thrown item does).
+- Events: `sky` { sky, turnIn, reason: start | action | turned }, `sky_turn` { sky, natural, by }, `exposed` { target, on, side },
+  `ascendant` { target, on, side }, `foretell` { source, target, pinned, turnIn, skill, moved? }, a `telegraph` with `foretell: true` (the
+  help text; `SKILLS.last_prophecy.foretold` is the flag for the `SIGNATURE_TECHS` row), `foretell_broken` { source, target, reason: turned
+  | break | gone }, `foretell_fall` { source, target }, then an `action_start` with `charged: true` (clears the telegraph).
+
+### 13.3 The Mirage Knight (ai `mirage_knight`) and the Sand Oracle (ai `oracle`)
+
+- **Knight**: Mirror Turn (data) keeps it Ascendant on natural Turns, so only a Turn the party makes catches it Exposed (Mira's tip). Horizon
+  Cleave announced at the end of every 3rd turn. At 50%, once: "The Knight's mirror steps out beside it!" (kind `double`), `summon`
+  `mirage_double`. Loot: Horizon Glass, 1 rare (ilvl 23), 2 Hi-Potions. Encounter: no flee, flag `knight_defeated`, backdrop `ep5_gallery`.
+- **Oracle 1 The Read Sky** (HP locked at 72%). **2 False Futures** (from 72%): `summon` Hunger and Fear, kind `veil`; under the Mirage Veil
+  it takes 15% damage, its shields hold and its HP stops at 34%. The last future down tears the Veil (kind `veil_break`, `phase` 3, `break`,
+  +25 `fury_gain` reason `veil_break`). **3 The True Horizon**: weak ice, spear, light; no resists; 9 shields; Haste; mirrors; the Sandstorm
+  every 4th turn (the first a turn early). Every `phase` event carries `sprite` (`oracle`, `oracle_futures`, `oracle_true`). The Last
+  Prophecy is read at the end of an Oracle turn when the Turn is 3 actions away or less and nothing is pinned: the hero first, then the
+  lowest HP. The Turn then waits for the words (E5-fixes A2, PLAYTEST_REVIEW_7 item 2): it is set to exactly `READ_AT` (3) actions out,
+  and sky.js `holdForMira` keeps it past Mira's next turn, at the read and after every action until she has acted (a Dread push
+  included), so a reading never lands before the member who can answer it has had a turn. The False Futures stand at scene.js
+  `FUTURE_SPOTS` (Hunger 194,116; Fear 240,134), on the foes' side in front of the Oracle, each row under its own feet (CRITIQUE_7 item 2). A Break cancels it; Answer does not ("A foretelling is not a decree. Nothing is written yet.", kind `foretell_answer`).
+  Encounter: no flee, flag `oracle_defeated`, music `boss_oracle`, backdrop `ep5_oracle`, `startFury` +20 with `moonwell_woken`. Loot: The
+  Oracle's Mask, 2 rares (ilvl 24), a Phoenix Feather, 2 Hi-Ethers.
+
+### 13.4 Auto (`POLICY_EXT`, careful play only)
+
+`ep5Policy` returns null unless the battle has a sky. 1. A foretelling pinned: Mira turns the sky when the Turn is 2 actions away or less, or
+when her next turn would come after it; when Mira cannot, anyone holds it with Hourglass Sand on the last action. 2. More foe HP Ascendant
+than Exposed, the Turn 4 or more away, and Mira keeps 24 MP after it: she turns it. While Mira owes a pinned reading its answer nobody
+takes her into a combo (it would spend her turn: before E5-fixes most careful-play falls were Ember Edge and Thorn Bulwark). 3. A foe Exposed one hit from Broken, the Turn 1 away:
+Hourglass Sand. 4. Against the Oracle Mira keeps 12 MP (an MP action that would spend it becomes an Attack; under 12, an Ether). Reckless
+and attack-only play never turn or hold the sky. Careful play against the Oracle (Lv 24, after E5-fixes): 2.4 readings a fight, 91% broken by Turn
+the Sky, 8% by a Break, 0% fall; 5.1 Turn the Sky casts and 0.1 Hourglass Sand a fight (before: 2.5, 87%, 4%, 7%, 5.1, 0.6).
+
+### 13.5 Items, loot, shops
+
+Tier 9 (ilvl 21) and tier 10 (ilvl 23) as plan 7.2; uniques and the Nomad's Way set as 7.3, except The Veiled Star: "evade" has no party
+rule, so it carries DEF +5 (with SPR +8 and Nameless resist 50%). Affixes: a seventh tier at ilvl 22. `RARE_NAME_EXT` gains [22: Sunlit,
+Starborn, Shaded, Wayfaring, Foretold] (`loot.js`). ZONE_LOOT: ship and road ilvl 21 (0.16), F1 22 (0.17), F2 23 (0.17), F3 24 (0.18).
+Shops: `pathkeeper` (Omar, road prices), `saffron_supplies` (Yasmin), `copperwind` (Hassan; the tier 8 weapons too, tier 10 after
+`lab_f2_done`).
+
+### 13.6 Simulator and the final table
+
+`tools/sim/ep5.mjs`: `registerData()` registers the ep4 and ep5 battle data plus `SIM_HOUR`, a `RULE_EXT` hook that sets each zone's field
+hour (`ZONE_HOURS`); one added line in `simulate.mjs` (the `EP5` attach, which also chains its progression and check onto Episode 4's) and
+`EPISODES[5]` in the default zone list. Loadouts: `ep5_ship` is the quick start's party (`EP5_START`, without the plan's two tier 8 pieces);
+the road adds Hourglass Sand; F1 Dunewalker Mail, Starweave Robe and `sky_learned`; F2 Nomad Wraps; F3 the Copperwind Sword and Armillary
+Rod; the Oracle Horizon Glass and mastery a step up. Progression from 8,900 EXP, every fight: ship 21, road -> 22, F1 -> 23, F2 -> 24
+(11,888), F3 24, the Oracle at 24 -> 25; at 80%: the Oracle at 24 (12,008). Well F3 (Lv 23): careful HP lost 19%, attack-only wins 72%.
+Battle gold: 3,200 in, 8,930 earned, 12,130 out.
+
+| Zone | Careful: win / rounds / HP lost | Attack-only: win / rounds |
+|---|---|---|
+| ep5_ship | 100% / 3.79 / 6% | 100% / 7.28 |
+| ep5_caravan_road | 100% / 3.45 / 6% | 100% / 6.64 |
+| ep5_lab_f1 | 100% / 3.65 / 9% | 100% / 6.92 |
+| ep5_lab_f2 | 100% / 3.83 / 5% | 100% / 8.01 |
+| ep5_lab_f3 | 100% / 4.24 / 18% (Lv 23: 19%) | 82% (Lv 23: 72%) / 8.81 |
+
+| Boss | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only | Ignoring telegraphs |
+|---|---|---|---|---|
+| **mirage_knight** | 23 | 100% / 8.75 (7.3-10.3) / 8% | 0% / 4.56 | 86% / 11.53 |
+| **mirage_knight** | 24 | 100% / 8.68 (7.3-10.3) / 7% | 0% / 4.95 | - |
+| **oracle** | 24 | 99% / 13.14 (10.3-16.3) / 23% | 0% / 5.56 | 79% / 14.71 |
+| **oracle** | 25 | 100% / 12.88 (10.0-15.7) / 21% | 0% / 5.96 | - |
+
+### 13.7 E5-fixes (2026-11-09: CRITIQUE_7, PLAYTEST_REVIEW_7)
+
+- **The menu casts a skill with no target** (`src/battle/scene/menu.js`, the one core change): the sub-list confirm returns the action
+  when `b.targets()` says `mode: 'none'` (before, startTarget refused it and the menu buzzed, so Turn the Sky could not be cast by keys
+  or touch; every bot acts through battleAct or Auto). Turn the Sky is the only party skill with no target in any episode. Paid in the
+  same file by two comment trims (menu.js 5273 to 5258 gz). Proof through the menu: `qa/battlescene/ep5_menu_cast.test.mjs` (keys, taps,
+  the pinned reading, every no-target party skill) and `qa/realplay/ep5battle.py` (real keys, the A button, canvas taps).
+- **The reading is fair** (13.3): the Last Prophecy 280% -> 320% so ignoring telegraphs still costs 15+ points with the longer windows.
+  The help line names who can answer: "Mira can turn the sky." only when her turn comes before the Turn and she can cast, else
+  "Hourglass Sand holds the sky." with sand in the bag, else nothing (scene.js `answerLine`, ai.js `miraAnswers`).
+- **Day is its own sky** (CRITIQUE_7 item 1): scene.js `paintDay` builds the Day copy from the stage's pixels: the warm grade, then
+  over each stage's sky (`DAY_SKY`) the stars and the moon's path come down (a 5 x 5 grey opening finds small bright specks on a cool
+  ground), the moon circle takes its row's sky, and the sky is repainted pale blue overhead to pale gold at the horizon with the
+  painting's light and dark kept; the deck's sea turns turquoise. The gallery is indoors: the grade alone. About 30 ms once a battle.
+- **Turn the Sky's icon** (CRITIQUE_7 item 10): a 12 x 12 sun and crescent drawn by scene.js on its Tech row (the core's hitIcon has
+  none for a skill with no target).
+- **Day is clear daylight, not a veil** (E5-finish): the warm grade (multiply `#ffcf8a`, then screen `#ffe2a6` at 0.56) lifted
+  every dark to about 0.55 and read as a milky wash over the dunes and the Oracle's city. The pixel path is now `DAY_TONE` in OKLab:
+  lightness 1 - (1 - L)^1.55 (darks lift, the painting's light and dark kept), violet to magenta (not blue) turned toward warm rock
+  by 0.6 of its coolness with its chroma muted up to 45%, everything else at its own chroma, a small warm cast. Blue water and
+  painted windows stay blue. The multiply and screen stay only as the fallback when the stage's pixels cannot be read. Foes still
+  read: E5-tiles' check (share of a foe's body more than 0.12 OKLab from the ring round it) is 0.611 at worst by Day (the Well's
+  husk; aim 0.6), the dunes' reaver 0.775 -> 0.749, the Oracle 0.95 -> 0.877 (its night value).
+- **The Oracle with every optional fight** (E5-finish, PLAYTEST_REVIEW_7 item 3): no data change. The Lv 26 Continue run had
+  fought 23 ordinary fights against 17 placed foes: its own save-and-reload check at F1 brings a dungeon floor's beaten foes back
+  (field.js keeps them gone for the scene's life), and `--all-fights` hunted them again. Every placed foe once from the Episode 4
+  save is 9,746 + 3,829 = 13,575 EXP before elites (Lv 25 spans 12,989 to 14,224). `qa/autoplay.py --all-fights` now hunts each
+  placed foe once (foes back after its reload are not hunted); the run met the Oracle at Lv 25 (14,021 EXP, 21 battles, 2 elites).
+  A data cut cannot cover the reload case: it needs about 240 EXP off the run, and the quick start's 80% route has 194 EXP over
+  Lv 24 at the Oracle. Oracle by level (200 fights): Lv 25 careful 100% / 13.05 rounds, ignoring telegraphs 92%; Lv 26 98%.
+
+### 13.8 Seams this pack would like (none blocks Episode 5)
+
+- `src/battle/rules.js` useSkill(), after the effects: `for (const h of RULE_EXT) if (h.skill) h.skill(ctx, user, sk, targets)`. Today
+  Turn the Sky reaches sky.js through `{ keep: 'sky' }` (applyEffect hands `keep` to ai.js special(), the user's script, `basic` for a party
+  member, which sky.js gives a `special` that answers only `e.sky`). `SKY_RULE.skill` is ready; each action is applied once.
+- `src/battle/rules.js` targetInfo(): an item `target: 'none'` would let Hourglass Sand skip the ally picker.

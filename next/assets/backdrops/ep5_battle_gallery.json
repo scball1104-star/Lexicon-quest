@@ -1,0 +1,42 @@
+{
+ "image": "ep5_battle_gallery.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Gallery of False Horizons and the Mirage Knight: a sandstone arcade, painted horizons, two window shafts, a pale stone floor (composed)",
+ "extraColors": [
+  "#8ecbeb",
+  "#645762"
+ ],
+ "colors": 39,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep5_build.py (gallery)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep5_gallery",
+ "fallback": "archive",
+ "grades": {
+  "night": "as painted",
+  "day": {
+   "multiply": "#ffcf8a",
+   "multiplyAlpha": 0.5,
+   "screen": "#ffe2a6",
+   "screenAlpha": 0.56,
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "Day: over rows day.rows (0 to bandY: the sky and the far scene, never the floor the foes stand on) multiply by day.multiply at day.multiplyAlpha, then screen day.screen at day.screenAlpha; cross-fade over 20 frames on a Turn. Night: as painted.",
+  "meanLuma": {
+   "night": 0.4374,
+   "day": 0.5707
+  },
+  "skyLuma": {
+   "night": 0.4827,
+   "day": 0.7198
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ }
+}

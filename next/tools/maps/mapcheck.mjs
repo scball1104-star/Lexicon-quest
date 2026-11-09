@@ -48,7 +48,7 @@ const ep3Ids = () => (fs.existsSync(EP3_DIR) ? fs.readdirSync(EP3_DIR).filter((f
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 export function listMapIds() {
-  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && f !== 'ep4_patches.js').map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
+  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !/^ep[45]_patches\.js$/.test(f)).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
 }
 
 export async function loadMap(id, { unpatched = false } = {}) {
@@ -875,6 +875,7 @@ const CHEST_TIERS = new Set(['wood', 'iron', 'gold', 'red', 'blue']);   // red a
 const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 // E4-world: Episode 4 tide locks (tools/maps/ep4_check.mjs) take over walk/buildGrid/loadDb for maps with a `tide` block
 ({ walk, loadDb, buildGrid } = (await import('./ep4_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));
+({ walk, loadDb, buildGrid } = (await import('./ep5_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E5-world: sun and shade
 
 /**
  * Validate one map. `maps` = { id: module } for door/exit targets (grids built lazily).

@@ -182,7 +182,8 @@ test('total synthesized audio stays small', () => {
     const d = join(NEXT, 'assets/audio', sub);
     for (const f of readdirSync(d)) total += statSync(join(d, f)).size;
   }
-  assert.ok(total < 10.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  // Episode 5 adds ~0.97 MB of sfx and one ambience bed (pack ep5, lazy, never precached), so it moves to 11.5 MB
+  assert.ok(total < 11.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
 test('Episode 2 music: the five tracks have fallbacks and loop points (composed: the 60 ms guard; a Suno Pro replacement: measured)', () => {

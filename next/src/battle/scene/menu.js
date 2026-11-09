@@ -53,7 +53,7 @@ export class CommandMenu {
   get actors() { return this.scene.actors; }
   get rowH() { return this.touch ? TOUCH_CMD_ROW_H : CMD_ROW_H; }
 
-  /** Pick the window rects for the current layout (called on open; the closed window uses it too). */
+  /** Pick the window rects for the current layout. */
   syncLayout() {
     this.touch = touchUi(this.scene.engine);
     this.cmdRect = cmdWin(this.touch);
@@ -197,7 +197,7 @@ export class CommandMenu {
     const here = pos(cur);
     const key = dir === 'left' || dir === 'right' ? 'x' : 'y';
     const sign = dir === 'left' || dir === 'up' ? -1 : 1;
-    // Nearest unit in that direction; wrap around to the far side when none.
+    // Nearest unit that way, else wrap.
     let best = null, bestD = Infinity, far = null, farD = -Infinity;
     for (let i = 0; i < ids.length; i++) {
       if (i === this.tIndex) continue;
@@ -260,6 +260,7 @@ export class CommandMenu {
         const e = it.entry;
         audio.sfx('confirm');
         const base = e.skill ? { type: this.subCmd.id === 'combo' ? 'combo' : 'skill', skill: e.skill } : { type: 'item', item: e.item };
+        if (e.skill && this.b.targets(this.unit, base).mode === 'none') return base;   // nothing to pick
         if (!this.startTarget(base)) audio.sfx('buzzer');
       } else if (act === 'cancel') { audio.sfx('cancel'); this.state = 'root'; this.sub = null; this.syncHelp(); }
       return null;

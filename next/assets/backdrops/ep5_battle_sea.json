@@ -1,0 +1,39 @@
+{
+ "image": "ep5_battle_sea.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Saffron Wind at night: stars, a crescent moon and its path on black water, the rail and the mast; the foes stand on the lantern-lit deck (composed)",
+ "extraColors": [],
+ "colors": 33,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep5_build.py (sea)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep5_sea",
+ "fallback": "valley",
+ "grades": {
+  "night": "as painted",
+  "day": {
+   "multiply": "#ffcf8a",
+   "multiplyAlpha": 0.5,
+   "screen": "#ffe2a6",
+   "screenAlpha": 0.56,
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "Day: over rows day.rows (0 to bandY: the sky and the far scene, never the floor the foes stand on) multiply by day.multiply at day.multiplyAlpha, then screen day.screen at day.screenAlpha; cross-fade over 20 frames on a Turn. Night: as painted.",
+  "meanLuma": {
+   "night": 0.1962,
+   "day": 0.4135
+  },
+  "skyLuma": {
+   "night": 0.1864,
+   "day": 0.5858
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ }
+}

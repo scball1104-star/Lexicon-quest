@@ -135,3 +135,46 @@ its row only once its `EP4_MAPS_LISTED` is true).
   `QUEST_EXT` in `mainQuestFor`; Heat `heatQuench` / `heatWord` / `heatSfx`; `export const SCRIPTS`, `POLICY_EXT` (asked
   first by `competentPolicy`), `export const BACKDROPS`. Paid for by comment trims in `ai.js` and `title.js`: the pre-tap load
   went from 2,446,541 to 2,446,134 wire bytes (seams +426, trims -833, gzipped).
+
+## The ep5 pack (2026-11-08, E5-pack)
+
+`ep5` (prefix `ep5_`, entry `src/data/ep5/index.js`, asset fragment `assets/ep5_manifest.json`, audio pack `ep5`, cap 1.0 MB)
+holds all of Episode 5 (`docs/EPISODE5_PLAN.md` 13): every file under `src/data/ep5/`, `src/data/maps/ep5_*.js` (the eleven
+maps and `ep5_patches.js`), `assets/{tiles,sprites,ui,backdrops}/ep5_*`, `assets/tiles/ep5.png`, and the sounds
+`assets/audio/{sfx,ambience}/ep5_*` (`build_pwa.py` `LAZY_PREFIXES`). Its switch is `EP5_LIVE` in `src/game/episodes.js` (no
+`live.js`). `hard: true`, `touches: ['ep4_vw_inn', 'ep4_valewyn']`: the field waits for both ep4 and ep5 before loading either
+map. Wanted from `ep4_complete` or `ep5_started`. While `EP5_LIVE` is false nothing is fetched, except with `?pack=ep5` or
+`?ep=5` (the title hook forces it on; the pack adds its row only once its `EP5_MAPS_LISTED` is true).
+
+- **The chain ep3, ep4, ep5.** The ep5 entry awaits `ensurePack('ep4', { engine })` before any ep5 module is evaluated
+  (Episode 5 uses Valewyn's NPCs and patches Episode 4's maps). Only registration is ordered: the title hook and the field start
+  both packs' fetches at once, and the entry starts its own code (`prefetchCode()`, every module of ORDER at once; a 404 is a
+  module not written yet and is skipped without an `import()`) and map files (`maps.js` `prefetch()`) before it waits.
+  Measured on the phone profile (844x390 at 3x, CPU 4x slower, 10 Mbps and 40 ms; `qa/ui/ep5_saves_headless.py`, three runs,
+  2026-11-08, the ep5 pack still a skeleton): ep5 adds 0.1 to 0.5 s to the ep4 pack's own load, which is 7.6 to 10.4 s cold
+  and 2.9 to 4.1 s warm. Plan 3.3's targets (under 8 s cold, under 3 s warm) are missed by the ep4 pack itself.
+- **`register(engine)`.** ORDER `flags, enemies, items, skills, loot, encounters, sky, shops, ai, npcs, quests, text, story,
+  ledger, audio, world, pages, maps, hooks, start, scene`, each module's `register(engine, modules())` in turn; `title` is loaded
+  on first use by `hooks.js`. A missing module is skipped and reported. Modules are imported one at a time in that order, each
+  after the one before it has registered (as in ep4); only `maps.js` is imported early, for its `prefetch()`.
+- **Audio.** `src/data/ep5/audio.js` exports the fragment in the `assets/audio/manifest.json` entry shape; the entry merges it
+  (never overwriting an id, `pack` as `manifest.packs.ep5`) on every path that brings the pack up. The quick start calls
+  `readyPacks(engine)` (both packs through `ensurePack`, then both entries' `register(engine)`) before the fade in, so a
+  quick-start party has every Episode 4 and 5 sound. `qa/pwa/precache.test.mjs` resolves sfx ids named under `src/data/ep5/`
+  against the ep5 fragment, then the ep4 one.
+- **Maps and the order trap.** `src/data/ep5/maps.js` awaits the ep4 maps registry's `register()` first, then registers the
+  eleven maps by a guarded list and patches the registered `ep4_vw_inn` / `ep4_valewyn` with `ep5_patches.js` `withEp5Wake` /
+  `withShipBerth` (identity until that file exists). `qa/core/ep5_maps_order.test.mjs`.
+- **Hooks** (`src/data/ep5/hooks.js`): `CREDITS_HANDOFF[5]` (from text.js `CREDITS_EP5`), `CREDITS_HANDOFF[4].endCard` =
+  `END_CARD_EP4_LIVE` while live, `QUEST_EXT` (Episode 5 first), `globalThis.LQ_EP5` (`title`, `offer`, `start`,
+  `pickRunSlot`), `LQ_DEBUG.newGameEp5` (async).
+- **Core seams** (plan 13.2): the table entry; `EP5_LIVE`; one title line (with `newestWith`, now exported from
+  `episodes.js`); `RULE_EXT` in `src/battle/rules.js`; the landing regex `ep[45]_` in `packFallback.js`.
+  `RULE_EXT` holds `{ start(ctx), afterAction(ctx, units) }`: `start` runs once in `begin()` after `AI.onStart`,
+  `afterAction` at the end of every `endTurn` (skipped turns included) with the unit, or a combo's array of units. A foe with
+  `exposed` set takes every type of a hit as a weakness for that hit (its shield cracks, the damage takes `WEAK_MULT`); an
+  absorbed or fully immune hit is unchanged, and the bestiary learns only what a plain hit teaches. Ascendant needs no call point:
+  `addMod(u, stat, mult, turns, 'sky')` adds it and `u.mods = u.mods.filter((m) => m.source !== 'sky')` clears it by source.
+  Empty, every Episode 1 to 4 battle is bit-identical (`qa/core/ep5_rule_ext.test.mjs`; `simulate.mjs --check` output identical
+  before and after). Paid for by comment trims in `src/game/cave.js` and `src/game/episodes.js`: the pre-tap load went from
+  2,445,728 to 2,445,451 wire bytes (seams +235, trims -512, gzipped).

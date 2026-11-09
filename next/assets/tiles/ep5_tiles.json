@@ -1,0 +1,3821 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/ep5.py (python build_tiles.py ep5)",
+ "note": "Episode 5 (ep5 pack) tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each ep5 terrain is drawn below.",
+ "extraColors": [
+  "#9c6a32",
+  "#c08a45",
+  "#dcae62",
+  "#15171c",
+  "#20232a",
+  "#2e323b",
+  "#454a55"
+ ],
+ "terrainOrder": [
+  "caravan_paving",
+  "dune_court",
+  "gallery_tile",
+  "well_basalt",
+  "star_glass",
+  "deck_planks",
+  "groove",
+  "dune_sand",
+  "running_sand",
+  "night_sea"
+ ],
+ "terrainInsertBefore": {
+  "caravan_paving": "stone_floor",
+  "dune_court": "stone_floor",
+  "gallery_tile": "stone_floor",
+  "well_basalt": "stone_floor",
+  "star_glass": "stone_floor",
+  "deck_planks": "stone_floor",
+  "groove": "stone_floor",
+  "dune_sand": "stone_floor"
+ },
+ "terrains": {
+  "dune_sand": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     0
+    ],
+    [
+     48,
+     0
+    ],
+    [
+     64,
+     0
+    ],
+    [
+     80,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     112,
+     0
+    ]
+   ],
+   "variantWeights": [
+    48,
+    3,
+    1,
+    3,
+    3,
+    3
+   ],
+   "note": "firm sand (still ochre ripples): the ground layer of every sand cell; E5-world draws running_sand over the lit ones and the violet shade over the shaded ones",
+   "sheet": "ep5.png",
+   "order": 17
+  },
+  "caravan_paving": {
+   "x": 128,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     160,
+     0
+    ],
+    [
+     176,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     208,
+     0
+    ],
+    [
+     224,
+     0
+    ],
+    [
+     240,
+     0
+    ]
+   ],
+   "variantWeights": [
+    36,
+    4,
+    6,
+    2,
+    4,
+    1
+   ],
+   "note": "sandstone pavement, the safe ground of a shade puzzle (dials, plate approaches, starts)",
+   "sheet": "ep5.png",
+   "order": 10
+  },
+  "groove": {
+   "x": 256,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [],
+   "note": "a worn rut in the paving: a Shove-able caster or lamp slides only along groove cells (legend id groove)",
+   "sheet": "ep5.png",
+   "order": 16
+  },
+  "dune_court": {
+   "x": 288,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     320,
+     0
+    ],
+    [
+     336,
+     0
+    ],
+    [
+     352,
+     0
+    ],
+    [
+     368,
+     0
+    ],
+    [
+     384,
+     0
+    ],
+    [
+     400,
+     0
+    ]
+   ],
+   "variantWeights": [
+    44,
+    3,
+    2,
+    3,
+    2,
+    2
+   ],
+   "note": "F1 the Shifting Dunes: terracotta-ochre flagstones, sand in the joints",
+   "sheet": "ep5.png",
+   "order": 11
+  },
+  "gallery_tile": {
+   "x": 416,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     448,
+     0
+    ],
+    [
+     464,
+     0
+    ],
+    [
+     480,
+     0
+    ],
+    [
+     496,
+     0
+    ],
+    [
+     0,
+     48
+    ],
+    [
+     16,
+     48
+    ]
+   ],
+   "variantWeights": [
+    40,
+    3,
+    4,
+    4,
+    2,
+    2
+   ],
+   "note": "F2 the Gallery of False Horizons: lapis tiles in a gold lattice",
+   "sheet": "ep5.png",
+   "order": 12
+  },
+  "well_basalt": {
+   "x": 32,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     64,
+     48
+    ],
+    [
+     80,
+     48
+    ],
+    [
+     96,
+     48
+    ],
+    [
+     112,
+     48
+    ],
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ]
+   ],
+   "variantWeights": [
+    40,
+    3,
+    3,
+    4,
+    2,
+    2
+   ],
+   "note": "F3 the Well of Tomorrow: dark basalt columns with star-glass seams",
+   "sheet": "ep5.png",
+   "order": 13
+  },
+  "star_glass": {
+   "x": 160,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ],
+    [
+     224,
+     48
+    ],
+    [
+     240,
+     48
+    ]
+   ],
+   "variantWeights": [
+    10,
+    3,
+    3,
+    2
+   ],
+   "note": "deep blue glass full of stars: the Eye of the Oracle and F2's Star Floor",
+   "sheet": "ep5.png",
+   "order": 14
+  },
+  "deck_planks": {
+   "x": 256,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     288,
+     48
+    ],
+    [
+     304,
+     48
+    ],
+    [
+     320,
+     48
+    ],
+    [
+     336,
+     48
+    ]
+   ],
+   "variantWeights": [
+    16,
+    2,
+    2,
+    1
+   ],
+   "note": "the Saffron Wind's deck planks",
+   "sheet": "ep5.png",
+   "order": 15
+  },
+  "running_sand": {
+   "x": 0,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2
+    ],
+    "frameDx": 32,
+    "ms": 150
+   },
+   "flow": "sand",
+   "note": "running sand (A1, 3 frames, collision water): drawn over every LIT sand cell; gold streaks flow down-right, a dithered glow spills onto the cell edge (translucent pixels: draw it over dune_sand)",
+   "sheet": "ep5.png",
+   "order": 36
+  },
+  "night_sea": {
+   "x": 96,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 320
+   },
+   "flow": "sea",
+   "note": "the night sea at the ship's edges (decor water, collision water)",
+   "sheet": "ep5.png",
+   "order": 37
+  }
+ },
+ "walls": {
+  "dune_court": {
+   "top": [
+    0,
+    144
+   ],
+   "face": [
+    32,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     144
+    ],
+    [
+     144,
+     144
+    ],
+    [
+     160,
+     144
+    ],
+    [
+     176,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    7,
+    2,
+    2,
+    2
+   ],
+   "note": "E5 wall band (dune_court_top) and inner face (dune_court_face), a 2-row face; faceStyles per room (tools/art/tiles/ep5_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      144
+     ]
+    ],
+    [
+     [
+      0,
+      288
+     ],
+     [
+      32,
+      288
+     ]
+    ],
+    [
+     [
+      64,
+      288
+     ],
+     [
+      96,
+      288
+     ],
+     [
+      128,
+      288
+     ]
+    ],
+    [
+     [
+      160,
+      288
+     ],
+     [
+      192,
+      288
+     ]
+    ],
+    [
+     [
+      224,
+      288
+     ],
+     [
+      256,
+      288
+     ],
+     [
+      288,
+      288
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep5_lab_f1": {
+     "cycle": [
+      0,
+      1,
+      2,
+      0,
+      3,
+      1,
+      4
+     ]
+    }
+   },
+   "sheet": "ep5.png"
+  },
+  "dune_court_out": {
+   "top": [
+    64,
+    144
+   ],
+   "face": [
+    96,
+    144
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     144
+    ],
+    [
+     208,
+     144
+    ],
+    [
+     224,
+     144
+    ],
+    [
+     240,
+     144
+    ],
+    [
+     256,
+     144
+    ],
+    [
+     272,
+     144
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (dune_court_out_top, no edges) and the outer face under a band's south lip (dune_court_out_face)",
+   "sheet": "ep5.png"
+  },
+  "horizon_gallery": {
+   "top": [
+    0,
+    192
+   ],
+   "face": [
+    32,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     192
+    ],
+    [
+     144,
+     192
+    ],
+    [
+     160,
+     192
+    ],
+    [
+     176,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E5 wall band (horizon_gallery_top) and inner face (horizon_gallery_face), a 2-row face; faceStyles per room (tools/art/tiles/ep5_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      320,
+      288
+     ],
+     [
+      352,
+      288
+     ]
+    ],
+    [
+     [
+      384,
+      288
+     ],
+     [
+      416,
+      288
+     ]
+    ],
+    [
+     [
+      448,
+      288
+     ],
+     [
+      480,
+      288
+     ]
+    ],
+    [
+     [
+      0,
+      320
+     ],
+     [
+      32,
+      320
+     ]
+    ],
+    [
+     [
+      64,
+      320
+     ],
+     [
+      96,
+      320
+     ],
+     [
+      128,
+      320
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep5_lab_f2": {
+     "cycle": [
+      1,
+      5,
+      4,
+      2,
+      5,
+      3,
+      4
+     ]
+    }
+   },
+   "sheet": "ep5.png"
+  },
+  "horizon_gallery_out": {
+   "top": [
+    64,
+    192
+   ],
+   "face": [
+    96,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     192
+    ],
+    [
+     208,
+     192
+    ],
+    [
+     224,
+     192
+    ],
+    [
+     240,
+     192
+    ],
+    [
+     256,
+     192
+    ],
+    [
+     272,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (horizon_gallery_out_top, no edges) and the outer face under a band's south lip (horizon_gallery_out_face)",
+   "sheet": "ep5.png"
+  },
+  "well_shaft": {
+   "top": [
+    0,
+    240
+   ],
+   "face": [
+    32,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     240
+    ],
+    [
+     144,
+     240
+    ],
+    [
+     160,
+     240
+    ],
+    [
+     176,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E5 wall band (well_shaft_top) and inner face (well_shaft_face), a 2-row face; faceStyles per room (tools/art/tiles/ep5_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      240
+     ]
+    ],
+    [
+     [
+      160,
+      320
+     ],
+     [
+      192,
+      320
+     ],
+     [
+      224,
+      320
+     ]
+    ],
+    [
+     [
+      256,
+      320
+     ],
+     [
+      288,
+      320
+     ]
+    ],
+    [
+     [
+      320,
+      320
+     ],
+     [
+      352,
+      320
+     ],
+     [
+      384,
+      320
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep5_lab_f3": {
+     "cycle": [
+      0,
+      1,
+      2,
+      0,
+      3
+     ]
+    },
+    "ep5_lab_oracle": {
+     "cycle": [
+      3,
+      1,
+      3
+     ]
+    }
+   },
+   "sheet": "ep5.png"
+  },
+  "well_shaft_out": {
+   "top": [
+    64,
+    240
+   ],
+   "face": [
+    96,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     240
+    ],
+    [
+     208,
+     240
+    ],
+    [
+     224,
+     240
+    ],
+    [
+     240,
+     240
+    ],
+    [
+     256,
+     240
+    ],
+    [
+     272,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (well_shaft_out_top, no edges) and the outer face under a band's south lip (well_shaft_out_face)",
+   "sheet": "ep5.png"
+  }
+ },
+ "tiles": {
+  "water_stair": {
+   "x": 128,
+   "y": 944,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "steps down into the water (the Haven's water stairs)",
+   "sheet": "ep5.png"
+  },
+  "wall_sandstone": {
+   "x": 144,
+   "y": 944,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a low sandstone town wall; line16 index N*1+E*2+S*4+W*8",
+   "sheet": "ep5.png"
+  },
+  "haven_far": {
+   "x": 0,
+   "y": 992,
+   "w": 160,
+   "h": 96,
+   "collision": "none",
+   "note": "160 x 96 decal of Saffron Haven from environments cell 4 (transparent sky) for the overhead layer at the last dune (mark haven_far)",
+   "sheet": "ep5.png"
+  },
+  "ship_rail": {
+   "x": 0,
+   "y": 1104,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "the Saffron Wind's copper-capped rail; line16 index N*1+E*2+S*4+W*8",
+   "sheet": "ep5.png"
+  }
+ },
+ "objects": {
+  "sundial": {
+   "rect": [
+    0,
+    368,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     368,
+     16,
+     32
+    ],
+    [
+     16,
+     368,
+     16,
+     32
+    ],
+    [
+     32,
+     368,
+     16,
+     32
+    ]
+   ],
+   "note": "sundial on a stand (event sundial); frames by hour: 0 dawn (rose notch, left), 1 noon (white, top), 2 dusk (violet, right); the face is on the tile above the stand, so the party never covers it",
+   "sheet": "ep5.png"
+  },
+  "obelisk": {
+   "rect": [
+    48,
+    368,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "caster h 3 (event standstone h 3): a sandstone obelisk, gold cap",
+   "sheet": "ep5.png"
+  },
+  "obelisk_scraped": {
+   "rect": [
+    64,
+    368,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "caster h 3: the obelisk whose names were chiselled off",
+   "sheet": "ep5.png"
+  },
+  "standing_stone": {
+   "rect": [
+    80,
+    368,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "caster h 2 (event standstone h 2)",
+   "sheet": "ep5.png"
+  },
+  "low_block": {
+   "rect": [
+    96,
+    368,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "caster h 1 (event standstone h 1): a squat cut block",
+   "sheet": "ep5.png"
+  },
+  "pillar_gallery": {
+   "rect": [
+    112,
+    368,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "caster h 2 indoors (F2): a lapis-and-gold pillar",
+   "sheet": "ep5.png"
+  },
+  "lamp_cart": {
+   "rect": [
+    128,
+    368,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 180
+   },
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.4
+   },
+   "note": "a sun-lamp on a rail cart (event lampcart): solid, lit; Shove rolls it along a groove",
+   "sheet": "ep5.png"
+  },
+  "sun_plate": {
+   "rect": [
+    0,
+    416,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     416,
+     16,
+     16
+    ],
+    [
+     16,
+     416,
+     16,
+     16
+    ],
+    [
+     32,
+     416,
+     16,
+     16
+    ],
+    [
+     48,
+     416,
+     16,
+     16
+    ]
+   ],
+   "note": "floor glyph (event sunplate, walkable): frames 0 sun dark, 1 sun lit, 2 moon dark, 3 moon lit; a when:lit plate shows the sun (lit while its cell is lit), a when:shade plate the moon (lit while its cell is shaded)",
+   "sheet": "ep5.png"
+  },
+  "sun_gate_closed": {
+   "rect": [
+    64,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "a one-cell sun gate in a doorway (GATE_SPRITES sun_gate): closed, solid",
+   "sheet": "ep5.png"
+  },
+  "sun_gate_open": {
+   "rect": [
+    80,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the sun gate open: the slab sunk, the glyph glowing on the lintel; walkable at (0,0)",
+   "sheet": "ep5.png"
+  },
+  "moon_gate_closed": {
+   "rect": [
+    96,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "a one-cell moon gate in a doorway (GATE_SPRITES moon_gate): closed, solid",
+   "sheet": "ep5.png"
+  },
+  "moon_gate_open": {
+   "rect": [
+    112,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the moon gate open: the slab sunk, the glyph glowing on the lintel; walkable at (0,0)",
+   "sheet": "ep5.png"
+  },
+  "window_horizon": {
+   "rect": [
+    128,
+    416,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     128,
+     416,
+     16,
+     16
+    ],
+    [
+     144,
+     416,
+     16,
+     16
+    ]
+   ],
+   "note": "a horizon window on a wall cell, seen from above (event window): frames 0 dark, 1 lit",
+   "sheet": "ep5.png"
+  },
+  "window_horizon_face": {
+   "rect": [
+    160,
+    416,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     160,
+     416,
+     16,
+     32
+    ],
+    [
+     176,
+     416,
+     16,
+     32
+    ]
+   ],
+   "note": "a tall arched horizon window in a 2-row north face: frames 0 dark, 1 lit (art only; collision is the wall)",
+   "sheet": "ep5.png"
+  },
+  "star_floor": {
+   "rect": [
+    0,
+    448,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     448,
+     32,
+     32
+    ],
+    [
+     32,
+     448,
+     32,
+     32
+    ],
+    [
+     64,
+     448,
+     32,
+     32
+    ]
+   ],
+   "note": "F2 Star Floor inlay (collision none): frames 0 dim, 1 waking, 2 lit",
+   "sheet": "ep5.png"
+  },
+  "painted_horizon": {
+   "rect": [
+    96,
+    448,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     96,
+     448,
+     32,
+     32
+    ],
+    [
+     128,
+     448,
+     32,
+     32
+    ],
+    [
+     160,
+     448,
+     32,
+     32
+    ]
+   ],
+   "note": "a painted horizon in a 2-row face, 2 wide (art over the wall): frames 0 sea, 1 dunes, 2 city",
+   "sheet": "ep5.png"
+  },
+  "spring": {
+   "rect": [
+    192,
+    448,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     192,
+     448,
+     32,
+     32
+    ],
+    [
+     224,
+     448,
+     32,
+     32
+    ]
+   ],
+   "note": "a Well spring (springs shelter, truth, return): frames 0 dry, 1 full",
+   "sheet": "ep5.png"
+  },
+  "font_oasis": {
+   "rect": [
+    256,
+    448,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "light": {
+    "color": "#2ec4d0",
+    "radius": 2.6
+   },
+   "note": "the oasis spring font (rest and save; font_l1 to font_l3)",
+   "sheet": "ep5.png"
+  },
+  "vow_stone": {
+   "rect": [
+    352,
+    448,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     352,
+     448,
+     16,
+     32
+    ],
+    [
+     368,
+     448,
+     16,
+     32
+    ],
+    [
+     384,
+     448,
+     16,
+     32
+    ]
+   ],
+   "note": "a carved basalt stele by a spring: frames 0 shelter, 1 truth, 2 return (pictures, no letters)",
+   "sheet": "ep5.png"
+  },
+  "sun_keyhole_closed": {
+   "rect": [
+    0,
+    480,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Sun Keyhole (door_oracle, needs sun_key), door_boss style, 3 wide in a 2-row face",
+   "sheet": "ep5.png"
+  },
+  "sun_keyhole_open": {
+   "rect": [
+    48,
+    480,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "open: cell (1,0) is the doorway",
+   "sheet": "ep5.png"
+  },
+  "door_dune_closed": {
+   "rect": [
+    96,
+    480,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "a locked sandstone door in a 2-row face (dune_key); cell (0,0) is the doorway",
+   "sheet": "ep5.png"
+  },
+  "door_dune_open": {
+   "rect": [
+    112,
+    480,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the doorway open",
+   "sheet": "ep5.png"
+  },
+  "stair_sand_down": {
+   "rect": [
+    128,
+    480,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "stairs down in a sandstone floor (F1, F2): the door cell is (0,0)",
+   "sheet": "ep5.png"
+  },
+  "stair_well_down": {
+   "rect": [
+    144,
+    480,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "stairs down in basalt (F3)",
+   "sheet": "ep5.png"
+  },
+  "lift_cage": {
+   "rect": [
+    160,
+    480,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "a brass cage lift (lift_f2_short, lift_out): the door cell is (0,0)",
+   "sheet": "ep5.png"
+  },
+  "oracle_ring": {
+   "rect": [
+    0,
+    528,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     3,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     528,
+     64,
+     64
+    ],
+    [
+     64,
+     528,
+     64,
+     64
+    ]
+   ],
+   "note": "the golden ring in the Eye (4 x 4): 0 coiled (the Oracle's starry body round it), 1 empty (the chart's glow pooled inside, after oracle_defeated)",
+   "sheet": "ep5.png"
+  },
+  "chart_glow": {
+   "rect": [
+    128,
+    528,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 200
+   },
+   "light": {
+    "color": "#b4e4f2",
+    "radius": 3.0
+   },
+   "note": "the chart's glow on the glass after the fight (collision none)",
+   "sheet": "ep5.png"
+  },
+  "feather_glass": {
+   "rect": [
+    224,
+    528,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the black feather lying on the glass (F2 star floor, the Eye); it reflects nothing",
+   "sheet": "ep5.png"
+  },
+  "reliquary": {
+   "rect": [
+    240,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "frames": [
+    [
+     240,
+     528,
+     16,
+     32
+    ],
+    [
+     256,
+     528,
+     16,
+     32
+    ]
+   ],
+   "note": "the Reliquary alcove in a west face (reliquary_obj): 0 sand, 1 the names showing under the Lantern",
+   "sheet": "ep5.png"
+  },
+  "map_table": {
+   "rect": [
+    272,
+    528,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "F2 map table (memory2 beat)",
+   "sheet": "ep5.png"
+  },
+  "page_glass": {
+   "rect": [
+    304,
+    528,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     304,
+     528,
+     16,
+     16
+    ],
+    [
+     320,
+     528,
+     16,
+     16
+    ]
+   ],
+   "note": "Ishra's page sealed in glass (F3 page_spot): 0 the page, 1 empty (after ishra_page)",
+   "sheet": "ep5.png"
+  },
+  "cracked_base": {
+   "rect": [
+    336,
+    528,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     336,
+     528,
+     16,
+     32
+    ],
+    [
+     352,
+     528,
+     16,
+     32
+    ]
+   ],
+   "note": "a Dash-cracked obelisk base: 0 cracked (solid), 1 broken (use as rubble decor; the cell opens)",
+   "sheet": "ep5.png"
+  },
+  "inn_lantern": {
+   "rect": [
+    0,
+    608,
+    136,
+    112
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     7,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     7,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     7,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     7,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "tower_armillary": {
+   "rect": [
+    136,
+    608,
+    88,
+    96
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     4,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "house_dome_a": {
+   "rect": [
+    224,
+    608,
+    72,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "house_dome_b": {
+   "rect": [
+    296,
+    608,
+    88,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "shop_cloth": {
+   "rect": [
+    384,
+    608,
+    88,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "smithy_copper": {
+   "rect": [
+    0,
+    720,
+    88,
+    80
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "house_flat": {
+   "rect": [
+    88,
+    720,
+    56,
+    64
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "arcade_serai": {
+   "rect": [
+    144,
+    720,
+    104,
+    48
+   ],
+   "kind": "building",
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "sheet": "ep5.png"
+  },
+  "armillary": {
+   "rect": [
+    0,
+    800,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [],
+   "overheadRows": 4,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the great armillary on the Armillary Tower's roof (4 x 4, all overhead, collision none)",
+   "sheet": "ep5.png"
+  },
+  "armillary_rings": {
+   "rect": [
+    64,
+    800,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     1,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     800,
+     48,
+     48
+    ],
+    [
+     112,
+     800,
+     48,
+     48
+    ]
+   ],
+   "note": "the observatory's great rings (3 x 3, Laleh's rings): frames 0 and 1 = the rings turned",
+   "sheet": "ep5.png"
+  },
+  "mural_stars": {
+   "rect": [
+    160,
+    800,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the mural of the seven wandering stars, 3 x 2 piece on the caravanserai wall (collision none)",
+   "sheet": "ep5.png"
+  },
+  "bulletin": {
+   "rect": [
+    208,
+    800,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     208,
+     800,
+     32,
+     32
+    ],
+    [
+     240,
+     800,
+     32,
+     32
+    ]
+   ],
+   "note": "the Sandstone Bulletin (sign): 0 every route struck, 1 the routes open (after haven_restored)",
+   "sheet": "ep5.png"
+  },
+  "moonwell": {
+   "rect": [
+    272,
+    800,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     272,
+     800,
+     32,
+     32
+    ],
+    [
+     304,
+     800,
+     32,
+     32
+    ]
+   ],
+   "light": {
+    "color": "#b4e4f2",
+    "radius": 2.8
+   },
+   "note": "the Moonwell (object moonwell): 0 asleep, 1 woken (after moonwell_woken; its light then)",
+   "sheet": "ep5.png"
+  },
+  "waystone": {
+   "rect": [
+    336,
+    800,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     336,
+     800,
+     16,
+     32
+    ],
+    [
+     352,
+     800,
+     16,
+     32
+    ],
+    [
+     368,
+     800,
+     16,
+     32
+    ],
+    [
+     384,
+     800,
+     16,
+     32
+    ]
+   ],
+   "shiftFrames": [
+    0,
+    1,
+    2
+   ],
+   "note": "the waystone: state 0 = the glyph rows shifting (cycle frames 0, 1, 2 at about 200 ms while the tint is dusk or night and haven_restored is unset), state 1 = still (frame 3); glyphs never legible",
+   "sheet": "ep5.png"
+  },
+  "bell_rack": {
+   "rect": [
+    0,
+    864,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     864,
+     32,
+     32
+    ],
+    [
+     32,
+     864,
+     32,
+     32
+    ],
+    [
+     64,
+     864,
+     32,
+     32
+    ],
+    [
+     96,
+     864,
+     32,
+     32
+    ]
+   ],
+   "note": "Hassan's bell rack: frames 0..3 = bells hung (bell_1_found to bell_3_found)",
+   "sheet": "ep5.png"
+  },
+  "star_charts": {
+   "rect": [
+    128,
+    864,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     128,
+     864,
+     32,
+     32
+    ],
+    [
+     160,
+     864,
+     32,
+     32
+    ]
+   ],
+   "note": "star charts on the observatory wall: 0 with Laleh's empty space, 1 a star in it (chart_restored)",
+   "sheet": "ep5.png"
+  },
+  "camel_rest": {
+   "rect": [
+    0,
+    896,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a camel resting (decor, solid)",
+   "sheet": "ep5.png"
+  },
+  "camel_stand": {
+   "rect": [
+    32,
+    896,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a camel standing (decor, solid)",
+   "sheet": "ep5.png"
+  },
+  "camel_load": {
+   "rect": [
+    64,
+    896,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "packed loads (decor, solid)",
+   "sheet": "ep5.png"
+  },
+  "palm": {
+   "rect": [
+    80,
+    896,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a date palm: the trunk cell solid, the fronds overhead",
+   "sheet": "ep5.png"
+  },
+  "tent_caravan": {
+   "rect": [
+    112,
+    896,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a striped caravan tent (decor, solid)",
+   "sheet": "ep5.png"
+  },
+  "stall_saffron": {
+   "rect": [
+    160,
+    896,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "market stall, saffron awning",
+   "sheet": "ep5.png"
+  },
+  "stall_indigo": {
+   "rect": [
+    208,
+    896,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "market stall, indigo awning",
+   "sheet": "ep5.png"
+  },
+  "lamp_brass": {
+   "rect": [
+    256,
+    896,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.0
+   },
+   "note": "a brass street lamp (lit under the dusk tint until haven_restored)",
+   "sheet": "ep5.png"
+  },
+  "rug_saffron": {
+   "rect": [
+    272,
+    896,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "a saffron rug (floor decor, collision none)",
+   "sheet": "ep5.png"
+  },
+  "lantern_hanging": {
+   "rect": [
+    320,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 170
+   },
+   "light": {
+    "color": "#eba14d",
+    "radius": 3.2
+   },
+   "note": "a hanging lantern (overhead, collision none)",
+   "sheet": "ep5.png"
+  },
+  "water_jars": {
+   "rect": [
+    368,
+    896,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "two clay water jars",
+   "sheet": "ep5.png"
+  },
+  "cloth_bolts": {
+   "rect": [
+    384,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "bolts of saffron cloth on a stand (Yasmin's shop)",
+   "sheet": "ep5.png"
+  },
+  "forge_copper": {
+   "rect": [
+    400,
+    896,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 150
+   },
+   "light": {
+    "color": "#e06b39",
+    "radius": 3.0
+   },
+   "note": "the Copperwind forge (Hassan's smithy)",
+   "sheet": "ep5.png"
+  },
+  "campfire_desert": {
+   "rect": [
+    0,
+    944,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 140
+   },
+   "light": {
+    "color": "#eba14d",
+    "radius": 3.4
+   },
+   "note": "a campfire (tent_fire: rest, safe)",
+   "sheet": "ep5.png"
+  },
+  "tent_omar": {
+   "rect": [
+    48,
+    944,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "piece",
+   "note": "Omar's shade tent (3 x 3): the awning overhead, the poles at the front corners solid",
+   "sheet": "ep5.png"
+  },
+  "camp_ruin": {
+   "rect": [
+    96,
+    944,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the dead caravan camp at the jetty (decor)",
+   "sheet": "ep5.png"
+  },
+  "mast": {
+   "rect": [
+    128,
+    1104,
+    32,
+    96
+   ],
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 5,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the mast with its furled saffron sail (2 x 6): the base row solid, the rest overhead",
+   "sheet": "ep5.png"
+  },
+  "ship_lantern": {
+   "rect": [
+    160,
+    1104,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 170
+   },
+   "light": {
+    "color": "#eba14d",
+    "radius": 3.6
+   },
+   "note": "a deck lantern on a post",
+   "sheet": "ep5.png"
+  },
+  "crate_lashed": {
+   "rect": [
+    208,
+    1104,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a lashed cloth-wrapped crate",
+   "sheet": "ep5.png"
+  },
+  "crates_lashed": {
+   "rect": [
+    224,
+    1104,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "lashed crates, stacked (2 x 2)",
+   "sheet": "ep5.png"
+  },
+  "hatch": {
+   "rect": [
+    256,
+    1104,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the deck hatch (decor, solid)",
+   "sheet": "ep5.png"
+  },
+  "ship_wheel": {
+   "rect": [
+    288,
+    1104,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the helm (mark yara_wheel)",
+   "sheet": "ep5.png"
+  },
+  "gangway": {
+   "rect": [
+    304,
+    1104,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the gangway door (doorAt (0,0))",
+   "sheet": "ep5.png"
+  },
+  "ship_moored": {
+   "rect": [
+    320,
+    1104,
+    96,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     320,
+     1104,
+     96,
+     64
+    ],
+    [
+     416,
+     1104,
+     96,
+     64
+    ]
+   ],
+   "note": "the Saffron Wind from the quay (6 x 4; Valewyn berth, the Haven water stairs): 0 sail furled, 1 sail set",
+   "sheet": "ep5.png"
+  }
+ },
+ "overlays": {}
+}
