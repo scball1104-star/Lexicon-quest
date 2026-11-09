@@ -29,12 +29,13 @@ import { BACKDROPS, BOSS_CARD, BattleScene } from '../../scenes/battle.js';
 import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor, frameOrigin } from '../../battle/scene/actors.js';
 import { drawHead } from '../../battle/scene/hud.js';
-import { SIGNATURE_TECHS } from '../../battle/scene/menu.js';
+import { SIGNATURE_TECHS, CommandMenu } from '../../battle/scene/menu.js';
 import { TL, timelineSlotX } from '../../battle/scene/layout.js';
 import { BattleFx, C } from '../../battle/fx.js';
 import { ENEMIES } from '../enemies.js';
 import { EP5_BOSS_CARDS, EP5_ARC_LINES, EP5_BATTLE_TEXT } from './text.js';
 import { audioManifestOf } from './index.js';
+import { miraAnswers } from './ai.js';
 
 export const EP5_BACKDROPS = {
   ep5_sea: { asset: 'ep5_battle_sea', cell: 4, bright: 1.0, tint: null },
@@ -53,6 +54,9 @@ export const HINT_FLAG = 'hint_sky_mp';
 /** The Oracle's looks by phase id (E5-sprites' bosses atlas frames). */
 export const ORACLE_LOOK = { read_sky: 'oracle', false_futures: 'oracle_futures', true_horizon: 'oracle_true' };
 const SAND_ADDS = new Set(['future_hunger', 'future_fear']);
+/** Where the False Futures stand (CRITIQUE_7 item 2): on the foes' side, in the open ground just in front of the Oracle, staggered
+ * so each one's weakness row sits under its own feet, clear of the other's body, the windows and the party (qa row test). */
+export const FUTURE_SPOTS = { future_hunger: { x: 194, y: 116 }, future_fear: { x: 240, y: 134 } };
 const SKY_REFLECT = 'sky';                   // the knowledge flag that makes the row keep one slot for the sky badge
 
 const other = (s) => (s === 'day' ? 'night' : 'day');
@@ -110,6 +114,11 @@ export function drawSideBadge(r, side, x, y) {
   if (side === 'sun') blit(r, SUN8, x + 1, y + 1, SUN); else blit(r, STAR8, x + 1, y + 1, STARC);
 }
 export function drawRedStar(r, x, y) { blitOutlined(r, RED7, x, y, REDC); }
+// 12 x 12: Turn the Sky's menu icon (CRITIQUE_7 item 10): the sun, and the night with its crescent, split on the diagonal
+const SKY_ICON = ['.....rr.....', '.r...rr...r.', '..r.oooo.kk.', '...oggggoknk', '..oghhggknnk', 'rrohhggknm*k',
+  'rrogggknmnnk', '..oggknmmnnk', '...okknmmmnk', '..r.knnnnnk.', '.r..kknnnkk.', '.....kkkk...'];
+const SKY_ICON_PAL = { ...SUN, k: INK, n: '#1d2560', m: MOON.m, '*': MOON['*'] };
+export function drawSkyIcon(r, x, y) { blit(r, SKY_ICON, x, y, SKY_ICON_PAL); }
 
 // ---------------------------------------------------------------------------------------------------- fx (BattleFx)
 const SAND = ['#f9d77a', '#e0b060', '#c8904a', '#fff1c8'];
@@ -466,6 +475,120 @@ function gradeOf(engine, key) {
   const d = meta && meta.grades && meta.grades.day;
   return d && d.multiply ? d : DAY_GRADE;
 }
+// ---- the Day sky (CRITIQUE_7 item 1): Day is not the night brightened. Over each stage's sky the stars and the moon come down
+// (a small bright speck on a cool ground takes its ground's colour; a moon circle takes its row's sky) and the sky is repainted
+// from a day gradient, pale blue overhead to pale gold at the horizon, keeping the painting's light and dark; a sea turns
+// turquoise. What is not sky (the armillary, domes, mesas, lamps, the rail) only takes the warm grade. The gallery is indoors:
+// the grade alone. hz: the row the sky fades out by; moon: [x, y, r]; sea: [y0, y1]; coin: the sky is this ellipse [x, y, rx,
+// ry]; lmin: the sky is lighter than this (the dunes' mesas are as violet as their sky, but darker).
+export const DAY_SKY = {
+  ep5_sea: { hz: 76, moon: [296, 30, 27], sea: [76, 118] },
+  ep5_dunes: { hz: 70, lmin: 0.36 },
+  ep5_well: { hz: 34, coin: [192, -30, 120, 64] },
+  ep5_oracle: { hz: 104, moon: [392, -6, 48] },
+};
+const DAY_TOP = [0.47, 0.73, 0.93], DAY_MID = [0.72, 0.87, 0.95], DAY_LOW = [0.97, 0.89, 0.69];
+const SEA_TOP = [0.28, 0.72, 0.77], SEA_LOW = [0.14, 0.5, 0.59];
+const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+/** How much an rgb (0 to 1) belongs to a night sky: blue to violet to magenta, and not grey. */
+function coolness(r, g, b) {
+  const mx = Math.max(r, g, b), d = mx - Math.min(r, g, b);
+  if (!d) return 0;
+  const h = 60 * (mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4);
+  const hw = h >= 180 && h <= 350 ? 1 : h > 160 && h < 180 ? (h - 160) / 20 : h > 350 ? (360 - h) / 10 : 0;
+  return hw * smooth(0.06, 0.2, d / mx);
+}
+/** A w x n box filter of radius k ('min', 'max' or 'mean') on a Float32Array, separable, edges clamped; a new array. */
+function boxPass(src, w, n, k, op) {
+  const tmp = new Float32Array(w * n), out = new Float32Array(w * n), mean = op === 'mean', min = op === 'min';
+  const line = (a, b, start, step, len) => {
+    for (let i = 0; i < len; i++) {
+      const lo = Math.max(0, i - k), hi = Math.min(len - 1, i + k);
+      let v = mean ? 0 : a[start + lo * step];
+      for (let j = lo; j <= hi; j++) { const u = a[start + j * step]; v = mean ? v + u : min ? (u < v ? u : v) : (u > v ? u : v); }
+      b[start + i * step] = mean ? v / (hi - lo + 1) : v;
+    }
+  };
+  for (let y = 0; y < n; y++) line(src, tmp, y * w, 1, w);
+  for (let x = 0; x < w; x++) line(tmp, out, x, w, n);
+  return out;
+}
+/**
+ * The Day copy of a stage, in place on its RGBA pixels (w x h): the warm grade over rows 0 to y1 (multiply, then screen, as
+ * E5-tiles' recipe), and with a DAY_SKY spec the sky and the sea repainted as above. Pure (no canvas), so node can test it.
+ */
+export function paintDay(px, w, h, y1, grade, spec) {
+  const N = new Float32Array(px.length);
+  for (let i = 0; i < px.length; i++) N[i] = px[i] / 255;
+  const n = spec ? Math.min(h, Math.max(spec.hz, spec.sea ? spec.sea[1] : 0)) : 0;
+  const lum = new Float32Array(w * Math.max(1, n));
+  const lumOf = (i) => 0.2126 * N[i] + 0.7152 * N[i + 1] + 0.0722 * N[i + 2];
+  const satOf = (i) => { const mx = Math.max(N[i], N[i + 1], N[i + 2]); return mx ? (mx - Math.min(N[i], N[i + 1], N[i + 2])) / mx : 0; };
+  const inRegion = (x, y) => { const c = spec.coin; return !c || Math.hypot((x - c[0]) / c[2], (y - c[1]) / c[3]) < 1; };
+  let k = null, flat = null, mean = 0.25;
+  if (n) {
+    for (let y = 0; y < n; y++) for (let x = 0; x < w; x++) lum[y * w + x] = lumOf((y * w + x) * 4);
+    // 1. stars, specks and the moon's path: what a 5 x 5 grey opening takes away, on a cool ground
+    const open = boxPass(boxPass(lum, w, n, 2, 'min'), w, n, 2, 'max');
+    const fix = [];
+    for (let y = 0; y < n; y++) for (let x = 0; x < w; x++) {
+      const q = y * w + x;
+      if (lum[q] - open[q] < 0.06 || !inRegion(x, y) || (satOf(q * 4) > 0.4 && coolness(N[q * 4], N[q * 4 + 1], N[q * 4 + 2]) < 0.5)) continue;
+      let r = 0, g = 0, b = 0, c = 0;
+      for (let yy = Math.max(0, y - 2); yy <= Math.min(n - 1, y + 2); yy++) for (let xx = Math.max(0, x - 2); xx <= Math.min(w - 1, x + 2); xx++) {
+        if (lum[yy * w + xx] > open[q] + 0.03) continue;
+        const j = (yy * w + xx) * 4; r += N[j]; g += N[j + 1]; b += N[j + 2]; c++;
+      }
+      if (c && (coolness(r / c, g / c, b / c) > 0.5 || (b >= r && Math.max(r, g, b) - Math.min(r, g, b) < 0.2 * Math.max(r, g, b)))) fix.push(q * 4, r / c, g / c, b / c);
+    }
+    for (let i = 0; i < fix.length; i += 4) { N[fix[i]] = fix[i + 1]; N[fix[i] + 1] = fix[i + 2]; N[fix[i] + 2] = fix[i + 3]; }
+    if (spec.moon) {   // the moon: its row's sky (the mean of the row near it, outside the circle)
+      const [mx, my, mr] = spec.moon;
+      for (let y = Math.max(0, my - mr); y < Math.min(n, my + mr + 1); y++) {
+        let r = 0, g = 0, b = 0, c = 0;
+        for (let x = 0; x < w; x++) if (Math.hypot(x - mx, y - my) > mr && Math.abs(x - mx) < mr * 2.5) { const j = (y * w + x) * 4; r += N[j]; g += N[j + 1]; b += N[j + 2]; c++; }
+        if (c) for (let x = 0; x < w; x++) if (Math.hypot(x - mx, y - my) <= mr) { const j = (y * w + x) * 4; N[j] = r / c; N[j + 1] = g / c; N[j + 2] = b / c; }
+      }
+    }
+    // 2. the sky's weight: cool around here (a 7 x 7 neighbourhood, so a stray cool pixel on a dome stays put), in the region,
+    //    light enough (lmin); and the cleaned light and dark, softened, for the repaint's texture
+    for (let y = 0; y < n; y++) for (let x = 0; x < w; x++) lum[y * w + x] = lumOf((y * w + x) * 4);
+    flat = boxPass(lum, w, n, 1, 'mean');
+    const cool = new Float32Array(w * n);
+    for (let y = 0; y < n; y++) for (let x = 0; x < w; x++) {
+      const q = y * w + x, j = q * 4;
+      cool[q] = inRegion(x, y) && (!spec.lmin || flat[q] > spec.lmin) ? coolness(N[j], N[j + 1], N[j + 2]) : 0;
+    }
+    const near = boxPass(cool, w, n, 3, 'mean');
+    k = new Float32Array(w * n);
+    let sum = 0, cnt = 0;
+    for (let q = 0; q < w * n; q++) {
+      k[q] = smooth(0.45, 0.85, near[q]) * (cool[q] + (1 - cool[q]) * 0.4 * (1 - smooth(0.3, 0.5, satOf(q * 4))));
+      if (k[q] > 0.5 && q < w * spec.hz) { sum += flat[q]; cnt++; }
+    }
+    if (cnt) mean = sum / cnt;
+  }
+  // 3. the warm grade, then the day sky and the day sea over it
+  const m = hexRgb(grade.multiply), s = hexRgb(grade.screen), ma = grade.multiplyAlpha, sa = grade.screenAlpha;
+  const out = [0, 0, 0], d = [0, 0, 0];
+  for (let y = 0; y < Math.min(h, y1); y++) for (let x = 0; x < w; x++) {
+    const i = (y * w + x) * 4;
+    for (let c = 0; c < 3; c++) { let v = N[i + c]; v = lerp(v, v * m[c], ma); out[c] = lerp(v, 1 - (1 - v) * (1 - s[c]), sa); }
+    const q = y * w + x;
+    const sea = spec && spec.sea && y >= spec.sea[0] && y < spec.sea[1];
+    const wt = !k || y >= n ? 0 : sea ? 0.8 * k[q] : y < spec.hz ? k[q] * (1 - smooth(spec.hz * 0.6, spec.hz, y)) : 0;
+    if (wt > 0) {
+      const t = sea ? (y - spec.sea[0]) / (spec.sea[1] - spec.sea[0]) : y / spec.hz;
+      for (let c = 0; c < 3; c++) d[c] = sea ? lerp(SEA_TOP[c], SEA_LOW[c], t) : t < 0.6 ? lerp(DAY_TOP[c], DAY_MID[c], t / 0.6) : lerp(DAY_MID[c], DAY_LOW[c], (t - 0.6) / 0.4);
+      const f = Math.max(0.7, Math.min(1.08, 1 + 0.7 * (flat[q] - mean)));
+      for (let c = 0; c < 3; c++) out[c] = lerp(out[c], Math.min(1, d[c] * f), wt);
+    }
+    for (let c = 0; c < 3; c++) px[i + c] = Math.round(Math.max(0, Math.min(1, out[c])) * 255);
+  }
+  return px;
+}
 /** Night and Day copies of the stage layer (built once per layer: the core rebuilds it when its art arrives). */
 function gradeLayers(scene) {
   const sv = scene.sky5, bl = scene.backdropLayer, r = scene.engine.renderer;
@@ -476,10 +599,19 @@ function gradeLayers(scene) {
   day.ctx.drawImage(bl.canvas, 0, 0);
   const g = day.ctx, d = gradeOf(scene.engine, bl.key);
   const y1 = Math.max(1, Math.min(bl.h, (bl.band && Number.isFinite(bl.band.y) ? bl.band.y : 118), (d.rows && d.rows[1]) || bl.h));
-  g.save();
-  g.globalCompositeOperation = 'multiply'; g.globalAlpha = d.multiplyAlpha; g.fillStyle = d.multiply; g.fillRect(0, 0, bl.w, y1);
-  g.globalCompositeOperation = 'screen'; g.globalAlpha = d.screenAlpha; g.fillStyle = d.screen; g.fillRect(0, 0, bl.w, y1);
-  g.restore();
+  let done = false;
+  try {   // the pixel path (a tainted canvas on file:// falls back to the grade alone)
+    const id = g.getImageData(0, 0, bl.w, bl.h);
+    paintDay(id.data, bl.w, bl.h, y1, d, DAY_SKY[bl.key] || null);
+    g.putImageData(id, 0, 0);
+    done = true;
+  } catch (e) { done = false; }
+  if (!done) {
+    g.save();
+    g.globalCompositeOperation = 'multiply'; g.globalAlpha = d.multiplyAlpha; g.fillStyle = d.multiply; g.fillRect(0, 0, bl.w, y1);
+    g.globalCompositeOperation = 'screen'; g.globalAlpha = d.screenAlpha; g.fillStyle = d.screen; g.fillRect(0, 0, bl.w, y1);
+    g.restore();
+  }
   sv.night = night; sv.day = day; sv.painted = -1;
   paintSky(scene);
 }
@@ -502,10 +634,13 @@ function setSky(scene, sky, fade) {
   if (!fade || scene.fast) sv.k = sv.goal;
   paintSky(scene);
 }
-/** "The Oracle reads Arden's star. It falls when the sky turns." and who can answer it, while that member can. */
-function answerLine(scene) {
-  const m = scene.b && scene.b.unit('mira');
-  return m && m.alive && Array.isArray(m.skills) && m.skills.includes('turn_sky') ? ` {c:gold}${m.name} can turn the sky.{/c}` : '';
+/** "The Oracle reads Arden's star. It falls when the sky turns." and who can answer it: Mira only when her turn comes before it
+ * lands and she can cast (PLAYTEST_REVIEW_7 item 2), else Hourglass Sand when the bag has some, else nothing. */
+export function answerLine(scene) {
+  const b = scene.b, m = b && b.unit('mira');
+  if (!m) return '';
+  if (miraAnswers(b)) return ` {c:gold}${m.name} can turn the sky.{/c}`;
+  return (b.state.inventory || {}).hourglass_sand > 0 ? ' {c:cyan}Hourglass Sand holds the sky.{/c}' : '';
 }
 /** Once per save: Mira under Turn the Sky's MP in a fight where a star can be read (the Oracle). */
 function lowMpHint(scene, op) {
@@ -606,6 +741,20 @@ function drawSkyRows(scene, r) {
   }
 }
 
+/** Turn the Sky's row in the Tech list draws its icon (the core's hitIcon has none for a skill with no target). */
+function wrapMenu(M) {
+  const openSub = M.openSub;
+  M.openSub = function (cmd) {
+    const ok = openSub.call(this, cmd);
+    const L = this.sub, it = ok && L && L.items.find((x) => x.id === 'turn_sky');
+    if (it) {
+      if (!L.icons) { L.icons = true; L.textX = 15; }
+      it.draw = (r, rr, dim, alpha) => r.withAlpha(alpha * (dim ? 0.5 : 1), () => drawSkyIcon(r, rr.x + L.iconX, rr.y + L.textDy));
+    }
+    return ok;
+  };
+}
+
 function wrapScene(B) {
   const base = { enter: B.enter, update: B.update, draw: B.draw, runOp: B.runOp, planEnemyRows: B.planEnemyRows, drawHelpWindow: B.drawHelpWindow, party: B.party };
   B.enter = function (data) {
@@ -672,7 +821,11 @@ function wrapScene(B) {
     if (sv && op.op === 'telegraph' && op.foretell) op = { ...op, text: op.text + answerLine(this) };
     if (sv && op.op === 'help' && op.foretell) op = { ...op, text: op.text + answerLine(this) };
     const res = base.runOp.call(this, op);
-    if (sv && op.op === 'summon') { const a = this.actor(op.uid), u = this.unit(op.uid); if (a && u) a.skySide = !!(u.skySide || (ENEMIES[u.id] && ENEMIES[u.id].sky)); }
+    if (sv && op.op === 'summon') {
+      const a = this.actor(op.uid), u = this.unit(op.uid), spot = u && FUTURE_SPOTS[u.id];
+      if (a && u) a.skySide = !!(u.skySide || (ENEMIES[u.id] && ENEMIES[u.id].sky));
+      if (a && spot) { a.homeX = a.x = spot.x; a.homeY = a.y = spot.y; a.backRow = false; }
+    }
     if (sv && op.op === 'mp') lowMpHint(this, op);
     return res;
   };
@@ -699,7 +852,8 @@ export function register(engine) {
   wrapPlanner(Planner.prototype);
   wrapActor(Actor.prototype);
   wrapScene(BattleScene.prototype);
+  wrapMenu(CommandMenu.prototype);
   done = true;
-  return ['backdrops', 'cards', 'signature', 'fx', 'planner', 'actor', 'scene'];
+  return ['backdrops', 'cards', 'signature', 'fx', 'planner', 'actor', 'scene', 'menu'];
 }
 export default register;

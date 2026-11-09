@@ -10,7 +10,8 @@
 //                  while either stands the Mirage Veil holds (15% damage taken, shields locked, HP stops at 34%). Both down: the
 //                  Veil tears, the Oracle is Broken, the party gains 25 Fury. 3 The True Horizon: weak ice, spear, light, no
 //                  resists, 9 shields, Haste, Mirror of the Sky, the Unbound Sandstorm announced on every 4th turn.
-//                  Every phase: the Last Prophecy, read when the Turn is READ_AT actions away or less and nothing is pinned
+//                  Every phase: the Last Prophecy, read when the Turn is READ_AT actions away or less and nothing is pinned;
+//                  the Turn then waits: it lands exactly READ_AT actions out, and never before Mira's next turn
 //                  (the hero first, then the member with the lowest HP), pinned to the Turn by sky.js foretell().
 //   future         Hunger: Devour the Road (15 Fury from the member with most, the Oracle +5% HP) every turn. Fear: Dread (the
 //                  soonest party member half a turn back) every turn; Hush the Reader on Mira every 3rd turn.
@@ -22,11 +23,11 @@
 import { SCRIPTS, POLICY_EXT, competentPolicy } from '../../battle/ai.js';
 import { ENEMIES } from '../enemies.js';
 import { SKILLS } from '../skills.js';
-import { foretell, breakForetelling, refresh, TURN_EVERY } from './sky.js';
+import { foretell, breakForetelling, refresh, holdForMira, TURN_EVERY } from './sky.js';
 
 export const VEIL_MULT = 0.15;        // damage the Oracle takes under the Mirage Veil (canon)
 export const VEIL_FURY = 25;          // Fury each party member gains when the Veil tears (canon +25 Focus)
-export const READ_AT = 3;             // the Oracle reads a star when the Turn is this many actions away or less
+export const READ_AT = 3;             // a reading lands exactly this many actions out (the Oracle reads when the Turn is this near)
 export const READ_COOLDOWN = 0;       // Oracle turns between readings (0: whenever nothing is pinned)
 export const FUTURES = ['future_hunger', 'future_fear'];
 const FURY_MAX = 100;
@@ -136,6 +137,10 @@ function readStar(ctx, u) {
   if (u.ai.turns < (u.ai.readAt || 0)) return;
   const t = readTarget(ctx);
   if (!t) return;
+  // never a one-action window (PLAYTEST_REVIEW_7 item 2): the Turn waits for the words, READ_AT actions out, and past Mira's
+  // next turn, so the member who can answer it always has a turn to
+  S.turnIn = READ_AT;
+  holdForMira(ctx);
   if (foretell(ctx, u, t, 'last_prophecy')) u.ai.readAt = u.ai.turns + 1 + READ_COOLDOWN;
 }
 const oracle = {
@@ -223,6 +228,7 @@ export const EP5_SCRIPTS = { sky, mirage_knight: knight, mirage_double: double, 
 //      it. When Mira cannot (down, silenced, short of MP), anyone holds the sky with Hourglass Sand on the last action.
 //   2. More foe HP stands Ascendant than Exposed, the Turn 4 actions away or more, and Mira keeps 24 MP after it: she turns it.
 //   3. A foe Exposed and one hit from Broken, the Turn 1 action away: Hourglass Sand.
+//      While Mira still owes a pinned reading its answer, nobody else takes her into a combo (it would spend her turn).
 //   4. With a foretelling possible (the Oracle) Mira keeps 12 MP for Turn the Sky: an MP action that would spend it becomes an
 //      Attack, and under 12 MP she drinks an Ether.
 export const TURN_MP_KEEP = 24;
@@ -253,6 +259,14 @@ function miraBeforeTurn(b, S, me) {
   const i = order.indexOf('mira');   // order[0] is the current actor
   return i > 0 && i + 1 <= S.turnIn;
 }
+/** For the scene's line under a reading: Mira can turn the sky, and her turn comes before the reading lands (counting the actor
+ * whose turn it is now as action 1). */
+export function miraAnswers(b) {
+  const S = b.state.sky, m = b.unit('mira');
+  if (!S || !S.pinned || !miraCan(b)) return false;
+  const i = b.timeline(12).findIndex((r) => r.uid === m.uid && !r.skip);
+  return i >= 0 && i + 1 <= S.turnIn;
+}
 function costOf(me, a) {
   if (!a || (a.type !== 'skill' && a.type !== 'combo')) return 0;
   const sk = SKILLS[a.skill];
@@ -276,6 +290,15 @@ export function ep5Policy(b, me, opts = {}) {
     if (me.id !== 'mira' && S.turnIn <= 1 && sandOk && !(miraCan(b) && miraBeforeTurn(b, S, me))) {
       return { type: 'item', item: 'hourglass_sand', target: me.uid };
     }
+  }
+  // 1b. nobody spends Mira's turn on a combo while she still owes a reading its answer
+  if (S.pinned && !S.pinned.answered && me.id !== 'mira' && miraCan(b)) {
+    inner = true;
+    let a;
+    try { a = competentPolicy(b, me, opts); } finally { inner = false; }
+    const sk = a && a.type === 'combo' && SKILLS[a.skill];
+    if (sk && (sk.members || []).includes('mira')) return { type: 'attack', target: (foes.find((f) => f.exposed) || foes[0]).uid };
+    return a;
   }
   // 2. the sky favours the foes: turn it
   if (P.general && turnOk && !S.pinned && S.turnIn >= P.turnMin && me.mp - turnCost() >= TURN_MP_KEEP) {

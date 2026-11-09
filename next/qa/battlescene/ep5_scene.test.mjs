@@ -171,3 +171,37 @@ test('the Knight and the Oracle: their weakness rows never cross the body (phone
     assert.ok(!hit({ x: a.x, y: a.y, w, h: L.ENEMY_ROW_H }, top), `${id} desktop: the row at the feet, not across the head or chest`);
   }
 });
+
+// CRITIQUE_7 item 2 (E5-fixes A4): the False Futures stand on the foes' side, by the Oracle, each with its row under its own
+// feet: never over the party, the other Future or the Oracle, and the two rows never meet (phone and desktop).
+test('the False Futures: foe-side spots by the Oracle, each row under its own feet, clear of the party and of each other', async () => {
+  const L = await import('../../src/battle/scene/layout.js');
+  L.STAGE.tall.clear();
+  const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const party = [[300, 150], [324, 146], [348, 150]].map(([x, y]) => ({ x: x - 12, y: y - 36, w: 24, h: 36, party: true }));
+  const unit = (uid, id, x, y, w, h) => ({ uid, id, side: 'enemy', x, y, homeX: x, homeY: y, w, h });
+  const oracle = unit('e0', 'oracle', L.BOSS_SLOT.x, L.BOSS_SLOT.y, 141, 118);
+  const futs = [['e1', 'future_hunger', 15 * 3], ['e2', 'future_fear', 15 * 4]].map(([uid, id, w]) => ({ u: unit(uid, id, scene.FUTURE_SPOTS[id].x, scene.FUTURE_SPOTS[id].y, 37, 57), w }));
+  const partyLeft = Math.min(...party.map((p) => p.x));
+  for (const f of futs) {
+    const b = L.spriteBox(f.u, true);
+    assert.ok(b.x + b.w < partyLeft - 12, `${f.u.id} stands on the foes' side, clear of the party (${b.x + b.w} < ${partyLeft})`);
+    assert.ok(!hit(b, L.spriteBox(oracle, true)), `${f.u.id} is beside the Oracle, not inside it`);
+  }
+  const bodies = [oracle, ...futs.map((f) => f.u)].map((u) => ({ uid: u.uid, ...L.spriteBox(u, true) }));
+  for (const helpBottom of [23, 34, 46]) {
+    const placed = [];
+    for (const f of futs) {
+      const others = [...party, ...bodies.filter((b) => b.uid !== f.u.uid)];
+      const s = L.touchRowSpot(f.u, f.w, { cw: L.CMD_WIN_TOUCH, blocks: L.topBlocks(helpBottom), boxes: others, placed });
+      const box = { x: s.x, y: s.y, w: f.w, h: L.ENEMY_ROW_H };
+      assert.equal(s.place, 'below', `${f.u.id}, help bottom ${helpBottom}: the row under its feet (got ${s.place})`);
+      for (const o of others) assert.ok(!hit(box, o), `${f.u.id}: its row ${JSON.stringify(box)} is clear of ${o.uid || 'the party'}`);
+      for (const p of placed) assert.ok(!hit(box, p), `${f.u.id}: its row is clear of the other Future's row`);
+      placed.push(box);
+    }
+  }
+  const rows = futs.map((f) => ({ ...L.enemyRowAnchor(f.u, false, L.CMD_WIN), w: f.w, h: L.ENEMY_ROW_H }));
+  assert.ok(!hit(rows[0], rows[1]), `desktop: the two rows apart ${JSON.stringify(rows)}`);
+  for (const r of rows) for (const p of party) assert.ok(!hit(r, p), 'desktop: a Future\'s row is clear of the party');
+});

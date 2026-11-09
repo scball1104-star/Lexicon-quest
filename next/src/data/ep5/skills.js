@@ -84,7 +84,7 @@ export const EP5_SKILLS = {
   sandfall: foe({ id: 'sandfall', name: 'Sandfall', target: 'enemies', formula: 'mag', power: 100,
     effects: [{ status: 'blind', chance: 0.25 }], help: 'Sand pours from the stars. May Blind.', fx: 'ink_wave' }),
   // Pinned to the Turn (sky.js): a reading, resolved when the sky turns naturally. Taunt and Guard do not move it.
-  last_prophecy: foe({ id: 'last_prophecy', name: 'The Last Prophecy', target: 'enemy', formula: 'mag', power: 280, foretold: true,
+  last_prophecy: foe({ id: 'last_prophecy', name: 'The Last Prophecy', target: 'enemy', formula: 'mag', power: 320, foretold: true,
     telegraph: "The Oracle reads {target}'s star. It falls when the sky turns.", telegraphSfx: 'prophecy_read',
     help: 'A star read. Turn the sky first.', fx: 'devour', sfx: 'prophecy_read' }),
   sandstorm: foe({ id: 'sandstorm', name: 'Unbound Sandstorm', target: 'enemies', formula: 'mag', power: 180,

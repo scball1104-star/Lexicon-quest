@@ -15,6 +15,7 @@
 // - Turn the Sky (Mira): the sky turns now, the Turn resets to TURN_EVERY, no foe mirrors; a pinned foretelling fails ("The words
 //   change.") and its owner is Broken.
 // - Hourglass Sand: +HOLD actions before the next Turn (a pinned foretelling moves with the marker).
+// - A pinned foretelling never lands before Mira's next turn: the Turn holds until she has had one (holdForMira).
 //
 // Events (the scene draws them; E5-scene-ui): `sky` { sky, turnIn, reason } after every change of either; `sky_turn` { sky,
 // natural, by }; `exposed` { target, on }; `ascendant` { target, on }; `foretell` { source, target, pinned, turnIn };
@@ -185,6 +186,20 @@ export function turnSky(ctx, by) {
   tell(ctx, 'turned');
   return true;
 }
+/** Actions until Mira's next turn (1: the next action), or 0 when she will not stand there (down, Kept, the tech unknown). */
+export function miraNext(ctx) {
+  const m = ctx.living('party').find((u) => u.id === 'mira');
+  if (!m || ctx.kept(m) || !(m.skills || []).includes('turn_sky')) return 0;
+  const i = ctx.timeline(12).findIndex((r) => r.uid === m.uid && !r.skip);
+  return i < 0 ? 0 : i + 1;
+}
+/** A reading is fair only if Mira can answer it: hold the Turn until her next turn has come (PLAYTEST_REVIEW_7 item 2). */
+export function holdForMira(ctx) {
+  const S = ctx.state.sky, n = S ? miraNext(ctx) : 0;
+  if (!n || n <= S.turnIn) return false;
+  S.turnIn = n;
+  return true;
+}
 function hold(ctx, n) {
   const S = ctx.state.sky;
   S.turnIn += HOLD * n;
@@ -206,7 +221,7 @@ export const SKY_RULE = {
     refresh(ctx);
     tell(ctx, 'start');
   },
-  afterAction(ctx) {
+  afterAction(ctx, units) {
     const S = ctx.state.sky;
     if (!S) return;
     ensureSides(ctx);
@@ -214,6 +229,11 @@ export const SKY_RULE = {
     if (used > S.sand) { hold(ctx, used - S.sand); S.sand = used; }
     if (S.skip) S.skip = false;
     else S.turnIn--;
+    // a pinned reading waits for Mira's turn (once she has had it, the Turn keeps its time)
+    if (S.pinned && !S.pinned.answered) {
+      if ([].concat(units).some((u) => u && u.id === 'mira')) S.pinned.answered = true;
+      else if (holdForMira(ctx)) ctx.emit({ type: 'foretell', source: S.pinned.source, target: S.pinned.target, pinned: true, turnIn: S.turnIn, skill: S.pinned.skill, moved: true });
+    }
     if (S.turnIn <= 0) {
       turn(ctx, true);
       if (S.pinned) fall(ctx);

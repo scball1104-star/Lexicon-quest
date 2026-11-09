@@ -131,10 +131,10 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
   `fire_stage`. First visit: one choice of three. Later visits: one box from Omar.
 - `haven_view`, step trigger on the last dune. `mystery`, pans to `haven_far` (the decal), back to `ash_road`. 4 boxes.
 
-### `ep5_saffron` (marks `south_gate`, `waystone`, `bulletin`, `yasmin_gate`, `waystone_stage`, `waystone_stage_m`, `waystone_stage_b`, `shop_door`, `market`, `sel_spot`, `sel_stage`, `sel_stage_m`, `sel_stage_b`, `nasrin_bench`, `moonwell`, `moonwell_stage`, `moonwell_stage_m`, `moonwell_stage_b`, `moonwell_sel`, `inn_door`, `smithy_door`, `tower_door`, `north_gate`, `gate_sel`, `gate_stage`, `gate_stage_m`, `gate_stage_b`, `water_stairs`, `tamir_spot`, `gather_sel`, `gather_yara`, `gather_nasrin`, `gather_tamir`, `gather_trav_a`, `gather_trav_b`, `caravan_in`, `caravan_in_b`, `caravan_in_c`, `roof_view`, `roof_stage`, `roof_stage_m`, `roof_stage_b`, `roof_laleh`, `roof_sel`, `roof_yara`)
+### `ep5_saffron` (marks `south_gate`, `waystone`, `bulletin`, `yasmin_gate`, `waystone_stage`, `waystone_stage_m`, `waystone_stage_b`, `shop_door`, `market`, `sel_spot`, `sel_stage`, `sel_stage_m`, `sel_stage_b`, `nasrin_bench`, `moonwell`, `moonwell_stage`, `moonwell_stage_m`, `moonwell_stage_b`, `moonwell_sel`, `inn_door`, `smithy_door`, `tower_door`, `north_gate`, `gate_sel`, `gate_stage`, `gate_stage_m`, `gate_stage_b`, `water_stairs`, `tamir_spot`, `gather_sel`, `gather_yara`, `gather_nasrin`, `gather_tamir`, `gather_trav_a`, `gather_trav_b`, `caravan_in`, `caravan_in_b`, `caravan_in_c`, `roof_view`, `roof_stage`, `roof_stage_m`, `roof_stage_b`, `roof_laleh`, `roof_sel`, `roof_yara`, `armillary_view`)
 
 - `haven_arrival`, on first enter by the south gate. Silence; spawns `yasmin_t` at `yasmin_gate`; stages at
-  `waystone_stage`; pans to `bulletin`, then `waystone` (the glyph rows change as the narration says so); `saffron` from
+  `waystone_stage`; pans to `armillary_view` (the armillary over the town), `bulletin`, then `waystone` (the glyph rows change as the narration says so); `saffron` from
   the change. 6 boxes. Yasmin walks to `shop_door` and is despawned.
 - `meet_sel`, Sel's talk entry (NPC `sel` at `sel_spot` under the copper awning). Stages at `sel_stage`. 5 boxes.
 - `moonwell`, the Moonwell object `moonwell` (`script: 'moonwell'`). First look: stages at `moonwell_stage`, Kamal (NPC at

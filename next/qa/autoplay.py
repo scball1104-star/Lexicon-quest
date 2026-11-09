@@ -190,6 +190,7 @@ class Bot:
         self.page.on('pageerror', lambda e: self.errors.append(f'pageerror: {e}'))
         self.grids = {}
         self.gated = {}         # map id -> the flags its gated overlays depend on (autoplay_grid.mjs)
+        self.revealed = {}      # map id -> cells a Lantern reveal made floor (the static grid still has them as pits)
         self.shot_n = 0
         self.last_shot = 0
         self.t0 = time.time()
@@ -535,6 +536,9 @@ class Bot:
                     avoid.add(c)
             if e['type'] == 'pit' and not allow_pits:
                 for c in cells:
+                    # E5-fixes A8: a pit under a revealed ink bridge (the Starwright Bow's keeper_marks) no longer drops you
+                    if c in self.revealed.get(f['map'], ()) or opened.get(f'{f["map"]}:ink:{c[0]},{c[1]}'):
+                        continue
                     avoid.add(c)            # E3: the fan shaft on F2 drops to F1
             if e['type'] == 'trigger' and e['on'] != 'enter' and e['script'] in ('south_gate',) and not fight:
                 pass
@@ -558,6 +562,7 @@ class Bot:
         crust = {(x, y) for x, y in f.get('crust') or []}
         live = {(x, y): c for x, y, c in ((f.get('tide') or {}).get('cells') or [])}     # E4: water, floats, seals right now
         live.update({(x, y): c for x, y, c in ((f.get('shade') or {}).get('cells') or [])})   # E5: running sand is water right now
+        revealed = self.revealed.get(f['map'], set())       # E5-fixes A8: a faint bridge the Lantern lit (the Starwright Bow's)
 
         def passable(x, y, d):
             if not (0 <= x < W and 0 <= y < H):
@@ -568,7 +573,7 @@ class Bot:
                 return False
             if (x, y) in unblocked:
                 return True
-            if (x, y) in lit_bridges or (x, y) in crust:
+            if (x, y) in lit_bridges or (x, y) in crust or (x, y) in revealed:
                 return True
             if (x, y) in dim_bridges:
                 return allow_pits or (x, y) == goal_t
@@ -578,7 +583,8 @@ class Bot:
             if c == 'none':
                 return True
             if c == 'pit':
-                return allow_pits or (x, y) == goal_t
+                # a revealed ink bridge over a pit (saved as opened ink) is floor, whatever the static grid says
+                return allow_pits or (x, y) == goal_t or bool(opened.get(f'{f["map"]}:ink:{x},{y}'))
             if c in ('ledge_s', 'ledge_e', 'ledge_w'):
                 return d == {'ledge_s': 'down', 'ledge_e': 'right', 'ledge_w': 'left'}[c]
             return False
@@ -966,6 +972,10 @@ class Bot:
             # done when no faint tile is left on any of the target cells (a 16x32 glyph only owns its top cell)
             left = self.page.evaluate("(cells) => cells.filter(([x, y]) => LQ_ENGINE.scene.map.idsAt(x, y).some(id => /_faint$/.test(id)))", [list(c) for c in cells])
             if not left:
+                # rebuild the walk model for these cells from the live map: a revealed bridge over a pit is floor now, though
+                # the static grid (and no ink flag, on some maps) still calls it a pit (PLAYTEST_REVIEW_7 item 5)
+                live = self.page.evaluate("(cells) => cells.filter(([x, y]) => LQ_ENGINE.scene.map.idsAt(x, y).some(id => /bridge.*_revealed$/.test(id)))", [list(c) for c in cells])
+                self.revealed.setdefault(f['map'], set()).update((x, y) for x, y in live)
                 return
             passable, _ = self.model(f)
             cx = sum(c[0] for c in cells) / len(cells)
@@ -5810,6 +5820,7 @@ def main(argv):
     ap.add_argument('--name', default='Arden')
     ap.add_argument('--until', default=None)
     ap.add_argument('--no-side', action='store_true')
+    ap.add_argument('--all-fights', action='store_true', help='Episode 5: no EXP cap on optional fights (every hunt runs; output tagged -all; PLAYTEST_REVIEW_7 item 3)')
     ap.add_argument('--hollow', action='store_true', help='W13: also play Whisperwood Hollow after the Lantern (Episode 1; off by default)')
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
@@ -5867,7 +5878,7 @@ def main(argv):
         if a.start == 'new':
             seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
     if a.episode == 5 and not a.tier:
-        tag, ep3 = '-ep5' + ('-new' if a.start == 'new' else ''), True
+        tag, ep3 = '-ep5' + ('-new' if a.start == 'new' else '') + ('-all' if a.all_fights else ''), True
         os.environ['LQ_EP4_LIVE'] = '1'
         os.environ['LQ_EP5_LIVE'] = '1'      # episodes.js served with EP5_LIVE forced on (a local copy of the switch)
         if not resume:
@@ -5903,7 +5914,10 @@ def main(argv):
         elif a.episode == 4:
             Episode4(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.episode == 5:
-            Episode5(bot, side=not a.no_side, until=a.until, start=a.start).run()
+            ep = Episode5(bot, side=not a.no_side, until=a.until, start=a.start)
+            if a.all_fights:
+                ep.ZONE_EXP = {}
+            ep.run()
         elif a.route == 'complete':
             sys.path.insert(0, str(HERE / 'integrate'))
             import autoplay_x1

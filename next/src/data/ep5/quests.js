@@ -309,6 +309,10 @@ export const BANTER_EP5 = {
     m("You'll get your sea legs by the time we land."),
   ] }],
   ep5_caravan_road: [
+    // the field link, said once the first fight has taught the sky (PLAYTEST_REVIEW_7 item 9): until the Haven
+    { if: [...BOTH, 'ship_first_fight_done'], ifNot: 'haven_arrived', lines: [
+      m('Sun-things glow by day. Fight them at dusk, or wait for the turn.'),
+    ] },
     { if: [...BOTH, 'haven_restored'], lines: [
       m('Listen. Bells on the dunes. Somebody is walking this road again.'),
       b('Omar is going to need more stones.'),
@@ -358,12 +362,25 @@ export const TALK_OPENER_EP5_FAR = {
   ],
 };
 
+// The Valewyn morning (PLAYTEST_REVIEW_7 item 10): from ep5_started until the ship, Talk in Valewyn says the Episode 5 step
+// (Bram and Mira on the ship at the south landing) and holds the rest: an empty entry put first in every other side quest's
+// chat and in the Valewyn banter matches there and then, and says nothing.
+export const MORNING_HOLD = { map: VW_MAPS, if: 'ep5_started', ifNot: 'ship_boarded', lines: [] };
+function holdMorning() {
+  for (const q of ALL_SIDE_QUESTS) {
+    if (SIDE_QUESTS_EP5.includes(q)) continue;
+    for (const st of q.steps || []) if (Array.isArray(st.chat) && !st.chat.includes(MORNING_HOLD)) st.chat.unshift(MORNING_HOLD);
+  }
+  for (const map of VW_MAPS) if (Array.isArray(BANTER[map]) && !BANTER[map].includes(MORNING_HOLD)) BANTER[map].unshift(MORNING_HOLD);
+}
+
 export function register(opts) {
   const on = opts && typeof opts.ep5Live === 'boolean' ? opts.ep5Live : EP5_LIVE;   // the pack entry passes the engine here
   for (const q of SIDE_QUESTS_EP5) if (!ALL_SIDE_QUESTS.includes(q)) ALL_SIDE_QUESTS.push(q);
   for (const [map, entries] of Object.entries(BANTER_EP5)) if (!(map in BANTER)) BANTER[map] = entries;
   if (Array.isArray(Q.QUEST_EXT) && !Q.QUEST_EXT.some((e) => e && e[0] === 'ep5_started')) Q.QUEST_EXT.unshift(QUEST_EXT_ENTRY);
   if (on) for (const e of [TALK_OPENER_EP5, TALK_OPENER_EP5_FAR]) if (!TALK_PREPEND.includes(e)) TALK_PREPEND.push(e);
+  holdMorning();
 }
 
 export default register;

@@ -997,7 +997,7 @@ F2 mixed 0.65, F3 shades 0.6) so a fight pays about 200 and the Oracle is met at
 | Tomorrow Husk | sun | 24 | 900 | 150/40 | 48/26 | 8 | 5 | ice, axe | fire, sword, spear | 125 / 200 | Ground Slam (party phys 65%), Sandglass (Haste), **Hour Crush** (party phys 110%, first turn 1, then every 2) |
 | The Mirage Knight | sun, mirrors | 23 | 2450 | 420/220 | 34/26 | 13 | 7 | ice, axe | fire, sword | 220 / 900 | Mirage Slash, Glare (party light 70%, Blind 20%); **Horizon Cleave** (party phys 400%) every 3rd turn; Double at 50%; immune Silence |
 | Mirage Double | opposite the Knight | 23 | 600 | 150/90 | 30/24 | 12 | 2 | ice | - | 0 / 0 | Mirror Copy: the Knight's last attack at half power |
-| The Sand Oracle | sun (phase 3 mirrors) | 24 | 4000 | 380/420 | 30/28 | 14 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | fire, thunder (phases 1, 2) | 1000 / 1400 | Stinger, Sandfall (party mag 100%, Blind 25%); **The Last Prophecy** (single mag 280%, Starless); **Unbound Sandstorm** (party mag 180%, Blind 30%); immune Stun, Poison, Blind |
+| The Sand Oracle | sun (phase 3 mirrors) | 24 | 4000 | 380/420 | 30/28 | 14 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | fire, thunder (phases 1, 2) | 1000 / 1400 | Stinger, Sandfall (party mag 100%, Blind 25%); **The Last Prophecy** (single mag 320%, Starless); **Unbound Sandstorm** (party mag 180%, Blind 30%); immune Stun, Poison, Blind |
 | False Future: Hunger | sun | 24 | 520 | 90/120 | 20/24 | 13 | 2 | ice | fire | 0 / 0 | Devour the Road (15 Fury from the member with most, the Oracle +5%) |
 | False Future: Fear | star | 24 | 560 | 80/120 | 20/26 | 13 | 3 | spear, light | ice | 0 / 0 | Dread (the soonest member half a turn back); Hush the Reader on Mira every 3rd turn (Silence 40%) |
 
@@ -1041,7 +1041,10 @@ became party-wide (60% and 65%), and Hour Crush and Eclipse dropped to 110% and 
   +25 `fury_gain` reason `veil_break`). **3 The True Horizon**: weak ice, spear, light; no resists; 9 shields; Haste; mirrors; the Sandstorm
   every 4th turn (the first a turn early). Every `phase` event carries `sprite` (`oracle`, `oracle_futures`, `oracle_true`). The Last
   Prophecy is read at the end of an Oracle turn when the Turn is 3 actions away or less and nothing is pinned: the hero first, then the
-  lowest HP. A Break cancels it; Answer does not ("A foretelling is not a decree. Nothing is written yet.", kind `foretell_answer`).
+  lowest HP. The Turn then waits for the words (E5-fixes A2, PLAYTEST_REVIEW_7 item 2): it is set to exactly `READ_AT` (3) actions out,
+  and sky.js `holdForMira` keeps it past Mira's next turn, at the read and after every action until she has acted (a Dread push
+  included), so a reading never lands before the member who can answer it has had a turn. The False Futures stand at scene.js
+  `FUTURE_SPOTS` (Hunger 194,116; Fear 240,134), on the foes' side in front of the Oracle, each row under its own feet (CRITIQUE_7 item 2). A Break cancels it; Answer does not ("A foretelling is not a decree. Nothing is written yet.", kind `foretell_answer`).
   Encounter: no flee, flag `oracle_defeated`, music `boss_oracle`, backdrop `ep5_oracle`, `startFury` +20 with `moonwell_woken`. Loot: The
   Oracle's Mask, 2 rares (ilvl 24), a Phoenix Feather, 2 Hi-Ethers.
 
@@ -1049,10 +1052,11 @@ became party-wide (60% and 65%), and Hour Crush and Eclipse dropped to 110% and 
 
 `ep5Policy` returns null unless the battle has a sky. 1. A foretelling pinned: Mira turns the sky when the Turn is 2 actions away or less, or
 when her next turn would come after it; when Mira cannot, anyone holds it with Hourglass Sand on the last action. 2. More foe HP Ascendant
-than Exposed, the Turn 4 or more away, and Mira keeps 24 MP after it: she turns it. 3. A foe Exposed one hit from Broken, the Turn 1 away:
+than Exposed, the Turn 4 or more away, and Mira keeps 24 MP after it: she turns it. While Mira owes a pinned reading its answer nobody
+takes her into a combo (it would spend her turn: before E5-fixes most careful-play falls were Ember Edge and Thorn Bulwark). 3. A foe Exposed one hit from Broken, the Turn 1 away:
 Hourglass Sand. 4. Against the Oracle Mira keeps 12 MP (an MP action that would spend it becomes an Attack; under 12, an Ether). Reckless
-and attack-only play never turn or hold the sky. Careful play against the Oracle (Lv 24): 2.5 readings a fight, 87% broken by Turn the Sky,
-4% by a Break, 7% fall; 5.1 Turn the Sky casts and 0.6 Hourglass Sand a fight.
+and attack-only play never turn or hold the sky. Careful play against the Oracle (Lv 24, after E5-fixes): 2.4 readings a fight, 91% broken by Turn
+the Sky, 8% by a Break, 0% fall; 5.1 Turn the Sky casts and 0.1 Hourglass Sand a fight (before: 2.5, 87%, 4%, 7%, 5.1, 0.6).
 
 ### 13.5 Items, loot, shops
 
@@ -1084,10 +1088,27 @@ Battle gold: 3,200 in, 8,930 earned, 12,130 out.
 |---|---|---|---|---|
 | **mirage_knight** | 23 | 100% / 8.75 (7.3-10.3) / 8% | 0% / 4.56 | 86% / 11.53 |
 | **mirage_knight** | 24 | 100% / 8.68 (7.3-10.3) / 7% | 0% / 4.95 | - |
-| **oracle** | 24 | 99% / 13.57 (10.7-17.3) / 23% | 0% / 4.86 | 76% / 14.96 |
-| **oracle** | 25 | 100% / 12.72 (10.0-15.3) / 19% | 0% / 5.12 | - |
+| **oracle** | 24 | 99% / 13.14 (10.3-16.3) / 23% | 0% / 5.56 | 79% / 14.71 |
+| **oracle** | 25 | 100% / 12.88 (10.0-15.7) / 21% | 0% / 5.96 | - |
 
-### 13.7 Seams this pack would like (none blocks Episode 5)
+### 13.7 E5-fixes (2026-11-09: CRITIQUE_7, PLAYTEST_REVIEW_7)
+
+- **The menu casts a skill with no target** (`src/battle/scene/menu.js`, the one core change): the sub-list confirm returns the action
+  when `b.targets()` says `mode: 'none'` (before, startTarget refused it and the menu buzzed, so Turn the Sky could not be cast by keys
+  or touch; every bot acts through battleAct or Auto). Turn the Sky is the only party skill with no target in any episode. Paid in the
+  same file by two comment trims (menu.js 5273 to 5258 gz). Proof through the menu: `qa/battlescene/ep5_menu_cast.test.mjs` (keys, taps,
+  the pinned reading, every no-target party skill) and `qa/realplay/ep5battle.py` (real keys, the A button, canvas taps).
+- **The reading is fair** (13.3): the Last Prophecy 280% -> 320% so ignoring telegraphs still costs 15+ points with the longer windows.
+  The help line names who can answer: "Mira can turn the sky." only when her turn comes before the Turn and she can cast, else
+  "Hourglass Sand holds the sky." with sand in the bag, else nothing (scene.js `answerLine`, ai.js `miraAnswers`).
+- **Day is its own sky** (CRITIQUE_7 item 1): scene.js `paintDay` builds the Day copy from the stage's pixels: the warm grade, then
+  over each stage's sky (`DAY_SKY`) the stars and the moon's path come down (a 5 x 5 grey opening finds small bright specks on a cool
+  ground), the moon circle takes its row's sky, and the sky is repainted pale blue overhead to pale gold at the horizon with the
+  painting's light and dark kept; the deck's sea turns turquoise. The gallery is indoors: the grade alone. About 30 ms once a battle.
+- **Turn the Sky's icon** (CRITIQUE_7 item 10): a 12 x 12 sun and crescent drawn by scene.js on its Tech row (the core's hitIcon has
+  none for a skill with no target).
+
+### 13.8 Seams this pack would like (none blocks Episode 5)
 
 - `src/battle/rules.js` useSkill(), after the effects: `for (const h of RULE_EXT) if (h.skill) h.skill(ctx, user, sk, targets)`. Today
   Turn the Sky reaches sky.js through `{ keep: 'sky' }` (applyEffect hands `keep` to ai.js special(), the user's script, `basic` for a party

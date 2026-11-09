@@ -316,7 +316,7 @@ function stagingMarks() {
   return out;
 }
 // marks the camera pans to or a scene names but nobody walks to (the decal, an object, a building's roof)
-const CAMERA_ONLY = new Set(['flat', 'dial', 'haven_far', 'waystone', 'bulletin', 'roof_view', 'fire']);
+const CAMERA_ONLY = new Set(['flat', 'dial', 'haven_far', 'waystone', 'bulletin', 'roof_view', 'fire', 'armillary_view']);
 const DIRS4 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
 test('every STAGING_EP5 mark of part A exists, and every mark a scene walks to is walkable, reachable and off sand', () => {

@@ -460,3 +460,33 @@ test('the ban list: no banned word, no em dash, ASCII, LF in every Episode 5 fil
   const bible = readFileSync(join(NEXT, 'docs', 'story', 'EPISODE5.md'), 'utf8');
   assert.ok(!bible.includes(EM), 'EPISODE5.md: em dash');
 });
+
+// E5-fixes A6 (CRITIQUE_7 items 7 and 8, PLAYTEST_REVIEW_7 item 8): Vex opaque (never Episode 2's in-glass id), facing away at
+// the star floor while the party stops below him, the scene cut to 10 lines a path; the restored chart in three beats, the
+// counter-seal and "Keep this one." in the last.
+test('vex_gallery: Vex is no mirror image, the party on its marks, 10 lines a path; the chart seal is its own beat', async () => {
+  const IN_GLASS_IDS = ['vex'];   // world/reflections.js IN_GLASS
+  const runs = (await explore(scenes.vex_gallery, { flags: [...EP4_DONE, 'lab_f2_arrived'] })).filter((r) => ops(r.log, 'spawn').length);
+  assert.ok(runs.length >= 2, 'both answers explored');
+  for (const r of runs) {
+    const spawn = ops(r.log, 'spawn').find((e) => e.args[1] && e.args[1].sprite === 'npc_vex');
+    assert.ok(spawn && !IN_GLASS_IDS.includes(spawn.args[0]), `Vex spawns as ${spawn && spawn.args[0]}, not an in-glass id`);
+    assert.equal(spawn.args[1].dir, 'up', 'he works at the star floor, his back to the party');
+    assert.ok(says(r.log).length <= 10, `${says(r.log).length} lines`);
+    const first = r.log.findIndex((e) => e.op === 'say');
+    assert.ok(r.log.slice(0, first).some((e) => e.op === 'walk' && e.args[1] === 'party_stop'), 'the party is on party_stop first');
+  }
+  const lines = new Set(runs.flatMap((r) => says(r.log).map((e) => e.args[1])));
+  for (const keep of ['Every night I move you', 'A lie that saves lives is still a lie', 'Somebody asked me to keep you. In writing.']) {
+    assert.ok([...lines].some((t) => t.includes(keep)), `kept: ${keep}`);
+  }
+  const kinds = Object.keys(PAGE_KINDS);
+  PAGE_KINDS.ep5_chart = () => ({});
+  try {
+    const log = await one('oracle_after', ['oracle_defeated']);
+    const modeAt = (re) => { let m = null; for (const e of log) { if (e.op === 'closeup') m = e.args[0] ? e.args[1] && e.args[1].mode : null; if (e.op === 'say' && re.test(e.args[1])) return m; } return 'unsaid'; };
+    assert.equal(modeAt(/struck stars light again/), 'restored_1');
+    assert.equal(modeAt(/a star\. Yours\./), 'restored_2');
+    assert.equal(modeAt(/Keep this one\./), 'restored_3', 'the seal only with its own line (step 4)');
+  } finally { for (const k of Object.keys(PAGE_KINDS)) if (!kinds.includes(k)) delete PAGE_KINDS[k]; }
+});

@@ -358,3 +358,24 @@ test('the pack modules export register(), and Episode 5 is not reachable from co
   assert.equal(TALK_PREPEND.length, before);
   for (const q of fresh.SIDE_QUESTS_EP5) { const i = ALL_SIDE_QUESTS.indexOf(q); if (i >= 0) ALL_SIDE_QUESTS.splice(i, 1); }
 });
+
+// E5-fixes A7 (PLAYTEST_REVIEW_7 items 9 and 10): the Valewyn morning's Talk is the Episode 5 step alone (Bram and Mira on
+// the ship), with an older side quest active and Valewyn's own banter on file; the road says how to meet sun-things.
+test('Talk: the Valewyn morning names only the ship; the road tells the dusk trick after the first fight', () => {
+  const flags = new Set(['intro_done', 'mira_joined', 'bram_joined', 'ep1_complete', 'lantern_get', 'lost_bridge_started',
+    'ep4_started', 'ep4_complete', 'ep5_started']);
+  const has = (f) => flags.has(f);
+  const talk = (map) => { const c = Q.partyChat(has, map); return [...c.lines, ...c.side, ...c.banter]; };
+  for (const map of ['ep4_valewyn', 'ep4_vw_inn']) {
+    const boxes = talk(map);
+    assert.deepEqual(boxes.map((l) => l.who), ['bram', 'mira'], `${map}: ${boxes.map((l) => l.text).join(' | ')}`);
+    assert.match(boxes[0].text, /south landing/);
+  }
+  flags.add('ship_boarded');
+  assert.ok(talk('ep4_valewyn').length >= 1, 'after the ship the hold lets go');
+  for (const f of ['ship_arrived', 'bram_asked', 'ship_first_fight_done', 'road_landed']) flags.add(f);
+  const road = Q.partyChat(has, 'ep5_caravan_road').banter.map((l) => l.text);
+  assert.deepEqual(road, ['Sun-things glow by day. Fight them at dusk, or wait for the turn.']);
+  flags.add('haven_arrived');
+  assert.notDeepEqual(Q.partyChat(has, 'ep5_caravan_road').banter.map((l) => l.text), road, 'once at the Haven, the old banter');
+});

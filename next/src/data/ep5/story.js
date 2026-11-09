@@ -22,11 +22,12 @@
 import { EP5_LIVE } from '../../game/episodes.js';
 import * as STORY from '../../game/story.js';
 import { PAGE_KINDS } from '../../world/closeup.js';
+import * as PAGES from './pages.js';
 import { REWARDS_EP5 } from './quests.js';
 import { EPISODE6_CARD, END_TITLE_EP5 } from './text.js';
 
 // Speakers with portraits (a missing one draws none). Sel, Yara and the Haven have none (plan 9.5); the Oracle has its crop.
-const PORTRAIT = { hero: 'hero', mira: 'mira', bram: 'bram', vex: 'silver_rogue', oracle: 'oracle', oracle_v: 'oracle' };
+const PORTRAIT = { hero: 'hero', mira: 'mira', bram: 'bram', vex: 'silver_rogue', vex_k: 'silver_rogue', oracle: 'oracle', oracle_v: 'oracle' };
 
 const say = (s, who, text) => s.say(who, text, PORTRAIT[who] ? { portrait: PORTRAIT[who] } : {});
 const narrate = (s, text) => s.say(null, text);
@@ -44,6 +45,12 @@ async function page(s, kind, mode) {
   return true;
 }
 async function unpage(s, open) { if (open) await s.closeup(null); }
+/** The restored chart in three beats (CRITIQUE_7 item 7): pages.js's restored_1..3 when it has them, else `restored` once. */
+const CHART_BEATS = PAGES.RESTORED_STAGES && PAGES.RESTORED_STAGES.length === 3 ? PAGES.RESTORED_STAGES : null;
+async function chartBeat(s, i, open) {
+  if (CHART_BEATS) return (await page(s, 'ep5_chart', CHART_BEATS[i])) || open;
+  return i === 0 ? page(s, 'ep5_chart', 'restored') : open;
+}
 
 const spawnSel = (s, at, dir = 'down') => s.spawn('sel_t', { sprite: 'npc_sel', name: 'Sel', at, dir });
 const spawnYara = (s, at, dir = 'down') => s.spawn('yara_t', { sprite: 'npc_yara', name: 'Yara', at, dir });
@@ -263,6 +270,8 @@ async function haven_arrival(s) {
   await s.music(null);
   await s.spawn('yasmin_t', { sprite: 'npc_yasmin', name: 'Yasmin', at: 'yasmin_gate', dir: 'left' });
   await stage(s, 'waystone_stage');
+  await s.camera.panTo('armillary_view', 30);   // the armillary over the Haven first (CRITIQUE_7 item 5; mark armillary_view)
+  await s.wait(40);
   await s.camera.panTo('bulletin', 30);
   await narrate(s, 'Camels in their stalls. Loads packed, corded, and never lifted. A bulletin of caravan routes, every one struck out.');
   await s.camera.panTo('waystone', 30);
@@ -455,26 +464,28 @@ async function sel_memory_2(s) {
 }
 
 // 21. ep5_lab_f2, step trigger vex_trig at the star floor, placed so the party stops two rows below Vex. The episode's
-// main truth choice. Vex is a scene spawn; he never fights; the feather prop feather_glass stays. 12 boxes on each path.
+// main truth choice. Vex is a scene spawn; he never fights; the feather prop feather_glass stays. 10 boxes on each path, with the
+// choice and the list's toast 12 on screen (PLAYTEST_REVIEW_7 item 8: cut, not rewritten). He is spawned as vex_k, not vex:
+// `vex` is Episode 2's mirror-glass id (world/reflections.js IN_GLASS), drawn as a pale image in the glass (CRITIQUE_7 item 8).
+// He kneels at the star floor with his back to the party (vex_spot, facing up) and turns to the hero to speak; the party
+// stands on party_stop, two clear rows below him.
 // Gives fifth_list. Sets fifth_list_get, vex_gallery_met, and star_restored or star_hidden.
 async function vex_gallery(s) {
   await s.music(null);
   await s.camera.panTo('star_floor', 40);
-  await s.spawn('vex', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_spot', dir: 'up' });
+  await s.spawn('vex_k', { sprite: 'npc_vex', name: 'Vex Quill', at: 'vex_spot', dir: 'up' });
   await stage(s, 'party_stop');
   await narrate(s, 'A floor of dark star-glass. Vex Quill kneels on it, lifts one small star from its socket, and sets it in a painted sky.');
   await s.music('mystery');
-  await s.face('vex', 'hero');
-  await say(s, 'vex', 'Every night it looks for you. Every night I move you. Months now. My knees hate this floor.');
-  await say(s, 'mira', "You hid {hero}'s star.");
-  await say(s, 'vex', 'From a machine that reads endings. Yes.');
-  await say(s, 'vex', 'A lie that saves lives is still a lie. Decide whether that matters.');
+  await s.face('vex_k', 'hero');
+  await say(s, 'vex_k', 'Every night it looks for you. Every night I move you. Months now. My knees hate this floor.');
+  await say(s, 'vex_k', 'A lie that saves lives is still a lie. Decide whether that matters.');
   await narrate(s, 'He holds out a list: cheap paper, a cold hand, the seal of an empty book. At the bottom, one line in fresh ink.');
-  await say(s, 'vex', "Five lists. This one's old. Somebody added a line last week. I don't keep lists with your name on them.");
+  await say(s, 'vex_k', "Five lists. This one's old. Somebody added a line last week. I don't keep lists with your name on them.");
   await s.give(REWARDS_EP5.fifth_list.item, REWARDS_EP5.fifth_list.qty);
   await s.setFlag('fifth_list_get');
   await say(s, 'mira', 'Why do you care?');
-  await say(s, 'vex', 'Somebody asked me to keep you. In writing.');
+  await say(s, 'vex_k', 'Somebody asked me to keep you. In writing.');
   const c = await s.choice(['Put it back.', 'Leave it hidden.']);
   if (c === 0) {
     await s.setFlag('star_restored');
@@ -482,14 +493,14 @@ async function vex_gallery(s) {
     await s.sfx('name_restore');
     await s.flash('#fff2d0', 10);
     await narrate(s, 'You set the star back in its socket. It lights.');
-    await say(s, 'vex', "...On the record again. You're very consistent.");
+    await say(s, 'vex_k', "...On the record again. You're very consistent.");
   } else {
     await s.setFlag('star_hidden');
-    await say(s, 'vex', 'For now, then.');
+    await say(s, 'vex_k', 'For now, then.');
     await narrate(s, 'The small star stays in the painted sky, where nothing reads.');
   }
   await s.flash('#d8e4ff', 10);
-  await s.despawn('vex');
+  await s.despawn('vex_k');
   await narrate(s, 'Then he is gone. The black feather lies on the glass, and does not reflect.');
   await s.music('labyrinth');
   await s.camera.follow('hero');
@@ -696,12 +707,14 @@ async function oracle_after(s) {
   await s.sfx('name_restore');
   await s.flash('#fff2d0', 16);
   await s.music('triumph');
-  const open = await page(s, 'ep5_chart', 'restored');
+  let open = await chartBeat(s, 0, false);
   await narrate(s, 'Twenty years of struck stars light again, one by one, like lamps coming on along a road.');
+  open = await chartBeat(s, 1, open);
   await narrate(s, 'Beside the empty space Laleh kept in her charts, a star. Yours. The space is not empty now.');
   if (await s.hasFlag('star_restored')) await say(s, 'mira', "You put it back yourself. It's brighter than the ones around it.");
   else await say(s, 'mira', 'Vex hid it. The chart found it anyway. You were standing in it.');
   await s.music('mystery');
+  open = await chartBeat(s, 2, open);
   await narrate(s, 'Under your star, a tiny constellation: an open book with one line. Under it, in starlight: Keep this one.');
   await s.give(REWARDS_EP5.fragment.item, REWARDS_EP5.fragment.qty);
   await s.setFlag('fragment5_get');
@@ -958,7 +971,7 @@ export const PAYOFFS = {
   ep5_morning: [['ep5_letter', 'blank']],
   star_reading: [['ep5_chart', 'prophecy']],
   sel_memory_3: [['ep5_page', undefined]],
-  oracle_after: [['ep5_chart', 'restored']],
+  oracle_after: CHART_BEATS ? CHART_BEATS.map((m) => ['ep5_chart', m]) : [['ep5_chart', 'restored']],
   ep5_ending: [['ep5_chart', 'road']],
 };
 
