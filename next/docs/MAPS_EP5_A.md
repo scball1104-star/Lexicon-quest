@@ -27,7 +27,12 @@ inn's marks are in the guest room, where the party wakes after the Episode 4 cre
 the street that enters the inn by the front door starts the scene in the taproom (the stair up is a door): `ep5_morning`
 then stages on the `_tap` marks (E5-integrate; the scene reads the leader's tile through the pack's `s.leaderAt`).
 
-## 2. `ep5_ship` (28 x 14, field, `mystery`, `mere_still`, tint `night`, `dawn` from `ship_first_fight_done`)
+## 2. `ep5_ship` (28 x 14, field, `mystery`, `mere_still`, tint `sea_night`, `dawn` from `ship_first_fight_done`)
+
+E5-fixes B1 (CRITIQUE_7 item 4): the night is the pack's `sea_night` (the battle sky reads it as night), dark 0.3 by
+`tintDark` round the two lanterns' pools (their tiles `light`, plus a pool thrown down on the deck), stars on the water at the
+edges (`stars`), the party and crew lifted 0.4 over the tint (`liftActors`); plain at dawn. Phone frame (844 x 390, the party
+mid-deck): deck luma 0.094 before, 0.17 after; Mira's body 0.104 before, 0.24 after (`qa/world/ep5_fixes.py ship`).
 
 Deck (`deck_planks`) x 2..21, rows 3..10, a stepped bow x 22..24; the copper rail (`ship_rail`) round it and one row of hull
 planking under the south rail. Mast (16..17, 7), lanterns (6,3) and (19,3), helm (3,7), hatch (7..8, 8), lashed crates,
@@ -94,10 +99,16 @@ obelisk (23,13), flat signpost (16,15), tent (29,11), safe stones (35,17), the f
 
 ## 4. `ep5_saffron` (44 x 34, town, `saffron`, `desert_wind`, tint `dusk` until `haven_restored`, then `none`)
 
+E5-fixes B2 (CRITIQUE_7 item 5): the paving is `dune_court` (warm sandstone flagstones; it was the pale `caravan_paving`,
+which the dusk tint turned lilac); at dusk the town darkens 0.24 round its lit brass lamps (`tintDark`; their pools on the
+paving, the lilac kept for the shade between them; no party light, `partyLight: false`); the armillary catches the light; the
+waystone stands on the gate's axis at (20,25), between a lamp and Yasmin's mark, the first thing the party walks up to. The
+mark `armillary_view` (26,11) frames the tower, its armillary and the oasis for a first look in `haven_arrival` (story.js).
+
 | Mark | Cell | | Mark | Cell |
 |---|---|---|---|---|
 | south_gate (start, from the road) | (21,30) | | north_gate (from the Labyrinth and the lift) | (21,5) |
-| waystone (camera) | (19,28) | | bulletin (camera) | (24,28) |
+| waystone (camera) | (20,25) | | bulletin (camera) | (24,28) |
 | yasmin_gate | (21,25) | | waystone_stage, _m, _b | (21,27), (20,27), (22,27) |
 | market | (6,11) | | sel_spot | (8,10) |
 | sel_stage, _m, _b | (8,12), (7,12), (9,12) | | nasrin_bench | (11,10) |
@@ -114,7 +125,7 @@ Doors (each lands on the interior's exit cell facing up; the interior lands back
 shop (40,19), smithy (33,29), tower (26,13). `north_door` (21..22, 0, if `gnomon_get`) to `ep5_lab_f1` (20,27,'up');
 `gate_trig` (21..22, 4, the gap in the wall, if `star_reading_done`, `sel_gate`). `haven_boat` (4..5, 29, boat, if
 `road_landed`) to `ep4_valewyn` (32,30,'up'). Exit (21..22, 33) to the road (50,7,'left').
-Two-state objects: `waystone` / `waystone_still` (19,28, frame 0 / 3), `bulletin` / `bulletin_open` (24..25,28),
+Two-state objects: `waystone` / `waystone_still` (20,25, frame 0 / 3), `bulletin` / `bulletin_open` (24..25,28),
 `moonwell` / `moonwell_rest` (19..20,18; from `moonwell_woken` also `rest`, `safe`), `bell_rack` / `bell_rack_full` (28..29,29,
 frame 0 / 3); the six `loads_*` objects go with `haven_restored` (signs `loads_marks*` take their place).
 NPCs: `sel` (8,10), `nasrin` (11,10), `kamal` (19,17), `yara` (7,27), `tamir` (9,27). Enter triggers `haven_enter`

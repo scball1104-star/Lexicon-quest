@@ -31,7 +31,8 @@ shade: {
 - The hour resets to `hour` on every arrival; Shoved stones and lamps stand on their authored cells again. Latched plates
   persist (`game.opened["<map>:<id>"]` and their `flag`). **No new save field.** A save made on firm sand that runs at the
   start hour wakes the party on the nearest safe cell.
-- Tint per hour: dawn `dawn`, noon `desert_noon` (pack tint), dusk `dusk`, night: the map's own `lighting.tint`.
+- Tint per hour: dawn `sun_dawn` under an open sky (a rose pack tint, E5-fixes B4) and the core `dawn` on a roofed floor,
+  noon `desert_noon` (pack tint), dusk `dusk`, night: the map's own `lighting.tint`.
 
 ## 2. Event types (on `EXT`, registered when the pack loads)
 
@@ -74,6 +75,28 @@ actors (`glass.drawBeams`). Measured (phone and desktop crop, `ep5_lab.py tint`)
 at no tint, 0.284 to 0.291 under `desert_noon` (96 to 102% kept), so `desert_noon` stays (`{ color: '#fff1d6', alpha: 0.22,
 glow: '#fff4dc', glowAlpha: 0.05 }`). E5-tiles should re-measure with its sand.
 
+**E5-fixes B3 and B4 (CRITIQUE_7 items 3, 6, 10).** Shade keeps the violet only on sand cells, where it carries the rule. On
+paving and every other floor it is `SHADE_PAVE` (`#343a66` at 0.34, dots `#1c2040` at 0.24, a fainter rim): cooler and
+lighter, a shadow and not a rug (F1's court at dawn: shaded paving luma 0.267 before, 0.395 after, lit paving 0.545). The
+cell where a stone's sun shadow starts (beside it, on the side the hour throws it: `Shade.rootsOf`) takes one more step of
+dark (`SHADE_ROOT`), so a shadow grows from its stone. Where a shadow falls on cells a stone's own art covers (the rows north
+of its cell: a noon shadow under its head), the shade is drawn again over the stone's pixels there (`drawOverCasters`, from
+the wrapped `glass.drawFlares`, clipped to the sprite), so the road island's noon stair reads as one band. Dawn under an open
+sky is the rose `sun_dawn` (`system.js DAWN_TINT`: `#ff9fb4` at 0.34, a faint warm glow): the road's screen drops about as far
+in green as before but turns rose, where it used to look like noon. Running minus firm sand on the phone (`ep5_lab.py tint`,
+the test court, E5-tiles' sand): 0.502 no tint, 0.488 `desert_noon`, 0.446 `sun_dawn`, 0.402 `dusk` (the case now fails under
+0.25 for the last two).
+
+**Lamps, darkness by tint, stars (E5-fixes B1, B2).** The pack's lamp objects carry `light: { color, radius }` in the tiles,
+which the core never read. `events.js propLights` adds a warm light for every visible prop that has one (and the Haven's
+`armillary`) on an Episode 5 map while the tint lights lamps (dusk, night, `sea_night`) or the map is dark; `LAMP_SPILL`
+adds a second, lower pool where a lamp throws its light on the floor. Map `lighting` fields the pack reads: `tintDark: {
+<tint>: dark }` (the darkness follows the tint, easing through a cross-fade: the deck dark round its lantern pools at night,
+plain at dawn), `stars: { on: <terrain>, tints, density }` (a breathing star speck on some cells of that terrain, drawn over
+the tint), `liftActors` (every non-foe actor drawn again over a night or dusk tint at that alpha, as `FOE_LIFT` does for foes),
+`partyLight: false` (no party light where the darkness is only for lamp pools). The pack tint `sea_night` (`#4a5490` at 0.5,
+desat 0.24) counts as night for lamps, the foe lift and the battle sky (`system.js TINT_HOURS`).
+
 **Stand-in art.** Until E5-tiles ships them, `art.js` adds code-drawn objects for any of these ids the tile database lacks
 (after the pack's fragment merged, so a real id always wins): `sundial`, `obelisk`, `standing_stone`, `low_block`,
 `pillar_gallery`, `lamp_cart`, `sun_plate` (4 frames), `window_horizon` (2), `sun_gate_closed` / `_open`, `moon_gate_closed`
@@ -82,12 +105,13 @@ glow: '#fff4dc', glowAlpha: 0.05 }`). E5-tiles should re-measure with its sand.
 ## 5. Hooks used (no core edit)
 
 `attach(field)` wraps, per field instance: `glass.reset` (then `shade.reset`), `glass.update`, `glass.drawBeams`,
-`collectLights`, `syncTimeOfDay` (the hour's tint on arrival), `setFlag` (a flag set outside a scene keeps the hour's tint),
+`glass.drawFlares` (shade over the stones' heads), `collectLights` (lamp pools, prop lights, `partyLight`), `lighting.draw`
+(`tintDark`, `stars`, the lifts), `syncTimeOfDay` (the hour's tint on arrival), `setFlag` (a flag set outside a scene keeps the hour's tint),
 `tryLeaderStep` (`push`), `hasFlag` (`hour:`), `debugState`, the field's `abilities.resolve` (a faced `shove` stone or lamp is
 Bram's first) and `abilities.shove`; and `map.recomputeCell` per map (keeps the `water` override). It runs from every shade
 type's `create` and from an `engine.on('scene')` hook set in `world.js register(engine)`. **The battle sky:** every map
 entry calls `setFieldHour` (src/data/ep5/sky.js) with the shade hour, an Episode 5 map's tint hour (`ep5_*` without a shade
-block: dawn, dusk or night from its tint, else noon), or null; every hour change calls it again. Debug: `LQ_DEBUG.shade()`,
+block: dawn, dusk or night from its tint, a pack tint by `TINT_HOURS`, else noon), or null; every hour change calls it again. Debug: `LQ_DEBUG.shade()`,
 `LQ_DEBUG.setHour(h)`, `LQ_DEBUG.shoveCaster(id, dir)`.
 
 E5-integrate added three small things to `attach` (pack-only): `lighting.draw` is wrapped so that on an Episode 5 map under

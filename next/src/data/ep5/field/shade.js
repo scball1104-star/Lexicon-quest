@@ -318,9 +318,12 @@ export function hourFlag(key, hour) {
   return m ? m[1] === hour : undefined;
 }
 
-/** The tint an hour asks for (null at night: the map keeps its own). `noonTint` is the pack's noon tint id or 'none'. */
-export function tintForHour(hour, noonTint = 'none') {
-  if (hour === 'dawn') return 'dawn';
+/**
+ * The tint an hour asks for (null at night: the map keeps its own). `noonTint` is the pack's noon tint id or 'none';
+ * `dawnTint` the dawn one (the field's rose `sun_dawn` under an open sky, the core `dawn` under a roof).
+ */
+export function tintForHour(hour, noonTint = 'none', dawnTint = 'dawn') {
+  if (hour === 'dawn') return dawnTint;
   if (hour === 'dusk') return 'dusk';
   if (hour === 'noon') return noonTint;
   return null;

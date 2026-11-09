@@ -206,7 +206,14 @@ test('STAGING_EP5 marks and plan 4.10 named events exist; staged and spawn marks
   assert.equal(byId(maps.ep5_lab_f3, 'plate_r').when, 'shade');
   // CRITIQUE_6 item 11: the party stops two rows below the speaker
   const M2 = maps.ep5_lab_f2.marks;
-  assert.deepEqual([M2.party_stop[0], M2.party_stop[1] - M2.vex_spot[1]], [M2.vex_spot[0], 2], 'party_stop two rows below Vex');
+  // E5-fixes B6 (CRITIQUE_7 item 8): two CLEAR rows between Vex's cell and the party's (the star inlay between), so the
+  // heads stand clear of his feet; and nothing else in the scene's frame (the floor's shade comes after him)
+  assert.deepEqual([M2.party_stop[0], M2.party_stop[1] - M2.vex_spot[1]], [M2.vex_spot[0], 3], 'party_stop two clear rows below Vex');
+  assert.equal(byId(maps.ep5_lab_f2, 'e_c').if, 'vex_gallery_met', 'the Star Floor shade steps in after Vex');
+  // E5-fixes B5 (PLAYTEST_REVIEW_7 item 4): the last spring, once filled, is a rest and save font; the first two are not
+  const sp = (id) => byId(maps.ep5_lab_f3, id);
+  assert.ok(sp('spring_return_full').rest && sp('spring_return_full').safe && sp('spring_return_full').if === 'landing_return');
+  assert.ok(!sp('spring_return').rest && !sp('spring_shelter_full').rest && !sp('spring_truth_full').rest);
   assert.deepEqual([M2.table_stage[0], M2.table_stage[1] - M2.table_student[1]], [M2.table_student[0], 2]);
   assert.equal(byId(maps.ep5_lab_f2, 'knight_trig').y - M2.knight_spot[1], 2, 'knight_trig two rows below the Knight');
   const M3 = maps.ep5_lab_f3.marks;

@@ -17,6 +17,7 @@ from PIL import Image  # noqa: E402
 
 OUT = os.path.join(HERE, 'out', 'ep5')
 CASES = [('ep5_letter', 'full'), ('ep5_letter', 'blank'), ('ep5_chart', 'prophecy'), ('ep5_chart', 'restored'),
+         ('ep5_chart', 'restored_1'), ('ep5_chart', 'restored_2'), ('ep5_chart', 'restored_3'),     # E5-fixes B7: the three beats
          ('ep5_chart', 'road'), ('ep5_page', None)]
 
 JS = """async ([kind, mode, name, p]) => {

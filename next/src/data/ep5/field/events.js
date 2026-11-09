@@ -8,16 +8,30 @@
 //   sunplate    { when ('lit' | 'shade'), latch?, flag?, script?, target?, sprite? ('sun_plate') }   a gate source
 //
 // attach(field) is idempotent per field instance: it adds field.shade and wraps this field's glass.reset / update /
-// drawBeams, collectLights, setFlag (the hour keeps its tint), syncTimeOfDay (the tint on arrival), tryLeaderStep (`push`),
+// drawBeams / drawFlares (shade over the stones' heads), collectLights (lamp pools, the pack's lit lamps), lighting.draw
+// (darkness by tint, stars on the water, the foe and actor lifts), setFlag (the hour keeps its tint), syncTimeOfDay (the tint on arrival), tryLeaderStep (`push`),
 // hasFlag (`hour:<name>`), debugState, and the field's abilities.resolve / shove (Bram's Shove reaches stones and lamps),
 // the way Episode 4's tide attaches (src/data/ep4/field/events.js). Every create() above attaches first, and ../world.js
 // attaches every field the engine enters, so the battle sky hears the hour of every map.
 
 import { EXT, INTERACT_TYPES, GATE_SPRITES, SOURCE_TYPES, entitiesAt } from '../../../world/events.js';
 import { DIRS } from '../../../world/pathfind.js';
-import { Shade, isHourFlag } from './system.js';
+import { TINTS, NIGHT_TINTS, LAMP_TINTS } from '../../../world/lighting.js';
+import { Shade, isHourFlag, DAWN_TINT } from './system.js';
 import { compile, DIAL_HOURS } from './shade.js';
 import { ensureArt, STONE_SPRITE } from './art.js';
+
+/**
+ * The night at sea (the Saffron Wind's deck, E5-fixes B1, CRITIQUE_7 item 4): the core `night` held the deck at luma 0.09 and
+ * hid Mira's robe. A lighter, cool night (the deck one value up), its lanterns' pools carried by the map's tint darkness
+ * (`lighting.tintDark`), stars on the water at the edges (`lighting.stars`). Lamps are lit and it counts as night everywhere
+ * the core asks (fireflies stay off: the field has none at sea).
+ */
+export const SEA_NIGHT = { color: '#4a5490', alpha: 0.5, desat: 0.24 };
+if (!TINTS.sea_night) TINTS.sea_night = SEA_NIGHT;
+if (!TINTS[DAWN_TINT.id]) TINTS[DAWN_TINT.id] = DAWN_TINT.spec;
+NIGHT_TINTS.add('sea_night');
+LAMP_TINTS.add('sea_night');
 
 Object.assign(GATE_SPRITES, {
   sun_gate: GATE_SPRITES.sun_gate || ['sun_gate_closed', 'sun_gate_open'],
@@ -77,24 +91,98 @@ EXT.sunplate = {
 
 /** How much of a field foe's own colour comes back over the night or dusk tint (0 = fully tinted, 1 = untinted). */
 export const FOE_LIFT = 0.55;
-const LIFT_TINTS = new Set(['night', 'dusk']);
+const LIFT_TINTS = new Set(['night', 'dusk', 'sea_night']);
 /**
  * On an Episode 5 map under the night or dusk tint, every field foe on screen is drawn once more after the lighting at
  * FOE_LIFT alpha, so its dark outline and side-coded rim (gold sun, pale blue star) keep their contrast instead of sinking
  * into a silhouette; the foe still sits in the scene's light. Day tints and other episodes' maps are untouched.
+ * A map's `lighting.liftActors` (0..1) lifts every other actor the same way (the party and the crew on the night deck, where
+ * Mira's robe sank into the planks: E5-fixes B1).
  */
 function liftFoes(field, r, cam) {
   const map = field.map, Lt = field.lighting;
   if (!map || !/^ep5_/.test(map.id || '') || !Lt || !LIFT_TINTS.has(Lt.tintName)) return;
+  const others = (map.mod && map.mod.lighting && map.mod.lighting.liftActors) || 0;
   let pushed = false;
   for (const a of field.actors) {
-    if (!a.visible || !a.spr || a.spr.kind !== 'enemy' || !cam.visible(a.px - 8, a.py - 24, 32, 40, 8)) continue;
+    const k = a.spr && a.spr.kind === 'enemy' ? FOE_LIFT : others;
+    if (!a.visible || !a.spr || k <= 0 || !cam.visible(a.px - 8, a.py - 24, 32, 40, 8)) continue;
     if (!pushed) { r.pushCamera(cam.x, cam.y); pushed = true; }
     const was = a.alpha;
-    a.alpha = (was == null ? 1 : was) * FOE_LIFT;
+    a.alpha = (was == null ? 1 : was) * k;
     try { a.draw(r, field.time, { shadow: false }); } finally { a.alpha = was; }
   }
   if (pushed) r.popCamera();
+}
+
+/**
+ * Lamps that are lit (E5-fixes B1, B2). The pack's lamp objects carry `light: { color, radius }` (tiles), which the core
+ * never read, so the Haven's brass lamps stood dark at dusk and the deck lanterns threw no pool. On an Episode 5 map, while
+ * the tint lights lamps (dusk, night, the sea night) or the map is dark, every visible prop with a `light` adds a warm light:
+ * a halo by tint, and a pool where the map is dark. LAMP_GLASS: where the glass sits in the art (px from the sprite's top).
+ */
+const LAMP_GLASS = { lamp_brass: 8, ship_lantern: 7, lantern_hanging: 19, armillary: 26 };
+/** Lights for pack objects whose tiles carry none: the armillary's gold rings catch the last light over the Haven at dusk. */
+const EXTRA_LIGHT = { armillary: { color: '#ffcf6a', radius: 3.2 } };
+/** A lamp that throws its light down onto the floor in front of it (the deck lanterns: "It throws the rose onto the deck"). */
+const LAMP_SPILL = { ship_lantern: { dy: 30, r: 70 }, lamp_brass: { dy: 34, r: 40 } };
+function propLights(field) {
+  const map = field.map, Lt = field.lighting, out = [];
+  if (!map || !/^ep5_/.test(map.id || '') || !Lt || !map.props) return out;
+  if (!(Lt.lampsLit || Lt.isNight || Lt.dark > 0.01)) return out;
+  const objs = (map.db && map.db.objects) || {};
+  for (const p of map.props) {
+    const o = p.visible && p.draw && objs[p.t], lt = o && (o.light || EXTRA_LIGHT[p.t]);
+    if (!lt) continue;
+    const d = p.draw, x = d.dx + p.offX + d.w / 2, y = d.dy + p.offY + (LAMP_GLASS[p.t] == null ? 8 : LAMP_GLASS[p.t]);
+    out.push({ x, y, r: Math.round((lt.radius || 3) * 16), color: lt.color || '#ffd080', kind: 'warm', flicker: !EXTRA_LIGHT[p.t] });
+    const sp = LAMP_SPILL[p.t];
+    if (sp) out.push({ x, y: y + sp.dy, r: sp.r, color: null, kind: 'warm', flicker: false, glow: 0.6 });
+  }
+  return out;
+}
+
+/**
+ * Darkness that follows the tint (`lighting.tintDark: { <tint>: dark }`, else the map's `dark`): the deck is dark round its
+ * lantern pools at night and plain at dawn. Follows a tint cross-fade over about a second; snaps otherwise (map load).
+ */
+function tintDark(field) {
+  const map = field.map, Lt = field.lighting, L = map && map.mod && map.mod.lighting;
+  if (!Lt || !L || !L.tintDark) return;
+  const want = L.tintDark[Lt.tintName] != null ? L.tintDark[Lt.tintName] : L.dark || 0;
+  if (Lt.tintFade) Lt.dark += Math.sign(want - Lt.dark) * Math.min(Math.abs(want - Lt.dark), 1 / 60);
+  else Lt.dark = want;
+}
+
+/**
+ * Stars on the water (`lighting.stars: { on: <terrain id>, tints: [...] }`): one or none per cell, set by a hash, each
+ * breathing on its own phase; a few with a small cross. Drawn over the tint, so they shine at night (screen pixels).
+ */
+const STAR_COLORS = ['#f4f8ff', '#c4d8ff', '#f4f8ff', '#ffe8b8'];
+const h01 = (x, y, s) => { const v = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return v - Math.floor(v); };
+function seaStars(field, r, cam) {
+  const map = field.map, Lt = field.lighting, S = map && map.mod && map.mod.lighting && map.mod.lighting.stars;
+  if (!S || !Lt || !(S.tints || []).includes(Lt.tintName) || Lt.tintFade) return;
+  if (field._starMap !== map) {
+    field._starMap = map;
+    const mod = map.mod, legend = mod.legend || {}, cells = [];
+    for (let y = 0; y < mod.ground.length; y++) for (let x = 0; x < mod.ground[y].length; x++) {
+      if (legend[mod.ground[y][x]] !== S.on || h01(x, y, 1) > (S.density || 0.5)) continue;
+      cells.push([x * 16 + 1 + Math.floor(h01(x, y, 2) * 14), y * 16 + 1 + Math.floor(h01(x, y, 3) * 14), h01(x, y, 4), h01(x, y, 5)]);
+    }
+    field._starCells = cells;
+  }
+  const g = r.ctx, t = field.frame | 0, still = !!(field.engine.settings && field.engine.settings.reduceMotion);
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+  for (const [wx, wy, ph, k] of field._starCells) {
+    const sx = Math.round(wx - cam.x), sy = Math.round(wy - cam.y);
+    if (sx < -2 || sy < -2 || sx > r.W + 2 || sy > r.H + 2) continue;
+    const a = still ? 0.8 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t / 26 + ph * 6.28));
+    g.globalAlpha = a; g.fillStyle = STAR_COLORS[Math.floor(k * 4)];
+    g.fillRect(sx, sy, 1, 1);
+    if (k > 0.82) { g.globalAlpha = a * 0.5; g.fillRect(sx - 1, sy, 1, 1); g.fillRect(sx + 1, sy, 1, 1); g.fillRect(sx, sy - 1, 1, 1); g.fillRect(sx, sy + 1, 1, 1); }
+  }
+  g.restore();
 }
 
 /**
@@ -142,9 +230,18 @@ export function attach(field) {
   wrap(field.glass, 'reset', (o) => { o(); s.reset(); });
   wrap(field.glass, 'update', (o) => { o(); s.update(); shiftGlyphs(field); });
   wrap(field.glass, 'drawBeams', (o, r, t) => { s.drawLow(r, t); o(r, t); });
-  wrap(field, 'collectLights', (o) => { const out = o(); out.push(...s.lights()); return out; });
+  // shade over the part of a stone's art that stands on shaded cells (after the props and actors, under the overhead)
+  wrap(field.glass, 'drawFlares', (o, r, t) => { s.drawOverCasters(r); o(r, t); });
+  wrap(field, 'collectLights', (o) => {
+    let out = o();
+    // `lighting.partyLight: false`: a town whose dusk darkness is only for its lamps' pools (the Haven) drops the party's own light
+    const L = field.map && field.map.mod && field.map.mod.lighting;
+    if (L && L.partyLight === false) out = out.filter((l) => !(l.color == null && (l.kind === 'cool' || l.kind === 'lantern')));
+    out.push(...s.lights(), ...propLights(field));
+    return out;
+  });
   // field foes stay readable under the night and dusk tints (E5-integrate; plan 9.2, CRITIQUE_6 C8): see liftFoes
-  wrap(field.lighting, 'draw', (o, r, cam, lights, lanternAt) => { o(r, cam, lights, lanternAt); liftFoes(field, r, cam); });
+  wrap(field.lighting, 'draw', (o, r, cam, lights, lanternAt) => { tintDark(field); o(r, cam, lights, lanternAt); seaStars(field, r, cam); liftFoes(field, r, cam); });
   // the map's tint on arrival is the hour's (field.loadMap sets the map tint after glass.reset, then calls syncTimeOfDay)
   wrap(field, 'syncTimeOfDay', (o) => { if (s.tintPending) { s.tintPending = false; s.applyTint(0); } return o(); });
   // a flag set outside a scene re-reads the map tint: on a shade map the hour keeps its own

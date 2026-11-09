@@ -18,6 +18,7 @@
 //      (16,31) to the last spring only in the dark. The stone (14,30) already keeps lamp_r1's row off it; lamp_r2 (18,29)
 //      still reaches it across the diagonal. Shove lamp_r2 east twice to (20,29), out of reach: the plate falls dark and
 //      latches. return_trig runs landing_return (then sel_memory_3) at spring_return; Ishra's page under it. One group.
+//      Once filled, spring_return is a rest and save font (the last before the Eye; E5-fixes B5).
 //   The Sun Keyhole (rows 37..38): the stair down from Return; door_oracle (15..17,36), the Nomad Sun Key, once
 //      oracle_door_open; the hourglass chest.
 // Every landing is two-way by its stairs, and the two islands a lamp or a stone cuts off have a brass lift to the top,
@@ -77,9 +78,10 @@ const decor = [
   { t: 'stairs_up', x: 21, y: 36 },
 ];
 
-const springs = (n, id, x, y, flag) => [
+// rest: the filled spring is a rest and save font too (the last landing's: E5-fixes B5, PLAYTEST_REVIEW_7 item 4)
+const springs = (n, id, x, y, flag, rest = false) => [
   object(id, x, y, 'spring', { w: 2, state: 0, text: `ep5_${id}`, script: flag, ifNot: flag }),
-  object(`${id}_full`, x, y, 'spring', { w: 2, state: 1, text: `ep5_${id}`, if: flag }),
+  object(`${id}_full`, x, y, 'spring', { w: 2, state: 1, text: `ep5_${id}`, if: flag, ...(rest ? { safe: true, rest: true } : {}) }),
 ];
 
 const events = [
@@ -120,7 +122,7 @@ const events = [
   sunPlate('plate_r', 16, 30, 'shade', 'gate_r', { sprite: 'sun_plate' }),
   sunGate('gate_r', 16, 31, { sprite: 'moon_gate' }),
   trigger('return_trig', 16, 32, 1, 1, 'landing_return'),
-  ...springs(3, 'spring_return', 11, 32, 'landing_return'),
+  ...springs(3, 'spring_return', 11, 32, 'landing_return', true),
   object('page', 11, 33, 'page_glass', { state: 0, text: 'ep5_page_glass', ifNot: 'sel_memory_3' }),
   object('page_gone', 11, 33, 'page_glass', { state: 1, text: 'ep5_page_glass', solid: false, if: 'sel_memory_3' }),
   door('down_keyhole', 22, 33, ['ep5_lab_f3', 22, 37, 'down'], { kind: 'stairs' }),

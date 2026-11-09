@@ -167,6 +167,8 @@ test('rule: plates, monotone latches, the hour flags, the tints', () => {
   assert.ok(isHourFlag('hour:dusk') && !isHourFlag('hour:teatime') && !isHourFlag('dusk'));
   assert.equal(hourFlag('hour:dusk', 'dusk'), true); assert.equal(hourFlag('hour:dusk', 'noon'), false); assert.equal(hourFlag('mira_joined', 'noon'), undefined);
   assert.deepEqual(['dawn', 'noon', 'dusk', 'night'].map((h) => tintForHour(h, 'desert_noon')), ['dawn', 'desert_noon', 'dusk', null]);
+  // E5-fixes B4: under an open sky the field asks for the rose dawn
+  assert.deepEqual(['dawn', 'noon', 'dusk', 'night'].map((h) => tintForHour(h, 'desert_noon', 'sun_dawn')), ['sun_dawn', 'desert_noon', 'dusk', null]);
   assert.equal(running(T, { hour: 'night' }).size, 0);
   assert.equal(firm(T, { hour: 'night' }).size, compile(T).sand.reduce((a, b) => a + b, 0));
 });
@@ -238,7 +240,7 @@ test('field: the hour by name at a dial: the current hour marked, Cancel keeps i
   assert.equal(code(f, 12, 17), 'water');
   assert.equal(f.entities.get('dial_b').prop.state, 0, 'every dial on the map shows the hour');
   assert.ok(f.sfx.includes('sun_dial') && f.sfx.includes('sand_hold'));
-  assert.equal(f.lighting.tintName, 'dawn');
+  assert.equal(f.lighting.tintName, 'sun_dawn', 'the open court takes the rose dawn (E5-fixes B4)');
   assert.equal(getFieldHour(), 'dawn');
   assert.equal(f.inputLocked, 0, 'input back after the sweep');
 });
@@ -421,6 +423,38 @@ test('field: the sky link: a shade map says its hour, another Episode 5 map its 
   assert.equal(fieldHourFor({ id: 'ep5_ship', lighting: { tint: 'night' } }, null), 'night');
   assert.equal(fieldHourFor({ id: 'ep5_saffron', lighting: { tint: 'none' } }, null), 'noon');
   assert.equal(fieldHourFor({ id: 'valley', lighting: { tint: 'dusk' } }, null), null);
+  // E5-fixes B1: the pack's sea night is night to the battle sky, and the real deck map says so before its first fight
+  assert.equal(fieldHourFor({ id: 'ep5_ship', lighting: { tint: 'sea_night' } }, null), 'night');
+  const ship = peekMap('ep5_ship');
+  if (ship) assert.equal(fieldHourFor(ship, null, () => false), 'night');
+  assert.ok(TINTS.sea_night && TINTS.sun_dawn, 'the pack registers its sea night and rose dawn tints');
+});
+
+test("field: shade on paving is the pale style, on sand the violet; a stone's shadow has a darker root (E5-fixes B3)", () => {
+  const f = makeField(T);
+  const s = f.shade, m = compile(T);
+  const sh = new Uint8Array(m.N);
+  let sandI = -1, paveI = -1;
+  for (let i = 0; i < m.N; i++) { if (m.sand[i] && sandI < 0) sandI = i; if (!m.sand[i] && !s.wallSolid[i] && paveI < 0) paveI = i; }
+  s.ensureLayers();
+  assert.equal(s.shadeStyle(sandI)[0].wash, '#2e1a62', 'sand keeps the violet');
+  assert.notEqual(s.shadeStyle(paveI)[0].wash, '#2e1a62', 'paving takes the paler indigo-grey');
+  assert.ok(s.shadeStyle(paveI)[0].washAlpha < s.shadeStyle(sandI)[0].washAlpha, 'and lighter');
+  // the root: the shaded cell beside each stone on the side the hour throws its shadow
+  for (const h of ['dawn', 'noon', 'dusk']) {
+    s.hour = h;
+    const L = light(T, { hour: h, solid: wallsOf(T), pos: s.positions() });
+    const shade = s.shadeMask(L), roots = s.rootsOf(shade);
+    const [dx, dy] = { dawn: [-1, 0], noon: [0, -1], dusk: [1, 0] }[h];
+    let n = 0;
+    for (let i = 0; i < m.N; i++) if (roots[i]) {
+      n++;
+      const x = i % m.W, y = (i / m.W) | 0;
+      assert.ok(m.casters.some((r) => { const e = f.entities.get(r.id); return e && e.x === x - dx && e.y === y - dy; }), `${h}: root ${x},${y} sits by a stone`);
+      assert.equal(shade[i], 1, `${h}: a root is shaded`);
+    }
+    assert.ok(n > 0, `${h}: some shadow has a root`);
+  }
 });
 
 test('timing: an hour change recomputes under 1 ms, a field frame under 3 ms', async () => {

@@ -243,25 +243,34 @@ export function paintRunEdges(g, px, py, nb, frame) {
 }
 
 // Shade: DESIGN 6.2's dithered indigo, pushed violet so it reads as shade on ochre. A flat wash plus a 50% checker.
+// On sand the strong violet carries the rule (the sand under it holds); on paving and every other floor a cooler, paler
+// indigo-grey at lower opacity, so a shadow on paving reads as a shadow, not a rug (CRITIQUE_7 item 3). The cell where a
+// stone's shadow starts (its root) takes one more step of dark under either style.
 export const SHADE = { wash: '#2e1a62', washAlpha: 0.54, dot: '#1a0c3a', dotAlpha: 0.32, rim: '#140a30', rimAlpha: 0.4 };
+export const SHADE_PAVE = { wash: '#343a66', washAlpha: 0.34, dot: '#1c2040', dotAlpha: 0.24, rim: '#181a36', rimAlpha: 0.22 };
+export const SHADE_ROOT = { wash: '#1a1636', washAlpha: 0.2 };
 /** Paint the 16x16 shade tile (wash plus 50% checker, no rim) at (ox, oy) of ctx g: cached once, then blitted per cell. */
-export function paintShadeTile(g, ox, oy) {
-  g.globalAlpha = SHADE.washAlpha; R(g, ox, oy, TILE, TILE, SHADE.wash);
-  g.globalAlpha = SHADE.dotAlpha;
-  g.fillStyle = SHADE.dot;
+export function paintShadeTile(g, ox, oy, P = SHADE) {
+  g.globalAlpha = P.washAlpha; R(g, ox, oy, TILE, TILE, P.wash);
+  g.globalAlpha = P.dotAlpha;
+  g.fillStyle = P.dot;
   for (let y = 0; y < TILE; y++) for (let x = y & 1; x < TILE; x += 2) g.fillRect(ox + x, oy + y, 1, 1);
   g.globalAlpha = 1;
 }
-/** One shaded cell from the cached tile `tile` (a canvas), with a darker rim on the sides whose neighbour is not shaded. */
-export function paintShadeCell(g, px, py, nb, tile) {
+/**
+ * One shaded cell from the cached tile `tile` (a canvas), with a darker rim on the sides whose neighbour is not shaded.
+ * P: the style the tile was painted in (its rim); root: the cell where a stone's shadow starts (one more step of dark).
+ */
+export function paintShadeCell(g, px, py, nb, tile, P = SHADE, root = false) {
   if (tile) g.drawImage(tile, 0, 0, TILE, TILE, px, py, TILE, TILE);
-  else paintShadeTile(g, px, py);
-  if (!nb) return;
-  g.globalAlpha = SHADE.rimAlpha;
-  if (!nb.N) R(g, px, py, TILE, 1, SHADE.rim);
-  if (!nb.S) R(g, px, py + TILE - 1, TILE, 1, SHADE.rim);
-  if (!nb.W) R(g, px, py, 1, TILE, SHADE.rim);
-  if (!nb.E) R(g, px + TILE - 1, py, 1, TILE, SHADE.rim);
+  else paintShadeTile(g, px, py, P);
+  if (root) { g.globalAlpha = SHADE_ROOT.washAlpha; R(g, px, py, TILE, TILE, SHADE_ROOT.wash); }
+  if (!nb) { g.globalAlpha = 1; return; }
+  g.globalAlpha = P.rimAlpha;
+  if (!nb.N) R(g, px, py, TILE, 1, P.rim);
+  if (!nb.S) R(g, px, py + TILE - 1, TILE, 1, P.rim);
+  if (!nb.W) R(g, px, py, 1, TILE, P.rim);
+  if (!nb.E) R(g, px + TILE - 1, py, 1, TILE, P.rim);
   g.globalAlpha = 1;
 }
 

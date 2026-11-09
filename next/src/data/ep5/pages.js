@@ -9,6 +9,8 @@
 //                { mode: 'restored' } the struck stars light again (they write themselves in); the hero's star in the
 //                                    space, the brightest thing on the page; under it the counter-seal drawn in stars (an
 //                                    open book with one line) and "Keep this one." in starlight (oracle_after)
+//                { mode: 'restored_1' | 'restored_2' | 'restored_3' } the same page in three beats, one per line of
+//                                    oracle_after: the stars, then the hero's star, then the seal (E5-fixes B7)
 //                { mode: 'road' }     a line of caravan stars leading north and west from the Haven to a library above
 //                                    the clouds, the new reading (ep5_ending)
 //   ep5_page     Ishra's page, sealed in glass: the canon line in a warm, careful hand (sel_memory_3)
@@ -251,8 +253,51 @@ function road(mk, r) {
   return { base };
 }
 
+// The restored chart in three beats (CRITIQUE_7 item 7: the seal is its own beat, oracle_after step 4). Asked again while
+// the frame is open, the page takes the next mode in place (world/closeup.js openPage) and runs from the beat before:
+//   restored_1  the struck stars light again, one by one along the chart (a wipe over the struck chart); the empty space
+//               still empty (oracle_after step 2)
+//   restored_2  the hero's star in the space, the brightest thing on the page, its name under it (step 3)
+//   restored_3  under it the counter-seal drawn in stars and "Keep this one." in starlight (step 4); its end state is the
+//               whole `restored` page
+// `restored` (all at once) stays for a story that opens the chart once.
+/** One beat of the restored chart, drawn whole on g: 0 struck, 1 lit, 2 + the hero's star, 3 + the counter-seal. */
+function chartStage(mk, g, r, o, stage, w, h) {
+  sky(g, w, h);
+  chartField(g, stage >= 1);
+  if (stage >= 3) {
+    for (const [a, b] of BOOK.links) dots(g, BOOK.pts[a][0], BOOK.pts[a][1], BOOK.pts[b][0], BOOK.pts[b][1], GOLD, 0.75, 2);
+    dots(g, BOOK.line[0][0], BOOK.line[0][1], BOOK.line[1][0], BOOK.line[1][1], GOLD_HI, 0.9, 1);
+    for (const [x, y] of BOOK.pts) star(g, x, y, 1, STAR_BLUE);
+    line(mk, g, r, 'Keep this one.', 156, 77, { align: 'center', color: '#e9d9a8', glow: '#6b5a2a', slant: 2 });
+  }
+  star(g, NEIGHBOR.x, NEIGHBOR.y, 1, stage >= 1 ? STAR_BLUE : STAR_DIM);
+  if (stage >= 2) {
+    line(mk, g, r, heroName(o), SPACE.x, SPACE.y + 9, { align: 'center', color: GOLD, fit: 80 });
+    star(g, SPACE.x, SPACE.y, 3);                                // the hero's star, the brightest thing on the page
+  } else emptySpace(g);
+  frame(g, w, h, stage >= 2 ? GOLD_HI : GOLD);
+}
+function restoredStage(mk, r, o, stage) {
+  const base = mk(), g = base.getContext('2d'), w = base.width, h = base.height;
+  if (stage === 1) {
+    chartStage(mk, g, r, o, 0, w, h);
+    const over = mk();
+    chartField(over.getContext('2d'), true);
+    return { base, over, how: 'wipe', frames: 90 };
+  }
+  chartStage(mk, g, r, o, stage, w, h);
+  // the beat before, fading away over this one (a cross-fade: `run` with no drip)
+  const over = mk();
+  chartStage(mk, over.getContext('2d'), r, o, stage - 1, w, h);
+  return { base, over, how: 'run', frames: 50 };
+}
+export const RESTORED_STAGES = ['restored_1', 'restored_2', 'restored_3'];
+
 function ep5_chart(mk, r, o) {
   if (o.mode === 'restored') return restored(mk, r, o);
+  const k = RESTORED_STAGES.indexOf(o.mode);
+  if (k >= 0) return restoredStage(mk, r, o, k + 1);
   if (o.mode === 'road') return road(mk, r, o);
   return prophecy(mk, r, o);
 }

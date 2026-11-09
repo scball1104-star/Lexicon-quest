@@ -9,7 +9,7 @@ qa/world/ep5_out/<device>_<name>.png (3x) and _x1.png. Never writes to qa/world/
 Cases: hours (the court at noon, dawn, dusk and a frame mid-sweep), shove (the stone up its groove, then dusk: the bridge
 to the nook), refuse (the Shove refused over running sand), plate (the plate latching at dusk, the sun gate open), indoor
 (the dawn shaft, the pillar Shoved into it, the lamp room before and after the lamp rolls), tint (desert_noon against no
-tint: running vs firm sand luma on the frame), perf (shade logic and draw timings; frame rate at 4x CPU throttle on the
+tint: running vs firm sand luma on the frame; the rose sun_dawn and dusk at least 0.25 too), perf (shade logic and draw timings; frame rate at 4x CPU throttle on the
 current device profile). Fails on any console error.
 """
 import json
@@ -195,7 +195,7 @@ def case_tint(lab):
     setup(lab, 'ep5_testshade', 21, 15, 'up')     # the party well away from the cells measured
     look(lab, 29, 17)
     out = {}
-    for t in ('none', 'desert_noon'):
+    for t in ('none', 'desert_noon', 'sun_dawn', 'dusk'):
         lab.run(fjs(f'f.lighting.setTint("{t}", 0); return true;'))
         lab.frames(3)
         run_l, firm_l, pave_l = lab.page.evaluate(LUMA, [[27, 17], [30, 17], [29, 15]])
@@ -206,6 +206,9 @@ def case_tint(lab):
     b = out['desert_noon'][0] - out['desert_noon'][1]
     check(a >= 0.25, f'running vs firm sand at no tint: {a:.3f} (at least 0.25)')
     check(b >= a * 0.9, f'desert_noon keeps {100 * b / a:.0f}% of that contrast (at least 90%)')
+    for t in ('sun_dawn', 'dusk'):     # E5-fixes B3, B4: the rose dawn and the dusk keep the floor's one rule readable
+        c = out[t][0] - out[t][1]
+        check(c >= 0.25, f'running vs firm sand under {t}: {c:.3f} (at least 0.25)')
 
 
 def case_perf(lab):

@@ -24,12 +24,20 @@ import { markOpened, isOpened, count, setPosition } from '../../../game/state.js
 import { inspectBoxes, tintFor } from '../../../game/story.js';
 import { DIRS } from '../../../world/pathfind.js';
 import { setFieldHour } from '../sky.js';
-import { ensureArt, paintRunTile, paintRunEdges, paintRunEdgeSet, paintShadeTile, paintShadeCell, paintRut } from './art.js';
+import { ensureArt, paintRunTile, paintRunEdges, paintRunEdgeSet, paintShadeTile, paintShadeCell, paintRut, SHADE, SHADE_PAVE } from './art.js';
 
 export const SWEEP_FRAMES = 30;
 export const FAR_TILES = 6;
 /** The pack's noon tint (world.js sets `id` to 'desert_noon' when it keeps that tint). */
 export const NOON_TINT = { id: 'none' };
+/**
+ * Dawn under the open sky: a rose light about as strong as the dusk tint, warm where dusk is violet, so choosing Dawn changes
+ * the screen and not only the shadows (CRITIQUE_7 item 6, PLAYTEST_REVIEW_7 item 6). Roofed floors keep the core `dawn`.
+ * Registered on TINTS by ./events.js; measured in qa/world/ep5_lab.py (case `tint`) and qa/world/ep5_fixes.py (case hours).
+ */
+export const DAWN_TINT = { id: 'sun_dawn', spec: { color: '#ff9fb4', alpha: 0.34, glow: '#ffc2b0', glowAlpha: 0.035 } };
+/** Pack tints and the hour each stands for (the battle sky's field hour, the foe lift, lamps). */
+export const TINT_HOURS = { sun_dawn: 'dawn', sea_night: 'night', desert_noon: 'noon' };
 const CAP = { dawn: 'Dawn', noon: 'Noon', dusk: 'Dusk' };
 const SHADE_ENT = new Set(['standstone', 'lampcart', 'sundial', 'window', 'sunplate']);
 const NB4 = { N: [0, -1], S: [0, 1], W: [-1, 0], E: [1, 0] };
@@ -43,7 +51,7 @@ export function fieldHourFor(mod, model, hasFlag) {
   if (!mod) return null;
   if (model && mod.shade) return model.hour;
   if (!/^ep5_/.test(mod.id || '')) return null;
-  const t = tintFor(mod.id, (mod.lighting || {}).tint, hasFlag || (() => false));
+  const t0 = tintFor(mod.id, (mod.lighting || {}).tint, hasFlag || (() => false)), t = TINT_HOURS[t0] || t0;
   return t === 'dawn' || t === 'dusk' || t === 'night' ? t : 'noon';
 }
 
@@ -62,6 +70,8 @@ export class Shade {
     this.target = null;             // { run, shade }: what the rule says now
     this.shownRun = null;           // what is drawn now (lags the rule during a sweep)
     this.shownShade = null;
+    this.shownRoot = null;          // the roots of the stones' sun shadows (drawn one step darker)
+    this.layerRoot = null;
     this.beamShown = null;
     this.anim = null;
     this.layers = null;             // three running-sand frames
@@ -290,7 +300,7 @@ export class Shade {
 
   // ------------------------------------------------------------------ the hour
   hourTint() {
-    const t = tintForHour(this.hour, NOON_TINT.id);
+    const t = tintForHour(this.hour, NOON_TINT.id, this.m.openSky ? DAWN_TINT.id : 'dawn');
     if (t) return t;
     const mod = this.mod;
     return tintFor(mod.id, (mod.lighting || {}).tint, this.f.hasFlag) || 'none';
@@ -607,7 +617,10 @@ export class Shade {
     this.shadeLayer = r.createLayer(Math.max(1, m.W * TILE), Math.max(1, m.H * TILE));
     // cached pieces, so a sweep frame blits instead of painting pixel by pixel (the 4x-throttle frame budget)
     this.shadeTile = r.createLayer(TILE, TILE);
-    paintShadeTile(this.shadeTile.ctx, 0, 0);
+    paintShadeTile(this.shadeTile.ctx, 0, 0, SHADE);
+    this.shadePave = r.createLayer(TILE, TILE);
+    paintShadeTile(this.shadePave.ctx, 0, 0, SHADE_PAVE);
+    this.capWork = r.createLayer(TILE, TILE);
     this.edges = r.createLayer(TILE * 4, TILE * n);
     for (let k = 0; k < n; k++) paintRunEdgeSet(this.edges.ctx, 0, k * TILE, k);
     if (!meta) {
@@ -625,9 +638,11 @@ export class Shade {
   show(run, shade, beam, direct = false) {
     const m = this.m;
     this.beamShown = beam;
-    if (!this.ensureLayers()) { this.shownRun = new Uint8Array(run); this.shownShade = new Uint8Array(shade); this.layerShade = this.shownShade; return; }
+    const roots = this.rootsOf(shade);
+    if (!this.ensureLayers()) { this.shownRun = new Uint8Array(run); this.shownShade = new Uint8Array(shade); this.layerShade = this.shownShade; this.shownRoot = roots; return; }
     if (!this.shownRun) {
       this.shownRun = new Uint8Array(run); this.shownShade = new Uint8Array(shade); this.layerShade = new Uint8Array(shade);
+      this.shownRoot = roots; this.layerRoot = new Uint8Array(roots);
       for (const L of this.layers) L.ctx.clearRect(0, 0, L.w, L.h);
       this.shadeLayer.ctx.clearRect(0, 0, this.shadeLayer.w, this.shadeLayer.h);
       for (let i = 0; i < m.N; i++) { if (run[i]) this.paintRun(i); if (shade[i]) this.paintShade(i); }
@@ -637,13 +652,68 @@ export class Shade {
     for (let i = 0; i < m.N; i++) if (this.shownRun[i] !== run[i]) dr.push(i);
     this.shownRun.set(run);
     this.shownShade.set(shade);
+    this.shownRoot = roots;
     this.shadeDirect = direct;
     if (dr.length) this.repaint(dr, (i) => this.paintRun(i), this.layers);
     if (direct) return;
     const ds = [];
-    for (let i = 0; i < m.N; i++) if (this.layerShade[i] !== shade[i]) ds.push(i);
+    for (let i = 0; i < m.N; i++) if (this.layerShade[i] !== shade[i] || this.layerRoot[i] !== roots[i]) ds.push(i);
     this.layerShade.set(shade);
+    this.layerRoot.set(roots);
     if (ds.length) this.repaint(ds, (i) => this.paintShade(i), [this.shadeLayer]);
+  }
+
+  /**
+   * The root of every stone's sun shadow: the shaded cell next to the stone on the side the hour throws it (west at dawn,
+   * north at noon, east at dusk). Drawn one step darker so a shadow grows from its stone (CRITIQUE_7 item 3).
+   */
+  rootsOf(shade) {
+    const m = this.m, out = new Uint8Array(m.N), sun = SUN[this.hour];
+    if (!sun || !m.openSky) return out;
+    const [dx, dy] = { west: [-1, 0], north: [0, -1], east: [1, 0] }[sun[0]];
+    for (const r of m.casters) {
+      const e = this.f.entities.get(r.id);
+      if (!e || !e.present) continue;
+      const x = e.x + dx, y = e.y + dy;
+      if (x < 0 || y < 0 || x >= m.W || y >= m.H) continue;
+      if (shade[y * m.W + x]) out[y * m.W + x] = 1;
+    }
+    return out;
+  }
+
+  /** The cached shade tile for cell i: the strong violet on sand, the paler indigo-grey on paving and every other floor. */
+  shadeStyle(i) {
+    return this.m.sand[i] ? [SHADE, this.shadeTile && this.shadeTile.canvas] : [SHADE_PAVE, this.shadePave && this.shadePave.canvas];
+  }
+
+  /**
+   * Shade over the part of a stone's sprite that stands on shaded cells (the rows north of its own cell that its art covers),
+   * clipped to the stone's own pixels: so a noon shadow that falls under a stone's head still shows as one band (the road
+   * island's stair, CRITIQUE_7 item 10, PLAYTEST_REVIEW_7 item 7). World pixels, after the props and actors are drawn.
+   */
+  drawOverCasters(r) {
+    if (!this.active || !this.shownShade || !this.capWork || !this.capWork.ctx) return;
+    const m = this.m, sh = this.shownShade, cam = this.f.camera, W = this.capWork, g = W.ctx;
+    for (const rec of m.casters) {
+      const e = this.f.entities.get(rec.id), p = e && e.prop;
+      if (!e || !e.present || !p || !p.visible || !p.draw || !p.draw.img) continue;
+      const d = p.draw, x0 = d.dx + p.offX, y0 = d.dy + p.offY, rows = Math.round(d.h / TILE);
+      if (!cam.visible(x0, y0, d.w, d.h, 8) || d.w !== TILE) continue;
+      for (let k = 0; k < rows - 1; k++) {
+        const cy = Math.round((y0 + k * TILE) / TILE), cx = Math.round(x0 / TILE);
+        if (cx < 0 || cy < 0 || cx >= m.W || cy >= m.H || !sh[cy * m.W + cx]) continue;
+        const [, tile] = this.shadeStyle(cy * m.W + cx);
+        if (!tile) continue;
+        g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+        g.clearRect(0, 0, TILE, TILE);
+        g.drawImage(d.img, d.sx, d.sy + k * TILE, TILE, TILE, 0, 0, TILE, TILE);
+        g.globalCompositeOperation = 'source-atop';
+        g.drawImage(tile, 0, 0);
+        if (this.shownRoot && this.shownRoot[cy * m.W + cx]) { g.globalAlpha = 0.2; g.fillStyle = '#1a1636'; g.fillRect(0, 0, TILE, TILE); g.globalAlpha = 1; }
+        g.globalCompositeOperation = 'source-over';
+        r.ctx.drawImage(W.canvas, Math.round(x0), Math.round(y0 + k * TILE));
+      }
+    }
   }
 
   repaint(cells, paint, layers) {
@@ -694,7 +764,8 @@ export class Shade {
     const x = i % m.W, y = (i / m.W) | 0;
     const nb = {};
     for (const k in NB4) { const nx = x + NB4[k][0], ny = y + NB4[k][1]; nb[k] = nx < 0 || ny < 0 || nx >= m.W || ny >= m.H ? true : !!sh[ny * m.W + nx] || !!this.wallSolid[ny * m.W + nx]; }
-    paintShadeCell(this.shadeLayer.ctx, x * TILE, y * TILE, nb, this.shadeTile && this.shadeTile.canvas);
+    const [P, tile] = this.shadeStyle(i);
+    paintShadeCell(this.shadeLayer.ctx, x * TILE, y * TILE, nb, tile, P, !!(this.shownRoot && this.shownRoot[i]));
   }
 
   drawLow(r, t) {
@@ -722,13 +793,14 @@ export class Shade {
       }
     }
     if (this.shadeDirect && this.anim) {
-      const tile = this.shadeTile && this.shadeTile.canvas, sm = this.shownShade, g = r.ctx;
+      const sm = this.shownShade, rt = this.shownRoot, g = r.ctx;
       for (let y = Math.max(0, y0); y <= Math.min(m.H - 1, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(m.W - 1, x1); x++) {
         const i = y * m.W + x;
         if (!sm[i]) continue;
         const nb = { N: y === 0 || !!sm[i - m.W] || !!this.wallSolid[i - m.W], S: y === m.H - 1 || !!sm[i + m.W] || !!this.wallSolid[i + m.W],
           W: x === 0 || !!sm[i - 1] || !!this.wallSolid[i - 1], E: x === m.W - 1 || !!sm[i + 1] || !!this.wallSolid[i + 1] };
-        paintShadeCell(g, x * TILE, y * TILE, nb, tile);    // world pixels: drawLow runs under the field's pushCamera
+        const [P, tile] = this.shadeStyle(i);
+        paintShadeCell(g, x * TILE, y * TILE, nb, tile, P, !!(rt && rt[i]));    // world pixels: drawLow runs under the field's pushCamera
       }
     } else if (sw > 0 && sh > 0) r.drawLayer(this.shadeLayer, sx, sy, sw, sh, sx, sy);
   }

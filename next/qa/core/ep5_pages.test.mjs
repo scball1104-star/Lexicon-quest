@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PAGE_KINDS, INSERT } from '../../src/world/closeup.js';
-import { EP5_PAGES, HERO_STAR, register } from '../../src/data/ep5/pages.js';
+import { EP5_PAGES, HERO_STAR, RESTORED_STAGES, register } from '../../src/data/ep5/pages.js';
 
 const rgb = (c) => { const n = parseInt(String(c).slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 
@@ -66,10 +66,11 @@ const R = {
   font: () => ({ draw(c, s, x, y, o) { c.fillStyle = o.color; for (let i = 0; i < s.length; i++) if (s[i] !== ' ') c.fillRect(x + i * 5, y + 2, 4, 7); } }),
 };
 const luma = (d, i) => (d[i] * 0.2126 + d[i + 1] * 0.7152 + d[i + 2] * 0.0722) / 255;
+/** The page as it rests once its animation is done: a wipe writes `over` in; a run (or a cross-fade) leaves the base. */
 function finished(P) {
   const c = mk();
   c.getContext().drawImage(P.base, 0, 0);
-  if (P.over) c.getContext().drawImage(P.over, 0, 0);
+  if (P.over && P.how !== 'run') c.getContext().drawImage(P.over, 0, 0);
   return c;
 }
 
@@ -85,7 +86,7 @@ test('register puts the three kinds on PAGE_KINDS, idempotent, never replacing a
 
 test('every mode the story opens builds a full insert page', () => {
   const cases = [['ep5_letter', 'full'], ['ep5_letter', 'blank'], ['ep5_chart', 'prophecy'], ['ep5_chart', 'restored'],
-    ['ep5_chart', 'road'], ['ep5_page', undefined]];
+    ...RESTORED_STAGES.map((m) => ['ep5_chart', m]), ['ep5_chart', 'road'], ['ep5_page', undefined]];
   for (const [k, mode] of cases) {
     const P = EP5_PAGES[k](mk, R, { name: 'Arden', mode });
     assert.ok(P.base instanceof Canvas, `${k} ${mode}`);
@@ -110,8 +111,8 @@ test('the blank letter has lost its top name; the others stay', () => {
   assert.ok(count(blank, 34, 94) > 150 && count(blank, 34, 94) === count(full, 34, 94), 'Mira and Bram stay');
 });
 
-test("the restored chart: the hero's star is the brightest thing on the page", () => {
-  const P = EP5_PAGES.ep5_chart(mk, R, { name: 'Arden', mode: 'restored' });
+for (const mode of ['restored', 'restored_3']) test(`the restored chart (${mode}): the hero's star is the brightest thing on the page`, () => {
+  const P = EP5_PAGES.ep5_chart(mk, R, { name: 'Arden', mode });
   const c = finished(P), d = c.data, W = INSERT.w;
   let best = -1, at = null;
   for (let y = 3; y < INSERT.h - 4; y++) for (let x = 3; x < W - 4; x++) {
@@ -129,4 +130,29 @@ test("the restored chart: the hero's star is the brightest thing on the page", (
     second = Math.max(second, s);
   }
   assert.ok(best - second > 0.8, `the star (${best.toFixed(2)}) stands clear of the next brightest (${second.toFixed(2)})`);
+});
+
+test("the restored chart in three beats: the stars, then the hero's star, then the seal (E5-fixes B7)", () => {
+  const pages = RESTORED_STAGES.map((mode) => EP5_PAGES.ep5_chart(mk, R, { name: 'Arden', mode }));
+  assert.deepEqual(pages.map((P) => P.how), ['wipe', 'run', 'run'], 'beat 1 writes the stars in; beats 2 and 3 fade in over the beat before');
+  // the seal's line "Keep this one." is set in #e9d9a8 by the block font: count those pixels on each finished beat
+  const sealPx = (c) => { let n = 0; for (let i = 0; i < c.data.length; i += 4) if (c.data[i] === 0xe9 && c.data[i + 1] === 0xd9 && c.data[i + 2] === 0xa8) n++; return n; };
+  const starAt = (c) => { const i = (HERO_STAR.y * INSERT.w + HERO_STAR.x) * 4; return luma(c.data, i); };
+  const done = pages.map(finished);
+  assert.equal(sealPx(done[0]), 0, 'beat 1: no seal'); assert.equal(sealPx(done[1]), 0, 'beat 2: no seal');
+  assert.ok(sealPx(done[2]) > 50, 'beat 3: the seal and its line');
+  assert.ok(starAt(done[0]) < 0.5, 'beat 1: the space is still empty');
+  assert.ok(starAt(done[1]) > 0.95 && starAt(done[2]) > 0.95, "beats 2 and 3: the hero's star burns in the space");
+  // each beat starts from the one before: beat 2's fading layer is beat 1's end state, beat 3's is beat 2's
+  for (const k of [1, 2]) {
+    const prev = done[k - 1].data, over = pages[k].over.data;
+    let same = 0;
+    for (let i = 0; i < prev.length; i += 4) if (prev[i] === over[i] && prev[i + 1] === over[i + 1] && prev[i + 2] === over[i + 2]) same++;
+    assert.ok(same / (prev.length / 4) > 0.97, `beat ${k + 1} fades from beat ${k} (${(100 * same / (prev.length / 4)).toFixed(1)}% the same)`);
+  }
+  // and the last beat rests on the whole restored page
+  const whole = finished(EP5_PAGES.ep5_chart(mk, R, { name: 'Arden', mode: 'restored' })).data, last = done[2].data;
+  let diff = 0;
+  for (let i = 0; i < last.length; i += 4) if (Math.abs(last[i] - whole[i]) + Math.abs(last[i + 1] - whole[i + 1]) + Math.abs(last[i + 2] - whole[i + 2]) > 24) diff++;
+  assert.ok(diff / (last.length / 4) < 0.05, `beat 3 ends as the restored page (${(100 * diff / (last.length / 4)).toFixed(1)}% differ)`);
 });

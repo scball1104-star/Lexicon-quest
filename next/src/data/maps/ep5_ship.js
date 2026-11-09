@@ -13,6 +13,8 @@
 //     ship_fight; the two foes drop ahead of the party at foes_drop (11,5) and foes_drop_b (11,9);
 //   - after ship_first_fight_done the tint is dawn and the gangway door (20,11) in the south rail by the bow leads down to
 //     the Caravan Road's jetty.
+// The night is the pack's `sea_night` (src/data/ep5/field/events.js): the deck one value lighter than the core night, dark
+// round the lanterns' pools (`tintDark`), stars on the water (`stars`); the battle sky reads it as night (TINT_HOURS).
 // e_e5s_first is the zone plan's anchor for the scripted fight (EP5_ZONES.ep5_ship plan: e5s_first x1). The scene spawns
 // its own two foes, so the anchor's flags never hold together (if bram_asked, ifNot bram_asked) and it never stands on
 // the deck: no free fight, no double. No chest, no other enemy.
@@ -86,7 +88,11 @@ const events = [
 export default {
   id: 'ep5_ship', name: 'The Saffron Wind', area: 'field',
   music: 'mystery', ambience: 'mere_still', tileset: 'town',
-  lighting: { tint: [{ if: 'ship_first_fight_done', id: 'dawn' }, { id: 'night' }], dark: 0 },
+  // E5-fixes B1 (CRITIQUE_7 item 4): the pack's lighter sea night, dark round the two lanterns' pools (their `light`, lit by
+  // the pack while the tint lights lamps), stars on the water at the edges, the party and crew lifted a little over the
+  // night (Mira's robe on the planks); plain at dawn
+  lighting: { tint: [{ if: 'ship_first_fight_done', id: 'dawn' }, { id: 'sea_night' }], dark: 0, tintDark: { sea_night: 0.3 }, liftActors: 0.4,
+    stars: { on: 'night_sea', tints: ['sea_night'], density: 0.55 } },
   under: 'deck_planks',
   legend: { 'k': 'deck_planks', 'n': 'night_sea', 'r': 'ship_rail', 'h': 'wall_planks_top_m', 'L': 'wall_planks_top_l', 'R': 'wall_planks_top_r' },
   ground,

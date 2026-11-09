@@ -17,8 +17,9 @@
 //   West: the Dune Lantern Rest (1..8, 15..21, door (4,21)). East: Saffron Caravan Supplies (37..41, 16..19, door (40,19))
 //      with Yasmin's saffron stall outside. South-east: the Copperwind Smithy (30..34, 26..29, door (33,29)) with Hassan's
 //      bell rack (28..29, 29) between it and the gate.
-//   The south gate (21..22, 31): the arrival from the Caravan Road (south_gate (21,30)); the waystone (19,28) and the
-//      Sandstone Bulletin (24..25, 28) either side; the exit at the map's south edge back to the road.
+//   The south gate (21..22, 31): the arrival from the Caravan Road (south_gate (21,30)); the waystone (20,25) on the gate's
+//      axis between a brass lamp (18,25) and Yasmin's mark, the first thing the party walks up to (E5-fixes B2), and the
+//      Sandstone Bulletin (24..25, 28) by the gate; the exit at the map's south edge back to the road.
 //   The quay (south-west, rows 25..27): the water stairs (4..5, 28) down to the boat (haven_boat (4..5, 29), present from
 //      road_landed) that carries the party to Valewyn's south quay; Yara at the top of the stairs (water_stairs (7,27)),
 //      her ship moored in the bay (decor).
@@ -124,8 +125,8 @@ const events = [
   sign('water_stairs_sign', 2, 27, 'ep5_water_stairs'),
   sign('haven_ship_sign', 8, 28, 'ep5_ship_moored', { solid: false }),
   // the south gate: the waystone and the bulletin, each in two states
-  object('waystone', 19, 28, 'waystone', { state: 0, text: 'ep5_waystone', ifNot: RES }),
-  object('waystone_still', 19, 28, 'waystone', { state: 3, text: 'ep5_waystone', if: RES }),
+  object('waystone', 20, 25, 'waystone', { state: 0, text: 'ep5_waystone', ifNot: RES }),
+  object('waystone_still', 20, 25, 'waystone', { state: 3, text: 'ep5_waystone', if: RES }),
   sign('bulletin', 24, 28, 'ep5_bulletin', { w: 2, sprite: 'bulletin', state: 0, ifNot: RES }),
   sign('bulletin_open', 24, 28, 'ep5_bulletin', { w: 2, sprite: 'bulletin', state: 1, if: RES }),
   // the caravanserai
@@ -162,10 +163,12 @@ const events = [
 export default {
   id: 'ep5_saffron', name: 'Saffron Haven', area: 'town',
   music: 'saffron', ambience: 'desert_wind', tileset: 'town',
-  lighting: { tint: [{ if: RES, id: 'none' }, { id: 'dusk' }], dark: 0 },
+  // E5-fixes B2 (CRITIQUE_7 item 5): at dusk the town darkens a step round its lit brass lamps (their pools on the warm
+  // paving, the pack's lamp lights), the lilac kept for the shade between them; the party carries no light of its own here
+  lighting: { tint: [{ if: RES, id: 'none' }, { id: 'dusk' }], dark: 0, tintDark: { dusk: 0.24 }, partyLight: false },
   under: 'caravan_paving',
   legend: {
-    'p': 'caravan_paving', 'd': 'dune_sand', 'g': 'grass', 'w': 'water', 'W': 'wall_sandstone', 'S': 'water_stair',
+    'p': 'dune_court', 'd': 'dune_sand', 'g': 'grass', 'w': 'water', 'W': 'wall_sandstone', 'S': 'water_stair',
   },
   ground,
   overlays,
@@ -175,7 +178,7 @@ export default {
   exits: [{ x: 21, y: 33, w: 2, h: 1, to: ['ep5_caravan_road', 50, 7, 'left'] }],
   marks: {
     // the south gate (haven_arrival)
-    south_gate: [21, 30], waystone: [19, 28], bulletin: [24, 28], yasmin_gate: [21, 25],
+    south_gate: [21, 30], waystone: [20, 25], bulletin: [24, 28], yasmin_gate: [21, 25],
     waystone_stage: [21, 27], waystone_stage_m: [20, 27], waystone_stage_b: [22, 27],
     // the market court (meet_sel)
     market: [6, 11], sel_spot: [8, 10], sel_stage: [8, 12], sel_stage_m: [7, 12], sel_stage_b: [9, 12], nasrin_bench: [11, 10],
@@ -191,6 +194,8 @@ export default {
     // the quay
     water_stairs: [7, 27], tamir_spot: [9, 27], dock: [4, 27],
     // the roof terrace (ep5_ending)
+    // the tower, its armillary and the oasis in one frame (a camera mark for haven_arrival's first look, E5-fixes B2)
+    armillary_view: [26, 11],
     roof_view: [30, 7], roof_stage: [39, 8], roof_stage_m: [38, 8], roof_stage_b: [40, 8],
     roof_laleh: [39, 6], roof_sel: [37, 6], roof_yara: [41, 6],
   },

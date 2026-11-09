@@ -15,7 +15,8 @@
 //      niche (12,8) over the second oculus (12,9). dial_b in the middle. One group.
 //      The map table room (x 2..7, rows 3..8): memory2_trig (sel_memory_2), the table, its window. East along row 3 to C.
 //   C  the Star Floor (x 18..28, rows 3..8): star-glass, painted horizons on the north face, vex_trig across its mouth so
-//      the party stops two rows below Vex (vex_spot 23,4; party_stop 23,6). One group.
+//      the party stops two clear rows below Vex (vex_spot 23,4; the star inlay 22..23,5..6 between; party_stop 23,7: the
+//      heads clear of his feet, E5-fixes B6). One group, e_c, steps in by the way to D once Vex has gone.
 //   D  Two Windows (x 30..38, rows 4..21): three rooms down a column, cut by two shafts with a window at each end.
 //      Upper (rows 4..6) -> shaft K1 (row 8, its only door from above the cell 35,8 under an oculus) -> middle (rows 9..14)
 //      -> shaft K2 (row 15, its only door below the cell 33,15 under an oculus) -> lower (rows 17..21). K1 has a fixed
@@ -129,7 +130,9 @@ const events = [
   object('feather', 23, 4, 'feather_glass', { text: 'ep5_feather_glass', solid: false, if: 'vex_gallery_met' }),
   sign('sea_sign', 19, 2, 'ep5_painted_horizon', { solid: false }),
   sign('city_sign', 26, 2, 'ep5_painted_city', { solid: false }),
-  enemy('e_c', 26, 7, 'horizon_shade', 'e5l2_shades', 'guard'),
+  // the Star Floor's shade steps out of the painted horizon once Vex has gone: nothing stands by the party in his scene, and
+  // it waits by the way on to D (E5-fixes B6, CRITIQUE_7 item 8)
+  enemy('e_c', 27, 4, 'horizon_shade', 'e5l2_shades', 'guard', { if: 'vex_gallery_met' }),
   light('l_star', 23, 5, 4, '#9fc4ff'),
   // ---- D: Two Windows (puzzle D)
   windowEv('win_k1w', 29, 8, 'east', ['dusk'], { reach: 9 }),
@@ -182,7 +185,7 @@ export default {
     middle: [6, 11], dial_b: [4, 10], niche: [12, 9],
     map_table: [4, 5], table_stage: [4, 6], table_stage_m: [3, 6], table_stage_b: [5, 6],
     table_student: [4, 4], table_tamir: [6, 5], table_traveler: [2, 5], table_window: [2, 4],
-    star_floor: [23, 5], vex_spot: [23, 4], party_stop: [23, 6], party_stop_m: [22, 6], party_stop_b: [24, 6], star_socket: [23, 5],
+    star_floor: [23, 5], vex_spot: [23, 4], party_stop: [23, 7], party_stop_m: [22, 7], party_stop_b: [24, 7], star_socket: [23, 5],
     windows: [34, 11], dial_u: [36, 5], k1_door: [35, 7], dial_m: [31, 12], pl_d_shove: [36, 12], k2_door: [33, 16],
     reliquary: [31, 5], cache: [31, 2], approach: [24, 26],
     arena: [22, 16], knight_spot: [22, 13], stairs_down: [22, 12], lift: [25, 12],
