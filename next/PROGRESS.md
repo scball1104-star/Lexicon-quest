@@ -523,3 +523,15 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - All of it is pull request #37 into overhaul. Shipping waits for your word, or Stephen's. The story choices still open
   for the two of you are in the morning email.
 
+## 2026-11-09 (Mon): Episode 5 shipped, with the Episode 4 polish
+- On your word, Episodes 4 and 5 went live together (live main d93eef5). New for players: Episode 5 "The Last Prophecy" (the
+  sea crossing, the Caravan Road, Saffron Haven, the three-floor Oracle Labyrinth, sun-and-shade puzzles, day and night in
+  battle, Mira's Turn the Sky, the Mirage Knight and the Sand Oracle), plus the Episode 4 polish that waited since 11/5 (the
+  Answer hint, the story close-ups, the painted keep stages and Flood Road, the Causeway darkened).
+- Episode 5 shows on the title once a save has finished Episode 4, or as "Episode 5: new party" with `?ep=5`.
+- Checks before the push: every test (two timing tests and one screenshot passed when rerun alone), all balance targets for
+  every episode, GitHub's own check, four full Episode 5 bot runs with no game overs (61 to 86 minutes), and a real-key cast
+  of Turn the Sky. A reviewer caught the one bug the bots could not: the skill could not be chosen from the menu. Fixed.
+- Checked live: title on desktop and phone with no console errors; Episode 5's files load from the live site. Not checked
+  from here: an offline reload, a full live playthrough.
+

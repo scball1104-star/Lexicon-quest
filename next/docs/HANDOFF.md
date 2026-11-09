@@ -32,6 +32,15 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   it alone before treating it as real.
 
 ## Status at handoff
+- **Shipped 2026-11-09 on Scott's word ("Finish episode 5 and ship 4 and 5 together"): live main = d93eef5 (sw a70984db134f).**
+  Episode 5 "The Last Prophecy" (PR #51, issue #50; `EP5_LIVE` on, lazy `ep5` pack; design `docs/EPISODE5_PLAN.md`, story
+  `docs/story/EPISODE5.md`, reviews `docs/CRITIQUE_7.md` and `docs/PLAYTEST_REVIEW_7.md`) plus the Episode 4 polish held since
+  11/5 (#46 to #49). TRAPS from the build: (1) a bot never opens the battle menu, so a no-target skill (Turn the Sky) buzzed for
+  players while every bot passed; `qa/battlescene/ep5_menu_cast.test.mjs` and `qa/realplay/ep5battle.py` now cast it through
+  the menu; (2) generated pack manifests (`assets/ep5_manifest.json`) must be committed at each wave close; (3) the main
+  checkout D:\LexiconQuest held 395 files CRLF in the working tree against LF in the index, so build `sw.js` in an LF worktree
+  (D:\lq-lf2, detached with `-c core.autocrlf=false`); (4) `qa/world/ep5_shade.test.mjs` hour-change timing and `x1_wild` fail
+  under full-suite load and pass alone; `field_aim` shot likewise.
 - **Episode 4 "The Sunken Keep": BUILT 2026-11-04 overnight on `scott/ep4-build`, PR #37 into overhaul. NOT shipped.** All of it
   is in the lazy `ep4` pack (`src/data/ep4/`), behind `EP4_LIVE` in `src/game/episodes.js` (true on the branch; it rides to
   overhaul on). Waves: pack, story, battle, tiles, sprites, world, maps A and B, audio, scene-ui, integrate, critique 6 and
