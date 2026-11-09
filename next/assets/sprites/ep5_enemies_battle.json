@@ -1,0 +1,1053 @@
+{
+ "image": "ep5_enemies_battle.png",
+ "frames": {
+  "mirage_knight_cast": [
+   0,
+   0,
+   123,
+   110
+  ],
+  "mirage_double_cast": [
+   125,
+   0,
+   111,
+   100
+  ],
+  "mirage_knight_idle_1": [
+   0,
+   112,
+   97,
+   99
+  ],
+  "mirage_knight_die_0": [
+   99,
+   112,
+   97,
+   99
+  ],
+  "mirage_knight": [
+   0,
+   213,
+   97,
+   98
+  ],
+  "mirage_knight_attack": [
+   99,
+   213,
+   127,
+   98
+  ],
+  "mirage_knight_hurt": [
+   0,
+   313,
+   99,
+   96
+  ],
+  "horizon_shade_cast": [
+   101,
+   313,
+   87,
+   95
+  ],
+  "tomorrow_husk_die_0": [
+   0,
+   411,
+   91,
+   94
+  ],
+  "mirage_knight_die_1": [
+   93,
+   411,
+   97,
+   93
+  ],
+  "tomorrow_husk_attack": [
+   0,
+   507,
+   115,
+   92
+  ],
+  "tomorrow_husk_idle_1": [
+   117,
+   507,
+   91,
+   91
+  ],
+  "tomorrow_husk": [
+   0,
+   601,
+   91,
+   90
+  ],
+  "mirage_double_idle_1": [
+   93,
+   601,
+   87,
+   89
+  ],
+  "tomorrow_husk_hurt": [
+   0,
+   693,
+   97,
+   88
+  ],
+  "mirage_double": [
+   99,
+   693,
+   87,
+   88
+  ],
+  "mirage_double_attack": [
+   0,
+   783,
+   117,
+   88
+  ],
+  "mirage_double_hurt": [
+   119,
+   783,
+   89,
+   86
+  ],
+  "mirage_double_die_0": [
+   0,
+   873,
+   87,
+   86
+  ],
+  "tomorrow_husk_die_1": [
+   89,
+   873,
+   91,
+   85
+  ],
+  "horizon_shade": [
+   0,
+   961,
+   83,
+   83
+  ],
+  "horizon_shade_idle_1": [
+   85,
+   961,
+   85,
+   83
+  ],
+  "horizon_shade_die_0": [
+   172,
+   961,
+   83,
+   83
+  ],
+  "silt_reaver_cast": [
+   0,
+   1046,
+   71,
+   82
+  ],
+  "horizon_shade_attack": [
+   73,
+   1046,
+   103,
+   82
+  ],
+  "horizon_shade_hurt": [
+   0,
+   1130,
+   91,
+   82
+  ],
+  "mirage_double_die_1": [
+   93,
+   1130,
+   87,
+   77
+  ],
+  "dust_harrier_cast": [
+   0,
+   1214,
+   77,
+   76
+  ],
+  "dust_harrier_attack": [
+   79,
+   1214,
+   79,
+   75
+  ],
+  "dust_harrier_die_0": [
+   160,
+   1214,
+   71,
+   74
+  ],
+  "silt_reaver": [
+   0,
+   1292,
+   71,
+   74
+  ],
+  "silt_reaver_idle_1": [
+   73,
+   1292,
+   71,
+   74
+  ],
+  "silt_reaver_die_0": [
+   146,
+   1292,
+   71,
+   74
+  ],
+  "horizon_shade_die_1": [
+   0,
+   1368,
+   83,
+   74
+  ],
+  "silt_reaver_attack": [
+   85,
+   1368,
+   87,
+   73
+  ],
+  "dust_harrier": [
+   174,
+   1368,
+   71,
+   72
+  ],
+  "dust_harrier_idle_1": [
+   0,
+   1444,
+   73,
+   72
+  ],
+  "silt_reaver_hurt": [
+   75,
+   1444,
+   81,
+   72
+  ],
+  "dust_harrier_die_1": [
+   158,
+   1444,
+   69,
+   71
+  ],
+  "mirage_knight_die_2": [
+   0,
+   1518,
+   97,
+   71
+  ],
+  "dust_harrier_hurt": [
+   99,
+   1518,
+   79,
+   70
+  ],
+  "silt_reaver_die_1": [
+   180,
+   1518,
+   71,
+   69
+  ],
+  "tomorrow_husk_die_2": [
+   0,
+   1591,
+   91,
+   64
+  ],
+  "future_fear_die_0": [
+   93,
+   1591,
+   37,
+   61
+  ],
+  "dune_stalker_idle_1": [
+   132,
+   1591,
+   63,
+   60
+  ],
+  "dune_stalker_die_0": [
+   0,
+   1657,
+   63,
+   60
+  ],
+  "future_hunger_cast": [
+   65,
+   1657,
+   37,
+   60
+  ],
+  "future_hunger_die_0": [
+   104,
+   1657,
+   37,
+   60
+  ],
+  "future_fear_cast": [
+   143,
+   1657,
+   37,
+   60
+  ],
+  "dune_stalker": [
+   182,
+   1657,
+   63,
+   59
+  ],
+  "dune_stalker_attack": [
+   0,
+   1719,
+   67,
+   59
+  ],
+  "mirage_double_die_2": [
+   69,
+   1719,
+   87,
+   59
+  ],
+  "future_hunger_attack": [
+   158,
+   1719,
+   39,
+   59
+  ],
+  "future_fear_attack": [
+   199,
+   1719,
+   39,
+   59
+  ],
+  "future_hunger_idle_1": [
+   0,
+   1780,
+   37,
+   58
+  ],
+  "future_fear_idle_1": [
+   39,
+   1780,
+   37,
+   58
+  ],
+  "dune_stalker_hurt": [
+   78,
+   1780,
+   69,
+   57
+  ],
+  "dune_stalker_die_1": [
+   149,
+   1780,
+   63,
+   57
+  ],
+  "starsilt_cast": [
+   0,
+   1840,
+   51,
+   57
+  ],
+  "future_hunger": [
+   53,
+   1840,
+   37,
+   57
+  ],
+  "future_hunger_hurt": [
+   92,
+   1840,
+   41,
+   57
+  ],
+  "future_fear": [
+   135,
+   1840,
+   37,
+   57
+  ],
+  "future_fear_hurt": [
+   174,
+   1840,
+   41,
+   57
+  ],
+  "horizon_shade_die_2": [
+   0,
+   1899,
+   83,
+   56
+  ],
+  "future_fear_die_1": [
+   85,
+   1899,
+   37,
+   56
+  ],
+  "dust_harrier_die_2": [
+   124,
+   1899,
+   67,
+   54
+  ],
+  "future_hunger_die_1": [
+   193,
+   1899,
+   37,
+   54
+  ],
+  "dune_scarab_idle_1": [
+   0,
+   1957,
+   57,
+   52
+  ],
+  "dune_scarab_die_0": [
+   59,
+   1957,
+   57,
+   52
+  ],
+  "dune_scarab": [
+   118,
+   1957,
+   57,
+   51
+  ],
+  "silt_reaver_die_2": [
+   177,
+   1957,
+   71,
+   51
+  ],
+  "dune_scarab_attack": [
+   0,
+   2011,
+   69,
+   50
+  ],
+  "dune_scarab_hurt": [
+   71,
+   2011,
+   59,
+   49
+  ],
+  "starsilt_idle_1": [
+   132,
+   2011,
+   49,
+   49
+  ],
+  "starsilt_die_0": [
+   183,
+   2011,
+   51,
+   49
+  ],
+  "dune_scarab_die_1": [
+   0,
+   2063,
+   57,
+   47
+  ],
+  "starsilt": [
+   59,
+   2063,
+   51,
+   47
+  ],
+  "starsilt_hurt": [
+   112,
+   2063,
+   53,
+   47
+  ],
+  "starsilt_die_1": [
+   167,
+   2063,
+   51,
+   44
+  ],
+  "dune_stalker_die_2": [
+   0,
+   2112,
+   63,
+   43
+  ],
+  "future_fear_die_2": [
+   65,
+   2112,
+   37,
+   43
+  ],
+  "starsilt_attack": [
+   104,
+   2112,
+   57,
+   42
+  ],
+  "future_hunger_die_2": [
+   163,
+   2112,
+   37,
+   41
+  ],
+  "dune_scarab_die_2": [
+   0,
+   2157,
+   57,
+   37
+  ],
+  "starsilt_die_2": [
+   59,
+   2157,
+   51,
+   33
+  ]
+ },
+ "origin": {
+  "dune_stalker": [
+   31,
+   58
+  ],
+  "dune_stalker_idle_1": [
+   31,
+   59
+  ],
+  "dune_stalker_attack": [
+   33,
+   58
+  ],
+  "dune_stalker_hurt": [
+   34,
+   56
+  ],
+  "dune_stalker_die_0": [
+   31,
+   59
+  ],
+  "dune_stalker_die_1": [
+   31,
+   56
+  ],
+  "dune_stalker_die_2": [
+   31,
+   42
+  ],
+  "dune_scarab": [
+   28,
+   50
+  ],
+  "dune_scarab_idle_1": [
+   28,
+   51
+  ],
+  "dune_scarab_attack": [
+   34,
+   49
+  ],
+  "dune_scarab_hurt": [
+   29,
+   48
+  ],
+  "dune_scarab_die_0": [
+   28,
+   51
+  ],
+  "dune_scarab_die_1": [
+   28,
+   46
+  ],
+  "dune_scarab_die_2": [
+   28,
+   36
+  ],
+  "dust_harrier": [
+   35,
+   71
+  ],
+  "dust_harrier_idle_1": [
+   36,
+   71
+  ],
+  "dust_harrier_attack": [
+   39,
+   74
+  ],
+  "dust_harrier_hurt": [
+   39,
+   69
+  ],
+  "dust_harrier_cast": [
+   38,
+   75
+  ],
+  "dust_harrier_die_0": [
+   35,
+   73
+  ],
+  "dust_harrier_die_1": [
+   34,
+   70
+  ],
+  "dust_harrier_die_2": [
+   33,
+   53
+  ],
+  "silt_reaver": [
+   35,
+   73
+  ],
+  "silt_reaver_idle_1": [
+   35,
+   73
+  ],
+  "silt_reaver_attack": [
+   43,
+   72
+  ],
+  "silt_reaver_hurt": [
+   40,
+   71
+  ],
+  "silt_reaver_cast": [
+   35,
+   81
+  ],
+  "silt_reaver_die_0": [
+   35,
+   73
+  ],
+  "silt_reaver_die_1": [
+   35,
+   68
+  ],
+  "silt_reaver_die_2": [
+   35,
+   50
+  ],
+  "starsilt": [
+   25,
+   46
+  ],
+  "starsilt_idle_1": [
+   24,
+   48
+  ],
+  "starsilt_attack": [
+   28,
+   41
+  ],
+  "starsilt_hurt": [
+   26,
+   46
+  ],
+  "starsilt_cast": [
+   25,
+   56
+  ],
+  "starsilt_die_0": [
+   25,
+   48
+  ],
+  "starsilt_die_1": [
+   25,
+   43
+  ],
+  "starsilt_die_2": [
+   25,
+   32
+  ],
+  "horizon_shade": [
+   41,
+   82
+  ],
+  "horizon_shade_idle_1": [
+   42,
+   82
+  ],
+  "horizon_shade_attack": [
+   51,
+   81
+  ],
+  "horizon_shade_hurt": [
+   45,
+   81
+  ],
+  "horizon_shade_cast": [
+   43,
+   94
+  ],
+  "horizon_shade_die_0": [
+   41,
+   82
+  ],
+  "horizon_shade_die_1": [
+   41,
+   73
+  ],
+  "horizon_shade_die_2": [
+   41,
+   55
+  ],
+  "tomorrow_husk": [
+   45,
+   89
+  ],
+  "tomorrow_husk_idle_1": [
+   45,
+   90
+  ],
+  "tomorrow_husk_attack": [
+   57,
+   91
+  ],
+  "tomorrow_husk_hurt": [
+   48,
+   87
+  ],
+  "tomorrow_husk_die_0": [
+   45,
+   93
+  ],
+  "tomorrow_husk_die_1": [
+   45,
+   84
+  ],
+  "tomorrow_husk_die_2": [
+   45,
+   63
+  ],
+  "mirage_knight": [
+   48,
+   97
+  ],
+  "mirage_knight_idle_1": [
+   48,
+   98
+  ],
+  "mirage_knight_attack": [
+   63,
+   97
+  ],
+  "mirage_knight_hurt": [
+   49,
+   95
+  ],
+  "mirage_knight_cast": [
+   61,
+   109
+  ],
+  "mirage_knight_die_0": [
+   48,
+   98
+  ],
+  "mirage_knight_die_1": [
+   48,
+   92
+  ],
+  "mirage_knight_die_2": [
+   48,
+   70
+  ],
+  "mirage_double": [
+   43,
+   87
+  ],
+  "mirage_double_idle_1": [
+   43,
+   88
+  ],
+  "mirage_double_attack": [
+   58,
+   87
+  ],
+  "mirage_double_hurt": [
+   44,
+   85
+  ],
+  "mirage_double_cast": [
+   55,
+   99
+  ],
+  "mirage_double_die_0": [
+   43,
+   85
+  ],
+  "mirage_double_die_1": [
+   43,
+   76
+  ],
+  "mirage_double_die_2": [
+   43,
+   58
+  ],
+  "future_hunger": [
+   18,
+   56
+  ],
+  "future_hunger_idle_1": [
+   18,
+   57
+  ],
+  "future_hunger_attack": [
+   19,
+   58
+  ],
+  "future_hunger_hurt": [
+   20,
+   56
+  ],
+  "future_hunger_cast": [
+   18,
+   59
+  ],
+  "future_hunger_die_0": [
+   18,
+   59
+  ],
+  "future_hunger_die_1": [
+   18,
+   53
+  ],
+  "future_hunger_die_2": [
+   18,
+   40
+  ],
+  "future_fear": [
+   18,
+   56
+  ],
+  "future_fear_idle_1": [
+   18,
+   57
+  ],
+  "future_fear_attack": [
+   19,
+   58
+  ],
+  "future_fear_hurt": [
+   20,
+   56
+  ],
+  "future_fear_cast": [
+   18,
+   59
+  ],
+  "future_fear_die_0": [
+   18,
+   60
+  ],
+  "future_fear_die_1": [
+   18,
+   55
+  ],
+  "future_fear_die_2": [
+   18,
+   42
+  ]
+ },
+ "anims": {
+  "dune_stalker_idle": {
+   "frames": [
+    "dune_stalker",
+    "dune_stalker_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "dune_stalker_die": {
+   "frames": [
+    "dune_stalker_die_0",
+    "dune_stalker_die_1",
+    "dune_stalker_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "dune_scarab_idle": {
+   "frames": [
+    "dune_scarab",
+    "dune_scarab_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "dune_scarab_die": {
+   "frames": [
+    "dune_scarab_die_0",
+    "dune_scarab_die_1",
+    "dune_scarab_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "dust_harrier_idle": {
+   "frames": [
+    "dust_harrier",
+    "dust_harrier_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "dust_harrier_die": {
+   "frames": [
+    "dust_harrier_die_0",
+    "dust_harrier_die_1",
+    "dust_harrier_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "silt_reaver_idle": {
+   "frames": [
+    "silt_reaver",
+    "silt_reaver_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "silt_reaver_die": {
+   "frames": [
+    "silt_reaver_die_0",
+    "silt_reaver_die_1",
+    "silt_reaver_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "starsilt_idle": {
+   "frames": [
+    "starsilt",
+    "starsilt_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "starsilt_die": {
+   "frames": [
+    "starsilt_die_0",
+    "starsilt_die_1",
+    "starsilt_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "horizon_shade_idle": {
+   "frames": [
+    "horizon_shade",
+    "horizon_shade_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "horizon_shade_die": {
+   "frames": [
+    "horizon_shade_die_0",
+    "horizon_shade_die_1",
+    "horizon_shade_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "tomorrow_husk_idle": {
+   "frames": [
+    "tomorrow_husk",
+    "tomorrow_husk_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "tomorrow_husk_die": {
+   "frames": [
+    "tomorrow_husk_die_0",
+    "tomorrow_husk_die_1",
+    "tomorrow_husk_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "mirage_knight_idle": {
+   "frames": [
+    "mirage_knight",
+    "mirage_knight_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "mirage_knight_die": {
+   "frames": [
+    "mirage_knight_die_0",
+    "mirage_knight_die_1",
+    "mirage_knight_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "mirage_double_idle": {
+   "frames": [
+    "mirage_double",
+    "mirage_double_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "mirage_double_die": {
+   "frames": [
+    "mirage_double_die_0",
+    "mirage_double_die_1",
+    "mirage_double_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "future_hunger_idle": {
+   "frames": [
+    "future_hunger",
+    "future_hunger_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "future_hunger_die": {
+   "frames": [
+    "future_hunger_die_0",
+    "future_hunger_die_1",
+    "future_hunger_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "future_fear_idle": {
+   "frames": [
+    "future_fear",
+    "future_fear_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "future_fear_die": {
+   "frames": [
+    "future_fear_die_0",
+    "future_fear_die_1",
+    "future_fear_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "oracle": "bosses_battle",
+  "oracle_futures": "bosses_battle",
+  "oracle_true": "bosses_battle"
+ },
+ "notes": "Episode 5 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin bottom-centre (the default; the `origin` table agrees). Derived <id>_idle_1 (breathe), _attack, _hurt, _die_0..2 for every id, _cast for dust_harrier, silt_reaver, starsilt, horizon_shade, mirage_knight, mirage_double, future_hunger, future_fear; anims <id>_idle and <id>_die. Draw 1x, untinted. dune_stalker, dune_scarab, dust_harrier, silt_reaver, starsilt, horizon_shade, tomorrow_husk (enemies.png cells 2, 3, 6, 1, 0, 7, 4), mirage_knight (cell 5 at 96 px), mirage_double (cell 5 cut again at 86 px), future_hunger and future_fear (drawn in code). Every foe carries a dark outline and a side rim (gold sun, pale blue star). The Sand Oracle lives in bosses_battle (see `external`)."
+}

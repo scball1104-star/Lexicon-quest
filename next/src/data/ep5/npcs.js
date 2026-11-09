@@ -171,7 +171,7 @@ export const EP5_NPCS = {
     ],
   },
   ep5_innkeeper: {
-    name: 'The Dune Host', sprite: 'npc_innkeeper', map: 'ep5_sh_inn', spot: 'Behind the Dune Lantern counter (mark counter)', move: 'stand',
+    name: 'The Dune Host', sprite: 'npc_dune_host', map: 'ep5_sh_inn', spot: 'Behind the Dune Lantern counter (mark counter)', move: 'stand',
     service: { type: 'inn', price: 100 },
     about: 'Keeps the Dune Lantern Rest (canon title). Not a Ledger name (a shop counter).',
     talk: [

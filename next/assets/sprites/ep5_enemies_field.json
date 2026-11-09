@@ -1,0 +1,311 @@
+{
+ "image": "ep5_enemies_field.png",
+ "frames": {
+  "dune_stalker_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "dune_stalker_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "dune_scarab_0": [
+   50,
+   0,
+   16,
+   16
+  ],
+  "dune_scarab_1": [
+   67,
+   0,
+   16,
+   16
+  ],
+  "dust_harrier_0": [
+   84,
+   0,
+   24,
+   20
+  ],
+  "dust_harrier_1": [
+   109,
+   0,
+   24,
+   20
+  ],
+  "silt_reaver_0": [
+   134,
+   0,
+   24,
+   24
+  ],
+  "silt_reaver_1": [
+   159,
+   0,
+   24,
+   24
+  ],
+  "starsilt_0": [
+   184,
+   0,
+   16,
+   16
+  ],
+  "starsilt_1": [
+   201,
+   0,
+   16,
+   16
+  ],
+  "horizon_shade_0": [
+   218,
+   0,
+   24,
+   24
+  ],
+  "horizon_shade_1": [
+   0,
+   25,
+   24,
+   24
+  ],
+  "tomorrow_husk_0": [
+   25,
+   25,
+   24,
+   24
+  ],
+  "tomorrow_husk_1": [
+   50,
+   25,
+   24,
+   24
+  ],
+  "mirage_knight_0": [
+   75,
+   25,
+   24,
+   32
+  ],
+  "mirage_knight_1": [
+   100,
+   25,
+   24,
+   32
+  ],
+  "oracle_avatar_0": [
+   125,
+   25,
+   47,
+   47
+  ],
+  "oracle_avatar_1": [
+   173,
+   25,
+   47,
+   47
+  ],
+  "oracle_avatar_back_0": [
+   0,
+   73,
+   47,
+   47
+  ],
+  "oracle_avatar_back_1": [
+   48,
+   73,
+   47,
+   47
+  ]
+ },
+ "anims": {
+  "dune_stalker_idle": {
+   "frames": [
+    "dune_stalker_0",
+    "dune_stalker_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "dune_scarab_idle": {
+   "frames": [
+    "dune_scarab_0",
+    "dune_scarab_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "dust_harrier_idle": {
+   "frames": [
+    "dust_harrier_0",
+    "dust_harrier_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "silt_reaver_idle": {
+   "frames": [
+    "silt_reaver_0",
+    "silt_reaver_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "starsilt_idle": {
+   "frames": [
+    "starsilt_0",
+    "starsilt_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "horizon_shade_idle": {
+   "frames": [
+    "horizon_shade_0",
+    "horizon_shade_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "tomorrow_husk_idle": {
+   "frames": [
+    "tomorrow_husk_0",
+    "tomorrow_husk_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "mirage_knight_idle": {
+   "frames": [
+    "mirage_knight_0",
+    "mirage_knight_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "oracle_avatar_idle": {
+   "frames": [
+    "oracle_avatar_0",
+    "oracle_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "oracle_avatar_back_idle": {
+   "frames": [
+    "oracle_avatar_back_0",
+    "oracle_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "dune_stalker": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "dune_scarab": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "dust_harrier": {
+   "size": [
+    24,
+    20
+   ],
+   "origin": [
+    12,
+    19
+   ]
+  },
+  "silt_reaver": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "starsilt": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "horizon_shade": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "tomorrow_husk": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "mirage_knight": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "oracle_avatar": {
+   "size": [
+    47,
+    47
+   ],
+   "origin": [
+    23,
+    46
+   ]
+  },
+  "oracle_avatar_back": {
+   "size": [
+    47,
+    47
+   ],
+   "origin": [
+    23,
+    46
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Episode 5 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin bottom-centre. Each foe carries its own dark outline and a 1 px side rim inside it (gold sun, pale blue star), so a FIELD_LOOK entry is not needed. oracle_avatar (front) and oracle_avatar_back (seen from behind, mirrored) are the Sand Oracle coiled on the ring in the Eye of the Oracle."
+}

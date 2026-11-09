@@ -1,0 +1,27 @@
+{
+ "image": "ep5_portraits.png",
+ "frames": {
+  "oracle_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "oracle_32": [
+   48,
+   0,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "oracle": {
+   "48": "oracle_48",
+   "32": "oracle_32"
+  }
+ },
+ "sources": {
+  "oracle": "battle frame oracle (The Read Sky; 1x crop, E5-sprites)"
+ },
+ "notes": "Episode 5 pack atlas, merged into portraits. oracle: the ivory mask on the gold head and one golden claw (48), the mask alone (32), cropped at 1x from The Read Sky battle frame. Sel has no portrait (plan 9.5)."
+}

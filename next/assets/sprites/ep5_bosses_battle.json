@@ -1,0 +1,302 @@
+{
+ "image": "ep5_bosses_battle.png",
+ "frames": {
+  "oracle_cast": [
+   0,
+   0,
+   121,
+   134
+  ],
+  "oracle_futures_cast": [
+   123,
+   0,
+   141,
+   134
+  ],
+  "oracle_true_cast": [
+   266,
+   0,
+   121,
+   134
+  ],
+  "oracle_die_0": [
+   389,
+   0,
+   121,
+   122
+  ],
+  "oracle_true_die_0": [
+   0,
+   136,
+   121,
+   122
+  ],
+  "oracle_idle_1": [
+   123,
+   136,
+   121,
+   119
+  ],
+  "oracle_futures_idle_1": [
+   246,
+   136,
+   141,
+   119
+  ],
+  "oracle_true_idle_1": [
+   389,
+   136,
+   121,
+   119
+  ],
+  "oracle": [
+   0,
+   260,
+   121,
+   118
+  ],
+  "oracle_attack": [
+   123,
+   260,
+   121,
+   118
+  ],
+  "oracle_futures": [
+   246,
+   260,
+   141,
+   118
+  ],
+  "oracle_futures_attack": [
+   0,
+   380,
+   141,
+   118
+  ],
+  "oracle_futures_die_0": [
+   143,
+   380,
+   141,
+   118
+  ],
+  "oracle_true": [
+   286,
+   380,
+   121,
+   118
+  ],
+  "oracle_true_attack": [
+   0,
+   500,
+   121,
+   118
+  ],
+  "oracle_hurt": [
+   123,
+   500,
+   123,
+   116
+  ],
+  "oracle_futures_hurt": [
+   248,
+   500,
+   143,
+   116
+  ],
+  "oracle_true_hurt": [
+   0,
+   620,
+   123,
+   116
+  ],
+  "oracle_true_die_1": [
+   125,
+   620,
+   121,
+   113
+  ],
+  "oracle_die_1": [
+   248,
+   620,
+   121,
+   111
+  ],
+  "oracle_futures_die_1": [
+   371,
+   620,
+   141,
+   107
+  ],
+  "oracle_die_2": [
+   0,
+   738,
+   121,
+   81
+  ],
+  "oracle_true_die_2": [
+   123,
+   738,
+   121,
+   81
+  ],
+  "oracle_futures_die_2": [
+   246,
+   738,
+   141,
+   77
+  ]
+ },
+ "origin": {
+  "oracle": [
+   60,
+   117
+  ],
+  "oracle_idle_1": [
+   60,
+   118
+  ],
+  "oracle_attack": [
+   60,
+   117
+  ],
+  "oracle_hurt": [
+   61,
+   115
+  ],
+  "oracle_cast": [
+   60,
+   133
+  ],
+  "oracle_die_0": [
+   60,
+   121
+  ],
+  "oracle_die_1": [
+   60,
+   110
+  ],
+  "oracle_die_2": [
+   60,
+   80
+  ],
+  "oracle_futures": [
+   70,
+   117
+  ],
+  "oracle_futures_idle_1": [
+   70,
+   118
+  ],
+  "oracle_futures_attack": [
+   70,
+   117
+  ],
+  "oracle_futures_hurt": [
+   71,
+   115
+  ],
+  "oracle_futures_cast": [
+   70,
+   133
+  ],
+  "oracle_futures_die_0": [
+   70,
+   117
+  ],
+  "oracle_futures_die_1": [
+   70,
+   106
+  ],
+  "oracle_futures_die_2": [
+   70,
+   76
+  ],
+  "oracle_true": [
+   60,
+   117
+  ],
+  "oracle_true_idle_1": [
+   60,
+   118
+  ],
+  "oracle_true_attack": [
+   60,
+   117
+  ],
+  "oracle_true_hurt": [
+   61,
+   115
+  ],
+  "oracle_true_cast": [
+   60,
+   133
+  ],
+  "oracle_true_die_0": [
+   60,
+   121
+  ],
+  "oracle_true_die_1": [
+   60,
+   112
+  ],
+  "oracle_true_die_2": [
+   60,
+   80
+  ]
+ },
+ "anims": {
+  "oracle_idle": {
+   "frames": [
+    "oracle",
+    "oracle_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "oracle_die": {
+   "frames": [
+    "oracle_die_0",
+    "oracle_die_1",
+    "oracle_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "oracle_futures_idle": {
+   "frames": [
+    "oracle_futures",
+    "oracle_futures_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "oracle_futures_die": {
+   "frames": [
+    "oracle_futures_die_0",
+    "oracle_futures_die_1",
+    "oracle_futures_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "oracle_true_idle": {
+   "frames": [
+    "oracle_true",
+    "oracle_true_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "oracle_true_die": {
+   "frames": [
+    "oracle_true_die_0",
+    "oracle_true_die_1",
+    "oracle_true_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "notes": "Episode 5 pack atlas, merged into bosses_battle. The Sand Oracle (bosses.png cell 4, 1x, not flipped: the stinger points at the party) in three looks: oracle (The Read Sky: the ivory mask), oracle_futures (False Futures: a ring of drifting sand, the mask cracked), oracle_true (The True Horizon: the head plates split, a face of stars). Each has _idle_1, _attack, _hurt, _cast, _die_0..2. The phases name their look: read_sky -> oracle, false_futures -> oracle_futures, true_horizon -> oracle_true (src/data/ep5/enemies.js)."
+}
