@@ -27,6 +27,10 @@ records (next/qa/out/autoplay/<prefix>-report.json and <prefix>-dialog.log, the 
     python next/qa/integrate/story_time.py desktop-ep4        Episode 4 (E4-integrate): the same, with tide puzzles (the bot's
                                                               "tide <puzzle>: N turns" notes, by actions as quench), the end
                                                               at the Episode 4 credits and the first fight e4r_first
+    python next/qa/integrate/story_time.py desktop-ep5        Episode 5 (E5-integrate): sun and shade puzzles by decisions, not
+                                                              clicks (the bot's "shade <puzzle>: N decisions" notes: one per hour
+                                                              chosen and one per Shove sequence; 0.5 to 1 min each), the end at
+                                                              the Episode 5 credits and the first fight e5s_first after ep5_morning
 """
 import json
 import pathlib
@@ -37,6 +41,9 @@ OUT = pathlib.Path(__file__).resolve().parents[1] / 'out' / 'autoplay'
 READ_CPS, TYPE_CPS, PRESS_S = 15.0, 60.0, 0.6
 # seconds of thinking per further action (low, high): a quench paddle turn or Shove, and a tide wheel turn
 QUENCH_MORE, TIDE_MORE = (60, 120), (18, 36)
+# E5-integrate (EPISODE5_PLAN 12): a sun and shade decision (an hour chosen by name, or one Shove sequence) is real thinking each
+# time (no cycling past a mark), so every further one costs as much as the first: 0.5 to 1 minute
+SHADE_MORE = (30, 60)
 EQUIP_PROMPT = re.compile(r'Equip the .*\?$')
 # note keys -> one puzzle and its player actions (paddle turns plus Shoves)
 QUENCH_PUZZLES = {
@@ -64,7 +71,7 @@ def main(prefix):
     chars = sum(len(p) for p in pages)
     dialogue_s = sum(max(len(p) / READ_CPS, len(p) / TYPE_CPS) + PRESS_S for p in pages)
     timing = [t for t in report.get('timing') or [] if t['step'] != 'boot']        # boot is before the save loads
-    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'epilogue')), timing[-1] if timing else None)
+    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'ep5_credits_done', 'epilogue')), timing[-1] if timing else None)
     field_s = (end['game_s'] - timing[0]['game_s']) if len(timing) > 1 else 0
     # the bot's own pages pass in about 4 frames each (instant text): take them out of its field time
     field_s = max(0.0, field_s - len(pages) * 4 / 60)
@@ -73,10 +80,11 @@ def main(prefix):
     # 0.5 to 1 min for one action, then 1 to 2 min more for each further action (2 actions = the old 1.5 to 3).
     kinds = {}
     for n in report.get('notes', []):
-        if n.startswith('beam ') or n.startswith('quench ') or n.startswith('tide '):
-            m = re.search(r': (\d+) turns?', n)
+        if n.startswith('beam ') or n.startswith('quench ') or n.startswith('tide ') or n.startswith('shade '):
+            m = re.search(r': (\d+) (?:turns?|decisions?)', n)
             kinds[n.split(':')[0]] = max(1, int(m.group(1))) if (m and not n.startswith('beam ')) else None
     tide = {k for k in kinds if k.startswith('tide ')}
+    shade = {k for k in kinds if k.startswith('shade ')}
     # polish-world: puzzles the bot solves in two notes whose shoves its turn count leaves out are one puzzle of their
     # real action count (F3 Home: turn sl_home, then three Shoves)
     for name, (parts, actions) in QUENCH_PUZZLES.items():
@@ -85,7 +93,7 @@ def main(prefix):
                 kinds.pop(p, None)
             kinds[name] = actions
     puzzles = len(kinds)
-    per = {k: (TIDE_MORE if k in tide else QUENCH_MORE) for k in kinds}
+    per = {k: (TIDE_MORE if k in tide else SHADE_MORE if k in shade else QUENCH_MORE) for k in kinds}
     p_lo = sum(90 if a is None else 30 + per[k][0] * (a - 1) for k, a in kinds.items())
     p_hi = sum(180 if a is None else 60 + per[k][1] * (a - 1) for k, a in kinds.items())
     battles = report.get('battles') or []
@@ -101,6 +109,8 @@ def main(prefix):
         episode3(report, dialog, battles)
     elif prefix.split('-')[1:2] == ['ep4']:
         episode3(report, dialog, battles, morning='ep4_morning', first_enc='e4r_first')
+    elif prefix.split('-')[1:2] == ['ep5']:
+        episode3(report, dialog, battles, morning='ep5_morning', first_enc='e5s_first')
     return 0
 
 

@@ -45,6 +45,13 @@ agents' solutions (docs/MAPS_EP4_A.md, MAPS_EP4_B.md) on the field's live water.
 
     python next/qa/autoplay.py --episode 4 [--start new] [--device phone]
 
+Episode 5 (E5-integrate, EPISODE5_PLAN 12): the same two starts from <device>-ep4-credits-save.json (built from the last finished
+Episode 4 game): Continue on it in record 1, or the title's "Episode 5: new party" with it in slot 0. Sun and shade follow the map
+agents' solutions (docs/MAPS_EP5_A.md, MAPS_EP5_B.md): dials set by hour name, stones and lamps Shoved, on the field's live sand.
+The Sand Oracle's prophecies are logged with how each ended. Writes <device>-ep5-* files.
+
+    python next/qa/autoplay.py --episode 5 [--start new] [--device phone]
+
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
 Episode 2 runs write <device>-ep2-* files instead. Exit code 1 on any console error, page error, engine error,
@@ -55,6 +62,7 @@ import collections
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -98,7 +106,8 @@ FIELD_JS = """() => {
       blocked: e.cells.map(([x, y]) => !!f.map.blockedAt(x, y)), to: e.ev.to || null, on: e.ev.on || null,
       script: e.ev.script || null, item: e.ev.item || null, key: e.ev.key || null, kind: e.ev.kind || null,
       doorAt: e.prop && e.prop.doorAt ? e.prop.doorAt : null, hidden: !!(e.data && e.data.ink),
-      opens: e.state === 'broken' && e.ev.opens ? e.ev.opens.filter(([x, y]) => f.map.collisionAt(x, y) === 'none') : null });
+      opens: e.state === 'broken' && e.ev.opens ? e.ev.opens.filter(([x, y]) => f.map.collisionAt(x, y) === 'none') : null,
+      home: e.type === 'standstone' || e.type === 'lampcart' ? [e.ev.x, e.ev.y] : null });
   }
   const actors = f.actors.map(a => ({ id: a.id, kind: a.kind, x: a.tx, y: a.ty, solid: a.solid, dir: a.dir, moving: a.moving,
     fighting: !!(a.data && a.data.fighting), mode: a.brain && a.brain.mode || null }));
@@ -119,9 +128,17 @@ FIELD_JS = """() => {
     tide = { levels: { ...T.levels }, starts, wheels: Object.fromEntries(T.m.wheels.map(w => [w.id, w.b])), cells,
       washed: [...T.washed].sort(), latched: [...T.latched].sort(), busy: !!T.busy || !!T.anim };
   }
+  // E5: sun and shade: every sand cell with the collision it has now (running sand is water), the hour and the latched plates
+  let shade = null;
+  const S = f.shade;
+  if (S && S.active && S.m && S.mapRef === f.map) {
+    const W = f.map.w, cells = [];
+    for (let i = 0; i < S.m.N; i++) if (S.m.sand[i]) { const x = i % W, y = Math.floor(i / W); cells.push([x, y, f.map.collisionAt(x, y)]); }
+    shade = { hour: S.hour, start: S.m.hour, cells, latched: [...S.latched].sort(), busy: !!S.busy || !!S.anim || !!S.revealing };
+  }
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, bridges, crust, tide, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    lantern: f.lantern, ents, actors, bridges, crust, tide, shade, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
     busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
@@ -462,7 +479,7 @@ class Bot:
                 calm = 0
                 continue
             f = self.field()
-            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy'):
+            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy') and not (f.get('shade') or {}).get('busy'):
                 calm += 1
                 if calm >= 2:
                     return f
@@ -509,8 +526,8 @@ class Bot:
             for c, b in zip(cells, e['blocked']):
                 if b:
                     blocked.add(c)
-                elif e['type'] in ('door', 'gate', 'locked_door'):
-                    unblocked.add(c)        # a doorway cut into a wall face: the static grid calls it solid
+                elif e['type'] in ('door', 'gate', 'locked_door') or e.get('doorAt'):
+                    unblocked.add(c)        # a doorway cut into a wall face (or E5's gangway prop): the static grid calls it solid
             if e.get('opens'):
                 unblocked.update(tuple(c) for c in e['opens'])      # W9: a broken crack carved these cells to floor
             if e['type'] == 'door' or (e['type'] in ('gate', 'locked_door') and e['state'] == 'open' and e['to']) or e['type'] == 'ferry':
@@ -540,6 +557,7 @@ class Bot:
         dim_bridges = {(x, y) for x, y, lit in f.get('bridges') or [] if not lit}
         crust = {(x, y) for x, y in f.get('crust') or []}
         live = {(x, y): c for x, y, c in ((f.get('tide') or {}).get('cells') or [])}     # E4: water, floats, seals right now
+        live.update({(x, y): c for x, y, c in ((f.get('shade') or {}).get('cells') or [])})   # E5: running sand is water right now
 
         def passable(x, y, d):
             if not (0 <= x < W and 0 <= y < H):
@@ -4454,6 +4472,735 @@ class Episode4(Episode3):
         self.check_slots('the end')
 
 
+# ================================================================================================ Episode 5
+def ep5_fixture(device):
+    """The Episode 4 credits save (EPISODE5_PLAN 10.2): built from the newest finished Episode 4 game (<device>-ep4-last-game.json,
+    else the desktop one) by putting the party where the Episode 4 credits wake it: ep4_vw_inn, inn_bed (17, 7), facing down.
+    Written to <device>-ep4-credits-save.json. Returns the path."""
+    path = OUT / f'{device}-ep4-credits-save.json'
+    if path.exists():
+        return path
+    for src in (OUT / f'{device}-ep4-last-game.json', OUT / 'desktop-ep4-last-game.json'):
+        if src.exists():
+            g = json.loads(src.read_text(encoding='utf-8'))
+            if not (g.get('flags') or {}).get('ep4_complete') or not (g.get('counters') or {}).get('credits4_rolled'):
+                continue
+            if any(k in EP5_FLAG_HINTS for k, v in (g.get('flags') or {}).items() if v):
+                continue
+            g['map'] = 'ep4_vw_inn'
+            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['autosaveSlot'] = 1
+            path.write_text(json.dumps(g), encoding='utf-8')
+            return path
+    raise Fail('no finished Episode 4 game to build the credits save from: run python qa/autoplay.py --episode 4 first')
+
+
+EP5_FLAG_HINTS = ('ep5_started', 'ep5_morning_done', 'ship_boarded')
+# QA only: a RULE_EXT entry that records the Turning Sky as each battle opens (the start sky and the field hour it read: open
+# item 2 of E5-integrate) and every foretelling event (pinned, broken by Turn the Sky or a Break, gone with the Oracle, landed).
+SKY_LOG_JS = """(async () => {
+  const R = await import('./src/battle/rules.js');
+  if (R.RULE_EXT.some((h) => h && h.id === 'qa_sky_log')) return true;
+  window.__lqSky = window.__lqSky || [];
+  R.RULE_EXT.push({ id: 'qa_sky_log', start(ctx) {
+    const st = ctx.state || {}, S = st.sky || null, o = st.options || {}, enc = o.encounterId || o.encounter || o.id || null;
+    window.__lqSky.push({ type: 'start', enc, sky: S ? S.sky : null, turnIn: S ? S.turnIn : null, hour: S ? S.hour : null });
+    if (typeof ctx.emit !== 'function' || ctx.__qaSky) return;
+    ctx.__qaSky = true;
+    const emit = ctx.emit.bind(ctx);
+    ctx.emit = (ev) => {
+      if (ev && typeof ev.type === 'string' && /^foretell/.test(ev.type)) {
+        let mira = null;
+        try { const m = (typeof ctx.all === 'function' ? ctx.all() : []).find((u) => u.id === 'mira'); if (m) mira = { alive: !!m.alive, mp: m.mp, st: Object.keys(m.statuses || {}) }; } catch (e) {}
+        window.__lqSky.push({ type: ev.type, enc, reason: ev.reason || null, moved: !!ev.moved, skill: ev.skill || null, mira });
+      }
+      return emit(ev);
+    };
+  } });
+  return true;
+})()"""
+
+
+class Episode5(Episode4):
+    """Episode 5, "The Last Prophecy" (docs/story/EPISODE5.md, STAGING_EP5.md, MAPS_EP5_A.md, MAPS_EP5_B.md): from the morning after
+    the Episode 4 credits (Continue on the credits save, or the title's Episode 5 quick start) to the Episode 5 credits and the
+    wake in the Dune Lantern Rest. Sun and shade follow the map agents' reported solutions: a dial is set to an hour by name
+    (Episode5.set_hour) and stones and lamps are Shoved along their grooves (Bot.shove_to), walking on the field's live
+    collision (running sand is water, FIELD_JS `shade`). Fights are Auto at 2x. Each foretelling of the Sand Oracle is recorded
+    with how it ended (Turn the Sky, a Break, landed). The quick start is checked to write no save slot it does not own, and
+    no run may log an "unknown ... id" warning."""
+
+    # The EXP each zone is left at on the plan's route (EPISODE5_PLAN 6.1, from the quick start's 8,900): optional fights stop
+    # there, so a Continue run (an Episode 4 save arrives at Lv 22) and the quick start both meet the Oracle near Lv 24.
+    ZONE_EXP = {'ep5_caravan_road': 9640, 'ep5_lab_f1': 10720, 'ep5_lab_f2': 11500, 'ep5_lab_f3': 12100}
+    T9 = [('dunewalker_mail', 1), ('starweave_robe', 1)]
+    T10 = [('copperwind_sword', 1), ('armillary_rod', 1)]
+    CAP = {'dawn': 'Dawn', 'noon': 'Noon', 'dusk': 'Dusk'}
+
+    def __init__(self, bot, side=True, until=None, start='save'):
+        super().__init__(bot, side=side, until=until, start=start)
+        self.decisions = collections.Counter()     # puzzle label -> hours chosen + Shove sequences (story_time.py reads the notes)
+
+    # ---- sun and shade
+    def shade(self, f=None):
+        f = f or self.b.settle()
+        return f.get('shade') or {}
+
+    def set_hour(self, dial, hour, label=''):
+        """Set the floor's hour at `dial` by name (the dial asks Dawn / Noon / Dusk), walking to it on the live floor."""
+        b = self.b
+        for attempt in range(3):
+            f = b.settle()
+            sh = self.shade(f)
+            if not sh:
+                raise Fail(f'no sun and shade on {f["map"]} ({label})')
+            if sh.get('hour') == hour:
+                return f
+            # the dial's Dawn / Noon / Dusk list takes its first presses only once it is open: wait for it, then pick by name
+            b.interact_no_settle(ent_id=dial)
+            try:
+                b.page.wait_for_function("LQ_DEBUG.scene() === 'choice' && !LQ_DEBUG.state().transition", timeout=8000, polling=20)
+                b.frames(12)
+                ss = b.scene_state().get('ss') or {}
+                b.pick(b.choose(ss.get('options') or [], [self.CAP[hour]]), ss.get('index'))
+            except Exception as e:
+                b.notes.append(f'{dial}: no hour list ({e.__class__.__name__})')
+            f = b.settle()
+            if self.shade(f).get('hour') == hour:
+                self.decisions[label or dial] += 1
+                return f
+            b.notes.append(f'{dial}: asked for {hour}, the hour is {self.shade(f).get("hour")} (attempt {attempt + 1})')
+        raise Fail(f'{dial} did not set the hour to {hour} ({label})')
+
+    def shove(self, ent_id, target, label=''):
+        """One Shove sequence (Bram's Shove, one cell a press) along the stone's or lamp's groove: one decision."""
+        f = self.b.settle()
+        e = self.b.ent(f, ent_id)
+        if e and (e['x'], e['y']) == tuple(target):
+            return
+        self.b.shove_to(ent_id, target, label=label or ent_id)
+        self.decisions[label or ent_id] += 1
+
+    def puzzle_done(self, label):
+        n = self.decisions.pop(label, 0)
+        if n:
+            self.b.notes.append(f'shade {label}: {n} decisions')
+
+    def walk(self, cells, label):
+        """Walk to one of `cells`; a foe standing in the only corridor (a Labyrinth guard, back after a reload) is fought first."""
+        b = self.b
+        cells = [tuple(c) for c in cells]
+        try:
+            return b.walk_to(cells, label=label)
+        except Fail as e:
+            b.notes.append(f'{label}: {str(e)[:60]}; fighting through')
+            b.hunt(limit=3, label=f'clear the way ({label})')
+            return b.walk_to(cells, fight=True, label=label)
+
+    def trigger(self, cells, flag, label, max_s=600):
+        if self.has(flag):
+            return
+        self.walk(cells, label)
+        self.b.settle(max_s=max_s)
+        if not self.has(flag):
+            raise Fail(f'{label} did not set {flag}')
+
+    def round_trip(self, label):
+        """Save to this run's own slot only, quit, load it back, and check the Episode 5 world state came back (EPISODE5_PLAN 12,
+        saves): latched plates and opened doors kept, the floor at its start hour, every stone and lamp on its authored cell."""
+        b = self.b
+        before = b.field() or {}
+        sb = before.get('shade') or {}
+        b.round_trip(self.run_slot or 1, label)
+        after = b.settle()
+        sa = after.get('shade') or {}
+        if not set(sb.get('latched') or []) <= set(sa.get('latched') or []):
+            raise Fail(f'after the reload at {label}: latched {sb.get("latched")} -> {sa.get("latched")}')
+        opened = lambda f: sorted(e['id'] for e in f['ents'] if e['type'] in ('gate', 'locked_door') and e.get('state') == 'open')
+        if not set(opened(before)) <= set(opened(after)):
+            raise Fail(f'after the reload at {label}: doors {opened(before)} -> {opened(after)}')
+        if sa and sa.get('hour') != sa.get('start'):
+            raise Fail(f'after the reload at {label}: the hour is {sa.get("hour")}, not the start hour {sa.get("start")}')
+        moved = [(e['id'], (e['x'], e['y']), tuple(e['home'])) for e in after['ents'] if e.get('home') and (e['x'], e['y']) != tuple(e['home'])]
+        if moved:
+            raise Fail(f'after the reload at {label}: stones or lamps off their authored cells {moved}')
+        b.notes.append(f'reload at {label}: hour {sa.get("hour")} (start {sa.get("start")}), latched {sa.get("latched")}, doors {opened(after)}')
+
+    def inn_if_hurt(self, frac=0.7):
+        b = self.b
+        vit = b.party_vitals()
+        if not vit or min(v['hp'] / max(1, v['maxHp']) for v in vit) >= frac:
+            return
+        f = b.settle()
+        if f['map'] != 'ep5_saffron':
+            return
+        b.through('door_inn')
+        self.ensure_map('ep5_sh_inn')
+        b.rest_at_inn('ep5_innkeeper')
+        b.through('inn_exit', exact=False)
+
+    def ethers(self):
+        it = self.b.items()
+        return (it.get('ether') or 0) + (it.get('hi_ether') or 0)
+
+    def keep(self, label='', reserve=4, frac=0.3):
+        """Upkeep (Bot.maintain) that keeps `reserve` Ethers back for the Sand Oracle, whose foretellings only Mira's MP answers
+        (Turn the Sky, 12 MP), and whose Eye has no font: Optimize, Ethers only above the reserve, a font on this map when hurt."""
+        b = self.b
+        b.menu_optimize_all()
+        if self.ethers() > reserve:
+            b.top_up_mp(frac)
+        b.maybe_rest_at_fonts()
+
+    def sky_log(self):
+        return self.b.js('window.__lqSky || []') or []
+
+    # ---- phases
+    def title_start(self):
+        """Title -> Continue on the Episode 4 credits save (record 1), or Title -> Episode 5: new party -> the slot notice ->
+        Start -> name -> the inn. The quick start's row and slot notice are answered with real key presses."""
+        b = self.b
+        if b.scene() != 'title':
+            return
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title' && !LQ_DEBUG.state().transition", timeout=30000, polling=30)
+        b.frames(10)
+        for n in EP3_SLOTS:
+            self.slots0[n] = self.slot_raw(n)
+        if b.resume and self.start == 'save':
+            b.shot('title')
+            b.title_continue(1)
+            self.run_slot = 1
+            b.notes.append(f'resumed from {b.resume} (record 1)')
+            b.mark('resume')
+            return
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep5')); })()", timeout=60000, polling=50)
+        b.frames(6)
+        items = [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
+        if 'ep5' not in items:
+            raise Fail(f'the title does not offer Episode 5 (items {items})')
+        b.shot('title_ep5')
+        want = items.index('ep5')
+        cols = b.js('LQ_ENGINE.scene.menu.columns') or 1
+        rows = b.js('LQ_ENGINE.scene.menu.rows') or len(items)
+        for _ in range(12):
+            idx = b.js('LQ_ENGINE.scene.menu.index') or 0
+            if idx == want:
+                break
+            if cols > 1 and idx // rows != want // rows:
+                b.page.keyboard.press('ArrowRight' if want // rows > idx // rows else 'ArrowLeft')
+            else:
+                b.page.keyboard.press('ArrowDown' if want > idx else 'ArrowUp')
+            b.frames(4)
+        b.page.keyboard.press('KeyZ')
+        b.frames(10)
+        if self.slots0.get(0) is not None:
+            b.page.wait_for_function("LQ_DEBUG.scene() === 'ep5Ask'", timeout=10000, polling=30)
+            st = b.scene_state()['ss'] or {}
+            if st.get('options') != ['back', 'start']:
+                raise Fail(f'slot 0 is taken but the quick start showed no slot notice: {st}')
+            b.notes.append(f'quick start notice: {st.get("notice")!r}')
+            b.shot('ep5_slot_notice')
+            b.page.keyboard.press('ArrowDown')
+            b.frames(4)
+            b.page.keyboard.press('KeyZ')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'nameEntryEp5' && !LQ_DEBUG.state().transition", timeout=20000, polling=30)
+        b.frames(10)
+        for _ in range(8):
+            b.page.keyboard.press('Backspace')
+        b.page.keyboard.type(b.hero, delay=30)
+        b.frames(6)
+        b.shot('name_entry_ep5')
+        b.page.keyboard.press('Enter')
+        b.page.wait_for_function("LQ_DEBUG.state().scenes.includes('field')", timeout=60000, polling=30)
+        b.frames(30)
+        g = b.game() or {}
+        if g.get('heroName') != b.hero:
+            raise Fail(f'hero name is {g.get("heroName")!r}, typed {b.hero!r}')
+        self.run_slot = g.get('autosaveSlot')
+        b.notes.append(f'quick start: the run saves to slot {self.run_slot} (slot 0 was {"taken" if self.slots0.get(0) else "empty"})')
+        if self.slots0.get(0) is not None and self.run_slot == 0:
+            raise Fail('the quick start took slot 0 although it holds another game')
+        # PLAYTEST_REVIEW_6 fix 3: both packs' sounds are in the manifest before the fade in
+        missing = b.js("(() => { const a = LQ_ENGINE.audio, m = a.manifest || (a.real && a.real.manifest) || {}; "
+                       "const has = (k, id) => !!((m[k] || {})[id]); return ['valewyn:music', 'saffron:music', 'labyrinth:music', 'sun_dial:sfx', 'sky_turn:sfx']"
+                       ".filter((s) => { const [id, k] = s.split(':'); return !has(k, id); }); })()")
+        if missing:
+            raise Fail(f'the quick start party is missing sounds {missing}')
+        b.mark('ep5_new_game')
+
+    def morning(self):
+        b = self.b
+        f = b.settle()
+        if not self.has('ep5_started'):
+            raise Fail(f'ep5_morning did not run (on {f["map"]} at {f["leader"]})')
+        b.mark('ep5_morning')
+        if not b.items().get('star_letter'):
+            raise Fail('ep5_morning did not give the star letter')
+        g = b.game() or {}
+        b.notes.append(f'Episode 5 arrival: Lv {self.level()}, {(g.get("party") or [{}])[0].get("exp")} EXP, {g.get("gold")} G '
+                       f'({"the quick start" if self.start == "new" else "the Episode 4 save"})')
+        if f['map'] == 'ep4_vw_inn':
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            if self.side:
+                self.talk('ep4_innkeeper')
+            b.through('inn_exit', exact=False)
+        self.ensure_map('ep4_valewyn')
+        b.menu_talk()
+        self.check_slots('the morning')
+
+    def berth(self):
+        b = self.b
+        if self.has('ship_arrived'):
+            return
+        self.ensure_map('ep4_valewyn')
+        if self.side:
+            self.talk('ada')
+        if not self.has('ship_boarded'):
+            self.trigger([(32, 31)], 'ship_boarded', 'berth_trig')         # down the gangway (the berth object answers confirm too)
+        b.mark('berth')
+        if b.settle()['map'] == 'ep4_valewyn':
+            b.through('berth_sail', exact=False)
+        self.ensure_map('ep5_ship')
+        b.settle()
+        if not self.has('ship_arrived'):
+            raise Fail('ship_night did not run')
+        b.mark('ship')
+
+    def ship(self):
+        b = self.b
+        if self.has('ship_first_fight_done'):
+            return
+        self.ensure_map('ep5_ship')
+        self.trigger([(21, y) for y in range(3, 11)], 'bram_asked', 'bow_trig')
+        b.notes.append(f'ship_bram: {"truth (bram_told)" if self.has("bram_told") else "kind (bram_spared)"}')
+        self.trigger([(14, y) for y in range(3, 11)], 'ship_first_fight_done', 'fight_row', max_s=900)
+        b.mark('first_fight_done')
+        b.through('gangway_down', exact=False)
+        self.ensure_map('ep5_caravan_road')
+        b.settle()
+        if not self.has('road_landed'):
+            raise Fail('road_landing did not run')
+        b.mark('caravan_road')
+
+    def road(self):
+        b = self.b
+        if self.has('haven_arrived'):
+            return
+        self.ensure_map('ep5_caravan_road')
+        if self.side:
+            self.chest('chest_jetty')
+        self.trigger([(12, y) for y in range(0, 28)], 'saw_glass_flat', 'road_trig')
+        self.hunt(2, label='the jetty road')
+        # the island chest at noon (the start hour): the stones' noon shadows are its stair
+        if self.side and not (b.opened('ep5_caravan_road', 'chest_isle') or b.opened('ep5_caravan_road', 'chest_isle_bell')):
+            try:
+                self.set_hour('dial_road', 'noon', label='the Glass Flat')
+                self.chest('chest_isle_bell' if self.has('bells_started') else 'chest_isle')
+            except Fail as e:
+                b.notes.append(f'island chest skipped: {e}')
+        # dawn: the obelisk's long shadow is the bridge across the flat
+        self.set_hour('dial_road', 'dawn', label='the Glass Flat')
+        self.walk([(24, 13), (24, 14), (25, 13)], 'across the Glass Flat')
+        self.puzzle_done('the Glass Flat')
+        if not self.has('tent_rested'):
+            b.rest_at_fire('tent_fire', prefer=['Why is the road empty?', 'Rest', 'Not now'])
+        b.visit_shop('omar', [('hourglass_sand', 2)])
+        self.keep('the shade tent')
+        self.hunt(3, label='the road east')
+        if self.side and not b.opened('ep5_caravan_road', 'chest_cistern'):
+            try:
+                if b.dash_break('crack_cistern', label='cistern'):
+                    self.chest('chest_cistern')
+            except Fail as e:
+                b.notes.append(f'cistern skipped: {e}')
+        self.trigger([(44, y) for y in range(6, 28)], 'saw_haven', 'haven_view_trig')
+        b.exit_to((51, 7), label='to the Haven')
+        self.ensure_map('ep5_saffron')
+        b.settle()
+        if not self.has('haven_arrived'):
+            raise Fail('haven_arrival did not run')
+        b.mark('saffron')
+
+    def haven(self):
+        b = self.b
+        if self.has('gnomon_get'):
+            return
+        self.ensure_map('ep5_saffron')
+        if not self.has('met_sel'):
+            self.talk('sel')
+            if not self.has('met_sel'):
+                raise Fail('meet_sel did not set met_sel')
+            b.mark('met_sel')
+        if self.side and not self.has('moonwell_seen'):
+            try:
+                b.interact(ent_id='moonwell', label='the Moonwell')
+            except Fail as e:
+                b.notes.append(f'Moonwell skipped: {e}')
+        b.through('door_smithy')
+        self.ensure_map('ep5_sh_smithy')
+        b.visit_shop('hassan', self.T9)
+        b.through('smithy_exit', exact=False)
+        b.menu_optimize_all()
+        self.ensure_map('ep5_saffron')
+        b.through('door_shop')
+        self.ensure_map('ep5_sh_shop')
+        b.visit_shop('yasmin', [('hi_potion', 2), ('ether', 4), ('hi_ether', 1)])
+        b.through('shop_exit', exact=False)
+        self.ensure_map('ep5_saffron')
+        if not self.has('star_reading_done'):
+            b.through('door_tower')
+            self.ensure_map('ep5_sh_observatory')
+            self.trigger([(x, 11) for x in range(1, 11)], 'star_reading_done', 'reading_trig', max_s=900)
+            if not self.has('sky_learned'):
+                raise Fail('star_reading did not teach Turn the Sky')
+            b.mark('star_reading')
+            b.interact_no_settle(ent_id='save_bell_tower')
+            self.save_from_bell(self.run_slot or 1)
+            b.close_menu()
+            b.through('tower_exit', exact=False)
+        self.ensure_map('ep5_saffron')
+        self.inn_if_hurt(0.8)
+        self.ensure_map('ep5_saffron')
+        self.trigger([(21, 4), (22, 4)], 'gnomon_get', 'gate_trig')
+        b.mark('sel_gate')
+        b.through('north_door', exact=False)
+        self.ensure_map('ep5_lab_f1')
+        b.settle()
+        if not self.has('lab_f1_arrived'):
+            raise Fail('lab_f1_arrival did not run')
+        b.mark('lab_f1')
+
+    def lab_f1(self):
+        b = self.b
+        if self.has('lab_f1_done'):
+            return
+        self.ensure_map('ep5_lab_f1')
+        if self.side:
+            self.chest('chest_a')
+        # B, Two Shadows: dawn for the Dune Key on the strip, dusk to walk row 17 east
+        if not b.opened('ep5_lab_f1', 'chest_dune'):
+            self.set_hour('dial_a', 'dawn', label='F1 two shadows')
+            self.chest('chest_dune')
+        self.hunt(2, label='two shadows')
+        if not self.has('sel_memory_1'):
+            self.set_hour('dial_a', 'dusk', label='F1 two shadows')
+            self.walk([(27, 17)], 'east along row 17')
+            self.puzzle_done('F1 two shadows')
+            if self.side and not b.opened('ep5_lab_f1', 'chest_b'):
+                try:
+                    self.chest('chest_b')
+                except Fail as e:
+                    b.notes.append(f'chest_b skipped: {e}')
+            # C, the Groove: Shove ss_c up twice, then dawn: its long shadow west along row 4 into the camp court
+            self.hunt(2, label='the groove')
+            self.shove('ss_c', (30, 4), label='F1 the groove')
+            self.set_hour('dial_b', 'dawn', label='F1 the groove')
+            self.trigger([(24, y) for y in range(3, 11)], 'sel_memory_1', 'memory1_trig')
+            self.puzzle_done('F1 the groove')
+        self.keep('the camp court')
+        # D, the Sun Plate: the Dune Key door, Shove plt_m up, dawn latches the plate (the sun gate), noon for the colonnade path
+        if not self.has('plate_f1_open'):
+            self.hunt(2, label='the corridor')
+            b.through('door_d')
+            self.shove('plt_m', (11, 17), label='F1 the sun plate')
+            self.set_hour('dial_c', 'dawn', label='F1 the sun plate')
+            if not self.has('plate_f1_open'):
+                raise Fail('dawn on plate_d did not latch plate_f1_open')
+        self.set_hour('dial_c', 'noon', label='F1 the sun plate')
+        self.puzzle_done('F1 the sun plate')
+        self.hunt(2, label='the sun plate')
+        if not b.opened('ep5_lab_f1', 'chest_wraps'):
+            try:
+                if b.dash_break('crack_d', label='the cracked base'):
+                    self.chest('chest_wraps')
+                    if self.has('bells_started'):
+                        self.chest('chest_bell3')
+            except Fail as e:
+                b.notes.append(f'Nomad Wraps skipped: {e}')
+        self.keep('the sun plate')
+        self.round_trip('F1 the sun plate')
+        self.ensure_map('ep5_lab_f1')
+        self.check_slots('F1')
+        # E, the Far Court: west along row 14 at noon, through the latched sun gate; dawn for the Nomad Sun Key
+        self.walk([(3, 14)], 'the colonnade path')
+        self.walk([(3, 12), (3, 11), (3, 10)], 'through the sun gate')
+        self.hunt(2, label='the far court')
+        if not b.opened('ep5_lab_f1', 'chest_sunkey'):
+            self.set_hour('dial_d', 'dawn', label='F1 the far court')
+            self.chest('chest_sunkey')
+            if not b.items().get('sun_key'):
+                raise Fail('the far court chest did not give the Nomad Sun Key')
+        if self.side:
+            try:
+                self.set_hour('dial_d', 'dusk', label='F1 the far court')
+                self.chest('chest_bell2' if self.has('bells_started') else 'chest_bell2_alt')
+            except Fail as e:
+                b.notes.append(f'far court second chest skipped: {e}')
+        self.puzzle_done('F1 the far court')
+        self.hunt(2, label='the stair')
+        self.keep('end of F1')
+        self.trigger([(13, 2)], 'lab_f1_done', 'stair_trig')
+        f = b.settle()
+        if f['map'] == 'ep5_lab_f1':
+            b.through('stair_f2', exact=False)
+        self.ensure_map('ep5_lab_f2')
+        b.settle()
+        if not self.has('lab_f2_arrived'):
+            raise Fail('lab_f2_arrival did not run')
+        b.mark('lab_f2')
+
+    def lab_f2(self):
+        b = self.b
+        if self.has('lab_f2_done'):
+            return
+        self.ensure_map('ep5_lab_f2')
+        # B, the Long Shafts: Shove pl_b up twice into the dawn shaft; through the walk gap into the middle
+        if not self.has('sel_memory_2'):
+            self.shove('pl_b', (14, 13), label='F2 the long shafts')
+            self.hunt(2, label='the long shafts')
+            self.trigger([(x, 8) for x in range(2, 8)], 'sel_memory_2', 'memory2_trig')
+            self.puzzle_done('F2 the long shafts')
+        if not self.has('vex_gallery_met'):
+            self.trigger([(19, y) for y in range(3, 9)], 'vex_gallery_met', 'vex_trig', max_s=900)
+            b.notes.append(f'vex_gallery: {"truth (star_restored)" if self.has("star_restored") else "hidden (star_hidden)"}')
+            b.mark('vex_gallery')
+        self.hunt(2, label='the star floor')
+        # D, Two Windows: dusk through the K1 door cell; Shove pl_d down twice; dawn through the K2 door cell to the second key
+        if not b.opened('ep5_lab_f2', 'chest_key'):
+            self.set_hour('dial_u', 'dusk', label='F2 two windows')
+            self.walk([(35, 9), (35, 10)], 'through the K1 door cell')
+            self.hunt(2, label='two windows')
+            self.shove('pl_d', (36, 15), label='F2 two windows')
+            self.set_hour('dial_m', 'dawn', label='F2 two windows')
+            self.walk([(33, 17), (33, 18)], 'through the K2 door cell')
+            self.chest('chest_key')
+            self.puzzle_done('F2 two windows')
+        self.keep('two windows')
+        self.hunt(3, label='the approach')
+        if self.side and not b.opened('ep5_lab_f2', 'chest_ap'):
+            try:
+                self.chest('chest_ap')
+            except Fail as e:
+                b.notes.append(f'approach chest skipped: {e}')
+        b.through('door_e')
+        f = b.settle()
+        if b.ent(f, 'font_l2b'):
+            try:
+                b.rest_at_font('font_l2b', label='font F2')
+            except Fail as e:
+                b.notes.append(f'font F2 skipped: {e}')
+        self.round_trip('F2 mirror hall')
+        self.ensure_map('ep5_lab_f2')
+        self.check_slots('F2')
+        for attempt in range(5):
+            if self.has('knight_defeated'):
+                break
+            if attempt:
+                b.notes.append(f'Mirage Knight attempt {attempt + 1} (Lv {self.level()})')
+                self.keep('before the Knight again')
+            b.mark('mirage_knight')
+            b.walk_to([(x, 15) for x in range(18, 28)], label='knight_trig')
+            b.settle(max_s=900)
+        if not self.has('knight_defeated'):
+            raise Fail('the Mirage Knight did not fall in 5 attempts')
+        self.trigger([(22, 12)], 'lab_f2_done', 'stair_trig')
+
+    def town_trip(self):
+        """After the Gallery: the F2 lift to F1's Oasis Gate, out to the Haven's north gate, the two tier 10 pieces at the
+        Copperwind (plan 7.6; the simulator's lab_f3 row), the inn if hurt; then the north door, F1's lift to F2, the F3 stair."""
+        b = self.b
+        if not self.has('lab_f2_done') or getattr(self, '_tripped', False) or self.has('lab_f3_arrived'):
+            return
+        self._tripped = True
+        self.ensure_map('ep5_lab_f2')
+        b.through('lift_f2_short', exact=False)
+        self.ensure_map('ep5_lab_f1')
+        b.through('to_haven', exact=False)
+        self.ensure_map('ep5_saffron')
+        b.mark('town_trip')
+        b.through('door_smithy')
+        b.visit_shop('hassan', self.T10)
+        b.through('smithy_exit', exact=False)
+        b.menu_optimize_all()
+        self.ensure_map('ep5_saffron')
+        b.through('door_shop')
+        b.visit_shop('yasmin', [('ether', 6), ('hi_ether', 2), ('hi_potion', 2)])
+        b.through('shop_exit', exact=False)
+        self.inn_if_hurt(0.95)
+        self.ensure_map('ep5_saffron')
+        b.through('north_door', exact=False)
+        self.ensure_map('ep5_lab_f1')
+        b.through('lift_f1', exact=False)
+        self.ensure_map('ep5_lab_f2')
+        b.through('stairs_f3', exact=False)
+        self.ensure_map('ep5_lab_f3')
+        b.settle()
+        if not self.has('lab_f3_arrived'):
+            raise Fail('lab_f3_arrival did not run')
+        b.mark('lab_f3')
+
+    def lab_f3(self):
+        b = self.b
+        if self.has('oracle_door_open'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep5_lab_f2':
+            b.through('stairs_f3', exact=False)
+            self.ensure_map('ep5_lab_f3')
+            b.settle()
+            b.mark('lab_f3')
+        self.ensure_map('ep5_lab_f3')
+        if not self.has('sel_walked_in'):
+            raise Fail('sel_walks_in did not run')
+        # Shelter: roll the lamp east off the moat, cross in the dark
+        if not self.has('landing_shelter'):
+            if b.settle()['leader']['y'] < 9:
+                b.through('down_shelter')
+            self.shove('lamp_s', (20, 11), label='F3 shelter')
+            self.hunt(2, label='shelter')
+            self.trigger([(x, 14) for x in range(14, 19)], 'landing_shelter', 'shelter_trig')
+            self.puzzle_done('F3 shelter')
+        # Truth: put the stone between the lamp and the moat
+        if not self.has('landing_truth'):
+            b.through('down_truth')
+            self.hunt(2, label='truth')
+            self.shove('ss_t', (16, 20), label='F3 truth')
+            self.trigger([(x, 24) for x in range(14, 19)], 'landing_truth', 'truth_trig')
+            self.puzzle_done('F3 truth')
+            if self.side and not b.opened('ep5_lab_f3', 'chest_bow'):
+                try:
+                    b.reveal_near([(7, 24)], label='the faint bridge')
+                    self.chest('chest_bow')
+                except Fail as e:
+                    b.notes.append(f'Starwright Bow skipped: {e}')
+        self.keep('after the truth')
+        # Return: roll the second lamp east, the moon plate falls dark and latches, the moon gate opens
+        if not self.has('landing_return'):
+            b.through('down_return')
+            self.hunt(2, label='return')
+            self.shove('lamp_r2', (20, 29), label='F3 return')
+            f = b.settle()
+            if 'plate_r' not in (self.shade(f).get('latched') or []):
+                b.notes.append(f'plate_r not latched after the lamp (latched {self.shade(f).get("latched")})')
+            self.trigger([(16, 32)], 'landing_return', 'return_trig', max_s=900)
+            self.puzzle_done('F3 return')
+        b.settle(max_s=900)
+        if not self.has('oracle_door_open'):
+            raise Fail('sel_memory_3 did not open the Sun Keyhole')
+        b.mark('sel_memory_3')
+
+    def oracle(self):
+        b = self.b
+        if self.has('oracle_defeated'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep5_lab_f3':
+            if b.ent(f, 'down_keyhole') and f['leader']['y'] < 35:
+                b.through('down_keyhole')
+            if self.side:
+                self.chest('chest_hourglass')
+            self.keep('the keyhole', reserve=0, frac=0.9)      # Mira walks into the Eye with her MP for Turn the Sky
+            b.notes.append(f'into the Eye with {self.ethers()} Ethers, Mira MP {[(v["mp"], v["maxMp"]) for v in b.party_vitals() if v["id"] == "mira"]}')
+            self.round_trip('before the Sand Oracle')
+            self.ensure_map('ep5_lab_f3')
+        for attempt in range(5):
+            f = b.settle()
+            if f['map'] == 'ep5_lab_f3':
+                b.through('door_oracle', exact=False)
+            self.ensure_map('ep5_lab_oracle')
+            if attempt == 0:
+                b.mark('sand_oracle')
+            b.notes.append(f'Sand Oracle attempt {attempt + 1}: Lv {self.level()}')
+            b.walk_to([(x, 13) for x in range(1, 23)], label='oracle_trig')
+            b.settle(max_s=1500)
+            if self.has('oracle_defeated'):
+                break
+            f = b.settle()
+            if f['map'] == 'ep5_lab_oracle':
+                b.through('eye_exit')
+            self.ensure_map('ep5_lab_f3')
+            self.keep('before the Oracle again')
+        if not self.has('oracle_defeated'):
+            raise Fail('the Sand Oracle did not fall in 5 attempts')
+        b.settle(max_s=900)
+        if not self.has('chart_restored') or not b.items().get('name_fragment_5'):
+            raise Fail('oracle_after did not restore the chart and give the fifth fragment')
+        b.mark('oracle_after')
+        log = self.sky_log()
+        ended = collections.Counter(e.get('reason') or 'landed' for e in log if e.get('type') in ('foretell_broken', 'foretell_fall') and e.get('enc') == 'oracle')
+        read = sum(1 for e in log if e.get('type') == 'foretell' and not e.get('moved') and e.get('enc') == 'oracle')
+        b.notes.append(f'Sand Oracle prophecies: {read} read; ended {dict(ended)} (turned = Turn the Sky, break = a Break, gone = the Oracle fell, landed = it struck)')
+        landed = [e.get('mira') for e in log if e.get('type') == 'foretell_fall' and e.get('enc') == 'oracle']
+        if landed:
+            b.notes.append(f'Mira as each landed foretelling fell: {landed[:12]}')
+
+    def ending(self):
+        b = self.b
+        if self.has('ep5_complete') and (b.game() or {}).get('counters', {}).get('credits5_rolled'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep5_lab_oracle':
+            b.through('lift_out', exact=False)
+        b.settle(max_s=900)                                          # every_road, ep5_ending, the credits
+        if not self.has('ep5_complete'):
+            raise Fail(f'ep5_complete was not set (on {b.settle()["map"]})')
+        for _ in range(500):
+            sc = b.handle()
+            fs = b.field() or {}
+            if sc == 'field' and fs.get('map') == 'ep5_sh_inn' and not fs.get('locked'):
+                break
+        f = b.settle()
+        if f['map'] != 'ep5_sh_inn':
+            raise Fail(f'after the Episode 5 credits the party woke on {f["map"]}, not ep5_sh_inn')
+        if not (b.game() or {}).get('counters', {}).get('credits5_rolled'):
+            raise Fail('credits5_rolled was not counted')
+        b.mark('ep5_credits_done')
+        self.check_slots('the credits')
+
+    def epilogue5(self):
+        b = self.b
+        if not self.side or not self.has('ep5_complete'):
+            return
+        f = self.ensure_map('ep5_sh_inn')
+        if f['leader']['x'] >= 13:
+            b.through('inn_down')
+        self.talk('ep5_innkeeper')
+        b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')
+        self.ensure_map('ep5_saffron')
+        self.talk('yara')
+        b.menu_talk()
+        b.mark('ep5_epilogue')
+
+    def run(self):
+        b = self.b
+        b.mark('boot')
+        phases = [('ep5_start', self.title_start), ('ep5_morning', self.morning), ('berth', self.berth), ('ship', self.ship),
+                  ('road', self.road), ('haven', self.haven), ('lab_f1', self.lab_f1), ('lab_f2', self.lab_f2), ('town_trip', self.town_trip),
+                  ('lab_f3', self.lab_f3), ('oracle', self.oracle), ('ending', self.ending), ('epilogue5', self.epilogue5)]
+        for step_id, fn in phases:
+            print(f'-- {step_id}', flush=True)
+            if step_id == 'ep5_morning' and self.has('ship_boarded'):
+                continue                                          # a resumed game past the morning
+            fn()
+            if step_id == 'ep5_start':
+                b.js(SKY_LOG_JS)
+            if b.resume and step_id == 'ep5_start':
+                b.resume = None
+                self.ensure_any()
+            b.check_errors()
+            if self.until == step_id:
+                print(f'stopping after {step_id} (--until)', flush=True)
+                return
+        self.check_slots('the end')
+        starts = [e for e in self.sky_log() if e.get('type') == 'start']
+        b.notes.append('battle skies: ' + ', '.join(f'{e.get("enc")} {e.get("sky")}@{e.get("hour")}' for e in starts[:30]))
+        bad = sorted({w for w in b.warnings if re.search(r'unknown .*\bid\b|unknown (object|target|sprite|map|item|npc|encounter|scene)|no actor|no path|no scene', w, re.I)})
+        if bad:
+            raise Fail(f'{len(bad)} unknown-id or staging warnings: {bad[:6]}')
+        b.notes.append('warnings: no "unknown ... id", "no actor", "no path" or "no scene" line in the run')
+
+
 # ================================================================================================ the Deep Stacks (C3-sim-bot)
 CAVE_OUT = HERE / 'cave' / 'out'
 CAVE_JS = 'LQ_DEBUG.state().cave'
@@ -5067,9 +5814,10 @@ def main(argv):
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
-    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4],
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4, 5],
                     help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0; '
-                         '4: Episode 4 (E4-integrate), the same two starts from the Episode 3 credits save')
+                         '4: Episode 4 (E4-integrate), the same two starts from the Episode 3 credits save; '
+                         '5: Episode 5 (E5-integrate), the same two starts from the Episode 4 credits save')
     ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
@@ -5118,6 +5866,18 @@ def main(argv):
                 return 2
         if a.start == 'new':
             seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
+    if a.episode == 5 and not a.tier:
+        tag, ep3 = '-ep5' + ('-new' if a.start == 'new' else ''), True
+        os.environ['LQ_EP4_LIVE'] = '1'
+        os.environ['LQ_EP5_LIVE'] = '1'      # episodes.js served with EP5_LIVE forced on (a local copy of the switch)
+        if not resume:
+            try:
+                resume = str(ep5_fixture(a.device))
+            except Fail as e:
+                print(e)
+                return 2
+        if a.start == 'new':
+            seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
     if a.episode == 3 and not a.tier:
         tag, ep3 = '-ep3' + ('-new' if a.start == 'new' else ''), True
         if not resume:
@@ -5142,6 +5902,8 @@ def main(argv):
             Episode3(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.episode == 4:
             Episode4(bot, side=not a.no_side, until=a.until, start=a.start).run()
+        elif a.episode == 5:
+            Episode5(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.route == 'complete':
             sys.path.insert(0, str(HERE / 'integrate'))
             import autoplay_x1

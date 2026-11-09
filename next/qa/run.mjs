@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url';
 const QA = path.dirname(fileURLToPath(import.meta.url));
 const NEXT = path.dirname(QA);
 const TIMEOUT_MS = 180_000;
+// E5-integrate: the solo browser walks visit every map (60 of them with Episode 5), about 170 s alone
+const SOLO_TIMEOUT_MS = 300_000;
 
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose') || args.includes('-v');
@@ -33,7 +35,7 @@ function findTests(dir) {
   return out;
 }
 
-function runFile(file) {
+function runFile(file, limit = TIMEOUT_MS) {
   return new Promise((resolve) => {
     const started = Date.now();
     const child = spawn(process.execPath, ['--test', '--test-reporter=tap', file], {
@@ -43,7 +45,7 @@ function runFile(file) {
     child.stdout.on('data', (d) => { output += d; });
     child.stderr.on('data', (d) => { output += d; });
     let timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; child.kill('SIGKILL'); }, TIMEOUT_MS);
+    const timer = setTimeout(() => { timedOut = true; child.kill('SIGKILL'); }, limit);
     child.on('close', (code) => {
       clearTimeout(timer);
       const num = (re) => { const m = output.match(re); return m ? Number(m[1]) : 0; };
@@ -66,7 +68,7 @@ async function main() {
   const worker = async () => {
     while (next < files.length) {
       const f = files[next++];
-      const r = await runFile(f);
+      const r = await runFile(f, SOLO.test(f) ? SOLO_TIMEOUT_MS : TIMEOUT_MS);
       results.push(r);
       const ok = r.code === 0 && !r.timedOut;
       process.stdout.write(`${ok ? 'PASS' : 'FAIL'}  ${path.relative(NEXT, r.file).split(path.sep).join('/')}  (${r.ms} ms)\n`);
@@ -86,7 +88,7 @@ async function main() {
   const failed = results.filter((r) => r.code !== 0 || r.timedOut);
   for (const r of results) {
     if (verbose || r.code !== 0 || r.timedOut) {
-      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? '(TIMED OUT after 180 s)' : ''}`);
+      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? `(TIMED OUT after ${SOLO.test(r.file) ? SOLO_TIMEOUT_MS / 1000 : TIMEOUT_MS / 1000} s)` : ''}`);
       // TAP output: show failing assertions and diagnostics, not the full green list.
       const lines = r.output.split('\n');
       const shown = verbose ? lines : lines.filter((l) => /not ok|^\s+(error|expected|actual|operator|stack|at |location|message|code|failureType)|Error|^\s{4,}\S/.test(l));

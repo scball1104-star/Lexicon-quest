@@ -127,8 +127,8 @@ const events = [
   enemy('e_r', 24, 28, 'tomorrow_husk', 'e5l3_mixed', 'guard'),
   // ---- the Sun Keyhole
   door('up_return', 21, 36, ['ep5_lab_f3', 21, 33, 'left'], { kind: 'stairs', w: 2 }),
-  object('keyhole_shut', 15, 36, 'door_boss_closed', { w: 3, text: 'ep5_sun_keyhole', ifNot: 'oracle_door_open' }),
-  lockedDoor('door_oracle', 15, 36, 'sun_key', ['ep5_lab_oracle', 11, 18, 'up'], { w: 3, sprite: 'door_boss', text: 'ep5_sun_keyhole', if: 'oracle_door_open' }),
+  object('keyhole_shut', 15, 36, 'sun_keyhole_closed', { w: 3, text: 'ep5_sun_keyhole', ifNot: 'oracle_door_open' }),
+  lockedDoor('door_oracle', 15, 36, 'sun_key', ['ep5_lab_oracle', 11, 18, 'up'], { w: 3, sprite: 'sun_keyhole', text: 'ep5_sun_keyhole', if: 'oracle_door_open' }),
   chest('chest_hourglass', 11, 38, 'wood', { item: 'hourglass_sand', qty: 2 }),
   light('l_keyhole', 16, 37, 3, '#ffd27a'),
 ];

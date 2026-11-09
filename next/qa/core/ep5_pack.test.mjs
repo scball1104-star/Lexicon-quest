@@ -21,7 +21,7 @@ const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const read = (rel) => fs.readFileSync(path.join(NEXT, rel), 'utf8');
 const exists = (rel) => fs.existsSync(path.join(NEXT, rel));
 
-test('pack table: the ep5 entry is exactly plan 13.2 seam 1, behind EP5_LIVE (off)', () => {
+test('pack table: the ep5 entry is exactly plan 13.2 seam 1, behind EP5_LIVE', () => {
   const d = PACKS.ep5;
   assert.ok(d, 'PACKS.ep5');
   assert.equal(d.entry, '../data/ep5/index.js');
@@ -35,7 +35,7 @@ test('pack table: the ep5 entry is exactly plan 13.2 seam 1, behind EP5_LIVE (of
   assert.equal(d.wanted({ ep5_started: true }), true);
   assert.equal(d.wanted({ ep3_complete: true, ep4_started: true }), false);
   assert.equal(d.enabled(), EP5_LIVE);
-  assert.equal(EP5_LIVE, false, 'the switch ships off; E5-integrate flips it on the branch');
+  assert.equal(EP5_LIVE, true, 'E5-integrate flipped the switch on the branch (shipping stays with Scott or Stephen)');
   assert.equal(EP4_LIVE, true);
   // ep4 comes first in the table, so packForMap still names ep4 for the two shared maps; packsForMap names both
   assert.equal(packForMap('ep4_vw_inn').id, 'ep4');
@@ -53,13 +53,16 @@ test('pack table: the ep5 entry is exactly plan 13.2 seam 1, behind EP5_LIVE (of
 test('nothing is fetched while EP5_LIVE is false: ensurePack skips without importing, the call sites do not wait for it', async () => {
   resetPacks();
   let calls = 0;
-  const r = await ensurePack('ep5', { importer: async () => { calls++; return {}; }, quiet: true });
+  // the switch is on since E5-integrate: the off state is asserted through the `enabled` override the switch feeds
+  const r = await ensurePack('ep5', { importer: async () => { calls++; return {}; }, quiet: true, enabled: false });
   assert.equal(r.skipped, true);
   assert.equal(calls, 0, 'the entry was not imported');
-  assert.equal(packEnabled('ep5'), false);
-  assert.ok(!packsToAwait({ ep4_complete: true, ep3_complete: true, ep2_complete: true, ep1_complete: true }).includes('ep5'),
-    'an Episode 4 finisher does not wait for the pack while it is off');
-  assert.ok(!packsToAwait({ ep5_started: true }).includes('ep5'));
+  assert.equal(packEnabled('ep5', { enabled: false }), false);
+  assert.equal(packEnabled('ep5'), EP5_LIVE);
+  const done4 = { ep4_complete: true, ep3_complete: true, ep2_complete: true, ep1_complete: true };
+  assert.ok(!packsToAwait(done4, { enabled: false }).includes('ep5'), 'an Episode 4 finisher does not wait for the pack while it is off');
+  assert.equal(packsToAwait(done4).includes('ep5'), EP5_LIVE, 'an Episode 4 finisher waits for the pack only while live');
+  assert.equal(packsToAwait({ ep5_started: true }).includes('ep5'), EP5_LIVE);
   resetPacks();
 });
 
@@ -134,7 +137,8 @@ test('pack entry: ORDER, missing modules skipped, idempotent, the ep4 pack regis
   assert.equal(ep4.EP4_READY, true, 'the ep4 pack registered first (Valewyn NPCs, Episode 4 maps)');
   assert.ok(CREDITS_HANDOFF[4], 'the ep4 hooks ran before the ep5 hooks');
   assert.ok(globalThis.LQ_EP5 && typeof globalThis.LQ_EP5.title === 'function' && typeof globalThis.LQ_EP5.start === 'function');
-  assert.equal(CREDITS_HANDOFF[4].endCard, END_CARD_EP4, 'Episode 4 end card unchanged while EP5_LIVE is false');
+  assert.equal(CREDITS_HANDOFF[4].endCard.sub, EP5_LIVE ? 'Episode 5 begins in the morning.' : END_CARD_EP4.sub,
+    'the Episode 4 end card says Episode 5 begins in the morning while EP5_LIVE, unchanged while off');
   assert.equal(ep5.EP5_MAPS_LISTED, ep5.mapsListed());
   if (!exists('src/data/ep5/encounters.js')) assert.equal(ep5.EP5_MAPS_LISTED, false);
   const src = read('src/data/ep5/index.js');

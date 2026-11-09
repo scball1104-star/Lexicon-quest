@@ -12,9 +12,11 @@ x1 fragment and draws no sun and shade). Coordinates are tiles, (0,0) top-left.
 |---|---|---|
 | `ep4_vw_inn` (`withEp5Wake`) | enter trigger `ep5_wake` (`ep5_morning`, if `ep4_complete`) | (0,0) |
 | | marks `mira_window` (under the guest-room window), `inn_stage`, `inn_stage_b`, `yara_table` (by the long table) | (19,3), (17,4), (16,4), (19,8) |
+| | taproom marks (E5-integrate) `mira_window_tap`, `inn_stage_tap`, `inn_stage_b_tap`, `yara_table_tap` (the long table by the hearth) | (10,3), (9,5), (8,5), (5,7) |
 | `ep4_valewyn` (`withShipBerth`) | object `ship_moored` (the Saffron Wind, 6 x 4, footprint row 33, if `ep5_started`) | (30..35, 33) |
 | | sign `ship_moored_sign` on the hull (`ep5_ship_moored`, read from (31,30)) | (31,31) |
 | | object `ship_berth` (gangway, `ep5_board`, if `ep5_started`, ifNot `ship_boarded`), read from (32,30) facing down | (32,31) |
+| | step trigger `berth_trig` (`ep5_board`, same flags; E5-integrate): the gangway is a doorway, so walking down it boards | (32,31) |
 | | boat doors on the same cell: `berth_sail` to `ep5_ship` (5,7,'right') (if `ship_boarded`, ifNot `road_landed`); `berth_south` to `ep5_saffron` (4,27,'up') (if `road_landed`) | (32,31) |
 | | marks `berth_yara` (34,28), `berth_stage` (34,30), `berth_stage_m` (33,30), `berth_stage_b` (35,30), `berth_land` (32,30) | |
 
@@ -22,8 +24,8 @@ Every Episode 4 cell, overlay, decor, mark and event is unchanged (tested); with
 patched maps walk exactly as Episode 4's. The berth sits on the south quay east of the Flood Road ferry (which stays at
 (21..22,33)). Yara stands two rows above the party; the gangway's top cell (32,30) stays free so she can walk aboard. The
 inn's marks are in the guest room, where the party wakes after the Episode 4 credits (`inn_bed` (17,7)). A save made in
-the street that enters the inn by the front door starts the scene in the taproom: the walks to the guest room have no path
-(the stair is a door) and the lines play where the party stands (the same limit Episode 4's wake had).
+the street that enters the inn by the front door starts the scene in the taproom (the stair up is a door): `ep5_morning`
+then stages on the `_tap` marks (E5-integrate; the scene reads the leader's tile through the pack's `s.leaderAt`).
 
 ## 2. `ep5_ship` (28 x 14, field, `mystery`, `mere_still`, tint `night`, `dawn` from `ship_first_fight_done`)
 
@@ -149,5 +151,5 @@ screen: dial, flat, obelisk and far road in one frame, the dawn bridge landing i
 - E5-maps-b: the Labyrinth's way back to the Haven should land on `north_gate` (21,5) facing down (the gap cells (21..22,4)
   are walkable too, so the current (22,4) works). `lift_out` lands there as well; `every_road` runs on that arrival.
 - `mapcheck check` needs `--pack ep5` for the pack's NPCs, lines and encounters (as `--pack ep4` for Episode 4).
-- The waystone's shifting glyphs (`shiftFrames`) have no field code yet: the map shows frame 0 before `haven_restored` and
-  the still frame 3 after.
+- The waystone's shifting glyphs (`shiftFrames`) cycle frames 0, 1, 2 about every 200 ms while the tint is dusk or night
+  (E5-integrate, `src/data/ep5/field/events.js` `shiftGlyphs`); the still frame 3 after `haven_restored`.

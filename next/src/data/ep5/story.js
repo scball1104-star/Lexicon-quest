@@ -76,12 +76,16 @@ export const TIPS = {
 // 1. ep4_vw_inn, on enter after the Episode 4 credits (the pack patch's ep5_wake trigger checks credits4_rolled). Six
 // boxes, the letter's close-up by about 0:20, control by about 0:35. Yara is a scene spawn at the long table. Gives
 // star_letter. Sets ep5_morning_done, ep5_started.
+// A save made in the street comes in by the front door: the scene then plays in the taproom on its own marks (the stair up is
+// a door, so the guest-room marks have no path). s.leaderAt is the pack's (field/events.js attach); without it, the guest room.
 async function ep5_morning(s) {
-  await spawnYara(s, 'yara_table', 'down');
+  const at = 'leaderAt' in s ? s.leaderAt() : null;
+  const m = at && at[0] < 13 ? (k) => `${k}_tap` : (k) => k;
+  await spawnYara(s, m('yara_table'), 'down');
   await s.fade('in', 40);
-  await s.walk('hero', 'inn_stage');
-  await all(s.walk('mira', 'mira_window'), s.walk('bram', 'inn_stage_b'));
-  await s.camera.panTo('mira_window', 20);
+  await s.walk('hero', m('inn_stage'));
+  await all(s.walk('mira', m('mira_window')), s.walk('bram', m('inn_stage_b')));
+  await s.camera.panTo(m('mira_window'), 20);
   const open = await page(s, 'ep5_letter', 'blank');
   await say(s, 'mira', 'Star ink. It only reads in the dark.');
   await say(s, 'mira', 'Last night it had three names. This morning, two.');
@@ -740,7 +744,7 @@ async function every_road(s) {
   await s.camera.panTo('caravan_in', 40);
   await s.spawn('tamir_t', { sprite: 'npc_tamir', name: 'A Traveler', at: 'caravan_in', dir: 'up' });
   await s.spawn('traveler_a', { sprite: 'npc_traveler', name: 'Traveler', at: 'caravan_in_b', dir: 'up' });
-  await s.spawn('traveler_b', { sprite: 'npc_traveler', name: 'Traveler', at: 'caravan_in_c', dir: 'up' });
+  await s.spawn('traveler_b', { sprite: 'npc_traveler_b', name: 'Traveler', at: 'caravan_in_c', dir: 'up' });
   await narrate(s, "Out of the deep desert a caravan walks in: thin camels, sun-blacked faces, and at the front a man with Yara's nose.");
   await all(s.walk('tamir_t', 'gather_tamir'), s.walk('traveler_a', 'gather_trav_a'), s.walk('traveler_b', 'gather_trav_b'));
   await narrate(s, 'Yara lets the coil of rope slide off her shoulder, and does not pick it up.');

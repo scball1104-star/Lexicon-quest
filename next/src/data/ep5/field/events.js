@@ -22,6 +22,9 @@ import { ensureArt, STONE_SPRITE } from './art.js';
 Object.assign(GATE_SPRITES, {
   sun_gate: GATE_SPRITES.sun_gate || ['sun_gate_closed', 'sun_gate_open'],
   moon_gate: GATE_SPRITES.moon_gate || ['moon_gate_closed', 'moon_gate_open'],
+  // E5-tiles' Labyrinth doors (E5-integrate): the Sun Keyhole (3 wide, door_boss style) and the one-cell sandstone door
+  sun_keyhole: GATE_SPRITES.sun_keyhole || ['sun_keyhole_closed', 'sun_keyhole_open'],
+  door_dune: GATE_SPRITES.door_dune || ['door_dune_closed', 'door_dune_open'],
 });
 INTERACT_TYPES.add('sundial');
 SOURCE_TYPES.add('sunplate');
@@ -72,6 +75,51 @@ EXT.sunplate = {
   },
 };
 
+/** How much of a field foe's own colour comes back over the night or dusk tint (0 = fully tinted, 1 = untinted). */
+export const FOE_LIFT = 0.55;
+const LIFT_TINTS = new Set(['night', 'dusk']);
+/**
+ * On an Episode 5 map under the night or dusk tint, every field foe on screen is drawn once more after the lighting at
+ * FOE_LIFT alpha, so its dark outline and side-coded rim (gold sun, pale blue star) keep their contrast instead of sinking
+ * into a silhouette; the foe still sits in the scene's light. Day tints and other episodes' maps are untouched.
+ */
+function liftFoes(field, r, cam) {
+  const map = field.map, Lt = field.lighting;
+  if (!map || !/^ep5_/.test(map.id || '') || !Lt || !LIFT_TINTS.has(Lt.tintName)) return;
+  let pushed = false;
+  for (const a of field.actors) {
+    if (!a.visible || !a.spr || a.spr.kind !== 'enemy' || !cam.visible(a.px - 8, a.py - 24, 32, 40, 8)) continue;
+    if (!pushed) { r.pushCamera(cam.x, cam.y); pushed = true; }
+    const was = a.alpha;
+    a.alpha = (was == null ? 1 : was) * FOE_LIFT;
+    try { a.draw(r, field.time, { shadow: false }); } finally { a.alpha = was; }
+  }
+  if (pushed) r.popCamera();
+}
+
+/**
+ * Props whose object lists `shiftFrames` (the Haven's waystone, E5-tiles): while the tint is dusk or night their state steps
+ * through those frames about every 200 ms (the carved names blur and settle); by day they rest on the first. A prop in a
+ * state outside the list (the still waystone, frame 3) is left alone. The list is cached per map.
+ */
+function shiftGlyphs(field) {
+  const map = field.map;
+  if (!map || !map.props || (field.frame | 0) % 12) return;
+  if (field._shiftMap !== map) {
+    field._shiftMap = map;
+    const objs = (map.db && map.db.objects) || {};
+    field._shiftProps = map.props.filter((p) => objs[p.t] && Array.isArray(objs[p.t].shiftFrames) && objs[p.t].shiftFrames.includes(p.state));
+  }
+  if (!field._shiftProps.length) return;
+  const t = field.lighting && field.lighting.tintName, dark = t === 'dusk' || t === 'night';
+  for (const p of field._shiftProps) {
+    const sf = map.db.objects[p.t].shiftFrames, k = sf.indexOf(p.state);
+    if (k < 0) continue;
+    const want = dark ? sf[(k + 1) % sf.length] : sf[0];
+    if (want !== p.state) map.setPropState(p, want);
+  }
+}
+
 /** The stone or lamp the leader faces, if Bram's Shove can work on it (`shove: true`), else null. */
 function facedMover(field) {
   const L = field.leader;
@@ -92,9 +140,11 @@ export function attach(field) {
     obj[name] = w;
   };
   wrap(field.glass, 'reset', (o) => { o(); s.reset(); });
-  wrap(field.glass, 'update', (o) => { o(); s.update(); });
+  wrap(field.glass, 'update', (o) => { o(); s.update(); shiftGlyphs(field); });
   wrap(field.glass, 'drawBeams', (o, r, t) => { s.drawLow(r, t); o(r, t); });
   wrap(field, 'collectLights', (o) => { const out = o(); out.push(...s.lights()); return out; });
+  // field foes stay readable under the night and dusk tints (E5-integrate; plan 9.2, CRITIQUE_6 C8): see liftFoes
+  wrap(field.lighting, 'draw', (o, r, cam, lights, lanternAt) => { o(r, cam, lights, lanternAt); liftFoes(field, r, cam); });
   // the map's tint on arrival is the hour's (field.loadMap sets the map tint after glass.reset, then calls syncTimeOfDay)
   wrap(field, 'syncTimeOfDay', (o) => { if (s.tintPending) { s.tintPending = false; s.applyTint(0); } return o(); });
   // a flag set outside a scene re-reads the map tint: on a shade map the hour keeps its own
@@ -133,6 +183,9 @@ export function attach(field) {
     });
     wrap(ab, 'shove', (o, c) => (c && c.target && MOVERS.has(c.target.type) ? s.shoveWith(ab, c) : o(c)));
   }
+  // the leader's tile, for a scene that stages by where the party came in (ep5_morning: the guest room or the taproom)
+  const api = field.cutscene && field.cutscene.api;
+  if (api && !api.leaderAt) api.leaderAt = () => (field.leader ? [field.leader.tx, field.leader.ty] : null);
   installDebug(field);
   return s;
 }

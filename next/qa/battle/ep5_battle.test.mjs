@@ -56,7 +56,7 @@ function until(b, pred, max = 300) {
 }
 const sturdy = (b) => { for (const u of b.living('party')) u.hp = u.maxHp = 99999; return b; };
 
-test('Episode 5 ids are registered, kept unlisted, and Episodes 1 to 4 are untouched', () => {
+test('Episode 5 ids are registered, listed, and Episodes 1 to 4 are untouched', () => {
   for (const id of [...E5.enemies.EP5_FOES, ...E5.enemies.EP5_BOSSES, ...E5.enemies.EP5_ADDS]) {
     assert.ok(ENEMIES[id], id);
     assert.ok(['sun', 'star'].includes(ENEMIES[id].sky), `${id} has a sky side`);
@@ -65,8 +65,8 @@ test('Episode 5 ids are registered, kept unlisted, and Episodes 1 to 4 are untou
   for (const id of [...E5.enc.EP5_GROUP_IDS, ...E5.enc.EP5_BOSS_IDS]) assert.ok(ENCOUNTERS[id], id);
   assert.equal(E5.enc.EP5_GROUP_IDS.length, 14);
   for (const z of E5.enc.EP5_ZONE_ORDER) { assert.ok(ZONES[z], z); assert.equal(ZONES[z].episode, 5); }
-  assert.equal(E5.enc.EP5_MAPS_LISTED, false);
-  for (const z of E5.enc.EP5_ZONE_ORDER) assert.ok(!Object.keys(ZONES).includes(z), `${z} stays out of Object.keys(ZONES)`);
+  assert.equal(E5.enc.EP5_MAPS_LISTED, true, 'E5-integrate listed the zones once the path passed');
+  for (const z of E5.enc.EP5_ZONE_ORDER) assert.ok(Object.keys(ZONES).includes(z), `${z} is listed in Object.keys(ZONES)`);
   for (const z of before.zones) assert.ok(Object.keys(ZONES).includes(z), z);
   assert.equal(JSON.stringify([ZONE_ORDER, EP2_ZONE_ORDER, EP3_ZONE_ORDER]), before.orders);
   assert.equal(JSON.stringify(ENEMIES.paper_regent), before.regent);

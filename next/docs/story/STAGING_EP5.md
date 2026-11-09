@@ -227,7 +227,8 @@ Ship: `ep5_deck_crates`, `ep5_mast`, `ep5_ship_lantern`, `ep5_ship_wheel`, `ep5_
 Caravan Road: `ep5_jetty`, `ep5_dead_camp`, `ep5_glass_flat`, `ep5_tent`, `ep5_safe_stones`, `ep5_haven_far`.
 Sun and shade kit (any map): `ep5_sundial`, `ep5_obelisk`, `ep5_obelisk_scraped`, `ep5_standstone`, `ep5_low_block`,
 `ep5_running_sand`, `ep5_groove`, `ep5_sun_plate`, `ep5_moon_plate`, `ep5_sun_gate` (two states), `ep5_oasis_spring`
-(the fonts), `ep5_cracked_base` (the Dash bases), `ep5_camp_court`.
+(the fonts), `ep5_cracked_base` (the Dash bases), `ep5_camp_court`, `ep5_back_door` and `ep5_back_door_open` (the
+one-way sandstone doors, E5-integrate).
 Saffron Haven: `ep5_waystone` (two states), `ep5_bulletin` (two states), `ep5_moonwell` (two states), `ep5_mural`,
 `ep5_camels`, `ep5_packed_loads`, `ep5_armillary`, `ep5_bell_rack` (three states), `ep5_water_stairs`, `sign_ep5_inn`,
 `sign_ep5_shop`, `sign_ep5_smithy`, `sign_ep5_tower`, `sign_ep5_north_gate`.

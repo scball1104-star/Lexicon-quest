@@ -10,7 +10,7 @@
 import { enc, ENCOUNTERS, ZONES } from '../encounters.js';
 
 /** E5-maps-b (wave 5c): set to true once the Labyrinth maps exist (lists the six zones in ZONES for qa/maps). Mirrored by index.js. */
-export const EP5_MAPS_LISTED = false;
+export const EP5_MAPS_LISTED = true;
 
 export const EP5_ZONE_ORDER = ['ep5_ship', 'ep5_caravan_road', 'ep5_lab_f1', 'ep5_lab_f2', 'ep5_lab_f3', 'ep5_lab_oracle'];
 

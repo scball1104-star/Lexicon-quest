@@ -15,7 +15,8 @@
 import { CREDITS_HANDOFF } from '../../game/story.js';
 import { QUEST_EXT } from '../quests.js';
 import { EP5_LIVE, pickRunSlot } from '../../game/episodes.js';
-import { ensurePack } from '../../game/packs.js';
+import { ensurePack, onPackReady } from '../../game/packs.js';
+import { peekMap } from '../../world/maps.js';
 import { cleanName } from '../../game/state.js';
 import { END_CARD_EP4 } from '../ep4/text.js';
 import { register as registerEp4 } from '../ep4/index.js';
@@ -124,6 +125,29 @@ function installDebug(engine) {
   });
 }
 
+/**
+ * A cold first entry (E5-integrate): the field waits at most 8 s for a map's packs (field.js loadMap), and on a slow phone the
+ * ep4 pack alone can take longer, so ep4_vw_inn or ep4_valewyn may come up as the ep4 pack registered it, without this pack's
+ * patch (no wake trigger, no berth). Once the ep5 pack is ready, a field still standing on the unpatched module is re-entered
+ * where the party stands (the same-map dither), when it matters: the inn while ep5_morning is still to come, Valewyn once
+ * Episode 5 has started. Waits for the field to be idle (bounded). Returns true when it re-entered.
+ */
+export const PATCHED_MAPS = ['ep4_vw_inn', 'ep4_valewyn'];
+export function relandPatched(engine, tries = 40) {
+  const f = engine && (engine.stack || []).find((sc) => sc && sc.name === 'field');
+  if (!f || f.dead || !f.map || !f.game || !PATCHED_MAPS.includes(f.mapId)) return false;
+  const mod = peekMap(f.mapId), fl = f.game.flags || {};
+  if (!mod || f.map.mod === mod) return false;
+  if (f.mapId === 'ep4_vw_inn' ? !fl.ep4_complete || fl.ep5_morning_done : !fl.ep5_started) return false;
+  const L = f.leader;
+  if (f.loading || f.pendingWarp || f.inputLocked || (f.cutscene && f.cutscene.running) || engine.scene !== f || !L || L.moving) {
+    if (tries > 0 && typeof engine.after === 'function') engine.after(30, () => relandPatched(engine, tries - 1));
+    return false;
+  }
+  f.warpTo(f.mapId, L.tx, L.ty, L.dir, 'warp');
+  return true;
+}
+
 let done = false;
 let card4Off;   // CREDITS_HANDOFF[4].endCard as the ep4 pack left it (unregister puts it back)
 
@@ -142,7 +166,10 @@ export function register(engine, mods = {}) {
   else waiting.push('quest (quests.js MAIN_QUEST_EP5)');
   globalThis.LQ_EP5 = HOOKS;
   installed.push('title');
+  // the developer entry ?ep=5 (once the maps are listed) opens the story's switch, as ?ep=4 does for Episode 4 (ep4/scene.js)
+  if (mods.story && mods.story.GATE && typeof location !== 'undefined' && /[?&]ep=5(&|$)/.test(location.search || '') && mapsListed()) mods.story.GATE.live = true;
   installDebug(engine);
+  if (engine && !done) onPackReady('ep5', () => relandPatched(engine));
   done = true;
   return { installed, waiting };
 }

@@ -7267,6 +7267,931 @@
     }
    ],
    "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_ep5_morning_letter",
+   "note": "E5: ep5_morning, the star letter close-up at the Floodwatch Inn: three names last night, two this morning (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { (await import('./src/data/ep5/story.js')).GATE.live = true; return true; })()"
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Last night it had three names\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep5_morning_letter: Mira reads the letter"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_ship_bram",
+   "note": "E5: ship_bram, Bram at the bow of the Saffron Wind at night: the first truth choice (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_ship",
+      20,
+      6,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ship_bram\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Mira won't tell me whose name went\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ship_bram: Bram asks"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "battle_ship_first_night",
+   "note": "E5: the deck fight under a Night sky: both sun-things Exposed, the Turn marker 4 actions away",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e5s_first",
+      {
+       "seed": 1,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.state.sky && s.b.state.sky.sky === 'night')) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.state.sky.sky === 'night'",
+     "message": "the sky is night"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "battle_sky_turn",
+   "note": "E5: the deck fight after the Turn: Day, the foes glowing gold and Ascendant",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e5s_first",
+      {
+       "seed": 1,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.state.sky && s.b.state.sky.turns >= 1)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.state.sky.sky === 'day'",
+     "message": "the sky has turned to day"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_glass_flat_noon",
+   "note": "E5: the Caravan Road, the Glass Flat at noon: running sand, the dial, the obelisk and its short shadow",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_caravan_road",
+      16,
+      12,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.shade().hour === 'noon'",
+     "message": "noon on the flat"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_glass_flat_dawn",
+   "note": "E5: the Glass Flat at dawn: the obelisk's long shadow lies across the flat, the bridge",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_caravan_road",
+      16,
+      12,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const s = await LQ_DEBUG.setHour(\"dawn\"); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const d = LQ_DEBUG.shade(); if (d && !d.busy && d.anim == null && LQ_DEBUG.scene() === 'field') return d.hour; } throw new Error('the hour never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.shade().hour === 'dawn'",
+     "message": "dawn on the flat"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_saffron_dusk",
+   "note": "E5: Saffron Haven at dusk: the oasis, copper domes, the armillary turning over it all",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_saffron",
+      21,
+      20,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep5_saffron_dusk: the field is on top"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_star_reading",
+   "note": "E5: star_reading, the prophecy rises in the Armillary Tower: WHEN THE LAST NIGHT TURNS (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_sh_observatory",
+      9,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"star_reading\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"WHEN THE LAST NIGHT TURNS\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_star_reading: Nasrin reads it"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_lab_f1_shove",
+   "note": "E5: F1 the Groove: the stone Shoved up its groove, dawn: its long shadow west along the corridor",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_f1",
+      30,
+      8,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const v = await LQ_DEBUG.shoveCaster(\"ss_c\", \"up\"); if (!v || !v.ok) throw new Error('the Shove was refused: ' + JSON.stringify(v && v.why)); return v.to; })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 20
+    },
+    {
+     "eval": "(async () => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); f.leader.setPos(30, 7, 'up'); return true; })()"
+    },
+    {
+     "eval": "(async () => { const v = await LQ_DEBUG.shoveCaster(\"ss_c\", \"up\"); if (!v || !v.ok) throw new Error('the Shove was refused: ' + JSON.stringify(v && v.why)); return v.to; })()",
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const s = await LQ_DEBUG.setHour(\"dawn\"); for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 40)); const d = LQ_DEBUG.shade(); if (d && !d.busy && d.anim == null && LQ_DEBUG.scene() === 'field') return d.hour; } throw new Error('the hour never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.shade().pos.ss_c === '30,4' && LQ_DEBUG.shade().hour === 'dawn'",
+     "message": "the stone is home at the top and the hour is dawn"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_lab_f2_shafts",
+   "note": "E5: F2 Gallery of False Horizons at dawn: the window shafts across the long hall, light the barrier",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_f2",
+      13,
+      17,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.shade().hour === 'dawn'",
+     "message": "dawn in the gallery"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_vex_gallery",
+   "note": "E5: vex_gallery, Vex on the star floor, moving the hero's star into a painted horizon (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_f2",
+      21,
+      6,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_gallery\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Every night it looks for you\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_gallery: Vex speaks"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "battle_mirage_knight",
+   "note": "E5: the Mirage Knight, its mirror shield showing the other sky",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 23; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "mirage_knight",
+      {
+       "seed": 3,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (b.round >= 2)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'battle'",
+     "message": "in the fight"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "field_ep5_lab_f3_lamps",
+   "note": "E5: F3 the Well of Tomorrow at night: the Shelter landing, a sun-lamp on its rail, the dark moat",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\", \"vex_gallery_met\", \"fifth_list_get\", \"star_restored\", \"knight_tried\", \"knight_defeated\", \"lab_f2_done\", \"lab_f3_arrived\", \"sel_walked_in\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_f3",
+      12,
+      11,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep5_lab_f3_lamps: the field is on top"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_sel_memory_3_page",
+   "note": "E5: sel_memory_3, Ishra's page under the last spring: The future is not a single answer (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\", \"vex_gallery_met\", \"fifth_list_get\", \"star_restored\", \"knight_tried\", \"knight_defeated\", \"lab_f2_done\", \"lab_f3_arrived\", \"sel_walked_in\", \"landing_shelter\", \"landing_truth\", \"landing_return\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_f3",
+      14,
+      32,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"sel_memory_3\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"The future is not a single answer\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_sel_memory_3_page: Sel reads it"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "battle_oracle_prophecy",
+   "note": "E5: the Sand Oracle reads the Last Prophecy: a foretelling pinned to the Turn marker",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"sky_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 24; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "oracle",
+      {
+       "seed": 6,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (s.b.state.sky && !!s.b.state.sky.pinned)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "!!LQ_ENGINE.scene.b.state.sky.pinned",
+     "message": "a foretelling is pinned"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "battle_oracle_futures",
+   "note": "E5: the Sand Oracle, phase 2: the Mirage Veil and the two False Futures",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"sky_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 24; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "oracle",
+      {
+       "seed": 6,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { const O = () => LQ_ENGINE.scene.b.units().find(u => u.alive && u.id === 'oracle'); for (let i = 0; i < 12000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (!open) { LQ_DEBUG.advance(5); continue; } if (s.b.units().some(u => u.alive && /^future_/.test(u.id))) return i; const o = O(); if (!o) return -3; o.hp = Math.min(o.hp, Math.floor(o.maxHp * 0.725)); LQ_DEBUG.battleAct({ type: 'attack', target: o.uid }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 90
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => u.alive && /^future_/.test(u.id))",
+     "message": "the Futures are up"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_oracle_after_chart",
+   "note": "E5: oracle_after, the Star Chart restored: twenty years of struck stars light again (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\", \"vex_gallery_met\", \"fifth_list_get\", \"star_restored\", \"knight_tried\", \"knight_defeated\", \"lab_f2_done\", \"lab_f3_arrived\", \"sel_walked_in\", \"landing_shelter\", \"landing_truth\", \"landing_return\", \"sel_memory_3\", \"oracle_door_open\", \"oracle_tried\", \"oracle_defeated\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_lab_oracle",
+      11,
+      17,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Twenty years of struck stars\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_oracle_after_chart: the chart lights"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_every_road",
+   "note": "E5: every_road, dawn at the north gate: a caravan walks in, and Yara knows its leader (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\", \"vex_gallery_met\", \"fifth_list_get\", \"star_restored\", \"knight_tried\", \"knight_defeated\", \"lab_f2_done\", \"lab_f3_arrived\", \"sel_walked_in\", \"landing_shelter\", \"landing_truth\", \"landing_return\", \"sel_memory_3\", \"oracle_door_open\", \"oracle_tried\", \"oracle_defeated\", \"chart_restored\", \"fragment5_get\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_saffron",
+      21,
+      6,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"\\\\.\\\\.\\\\.Father\\\\?\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_every_road: Yara speaks"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "story_ep5_ending",
+   "note": "E5: ep5_ending, the freed armillary writes a road over the Haven: A LIBRARY ABOVE THE CLOUDS (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep5_morning_done\", \"ep5_started\", \"ship_boarded\", \"ship_arrived\", \"bram_asked\", \"bram_told\", \"ship_first_fight_done\", \"road_landed\", \"saw_glass_flat\", \"tent_rested\", \"saw_haven\", \"haven_arrived\", \"met_sel\", \"moonwell_seen\", \"star_reading_done\", \"sky_learned\", \"gnomon_get\", \"lab_entered\", \"lab_f1_arrived\", \"sel_memory_1\", \"plate_f1_open\", \"sun_key_found\", \"lab_f1_done\", \"lab_f2_arrived\", \"sel_memory_2\", \"vex_gallery_met\", \"fifth_list_get\", \"star_restored\", \"knight_tried\", \"knight_defeated\", \"lab_f2_done\", \"lab_f3_arrived\", \"sel_walked_in\", \"landing_shelter\", \"landing_truth\", \"landing_return\", \"sel_memory_3\", \"oracle_door_open\", \"oracle_tried\", \"oracle_defeated\", \"chart_restored\", \"fragment5_get\", \"roads_returned\", \"haven_restored\"]) g.flags[f] = true; g.items[\"gnomon\"] = 1; g.items[\"star_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep5_saffron",
+      21,
+      10,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ep5_ending\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"A LIBRARY ABOVE THE CLOUDS\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep5_ending: Laleh reads it"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "ui_title_ep5",
+   "note": "E5: the title with an Episode 4 finish in slot 0: the Episode 5 row offered, its help line beside it",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { await LQ_DEBUG.newGameEp5('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 36000, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()",
+     "timeout": 60000
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep5')",
+     "timeout": 30000
+    },
+    {
+     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep5'); return m.index; })()"
+    },
+    {
+     "frames": 90
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
   }
  ]
 }

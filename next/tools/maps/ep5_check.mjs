@@ -33,7 +33,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { compile, light, runMask, plates, latches, grooveNext, isHourFlag, hourFlag, DIAL_HOURS, HOURS, SHADE_TYPES } from '../../src/data/ep5/field/shade.js';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-export const EP5_GATE_SPRITES = ['sun_gate', 'moon_gate'];
+export const EP5_GATE_SPRITES = ['sun_gate', 'moon_gate', 'sun_keyhole', 'door_dune'];
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LEDGE_OK = { ledge_s: 'down', ledge_e: 'right', ledge_w: 'left' };
 const PASS_THROUGH = new Set(['actor', 'enemy', 'block', 'pot']);

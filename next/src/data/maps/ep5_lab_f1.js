@@ -82,8 +82,8 @@ export const oasisFont = (id, x, y) => ({ id, type: 'font', x, y, w: 2, h: 1, te
  * closed door is a solid object until the flag, the open doorway after it.
  */
 export const backDoor = (id, x, y, flag) => [
-  object(`${id}_shut`, x, y, 'door_dune_closed', { ifNot: flag }),
-  object(`${id}_open`, x, y, 'door_dune_open', { if: flag, solid: false }),
+  object(`${id}_shut`, x, y, 'door_dune_closed', { ifNot: flag, text: 'ep5_back_door' }),
+  object(`${id}_open`, x, y, 'door_dune_open', { if: flag, solid: false, text: 'ep5_back_door_open' }),
 ];
 /** A brass cage lift (a door of kind lift; the cage is drawn as decor on the same cell). */
 export const lift = (id, x, y, to, extra = {}) => ({ id, type: 'door', x, y, to, kind: 'lift', ...extra });

@@ -90,6 +90,13 @@ entry calls `setFieldHour` (src/data/ep5/sky.js) with the shade hour, an Episode
 block: dawn, dusk or night from its tint, else noon), or null; every hour change calls it again. Debug: `LQ_DEBUG.shade()`,
 `LQ_DEBUG.setHour(h)`, `LQ_DEBUG.shoveCaster(id, dir)`.
 
+E5-integrate added three small things to `attach` (pack-only): `lighting.draw` is wrapped so that on an Episode 5 map under
+the night or dusk tint every field foe on screen is drawn once more over the tinted frame at `FOE_LIFT` (0.55), so its outline
+and side-coded rim stay readable instead of sinking into a silhouette (measured on F1 under a forced night tint: edge contrast
+0.23 to 0.54); `glass.update` steps props whose object lists `shiftFrames` (the Haven's waystone) about every 200 ms at dusk and
+night; and the field's cutscene API gains `leaderAt()` (the leader's tile), which `ep5_morning` reads to stage in the guest
+room or the taproom. The sundial and door gate sprites `sun_keyhole` and `door_dune` are registered here too.
+
 ## 6. mapcheck
 
 `tools/maps/ep5_check.mjs` is installed by one line of `mapcheck.mjs`; for maps with a `shade` block or a shade event it

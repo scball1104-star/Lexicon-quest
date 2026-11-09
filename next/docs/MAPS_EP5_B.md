@@ -124,13 +124,14 @@ F1 at noon 0.609 / 0.642 (dawn 0.541, dusk 0.463); F2 at dawn 0.207 / 0.220 (noo
 
 ## 6. For other agents
 
-- `sun_keyhole` and `door_dune` are not gate sprites yet (GATE_SPRITES / mapcheck GATE_SPRITE_IDS): `door_oracle` draws
-  `door_boss` (its shut stand-in `keyhole_shut` the same art) and `door_d`, `door_e` draw `door_key`. Once registered as
-  `[<id>_closed, <id>_open]` pairs, swap the sprite on those three events.
+- `sun_keyhole` and `door_dune` are gate sprites (E5-integrate: `src/data/ep5/field/events.js` GATE_SPRITES, mapcheck
+  `EP5_GATE_SPRITES`): `door_oracle` and its shut stand-in `keyhole_shut` draw the Sun Keyhole. `door_d` and `door_e` stay on
+  `door_key`: they are two cells wide and `door_dune_closed` is one cell (its footprint would leave the second cell open), so
+  they need a two-cell sandstone door before they can switch.
 - The Dash crack `crack_d` draws the breakable `rock` art (`ab_cliff_crack`): `cracked_base` is an object, and breakables
   draw tiles, so it is not used.
-- The back doors are objects (`door_dune_closed` until the flag, `door_dune_open` after) with no inspect line: E5-story wrote
-  none (6 mapcheck warnings). A line `ep5_back_door` would clear them.
+- The back doors are objects (`door_dune_closed` until the flag, `door_dune_open` after) with the inspect lines
+  `ep5_back_door` / `ep5_back_door_open` (E5-integrate; mapcheck clean).
 - mapcheck's grid counts every event whatever its flags, so a door gone once its flag is set still stands in the bare
   `ep5_check` report (`chest_cache`, `book_log` show as unreached there); the test searches each floor as the field sees it
   under its flags.

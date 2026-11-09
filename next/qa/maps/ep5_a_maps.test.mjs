@@ -48,7 +48,7 @@ const reachAt = (m, hour, opts = {}) => new Set(walk(frozen(m, hour), db, opts).
 test('withEp5Wake and withShipBerth keep every Episode 4 cell, mark and event, only add, and are idempotent', () => {
   for (const [base, fn, added] of [
     [vwInn, P.withEp5Wake, ['ep5_wake']],
-    [valewyn, P.withShipBerth, ['ship_moored', 'ship_moored_sign', 'ship_berth', 'berth_sail', 'berth_south']],
+    [valewyn, P.withShipBerth, ['ship_moored', 'ship_moored_sign', 'ship_berth', 'berth_trig', 'berth_sail', 'berth_south']],
   ]) {
     const p = fn(base);
     assert.notEqual(p, base);
@@ -65,7 +65,7 @@ test('withEp5Wake and withShipBerth keep every Episode 4 cell, mark and event, o
   const w = P.withEp5Wake(vwInn);
   const wake = byId(w, 'ep5_wake');
   assert.deepEqual([wake.on, wake.script, wake.if], ['enter', 'ep5_morning', 'ep4_complete']);
-  for (const mk of ['inn_bed', 'yara_table', 'mira_window', 'inn_stage', 'inn_stage_b']) assert.ok(w.marks[mk], mk);
+  for (const mk of ['inn_bed', 'yara_table', 'mira_window', 'inn_stage', 'inn_stage_b', 'yara_table_tap', 'mira_window_tap', 'inn_stage_tap', 'inn_stage_b_tap']) assert.ok(w.marks[mk], mk);
 });
 
 test('the ep5 pack registers the patched Floodwatch Inn and Valewyn over the ep4 modules', async () => {
@@ -78,7 +78,9 @@ test('the ep5 pack registers the patched Floodwatch Inn and Valewyn over the ep4
 });
 
 test('Valewyn with Episode 4 complete and EP5_LIVE off: no ship, no berth, no door, and it walks exactly as Episode 4', () => {
-  assert.equal(EP5_LIVE, false, 'the switch stays off on this branch until E5-integrate');
+  // E5-integrate flipped the switch on the branch; the off state is a save without ep5_started, which only the switch-gated
+  // ep5_morning sets, so these flags are exactly what an Episode 4 finisher sees with EP5_LIVE false
+  assert.equal(EP5_LIVE, true, 'E5-integrate flipped the switch on the branch');
   const p = P.withShipBerth(valewyn);
   const flags = new Set(EP4_DONE);
   for (const id of ['ship_moored', 'ship_moored_sign', 'ship_berth', 'berth_sail', 'berth_south']) assert.ok(!live(byId(p, id), flags), `${id} absent`);

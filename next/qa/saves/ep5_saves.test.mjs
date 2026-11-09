@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSave } from '../../src/core/save.js';
-import { pickRunSlot, SLOTS_FULL_NOTICE } from '../../src/game/episodes.js';
+import { pickRunSlot, SLOTS_FULL_NOTICE, EP5_LIVE } from '../../src/game/episodes.js';
 import { FieldScene } from '../../src/scenes/field.js';
 import { createGame, deserialize, serialize, saveMeta, setPosition, EP1_DONE_FLAGS, EP2_DONE_FLAGS } from '../../src/game/state.js';
 import { CREDITS_HANDOFF, creditsPending, markCreditsRolled } from '../../src/game/story.js';
@@ -99,16 +99,17 @@ test('an Episode 4 credits save loads, rolls the Episode 4 credits with the unch
   const h = CREDITS_HANDOFF[4];
   assert.equal(h.map, 'ep4_vw_inn');
   assert.equal(h.mark, 'inn_bed');
-  assert.equal(h.endCard.sub, 'Episode 5 is not playable yet.', 'EP5_LIVE off: the Episode 4 end card is unchanged');
+  assert.equal(h.endCard.sub, EP5_LIVE ? 'Episode 5 begins in the morning.' : 'Episode 5 is not playable yet.',
+    'the Episode 4 end card follows the switch (E5-integrate flipped it on the branch)');
   markCreditsRolled(g, 4);
   setPosition(g, h.map, 17, 7, 'down');
   assert.equal(creditsPending(g, has), 0, 'no Episode 5 credits entry is due');
-  assert.ok(!packsToAwait(g.flags).includes('ep5'), 'the wake does not wait for the ep5 pack while it is off');
+  assert.equal(packsToAwait(g.flags).includes('ep5'), EP5_LIVE, 'the wake waits for the ep5 pack only while it is live');
   autosave(save, g);
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
   assert.equal(save.load(1).map, 'ep4_vw_inn');
   assert.equal(save.load(1).counters.credits4_rolled, 1);
-  assert.ok(!save.load(1).flags.ep5_started, 'ep5_morning did not run');
+  assert.ok(!save.load(1).flags.ep5_started, 'nothing here runs ep5_morning (the field does, on the next enter of the inn)');
 });
 
 test('an old save without any Episode 5 field (any slot) loads and autosaves to its own slot only', () => {
@@ -132,8 +133,6 @@ test('an Episode 1 save and a fresh game still autosave to slot 0 (the schema is
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-0']);
 });
 
-// Plan 10.8's cases that need the real story, patches and maps are E5-integrate's (qa/integrate/ep5_*), with EP5_LIVE on.
-const PENDING = 'needs ep5_morning (E5-story), the ep4_vw_inn wake patch (E5-maps-a) and EP5_LIVE on the branch; E5-integrate turns this on';
-test('EP5_LIVE on: the Episode 4 credits fixture wakes at ep4_vw_inn and ep5_morning runs once', { skip: PENDING }, () => {});
-test('a Fine Print (tier_1) save at ep4_vw_inn never reaches ep5_morning', { skip: PENDING }, () => {});
-test('an Episode 5 save made mid-Labyrinth reloads with latched plates and every floor at its start hour', { skip: 'needs the Labyrinth maps (E5-maps-b) and the field code (E5-world); E5-integrate turns this on' }, () => {});
+// Plan 10.8's cases that need the real story, patches and maps (the Episode 4 credits fixture reaches ep5_morning once with
+// EP5_LIVE on; a Fine Print save never does; a mid-Labyrinth save reloads with latched plates and every floor at its start hour)
+// are in qa/integrate/ep5_integrate.test.mjs (E5-integrate).

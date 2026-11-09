@@ -82,6 +82,8 @@ export const EP5_LINES = {
   ],
   ep5_oasis_spring: 'An oasis spring in a ring of sandstone. The water is cold, and tastes of stone and rest.',
   ep5_cracked_base: 'The base of this obelisk is cracked right through. A hard enough blow would open it.',
+  ep5_back_door: 'A sandstone door, shut fast. There is no handle on this side.',
+  ep5_back_door_open: 'The sandstone door stands open. The way through is clear.',
   ep5_camp_court: "Tent rings worn into the stone, and a carved toy camel half under the sand. Someone left in a hurry.",
 
   // ep5_saffron

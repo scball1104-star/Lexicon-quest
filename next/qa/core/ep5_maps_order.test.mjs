@@ -83,5 +83,5 @@ test('a broken map module (not a missing one) is not swallowed', async () => {
   assert.equal(isMissing(new SyntaxError('Unexpected token'), '/ep5_saffron.js'), false);
 });
 
-// Plan 3.4's map cases need the real patches (E5-maps-a, wave 5c); E5-integrate turns them on.
-test('with EP5_LIVE off no wake trigger fires and no ship is drawn; the berth doors land on walkable cells', { skip: 'needs src/data/maps/ep5_patches.js and the ep5 maps (E5-maps-a, wave 5c); E5-integrate turns this on' }, () => {});
+// Plan 3.4's map cases (with EP5_LIVE off no wake trigger fires and no ship is drawn; the berth doors land on walkable cells)
+// are in qa/integrate/ep5_integrate.test.mjs (E5-integrate), with the real patches and maps.

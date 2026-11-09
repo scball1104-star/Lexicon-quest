@@ -8,7 +8,7 @@ export const EP3_LIVE = true;
 /** Episode 4 (EPISODE4_PLAN 10.5): the ep4 pack is not fetched and nothing of it shows while false (`?ep=4` aside). */
 export const EP4_LIVE = true;
 /** Episode 5 (EPISODE5_PLAN 10.5), as EP4_LIVE. */
-export const EP5_LIVE = false;
+export const EP5_LIVE = true;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
