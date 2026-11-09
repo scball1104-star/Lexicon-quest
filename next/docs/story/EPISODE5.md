@@ -691,6 +691,45 @@ Episode 5 uses: map ids `ep5_*`, encounter prefixes `e5s_`, `e5r_`, `e5l1_`, `e5
 
 Reserved for E5-story (wave 5a): what the built script does beyond the beat sheet (deltas only, as EPISODE4 section 9).
 
+Built by E5-story, 2026-11-08 night (`src/data/ep5/{flags,npcs,quests,text,story,ledger}.js`, staging in
+`docs/story/STAGING_EP5.md`, tests `qa/content/ep5_story.test.mjs` and `ep5_data.test.mjs`). 39 scenes (32 main and
+chained, 7 side), main path 170 boxes (budget about 200; `ep5_morning` 6). Deltas from section 1:
+
+- **Staging.** Every scene with a speaker outside the party walks the hero to a mark two tiles from the speaker, Mira
+  one tile left of it and Bram one tile right (`X`, `X_m`, `X_b`; the marks are in STAGING_EP5 section 3). The one
+  exception is `road_shade`: Omar calls across the Glass Flat from the obelisk's shade.
+- **Pages.** The four payoffs open `ep5_letter`, `ep5_chart` (three modes) and `ep5_page` only when the kind is in
+  `PAGE_KINDS`; the lines said over them are the same with or without the picture.
+- **`ep5_board`** does not move the party: two boxes, Yara goes aboard, the tint drops to dusk, and the berth's boat door
+  does the crossing (the deck is night on arrival). A scene warp needs map coordinates the maps do not have yet.
+- **The memories do not change the tint** (the Labyrinth floor's hour owns it): a warm flash in and out, `sorrow` and a
+  distant caravan bell. At the three springs the First Student is a voice (`student_m`), not a spawn.
+- **Yasmin** keeps the shop counter in `ep5_sh_shop` (plan 4.4) and meets the party at the gate as a scene spawn in
+  `haven_arrival` (plan 4.10 listed her on the town map). **Nasrin** keeps her bench in the market; in the tower she is a
+  scene spawn. **Omar** sits at the obelisk on the east edge of the Glass Flat and walks to his fire in `tent_rest`.
+- **Scene twins** use the ep4 pack's compound flags: `sel` stands down from `sel_walked_in`, `yara` and `nasrin` from
+  `chart_restored`, all until `ep5_complete`; `tamir` (the record) appears at `ep5_complete`.
+- **Tamir's swap** happens on Yara's "...Father?" (`tamir_t` "A Traveler" becomes `tamir_n` "Tamir" on the same mark).
+  Yara dropping the rope is a narration box.
+- **Ishra's page** is given to the party: Sel says "Keep it with the others, Mira. She would want it read." (new line).
+  The scene ends on a pan to the Sun Keyhole.
+- **The Oracle answers each choice** before the fight with one new line ("EVERY ROAD I READ ENDS. THAT IS WHAT A ROAD IS." /
+  "THE SKY IS READ. WHAT IS READ IS DONE.").
+- **New boxes elsewhere:** Yara's "I'll bring her round to the Haven's water stairs. Follow the road east." in its own box
+  (`road_landing`); Bram's "Bigger than a ferry. Right. I can do bigger than a ferry." at the berth; Mira on the Gallery's
+  painted horizons; a narration of the Knight's mirror cracking after the win; the dawn coast after the deck fight.
+- **No choice in the Gallery** (a save that skipped `vex_trig`) plays the hidden path's lines and gives the Veiled Star:
+  the chart finds the star anyway.
+- **The first road bark** `first_shade` carries Bram's half of the ship's truth choice (the "one road bark" of plan 7.3).
+  The low-MP hint is both a bark (`sky_low_mp`, once per save) and `EP5_BATTLE_TEXT.low_mp`.
+- **`testimony_kamal`** is part of `roads_start` (Kamal gives the quest and is his own first witness), not a registered
+  scene: it keeps the built count at 39, under section 7's 40.
+- **Flags added:** `knight_tried`, `oracle_tried` (short retries).
+- **The Episode 6 card sub** is "Above the clouds, the first page waits." (section 10.10's 49 characters do not fit a
+  42-character card line). Still a placeholder.
+- **Boss cards, arc lines and battle lines** are exported from `text.js` (`EP5_BOSS_CARDS`, `EP5_ARC_LINES`,
+  `EP5_BATTLE_TEXT`) for E5-scene-ui to register, as Episode 4's `scene.js` did.
+
 ---
 
 ## 10. Choices made tonight that are Scott's or Stephen's (open for Scott and Stephen)
