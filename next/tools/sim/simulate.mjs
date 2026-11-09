@@ -107,6 +107,7 @@ for (const x of EXTENSIONS) {
   for (const [ep, zs] of Object.entries(x.zones || {})) for (const z of zs) if (!EPISODES[ep].includes(z)) EPISODES[ep].push(z);
 }
 const EP4 = (await import('./ep4.mjs')).attach({ EPISODES, TARGETS, SUITE_LEVELS, BOSS_LEVELS, BOSS_TARGETS });   // Episode 4 (tools/sim/ep4.mjs): EPISODES[4], its levels and targets, progression and check hooks for the CLI
+const EP5 = (await import('./ep5.mjs')).attach({ EPISODES, TARGETS, SUITE_LEVELS, BOSS_LEVELS, BOSS_TARGETS, EP4 });   // Episode 5 (tools/sim/ep5.mjs): EPISODES[5], its levels and targets; chains its progression and check onto EP4's
 
 export function makeParty(zone, level) {
   const L = LOADOUTS[zone];
@@ -463,7 +464,7 @@ if (isMain) {
     const zone = get('--zone', null);
     const episode = get('--episode', null);
     const t0 = Date.now();
-    const zones = zone ? [zone] : episode ? EPISODES[episode] : [...EPISODES[1], ...EPISODES[2], ...EPISODES[3], ...EPISODES[4]];
+    const zones = zone ? [zone] : episode ? EPISODES[episode] : [...EPISODES[1], ...EPISODES[2], ...EPISODES[3], ...EPISODES[4], ...EPISODES[5]];
     const rows = runSuite({ n, zones });
     const prog = [...progression(1), ...progression(0.8), ...progression(1, 2), ...progression(0.8, 2), ...progression(1, 3), ...progression(0.8, 3), ...EP4.progression(1), ...EP4.progression(0.8)];
     console.log(formatTable(rows));
