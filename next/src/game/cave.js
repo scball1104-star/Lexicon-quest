@@ -22,16 +22,8 @@
 //   riseAvailable(g, memberId) / takeRise(g, memberId)          the second_life prop (one free rise per member per reading)
 //   suspendMeta(g)                 saveMeta(g) plus { cave: { floor, seed } } for the suspend save's envelope
 //
-// WHAT THE SNAPSHOT HOLDS (plan 2.2, deep copies): party (every member record: level, exp, hp, mp, fury, weapon, worn gear,
-// mastery; skills are derived from level and mastery so they ride along), reserve, items, gear, gearNext, gold, map, pos,
-// lastSafe, playtime. Flags, counters, opened (except the floors' one-shots, see below), bestiary, the Ledger, Vows and quests
-// are NOT snapshotted: they persist through the run and out of it, as the plan's table says.
-//
-// WHAT RESETS ON ENTER: every active member to level 1 (exp 0, level-1 HP and MP, fury 0, the start weapon type, nothing
-// worn in any slot, mastery 0 in every type). `gear` = one fresh instance of every vault unique (uids from 1; the snapshot's
-// gearNext comes back on exit). `items` = {}. `gold` = 0. `opened` keys of generated floors (`cave_b*:`) are dropped so the
-// next reading's chests are closed again (the entrance hall `cave_landing0` keeps its one-shots). Reserve members are left as
-// they are: nothing in the game reads `reserve` today and the plan says only the current party enters.
+// enter() snapshots and resets what docs/DEEP_STACKS_PLAN.md 2.2 lists (flags, counters, bestiary, the Ledger, Vows and
+// quests persist; generated floors' `opened` one-shots are dropped; reserve members are left as they are).
 //
 // THE VAULT holds unique IDS (strings, no duplicates, in the order found), not instances: a cave unique has a fixed affix set
 // folded into its stats, so an instance is rebuilt from the id (battle/loot.js toInstance) whenever one is needed. The
@@ -48,9 +40,6 @@
 // floor's map is registered:   engine.save.save(SUSPEND_SLOT, serialize(game), suspendMeta(game))
 // and engine.save.remove(SUSPEND_SLOT) inside bank, die, quit and clear's callers. Loading it: deserialize(env.data), then
 // resumeInfo(g) gives the floor and seed to rebuild `cave_bNN` from; the party stands at the floor's arrival point.
-// core/save.js checkSlot() accepts 0..3 only today; the exact change (owner: C2-world, the report repeats it):
-//     export const SUSPEND_SLOTS = ['cave'];
-//     function checkSlot(n) { if (typeof n === 'string' && SUSPEND_SLOTS.includes(n)) return; ...the old check... }
 // list() never shows it (it loops 1..SLOT_COUNT); the title asks save.exists('cave') itself. The field's autosave must go
 // to SUSPEND_SLOT while inRun(game) (never to slot 0, which Continue would load into a floor no longer registered).
 

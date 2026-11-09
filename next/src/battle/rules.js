@@ -46,6 +46,8 @@ export const REFLECT_PHYS = 0.5;  // Echo Warden Bulwark: the attacker takes hal
 export const BOSS_INTERRUPT_DELAY = 0.35;
 export const OATH_HAMMER = 0.5;   // Episode 3: the share of a Last Hammer that Bram takes when his Tempered Oath turns it
 export const SPLIT_EXP = 0.25;
+/** Pack rules: docs/PWA_PACKS.md, the ep5 pack. */
+export const RULE_EXT = [];
 
 // ------------------------------------------------------------------------------- rng
 /** mulberry32 seeded rng with next() -> [0,1); same algorithm as core/rng.js. */
@@ -412,7 +414,7 @@ export function createBattle(cfg = {}) {
     if (!types.length || tgt.side !== 'enemy') return out;
     if (types.some((t) => tgt.absorb.includes(t))) { out.absorb = true; out.mult = -1; return out; }
     if (types.every((t) => tgt.immune.includes(t))) { out.immune = true; out.mult = 0; return out; }
-    out.weak = types.filter((t) => tgt.weak.includes(t));
+    out.weak = tgt.exposed ? types : types.filter((t) => tgt.weak.includes(t));
     if (out.weak.length) { out.mult = WEAK_MULT; return out; }
     if (types.some((t) => tgt.resist.includes(t) || tgt.immune.includes(t))) { out.resist = true; out.mult = RESIST_MULT; }
     return out;
@@ -1201,6 +1203,7 @@ export function createBattle(cfg = {}) {
     if (br && !state.hint && br.mp < o.mp && br.skills.includes(o.id) && !hasFlag(storyFlags, 'hint_oath_mp') && living('enemy').some((f) => f.id === 'cinder_warden')) {
       state.hint = 'hint_oath_mp'; emit({ type: 'message', text: `Bram is under ${o.mp} MP: too low for ${o.name}.` });
     }
+    for (const h of RULE_EXT) if (h.afterAction) h.afterAction(ctx, units);
   }
 
   function checkEnd() {
@@ -1401,6 +1404,7 @@ export function createBattle(cfg = {}) {
       if (u.fury >= FURY_MAX) emit({ type: 'fury_ready', target: u.uid });
     }
     AI.onStart(ctx);
+    for (const h of RULE_EXT) if (h.start) h.start(ctx);
     advance();
     state.startEvents = E.slice();
     return E;

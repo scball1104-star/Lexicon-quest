@@ -637,7 +637,7 @@ Tomorrow Husk, Dune Stalker (from "Sand Stalker", see below), Dust Wolf's role a
 
 **Changed, with reasons.**
 - **Word and order puzzles are gone** (DESIGN hard rule 2; Episodes 3 and 4 did the same). F1's three wind vanes with a
-  printed answer chart, F2's lens triple (Blank, True, False) and its "Crossword of the Open Sky" (anchor ORACLE), the
+  printed answer chart, F2's lens triple (Blank, True, False) and its word-grid puzzle (anchor ORACLE), the
   ordered chronicles (Departure, Crossing, Arrival) and the ordered vows (Shelter, Truth, Return, wrong order resets) are
   all replaced: the floors open by sun and shade (plan 5.1), the reliquary is a Lantern secret, and the vows are the Well's
   three landings in the order of the descent, never an answer to get right.
@@ -712,7 +712,7 @@ None of these blocks the build; the default is what the build agents use. Each i
    "one bell down in your valley" thread alive without answering it.
 7. **Renames and drops for canon conflicts:** the Mirage Serpent to the Mirage Knight, Nadir into Kamal, Sand Stalker to
    Dune Stalker, the Prophecy Shard to the fifth fragment, four phases to three, no quicksand damage, no vanes, lenses,
-   crossword or ordered vows. [default: as listed] Each follows a hard rule or an asset fact (section 8).
+   word grid or ordered vows. [default: as listed] Each follows a hard rule or an asset fact (section 8).
 8. **Truth choices:** two, Bram on the ship (one line) and the star in the Gallery (one line and Sel's gift). [default:
    two, small and honest] RESPONSIBILITY_ARC decision D; Episode 4 had one and Review 6 found it landed.
 9. **The Episode 5 card wording** stays as Episode 4 shipped it: "Episode 5: The Last Prophecy / In the desert, the words

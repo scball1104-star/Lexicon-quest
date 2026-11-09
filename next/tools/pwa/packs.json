@@ -63,6 +63,16 @@
       "pk_inn"
     ]
   },
+  "ep5": {
+    "entry": "../data/ep5/index.js",
+    "prefix": "ep5_",
+    "assets": "assets/ep5_manifest.json",
+    "audioPack": "ep5",
+    "touches": [
+      "ep4_vw_inn",
+      "ep4_valewyn"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

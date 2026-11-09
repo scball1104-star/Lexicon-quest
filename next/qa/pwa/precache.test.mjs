@@ -18,6 +18,10 @@ const wire = (rel) => (isText(rel) ? gz(rel) : sizeOf(rel));   // GitHub Pages g
 const EP4_AUDIO = exists('src/data/ep4/audio.js')
   ? await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep4', 'audio.js')).href).then((m) => m.AUDIO || m.default || m)
   : null;
+// Episode 5's the same way (EPISODE5_PLAN 13.3): src/data/ep5/audio.js (E5-audio, wave 5c). null until it exists.
+const EP5_AUDIO = exists('src/data/ep5/audio.js')
+  ? await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep5', 'audio.js')).href).then((m) => m.AUDIO || m.default || m)
+  : null;
 
 test('precache: built (not the placeholder), unique, and every entry exists', () => {
   assert.match(sw.version, /^[0-9a-f]{12}$/, 'SHELL_VERSION is a build hash (run python tools/pwa/build_pwa.py)');
@@ -61,12 +65,13 @@ test('audio manifest: core sfx and jingles are precached, pack sfx and music are
     assert.ok(!sw.entries.includes(s), `episode pack sfx must not be precached (lazy, runtime-cached): ${s}`);
   }
   for (const s of srcs(Object.values(a.music || {}))) assert.ok(s.startsWith('..') || !sw.entries.includes(s), `music must not be precached: ${s}`);
-  // the ep4 fragment: every file exists and none of it is precached (build_pwa.py LAZY_PREFIXES covers sfx/ep4_, ambience/ep4_)
-  if (EP4_AUDIO) for (const kind of ['sfx', 'ambience', 'music', 'jingles']) {
-    for (const s of srcs(Object.values(EP4_AUDIO[kind] || {}))) {
+  // the ep4 and ep5 fragments: every file exists and none of it is precached (build_pwa.py LAZY_PREFIXES covers sfx/ep4_,
+  // ambience/ep4_, sfx/ep5_, ambience/ep5_)
+  for (const [pack, frag] of [['ep4', EP4_AUDIO], ['ep5', EP5_AUDIO]]) if (frag) for (const kind of ['sfx', 'ambience', 'music', 'jingles']) {
+    for (const s of srcs(Object.values(frag[kind] || {}))) {
       if (s.startsWith('..')) continue;
-      assert.ok(exists(s), `ep4 ${kind} file exists: ${s}`);
-      assert.ok(!sw.entries.includes(s), `ep4 ${kind} must not be precached (the pack's, runtime-cached): ${s}`);
+      assert.ok(exists(s), `${pack} ${kind} file exists: ${s}`);
+      assert.ok(!sw.entries.includes(s), `${pack} ${kind} must not be precached (the pack's, runtime-cached): ${s}`);
     }
   }
 });
@@ -85,12 +90,13 @@ test('sfx packs: every pack is declared, loadable by the engine, and every sfx i
   // Every sfx id named in src/ must exist and sit in core or in a declared pack (a missing one would be silent).
   const ids = new Set();
   const ep4Ids = new Set();   // ids named under src/data/ep4/: they may resolve in the ep4 pack's audio fragment instead
+  const ep5Ids = new Set();   // ids named under src/data/ep5/: the ep5 fragment, or the ep4 one (the ep5 pack brings ep4 up first)
   const walk = (dir) => { for (const f of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
     const rel = path.posix.join(dir, f.name);
     if (f.isDirectory()) walk(rel);
     else if (f.name.endsWith('.js')) {
       const t = read(rel);
-      const into = rel.startsWith('src/data/ep4/') ? ep4Ids : ids;
+      const into = rel.startsWith('src/data/ep4/') ? ep4Ids : rel.startsWith('src/data/ep5/') ? ep5Ids : ids;
       for (const m of t.matchAll(/sfx\(\s*['"]([a-z0-9_]+)['"]/g)) into.add(m[1]);
       for (const m of t.matchAll(/op:\s*'sfx',\s*id:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
       for (const m of t.matchAll(/sfx:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
@@ -106,6 +112,14 @@ test('sfx packs: every pack is declared, loadable by the engine, and every sfx i
     else pending.push(id);
   }
   if (pending.length) console.log(`# ep4 sfx ids waiting for src/data/ep4/audio.js (E4-audio): ${pending.join(', ')}`);
+  const pending5 = [];
+  const inFrag = (frag, id) => { let e = frag && frag.sfx && frag.sfx[id]; if (e && e.alias) e = frag.sfx[e.alias] || a.sfx[e.alias]; return e && (e.src || e.srcs || e.variants) ? e : null; };
+  for (const id of ep5Ids) {
+    if (id === 'sfx' || id.endsWith('_') || a.sfx[id]) { if (a.sfx[id]) ids.add(id); continue; }
+    if (EP5_AUDIO) assert.ok(inFrag(EP5_AUDIO, id) || inFrag(EP4_AUDIO, id), `ep5 sfx id ${id} has no entry in src/data/ep5/audio.js, src/data/ep4/audio.js or the manifest`);
+    else pending5.push(id);
+  }
+  if (pending5.length) console.log(`# ep5 sfx ids waiting for src/data/ep5/audio.js (E5-audio): ${pending5.join(', ')}`);
   assert.ok(ids.size > 40, `found ${ids.size} referenced sfx ids`);
   const missing = [];
   for (const id of ids) {

@@ -7,11 +7,12 @@ import * as encounters from '../data/encounters.js';
 export const EP3_LIVE = true;
 /** Episode 4 (EPISODE4_PLAN 10.5): the ep4 pack is not fetched and nothing of it shows while false (`?ep=4` aside). */
 export const EP4_LIVE = true;
+/** Episode 5 (EPISODE5_PLAN 10.5), as EP4_LIVE. */
+export const EP5_LIVE = false;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 
-/** The title row and help for the Episode 3 quick start (shown by E3-scene-ui when `episodeOffers().ep3.show`). */
 /**
  * The title menu folded into two columns (the phone, with many rows): Config moves up in front of the episode rows, so those
  * stay together in one column. In place, idempotent, and only with two or more episode rows.
@@ -31,7 +32,7 @@ function urlEp(search) {
 }
 
 /** The newest save (slots 0..n) whose flags include `flag`: { slot, at, name } or null. */
-function newestWith(save, flag) {
+export function newestWith(save, flag) {
   let best = null;
   const last = save && Number.isFinite(save.slots) ? save.slots : 3;
   for (let n = 0; save && n <= last; n++) {
