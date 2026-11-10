@@ -1128,3 +1128,166 @@ Battle gold: 3,200 in, 8,930 earned, 12,130 out.
   Turn the Sky reaches sky.js through `{ keep: 'sky' }` (applyEffect hands `keep` to ai.js special(), the user's script, `basic` for a party
   member, which sky.js gives a `special` that answers only `e.sky`). `SKY_RULE.skill` is ready; each action is applied once.
 - `src/battle/rules.js` targetInfo(): an item `target: 'none'` would let Hourglass Sand skip the ally picker.
+
+## 14. Episode 6: The Skybound Isles (E6-battle, wave 6a)
+
+Design: `docs/EPISODE6_PLAN.md` sections 6 and 7. Everything is pack data and pack code (`src/data/ep6/{enemies,encounters,items,loot,shops,
+skills,ai,gale}.js`, each an idempotent `register()` the pack entry calls in its ORDER; `gale` must come after `encounters` and after the
+ep5 pack's `sky`); no core file changed (`RULE_EXT` is Episode 5's seam). `simulate.mjs --check` passes all six episodes; `--cave --check`
+and `--tier 1 --check` unchanged.
+
+### 14.1 Enemies (final numbers after tuning)
+
+Every foe has a wind (`aloft` rides the Gust, `ground` is blown back). Ordinary EXP about 100 a head; the three-foe groups carry an
+`expMul` (F1 sprites 0.65, F2 mixed 0.6).
+
+| Enemy | Wind | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold), trait |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Squall Wolf | ground | 25 | 760 | 175/20 | 30/22 | 20 | 2 | fire, spear | ice | 95 / 160 | Bite, Howl (allies ATK +20%); evade 10% |
+| Gale Sprite | aloft | 25 | 640 | 90/165 | 18/32 | 18 | 2 | thunder, spear | ice, bow | 90 / 160 | Slap, Whirl (party mag 70%) |
+| Rigger Beetle | ground | 25 | 600 | 165/18 | 44/24 | 9 | 4 | thunder, axe | sword, bow | 100 / 170 | Mandible, Clamp (Protect), Rivet (DEF +30%) |
+| Signal Wraith | aloft | 26 | 640 | 78/175 | 22/36 | 15 | 3 | light, fire | ice, thunder | 100 / 180 | Static (single mag 150%), False Signal (Silence 25%), Drain |
+| Storm Harrier | aloft | 26 | 600 | 175/30 | 26/26 | 22 | 3 | bow, ice | thunder | 100 / 180 | Talon, Dive (single phys 160%); flying, evade 15% |
+| Lightning Manta | aloft | 26 | 680 | 82/180 | 22/38 | 16 | 3 | ice, bow | thunder, fire | 105 / 190 | Shock (Stun 15%), **Thunder Glide** (party mag 130%, first 2, every 3) |
+| Storm-Marked Page | aloft | 27 | 640 | 100/185 | 20/40 | 17 | 3 | fire, light | thunder, ice | 100 / 200 | Margin Cut, Smudge (party mag 95%, Blind 15%), **Overwrite** (single mag 200%) |
+| The Gale Engine | ground | 26 | 1750 | 750/200 | 42/24 | 14 | 7 | thunder, axe | ice, bow | 240 / 1000 | Fan Blade (40%), Piston (party 25%); Bellows (the Gust every 3; Braced against its own Gusts while they run); **Full Blast** (party phys 170%, pinned to the Gust, then three clear Gusts); two Gale Sprites at 50%; immune Silence |
+| The Storm Scribe | aloft | 27 | 3900 | 520/520 | 32 (x1.4 armored)/30 | 15 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | ice, thunder (phases 1, 2) | 1300 / 1600 | Quillstorm (party phys 130%), Ink Squall (single mag 150%, Blind 20%); **Rewrite the Course** (pinned); **Thunderhead** (party mag 170%, Stun 20%); immune Stun, Poison, Blind |
+| The False Beacon | aloft | 27 | 560 | 200/200 | 22/28 | 14 | 2 | fire, light | thunder | 0 / 0 | False Light: Covers the Scribe every turn |
+| The Broken Compass | ground | 27 | 520 | 200/200 | 26/26 | 13 | 3 | axe, thunder | ice | 0 / 0 | Spin (the soonest member half a turn back); Misdirect on Bram every 3rd turn (Silence 40%) |
+
+The Eye of the Storm (the tightest ordinary floor): `encounters.js` `O3_POWER` pages 1.7, manta 1.8, mixed 2.8; `O3_SPEED` 1.45, 1.4,
+1.9; `O3_HP` 1.0, 1.0, 1.05.
+
+**What moved from the plan, and why.** Ordinary ATK and MAG about +30% (wolf 130 to 175, sprite MAG 120 to 165, wraith 132 to 175,
+page 150 to 185): at the plan's numbers the Lv 25 to 27 party lost 2 to 10% HP a fight and attack-only play won everything; the beetle's
+DEF 54 to 44 and HP 680 to 600 (it took 5.5 rounds). The bosses' ATK and MAG roughly tripled and doubled (the Engine 165 to 750, the
+Scribe 230/235 to 520/520) and their HP fell (the Engine 3000 to 1750, the Scribe 5600 to 3900, the Beacon 720 to 560, the Compass 660
+to 520): at the plan's numbers a pinned move that landed cost tempo but no fights, so ignoring the telegraphs cost 0 points, and careful
+play took 11.5 and 17.7 rounds. Full Blast 140% to 180% and the Engine's SPD 11 to 14 (blown back on every 3-action Gust, it acted too
+rarely to blast). Careful play heals through single-target pressure, so F3 is tight only through spread damage: the Page's Smudge became
+party-wide (plan: single, Blind 25%). EXP: the Page 110 to 100, the Manta 110 to 105, the Engine 260 to 240, the three-foe groups' `expMul`
+0.7 / 0.65 to 0.65 / 0.6, so every fight still meets the Scribe under Lv 28. The Gust (5) and the push (0.35), knobs 1 and 2, did not move.
+
+### 14.2 The Gale (`src/data/ep6/gale.js` on `RULE_EXT`)
+
+- A battle has a Gale only when a foe has a `wind` (`state.gale`, saved with the battle state). No encounter field (the `rollEncounter` and
+  `rules.js` double-entry trap is avoided); `GALE_START` (`encounters.js`) names the first Gust only for `e6a_first` (in 3).
+- The Gust falls after 5 actions (every ended turn, a combo is one), or every `gustEvery` (3) while the Gale Engine stands and its bellows run.
+  Every Aloft foe that is not Broken rides it (0.35 of its base delay sooner); every grounded foe and party member is blown back 0.35 unless
+  Braced (`u.defending`: Defended since its last turn, or a Ballast Stone's brace); an Anchored party catches it (each member 0.35 sooner).
+  A Broken Aloft foe is Grounded.
+- **The negative-push check.** `delayUnit(u, -f)` has no floor: a unit less than f of a turn from acting lands before `state.now` (seen in
+  the test: next 41 and 59 against now 78). `advance()` never moves time back, so it would just act next, but the timeline would show a
+  time in the past and two such units could swap for no visible reason. So every ride and catch is `delayUnit` with the fraction clamped
+  to the unit's room (`push()`): a unit about to act stays put, the rest keep their order. The plan's fallback (Aloft foes not moved) is
+  not needed (`RIDE = true`).
+- **Pinned moves** (`pin()`): Rewrite the Course and Full Blast are not charges. They are pinned to the Gust marker exactly 2 actions out and
+  never before Bram's next turn (`holdForBram`, at the pin and after every action until he has acted, a Spin push included). When the Gust
+  falls: Anchored, it fails ("The course holds.", sfx `rewrite_break`) and its owner goes back a full turn (the party's double turn). Else
+  the Rewrite sends every member back a full turn (Braced: half) and the Scribe acts at once; the Blast strikes the party (phys 180%,
+  Defend halves) and sends every member back a full turn (Defending: none; Ballast: half). A Break of its owner cancels it; so does its fall.
+- **Anchor** (`anchor_line`, Bram, 14 MP, rank 80, `target: 'none'`, `learn: { flag: 'anchor_learned' }`, fallback 26): the party is Anchored
+  through the next Gust. It reaches gale.js through `{ keep: 'gale', gale: 'anchor' }` (the 13.8 bridge: `basic.special` answers `e.gale` and
+  passes the rest on to Episode 5's sky bridge). For E6-scene-ui: its target kind is `none` (the menu's E5-fixes A1 path); its
+  `SIGNATURE_TECHS` row is `{ unit: 'bram', flag: 'rewrite', skill: 'anchor_line' }`.
+- **The Ballast Stone** (`ballast_stone`, 150): braces through the next Gust. rules.js tells a rule which unit acted, not whom its item went
+  to, so it braces the member who uses it (14.8).
+- **Answer, Turn the Sky.** Answer on the owner of a pinned move is a plain light hit and says "A course is not a decree." (kind
+  `rewrite_answer`). Turn the Sky in a Gale with no sky says "The wind is not the sky." (kind `rewrite_sky`) and changes nothing.
+- **Turn the Sky with no sky** (checked 2026-11-09): in a battle with no sky (an Episode 1 to 4 revisit, the cave, the tier, every Episode 6
+  battle) it was listed, enabled, and spent Mira's turn and 12 MP on "There is no sky to turn here.". `SKILL_GATE` (a `RULE_EXT` start, after
+  the sky and the Gale start) takes it out of that battle's copy of Mira's skills (the saved member keeps it), with `state.gated` = [{ unit,
+  skill, reason: 'No sky to turn.' }]; Anchor with no wind likewise ("No wind to hold."). Episode 5 is untouched (every Episode 5 battle has
+  a sky). `gale.js gateCommands(b, unit, cmds)` returns the list with each gated row put back, disabled, with its reason: the scene shows
+  it by wrapping `battle.commands` (E6-scene-ui; `src/scenes/battle.js`'s vow view is the pattern). No core line.
+- Events: `gale` { gustIn, every, reason: start | action | bellows | hold }, `gust` { pushed: [{ target, amount, ticks }] }, `aloft` { target,
+  on }, `anchored` { targets, on, by? }, `braced` { target, on, by: 'ballast' }, `rewrite` { source, pinned, gustIn, skill, moved? } plus a
+  `telegraph` with `rewrite: true` (`nextTurn` = actions to the Gust), `rewrite_broken` { source, reason: anchor | break | gone, skill },
+  `rewrite_land` { source, skill } then an `action_start` with `charged: true`, `telegraph_cancel` when a pin ends early. Message kinds
+  `gust`, `anchor`, `ballast`, `rewrite_broken`, `rewrite_land`, `rewrite_answer`, `rewrite_sky`, `bellows`, `vents`, `ward`, `ward_break`,
+  `blessing`.
+
+### 14.3 The Gale Engine (ai `gale_engine`) and the Storm Scribe (ai `scribe`)
+
+- **Engine**: Bellows from the start (the Gust every 3); a Break stalls them for 2 of its turns ("The bellows stall!") and cancels a pinned
+  blast. Full Blast pinned whenever the Gust is 2 actions away or less and nothing is pinned ("The Engine winds the bellows... It blasts when
+  the wind gusts."). At 50%, once: two Gale Sprites (`summon`, reward 0, Aloft). Loot: Bellows Heart, 1 rare (ilvl 26), 2 Hi-Potions.
+  Encounter: no flee, flag `engine_defeated`, backdrop `ep6_relays`.
+- **Scribe 1 The Wind Script** (HP locked at 68%): armored (a DEF x1.4 mod, source `armor`). **2 The Storm Script Ward** (from 68%): `summon`
+  the False Beacon and the Broken Compass; the ward: 20% damage, shields locked, HP stops at 33%. The last light down tears it (kind
+  `ward_break`, `phase` 3, `break`, +25 `fury_gain` reason `ward_break`). **3 The True Sky Chart**: armor gone, weak fire, spear, light, no
+  resists, 9 shields, Haste, Thunderhead every 4th turn (the first a turn early; a charge, so Defend or Break; Anchor does not stop it).
+  Rewrite the Course in every phase. `phase` events carry `sprite`: `scribe`, `scribe_ward`, `scribe_chart`. Encounter: no flee, flag
+  `scribe_defeated`, music `boss_scribe`, backdrop `ep6_eyrie`, `startFury` +20 with `beacon_lit`. Loot: The Scribe's Quill, 2 rares (ilvl
+  27), a Phoenix Feather, 2 Hi-Ethers.
+
+### 14.4 Auto (`POLICY_EXT`, careful play only)
+
+`ep6Policy` returns null unless the battle has a Gale. 1. A move pinned: Bram Anchors when the Gust is 2 actions away or less, or when his
+next turn would come after it; when he cannot, the member on turn Defends against a Full Blast, and Mira holds a Ballast Stone against a
+Rewrite. While Bram owes a pin its answer nobody takes him into a combo. 2. The Gust 1 or 2 away, Aloft foes outnumber grounded ones, and
+Bram keeps 28 MP: he Anchors. 3. The Gust 1 away and a member under 35% (not Mira): Defend. 4. Against the Engine and the Scribe, Bram keeps
+14 MP for Anchor. Reckless and attack-only play never Anchor, brace or use a stone. Careful play, the Scribe at Lv 27: 2.2 Rewrites a fight,
+79% broken by Anchor, 6% by a Break, 12% land; 2.6 Anchors and 0.3 Ballast Stones a fight. The Engine at Lv 26: 1.1 Full Blasts a fight,
+88% broken by Anchor, 2% by a Break, 4% land.
+
+### 14.5 Items, loot, shops
+
+Tier 11 (ilvl 25) and tier 12 (ilvl 27) as plan 7.2; uniques and the Skyhands set as 7.3 (every stat named is a party stat). The Sky
+Compass carries `descAfter: { flag: 'compass_restored', desc }` for its steady desc (the item view must read it). Affixes: an eighth tier
+at ilvl 26. `RARE_NAME_EXT` gains [26: Windborne, Stormwrit, Anchored, Highflown, Ballasted]. ZONE_LOOT: the Airstair and F1 ilvl 25
+(0.17), F2 26 (0.18), F3 27 (0.18). Shops: `winch` (Bennet, peddler prices), `aeris_provisions` (Nova; Hourglass Sand when the ep5 pack has
+registered it), `galewing` (Ilex; the tier 10 weapons too, tier 12 after `obs_f2_done`).
+
+### 14.6 Simulator and the final table
+
+`tools/sim/ep6.mjs`: `registerData()` registers the ep4, ep5 and ep6 battle data; the `EP6` attach line in `simulate.mjs` (chaining its
+progression and check onto Episode 4's, as Episode 5 does) and `EPISODES[6]` in the default zone list (two lines; that file is CRLF and
+kept so). The quick start's EXP is read from `src/data/ep6/start.js` `EP6_START` when it exists (else the plan's 13,300). Loadouts: the
+Airstair is `ep5_lab_oracle` plus the Oracle's Mask (Mira), the Caravan Compass and Sunplate Mail (Bram), the Sunplate Helm (hero); F1 +
+Skysteel Mail, Windweave Robe and `anchor_learned`; F2 + Skyhand Boots (Bram); F3 + the Galewing Sword and Compass Rod; the Scribe + Bellows
+Heart and mastery a step up; 2 to 4 Ballast Stones. Progression from 13,300, every fight: the Airstair 25, F1 -> 26, F2 -> 27, F3 27, **the
+Scribe met at Lv 27 with 16,834 EXP: 53 under Lv 28 (16,887)**; at 80%, 16,175 (Lv 27). The Eye of the Storm (Lv 27): careful HP lost 19%,
+attack-only wins 76%. Battle gold: 3,600 in, 9,230 earned, 12,830 out.
+
+| Zone | Careful: win / rounds / HP lost | Attack-only: win / rounds |
+|---|---|---|
+| ep6_airstair | 100% / 3.07 / 8% | 100% / 7.03 |
+| ep6_obs_f1 | 100% / 3.98 / 12% | 100% / 8.62 |
+| ep6_obs_f2 | 100% / 3.94 / 7% | 100% / 8.90 |
+| ep6_obs_f3 | 100% / 3.41 / 19% | 76% / 6.34 |
+
+| Boss | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only | Ignoring telegraphs |
+|---|---|---|---|---|
+| **gale_engine** | 26 | 100% / 8.88 (7.3-10.3) / 13% | 0% / 3.48 | 43% / 6.59 |
+| **gale_engine** | 27 | 100% / 8.84 (7.3-10.3) / 12% | 0% / 3.73 | - |
+| **scribe** | 27 | 97% / 14.55 (12.0-17.7) / 17% | 0% / 4.38 | 64% / 12.65 |
+| **scribe** | 28 | 96% / 13.91 (11.3-16.7) / 20% | 0% / 4.69 | - |
+
+**E6-fixes (2026-11-10, PLAYTEST_REVIEW_8 items 1, 4, 6).** The Engine was blown back by its own bellows Gust every 3 actions
+and acted twice a fight. `gale.js ownsWind`: a foe whose data has `gustEvery` is Braced against its own Gusts while its bellows run
+(a Break stalls them, and a stalled Engine is blown back like any grounded foe). Acting every turn, it hit too hard: Fan Blade 110
+to 40, Piston 70 to 25, Full Blast 180 to 170, and `ai.js ENGINE_TUNE.blastGap` 3 (after a blast lands or breaks, three Gusts pass
+clear). Now (400 fights a row) careful Lv 26 100% / 8.94 rounds / 14% HP lost, Lv 27 100% / 8.72; reckless 71%; attack-only 0%;
+1.8 Full Blasts and about 4 Engine turns a fight (was 1.1 and 2). Attack-only does not reach the review's 20 to 40%: it needs
+about 30 plain attacks into 1,750 HP with no healing while the two Gale Sprites ride every Gust, and even the Engine at a fifth of
+its ATK left it at 0%; the levers are the Engine's HP and the sprites (`enemies.js`, outside this pass). The Eye's manta pair now
+pays `expMul` 0.6 (205 to 123 a fight): the Scribe is met with 16,670 EXP at 100% of the fights, 217 under Lv 28 (was 53). Tier 11
+prices about 30% down (bodies 4,300 / 4,200, helms 2,100, boots 1,800, mantle 1,750, charms 1,550) so the arrival gold buys two
+pieces. The Defend row's help in a Gale battle reads "Brace against the gust." (scene.js menu wrap). The Scribe's first Rewrite comes on its second
+turn at the latest (`ai.js FIRST_REWRITE_TURN`, item 10; it pulls the Gust in to 2): careful Lv 27 98% / 14.73 rounds / 16% HP lost,
+Lv 28 98% / 14.14, reckless 63%, attack-only 0%; 2.59 Rewrites a fight, 87% broken by Anchor (was 2.17 and 79%).
+
+### 14.7 Tests
+
+`qa/battle/ep6_battle.test.mjs` (17): registration and idempotence, Episodes 1 to 5 untouched (an Episode 4 and an Episode 5 boss replay
+bit for bit), the negative-push check, the Gust's pushes, Defend and Ballast, Anchor, a Rewrite landing and failing, holdForBram, Answer and
+Turn the Sky against a Rewrite, Turn the Sky with no sky, the Engine, the Scribe's phases, Bram's two tips' levers, Auto, items, purity.
+`qa/battle/ep6_sim.test.mjs` (2): the suite at 100 fights and the EXP curve.
+
+### 14.8 Seams this pack would like (none blocks Episode 6)
+
+- `src/battle/rules.js` doItem(): hand the item's target to `RULE_EXT` (`h.item(ctx, user, it, target)`), so a Ballast Stone braces the ally
+  it is used on (today: its user).
+- `src/battle/rules.js` commands(): a `RULE_EXT` `commands(ctx, unit, list)` filter, so Turn the Sky with no sky could stay listed and
+  disabled ("No sky to turn.") without the scene's wrap (today: `SKILL_GATE` plus `gateCommands`).

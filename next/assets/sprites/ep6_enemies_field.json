@@ -1,0 +1,311 @@
+{
+ "image": "ep6_enemies_field.png",
+ "frames": {
+  "squall_wolf_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "squall_wolf_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "gale_sprite_0": [
+   50,
+   0,
+   16,
+   16
+  ],
+  "gale_sprite_1": [
+   67,
+   0,
+   16,
+   16
+  ],
+  "rigger_beetle_0": [
+   84,
+   0,
+   16,
+   16
+  ],
+  "rigger_beetle_1": [
+   101,
+   0,
+   16,
+   16
+  ],
+  "signal_wraith_0": [
+   118,
+   0,
+   24,
+   24
+  ],
+  "signal_wraith_1": [
+   143,
+   0,
+   24,
+   24
+  ],
+  "storm_harrier_0": [
+   168,
+   0,
+   24,
+   20
+  ],
+  "storm_harrier_1": [
+   193,
+   0,
+   24,
+   20
+  ],
+  "lightning_manta_0": [
+   218,
+   0,
+   24,
+   20
+  ],
+  "lightning_manta_1": [
+   0,
+   25,
+   24,
+   20
+  ],
+  "storm_page_0": [
+   25,
+   25,
+   16,
+   16
+  ],
+  "storm_page_1": [
+   42,
+   25,
+   16,
+   16
+  ],
+  "gale_engine_0": [
+   59,
+   25,
+   24,
+   24
+  ],
+  "gale_engine_1": [
+   84,
+   25,
+   24,
+   24
+  ],
+  "scribe_avatar_0": [
+   109,
+   25,
+   49,
+   49
+  ],
+  "scribe_avatar_1": [
+   159,
+   25,
+   49,
+   49
+  ],
+  "scribe_avatar_back_0": [
+   0,
+   75,
+   49,
+   49
+  ],
+  "scribe_avatar_back_1": [
+   50,
+   75,
+   49,
+   49
+  ]
+ },
+ "anims": {
+  "squall_wolf_idle": {
+   "frames": [
+    "squall_wolf_0",
+    "squall_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "gale_sprite_idle": {
+   "frames": [
+    "gale_sprite_0",
+    "gale_sprite_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "rigger_beetle_idle": {
+   "frames": [
+    "rigger_beetle_0",
+    "rigger_beetle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "signal_wraith_idle": {
+   "frames": [
+    "signal_wraith_0",
+    "signal_wraith_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "storm_harrier_idle": {
+   "frames": [
+    "storm_harrier_0",
+    "storm_harrier_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "lightning_manta_idle": {
+   "frames": [
+    "lightning_manta_0",
+    "lightning_manta_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "storm_page_idle": {
+   "frames": [
+    "storm_page_0",
+    "storm_page_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "gale_engine_idle": {
+   "frames": [
+    "gale_engine_0",
+    "gale_engine_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "scribe_avatar_idle": {
+   "frames": [
+    "scribe_avatar_0",
+    "scribe_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "scribe_avatar_back_idle": {
+   "frames": [
+    "scribe_avatar_back_0",
+    "scribe_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "squall_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "gale_sprite": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "rigger_beetle": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "signal_wraith": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "storm_harrier": {
+   "size": [
+    24,
+    20
+   ],
+   "origin": [
+    12,
+    19
+   ]
+  },
+  "lightning_manta": {
+   "size": [
+    24,
+    20
+   ],
+   "origin": [
+    12,
+    19
+   ]
+  },
+  "storm_page": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "gale_engine": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "scribe_avatar": {
+   "size": [
+    49,
+    49
+   ],
+   "origin": [
+    24,
+    48
+   ]
+  },
+  "scribe_avatar_back": {
+   "size": [
+    49,
+    49
+   ],
+   "origin": [
+    24,
+    48
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Episode 6 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin bottom-centre. Each foe carries its own dark outline and a 1 px side rim inside it (cloud white Aloft, brass grounded), so a FIELD_LOOK entry is not needed. scribe_avatar (front) and scribe_avatar_back (seen from behind, mirrored) are the Storm Scribe perched in the Scribe's Eyrie."
+}

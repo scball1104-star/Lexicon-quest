@@ -3,4 +3,4 @@ const W = ['valley', 1, 28, 'right'], N = ['valley', 21, 10, 'down'], S = ['vall
 /** The core map when the landing cannot load (Emberpeak is ep3's). */
 export const ROOT = W;
 /** [map, x, y, dir] on a real map for an x1, ep4 or ep5 map, or null. */
-export const landing = (id) => (/^x1_(terrace|orrery|cellar)/.test(id) ? N : /^x1_(mill|culvert)/.test(id) ? S : /^x1_/.test(id) ? W : /^ep[45]_/.test(id) ? E : null);
+export const landing = (id) => (/^x1_(terrace|orrery|cellar)/.test(id) ? N : /^x1_(mill|culvert)/.test(id) ? S : /^x1_/.test(id) ? W : /^ep[456]_/.test(id) ? E : null);

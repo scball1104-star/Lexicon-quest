@@ -1,0 +1,302 @@
+{
+ "image": "ep6_bosses_battle.png",
+ "frames": {
+  "scribe_cast": [
+   0,
+   0,
+   129,
+   148
+  ],
+  "scribe_ward_cast": [
+   131,
+   0,
+   147,
+   148
+  ],
+  "scribe_chart_cast": [
+   280,
+   0,
+   143,
+   148
+  ],
+  "scribe_ward_die_0": [
+   0,
+   150,
+   147,
+   142
+  ],
+  "scribe_ward_idle_1": [
+   149,
+   150,
+   147,
+   139
+  ],
+  "scribe_chart_idle_1": [
+   298,
+   150,
+   143,
+   139
+  ],
+  "scribe_ward": [
+   0,
+   294,
+   147,
+   138
+  ],
+  "scribe_ward_attack": [
+   149,
+   294,
+   155,
+   138
+  ],
+  "scribe_chart": [
+   306,
+   294,
+   143,
+   138
+  ],
+  "scribe_chart_attack": [
+   0,
+   434,
+   141,
+   138
+  ],
+  "scribe_chart_die_0": [
+   143,
+   434,
+   141,
+   138
+  ],
+  "scribe_ward_hurt": [
+   286,
+   434,
+   153,
+   136
+  ],
+  "scribe_chart_hurt": [
+   0,
+   574,
+   153,
+   136
+  ],
+  "scribe_die_0": [
+   155,
+   574,
+   129,
+   133
+  ],
+  "scribe_idle_1": [
+   286,
+   574,
+   129,
+   131
+  ],
+  "scribe": [
+   0,
+   712,
+   129,
+   130
+  ],
+  "scribe_attack": [
+   131,
+   712,
+   139,
+   130
+  ],
+  "scribe_hurt": [
+   272,
+   712,
+   137,
+   128
+  ],
+  "scribe_ward_die_1": [
+   0,
+   844,
+   147,
+   128
+  ],
+  "scribe_chart_die_1": [
+   149,
+   844,
+   129,
+   128
+  ],
+  "scribe_die_1": [
+   280,
+   844,
+   129,
+   121
+  ],
+  "scribe_chart_die_2": [
+   0,
+   974,
+   129,
+   97
+  ],
+  "scribe_ward_die_2": [
+   131,
+   974,
+   147,
+   94
+  ],
+  "scribe_die_2": [
+   280,
+   974,
+   129,
+   93
+  ]
+ },
+ "origin": {
+  "scribe": [
+   64,
+   129
+  ],
+  "scribe_idle_1": [
+   64,
+   130
+  ],
+  "scribe_attack": [
+   69,
+   129
+  ],
+  "scribe_hurt": [
+   68,
+   127
+  ],
+  "scribe_cast": [
+   64,
+   147
+  ],
+  "scribe_die_0": [
+   64,
+   132
+  ],
+  "scribe_die_1": [
+   64,
+   120
+  ],
+  "scribe_die_2": [
+   64,
+   92
+  ],
+  "scribe_ward": [
+   73,
+   137
+  ],
+  "scribe_ward_idle_1": [
+   73,
+   138
+  ],
+  "scribe_ward_attack": [
+   77,
+   137
+  ],
+  "scribe_ward_hurt": [
+   76,
+   135
+  ],
+  "scribe_ward_cast": [
+   73,
+   147
+  ],
+  "scribe_ward_die_0": [
+   73,
+   141
+  ],
+  "scribe_ward_die_1": [
+   73,
+   127
+  ],
+  "scribe_ward_die_2": [
+   73,
+   93
+  ],
+  "scribe_chart": [
+   71,
+   137
+  ],
+  "scribe_chart_idle_1": [
+   71,
+   138
+  ],
+  "scribe_chart_attack": [
+   70,
+   137
+  ],
+  "scribe_chart_hurt": [
+   76,
+   135
+  ],
+  "scribe_chart_cast": [
+   71,
+   147
+  ],
+  "scribe_chart_die_0": [
+   70,
+   137
+  ],
+  "scribe_chart_die_1": [
+   64,
+   127
+  ],
+  "scribe_chart_die_2": [
+   64,
+   96
+  ]
+ },
+ "anims": {
+  "scribe_idle": {
+   "frames": [
+    "scribe",
+    "scribe_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "scribe_die": {
+   "frames": [
+    "scribe_die_0",
+    "scribe_die_1",
+    "scribe_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "scribe_ward_idle": {
+   "frames": [
+    "scribe_ward",
+    "scribe_ward_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "scribe_ward_die": {
+   "frames": [
+    "scribe_ward_die_0",
+    "scribe_ward_die_1",
+    "scribe_ward_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "scribe_chart_idle": {
+   "frames": [
+    "scribe_chart",
+    "scribe_chart_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "scribe_chart_die": {
+   "frames": [
+    "scribe_chart_die_0",
+    "scribe_chart_die_1",
+    "scribe_chart_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "notes": "Episode 6 pack atlas, merged into bosses_battle. The Storm Scribe (bosses.png cell 5, 1x, not flipped: the beak points at the party) in three looks: scribe (The Wind Script, as painted), scribe_ward (The Storm Script Ward: a ring of false lamplight and a brass compass rose behind it, the quills scattered), scribe_chart (The True Sky Chart: the wings opened and bright with the Wind Script on them, lightning in the wingtips). Each has _idle_1, _attack, _hurt, _cast, _die_0..2. The phases name their look: wind_script -> scribe, storm_ward -> scribe_ward, true_sky_chart -> scribe_chart (src/data/ep6/enemies.js; ai.js enterPhase forwards it as `sprite`)."
+}

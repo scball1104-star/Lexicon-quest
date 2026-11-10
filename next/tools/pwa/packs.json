@@ -73,6 +73,16 @@
       "ep4_valewyn"
     ]
   },
+  "ep6": {
+    "entry": "../data/ep6/index.js",
+    "prefix": "ep6_",
+    "assets": "assets/ep6_manifest.json",
+    "audioPack": "ep6",
+    "touches": [
+      "ep5_sh_inn",
+      "ep5_saffron"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

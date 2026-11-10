@@ -1,0 +1,21 @@
+{
+ "image": "ep6_battle_sky.png",
+ "w": 384,
+ "h": 216,
+ "cell": 5,
+ "note": "the Airstair: environments cell 5, the open sky over the skyport, the airship at its dock and the near islands; the cloud under the band flattened to a calm mid value",
+ "extraColors": [
+  "#a6a3a8",
+  "#a3c1f0",
+  "#697a97",
+  "#897d6d"
+ ],
+ "colors": 68,
+ "source": "environments.webp cell 5",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep6_airstair",
+ "fallback": "valley",
+ "meanLuma": 0.4683
+}

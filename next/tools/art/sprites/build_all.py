@@ -34,6 +34,7 @@ def main():
         ('x1', lambda: __import__('x1_build').build()),
         ('ep4', lambda: __import__('ep4_build').build()),
         ('ep5', lambda: __import__('ep5_build').build()),
+        ('ep6', lambda: __import__('ep6_build').build()),
     ]
     for name, fn in steps:
         t = time.time()

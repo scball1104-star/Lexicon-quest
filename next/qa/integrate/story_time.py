@@ -31,6 +31,11 @@ records (next/qa/out/autoplay/<prefix>-report.json and <prefix>-dialog.log, the 
                                                               clicks (the bot's "shade <puzzle>: N decisions" notes: one per hour
                                                               chosen and one per Shove sequence; 0.5 to 1 min each), the end at
                                                               the Episode 5 credits and the first fight e5s_first after ep5_morning
+    python next/qa/integrate/story_time.py desktop-ep6        Episode 6 (E6-integrate): gust lane puzzles by decisions, not steps
+                                                              (the bot's "lane <puzzle>: N decisions" notes: one per vane toggled
+                                                              and one per ride chosen; 0.5 to 1 min each, as sun and shade), the
+                                                              end at the Episode 6 credits and the first fight e6a_first after
+                                                              ep6_morning
 """
 import json
 import pathlib
@@ -71,7 +76,7 @@ def main(prefix):
     chars = sum(len(p) for p in pages)
     dialogue_s = sum(max(len(p) / READ_CPS, len(p) / TYPE_CPS) + PRESS_S for p in pages)
     timing = [t for t in report.get('timing') or [] if t['step'] != 'boot']        # boot is before the save loads
-    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'ep5_credits_done', 'epilogue')), timing[-1] if timing else None)
+    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'ep5_credits_done', 'ep6_credits_done', 'epilogue')), timing[-1] if timing else None)
     field_s = (end['game_s'] - timing[0]['game_s']) if len(timing) > 1 else 0
     # the bot's own pages pass in about 4 frames each (instant text): take them out of its field time
     field_s = max(0.0, field_s - len(pages) * 4 / 60)
@@ -80,11 +85,11 @@ def main(prefix):
     # 0.5 to 1 min for one action, then 1 to 2 min more for each further action (2 actions = the old 1.5 to 3).
     kinds = {}
     for n in report.get('notes', []):
-        if n.startswith('beam ') or n.startswith('quench ') or n.startswith('tide ') or n.startswith('shade '):
+        if n.startswith('beam ') or n.startswith('quench ') or n.startswith('tide ') or n.startswith('shade ') or n.startswith('lane '):
             m = re.search(r': (\d+) (?:turns?|decisions?)', n)
             kinds[n.split(':')[0]] = max(1, int(m.group(1))) if (m and not n.startswith('beam ')) else None
     tide = {k for k in kinds if k.startswith('tide ')}
-    shade = {k for k in kinds if k.startswith('shade ')}
+    shade = {k for k in kinds if k.startswith('shade ') or k.startswith('lane ')}   # E6: a lane decision costs as a shade one
     # polish-world: puzzles the bot solves in two notes whose shoves its turn count leaves out are one puzzle of their
     # real action count (F3 Home: turn sl_home, then three Shoves)
     for name, (parts, actions) in QUENCH_PUZZLES.items():
@@ -111,6 +116,8 @@ def main(prefix):
         episode3(report, dialog, battles, morning='ep4_morning', first_enc='e4r_first')
     elif prefix.split('-')[1:2] == ['ep5']:
         episode3(report, dialog, battles, morning='ep5_morning', first_enc='e5s_first')
+    elif prefix.split('-')[1:2] == ['ep6']:
+        episode3(report, dialog, battles, morning='ep6_morning', first_enc='e6a_first')
     return 0
 
 

@@ -1,0 +1,21 @@
+{
+ "image": "ep6_battle_causeway.png",
+ "w": 384,
+ "h": 216,
+ "cell": 5,
+ "note": "F1 the Windward Causeways: environments cell 5, the arched bridge and the island causeways over the falls; the cloud under the band calmed",
+ "extraColors": [
+  "#a6a3a6",
+  "#697a94",
+  "#7c94b8",
+  "#c6c9dd"
+ ],
+ "colors": 63,
+ "source": "environments.webp cell 5",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep6_causeways",
+ "fallback": "valley",
+ "meanLuma": 0.4795
+}

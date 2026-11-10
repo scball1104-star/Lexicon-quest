@@ -1,0 +1,17 @@
+{
+ "image": "ep6_battle_relays.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "F2 the Hall of Broken Signals and the Gale Engine: a brass relay hall, lit dials, speaking tubes, two lamp pools, a dark grating floor (composed)",
+ "extraColors": [],
+ "colors": 40,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep6_build.py (relays); palette.json plus the ep6 sheet colours (ep6_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep6_relays",
+ "fallback": "archive",
+ "meanLuma": 0.2743
+}
