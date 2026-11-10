@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   PACKS, ensurePack, packReady, onPackReady, packWanted, packsToAwait, packForMap, packsForMap, awaitPacks, mergeTileFragment,
-  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST,
+  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST, storedAll, startPackWatch,
 } from '../../src/game/packs.js';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -229,4 +229,45 @@ test('setPackDefaults reaches calls that pass no options (maps.js and the call s
   assert.deepEqual(packsToAwait({ go: 1 }), [], 'ready packs are not awaited');
   resetPacks();
   assert.equal(packEnabled('x1'), PACKS.x1.enabled(), 'back to the real switch');
+});
+
+test('storedAll (issue #56): false with no service worker in control, so Node and a first visit keep the up-front fetch', async () => {
+  assert.equal(await storedAll(['https://example.test/next/src/data/ep6/flags.js']), false);
+  assert.equal(await storedAll([]), false);
+  assert.equal(await storedAll(null), false);
+});
+
+test('startPackWatch (issue #56): the side packs wait until no hard pack is loading', async () => {
+  resetPacks();
+  const order = [];
+  const gates = {};
+  const hardIds = Object.keys(PACKS).filter((id) => PACKS[id].hard);
+  const importer = (p) => {
+    const id = Object.keys(PACKS).find((k) => PACKS[k].entry === p);
+    order.push(id);
+    const m = { register: () => ({ id, loaded: [], skipped: [] }) };
+    if (!PACKS[id].hard) return Promise.resolve(m);
+    return new Promise((ok) => { gates[id] = () => ok(m); });
+  };
+  setPackDefaults({ importer, enabled: true, quiet: true, warm: false, packFiles: null });
+  let onScene = null;
+  const flags = { first_fight_done: true, ep1_complete: true, ep2_complete: true, ep3_complete: true, ep4_complete: true, ep5_complete: true };
+  const engine = { game: { flags }, save: null, on: (name, fn) => { if (name === 'scene') onScene = fn; return () => {}; } };
+  const stop = startPackWatch(engine, null);
+  try {
+    onScene();
+    await new Promise((r) => setTimeout(r, 10));
+    assert.deepEqual([...order].sort(), [...hardIds].sort(), 'only the hard packs start while they load');
+    for (const id of hardIds.slice(0, -1)) gates[id]();
+    await new Promise((r) => setTimeout(r, 10));
+    assert.equal(order.length, hardIds.length, 'one hard pack still loading: the side packs still wait');
+    gates[hardIds[hardIds.length - 1]]();
+    await new Promise((r) => setTimeout(r, 10));
+    const side = order.slice(hardIds.length);
+    assert.ok(side.includes('x1') && side.includes('cave'), `the side packs start once every hard pack is up: ${side}`);
+    assert.ok(side.every((id) => !PACKS[id].hard));
+  } finally {
+    stop();
+    resetPacks();
+  }
 });
