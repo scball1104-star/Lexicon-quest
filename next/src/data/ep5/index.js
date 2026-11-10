@@ -19,7 +19,7 @@
 // fn(engine, modules()). A module that does not exist yet is skipped (listed in `skipped`); one that exists but throws is
 // NOT swallowed. register() is idempotent: the same promise after success; a retry after a failure re-runs only what did
 // not finish; a later call with an engine merges the audio fragment if an engine-less call (Node) ran first.
-import { ensurePack } from '../../game/packs.js';
+import { ensurePack, storedAll } from '../../game/packs.js';
 import { isMissing, audioFragment, mergeAudio as mergeAudioAs } from '../ep4/index.js';
 
 export { isMissing, audioFragment };
@@ -87,8 +87,10 @@ export async function ensureEp4(engine) {
 export function prefetchCode() {
   if (typeof fetch !== 'function' || !/^https?:/.test(import.meta.url)) return Promise.resolve(new Set());
   const out = new Set();
-  return Promise.all(ORDER.map((n) => fetch(new URL(`./${n}.js`, import.meta.url).href)
-    .then((r) => { if (r.status === 404) out.add(n); }, () => {}))).then(() => out);
+  const hrefs = ORDER.map((n) => new URL(`./${n}.js`, import.meta.url).href);
+  // every module already in the worker's cache: none can answer 404 and import() reads them from there, so fetch none
+  return storedAll(hrefs).then((all) => (all ? out : Promise.all(hrefs.map((h, i) => fetch(h)
+    .then((r) => { if (r.status === 404) out.add(ORDER[i]); }, () => {}))).then(() => out)));
 }
 
 async function run(engine) {

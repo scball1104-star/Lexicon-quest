@@ -29,6 +29,12 @@ DEVICES = {
     'phone': {'width': 844, 'height': 390, 'dpr': 3, 'mobile': True, 'touch': True},
 }
 
+# Timing runs launch with these. Headless Chromium otherwise draws the canvas in software, which took about 40% of a phone-profile
+# pack entry with the CPU slowed 4x (issue #56); a real phone draws on its GPU. Windows needs the D3D11 backend to reach the GPU.
+GPU_ARGS = ['--enable-gpu', '--ignore-gpu-blocklist', '--enable-gpu-rasterization'] + (['--use-angle=d3d11'] if sys.platform == 'win32' else [])
+GPU_JS = ("() => { const c = document.createElement('canvas').getContext('webgl'); const x = c && c.getExtension('WEBGL_debug_renderer_info');"
+          " return x ? c.getParameter(x.UNMASKED_RENDERER_WEBGL) : 'no WebGL'; }")
+
 
 class Lab:
     def __init__(self, device='desktop', headless=True, timeout=25000):

@@ -8,7 +8,7 @@ With EP6_LIVE false (as the pack ships in wave 6a):
      slots 0 and 1 byte for byte intact, slot 3 empty; still no ep6 request.
   3. Zero console errors.
 Then, with the pack forced on (forcePack('ep6'), as ?pack=ep6 does) on the phone profile (844x390 at 3x, touch, CPU slowed 4x,
-10 Mbps with 40 ms latency), the time from a field reset into ep5_sh_inn until the inn is up with the ep4, ep5 and ep6 packs
+10 Mbps with 40 ms latency, GPU on), the time from a field reset into ep5_sh_inn until the inn is up with the ep4, ep5 and ep6 packs
 ready (the chain ep3, ep4, ep5, ep6): cold (a fresh browser profile) and warm (the same profile, reloaded). Plan 3.3 target:
 under 8 s cold, under 3 s warm.
 
@@ -186,7 +186,7 @@ def part_timing():
     lists = json.loads((NEXT / 'assets' / 'pack_files.json').read_text(encoding='utf-8'))
     want = sorted(f for k in ('ep4', 'ep5', 'ep6') for f in lists.get(k, []) if not f.endswith(('.mp3', '.wav')))
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=True)
+    browser = pw.chromium.launch(headless=True, args=fieldlab.GPU_ARGS)
     errors = []
     missing = []   # 404s: the pack's prefetch asks for every module and map of its lists, written or not (wave 6a: most are not)
     try:
@@ -203,6 +203,7 @@ def part_timing():
         cdp.send('Network.emulateNetworkConditions', {'offline': False, 'latency': 40, 'downloadThroughput': 10 * 1024 * 1024 / 8,
                                                       'uploadThroughput': 10 * 1024 * 1024 / 16})
         page.goto(base + '/next/index.html', wait_until='load')
+        print(f"  renderer: {page.evaluate(fieldlab.GPU_JS)} (software, such as SwiftShader, over-measures the entry)", flush=True)
         boot(page)
         core = page.evaluate(CORE_FLAGS_JS)
         data = page.evaluate(BUILD_JS % json.dumps({'name': 'Pia', 'map': 'ep5_saffron', 'x': 20, 'y': 30, 'slot': 3,

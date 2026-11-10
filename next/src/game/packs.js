@@ -168,6 +168,20 @@ async function loadFileLists(engine, opts) {
   } catch (e) { return null; }
 }
 
+/**
+ * In the browser with the service worker in control: does its cache already hold every one of these URLs? A pack then skips its
+ * up-front fetch of them (issue #56: on a slow phone each extra request costs main-thread time). Anything else, a first visit
+ * included, answers false and keeps the fetch, so a dropped connection still fails the pack and the retry can run. Never rejects.
+ */
+export async function storedAll(hrefs) {
+  try {
+    const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
+    if (!hrefs || !hrefs.length || typeof caches === 'undefined' || !sw || !sw.controller) return false;
+    const hits = await Promise.all(hrefs.map((h) => caches.match(h, { ignoreSearch: true })));
+    return hits.every(Boolean);
+  } catch (e) { return false; }
+}
+
 function say(engine, text) {
   try { if (engine && engine.toasts && typeof engine.toasts.flash === 'function') engine.toasts.flash(text, { frames: 240 }); } catch (e) { /* toasts are optional */ }
 }
@@ -187,8 +201,9 @@ async function attempt(id, def, opts) {
       const dir = 'src/' + def.entry.slice(3).replace(/[^/]+$/, '');   // the entry's folder
       const code = lists0 && Array.isArray(lists0[id]) ? lists0[id].filter((f) => f.startsWith(dir) && f.endsWith('.js')) : [];
       const base = engine && engine.assets ? engine.assets.base : new URL('../../', import.meta.url).href;
-      if (code.length && /^https?:/.test(base)) {
-        await Promise.all(code.map(async (f) => { const r = await fetch(new URL(f, base).href); if (!r.ok) throw new Error(`${f}: ${r.status}`); }));
+      const hrefs = /^https?:/.test(base) ? code.map((f) => new URL(f, base).href) : [];
+      if (hrefs.length && !(await storedAll(hrefs))) {
+        await Promise.all(hrefs.map(async (h, i) => { const r = await fetch(h); if (!r.ok) throw new Error(`${code[i]}: ${r.status}`); }));
       }
     }
     const mod = await importer(def.entry);
@@ -237,7 +252,7 @@ function warm(res, opts) {
   if (!/^https?:/.test(base)) return;
   const queue = files.filter((f) => !/\.(mp3|ogg|wav)$/i.test(f));
   const worker = async () => { while (queue.length) { const f = queue.shift(); try { await fetch(new URL(f, base).href); } catch (e) { /* offline: it will load when used */ } } };
-  const go = () => { for (let i = 0; i < 3; i++) worker(); };
+  const go = () => storedAll(queue.map((f) => new URL(f, base).href)).then((all) => { if (!all) for (let i = 0; i < 3; i++) worker(); });
   const idle = () => { if (typeof requestIdleCallback === 'function') requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 1500); };
   // Only a fetch that passes through the service worker lands in its runtime cache. On a first visit the worker installs a few
   // seconds after the game is playable, so wait for it to take control (at most 30 s), then warm.
@@ -303,8 +318,18 @@ export function startPackWatch(engine, params) {
   const live = () => packIds().filter((id) => packEnabled(id) && !packReady(id));
   if (!live().length) return () => {};
   const asked = new Set();
+  const later = new Set();   // wanted side packs (not hard) held until no hard pack is loading (issue #56: they shared the CPU)
+  const hardBusy = () => packIds().some((id) => PACKS[id].hard && state[id] && state[id].promise && !state[id].ready);
+  const flush = () => {
+    if (hardBusy()) return;
+    for (const id of later) { later.delete(id); asked.add(id); ensurePack(id); }
+  };
   const check = (flags) => {
-    for (const id of live()) if (!asked.has(id) && packWanted(id, flags)) { asked.add(id); ensurePack(id); }
+    for (const id of live()) {
+      if (asked.has(id) || later.has(id) || !packWanted(id, flags)) continue;
+      if (PACKS[id].hard) { asked.add(id); ensurePack(id).then(flush); } else later.add(id);
+    }
+    flush();
   };
   for (const id of forced) if (PACKS[id]) { asked.add(id); ensurePack(id); }
   const timers = [];

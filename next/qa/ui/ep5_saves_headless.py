@@ -8,7 +8,7 @@ With EP5_LIVE false (as the pack ships in wave 5a):
      slots 0 and 1 byte for byte intact, slot 3 empty; still no ep5 request.
   3. Zero console errors.
 Then, with the pack forced on (LQ_PACKS.forcePack('ep5'), as ?pack=ep5 does) on the phone profile (844x390 at 3x, touch,
-CPU slowed 4x, 10 Mbps with 40 ms latency), the time from a field reset into ep4_vw_inn until the inn is up with both the ep4
+CPU slowed 4x, 10 Mbps with 40 ms latency, GPU on), the time from a field reset into ep4_vw_inn until the inn is up with both the ep4
 and the ep5 pack ready: cold (a fresh browser profile) and warm (the same profile, reloaded). Plan 3.3 target: under 8 s cold,
 under 3 s warm.
 
@@ -182,7 +182,7 @@ def part_timing():
     lists = json.loads((NEXT / 'assets' / 'pack_files.json').read_text(encoding='utf-8'))
     want = sorted(f for k in ('ep4', 'ep5') for f in lists[k] if not f.endswith(('.mp3', '.wav')))
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=True)
+    browser = pw.chromium.launch(headless=True, args=fieldlab.GPU_ARGS)
     errors = []
     try:
         dev = fieldlab.DEVICES['phone']
@@ -197,6 +197,7 @@ def part_timing():
         cdp.send('Network.emulateNetworkConditions', {'offline': False, 'latency': 40, 'downloadThroughput': 10 * 1024 * 1024 / 8,
                                                       'uploadThroughput': 10 * 1024 * 1024 / 16})
         page.goto(base + '/next/index.html', wait_until='load')
+        print(f"  renderer: {page.evaluate(fieldlab.GPU_JS)} (software, such as SwiftShader, over-measures the entry)", flush=True)
         boot(page)
         core = page.evaluate("(async () => { const S = await import('/next/src/game/state.js'); return [...S.EP1_DONE_FLAGS, ...S.EP2_DONE_FLAGS]; })()")
         ep3 = re.findall(r"'([a-z0-9_]+)'", re.search(r"EP3_DONE_FLAGS = \[([^\]]+)\]", (NEXT / 'src/data/ep4/start.js').read_text(encoding='utf-8')).group(1))

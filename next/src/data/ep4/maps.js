@@ -9,6 +9,7 @@
 // The ten Episode 4 maps are a fixed, guarded list: a map module that does not exist yet (wave 4c writes them) is skipped
 // and reported, so the map agents only create files this list already names.
 import { registerMap, peekMap } from '../../world/maps.js';
+import { storedAll } from '../../game/packs.js';
 import { isMissing } from './index.js';
 
 export const EP4_MAP_IDS = ['ep4_flood_road', 'ep4_valewyn', 'ep4_vw_inn', 'ep4_vw_shop', 'ep4_vw_forge', 'ep4_vw_palace',
@@ -46,6 +47,7 @@ export function applyPatch(id, patch) {
 async function prefetch(opts) {
   if (opts.importer || typeof fetch !== 'function' || !/^https?:/.test(import.meta.url)) return;
   const files = [...EP4_MAP_IDS.map((id) => `../maps/${id}.js`), '../maps/ep4_patches.js'];
+  if (await storedAll(files.map((f) => new URL(f, import.meta.url).href))) return;   // all in the worker's cache (packs.js)
   await Promise.all(files.map(async (f) => {
     const r = await fetch(new URL(f, import.meta.url).href);
     if (!r.ok) throw new Error(`[ep4] ${f}: ${r.status}`);

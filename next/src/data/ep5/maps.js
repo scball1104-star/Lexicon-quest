@@ -10,6 +10,7 @@
 // The eleven Episode 5 maps are a fixed, guarded list: a map module that does not exist yet (wave 5c writes them) is skipped
 // and reported, so the map agents only create files this list already names.
 import { registerMap, peekMap } from '../../world/maps.js';
+import { storedAll } from '../../game/packs.js';
 import { isMissing } from '../ep4/index.js';
 
 export const EP5_MAP_IDS = ['ep5_ship', 'ep5_caravan_road', 'ep5_saffron', 'ep5_sh_inn', 'ep5_sh_shop', 'ep5_sh_smithy',
@@ -53,11 +54,13 @@ export function prefetch(opts = {}) {
   if (opts.importer || typeof fetch !== 'function' || !/^https?:/.test(import.meta.url)) return Promise.resolve(new Set());
   if (!fetched) {
     const absent = new Set();
-    fetched = Promise.all(FILES.map(async (f) => {
-      const r = await fetch(new URL(f, import.meta.url).href);
+    const hrefs = FILES.map((f) => new URL(f, import.meta.url).href);
+    // every map already in the worker's cache (packs.js storedAll): no fetch, and none can be a 404
+    fetched = storedAll(hrefs).then((all) => (all ? absent : Promise.all(FILES.map(async (f, i) => {
+      const r = await fetch(hrefs[i]);
       if (r.status === 404) absent.add(f);
       else if (!r.ok) throw new Error(`[ep5] ${f}: ${r.status}`);
-    })).then(() => absent, (e) => { fetched = null; throw e; });
+    })).then(() => absent))).catch((e) => { fetched = null; throw e; });
   }
   return fetched;
 }
