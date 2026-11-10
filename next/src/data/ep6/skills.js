@@ -63,12 +63,14 @@ export const EP6_SKILLS = {
     telegraph: '{name} writes {target} over in storm ink...', help: 'One name written over.', fx: 'ink_lance' }),
 
   // ------------------------------------------------------------------ the Gale Engine (ai 'gale_engine')
-  engine_fan: foe({ id: 'engine_fan', name: 'Fan Blade', target: 'enemy', formula: 'phys', power: 110, help: 'A brass blade comes round.', fx: 'slash' }),
-  engine_piston: foe({ id: 'engine_piston', name: 'Piston', target: 'enemies', formula: 'phys', power: 70, help: 'The floor jumps.', fx: 'quake' }),
+  // E6-fixes A1: braced against its own Gusts it acts every turn, so its plain moves hit softer (110 / 70 to 40 / 25) and the blast
+  // stays the exam (180 to 170, at most one Gust in four: ai.js ENGINE_TUNE).
+  engine_fan: foe({ id: 'engine_fan', name: 'Fan Blade', target: 'enemy', formula: 'phys', power: 40, help: 'A brass blade comes round.', fx: 'slash' }),
+  engine_piston: foe({ id: 'engine_piston', name: 'Piston', target: 'enemies', formula: 'phys', power: 25, help: 'The floor jumps.', fx: 'quake' }),
   // Named for the gauge and the tip test (the Engine runs them from the start; never chosen as a move).
   bellows: foe({ id: 'bellows', name: 'Bellows', target: 'none', rank: 80, help: 'The wind comes every 3 actions.', fx: 'buff' }),
   // Pinned to the Gust (gale.js): resolved when the wind gusts. Anchor makes it fail; a Break cancels it; Defend halves it.
-  full_blast: foe({ id: 'full_blast', name: 'Full Blast', target: 'enemies', formula: 'phys', power: 180, rewrite: true,
+  full_blast: foe({ id: 'full_blast', name: 'Full Blast', target: 'enemies', formula: 'phys', power: 170, rewrite: true,
     telegraph: 'The Engine winds the bellows... It blasts when the wind gusts.', telegraphSfx: 'rewrite_read',
     help: 'Pinned to the gust. Bram can anchor.', fx: 'quake', sfx: 'gale_gust' }),
 

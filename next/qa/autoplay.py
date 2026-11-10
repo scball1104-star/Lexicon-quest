@@ -5304,7 +5304,7 @@ class Episode6(Episode5):
     # The EXP each zone is left at on the plan's route (tools/sim/ep6.mjs progression(1), from the quick start's 13,300): optional
     # fights stop there, so a Continue run (an Episode 5 save arrives at Lv 25) and the quick start meet the Scribe near Lv 27.
     # F2's cap is before the Gale Engine (240 EXP), which is always fought.
-    ZONE_EXP = {'ep6_airstair': 13875, 'ep6_obs_f1': 15031, 'ep6_obs_f2': 15784, 'ep6_obs_f3': 16834}
+    ZONE_EXP = {'ep6_airstair': 13875, 'ep6_obs_f1': 15031, 'ep6_obs_f2': 15784, 'ep6_obs_f3': 16670}   # F3: E6-fixes A5
 
     def __init__(self, bot, side=True, until=None, start='save'):
         super().__init__(bot, side=side, until=until, start=start)
@@ -5433,14 +5433,35 @@ class Episode6(Episode5):
     def gale_log(self):
         return self.b.js('window.__lqGale || []') or []
 
-    def gear(self, gold_floor=400):
-        """What a player buys at the Galewing Workshop with the gold in hand (plan 7.6): the best tier 11 body piece that leaves
-        `gold_floor`, else a tier 11 hood or helm."""
+    # tier 11 at the Galewing Workshop (src/data/ep6/items.js, E6-fixes A4: about 30% off), in the order a player picks them
+    TIER11 = (('gale_hood', 2100), ('aviator_helm', 2100), ('cloudstep_boots', 1800), ('signal_charm', 1550),
+              ('windweave_robe', 4200), ('skysteel_mail', 4300))
+
+    def gear(self, gold_floor=200, pieces=2):
+        """What a player buys at the Galewing Workshop with the gold in hand (plan 7.6: two tier 11 pieces in town): up to
+        `pieces` pieces in TIER11 order, each leaving `gold_floor`."""
         gold = (self.b.game() or {}).get('gold') or 0
-        for item, price in (('windweave_robe', 6000), ('skysteel_mail', 6100), ('gale_hood', 3000), ('aviator_helm', 3000)):
-            if gold - price >= gold_floor:
-                return [(item, 1)]
-        return []
+        buy = []
+        for item, price in self.TIER11:
+            if len(buy) < pieces and gold - price >= gold_floor:
+                buy.append((item, 1))
+                gold -= price
+        return buy
+
+    def arrival_font(self, font_id, label):
+        """Rest at a floor's font where the floor begins (PLAYTEST_REVIEW_8 item 9: a person rests on arrival; from across the
+        lanes the bot's static grid cannot route back to it, so maybe_rest_at_fonts found every Observatory font unreachable)."""
+        b = self.b
+        f = b.settle()
+        if not b.ent(f, font_id):
+            return False
+        try:
+            b.rest_at_font(font_id, label=label)
+        except Fail as e:
+            b.notes.append(f'{label} skipped: {e}')
+            return False
+        b.notes.append(f'rested at {font_id} on {f["map"]}')
+        return True
 
     def shop_town(self):
         """Nova's provisions (Ballast Stones, Ethers), then the Galewing Workshop (the gear the gold buys, plan 7.6)."""
@@ -5661,6 +5682,7 @@ class Episode6(Episode5):
         if self.side:
             self.try_chest('chest_a')
         self.hunt(2, label='two ways in')
+        self.arrival_font('font_w1', 'font F1')
         # B: the west arm north onto the north deck
         if self.leader()[1] > 12:
             if (self.once or self.side) and not b.opened('ep6_obs_f1', 'chest_es'):
@@ -5735,6 +5757,7 @@ class Episode6(Episode5):
         P = 'F2 the Hall of Broken Signals'
         if not self.has('vex_relay_met'):
             self.hunt(2, label='the stair foot')
+            self.arrival_font('font_w2', 'font F2 stair foot')
             if not self.has('aeris_memory_2'):
                 self.vane('vane_b1', (9, 18), 'up', 'F2 vane_b1', puzzle=P)
                 self.ride((10, 18), 'right', (14, 18), 'F2 the fan duct east', puzzle=P)
@@ -5752,9 +5775,8 @@ class Episode6(Episode5):
                     self.ride((14, 12), 'left', (10, 12), 'F2 the duct west', puzzle=P)
                     self.hunt(2, label='the north-west platform')
                     self.try_chest('chest_b')
-                    self.ride((5, 13), 'down', (5, 16), 'F2 the duct home', puzzle=P)
-                    self.ride((10, 18), 'right', (14, 18), 'F2 the fan duct east again', puzzle=P)
-                    self.ride((18, 16), 'up', (18, 13), 'F2 the shaft again', puzzle=P)
+                    # E6-fixes (B2): one pass, the east-blowing return duct (11..13, 11) back to the shaft's foot
+                    self.ride((10, 11), 'right', (14, 11), 'F2 the return duct east', puzzle=P)
                 except Fail as e:
                     b.notes.append(f'north-west platform skipped: {e}')
             self.ride((18, 10), 'up', (18, 7), 'F2 the shaft to the crown room', puzzle=P)
@@ -5810,6 +5832,7 @@ class Episode6(Episode5):
         self.ensure_map('ep6_obs_f3')
         P = 'F3 the Eye of the Storm'
         self.hunt(2, label='the first landing')
+        self.arrival_font('font_w3', 'font F3')
         # Anchor: the ring clockwise to the post, the lamp
         if not self.has('pledge_anchor'):
             self.ride((16, 32), 'up', (17, 27), 'F3 the Anchor ring', puzzle=P)

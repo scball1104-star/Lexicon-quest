@@ -2,8 +2,8 @@
 //
 // A Dragon Quest town that reads at a glance on a phone around one image: the board plaza on the central island (the
 // Skyport Departure Board, Piri's post rack, the tied chimes), rope bridges out to the smaller islands, the docks on the
-// north and east rims, and the dark storm knot on the north-east skyline (the storm_far decal, overhead, 28..35, 5..9),
-// framed from the plaza between the north dock and the east rim.
+// north and east rims, and the dark storm knot on the north-east skyline (the storm_far decal, overhead, 26..33, 8..12, in
+// the cloud gap just past the plaza's north-east corner), in one phone frame with the board from the board's mark (22,15).
 //   The board plaza (15..30, 13..25): the board (21..23, 13..15, posts solid) with Bennet coiling line beside it
 //      (bennet_spot (24,16)); Piri at his post rack (18..19, 15); the three chimes on brass posts (tied with black thread
 //      until isles_restored, then ringing); Aeris Flight Provisions (26..30, 14..17, door (27,17)) on its east side; two
@@ -90,7 +90,7 @@ const decor = [
   // the board plaza
   { t: 'lamp_sky', x: 15, y: 13 }, { t: 'lamp_sky', x: 15, y: 20 }, { t: 'lamp_sky', x: 30, y: 24 },
   { t: 'lamp_sky', x: 20, y: 25 },
-  { t: 'windstone', x: 30, y: 13 }, { t: 'rotor', x: 16, y: 18 },
+  { t: 'windstone', x: 25, y: 13 }, { t: 'rotor', x: 16, y: 18 },
   // the north dock: the Kestrel moored over the cloud north of it, the net of cargo, bollards, a windsock
   { t: 'kestrel', x: 17, y: 2 },
   { t: 'cargo_net', x: 17, y: 6 },
@@ -115,9 +115,10 @@ const decor = [
   // the workshop island
   { t: 'lamp_sky', x: 33, y: 31 }, { t: 'rotor', x: 43, y: 28 }, { t: 'crates_barrels', x: 41, y: 32 },
 ];
-// the storm knot on the north-east skyline, framed by the north dock and the east rim from the plaza
+// the storm knot on the north-east skyline, over the cloud between the north dock, the plaza and the east rim: from the board's
+// mark (22,15) the phone frame (24 x 13.5 tiles) holds the board, Piri, Bennet, the shop and the whole storm
 const overhead = [
-  { t: 'storm_far', x: 28, y: 5 },
+  { t: 'storm_far', x: 26, y: 8 },
 ];
 
 // ---------------------------------------------------------------- events
@@ -210,7 +211,7 @@ export default {
     tower_roof: [9, 2], roof_view: [22, 12], roof_vex: [13, 2], roof_aeris: [8, 2],
     roof_stage: [12, 4], roof_stage_m: [11, 4], roof_stage_b: [13, 4], north_far: [24, 0],
     // the gardens, Pippa's place at home, the storm on the skyline
-    gardens: [6, 28], pippa_tower: [7, 10], storm_far: [31, 7],
+    gardens: [6, 28], pippa_tower: [7, 10], storm_far: [30, 10],
   },
   start: { x: 22, y: 32, dir: 'up' },
 };

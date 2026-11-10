@@ -212,6 +212,54 @@ test('rows: the Engine and the Scribe never across the body; the Beacon and the 
   assert.ok(!hit(rows[0], box(lights[1])) && !hit(rows[1], box(lights[0])), 'desktop: neither light row crosses the other light');
 });
 
+test('E6-fixes A2: the Scribe keeps one row anchor in all three looks, clear of the Gust gauge; the Beacon by its lamp; one rule for the Harriers', async () => {
+  const L = await import('../../src/battle/scene/layout.js');
+  L.STAGE.tall.clear();
+  const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const party = [[290, 146], [318, 146], [346, 146]].map(([x, y], i) => ({ uid: `p${i}`, id: 'hero', side: 'party', x, y, homeX: x, homeY: y, w: 24, h: 36 }));
+  const unit = (uid, id, x, y, w, h) => ({ uid, id, side: 'enemy', x, y, homeX: x, homeY: y, w, h });
+  const gauge = { x: L.TL.x, y: 0, w: L.W - L.TL.x, h: 40 };   // the timeline and the wind gauge under its head
+  const rw = 15 + 15 + 15 * 4;
+  const xs = new Set();
+  // look one and the chart look: the help docked; the ward look: the lights stand under the dock, so the help is top-left
+  for (const [look, w, h, docked, lights] of [['scribe', 129, 130, true, false], ['scribe_ward', 147, 138, false, true], ['scribe_chart', 143, 138, true, false]]) {
+    const home = L.touchEnemySlot(L.BOSS_SLOT, { w, h });
+    const sc = unit('e0', 'scribe', home.x, home.y, w, h);
+    const actors = [sc, ...party];
+    if (lights) actors.push(unit('e1', 'false_beacon', scene.WARD_SPOTS.false_beacon.x, scene.WARD_SPOTS.false_beacon.y, 43, 60),
+      unit('e2', 'broken_compass', scene.WARD_SPOTS.broken_compass.x, scene.WARD_SPOTS.broken_compass.y, 51, 58));
+    for (const helpBottom of [23, 34, 45]) {
+      const plan = new Map([['e0', { rect: { x: 175, y: 34, w: rw, h: L.ENEMY_ROW_H }, place: 'right' }]]);
+      if (lights) {
+        plan.set('e1', { rect: { x: 223, y: 48, w: 15 * 5, h: L.ENEMY_ROW_H }, place: 'right' });
+        plan.set('e2', { rect: { x: 198, y: 137, w: 60, h: L.ENEMY_ROW_H }, place: 'below' });
+      }
+      scene.steadyRows(plan, { actors, touch: true, helpBottom, docked });
+      const r = plan.get('e0').rect;
+      xs.add(r.x);
+      assert.equal(plan.get('e0').place, 'band', look);
+      assert.ok(!hit(r, gauge), `${look}: the Scribe's row ${JSON.stringify(r)} is clear of the timeline and the Gust gauge`);
+      if (!docked) assert.ok(r.y > helpBottom && r.y >= 4 + 19 + 2 * 11, `${look}: under the help window at its tallest (no hop), ${r.y}`);
+      else assert.ok(r.y + r.h <= sc.y - h + 8, `${look}: above its wing`);
+      for (const p of party) assert.ok(!hit(r, L.spriteBox(p)), `${look}: clear of the party`);
+      if (lights) {
+        const br = plan.get('e1').rect, cr = plan.get('e2').rect;
+        const bb = L.spriteBox(actors[4]), cb = L.spriteBox(actors[5]);
+        assert.ok(br.x >= bb.x + bb.w && br.y >= bb.y + 8 && br.y < bb.y + bb.h / 2, `the Beacon's row beside its lamp ${JSON.stringify(br)}`);
+        assert.ok(!hit(br, cb) && !hit(br, r) && !hit(br, cr) && !hit(br, gauge), "the Beacon's row clear of the Compass, the other rows and the gauge");
+        assert.ok(cb.x + cb.w <= 290 - 12 - 24, `the Compass stands back from Arden (${cb.x + cb.w})`);
+      }
+    }
+  }
+  assert.equal(xs.size, 1, `the Scribe's row keeps one x in every look (${[...xs]})`);
+  // the Airstair's two Harriers: the core put one row above, one below; both go one way
+  const hs = L.enemySlots(2).map((s, i) => { const t = L.touchEnemySlot(s, { w: 71, h: 72 }); return unit(`h${i}`, 'storm_harrier', t.x, t.y, 71, 72); });
+  const hp = new Map([['h0', { rect: { x: 41, y: 38, w: 60, h: L.ENEMY_ROW_H }, place: 'above' }], ['h1', { rect: { x: 134, y: 129, w: 60, h: L.ENEMY_ROW_H }, place: 'below' }]]);
+  scene.steadyRows(hp, { actors: [...hs, ...party], touch: true, helpBottom: 23 });
+  assert.deepEqual([...hp.values()].map((p) => p.place), ['above', 'above'], 'one rule for both Harriers');
+  for (const [uid, p] of hp) for (const h of hs) assert.ok(!hit(p.rect, L.spriteBox(h)), `${uid}: clear of every Harrier`);
+});
+
 test('the storm stages: the clear grade lifts the sky well over the storm; lightning stays under +0.12 luma, at most once in 4 s', () => {
   const w = 40, h = 30, px = new Uint8ClampedArray(w * h * 4);
   const lum = (i) => (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255;

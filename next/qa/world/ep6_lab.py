@@ -10,7 +10,8 @@ Cases: ride (lane A before, mid-ride and after, the direction held through the r
 no extra step), post (the ride stops on the post; step off), vane (both states of group a from the same framing; the swing;
 the refusal on the post with Mira's line), ring (the storm ring mid-ride and at its post), storm (the storm tint with a lamp
 pool: the party's floor luma; the lightning peak measured by drawing one frame without and one at the peak of a flash),
-contrast (the chevrons against plain cloud on the frame), perf (wind logic and draw timings). Fails on any console error.
+contrast (the chevrons against the lane band they sit on, and the band against plain cloud), duct (the same lanes as
+F2's ducts: the duct chevrons against the duct bed), perf (wind logic and draw timings). Fails on any console error.
 """
 import base64
 import io
@@ -267,10 +268,13 @@ def case_contrast(lab):
         bed.append(mean_luma(im, px, py, 16, 16))
     c, k, l = sum(chev) / len(chev), sum(cloud) / len(cloud), sum(bed) / len(bed)
     print(f'  chevron fill luma {c:.3f}, lane bed {l:.3f}, plain cloud {k:.3f}: chevron - bed {c - l:.3f}, cloud - bed {k - l:.3f}')
-    # the chevron reads on its own lane (plan 5.1's 0.2 floor, taken against the bed it sits on: E6-tiles' cloud is a pale
-    # sunlit white that nothing can stand 0.2 above); the lane against plain cloud is E6-tiles' own measure, reported here
-    check(c - l >= 0.2, f'the chevrons stand at least 0.2 luma above the lane bed ({c - l:.3f})')
-    RESULTS['contrast'] = {'chevron': round(c, 3), 'bed': round(l, 3), 'cloud': round(k, 3)}
+    # two pairs, never chevron against plain cloud (CRITIQUE_8 item 9: a chevron always sits on its band, and E6-tiles' cloud
+    # is a pale sunlit white nothing can stand 0.2 above): the chevron against the band it sits on (plan 5.1's 0.2 floor),
+    # and the band against plain cloud (the lane reads across the screen: at least 0.15 apart, the band the darker)
+    check(c - l >= 0.2, f'the chevrons stand at least 0.2 luma above the lane band ({c - l:.3f})')
+    check(k - l >= 0.15, f'the lane band sits at least 0.15 luma below plain cloud ({k - l:.3f})')
+    RESULTS['contrast'] = {'chevron': round(c, 3), 'bed': round(l, 3), 'cloud': round(k, 3),
+                           'chevronOverBand': round(c - l, 3), 'cloudOverBand': round(k - l, 3)}
 
 
 def case_duct(lab):
@@ -279,7 +283,19 @@ def case_duct(lab):
     lab.run(fjs('f.map.mod.wind.kind = "duct"; f.glass.reset(); return true;'))
     lab.frames(4)
     look(lab, 9, 18)
-    shot(lab, 'duct')
+    im = shot(lab, 'duct')
+    cam = lab.run(fjs('return [f.camera.x, f.camera.y];'))
+    # a duct takes a chevron on every cell (CRITIQUE_8 item 3), the 7x7 code chevron at +5..+11 of the cell, over a blue bed
+    chev, bed = [], []
+    for cx in range(7, 13):
+        px, py = int(cx * 16 - cam[0]), int(19 * 16 - cam[1])
+        box = sorted((lum(im.getpixel((px + 5 + i, py + 5 + j))) for j in range(7) for i in range(7)), reverse=True)
+        chev.append(sum(box[:13]) / 13)
+        bed.append(mean_luma(im, px, py, 16, 16))
+    c, l = sum(chev) / len(chev), sum(bed) / len(bed)
+    print(f'  duct chevron fill luma {c:.3f}, duct bed {l:.3f}: chevron - bed {c - l:.3f}')
+    check(c - l >= 0.2, f'the duct chevrons stand at least 0.2 luma above the duct bed ({c - l:.3f})')
+    RESULTS['duct'] = {'chevron': round(c, 3), 'bed': round(l, 3)}
     lab.run(fjs('f.map.mod.wind.kind = "open"; f.glass.reset(); return true;'))
     back(lab)
 

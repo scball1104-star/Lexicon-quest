@@ -60,7 +60,7 @@ export default {
     { id: 'skychart', type: 'object', x: 4, y: 5, w: 3, sprite: 'table_long', text: 'ep6_skychart' },
     npc('suri', 14, 5, 'down'),
     door('charts_exit', 9, 13, ['ep6_zephyr', 5, 10, 'down']),
-    { id: 'save_bell_charts', type: 'save', x: 12, y: 11, text: 'save_bell' },
+    { id: 'save_bell_charts', type: 'save', x: 12, y: 11, text: 'ep6_charts_bell' },
     ...manifests('manifests_west', 2, 2), ...manifests('manifests_east', 7, 2), ...manifests('manifests_wing', 15, 2),
     book('manifest_book', 1, 7, 'flight_manifests', { solid: false }),
   ],

@@ -93,7 +93,7 @@ def gust_near(page, n=1):
 MEASURE = """(() => {
   const s = LQ_ENGINE.scene, gv = s.gale6;
   if (!gv) return null;
-  const rows = s._gale6Rows ? [...s._gale6Rows.entries()].map(([uid, p]) => ({ uid, x: p.rect.x, y: p.rect.y, w: p.rect.w, aloft: p.know && p.know.reflect === 'aloft' })) : [];
+  const rows = s._gale6Rows ? [...s._gale6Rows.entries()].map(([uid, p]) => ({ uid, x: p.rect.x, y: p.rect.y, w: p.rect.w, place: p.place || null, aloft: p.know && p.know.reflect === 'aloft' })) : [];
   const bodies = [...s.actors.values()].filter(a => !a.dead && !a.ko && a.side !== 'marker').map(a => ({ uid: a.uid, id: a.id, side: a.side, x: Math.round(a.x - a.w / 2), y: Math.round(a.y - a.h), w: a.w, h: a.h }));
   return { rows, bodies, gustIn: gv.gustIn, order: s.timeline.length, pinned: !!gv.pinned };
 })()"""
@@ -101,7 +101,8 @@ MEASURE = """(() => {
 
 def measure(page, ctx, tag):
     """The Aloft badges and the Gust marker against their boxes (game pixels read from a screenshot), and every row clear of
-    every body (a row may sit in a foe's own feet band: the bottom 15% of its frame)."""
+    every body (a row may sit in a foe's own feet band: the bottom 15% of its frame; the Scribe's phone row, place 'band', keeps
+    its one anchor over its own wing in every look, E6-fixes A2, and must stay left of the timeline and its Gust gauge)."""
     from PIL import Image
     m = page.evaluate(MEASURE)
     if not m:
@@ -134,7 +135,11 @@ def measure(page, ctx, tag):
     out['marker'] = {'slot': at, 'disc': round(disc, 3), 'box': round(tile, 3), 'gap': round(disc - tile, 3)}
     clash = []
     for r in m['rows']:
+        if r.get('place') == 'band' and r['x'] + r['w'] > 224:
+            clash.append((r['uid'], 'the timeline and its gauge'))
         for b in m['bodies']:
+            if r.get('place') == 'band' and b['uid'] == r['uid']:
+                continue
             feet = int(b['h'] * (0.85 if touch else 0.55)) if b['uid'] == r['uid'] else b['h']
             top = {'x': b['x'], 'y': b['y'], 'w': b['w'], 'h': feet}
             if r['x'] < top['x'] + top['w'] and top['x'] < r['x'] + r['w'] and r['y'] < top['y'] + top['h'] and top['y'] < r['y'] + 14:

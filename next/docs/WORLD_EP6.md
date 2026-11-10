@@ -85,9 +85,17 @@ Scripts may turn a group with `field.wind.turn(group, { quiet: true })` (no soun
   system sets `state * 4 + arrow` (arrow 0 up, 1 right, 2 down, 3 left; state 0 authored, 1 turned); with 4 frames `arrow`;
   with fewer it sets `turned` and draws a code arrow over the head itself, so a head always agrees with its lanes.
 - `gust_mooring`: 16 x 32, anchor `[0, 1]`, walkable; 12 frames = downwind arrow * 3 + pennant frame, or 3 frames (pennant).
+  The system draws a stop ring round its foot (`art.js paintPostRing`: a pale 2 px ellipse with a dark rim under its lower
+  arc, the back half before the post and the front half after it), so a post reads as "the lane ends here".
 - Chevrons are code (`art.js CHEVRON`): 7 x 7, one every other cell (`(x + y)` even), white, gold on a turned group, a dark
   trailing edge. Streaks: 3 frames, three dashes across the stream, period 16, 5 px a frame along the arrow (120 ms a frame).
-  Measured on the frame (`ep6_lab.py contrast`): chevron fill at least 0.2 luma above plain cloud.
+- Ducts (`kind: 'duct'`): a blue bed under the grille bars on every live duct cell (`art.js tintDuctBed` recolours the bed
+  art's dark gaps to `DUCT.bed` / `bedHi`; a dead shaft stays dark), and the code chevron on every cell (not every other),
+  white or gold with the dark trailing edge and a 1 px dark outline (`CHEVRON.ductOl`) so it stands off the bars.
+- Measured on the frame (`ep6_lab.py contrast`), two pairs, never chevron against plain cloud (a chevron always sits on its
+  band): the chevron fill at least 0.2 luma above the lane band it sits on (0.957 on 0.681: +0.276), and the band at least
+  0.15 luma below plain cloud (0.877: +0.196), so the lane reads across the screen. `ep6_lab.py duct`: the duct chevron at
+  least 0.2 above the duct bed (+0.546). The lane art is protected: tune the measure, never brighten the art to pass it.
 
 ## 5. The storm (plan 5.2)
 

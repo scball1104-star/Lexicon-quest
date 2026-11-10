@@ -655,35 +655,83 @@ def _quant(col, pal):
 
 def isles_far():
     """160 x 96 decal for the overhead layer at the Airstair's top: the floating isles from environments cell 5 (the
-    castle island, its falls, the bridge and the far islands), quantized to the sheet palette, the blue sky made
-    transparent and the cloud at the foot dithered out so it sits on any sky or cloud."""
+    castle island, its falls, the bridge and the far islands), cut with a hard alpha and a 1 px dark outline (CRITIQUE_8
+    item 8, DESIGN 2.3: no soft painted edge, no stray pale pixels against the cloud). The painted cell is median-filtered
+    before and after the downscale (the brush noise would become specks), the sky and the cloud are keyed out (the falls go
+    with the cloud), the mask is shaved of one-pixel spurs, its pinholes closed, its specks (components under 24 px)
+    dropped and its sides cut back in a ragged margin so no isle ends on the decal's straight edge; the colours are
+    quantized to the sheet palette with a little sky haze, then the outline (storm slate 1) is drawn round the mask."""
+    from PIL import ImageFilter
     cell, cw, ch = _cell5()
-    box_ = (int(cw * 0.30), int(ch * 0.0), int(cw * 1.0), int(ch * 0.78))
-    crop = cell.crop(box_).resize((160, 96), Image.BOX)
+    box_ = (int(cw * 0.34), 0, int(cw * 1.0), int(ch * 0.74))
+    crop = cell.crop(box_).filter(ImageFilter.MedianFilter(5)).resize((160, 96), Image.BOX).filter(ImageFilter.MedianFilter(3))
     a = np.asarray(crop).astype(np.float32) / 255.0
     from pxlib import PAL
     import ep6_kit
     pal = np.array([hexc(x)[:3] for x in list(PAL['colors']) + ep6_kit.EXTRA[:4]], np.float32) / 255.0
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    sky = ((b > r + 0.10) & (b > g) & (lum > 0.40)) | ((b > r + 0.2) & (lum > 0.3))
+    keep = ~(sky | (lum > 0.70))
+    keep[90:, :] = False
+    keep[:2, :] = False
+    H, W = keep.shape
+    for y in range(H):                        # the ragged side margin
+        k = 3 + (y * 7 + (y >> 2) * 3) % 4
+        keep[y, :k] = False
+        keep[y, W - k:] = False
+
+    def nb(m):
+        p = np.pad(m, 1)
+        return p[:-2, 1:-1].astype(int) + p[2:, 1:-1] + p[1:-1, :-2] + p[1:-1, 2:]
+
+    def components(want):
+        """4-connected components of the cells where keep == want: lists of (y, x), and whether each meets the border."""
+        seen = np.zeros_like(keep)
+        out = []
+        for y0 in range(H):
+            for x0 in range(W):
+                if keep[y0, x0] != want or seen[y0, x0]:
+                    continue
+                st, comp, edge = [(y0, x0)], [], False
+                seen[y0, x0] = True
+                while st:
+                    cy, cx = st.pop()
+                    comp.append((cy, cx))
+                    edge = edge or cy in (0, H - 1) or cx in (0, W - 1)
+                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        ny, nx = cy + dy, cx + dx
+                        if 0 <= ny < H and 0 <= nx < W and keep[ny, nx] == want and not seen[ny, nx]:
+                            seen[ny, nx] = True
+                            st.append((ny, nx))
+                out.append((comp, edge))
+        return out
+
+    for _ in range(2):
+        keep = keep & (nb(keep) >= 2)         # shave specks and one-pixel spurs
+    keep = keep | (nb(keep) >= 3)             # close pinholes
+    for comp, _edge in components(True):
+        if len(comp) < 24:
+            for cy, cx in comp:
+                keep[cy, cx] = False
+    for comp, edge in components(False):
+        if not edge and len(comp) < 12:
+            for cy, cx in comp:
+                keep[cy, cx] = True
     cv = Canvas(160, 96)
-    for y in range(96):
-        for x in range(160):
-            r, g, b = a[y, x]
-            lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-            sky = (b > r + 0.10 and b > g + 0.0 and lum > 0.40) or (b > r + 0.2 and lum > 0.3)
-            if sky:
-                continue
-            hz = 0.06                         # far away: a little sky haze
-            col = np.array([r * (1 - hz) + 0.70 * hz, g * (1 - hz) + 0.80 * hz, b * (1 - hz) + 0.92 * hz])
-            if y > 80 and ((x + y) % 2 or y > 88):
-                continue
-            cv.set(x, y, _quant(col, pal))
-    # drop isolated pixels (single specks left by the sky key)
-    out = cv.copy()
-    for y in range(1, 95):
-        for x in range(1, 159):
-            if cv.get(x, y)[3] and sum(1 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) if cv.get(x + dx, y + dy)[3]) <= 1:
-                out.set(x, y, (0, 0, 0, 0))
-    return out
+    hz = 0.06                                 # far away: a little sky haze
+    for y in range(H):
+        for x in range(W):
+            if keep[y, x]:
+                col = np.array([r[y, x] * (1 - hz) + 0.70 * hz, g[y, x] * (1 - hz) + 0.80 * hz, b[y, x] * (1 - hz) + 0.92 * hz])
+                cv.set(x, y, _quant(col, pal))
+    ol = hexc(ep6_kit.EXTRA[5])
+    ring = (~keep) & (nb(keep) > 0)
+    for y in range(H):
+        for x in range(W):
+            if ring[y, x]:
+                cv.set(x, y, ol)
+    return cv
 
 
 def storm_far():

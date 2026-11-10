@@ -34,7 +34,8 @@ import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor } from '../../battle/scene/actors.js';
 import { drawHead } from '../../battle/scene/hud.js';
 import { SIGNATURE_TECHS, CommandMenu } from '../../battle/scene/menu.js';
-import { TL, timelineSlotX } from '../../battle/scene/layout.js';
+import { TL, timelineSlotX, HELP_WIN, HELP_LINE, HELP_LINES_MAX, STATUS_WIN, ENEMY_ROW_H, W, H, helpDock, spriteBox, topBlocks,
+  cmdWin } from '../../battle/scene/layout.js';
 import { BattleFx, C } from '../../battle/fx.js';
 import { Cutscene } from '../../world/cutscene.js';
 import { TILE } from '../../world/actors.js';
@@ -73,10 +74,73 @@ const ALOFT_REFLECT = 'aloft';               // the knowledge flag that makes a 
  * The Compass in the front row, its row under its feet; the Beacon (Aloft) rides the wind beside the Scribe's wing, its row
  * beside it in the open air (with the Scribe 147 px wide, two 60 to 75 px rows under two feet cannot both fit in the 94 px
  * left before the party: qa/battlescene/ep6_scene.test.mjs measures every spot). */
-export const WARD_SPOTS = { false_beacon: { x: 198, y: 104 }, broken_compass: { x: 240, y: 134 } };
+export const WARD_SPOTS = { false_beacon: { x: 198, y: 104 }, broken_compass: { x: 228, y: 134 } };
+// E6-fixes A2 (CRITIQUE_8 items 1 and 7). The Compass stands 12 px further from Arden (240 to 228). On the phone the Scribe's row
+// keeps ONE anchor in all three looks: top-left over its wing (look one's band spot, x = home + dx); while the ward's lights stand
+// the help window leaves its dock (the lights' heads are under it) and takes the top-left band, so the row sits under the help at
+// its tallest, the same x (a row that never hops as the help text grows). The Beacon's row stands beside its lamp, clear of the
+// Compass under it. Ordinary foes keep one rule per encounter: when the core puts one row above a head and another under feet,
+// steadyRows() puts them all above or all below if every row fits that way (the two Harriers).
+export const SCRIBE_ROW = { dx: -87, y: 2 };
+export const LAMP_ROW = { dy: 13 };      // the Beacon's row: right of the sprite, its top this far under the sprite's top
+const HELP_TALLEST = HELP_WIN.y + HELP_WIN.h + (HELP_LINES_MAX - 1) * HELP_LINE;
 const SCRIBE_LOOK = { wind_script: 'scribe', storm_ward: 'scribe_ward', true_sky_chart: 'scribe_chart' };
 const GALE_DELAYS = new Set(['gust', 'anchor', 'rewrite_course', 'full_blast']);
 const isRewrite = (id) => !!(SKILLS[id] && SKILLS[id].rewrite);
+
+const hitBox = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+/**
+ * E6-fixes A2: steady the enemy rows a Gale battle planned (pure; the scene's planEnemyRows wrap and the test call it). `plan` is
+ * the core's Map uid -> { at, rect, place, lift, badges }; `actors` every live actor ({ uid, id, side, x, y, homeX, homeY, w, h });
+ * `docked` whether the help window is in its dock. Changes the plan in place and returns it.
+ */
+export function steadyRows(plan, { actors, touch, helpBottom = 23, cw = null, docked = false }) {
+  const live = actors.filter((a) => a && !a.dead && !a.ko);
+  const byUid = new Map(live.map((a) => [a.uid, a]));
+  const clampX = (x, w) => Math.max(4, Math.min(W - w - 4, Math.round(x)));
+  const off = (a) => ({ dx: Math.round((a.x ?? 0) - (a.homeX ?? a.x ?? 0)), dy: Math.round((a.y ?? 0) - (a.homeY ?? a.y ?? 0)) });
+  const set = (p, a, x, y, place) => {
+    const o = off(a);
+    p.at = { x: x + o.dx, y: y + o.dy }; p.rect = { x: x + o.dx, y: y + o.dy, w: p.rect.w, h: ENEMY_ROW_H }; p.place = place; p.lift = 0;
+  };
+  const tall = (p, r) => (p.badges ? { x: r.x, y: r.y - 10, w: r.w, h: r.h + 10 } : r);
+  for (const [uid, p] of plan) {
+    const a = byUid.get(uid);
+    if (!a || !p.rect) continue;
+    if (touch && a.id === 'scribe') set(p, a, clampX((a.homeX ?? a.x) + SCRIBE_ROW.dx, p.rect.w), docked ? SCRIBE_ROW.y : HELP_TALLEST + 2, 'band');
+    else if (a.id === 'false_beacon' && p.place !== 'below') {
+      const own = spriteBox(a, true);
+      const r = { x: clampX(own.x + own.w + 3, p.rect.w), y: own.y + LAMP_ROW.dy, w: p.rect.w, h: ENEMY_ROW_H };
+      if (!live.some((o) => o.uid !== uid && hitBox(r, spriteBox(o, true)))) set(p, a, r.x, r.y, 'right');
+    }
+  }
+  if (!touch) return plan;
+  // one rule for the ordinary rows: all above or all below, when every row fits that way
+  const ord = [...plan.entries()].filter(([uid, p]) => byUid.get(uid) && (p.place === 'above' || p.place === 'below'));
+  const places = new Set(ord.map(([, p]) => p.place));
+  if (places.size < 2) return plan;
+  const n = (pl) => ord.filter(([, p]) => p.place === pl).length;
+  const order = n('above') > n('below') ? ['above', 'below'] : ['below', 'above'];
+  const hard = [cw || cmdWin(true), STATUS_WIN, ...topBlocks(helpBottom)];
+  const bodies = live.map((a) => ({ uid: a.uid, ...spriteBox(a, true) }));
+  const fixed = [...plan.entries()].filter(([uid]) => !ord.some(([u]) => u === uid)).map(([, p]) => tall(p, p.rect));
+  for (const rule of order) {
+    const spots = [];
+    let ok = true;
+    for (const [uid, p] of ord) {
+      const a = byUid.get(uid), own = spriteBox(a, true);
+      const r = { x: clampX((a.homeX ?? a.x) - p.rect.w / 2, p.rect.w), y: rule === 'below' ? own.y + own.h + 3 : own.y - ENEMY_ROW_H - 2, w: p.rect.w, h: ENEMY_ROW_H };
+      const t = tall(p, r);
+      if (t.y < 0 || r.y + r.h > H || hard.some((b) => hitBox(t, b)) || bodies.some((b) => hitBox(t, b))
+        || fixed.some((f) => hitBox(t, f)) || spots.some((q) => hitBox(t, q.t))) { ok = false; break; }
+      spots.push({ p, a, r, t });
+    }
+    if (!ok) continue;
+    for (const q of spots) set(q.p, q.a, q.r.x, q.r.y, rule);
+    break;
+  }
+  return plan;
+}
 
 // ---------------------------------------------------------------------------------------------------- pixel art
 const INK = '#14101e';
@@ -857,8 +921,12 @@ function wrapScene(B) {
     const b = this.b, know = b.knowledge;
     const aloft = new Set((uids || []).filter((u) => windOf(b.unit(u)) === 'aloft'));
     b.knowledge = (uid) => { const k = know.call(b, uid); return aloft.has(uid) && k && !k.reflect ? { ...k, reflect: ALOFT_REFLECT } : k; };
-    try { const plan = base.planEnemyRows.call(this, uids, touch, cwNow, helpBottom, scoreAll); this._gale6Rows = plan; return plan; }
-    finally { b.knowledge = know; }
+    try {
+      const plan = steadyRows(base.planEnemyRows.call(this, uids, touch, cwNow, helpBottom, scoreAll),
+        { actors: [...this.actors.values()], touch, helpBottom, cw: cwNow, docked: !!helpDock() });
+      this._gale6Rows = plan;
+      return plan;
+    } finally { b.knowledge = know; }
   };
   B.runOp = function (op) {
     const gv = this.gale6;
@@ -907,7 +975,15 @@ function wrapScene(B) {
 // ---------------------------------------------------------------------------------------------------- the menu
 /** Anchor's row draws its icon; the gated rows read the battle through the scene's view; Anchor floats while a move is pinned. */
 function wrapMenu(M) {
-  const openSub = M.openSub, sig = M.sig;
+  const openSub = M.openSub, sig = M.sig, open = M.open;
+  // E6-fixes A3: in a Gale battle the Defend row says it braces
+  M.open = function (unit) {
+    const res = open.call(this, unit);
+    const items = this.scene && this.scene.gale6 && this.root ? this.root.items || [] : [];
+    const d = items.find((it) => it.id === 'defend' && !it.disabled);
+    if (d) { d.help = T.defend_help; this.syncHelp(); }
+    return res;
+  };
   const own = Object.getOwnPropertyDescriptor(M, 'b');
   Object.defineProperty(M, 'b', { configurable: true, get() { const s = this.scene; return (s && s.b6view) || (own && own.get ? own.get.call(this) : s.b); } });
   M.openSub = function (cmd) {
@@ -931,7 +1007,8 @@ function wrapMenu(M) {
 }
 
 // ---------------------------------------------------------------------------------------------------- the field
-/** vex_falls: s.rope(fromMark, toMark) draws a 1 px line from Bram's hands to Vex's (paying out over 12 frames); s.rope(null)
+/** vex_falls: s.rope(fromMark, toMark) draws a 2 px pale line (E6-fixes A6: 1 px was lost at phone scale) from Bram's hands to
+ * Vex's (paying out over 12 frames; a mark or an [x, y] cell); s.rope(null)
  * clears it. A cutscene draw, not a field system: it rides the field's glass flare pass (world space, over the actors). */
 function ropeEnd(F, tile) {
   const a = (F.actors || []).find((x) => x && x.visible !== false && x.tx === tile[0] && x.ty === tile[1]);
@@ -947,8 +1024,8 @@ export function drawRope(r, F) {
   const n = Math.max(2, Math.ceil(Math.hypot(ex - x0, ey - y0)));
   for (let i = 0; i <= n; i++) {
     const s = i / n, x = Math.round(x0 + (ex - x0) * s), y = Math.round(y0 + (ey - y0) * s + sag * 4 * s * (1 - s));
-    r.rect(x, y + 1, 1, 1, '#3a2a1a');
-    r.rect(x, y, 1, 1, '#e0c88a');
+    r.rect(x, y + 2, 2, 1, '#3a2a1a');
+    r.rect(x, y, 2, 2, '#f2e2b4');
   }
 }
 function hookRope(F) {

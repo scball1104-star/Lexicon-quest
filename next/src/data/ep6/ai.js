@@ -6,7 +6,8 @@
 //   gale_engine   Fan Blade and Piston. Its bellows run from the start (data `gustEvery: 3`: the Gust every 3 actions, gale.js);
 //                 a Break stalls them for 2 of its turns. Full Blast: when the Gust is 2 actions away or less and nothing is pinned,
 //                 it winds up ("The Engine winds the bellows...") and the blast is pinned to the Gust (gale.js pin(): it lands
-//                 exactly 2 actions out, and never before Bram's next turn). At 50% HP, once: two Gale Sprites (Aloft, no reward).
+//                 exactly 2 actions out, and never before Bram's next turn), then ENGINE_TUNE.blastGap Gusts pass clear. Braced
+//                 against its own Gusts while the bellows run (gale.js ownsWind). At 50% HP, once: two Gale Sprites (Aloft, no reward).
 //   scribe        1 The Wind Script (100% to 68%, HP locked at 68%): armored (DEF x1.4), Quillstorm, Ink Squall. 2 The Storm Script
 //                 Ward (from 68%): the False Beacon and the Broken Compass; while either stands the ward holds (20% damage taken,
 //                 shields locked, HP stops at 33%). Both down: the ward tears, the Scribe is Broken, the party gains 25 Fury.
@@ -27,8 +28,12 @@ import { pin, cancelPin, refreshEvery, ANCHOR, BALLAST, isAloft, windOf } from '
 
 export const WARD_MULT = 0.2;         // damage the Scribe takes under the Storm Script Ward (plan 6.5)
 export const WARD_FURY = 25;          // Fury each party member gains when the ward tears (canon +25 Focus)
-export const PIN_AT = 2;              // a pinned move lands exactly this many actions out (they pin when the Gust is this near)
+export const PIN_AT = 2;
+export const FIRST_REWRITE_TURN = 2;   // the Scribe's first Rewrite on its second turn at the latest (E6-fixes A10)              // a pinned move lands exactly this many actions out (they pin when the Gust is this near)
 export const WARD_ADDS = ['false_beacon', 'broken_compass'];
+// The Engine winds a Full Blast for one Gust, then lets `blastGap` Gusts pass clear (E6-fixes A1: braced against its own wind it
+// acts every turn, and a blast on every 3-action Gust left attack-only play no turn to strike in)
+export const ENGINE_TUNE = { blastGap: 3 };
 const FURY_MAX = 100;
 const ARMOR = 'armor';
 
@@ -38,9 +43,9 @@ const wardStanding = (ctx) => ctx.living('enemy').filter((e) => WARD_ADDS.includ
 const scribeOf = (ctx) => ctx.living('enemy').find((e) => e.id === 'scribe') || null;
 
 /** Pin `skillId` when the Gust is PIN_AT actions away or less and nothing is pinned. The Gust is set to exactly PIN_AT. */
-function tryPin(ctx, u, skillId) {
+function tryPin(ctx, u, skillId, early = false) {
   const S = ctx.state.gale;
-  if (!S || S.pinned || !u.alive || u.broken || u.charging || S.gustIn > PIN_AT) return false;
+  if (!S || S.pinned || !u.alive || u.broken || u.charging || (S.gustIn > PIN_AT && !early)) return false;
   S.gustIn = PIN_AT;
   return pin(ctx, u, skillId);
 }
@@ -65,7 +70,7 @@ const gale = { ...basic };
 
 // --- the Gale Engine -------------------------------------------------------------------------------------------------
 const engine = {
-  start(ctx, u) { u.ai.spritesCalled = false; u.ai.blastAt = 0; u.ai.bellowsOff = false; u.ai.blasts = 0; },
+  start(ctx, u) { u.ai.spritesCalled = false; u.ai.blastAt = 0; u.ai.blastGust = 0; u.ai.bellowsOff = false; u.ai.blasts = 0; },
   decide(ctx, u, d) { return basic.decide(ctx, u, d); },
   afterTurn(ctx, u, d) {
     if (!u.alive) return;
@@ -74,9 +79,11 @@ const engine = {
       ctx.emit({ type: 'message', text: 'The bellows start again. The wind comes faster.', kind: 'bellows', target: u.uid });
       refreshEvery(ctx, 'bellows');
     }
-    if (u.ai.turns >= u.ai.blastAt && tryPin(ctx, u, 'full_blast')) {
+    const S = ctx.state.gale;
+    if (u.ai.turns >= u.ai.blastAt && S && S.gusts >= u.ai.blastGust && tryPin(ctx, u, 'full_blast')) {
       u.ai.blasts++;
       u.ai.blastAt = u.ai.turns + 1 + (d.blastCooldown || 0);
+      u.ai.blastGust = S.gusts + 1 + ENGINE_TUNE.blastGap;   // the Gust it lands on, then blastGap clear Gusts
     }
   },
   onBreak(ctx, u) {
@@ -156,7 +163,10 @@ const scribe = {
       ctx.planCharge(u, 'thunderhead', null);
       u.ai.thunderAt = u.ai.turns + (d.thunderheadEvery || 4);
     }
-    if (u.ai.turns >= (u.ai.rewriteAt || 0) && tryPin(ctx, u, 'rewrite_course')) {
+    // E6-fixes A10 (PLAYTEST_REVIEW_8 item 10): the first Rewrite comes on the Scribe's FIRST_REWRITE_TURN turn at the latest
+    // (it pulls the Gust in to PIN_AT), so even a short fight shows the climax's decision more than once
+    const early = !u.ai.rewrites && u.ai.turns >= FIRST_REWRITE_TURN;
+    if (u.ai.turns >= (u.ai.rewriteAt || 0) && tryPin(ctx, u, 'rewrite_course', early)) {
       u.ai.rewrites++;
       u.ai.rewriteAt = u.ai.turns + 1 + (d.rewriteCooldown || 0);
     }

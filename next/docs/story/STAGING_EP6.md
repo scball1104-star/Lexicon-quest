@@ -251,7 +251,8 @@ fans), `ep6_breeze_font` (the fonts), `ep6_dash_crate` (the Dash crates), `ep6_c
 Zephyr Landing: `ep6_board` (two states), `ep6_chimes` (two states), `ep6_post_rack` (three states), `ep6_beacon` (two
 states), `ep6_kestrel` (two states), `ep6_dock_four` (two states), `ep6_cloud_garden`, `ep6_storm_far`, `sign_ep6_inn`,
 `sign_ep6_shop`, `sign_ep6_workshop`, `sign_ep6_tower`, `sign_ep6_east_airstair` (two states).
-The Chart Room: `ep6_skychart` (two states), `ep6_manifest_wall` (two states); book `flight_manifests`.
+The Chart Room: `ep6_skychart` (two states), `ep6_manifest_wall` (two states), `ep6_charts_bell` (the save bell); book
+`flight_manifests`.
 Hall of Broken Signals: `ep6_relay`, `ep6_speaking_tube`, `ep6_grille`, `ep6_feather_grille`, `ep6_locker_ledge` (two
 states).
 The Eye: `ep6_spire`, `ep6_lamp_anchor`, `ep6_lamp_listen`, `ep6_lamp_return` (each dark, then lit with the charter's

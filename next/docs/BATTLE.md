@@ -1150,7 +1150,7 @@ Every foe has a wind (`aloft` rides the Gust, `ground` is blown back). Ordinary 
 | Storm Harrier | aloft | 26 | 600 | 175/30 | 26/26 | 22 | 3 | bow, ice | thunder | 100 / 180 | Talon, Dive (single phys 160%); flying, evade 15% |
 | Lightning Manta | aloft | 26 | 680 | 82/180 | 22/38 | 16 | 3 | ice, bow | thunder, fire | 105 / 190 | Shock (Stun 15%), **Thunder Glide** (party mag 130%, first 2, every 3) |
 | Storm-Marked Page | aloft | 27 | 640 | 100/185 | 20/40 | 17 | 3 | fire, light | thunder, ice | 100 / 200 | Margin Cut, Smudge (party mag 95%, Blind 15%), **Overwrite** (single mag 200%) |
-| The Gale Engine | ground | 26 | 1750 | 750/200 | 42/24 | 14 | 7 | thunder, axe | ice, bow | 240 / 1000 | Fan Blade, Piston (party 70%); Bellows (the Gust every 3); **Full Blast** (party phys 180%, pinned to the Gust); two Gale Sprites at 50%; immune Silence |
+| The Gale Engine | ground | 26 | 1750 | 750/200 | 42/24 | 14 | 7 | thunder, axe | ice, bow | 240 / 1000 | Fan Blade (40%), Piston (party 25%); Bellows (the Gust every 3; Braced against its own Gusts while they run); **Full Blast** (party phys 170%, pinned to the Gust, then three clear Gusts); two Gale Sprites at 50%; immune Silence |
 | The Storm Scribe | aloft | 27 | 3900 | 520/520 | 32 (x1.4 armored)/30 | 15 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | ice, thunder (phases 1, 2) | 1300 / 1600 | Quillstorm (party phys 130%), Ink Squall (single mag 150%, Blind 20%); **Rewrite the Course** (pinned); **Thunderhead** (party mag 170%, Stun 20%); immune Stun, Poison, Blind |
 | The False Beacon | aloft | 27 | 560 | 200/200 | 22/28 | 14 | 2 | fire, light | thunder | 0 / 0 | False Light: Covers the Scribe every turn |
 | The Broken Compass | ground | 27 | 520 | 200/200 | 26/26 | 13 | 3 | axe, thunder | ice | 0 / 0 | Spin (the soonest member half a turn back); Misdirect on Bram every 3rd turn (Silence 40%) |
@@ -1263,6 +1263,20 @@ attack-only wins 76%. Battle gold: 3,600 in, 9,230 earned, 12,830 out.
 | **gale_engine** | 27 | 100% / 8.84 (7.3-10.3) / 12% | 0% / 3.73 | - |
 | **scribe** | 27 | 97% / 14.55 (12.0-17.7) / 17% | 0% / 4.38 | 64% / 12.65 |
 | **scribe** | 28 | 96% / 13.91 (11.3-16.7) / 20% | 0% / 4.69 | - |
+
+**E6-fixes (2026-11-10, PLAYTEST_REVIEW_8 items 1, 4, 6).** The Engine was blown back by its own bellows Gust every 3 actions
+and acted twice a fight. `gale.js ownsWind`: a foe whose data has `gustEvery` is Braced against its own Gusts while its bellows run
+(a Break stalls them, and a stalled Engine is blown back like any grounded foe). Acting every turn, it hit too hard: Fan Blade 110
+to 40, Piston 70 to 25, Full Blast 180 to 170, and `ai.js ENGINE_TUNE.blastGap` 3 (after a blast lands or breaks, three Gusts pass
+clear). Now (400 fights a row) careful Lv 26 100% / 8.94 rounds / 14% HP lost, Lv 27 100% / 8.72; reckless 71%; attack-only 0%;
+1.8 Full Blasts and about 4 Engine turns a fight (was 1.1 and 2). Attack-only does not reach the review's 20 to 40%: it needs
+about 30 plain attacks into 1,750 HP with no healing while the two Gale Sprites ride every Gust, and even the Engine at a fifth of
+its ATK left it at 0%; the levers are the Engine's HP and the sprites (`enemies.js`, outside this pass). The Eye's manta pair now
+pays `expMul` 0.6 (205 to 123 a fight): the Scribe is met with 16,670 EXP at 100% of the fights, 217 under Lv 28 (was 53). Tier 11
+prices about 30% down (bodies 4,300 / 4,200, helms 2,100, boots 1,800, mantle 1,750, charms 1,550) so the arrival gold buys two
+pieces. The Defend row's help in a Gale battle reads "Brace against the gust." (scene.js menu wrap). The Scribe's first Rewrite comes on its second
+turn at the latest (`ai.js FIRST_REWRITE_TURN`, item 10; it pulls the Gust in to 2): careful Lv 27 98% / 14.73 rounds / 16% HP lost,
+Lv 28 98% / 14.14, reckless 63%, attack-only 0%; 2.59 Rewrites a fight, 87% broken by Anchor (was 2.17 and 79%).
 
 ### 14.7 Tests
 

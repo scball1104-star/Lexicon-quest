@@ -3,7 +3,8 @@
 // platforms floating on cloud, white wind streaming between them, each deck adding one idea (plan 5.1's ladder).
 //
 //   A  the Recovery Alcove (south): arrival (21,27) from Zephyr Landing's east airstair, the breeze font, the ballast chest,
-//      the gangway home (20..22,29). North over the plank bridge (20..21,23) onto the south ledge.
+//      the gangway home (20..22,29), and once obs_f2_done the brass lift (24,25) back up to floor II's Bellows Hall (25,15),
+//      the other end of F2's shortcut down. North over the plank bridge (20..21,23) onto the south ledge.
 //   B  Two Ways In (puzzle B, where you step in decides where you land): one lane bends round the glass deck from its
 //      south-west corner (12,19). Its west arm (column x 12, rows 13..19) blows north: stepped into from the west ledge
 //      (x 8..11) it lands the party on the north deck (12,12), the way on. Its south arm (row 19, x 13..23) blows east:
@@ -124,7 +125,7 @@ const R = S.rows();
 const decor = [
   // A: the alcove
   { t: 'windsock', x: 18, y: 27 }, { t: 'bollard', x: 24, y: 28 }, { t: 'bollard', x: 18, y: 28 },
-  { t: 'skyflowers', x: 23, y: 27 }, { t: 'windstone', x: 24, y: 24 },
+  { t: 'skyflowers', x: 23, y: 27 }, { t: 'windstone', x: 24, y: 27 }, { t: 'lift_brass', x: 24, y: 25, if: 'obs_f2_done' },
   // B
   { t: 'bollard', x: 8, y: 22 }, { t: 'rotor', x: 22, y: 9 }, { t: 'bollard', x: 28, y: 20 }, { t: 'windsock', x: 21, y: 13 },
   { t: 'cargo_net', x: 14, y: 22 }, { t: 'windstone', x: 8, y: 14 }, { t: 'skyflowers', x: 16, y: 16 },
@@ -145,6 +146,7 @@ const events = [
   windFont('font_w1', 22, 25),
   chest('chest_a', 18, 25, 'wood', { item: 'ballast_stone', qty: 2 }),
   object('chimes_a', 19, 24, 'chimes', { text: 'ep6_chimes_tied' }),
+  lift('lift_f2_back', 24, 25, ['ep6_obs_f2', 25, 15, 'down'], { if: 'obs_f2_done' }),   // the shortcut's way back up (the Bellows Hall)
   // ---- B: Two Ways In
   chest('chest_es', 28, 16, 'wood', { item: 'hi_potion', qty: 2 }),
   chest('chest_b', 20, 14, 'iron'),

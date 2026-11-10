@@ -178,7 +178,8 @@ async function airstair_fight(s) {
   await s.spawn('foe_harrier_b', { sprite: 'storm_harrier', name: 'Storm Harrier', at: 'foes_drop_b', dir: 'down' });
   await all(s.emote('mira', '!'), s.emote('bram', '!'));
   await s.camera.follow('hero');
-  await say(s, 'mira', 'Birds that ride the wind. When it gusts, brace, or it throws us back.');
+  // E6-fixes A3 (PLAYTEST_REVIEW_8 item 5): one word swapped from the bible's line so the screen says how to brace
+  await say(s, 'mira', 'Birds that ride the wind. When it gusts, Defend, or it throws us back.');
   const result = await s.battle('e6a_first', { canFlee: false });
   if (result !== 'win') return;
   await all(s.despawn('foe_harrier'), s.despawn('foe_harrier_b'));
@@ -224,6 +225,9 @@ async function isles_view(s) {
 // board is a picture that clacks (E6-maps-a, two drawn states); nobody explains it. Sets zephyr_arrived.
 async function zephyr_arrival(s) {
   await s.music(null);
+  // E6-fixes (B4's handoff, CRITIQUE_8 item 4): the board is in frame from the first beat (the map's bottom edge stops the
+  // camera short of it at the arrival cell), and the party walks up into that frame
+  await s.camera.panTo('board', 20);
   await stage(s, 'board_stage');
   await narrate(s, 'Rope bridges, brass domes, cloud gardens. Every wind chime in the plaza is tied silent with black thread.');
   await s.camera.panTo('board', 30);
@@ -303,6 +307,8 @@ async function anchor_lesson(s) {
   await narrate(s, 'A gust comes off the storm and hits the dock like a door slamming. Mira is lifted off her feet toward the edge.');
   await s.walk('mira', 'mira_lift', { speed: 'run' });
   await s.walk('bram', 'bram_spear', { speed: 'run' });
+  // E6-fixes A6: the camera on the catch (it stops at the map's east edge, where the dock ends)
+  await s.camera.panTo('bram_spear', 20);
   await s.sfx('anchor_set');
   await narrate(s, 'Bram drives his spear through the planks and catches her wrist, and holds, while the gust goes over.');
   await s.wait(40);
@@ -556,6 +562,8 @@ const pledge_return = (s) => pledge(s, 'pledge_return');
 // Bram's beat: actors, a shake, and the line drawn by the scene (rope helper). The party stops on party_stop_fall, two
 // rows below Vex's edge mark; nobody ever stands off the edge. No humor while he hangs. 15 boxes (budget 16). Sets
 // vex_held, asker_known.
+/** vex_falls: where Vex swings on the line, one cell out from vex_hang (19,13) and one down, over open cloud (ep6_obs_f3). */
+export const VEX_SWING = [20, 14];
 async function vex_falls(s) {
   await spawnVex(s, 'vex_edge', 'up');
   await stage(s, 'party_stop_fall');
@@ -567,9 +575,17 @@ async function vex_falls(s) {
   await spawnVex(s, 'vex_hang', 'up');   // torn off the planks: he hangs below the edge
   await s.walk('bram', 'bram_line', { speed: 'run' });
   await s.sfx('anchor_set');
-  const drawn = await rope(s, 'bram_line', 'vex_hang');
+  // E6-fixes A6 (CRITIQUE_8 item 2): he swings out over the open cloud on the line, a cell off the edge and below it, so the
+  // rope (2 px, pale) runs from Bram's hands across the drop; then Bram pulls him back the way he went
+  await s.spawn('vex_k', { sprite: 'npc_vex', name: 'Vex Quill', at: VEX_SWING, dir: 'up' });
+  const drawn = await rope(s, 'bram_line', VEX_SWING);
   await narrate(s, 'Bram sets his spear and throws the line. Vex hangs over nothing on the end of it. The line holds.');
   await say(s, 'vex_k', 'You want to know who asked. Fine. Pull me up first.');
+  if (drawn) {
+    await rope(s, 'bram_line', 'vex_hang');
+    await spawnVex(s, 'vex_hang', 'up');
+    await s.wait(12);
+  }
   await unrope(s, drawn);
   await spawnVex(s, 'vex_edge', 'down');
   await narrate(s, 'Bram pulls. Vex sits on the planks, breathing. He takes a letter from inside his coat.');
@@ -745,12 +761,18 @@ async function cloud_library(s) {
   await narrate(s, 'A round reading room on the top of the cloud, open to the sun. Shelves of weather logs. One page lies under glass.');
   await s.face('vex_k', 'hero');
   await say(s, 'vex_k', 'There. Your beginning. Half of it.');
+  // E6-fixes A7 (CRITIQUE_8 item 5): the party steps back two rows, so it stands in frame under the close-up (the insert
+  // covers rows 1 to 7 of the room and this map cannot scroll that far)
+  await all(...['hero', 'mira', 'bram'].map((who) => s.walk(who, ['down', 'down'])));
+  await all(...['hero', 'mira', 'bram'].map((who) => s.face(who, 'up')));
   await s.music('mystery');
   let open = await page(s, 'ep6_page', 'name');
   await narrate(s, 'Your name, in the warm hand. The first time it was ever written.');
   open = (await page(s, 'ep6_page', 'seal')) || open;
   await narrate(s, 'Under it, the counter-seal: an open book with one line.');
   open = (await page(s, 'ep6_page', 'torn')) || open;
+  // the torn stage writes its lines in over 50 frames (pages.js): hold until "Keep this one." is at full before it is named
+  if (open) await s.wait(56);
   await s.music('sorrow');
   await narrate(s, 'At the bottom, the start of another line, torn straight across: Carried down the White Road by');
   await narrate(s, 'And above the tear, in full, the line you know: Keep this one.');

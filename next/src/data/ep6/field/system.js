@@ -18,7 +18,7 @@
 // turned groups reset to the authored lanes on every arrival (the entities are rebuilt). No new save field.
 
 import { compile, live, follow, canTurn, toggled, vaneArrow, changed, maskOf, stateOf, DXY, DIR_NAMES } from './wind.js';
-import { ensureArt, paintLaneBody, paintDuctBody, paintStreaks, paintChevron, paintVaneHead, SHEET } from './art.js';
+import { ensureArt, paintLaneBody, paintDuctBody, paintStreaks, paintChevron, paintVaneHead, paintPostRing, tintDuctBed, CHEVRON, SHEET } from './art.js';
 import { TILE } from '../../../world/tilemap.js';
 import { RUN_FRAMES } from '../../../world/actors.js';
 import { setPosition } from '../../../game/state.js';
@@ -441,9 +441,12 @@ export class Wind {
       const row = [];
       for (let k = 0; k < 3; k++) { const L = r.createLayer(TILE, TILE); paintStreaks(L.ctx, 0, 0, a, k, 0, 0); row.push(L); }
       streak.push(row);
-      for (const tone of ['white', 'gold']) { const L = r.createLayer(9, 9); paintChevron(L.ctx, 4, 4, a, tone); chev[tone].push(L); }
+      for (const tone of ['white', 'gold']) { const L = r.createLayer(9, 9); paintChevron(L.ctx, 4, 4, a, tone, this.kind === 'duct' ? CHEVRON.ductOl : null); chev[tone].push(L); }
     }
-    this.tiles = { body, streak, chev };
+    const ring = r.createLayer(16, 12), ringFront = r.createLayer(16, 12);
+    paintPostRing(ring.ctx, 0, 0);
+    paintPostRing(ringFront.ctx, 0, 0, true);
+    this.tiles = { body, streak, chev, ring, ringFront };
     return this.tiles;
   }
 
@@ -511,6 +514,7 @@ export class Wind {
           const [qx, qy] = qs[q], [ox, oy] = QUARTER_OFFSET[QUARTERS[q]];
           g.drawImage(img, sx + qx * 8, meta.y + qy * 8, 8, 8, px + ox, py + oy, 8, 8);
         }
+        if (this.kind === 'duct') tintDuctBed(g, px, py);   // the blue bed under a live duct's bars
         const so = this.streakObj, simg = so && this.map.sheet(so.sheet);
         if (simg) { const [fx, fy, fw, fh] = so.frames[a * 3 + (k % 3)]; g.drawImage(simg, fx, fy, fw, fh, px, py, fw, fh); }
         else { const s = this.tiles.streak[a][k % 3]; if (s.canvas) g.drawImage(s.canvas, px, py); }
@@ -560,9 +564,11 @@ export class Wind {
       if (x < x0 || x > x1 || y < y0 || y > y1 + 1) continue;
       this.drawPost(g, x, y, this.shown ? this.shown[i] : -1, pk);
     }
-    // chevrons: one every other cell ((x + y) even), following each cell's arrow; white, or gold on a turned group
-    const a = this.anim, half = SWING_FRAMES >> 1;
-    for (let y = y0; y <= y1; y++) for (let x = x0 + ((x0 + y) & 1); x <= x1; x += 2) {
+    // chevrons: one every other cell ((x + y) even), following each cell's arrow; white, or gold on a turned group. Ducts
+    // (short lanes under a grille, in the dark) take one on every cell, the code chevron (the cloud lanes' white with the
+    // dark trailing edge) drawn over the bars, so a duct reads with a cloud lane's weight (CRITIQUE_8 item 3).
+    const a = this.anim, half = SWING_FRAMES >> 1, duct = this.kind === 'duct';
+    for (let y = y0; y <= y1; y++) for (let x = duct ? x0 : x0 + ((x0 + y) & 1); x <= x1; x += duct ? 1 : 2) {
       const i = y * m.W + x, arrow = this.shown[i];
       if (arrow < 0) continue;
       let alpha = 1;
@@ -571,7 +577,7 @@ export class Wind {
       const turned = m.groupOf[i] >= 0 && (this.shownMask & (1 << m.groupOf[i]));
       if (alpha < 1) g.globalAlpha = alpha;
       const co = this.chevObj, cimg = co && this.map.sheet(co.sheet);
-      if (cimg) { const [fx, fy, fw, fh] = co.frames[(turned ? 4 : 0) + arrow]; g.drawImage(cimg, fx, fy, fw, fh, x * TILE, y * TILE, fw, fh); }
+      if (cimg && !duct) { const [fx, fy, fw, fh] = co.frames[(turned ? 4 : 0) + arrow]; g.drawImage(cimg, fx, fy, fw, fh, x * TILE, y * TILE, fw, fh); }
       else { const c = this.tiles.chev[turned ? 'gold' : 'white'][arrow]; if (c.canvas) g.drawImage(c.canvas, x * TILE + 4, y * TILE + 4); }
       if (alpha < 1) g.globalAlpha = 1;
     }
@@ -586,12 +592,15 @@ export class Wind {
     if (!o) return;
     const img = this.f.map.sheet(o.sheet);
     if (!img) return;
+    const T = this.tiles, rx = x * TILE, ry = y * TILE + 8;   // the stop ring round the post's foot (its centre y + 14)
+    if (T && T.ring && T.ring.canvas) g.drawImage(T.ring.canvas, rx, ry);
     const fr = o.frames || [o.rect];
     const n = fr.length;
     const idx = n >= 12 ? Math.max(0, arrow) * 3 + k : n >= 3 ? k : 0;
     const [fx, fy, fw, fh] = fr[Math.min(n - 1, idx)];
     const an = o.anchor || [0, Math.round(fh / TILE) - 1];
     g.drawImage(img, fx, fy, fw, fh, (x - an[0]) * TILE, (y - an[1]) * TILE, fw, fh);
+    if (T && T.ringFront && T.ringFront.canvas) g.drawImage(T.ringFront.canvas, rx, ry);
   }
 
   /** A code arrow over vanes whose art has fewer than 4 frames (so the head always agrees with the lanes). World pixels. */

@@ -1,4 +1,4 @@
-// The Storm Observatory, III: The Eye of the Storm (36 x 40, dungeon, tint storm, dark 0.5). EPISODE6_PLAN 4.7 and 5.1;
+// The Storm Observatory, III: The Eye of the Storm (36 x 40, dungeon, tint storm, dark 0.6). EPISODE6_PLAN 4.7 and 5.1;
 // exact cells and every solution in docs/MAPS_EP6_B.md. A white stone spire climbing through the inside of the storm,
 // bottom (south) to top (north): three landings, each a block of the spire (x 15..20) ringed by a ring lane over slate
 // cloud, a post at each landing's stair, a signal lamp dark until the party lights it.
@@ -141,7 +141,7 @@ const events = [
 export default {
   id: 'ep6_obs_f3', name: 'The Eye of the Storm', area: 'dungeon',
   music: 'mystery', ambience: 'storm_rumble', tileset: 'ep6',
-  lighting: { tint: 'storm', dark: 0.5 },
+  lighting: { tint: 'storm', dark: 0.6 },
   under: 'storm_cloud',
   legend: { c: 'storm_cloud', '.': 'spire_stone', '#': 'spire_top', '|': 'spire_face' },
   ground: R.ground,

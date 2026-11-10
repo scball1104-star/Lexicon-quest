@@ -9,8 +9,8 @@
 //   and runs its bellows (the Gale Engine: 3). The first Gust: GALE_START[encounter] (encounters.js) if it names one.
 // - A Gust: "The wind gusts." Every Aloft foe that is not Broken RIDES it (comes round sooner by GUST_PUSH of its base delay); every
 //   grounded foe and every party member is BLOWN BACK by GUST_PUSH unless Braced (Defended since its last turn, `u.defending`, or
-//   holding a Ballast Stone's brace). An Anchored party (Bram's Anchor) CATCHES it instead: each member comes round sooner. A Broken
-//   Aloft foe is Grounded until it recovers.
+//   holding a Ballast Stone's brace; a foe whose bellows drive the wind is Braced against its own Gusts, ownsWind). An Anchored
+//   party (Bram's Anchor) CATCHES it instead: each member comes round sooner. A Broken Aloft foe is Grounded until it recovers.
 // - A move pinned to the Gust (`pin()`: the Scribe's Rewrite the Course, the Engine's Full Blast) falls with it. Anchored: it fails
 //   ("The course holds.") and its owner is blown back a full turn. Else the Rewrite blows every member back a full turn (Braced:
 //   half) and its owner acts at once; the Blast strikes the party (phys 140%, Defend halves) and blows every member back a full turn
@@ -89,6 +89,12 @@ export function push(ctx, u, frac, reason) {
 
 // ----------------------------------------------------------------------------- state
 function windy(ctx) { return ctx.living('enemy').some((u) => windOf(u)); }
+/**
+ * A foe that drives the wind (data `gustEvery`: the Gale Engine) is Braced against its own Gusts while its bellows run
+ * (PLAYTEST_REVIEW_8 item 1: blown back every 3 actions, it acted twice a fight). A Break stalls the bellows (ai.js
+ * u.ai.bellowsOff), and a stalled Engine is blown back like any grounded foe.
+ */
+export const ownsWind = (u) => !!(u && ENEMIES[u.id] && ENEMIES[u.id].gustEvery && !(u.ai && u.ai.bellowsOff));
 /** The Gust length now: the shortest `gustEvery` among standing foes whose bellows run (ai.js sets u.ai.bellowsOff), else GUST_EVERY. */
 export function gustEvery(ctx) {
   let n = GUST_EVERY;
@@ -218,7 +224,7 @@ function gust(ctx) {
   for (const u of ctx.living('enemy')) {
     if (!windOf(u)) continue;
     if (isAloft(u)) { if (RIDE) note(u, push(ctx, u, -GUST_PUSH, 'gust')); }
-    else if (!u.defending) note(u, push(ctx, u, GUST_PUSH, 'gust'));
+    else if (!u.defending && !ownsWind(u)) note(u, push(ctx, u, GUST_PUSH, 'gust'));
   }
   ctx.emit({ type: 'gust', pushed });
   const p = S.pinned;

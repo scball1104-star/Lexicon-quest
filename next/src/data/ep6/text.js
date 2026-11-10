@@ -165,6 +165,8 @@ export const EP6_LINES = {
     { if: 'first_page_read', lines: 'One shelf, one page, under glass. Half a page. Your name is at the top of it.' },
     { lines: 'One shelf with one page on it, under a glass dome.' },
   ],
+  // E6-fixes A9 (PLAYTEST_REVIEW_8 item 7): the chart room's save bell (ep6_zl_charts; it read Episode 1's Willowmere line)
+  ep6_charts_bell: "A small brass ship's bell by the chart table. Ring it, and Zephyr Landing will remember you were here.",
   ep6_reading_desk: 'A reading desk in the sun. A cushion on the chair has the shape of somebody who sat here for years.',
 };
 
@@ -328,6 +330,8 @@ export const EP6_BATTLE_TEXT = {
   aloft_ride: '{name} rides the gust.',
   blown_back: '{name} is blown back.',
   braced: '{name} braces.',
+  // the Defend row's help in a Gale battle (E6-fixes A3): Defend is how you brace (at most 111 px: 101)
+  defend_help: 'Brace against the gust.',
   anchored: 'The party holds. The wind carries them on.',
   rewrite_read: 'The Scribe rewrites the course. When the wind gusts, you go last.',
   can_anchor: 'Bram can anchor.',

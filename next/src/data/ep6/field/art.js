@@ -21,9 +21,13 @@ export const SHEET_W = 192, SHEET_H = 144;
 // sky palette (DESIGN 6.1 ramps; outlines in the ramp's own dark)
 export const CLOUD = { ol: '#4a5a92', dk: '#6a7cb6', md: '#8192c8', lt: '#a2b2dc', hi: '#c6d1ee' };
 export const LANE = { edge: '#8fa2d6', body: '#b8c7ee', dith: '#ccd8f5', streak: '#f6f9ff', streak2: '#e2eaff' };
-/** Indoors (F2's ducts, `wind.kind: 'duct'`): the stream over a dark shaft, brass grille bars across it. */
-export const DUCT = { edge: '#141824', body: '#2c3446', dith: '#363f54', bar: '#8a7448', barHi: '#c8a860' };
-export const CHEVRON = { size: 7, white: '#ffffff', gold: '#ffd650', back: '#33427e', backGold: '#7a4c12' };
+/**
+ * Indoors (F2's ducts, `wind.kind: 'duct'`): the stream over a dark shaft, brass grille bars across it. A live duct has a
+ * blue bed under its bars (CRITIQUE_8 item 3), so it differs from a dead shaft by colour as well as by its chevrons: `bed`
+ * and `bedHi` replace the bed art's dark gaps (see tintDuctBed), and the code body uses them too.
+ */
+export const DUCT = { edge: '#141824', body: '#24427e', dith: '#2c5296', bar: '#8a7448', barHi: '#c8a860', bed: '#1f3c78', bedHi: '#2c5294' };
+export const CHEVRON = { size: 7, white: '#ffffff', gold: '#ffd650', back: '#33427e', backGold: '#7a4c12', ductOl: '#0c1020' };
 const BRASS = { hi: '#fff0b0', lt: '#f0c860', md: '#c89238', dk: '#8a5a1e', ol: '#3e2810' };
 const WOOD = { hi: '#a87a50', lt: '#8a5e3a', md: '#6a4428', dk: '#48301c', ol: '#24160c' };
 const IRON = { hi: '#c8ccd8', lt: '#9aa0b4', md: '#6c7288', dk: '#454a5e', ol: '#1e2030' };
@@ -147,6 +151,27 @@ export function paintStreaks(g, px, py, arrow, frame, wx = px, wy = py) {
   }
 }
 
+/**
+ * The blue bed under a live duct's bars: every dark, cool pixel of the cell (px, py) (the gaps of E6-tiles' brass grille
+ * over the shaft, luma under 0.24, blue at least red) takes the bed blue, the darker half `bed`, the rest `bedHi`. The bars
+ * (brass) and the glints keep their colours. Needs getImageData (a canvas); a no-op without it.
+ */
+export function tintDuctBed(g, px, py) {
+  if (!g || typeof g.getImageData !== 'function') return;
+  const im = g.getImageData(px, py, TILE, TILE), d = im.data;
+  const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const lo = hex(DUCT.bed), hi = hex(DUCT.bedHi);
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 128) continue;
+    const r = d[i], gg = d[i + 1], b = d[i + 2];
+    const l = (0.2126 * r + 0.7152 * gg + 0.0722 * b) / 255;
+    if (l >= 0.24 || b < r) continue;
+    const c = l < 0.15 ? lo : hi;
+    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+  }
+  g.putImageData(im, px, py);
+}
+
 // a chevron pointing right in a 7 x 7 box: '#' fill, '+' the trailing dark edge
 const CHEV = [
   '##+....',
@@ -159,9 +184,19 @@ const CHEV = [
 ];
 /** Rotate a right-pointing (x, y) in a 7 x 7 box to arrow a (0 up, 1 right, 2 down, 3 left). */
 const rot = (x, y, a) => (a === 1 ? [x, y] : a === 3 ? [6 - x, y] : a === 2 ? [y, x] : [y, 6 - x]);
-/** One chevron, centered on (cx, cy) (its 7 x 7 box from cx - 3), colour by state: 'white' | 'gold'. */
-export function paintChevron(g, cx, cy, arrow, tone = 'white') {
+/**
+ * One chevron, centered on (cx, cy) (its 7 x 7 box from cx - 3), colour by state: 'white' | 'gold'. With `ol` (a colour) a
+ * 1 px outline goes round it first (the duct chevrons, so they stand off the grille bars; the box then needs 9 x 9).
+ */
+export function paintChevron(g, cx, cy, arrow, tone = 'white', ol = null) {
   const fill = tone === 'gold' ? CHEVRON.gold : CHEVRON.white, back = tone === 'gold' ? CHEVRON.backGold : CHEVRON.back;
+  if (ol) {
+    for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
+      if (CHEV[y][x] === '.') continue;
+      const [rx, ry] = rot(x, y, arrow);
+      for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) R(g, cx - 3 + rx + ox, cy - 3 + ry + oy, 1, 1, ol);
+    }
+  }
   for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
     const c = CHEV[y][x];
     if (c === '.') continue;
@@ -254,6 +289,21 @@ function paintSheet(g) {
   L.vane.forEach(([x, y], k) => paintVane(g, x, y, k));
   L.fan_vane.forEach(([x, y], k) => paintFan(g, x, y, k));
   L.gust_mooring.forEach(([x, y], k) => paintPost(g, x, y, k));
+}
+
+/**
+ * The stop ring at a mooring post's foot (CRITIQUE_8 item 10): a pale 2 px ellipse on the lane round the post's foot with a
+ * dark rim under its lower arc, so a post reads as "the lane ends here", not as a bollard. A 16 x 12 box whose centre is the
+ * foot; `front` paints only the lower arc (drawn again after the post, so the ring goes round it, not behind it).
+ */
+export function paintPostRing(g, ox = 0, oy = 0, front = false) {
+  const rx = 7.5, ry = 4.2, cx = 8, cy = 6;
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 16; x++) {
+    if (front && y + 0.5 < cy) continue;
+    const d = Math.hypot((x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry);
+    if (d >= 0.66 && d <= 1.0) R(g, ox + x, oy + y, 1, 1, y + 0.5 >= cy ? '#ffffff' : '#dfe8ff');
+    else if (d > 1.0 && d <= 1.25 && y + 0.5 >= cy) R(g, ox + x, oy + y, 1, 1, '#33427e');
+  }
 }
 
 /** A code-drawn arrow plate over a vane whose art has no arrow frames (fewer than 4 frames): a world-pixel overlay. */

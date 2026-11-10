@@ -40,11 +40,14 @@ east airstair.
 
 | Area | Cells | Contents |
 |---|---|---|
-| A Recovery Alcove | x 18..24, rows 24..28 | `to_zephyr` (20..22,29) to `ep6_zephyr` (44,6) if `obs_entered`; `font_w1` (22..23,25); `chest_a` wood ballast_stone x2 (18,25); `chimes_a` (19,24). Bridge north (20..21,23). |
+| A Recovery Alcove | x 18..24, rows 24..28 | `to_zephyr` (20..22,29) to `ep6_zephyr` (44,6) if `obs_entered`; `font_w1` (22..23,25); `chest_a` wood ballast_stone x2 (18,25); `chimes_a` (19,24); `lift_f2_back` (24,25, the brass cage, if `obs_f2_done`) up to `ep6_obs_f2` (25,15) in the Bellows Hall, the other end of F2's shortcut. Bridge north (20..21,23). |
 | B Two Ways In | south ledge x 12..22 rows 20..22; west ledge x 8..11 rows 14..22; north deck x 9..22 rows 9..12; glass deck x 13..21 rows 13..18; east spur x 24..28 rows 15..20 | West arm (12, 13..19) `^` lands (12,12); south arm (13..23,19) `>` lands (24,19); gust (10,13) `v` north deck to west ledge; spur home (26,21) `v` + (23..26,22) `<` lands (22,22). `chest_es` wood hi_potion x2 (28,16); `chest_b` iron (20,14); `chimes_b` (9,9). |
 | C First Vane | boardwalk x 23..33 rows 11..12; near deck x 34..39 rows 4..12; relay deck x 24..29 rows 3..8 | Group a lane (30..33,7): authored `>` lands (34,7), turned `<` lands (29,7). `vane_c` (35,6). `relay_old` (26,3); `memory1_trig` column x 29 rows 3..8; `chimes_c` (38,9). |
 | D The Post | key balcony x 19..22 rows 5..6; west deck x 2..7 rows 6..11; niche x 2..5 rows 14..16 behind the neck (3,12..13) | The Run (8..23,7), group a: authored `>` with (18,7) `^` into the post `mo_d` (18,6); turned `<` lands (7,7). Column (18,4..6) `^` lands (18,3). `chest_key` gold compass_key flag compass_key_found (22,5); `vane_cw` (5,8, group a); `coffer_d` iron (2,6, the Star-Sail Supply Coffer); `crate_d` (3,12, Dash, opens 3,12..13); behind it `chest_boots` gold skyhand_boots (2,15), `chest_letter3` wood dead_letter if letters_started / `chest_letter3_alt` hi_ether (4,15). |
 | E Upper Deck | x 12..22 rows 1..3; dead-end deck x 2..6 rows 1..3 | Group b lane (7..11,2): authored `>` lands (12,2), turned `<` lands (6,2). Gust (4,4..5) `v` lands (4,6) on the west deck; gust (23,3) `>` lands (24,3) on the relay deck. `vane_e` (13,1); `chest_letter2` wood dead_letter if letters_started / `chest_letter2_alt` hi_ether (2,2); `lift_trig` (21,2) obs_f1_lift; `lift_up` (21,1) to `ep6_obs_f2` (6,26). |
+
+**Back up after F2** (`obs_f2_done`): from the arrival (21,27) walk to (23,25) and step east into the cage `lift_f2_back`
+(24,25); it lands on (25,15) in F2's Bellows Hall, one step from `lift_up` (24,14) to F3.
 
 **Solution (autoplay):** north over the bridge; from (12,20) step north (or from the west ledge at x 11 step east): land
 (12,12). East along the boardwalk to (35,7): `vane_c` (group a turned). From (34,7) step west: land (29,7) on the relay deck
@@ -73,7 +76,7 @@ Marks: `alcove` (21,27), `font` (22,26), `ways_in` (14,17), `west_in` (11,16), `
 | Area | Cells | Contents |
 |---|---|---|
 | A Stair Foot | x 2..10, rows 24..28; gap (5..6, 22..23) | `lift_f1` (3,24) to `ep6_obs_f1` (20,2); `font_w2` (8..9,24). |
-| B Two Fans | the hall x 2..22 rows 10..21, cut by the shafts x 11..13 and rows 14..15 into: south-west x 2..10 rows 16..21, south-east x 14..22 rows 16..21, manifest x 14..22 rows 10..13, north-west x 2..10 rows 10..13 | Group a duct (11..13,18): authored `<` lands (10,18), turned `>` lands (14,18). Group b duct x 18: (18,14..15) authored `v` lands (18,16), turned `^` lands (18,13); (18,8..9) through the north wall authored `v` lands (18,10), turned `^` lands (18,7). Always: (11..13,12) `<` lands (10,12); (5,14..15) `v` lands (5,16). `vane_b1` (9,17, a), `vane_b2` (20,17, b), fan_vane art. `relay_manifest` (20,10); `memory2_trig` row 13 x 14..22; `chest_b` iron (2,10). |
+| B Two Fans | the hall x 2..22 rows 10..21, cut by the shafts x 11..13 and rows 14..15 into: south-west x 2..10 rows 16..21, south-east x 14..22 rows 16..21, manifest x 14..22 rows 10..13, north-west x 2..10 rows 10..13 | Group a duct (11..13,18): authored `<` lands (10,18), turned `>` lands (14,18). Group b duct x 18: (18,14..15) authored `v` lands (18,16), turned `^` lands (18,13); (18,8..9) through the north wall authored `v` lands (18,10), turned `^` lands (18,7). Always: (11..13,12) `<` lands (10,12); its twin (11..13,11) `>` lands (14,11) (the north-west platform is an out-and-back from the manifest platform); (5,14..15) `v` lands (5,16). `vane_b1` (9,17, a), `vane_b2` (20,17, b), fan_vane art. `relay_manifest` (20,10); `memory2_trig` row 13 x 14..22; `chest_b` iron (2,10). |
 | C Crown Relay | crown room x 4..25 rows 2..7 (west gallery x 4..13) | `crown_relay` (21,3); `vex_trig` column x 19 rows 2..7; Vex's duct (23,2..3) `^` into the wall (a blocked stop at 23,2); `feather_grille` (22,5); the west gallery's duct (6,8..9) `v` lands (6,10). East door (26,4..5). |
 | D Side Decks | x 27..37 rows 2..9; locker ledge x 34..37 rows 11..12 | `log_1` wood hi_potion (28,3), `log_2` wood hi_ether (33,2), `log_3` wood ballast_stone (37,6), flags log_1..3_found; `chest_d` wood hi_potion x2 (37,3). Group c duct x 30: authored (30,10..13) `v` lands (30,14) in the bellows hall; turned it bends at (30,11) along (30..33,11) `>` to the ledge (34,11), (30,12..13) calm. Ledge home (34,10) `^` lands (34,9). `vane_d` (31,8, c); `locker_obj` (36..37,11, script locker); `chest_locker` gold 400 + hi_ether x2 (37,12) if locker_found; `book_logs` flight_logs (34,12) if locker_found. |
 | E Bellows Hall | x 24..37 rows 14..25 | Duct (27,10..13) `^` lands (27,9) on the side decks. `font_w2b` (28..29,16); `engine_trig` row 18 x 24..37; actor `gale_engine` (31,22) ifNot engine_defeated; `lift_trig` (24,15) obs_f2_lift; `lift_up` (24,14) to `ep6_obs_f3` (18,35) if engine_defeated; `lift_f2_short` (25,14) to `ep6_obs_f1` (21,27) if obs_f2_done. |
@@ -82,6 +85,10 @@ Marks: `alcove` (21,27), `font` (22,26), `ways_in` (14,17), `west_in` (11,16), `
 (20,18). From (18,16) step north: land (18,13) (memory2_trig). From (18,10) step north: land (18,7). East across `vex_trig`
 (x 19). East through the door (26,4) to the side decks; from (30,9) step south (vane_d untouched): land (30,14). South across
 `engine_trig` (row 18): the Gale Engine. After the win: (24,15) `lift_trig`, north into `lift_up`.
+Optional (the north-west platform, chest_b and e_nw): from the manifest platform step west from (14,12): land (10,12); back by
+stepping east from (10,11): land (14,11), then on to the crown room as above. Two decisions (it was four: home by the south
+duct, then the fan duct east and the shaft again). Lane decisions on F2: 6 on the main path (vane_b1, the fan duct east,
+vane_b2, the shaft to the manifest, the shaft to the crown room, the side duct down), 8 with the north-west platform (was 10).
 Optional (the Locker): `vane_d` from (31,9); from (30,9) step south: the duct bends east, land (34,11). `locker_obj` from
 (35,11) facing east; then `chest_locker` from (36,12) facing east, `book_logs` from (34,11) facing south. Home: from (34,11)
 step north: land (34,9). Turn `vane_d` back before riding down to the bellows hall.
@@ -93,9 +100,9 @@ Marks: `arrival` (6,26), `font` (8,25), `fans` (9,18), `fan_b1` (9,18), `fan_b2`
 `manifest_stage` (20,13) +m (19,13) +b (21,13), `manifest_aeris` (20,11), `manifest_deck` (22,11), `crown` (21,3),
 `vex_spot` (21,4), `party_stop` (21,7) +m (20,7) +b (22,7) (two clear rows), `side_decks` (32,5), `vane_d` (31,9),
 `locker` (35,11), `locker_in` (34,11), `arena` (31,19), `engine_spot` (31,22), `arena_stage` (31,20) +m (30,20) +b (32,20),
-`lift_up` (24,15), `lift_short` (25,15).
+`lift_up` (24,15), `lift_short` (25,15) (also where F1's `lift_f2_back` lands, facing down).
 
-## 3. `ep6_obs_f3` The Eye of the Storm (36 x 40, tint `storm`, dark 0.5, `spire` walls, `spire_stone`, `storm_cloud`)
+## 3. `ep6_obs_f3` The Eye of the Storm (36 x 40, tint `storm`, dark 0.6, `spire` walls, `spire_stone`, `storm_cloud`)
 
 `wind.kind: 'ring'`. Arrival `start`/`arrival` (18,35) up, from F2's lift. `pitTo` (11,22) for the faint bridge.
 
@@ -153,11 +160,12 @@ north_dock) if library_reached. Marks: `shelf` (9,3), `vex_shelf` (11,4), `party
 
 ## 6. Measures (`ep6_obs_ingame.py`, the real game, Rec. 709 luma on sRGB, whole map / walkable floor cells)
 
-F1 0.741 / 0.543; F2 0.202 / 0.244 (every vane state within 0.001); F3 0.199 / 0.355 at the arrival (no lamp lit), 0.212 /
-0.397 with the three lamps lit; the Eyrie 0.354 / 0.470 (storm), 0.423 / 0.561 after the lid opens; the library 0.657 /
-0.527. F3 is at or below F2 (the darkest floor). Under the real `storm` tint and dark 0.5, unlit `spire_stone` (cells off
-any lamp: the Listen deck, the causeway, the Anchor deck, the east deck) reads 0.333; the party's floor at the arrival reads
-0.499 (gate: 0.22).
+F1 0.741 / 0.542; F2 0.204 / 0.244 (every vane state within 0.001); F3 0.171 / 0.304 at the arrival (no lamp lit), 0.186 /
+0.354 with the three lamps lit; the Eyrie 0.354 / 0.470 (storm), 0.423 / 0.561 after the lid opens; the library 0.657 /
+0.527. F3 is clearly below F2 (the darkest floor). Under the real `storm` tint and dark 0.6 (was 0.5: CRITIQUE_8 item 6, one value
+step down), unlit `spire_stone` (cells off any lamp: the Listen deck, the causeway, the Anchor deck, the east deck) reads
+0.276 (was 0.333); the party's floor at the arrival reads 0.492 (gate: 0.22), and the party's own light keeps its cell lit
+anywhere on the floor. Re-measured 2026-11-10 with `ep6_obs_ingame.py ep6_obs_f3 ep6_obs_f3_lit`.
 
 ## 7. For other agents
 

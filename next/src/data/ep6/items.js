@@ -43,15 +43,16 @@ const armor = (id, slot, tier, ilvl, name, price, who, stats, desc) =>
   [id, { id, name, slot, tier, ilvl, price, who, icon: { body: 'armor', head: 'helm' }[slot] || slot, stats, desc }];
 
 export const EP6_EQUIPMENT = Object.fromEntries([
-  // Tier 11 (ilvl 25): Zephyr Landing from arrival.
-  armor('skysteel_mail', 'body', 11, 25, 'Skysteel Mail', 6100, HB, { def: 44, spr: 8 }, 'Light plate hammered from a ship\'s keel. It does not catch the wind.'),
-  armor('windweave_robe', 'body', 11, 25, 'Windweave Robe', 6000, ['mira'], { def: 28, spr: 22, mag: 10 }, 'Cloud-white cloth that moves a moment before the wind does.'),
-  armor('aviator_helm', 'head', 11, 25, 'Aviator Helm', 3000, HB, { def: 19, spr: 5 }, 'Leather and brass, with glass for the eyes.'),
-  armor('gale_hood', 'head', 11, 25, 'Gale Hood', 3000, ['mira'], { def: 10, spr: 15, mag: 7 }, 'A chart reader\'s hood, tied tight under the chin.'),
-  armor('cloudstep_boots', 'boots', 11, 25, 'Cloudstep Boots', 2600, ALL, { spd: 5, def: 5 }, 'Soft soles for a deck that rolls.'),
-  armor('sailcloth_mantle', 'mantle', 11, 25, 'Sailcloth Mantle', 2500, ALL, { def: 9, spr: 6, luk: 3 }, 'Cut from an old sail. It still smells of rain.'),
-  armor('ballast_charm', 'charm', 11, 25, 'Ballast Charm', 2200, ALL, { resStun: 50, def: 4 }, 'A lead weight on a cord. Lightning finds you heavy.'),
-  armor('signal_charm', 'charm', 11, 25, 'Signal Charm', 2200, ALL, { resSilence: 50, mag: 4 }, 'A little lamp lens that keeps its own light.'),
+  // Tier 11 (ilvl 25): Zephyr Landing from arrival. E6-fixes A4 (PLAYTEST_REVIEW_8 item 4): about 30% off the first prices, so the
+  // arrival gold (about 3,800 to 4,800) buys two pieces (a helm and boots, 3,900; a hood and a charm, 3,650), as plan 7.6 asks.
+  armor('skysteel_mail', 'body', 11, 25, 'Skysteel Mail', 4300, HB, { def: 44, spr: 8 }, 'Light plate hammered from a ship\'s keel. It does not catch the wind.'),
+  armor('windweave_robe', 'body', 11, 25, 'Windweave Robe', 4200, ['mira'], { def: 28, spr: 22, mag: 10 }, 'Cloud-white cloth that moves a moment before the wind does.'),
+  armor('aviator_helm', 'head', 11, 25, 'Aviator Helm', 2100, HB, { def: 19, spr: 5 }, 'Leather and brass, with glass for the eyes.'),
+  armor('gale_hood', 'head', 11, 25, 'Gale Hood', 2100, ['mira'], { def: 10, spr: 15, mag: 7 }, 'A chart reader\'s hood, tied tight under the chin.'),
+  armor('cloudstep_boots', 'boots', 11, 25, 'Cloudstep Boots', 1800, ALL, { spd: 5, def: 5 }, 'Soft soles for a deck that rolls.'),
+  armor('sailcloth_mantle', 'mantle', 11, 25, 'Sailcloth Mantle', 1750, ALL, { def: 9, spr: 6, luk: 3 }, 'Cut from an old sail. It still smells of rain.'),
+  armor('ballast_charm', 'charm', 11, 25, 'Ballast Charm', 1550, ALL, { resStun: 50, def: 4 }, 'A lead weight on a cord. Lightning finds you heavy.'),
+  armor('signal_charm', 'charm', 11, 25, 'Signal Charm', 1550, ALL, { resSilence: 50, mag: 4 }, 'A little lamp lens that keeps its own light.'),
   // Tier 12 (ilvl 27): the Galewing Workshop after obs_f2_done.
   weapon('galewing_sword', 'sword', 12, 27, 'Galewing Sword', 8000, { atk: 72, crit: 6 }, 'A blade as thin as a wing, and as quick.'),
   weapon('stormsplit_axe', 'axe', 12, 27, 'Stormsplit Axe', 8100, { atk: 80, spd: -1 }, 'It splits a squall down the middle.'),

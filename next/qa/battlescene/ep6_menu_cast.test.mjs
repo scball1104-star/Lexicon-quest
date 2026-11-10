@@ -198,3 +198,20 @@ test('the right signature floats: a Rewrite and an Episode 3 Oath charge both up
   r2.frame(['confirm']);
   assert.equal(r2.scene.menu.sub.items[0].id, 'tempered_oath', 'with no Rewrite the Oath keeps its place');
 });
+
+test('E6-fixes A3: in a Gale battle the Defend row says it braces (through menu.js, keys); without a Gale it keeps its help', () => {
+  const T = { defend: 'Brace against the gust.', plain: 'Halve damage this turn.' };
+  for (const gale of [true, false]) {
+    const b = battle([{ id: 'storm_harrier' }, { id: 'storm_harrier' }], { level: 26, seed: 2, options: { flags: FLAGS } });
+    for (let i = 0; i < 20 && b.current().side !== 'party'; i++) b.runEnemyTurn();
+    const r = rig(b);
+    if (gale) r.scene.gale6 = { gustIn: 3, every: 5, slides: [] };
+    r.frame();
+    const M = r.scene.menu;
+    assert.equal(M.state, 'root');
+    r.frame(['right']);
+    for (let i = 0; i < 8 && M.root.item.id !== 'defend'; i++) r.frame(['down']);
+    assert.equal(M.root.item.id, 'defend', 'the cursor is on Defend');
+    assert.equal(M.helpText, gale ? T.defend : T.plain);
+  }
+});

@@ -192,6 +192,12 @@ test('F2: the two fans, one order; the side fan the main route leaves alone', ()
   assert.ok(!sab.has(k(34, 11)), 'the locker ledge is shut in the main route\'s states');
   assert.ok(reach(m, [30, 9], ab | c).has(k(34, 11)), 'vane_d turned: the side duct to the locker ledge');
   for (const mask of [0, a, ab, ab | c, c]) assert.ok(reach(m, [18, 7], mask).has(k(6, 26)), `from the crown room home in state ${mask}`);
+  // the north-west platform's chest is an out-and-back from the manifest platform (PLAYTEST_REVIEW_8 item 3): one ride west,
+  // one ride back east, in every state, never home and through the fans again
+  for (const mask of [0, a, ab, ab | c]) {
+    const nw = reach(m, [10, 12], mask);
+    assert.ok(nw.has(k(14, 11)) && nw.has(k(18, 13)), `from the north-west platform back to the manifest platform in state ${mask}`);
+  }
 });
 
 test('F3: a ring and a post; a ring that turns; two halves of one ring; the hidden Keeper bridge', () => {
@@ -272,4 +278,15 @@ test('the critical path: the Airstair foot, the town, F1 to the Eyrie, the libra
   assert.equal(byId(maps.ep6_obs_f2, 'lift_f2_short').if, 'obs_f2_done');
   assert.ok(doorTo('ep6_obs_f3', [18, 35], 'ep6_obs_f2'), 'F3 lift down to F2');
   assert.ok(doorTo('ep6_obs_f1', [21, 27], 'ep6_zephyr'), 'F1 alcove back to the town');
+  // the shortcut's way back up (PLAYTEST_REVIEW_8 item 2): F1's alcove lift to F2's Bellows Hall once obs_f2_done
+  const back = byId(maps.ep6_obs_f1, 'lift_f2_back');
+  assert.deepEqual(back.to.slice(0, 3), ['ep6_obs_f2', 25, 15]);
+  assert.equal(back.if, 'obs_f2_done');
+  const up = doorTo('ep6_obs_f1', [21, 27], 'ep6_obs_f2');
+  assert.ok(up, 'the alcove reaches a lift up to F2');
+  const f2 = buildGrid(maps.ep6_obs_f2, db), f2m = compile(maps.ep6_obs_f2);
+  assert.equal(f2.code[15][25], 'none', 'the alcove lift lands on ground in the Bellows Hall');
+  assert.ok(!f2m.anyLane[15 * f2.W + 25], 'and off every duct');
+  assert.ok(reach(maps.ep6_obs_f2, [25, 15], 0).has(k(25, 14)) && reach(maps.ep6_obs_f2, [25, 15], 0).has(k(24, 14)),
+    'from the landing both lifts (down to F1, up to F3) are one step away');
 });

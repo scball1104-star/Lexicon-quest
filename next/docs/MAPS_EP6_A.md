@@ -82,8 +82,10 @@ field's rock art), not a crate: the field has no break art for `crate_dash` (see
 
 Ground: `cloudbank` round the islands, `skyport_paving` plazas, `skyplank` docks, `skybridge` stone (the south stair, the
 east airstair), `skywalk` rope bridges, `grass` gardens, `spire_stone` / `spire_top` / `spire_face` for the beacon's roof
-deck with `stairs_stone_*` up its face (10..11, 5..7). Overhead: `storm_far` (28..35, 5..9), framed from the plaza between the
-north dock and the east rim (`ep6_zephyr_plaza_phone.png`: board, Piri, Bennet, the shop, the north dock and the storm).
+deck with `stairs_stone_*` up its face (10..11, 5..7). Overhead: `storm_far` (26..33, 8..12, in the cloud gap past the plaza's
+north-east corner; was 28..35, 5..9), so the phone frame on the board's mark (22,15), where `zephyr_arrival` pans, holds the
+board, Piri, Bennet, the shop and the whole storm (CRITIQUE_8 item 4). The windstone moved from (30,13) to (25,13), out from
+under it.
 
 | Part | Cells | Contents |
 |---|---|---|
@@ -119,7 +121,7 @@ Enter triggers: `zephyr_enter` (`zephyr_arrival`), `zephyr_return` (`isles_retur
 | beacon_stage6, _m, _b | (10,4), (9,4), (11,4) | | tower_roof | (9,2) |
 | roof_stage, _m, _b | (12,4), (11,4), (13,4) | | roof_vex, roof_aeris | (13,2), (8,2) |
 | roof_view, north_far (camera) | (22,12), (24,0) | | gardens, pippa_tower | (6,28), (7,10) |
-| storm_far (camera) | (31,7) | | | |
+| storm_far (camera) | (30,10) | | | |
 
 **Differs from the plan:** dock four's gangway is the berth's end cell (45,10), where Pippa steps off in `isles_return` (the
 camera pans to dock four first); the Kestrel moors north of the north dock. The beacon is on a white stone roof deck east of
@@ -139,7 +141,7 @@ dock (41,16): `D L2 D5 L3 L*land` to (30,22).
 | `ep6_zl_inn` | `inn` | 22 x 13 | (10..11, 11) to (6,22) | `ep6_innkeeper` (3,4) (inn 120); stairs (11,2) / (15,2); berths and lanterns in the guest room; marks `counter` (3,4), `inn_bed` (17,7) |
 | `ep6_zl_shop` | `item_shop` | 12 x 12 | (7,10) to (27,18) | `nova` (5,4) (shop `aeris_provisions`); cargo nets, crates; mark `counter` (5,4) |
 | `ep6_zl_workshop` | `smithy` | 14 x 12 | (8,10) to (38,32) | `ilex` (10,5) (shop `galewing`); brass forge (7..8, 3), anvil, rotors in for mending; mark `forge` (10,5) |
-| `ep6_zl_charts` | `chapel` | 18 x 15 | (9,13) to (5,10) | `charts_trig` the whole row y 11, x 1..10, if `met_aeris` (`chart_room`); object `skychart` (4..6, 5); `suri` (14,5); save bell (12,11); manifests on the walls (2,2), (7,2), (15,2) (`star_charts` art, two states by `isles_restored`, text `ep6_manifest_wall`); book `flight_manifests` on the lectern (1,7); marks `charts_stage` (7,6), `_m` (6,6), `_b` (8,6), `aeris_table` (7,4), `liora_door` (9,12), `suri_spot` (14,5) |
+| `ep6_zl_charts` | `chapel` | 18 x 15 | (9,13) to (5,10) | `charts_trig` the whole row y 11, x 1..10, if `met_aeris` (`chart_room`); object `skychart` (4..6, 5); `suri` (14,5); save bell (12,11); manifests on the walls (2,2), (7,2), (15,2) (`star_charts` art, two states by `isles_restored`, text `ep6_manifest_wall`); book `flight_manifests` on the lectern (1,7); marks `charts_stage` (7,6), `_m` (6,6), `_b` (8,6), `aeris_table` (7,4), `liora_door` (9,12), `suri_spot` (14,5); the save bell reads `ep6_charts_bell` (an Episode 6 line in `src/data/ep6/text.js`, PLAYTEST_REVIEW_8 item 7), no longer Episode 1's `save_bell` |
 
 ## 5. Previews (`tools/maps/previews/`, 2x, `<name>.png` annotated and `<name>_clean.png`; phone frames `_phone.png` and `_2x.png`)
 

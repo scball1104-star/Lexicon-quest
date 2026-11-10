@@ -136,7 +136,7 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
    `e6a_first`, no flee; sets `airstair_fight_done`]. A shriek on the wind. Two Storm Harriers fold out of the cloud. The
    battle opens with the **Gust** three actions away: both foes are **Aloft**, so when it gusts they ride it and come round
    sooner, and anyone who did not brace is blown back. The teaching fight for the Gale. No tutorial box.
-   - Before: Mira: "Birds that ride the wind. When it gusts, brace, or it throws us back."
+   - Before: Mira: "Birds that ride the wind. When it gusts, Defend, or it throws us back."
    - Mid-battle (the battle's message when the marker passes): "The wind gusts." The Harriers come round at once.
    - After: Bram: "Birds. Big birds. On a rope. Fine."
 

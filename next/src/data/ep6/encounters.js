@@ -32,7 +32,9 @@ export const O3_HP = { e6o3_pages: 1.0, e6o3_manta: 1.0, e6o3_mixed: 1.05 };
 
 // The three-foe groups pay less a head (plan 6.1: about 190 to 200 EXP an ordinary fight): the encounter's `expMul`
 // (data/expcurve.js), so the same foes pay in full in their two-foe groups.
-export const EXP_MUL = { e6o1_sprites: 0.65, e6o2_mixed: 0.6 };
+// E6-fixes A5 (PLAYTEST_REVIEW_8 item 6): the Eye's manta pair pays 0.6 too, about 160 EXP off F3's plan, so the bots (whose
+// elites pay double) meet the Scribe at Lv 27, not 28.
+export const EXP_MUL = { e6o1_sprites: 0.65, e6o2_mixed: 0.6, e6o3_manta: 0.6 };
 
 // [id, zone, leader (field sprite), enemies, extra]
 const GROUPS = [
@@ -51,7 +53,7 @@ const GROUPS = [
   ['e6o2_mixed', 'ep6_obs_f2', 'signal_wraith', ['signal_wraith', 'gale_sprite', 'rigger_beetle'], { expMul: EXP_MUL.e6o2_mixed }],
   // F3: The Eye of the Storm (the tightest floor)
   ['e6o3_pages', 'ep6_obs_f3', 'storm_page', ['storm_page', 'storm_page'], { power: O3_POWER.e6o3_pages, speed: O3_SPEED.e6o3_pages, hp: O3_HP.e6o3_pages }],
-  ['e6o3_manta', 'ep6_obs_f3', 'lightning_manta', ['lightning_manta', 'storm_harrier'], { power: O3_POWER.e6o3_manta, speed: O3_SPEED.e6o3_manta, hp: O3_HP.e6o3_manta }],
+  ['e6o3_manta', 'ep6_obs_f3', 'lightning_manta', ['lightning_manta', 'storm_harrier'], { power: O3_POWER.e6o3_manta, speed: O3_SPEED.e6o3_manta, hp: O3_HP.e6o3_manta, expMul: EXP_MUL.e6o3_manta }],
   ['e6o3_mixed', 'ep6_obs_f3', 'storm_page', ['storm_page', 'rigger_beetle'], { power: O3_POWER.e6o3_mixed, speed: O3_SPEED.e6o3_mixed, hp: O3_HP.e6o3_mixed }],
 ];
 

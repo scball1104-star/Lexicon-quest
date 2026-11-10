@@ -11,7 +11,9 @@
 //      manifest platform (18,13: memory2_trig, the manifest relay), then on up into the crown room (18,7). Reach decides
 //      the order: b2 stands where only b1's duct goes.
 //      The way home holds in every state: the north-west platform's duct (5,14..15) drops to the south-west platform; the
-//      manifest platform's duct (11..13,12) and the crown room's west gallery duct (6,8..9) both feed it.
+//      manifest platform's duct (11..13,12) and the crown room's west gallery duct (6,8..9) both feed it. The twin duct
+//      above it (11..13,11) blows back east, so the north-west platform's chest is an out-and-back from the manifest
+//      platform (one ride each way), never a second pass through the fans.
 //   C  The Crown Relay (crown room x 4..25, rows 2..7): vex_trig (column x 19), Vex at vex_spot (21,4) facing the crown
 //      relay (21,3), the party two clear rows below on party_stop (21,7). The feather in the grille (22,5). Vex's duct
 //      (23,2..3) runs into the north wall (a live lane, a blocked stop: decor end).
@@ -25,7 +27,8 @@
 // Solution for the bot: vane_b1 from (9,18); step east from (10,18): land (14,18). vane_b2 from (20,18); step north from
 // (18,16): land (18,13) (memory2_trig); step north from (18,10): land (18,7). East across vex_trig. East door (26,4) to the
 // side decks; step south from (30,9) (vane_d untouched): land (30,14). South across engine_trig (row 18). After the win:
-// lift_trig (24,15), lift_up (24,14). Optional: vane_d from (31,9), step south from (30,9): land on the locker ledge (34,11);
+// lift_trig (24,15), lift_up (24,14). Optional: from the manifest platform step west from (14,12): land (10,12) on the
+// north-west platform (chest_b); step east from (10,11): land (14,11), back on the manifest platform. Optional: vane_d from (31,9), step south from (30,9): land on the locker ledge (34,11);
 // locker_obj from (35,11) facing east, then chest_locker from (36,12); the ledge duct north from (34,11) to (34,9).
 import { wallDepth, door, sign, object, trigger, enemy, chest, actor, book, steps, enter } from './_kit.js';
 import { skyGrid, vane, windFont, lift, glow } from './ep6_obs_f1.js';
@@ -64,6 +67,7 @@ turnBox('b', 18, 14, 18, 15, '^');        //    turned: north to the manifest pl
 laneBox(18, 8, 18, 9, 'v');               //    group b: the crown room down to the manifest platform (lands 18,10)
 turnBox('b', 18, 8, 18, 9, '^');          //    turned: up into the crown room (lands 18,7)
 laneBox(11, 12, 13, 12, '<');             //    the manifest platform -> the north-west platform (lands 10,12)
+laneBox(11, 11, 13, 11, '>');             //    and back: the north-west platform -> the manifest platform (lands 14,11)
 laneBox(5, 14, 5, 15, 'v');               //    the north-west platform -> the south-west platform (lands 5,16)
 laneBox(6, 8, 6, 9, 'v');                 // C  the west gallery -> the north-west platform (lands 6,10)
 laneBox(23, 2, 23, 3, '^');               //    Vex's duct: into the wall (a blocked stop at 23,2)
