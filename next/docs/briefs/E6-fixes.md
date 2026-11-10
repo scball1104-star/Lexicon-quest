@@ -1,8 +1,6 @@
 # E6-fixes: the Episode 6 fix pass (from CRITIQUE_8 and PLAYTEST_REVIEW_8)
 
-**A template.** The orchestrator fills the items from the review (as E5-fixes was written from CRITIQUE_7 and
-PLAYTEST_REVIEW_7) and dates it. The shape, the owned paths and the traps below stand; the item lists are placeholders
-until then. Two agents run at once with DISJOINT paths: **A** (battle and play) and **B** (field art and maps).
+**Filled 2026-11-10** from CRITIQUE_8 (C) and PLAYTEST_REVIEW_8 (P); no blocker was found, so this is a tuning pass. Two agents run at once with DISJOINT paths: **A** (battle and play) and **B** (field art and maps).
 
 ## Inputs (read first, in this order)
 
@@ -25,8 +23,44 @@ Where an item needs both (a page mode called from a scene, a mark moved for a st
 
 ## Outputs
 
-- **A1 to An** and **B1 to Bn**: the review's items, each with its file, its smallest fix and its size, in the review's
-  rank order (blockers first).
+Items in rank order. "C n" and "P n" point at the review's top-ten rows, which give the smallest fix.
+
+**A (battle and play).** Owned paths above, plus `src/data/ep6/{items,encounters}.js` for A4 and A5.
+- **A1 (P1, S)** The Gale Engine braces against its own Gusts; re-tune so attack-only wins 20 to 40% and careful play 85%
+  or more. `gale.js`, `ai.js`, `tools/sim/ep6.mjs` targets.
+- **A2 (C1 + C7, S)** The Scribe's HUD row stays over it in all three looks, clear of the Gust pips; the Beacon's row under
+  its lamp; the Compass 12 px left of Arden; one row rule per encounter (both Harriers alike). `scene.js`; both looks in
+  `qa/battlescene/ep6_scene.test.mjs`.
+- **A3 (P5, S)** Say that Defend braces: Mira's first-fight line (`story.js` about line 181, cut or swap within the bible's
+  voice, never invent a new beat) and the Defend help text in Gale fights.
+- **A4 (P4, S)** Tier 11 prices down about 30% so two pieces are affordable on arrival (about 4,600 G). `items.js`.
+- **A5 (P6, S)** About 150 EXP off one F3 group so the bots meet the Scribe at Lv 27. `encounters.js`, then the sim.
+- **A6 (C2, S to M)** Show Vex hanging over the cloud on a visible rope in `vex_falls`; frame the `anchor_lesson` dock
+  catch with Mira and Bram centred. `story.js`. If the rope needs an asset, ask B in the report rather than drawing one.
+- **A7 (C5, S)** In `cloud_library`, the first page's line reaches full alpha only when "in full" is said, and the party's
+  mark is in frame. Wire the call in `story.js`; B owns `pages.js` if the page art itself changes.
+- **A8 (P9, S)** The bot rests at each floor's font and at `font_w2b`. `qa/autoplay.py` `Episode6`.
+- **A9 (P7, text half)** Add an Episode 6 line for the chart-room bell in `text.js` (key `ep6_charts_bell`); B points the
+  map at it.
+- **A10 (P10, optional)** The Scribe's first Rewrite on its second turn. `ai.js`. Only if A1 to A9 leave the fight in band.
+
+**B (field art and maps).** Owned paths above, plus `tools/art/backdrops/ep6*` and `src/data/maps/ep6_*.js` (all).
+- **B1 (P2, S)** A lift from F1's alcove up to F2's Bellows Hall once `obs_f2_done`. `ep6_obs_f1.js` (and F2's landing).
+- **B2 (P3, S to M)** One pass through F2's duct loop, not two. `ep6_obs_f2.js`. Report the new lane-decision count; the
+  orchestrator re-times with `story_time.py` and decides on the plan's Cut 1 if still over 95 minutes.
+- **B3 (C3, S)** Duct chevrons in white with the trailing edge, a blue bed under live ducts. `field/art.js`.
+- **B4 (C4, S)** The board in Zephyr's arrival frame; the storm on the plaza's skyline. `ep6_zephyr.js`.
+- **B5 (C6, S)** Unlit F3 stone one value step darker; the party's floor stays at luma 0.22 or more. `field/storm.js` or
+  the F3 tiles.
+- **B6 (C8, S)** Re-cut the painted islands with hard alpha and an outline. `tools/art/backdrops`, `assets/backdrops/ep6_*`.
+- **B7 (C9, S)** Measure chevron against band and band against cloud, not chevron against plain cloud. `docs/WORLD_EP6.md`
+  section 4 and the `ep6_lab.py contrast` check. Do not change the lane art (protected).
+- **B8 (P7, map half)** Point the chart-room bell (`ep6_zl_charts.js` about line 63) at `ep6_charts_bell`.
+- **B9 (C10, optional)** A pale ring at a post's foot. `field/art.js`.
+
+**Not in this pass:** P8 (fetch every pack at once on a resume) touches the hot core file `src/game/packs.js`; it stays a
+follow-up for Scott's word. **Protect** both reviews' protect lists, above all the lane look, Anchor's menu path, the ride
+safety and save rules, and the first five minutes.
 - **A, always:** after any battle change, re-run `simulate.mjs --check` and one Continue bot run with `--all-fights`, and
   confirm the Scribe at its level is in band.
 - **B, always:** after any map change, `node tools/maps/ep6_check.mjs`, the critical path and reload-home tests.
