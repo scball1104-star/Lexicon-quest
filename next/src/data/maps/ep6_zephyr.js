@@ -27,7 +27,9 @@
 // wind: two one-way comfort lanes (N, E), no vane; the bridges always walk back.
 import { grid, box, put, rows, hash01, sign, object, trigger, enter, npc, door, stoneStairs } from './_kit.js';
 
-const W = 46, H = 34;
+// W runs six cloud columns past the east docks (x 46..51) so the camera can centre a scene at the dock's end (the
+// anchor_lesson catch at x 45); the docks and the doors at x 45 are unchanged.
+const W = 52, H = 34;
 const g = grid(W, H, '~');
 const RES = 'isles_restored';
 
