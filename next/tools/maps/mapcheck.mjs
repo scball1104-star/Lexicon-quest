@@ -48,7 +48,7 @@ const ep3Ids = () => (fs.existsSync(EP3_DIR) ? fs.readdirSync(EP3_DIR).filter((f
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 export function listMapIds() {
-  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !/^ep[45]_patches\.js$/.test(f)).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
+  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !/^ep[456]_patches\.js$/.test(f)).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
 }
 
 export async function loadMap(id, { unpatched = false } = {}) {

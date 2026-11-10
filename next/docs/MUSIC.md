@@ -590,6 +590,115 @@ against 129 Hz, harmonic against beating bronze, dry against underwater). Ambien
 steady wind over open sand, a constant faint grain-hiss, and twice in the loop a gust lifting a sheet of sand off a crest.
 `well_hush` is an alias of the core `archive_hush` (plan 2.7).
 
+## Episode 6: three more tracks (E6-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops). Plan: `docs/EPISODE6_PLAN.md` 8. Files are `assets/audio/music/ep6_<id>.mp3` (+ sidecar), songs
+`tools/music/songs/ep6_*.py`; render with `python tools/music/render.py ep6_zephyr ep6_storm_observatory ep6_boss_scribe --wav`.
+Like Episodes 4 and 5, they are NOT in `render.py`'s `ALL`, in `build.py`'s `MUSIC_IDS` or in `assets/audio/manifest.json`:
+Episode 6 audio reaches the game only through the pack fragment `src/data/ep6/audio.js` (plan 13.3), whose `volume` brings each
+decoded MP3 to -16 LUFS (measured -16.44 to -16.45). `python tools/audio/ep6_review.py` decodes each MP3 and draws the loop seam,
+the sound pairs and the wind harp's motif (`tools/audio/out/ep6/seams.png`, `pairs.png`, `motif.png`; `levels.json`). No Suno:
+the optional Suno `zephyr` of plan 9.5 stays Scott's call.
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `zephyr` | The Windward Docks | G major (Lydian colour on the IV) | 112, 4/4 | 40 | 0.060 s to 85.774 s | 85.87 s | `the_downs` |
+| `storm_observatory` | The Windward Causeways | D Dorian | 96, 4/4 | 36 | 0.060 s to 90.060 s | 90.16 s | `court` |
+| `boss_scribe` | The Storm Scribe | E minor | 6/8, quarter = 138 (dotted quarter 92) | 80 (2 intro + 78 loop) | 2.609 s to 104.348 s | 104.45 s | `boss_king` |
+
+### The Zephyr tune and the wind harp (`tools/music/songs/ep6_theme.py`)
+Eight bars of 4/4 in scale degrees, opening with the complete motif (0 4 5 3, G D E C in G major), its fourth note held over the
+bar line into Cmaj7, then lifted an octave by the wind. `zephyr` plays it in G major in its B section; `boss_scribe` quotes it in
+E minor, re-barred to 6/8 by `swing68` (one 4/4 bar becomes two 6/8 bars). The module also holds the song-local instruments
+(synth.py is untouched). `WindHarp` is an aeolian harp: two strings per course a few cents apart, each a bank of very narrow
+two-pole resonators, one per harmonic, excited not by a pluck but by band-limited noise under a slow S-curve swell (a separate
+gust of noise per harmonic, so the overtones wander independently). It has no attack: the note swells in as the gust catches the
+string (`catch`, the short time constant while the wind holds), sings on its harmonics, and when the gust lets go the same
+resonators continue from their exact state with the longer `ring`, so it fades rather than stops. `harmonics=1` moves the voice
+onto its overtones (the fundamental a whisper) for the high echoes. `Swell` wraps any instrument in a gust envelope (a drone that
+rises and falls), and `Cymbal` is a light suspended cymbal (a soft mallet roll below C4, a stick tap above).
+`python tools/music/songs/ep6_theme.py` checks the bars, the motif's intervals (G D E C, exactly 0 +7 +9 +5), the F# over C and
+the 6/8 re-barring (one motif note on each pulse, E B C A in E minor).
+
+### How Episode 6 wears the name motif
+- **zephyr**: the wind harp, G4 D5 E5 C5, bars 1-2, 5-6 and 33-34: the C enters on beat 4, swells in late and is held over the
+  bar line, where it becomes the root of Cmaj7#11. Decoded from the MP3 (`motif.png`), the strongest pitch per beat of bars 1-2
+  is 392, 587, 658, then 523 Hz for five beats. In B the Zephyr tune has the same four notes on the wind harp, the flute an octave
+  over it. Bar 37 echoes the motif on the wind harp's overtones, an octave up and quiet.
+- **storm_observatory**: the low horn, augmented to a bar a note, D3 A3 B3 G3 (the B the Dorian sixth), bars 1-4; the wind harp
+  answers each note two beats late on its overtones, D5 A5 B5 G5. A' moves the pair onto G (G3 D4 E4 C4). In C the wind harp
+  turns it over, the inverted guise D5 A4 G4 B4, and the horn answers each note low. T brings the horn back for three notes; the
+  fourth is left to the chime.
+- **boss_scribe**: the brass, G3 D4 E4 C4 from the third of E minor, one note on each 6/8 pulse over two bars, the C held into the
+  C chord (bars 3 and 11; doubled by high strings and horn in 19 and 27; fortissimo in 65). In B the Zephyr quote in E minor: its
+  motif notes on the wind harp (the town's instrument, E4 B4 C5 A4), the rest on horn and strings, then the brass. In C the motif
+  climbs from E, G and A. Bars 79-80, the last before the loop, are E major: the wind harp plays E B C# A in eighths and lets the
+  A fall to G#, the major third, held until the loop returns to E minor.
+
+### zephyr: The Windward Docks (ep6_zephyr and ep6_zl_*, zephyr_arrival, isles_return, the Episode 6 credits; loops)
+The root region-6 brief for the tracker: a soaring flute, buoyant strings, a bright harp, light cymbals. The sky is in the
+instruments, the mode and the space: the harp's sixteenths are stacked fifths (over Cmaj7#11 they climb C G D F# B; the Lydian
+scale is stacked fifths), the A pads are open fifths with no third, a wide hall, and a light low end (the bass from bar 9, the
+low strings only under the docks). A (1-8) G, Cmaj7#11, Em7, Dsus4-D, G, Cmaj7#11, Am7, Dsus4-D: the motif, the flute's answers,
+a soft cymbal roll into bars 1 and 5. A' (9-16) G, D/F#, Em7, Cmaj7#11, G/B, C, Am7, D: the flute soars (F#6 over C in bar 12),
+pizzicato and bass enter. B (17-24) the Zephyr tune: G, Cmaj7, Em7, D, C, G/B, Am7-D7, G; strings an octave under the flute, low
+strings, cymbal taps on 2 and 4, the harp in broken chords with the third. B' (25-32) C, G/B, Am7, D, Em7, Cmaj7#11, Am7-D7, G:
+flute and high strings in octaves, glockenspiel points. T (33-40) the A harmony again, the motif and its echo, the strings
+descending B A G F# E F# into bar 1. Instruments: wind harp (two settings), flute, strings_high, strings, strings_low, harp, pizz,
+bass, glock, cymbal. Reverb room 0.9, 4.0 s.
+
+### storm_observatory: The Windward Causeways (ep6_obs_f1, ep6_obs_f2; loops)
+The plan's brief: a low timpani pulse and rope creaks, a string drone that rises and falls like gusts (`Swell` over strings_low,
+two-bar swells, deeper in A' and C), the horn's motif in long notes with the wind harp's echo, and the chime: on bars 1, 9, 17,
+25 and 33 two small glass chimes tied on one cord (A6 and D7) are struck together and a third (E7) slips free a beat and a half
+later, dry and close. A (1-8) a D pedal under Dm, Am7/D, G/D, C/D, Dm7, C/D, G/D, Am/D. B (9-16) Dm, C, G/B, Am7, Dm, F, G,
+Asus4: the bowed bass leaves the pedal, the high strings' slow line with the horn under it, pizzicato off-beats. A' (17-24) G, Dm,
+Am, F, Dm, C, G/B, Am: the motif on G. C (25-32) Dm, Am, C, G, Dm, F, Em7, Asus4: the storm; the inverted motif, choir, timpani
+eighths, the creaks closer. T (33-36) Dm, Am7/D, G/D, Asus4. Instruments: horn, wind harp (harmonics), strings_high, gust drone,
+gust strings, choir, bowbass, pizz, lowdrum, creak, glass.
+
+### boss_scribe: The Storm Scribe (the Scribe's battle; loops)
+6/8 written as three quarter beats a bar at 138 (pulses on 0 and 1.5). I (1-2) Em: timpani, snare gusts, the low brass pedal;
+played once, rendered as a head before loopStart at the body's gain (the boss_oracle construction), so the seam bar 80 -> bar 3
+is the tracker's sample-continuous one. A (3-18) Em, C, Am, B7, Em, C, D, B7 (two bars each): the running string ostinato (fiddle
+spiccato in eighths, rain on canvas), pizzicato roots, choir, the brass motif. A2 (19-34) Em, C, D, B7, Em, C, Am, B7: the motif
+doubled, the snare busier. B (35-50) the Zephyr quote: Em, Am7, Cmaj7, B7, C, G, Am7-B7, Em. C (51-66) the climb (Em-Am, G-C,
+Am-D), a B7 hemiola (63-64, three quarter stabs against two pulses, a timpani roll), the motif fortissimo. R (67-78) C, Am, B7,
+Em, C, B7: the rain thins under a held string line, the motif cut short, a B7 build. M (79-80) E major on the wind harp. A snare
+roll swells into the second pulse of every other bar (the gusts). Instruments: fiddle ostinato, pizz, brass (melody, stabs, low
+pedal), horn, strings_high, wind harp, choir, snare, lowdrum, cymbal, bass.
+
+### Sounds (plan 8.4), `tools/audio/ep6_sfx.py`
+Not registered in `sfx_defs.REG`, as Episodes 4 and 5: the script masters with `build.master` and writes
+`assets/audio/sfx/ep6_<id>.wav` (22.05 kHz mono) and `assets/audio/ambience/ep6_<id>.wav` (16 kHz mono, seamless); `--review`
+draws waveform and spectrogram sheets into `tools/audio/out/ep6/`. All pack `ep6`, lazy (`LAZY_PREFIXES`). The ep6 sfx and
+ambience add 1.05 MB, so `qa/audio/manifest.test.mjs`'s total cap moved from 11.5 to 12.5 MB (as Episodes 4 and 5 moved it).
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `gust_carry` | 1.17 s | `jump` | a rising rush of air with a cloth flap (0.5 s), then a low hold of moving air that thins away (one-shot) |
+| `gust_land` | 0.43 s | `land` | a falling whoosh, a soft boot thump on a plank |
+| `vane_turn` | 1.14 s | `switch_on` | a brass ratchet of six clicks, a post creak and seat, the wind's whistle gliding up a fourth |
+| `mooring_catch` | 0.33 s | `door_close` | a rope snapping taut (a low twang and a fibre crack) and a wooden knock |
+| `gale_gust` | 1.58 s | `flee` | a broad gust swell that rises and passes, rigging rattling and cloth flapping on it |
+| `anchor_set` | 1.05 s | `spear_thrust` | a thrust, a spear driven into planks (a wooden thunk, splinters), a rope pulled tight that rings once |
+| `rewrite_read` | 2.03 s | `telegraph` | fast dry quill scratches over paper, a low wind swelling under them on an open fifth that does not resolve |
+| `rewrite_break` | 1.30 s | `glass_break` | a quill snapping, paper ripped away on a rising whoosh, scraps fluttering off, one clear tone gliding D5 to A5 |
+| `signal_lamp` | 1.61 s | `crystal_hit` | a small glass chime (A6, E7 a moment later), short and beat-free, and a soft flame catching under it |
+
+Told apart on purpose (`pairs.png`): gale_gust against core `thunder` (a continuous broadband swell, centroid 1197 Hz, against a
+low boom with cracks, centroid 322 Hz, peak 64 Hz); rewrite_break against Episode 4's `decree_void` and Episode 5's
+`prophecy_break` (a paper tear and one rising tone, centroid 864 Hz, against a fixed glass arpeggio at 2490 Hz and rising glass
+glides at 4182 Hz); signal_lamp against Episode 5's `caravan_bell` (glass rod partials 1, 2.76, 5.4 at A6 and a 1.6 s decay,
+against a copper bell's harmonic partials at D6 ringing 3.8 s). A gust's left-to-right travel is written as a rise and a pass:
+the sfx are mono like every other set.
+
+Ambience: `sky_wind` (10 s, fallback `wind_valley`; the Airstair, the town, F1): a high, thin, steady wind over open sky, a faint
+rigging hum (two tones whose periods divide the loop) swelling with the wind, once in the loop a far glass chime.
+`storm_rumble` (8 s, fallback `moor_wind`; F2, F3, the Eyrie): a low rumbling wind, rain on canvas (fine taps through a taut
+sheet), one soft distant thunder roll a loop, so every 8 s.
+
 ## Instruments (tools/music/synth.py)
 All oscillators are band-limited wavetables (additive, Lanczos-smoothed), so nothing aliases.
 strings (five unevenly detuned saws with independent vibrato, dark-to-bright filter morph, slow attack;

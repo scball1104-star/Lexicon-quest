@@ -69,7 +69,7 @@ FAR_JS = """(n) => {
 
 
 def map_ids():
-    ids = sorted(p.stem for p in MAPS_DIR.glob('*.js') if not p.stem.startswith('_'))
+    ids = sorted(p.stem for p in MAPS_DIR.glob('*.js') if not p.stem.startswith('_') and not p.stem.endswith('_patches'))
     # Only shipped maps. The engine's scratch maps (src/world/_testmap.js) have doors on walk routes that
     # transfer mid-goto and stall the walk; they are dev fixtures, not content.
     return ids

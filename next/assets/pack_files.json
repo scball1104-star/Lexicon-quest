@@ -265,6 +265,7 @@
   "assets/ui/ep6_heads.json",
   "assets/ui/ep6_heads.png",
   "src/data/ep6/ai.js",
+  "src/data/ep6/audio.js",
   "src/data/ep6/encounters.js",
   "src/data/ep6/enemies.js",
   "src/data/ep6/field/_testwind.js",
@@ -289,7 +290,19 @@
   "src/data/ep6/start.js",
   "src/data/ep6/story.js",
   "src/data/ep6/text.js",
-  "src/data/ep6/world.js"
+  "src/data/ep6/world.js",
+  "src/data/maps/ep6_airstair.js",
+  "src/data/maps/ep6_library.js",
+  "src/data/maps/ep6_obs_eyrie.js",
+  "src/data/maps/ep6_obs_f1.js",
+  "src/data/maps/ep6_obs_f2.js",
+  "src/data/maps/ep6_obs_f3.js",
+  "src/data/maps/ep6_patches.js",
+  "src/data/maps/ep6_zephyr.js",
+  "src/data/maps/ep6_zl_charts.js",
+  "src/data/maps/ep6_zl_inn.js",
+  "src/data/maps/ep6_zl_shop.js",
+  "src/data/maps/ep6_zl_workshop.js"
  ],
  "tier": [
   "assets/tier_manifest.json",
