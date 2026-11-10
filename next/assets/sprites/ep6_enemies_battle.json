@@ -1,0 +1,956 @@
+{
+ "image": "ep6_enemies_battle.png",
+ "frames": {
+  "gale_engine_die_0": [
+   0,
+   0,
+   115,
+   107
+  ],
+  "gale_engine_attack": [
+   0,
+   109,
+   141,
+   104
+  ],
+  "gale_engine_idle_1": [
+   0,
+   215,
+   115,
+   103
+  ],
+  "gale_engine": [
+   117,
+   215,
+   115,
+   102
+  ],
+  "gale_engine_cast": [
+   0,
+   320,
+   141,
+   102
+  ],
+  "gale_engine_hurt": [
+   0,
+   424,
+   117,
+   100
+  ],
+  "gale_engine_die_1": [
+   119,
+   424,
+   115,
+   99
+  ],
+  "lightning_manta_cast": [
+   0,
+   526,
+   87,
+   95
+  ],
+  "lightning_manta_die_0": [
+   89,
+   526,
+   83,
+   86
+  ],
+  "lightning_manta": [
+   0,
+   623,
+   83,
+   83
+  ],
+  "lightning_manta_idle_1": [
+   85,
+   623,
+   85,
+   83
+  ],
+  "signal_wraith_cast": [
+   172,
+   623,
+   71,
+   82
+  ],
+  "lightning_manta_attack": [
+   0,
+   708,
+   103,
+   82
+  ],
+  "lightning_manta_hurt": [
+   105,
+   708,
+   91,
+   82
+  ],
+  "lightning_manta_die_1": [
+   0,
+   792,
+   83,
+   78
+  ],
+  "signal_wraith_die_0": [
+   85,
+   792,
+   71,
+   76
+  ],
+  "storm_harrier_die_0": [
+   158,
+   792,
+   71,
+   76
+  ],
+  "storm_harrier_attack": [
+   0,
+   872,
+   79,
+   75
+  ],
+  "signal_wraith": [
+   81,
+   872,
+   71,
+   74
+  ],
+  "signal_wraith_idle_1": [
+   154,
+   872,
+   71,
+   74
+  ],
+  "gale_engine_die_2": [
+   0,
+   949,
+   115,
+   74
+  ],
+  "signal_wraith_attack": [
+   117,
+   949,
+   87,
+   73
+  ],
+  "signal_wraith_hurt": [
+   0,
+   1025,
+   81,
+   72
+  ],
+  "storm_harrier": [
+   83,
+   1025,
+   71,
+   72
+  ],
+  "storm_harrier_idle_1": [
+   156,
+   1025,
+   73,
+   72
+  ],
+  "signal_wraith_die_1": [
+   0,
+   1099,
+   71,
+   70
+  ],
+  "storm_harrier_hurt": [
+   73,
+   1099,
+   79,
+   70
+  ],
+  "storm_harrier_die_1": [
+   154,
+   1099,
+   67,
+   68
+  ],
+  "lightning_manta_die_2": [
+   0,
+   1171,
+   83,
+   63
+  ],
+  "broken_compass_die_0": [
+   85,
+   1171,
+   51,
+   63
+  ],
+  "squall_wolf_idle_1": [
+   138,
+   1171,
+   63,
+   60
+  ],
+  "false_beacon": [
+   203,
+   1171,
+   43,
+   60
+  ],
+  "false_beacon_idle_1": [
+   0,
+   1236,
+   45,
+   60
+  ],
+  "false_beacon_attack": [
+   47,
+   1236,
+   45,
+   60
+  ],
+  "false_beacon_hurt": [
+   94,
+   1236,
+   37,
+   60
+  ],
+  "false_beacon_cast": [
+   133,
+   1236,
+   45,
+   60
+  ],
+  "false_beacon_die_0": [
+   180,
+   1236,
+   43,
+   60
+  ],
+  "squall_wolf": [
+   0,
+   1298,
+   63,
+   59
+  ],
+  "squall_wolf_attack": [
+   65,
+   1298,
+   67,
+   59
+  ],
+  "squall_wolf_die_0": [
+   134,
+   1298,
+   63,
+   59
+  ],
+  "broken_compass": [
+   199,
+   1298,
+   51,
+   58
+  ],
+  "broken_compass_idle_1": [
+   0,
+   1359,
+   51,
+   58
+  ],
+  "broken_compass_attack": [
+   53,
+   1359,
+   49,
+   58
+  ],
+  "broken_compass_hurt": [
+   104,
+   1359,
+   51,
+   58
+  ],
+  "broken_compass_cast": [
+   157,
+   1359,
+   51,
+   58
+  ],
+  "squall_wolf_hurt": [
+   0,
+   1419,
+   69,
+   57
+  ],
+  "gale_sprite_cast": [
+   71,
+   1419,
+   51,
+   57
+  ],
+  "broken_compass_die_1": [
+   124,
+   1419,
+   51,
+   57
+  ],
+  "false_beacon_die_1": [
+   177,
+   1419,
+   43,
+   55
+  ],
+  "squall_wolf_die_1": [
+   0,
+   1478,
+   63,
+   54
+  ],
+  "rigger_beetle_die_0": [
+   65,
+   1478,
+   57,
+   54
+  ],
+  "signal_wraith_die_2": [
+   124,
+   1478,
+   71,
+   54
+  ],
+  "storm_harrier_die_2": [
+   0,
+   1534,
+   67,
+   54
+  ],
+  "rigger_beetle_idle_1": [
+   69,
+   1534,
+   57,
+   52
+  ],
+  "rigger_beetle": [
+   128,
+   1534,
+   57,
+   51
+  ],
+  "rigger_beetle_attack": [
+   187,
+   1534,
+   69,
+   50
+  ],
+  "storm_page_idle_1": [
+   0,
+   1590,
+   35,
+   50
+  ],
+  "storm_page_attack": [
+   37,
+   1590,
+   45,
+   50
+  ],
+  "storm_page_cast": [
+   84,
+   1590,
+   45,
+   50
+  ],
+  "gale_sprite_idle_1": [
+   131,
+   1590,
+   49,
+   49
+  ],
+  "gale_sprite_die_0": [
+   182,
+   1590,
+   51,
+   49
+  ],
+  "rigger_beetle_hurt": [
+   0,
+   1642,
+   59,
+   49
+  ],
+  "rigger_beetle_die_1": [
+   61,
+   1642,
+   57,
+   49
+  ],
+  "storm_page_die_0": [
+   120,
+   1642,
+   35,
+   49
+  ],
+  "gale_sprite": [
+   157,
+   1642,
+   51,
+   47
+  ],
+  "gale_sprite_hurt": [
+   0,
+   1693,
+   53,
+   47
+  ],
+  "gale_sprite_die_1": [
+   55,
+   1693,
+   51,
+   47
+  ],
+  "storm_page": [
+   108,
+   1693,
+   35,
+   47
+  ],
+  "storm_page_hurt": [
+   145,
+   1693,
+   41,
+   47
+  ],
+  "storm_page_die_1": [
+   188,
+   1693,
+   35,
+   43
+  ],
+  "gale_sprite_attack": [
+   0,
+   1742,
+   57,
+   42
+  ],
+  "broken_compass_die_2": [
+   59,
+   1742,
+   49,
+   42
+  ],
+  "squall_wolf_die_2": [
+   110,
+   1742,
+   63,
+   41
+  ],
+  "false_beacon_die_2": [
+   175,
+   1742,
+   41,
+   41
+  ],
+  "rigger_beetle_die_2": [
+   0,
+   1786,
+   57,
+   39
+  ],
+  "gale_sprite_die_2": [
+   59,
+   1786,
+   51,
+   37
+  ],
+  "storm_page_die_2": [
+   112,
+   1786,
+   35,
+   31
+  ]
+ },
+ "origin": {
+  "squall_wolf": [
+   31,
+   58
+  ],
+  "squall_wolf_idle_1": [
+   31,
+   59
+  ],
+  "squall_wolf_attack": [
+   33,
+   58
+  ],
+  "squall_wolf_hurt": [
+   34,
+   56
+  ],
+  "squall_wolf_die_0": [
+   31,
+   58
+  ],
+  "squall_wolf_die_1": [
+   31,
+   53
+  ],
+  "squall_wolf_die_2": [
+   31,
+   40
+  ],
+  "gale_sprite": [
+   25,
+   46
+  ],
+  "gale_sprite_idle_1": [
+   24,
+   48
+  ],
+  "gale_sprite_attack": [
+   28,
+   41
+  ],
+  "gale_sprite_hurt": [
+   26,
+   46
+  ],
+  "gale_sprite_cast": [
+   25,
+   56
+  ],
+  "gale_sprite_die_0": [
+   25,
+   48
+  ],
+  "gale_sprite_die_1": [
+   25,
+   46
+  ],
+  "gale_sprite_die_2": [
+   25,
+   36
+  ],
+  "rigger_beetle": [
+   28,
+   50
+  ],
+  "rigger_beetle_idle_1": [
+   28,
+   51
+  ],
+  "rigger_beetle_attack": [
+   34,
+   49
+  ],
+  "rigger_beetle_hurt": [
+   29,
+   48
+  ],
+  "rigger_beetle_die_0": [
+   28,
+   53
+  ],
+  "rigger_beetle_die_1": [
+   28,
+   48
+  ],
+  "rigger_beetle_die_2": [
+   28,
+   38
+  ],
+  "signal_wraith": [
+   35,
+   73
+  ],
+  "signal_wraith_idle_1": [
+   35,
+   73
+  ],
+  "signal_wraith_attack": [
+   43,
+   72
+  ],
+  "signal_wraith_hurt": [
+   40,
+   71
+  ],
+  "signal_wraith_cast": [
+   35,
+   81
+  ],
+  "signal_wraith_die_0": [
+   35,
+   75
+  ],
+  "signal_wraith_die_1": [
+   35,
+   69
+  ],
+  "signal_wraith_die_2": [
+   35,
+   53
+  ],
+  "storm_harrier": [
+   35,
+   71
+  ],
+  "storm_harrier_idle_1": [
+   36,
+   71
+  ],
+  "storm_harrier_attack": [
+   39,
+   74
+  ],
+  "storm_harrier_hurt": [
+   39,
+   69
+  ],
+  "storm_harrier_die_0": [
+   35,
+   75
+  ],
+  "storm_harrier_die_1": [
+   33,
+   67
+  ],
+  "storm_harrier_die_2": [
+   33,
+   53
+  ],
+  "lightning_manta": [
+   41,
+   82
+  ],
+  "lightning_manta_idle_1": [
+   42,
+   82
+  ],
+  "lightning_manta_attack": [
+   51,
+   81
+  ],
+  "lightning_manta_hurt": [
+   45,
+   81
+  ],
+  "lightning_manta_cast": [
+   43,
+   94
+  ],
+  "lightning_manta_die_0": [
+   41,
+   85
+  ],
+  "lightning_manta_die_1": [
+   41,
+   77
+  ],
+  "lightning_manta_die_2": [
+   41,
+   62
+  ],
+  "gale_engine": [
+   57,
+   101
+  ],
+  "gale_engine_idle_1": [
+   57,
+   102
+  ],
+  "gale_engine_attack": [
+   70,
+   103
+  ],
+  "gale_engine_hurt": [
+   58,
+   99
+  ],
+  "gale_engine_cast": [
+   70,
+   101
+  ],
+  "gale_engine_die_0": [
+   57,
+   106
+  ],
+  "gale_engine_die_1": [
+   57,
+   98
+  ],
+  "gale_engine_die_2": [
+   57,
+   73
+  ],
+  "storm_page": [
+   17,
+   46
+  ],
+  "storm_page_idle_1": [
+   17,
+   49
+  ],
+  "storm_page_attack": [
+   22,
+   49
+  ],
+  "storm_page_hurt": [
+   20,
+   46
+  ],
+  "storm_page_cast": [
+   22,
+   49
+  ],
+  "storm_page_die_0": [
+   17,
+   48
+  ],
+  "storm_page_die_1": [
+   17,
+   42
+  ],
+  "storm_page_die_2": [
+   17,
+   30
+  ],
+  "false_beacon": [
+   21,
+   59
+  ],
+  "false_beacon_idle_1": [
+   22,
+   59
+  ],
+  "false_beacon_attack": [
+   22,
+   59
+  ],
+  "false_beacon_hurt": [
+   18,
+   59
+  ],
+  "false_beacon_cast": [
+   22,
+   59
+  ],
+  "false_beacon_die_0": [
+   21,
+   59
+  ],
+  "false_beacon_die_1": [
+   21,
+   54
+  ],
+  "false_beacon_die_2": [
+   20,
+   40
+  ],
+  "broken_compass": [
+   25,
+   57
+  ],
+  "broken_compass_idle_1": [
+   25,
+   57
+  ],
+  "broken_compass_attack": [
+   24,
+   57
+  ],
+  "broken_compass_hurt": [
+   25,
+   57
+  ],
+  "broken_compass_cast": [
+   25,
+   57
+  ],
+  "broken_compass_die_0": [
+   25,
+   62
+  ],
+  "broken_compass_die_1": [
+   25,
+   56
+  ],
+  "broken_compass_die_2": [
+   24,
+   41
+  ]
+ },
+ "anims": {
+  "squall_wolf_idle": {
+   "frames": [
+    "squall_wolf",
+    "squall_wolf_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "squall_wolf_die": {
+   "frames": [
+    "squall_wolf_die_0",
+    "squall_wolf_die_1",
+    "squall_wolf_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "gale_sprite_idle": {
+   "frames": [
+    "gale_sprite",
+    "gale_sprite_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "gale_sprite_die": {
+   "frames": [
+    "gale_sprite_die_0",
+    "gale_sprite_die_1",
+    "gale_sprite_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "rigger_beetle_idle": {
+   "frames": [
+    "rigger_beetle",
+    "rigger_beetle_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "rigger_beetle_die": {
+   "frames": [
+    "rigger_beetle_die_0",
+    "rigger_beetle_die_1",
+    "rigger_beetle_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "signal_wraith_idle": {
+   "frames": [
+    "signal_wraith",
+    "signal_wraith_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "signal_wraith_die": {
+   "frames": [
+    "signal_wraith_die_0",
+    "signal_wraith_die_1",
+    "signal_wraith_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "storm_harrier_idle": {
+   "frames": [
+    "storm_harrier",
+    "storm_harrier_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "storm_harrier_die": {
+   "frames": [
+    "storm_harrier_die_0",
+    "storm_harrier_die_1",
+    "storm_harrier_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "lightning_manta_idle": {
+   "frames": [
+    "lightning_manta",
+    "lightning_manta_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "lightning_manta_die": {
+   "frames": [
+    "lightning_manta_die_0",
+    "lightning_manta_die_1",
+    "lightning_manta_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "gale_engine_idle": {
+   "frames": [
+    "gale_engine",
+    "gale_engine_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "gale_engine_die": {
+   "frames": [
+    "gale_engine_die_0",
+    "gale_engine_die_1",
+    "gale_engine_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "storm_page_idle": {
+   "frames": [
+    "storm_page",
+    "storm_page_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "storm_page_die": {
+   "frames": [
+    "storm_page_die_0",
+    "storm_page_die_1",
+    "storm_page_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "false_beacon_idle": {
+   "frames": [
+    "false_beacon",
+    "false_beacon_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "false_beacon_die": {
+   "frames": [
+    "false_beacon_die_0",
+    "false_beacon_die_1",
+    "false_beacon_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "broken_compass_idle": {
+   "frames": [
+    "broken_compass",
+    "broken_compass_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "broken_compass_die": {
+   "frames": [
+    "broken_compass_die_0",
+    "broken_compass_die_1",
+    "broken_compass_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "scribe": "bosses_battle",
+  "scribe_ward": "bosses_battle",
+  "scribe_chart": "bosses_battle"
+ },
+ "notes": "Episode 6 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin bottom-centre (the default; the `origin` table agrees). Derived <id>_idle_1, _attack, _hurt, _die_0..2 for every id, _cast for gale_sprite, signal_wraith, lightning_manta, gale_engine, storm_page, false_beacon, broken_compass; anims <id>_idle and <id>_die. Draw 1x, untinted. squall_wolf, gale_sprite, rigger_beetle, signal_wraith, storm_harrier, lightning_manta (enemies.png cells 2, 0, 3, 1, 6, 7), gale_engine (cell 4 at 100 px, a fan in the core, bellows on its back), storm_page, false_beacon, broken_compass (drawn in code; the Beacon and the Compass each stand on their own ground shadow). Every foe carries a dark outline and a side rim (cloud white Aloft, brass grounded). The Storm Scribe lives in bosses_battle (see `external`)."
+}

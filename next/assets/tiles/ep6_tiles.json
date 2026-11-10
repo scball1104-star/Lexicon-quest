@@ -1,0 +1,3197 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/ep6.py (python build_tiles.py ep6)",
+ "note": "Episode 6 (ep6 pack) tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each ep6 terrain is drawn below: the voids below every terrain, the floors below the holes.",
+ "extraColors": [
+  "#8d9dbb",
+  "#b5c3da",
+  "#d9e2ef",
+  "#f7d9c0",
+  "#1b212c",
+  "#283040",
+  "#3a4457",
+  "#58647b",
+  "#7c889e",
+  "#6b5127",
+  "#a17e3a",
+  "#cfaa52",
+  "#efd78c"
+ ],
+ "terrainOrder": [
+  "cloudbank",
+  "storm_cloud",
+  "duct_shaft",
+  "relay_grate",
+  "spire_stone",
+  "skyport_paving",
+  "skybridge",
+  "stormglass",
+  "skyplank",
+  "skywalk",
+  "gust_lane",
+  "gust_duct",
+  "sea_foam"
+ ],
+ "terrainInsertBefore": {
+  "cloudbank": "archive_floor",
+  "storm_cloud": "archive_floor",
+  "duct_shaft": "archive_floor",
+  "relay_grate": "stone_floor",
+  "spire_stone": "stone_floor",
+  "skyport_paving": "stone_floor",
+  "skybridge": "stone_floor",
+  "stormglass": "stone_floor",
+  "skyplank": "stone_floor",
+  "skywalk": "stone_floor"
+ },
+ "terrains": {
+  "cloudbank": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "fill",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "the void of every open map (A1, 3 frames, collision void): sunlit cumulus in sky blue and peach; the lowest terrain, so every floor over it draws its own lip and front face",
+   "sheet": "ep6.png",
+   "order": 0
+  },
+  "storm_cloud": {
+   "x": 96,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "fill",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "F3 and the Eyrie's void (A1, 3 frames, collision void): the cloudbank's puffs in storm slate",
+   "sheet": "ep6.png",
+   "order": 1
+  },
+  "duct_shaft": {
+   "x": 0,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "void",
+   "variants": [
+    [
+     32,
+     48
+    ],
+    [
+     48,
+     48
+    ],
+    [
+     64,
+     48
+    ],
+    [
+     80,
+     48
+    ]
+   ],
+   "variantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "F2's dark shaft (collision void): the void under the grilles and duct lanes",
+   "sheet": "ep6.png",
+   "order": 2
+  },
+  "skyplank": {
+   "x": 96,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ],
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ]
+   ],
+   "variantWeights": [
+    64,
+    2,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "deck planks (honey timber, brass nails) with a 3 px plank-end front over the void",
+   "sheet": "ep6.png",
+   "order": 18
+  },
+  "stormglass": {
+   "x": 224,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ],
+    [
+     288,
+     48
+    ],
+    [
+     304,
+     48
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    1
+   ],
+   "note": "F1's pale blue glass panes in brass frames (darker and gridded: never cloud)",
+   "sheet": "ep6.png",
+   "order": 17
+  },
+  "skybridge": {
+   "x": 320,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     352,
+     48
+    ],
+    [
+     368,
+     48
+    ],
+    [
+     384,
+     48
+    ],
+    [
+     400,
+     48
+    ]
+   ],
+   "variantWeights": [
+    10,
+    2,
+    2,
+    1
+   ],
+   "note": "a pale stone span with a worn path and a thick arch front",
+   "sheet": "ep6.png",
+   "order": 16
+  },
+  "skyport_paving": {
+   "x": 416,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     448,
+     48
+    ],
+    [
+     464,
+     48
+    ],
+    [
+     480,
+     48
+    ],
+    [
+     496,
+     48
+    ],
+    [
+     0,
+     96
+    ],
+    [
+     16,
+     96
+    ]
+   ],
+   "variantWeights": [
+    64,
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "note": "the plaza of Zephyr Landing: big pale flagstones, cool joints, a brass compass inlay (a variant)",
+   "sheet": "ep6.png",
+   "order": 15
+  },
+  "relay_grate": {
+   "x": 32,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     64,
+     96
+    ],
+    [
+     80,
+     96
+    ],
+    [
+     96,
+     96
+    ],
+    [
+     112,
+     96
+    ]
+   ],
+   "variantWeights": [
+    10,
+    2,
+    2,
+    1
+   ],
+   "note": "F2's floor: brass grating over the dark, rivets, oil glints",
+   "sheet": "ep6.png",
+   "order": 13
+  },
+  "spire_stone": {
+   "x": 128,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ],
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "F3's white stone in curved courses (the lightest floor under the storm tint)",
+   "sheet": "ep6.png",
+   "order": 14
+  },
+  "skywalk": {
+   "x": 0,
+   "y": 144,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "note": "a rope bridge (A1, 3 frames: the slats sway): slats with sky between, rope rails on the open sides",
+   "sheet": "ep6.png",
+   "order": 19
+  },
+  "gust_lane": {
+   "x": 96,
+   "y": 144,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "flow": "wind",
+   "note": "the gust lane bed (A1, 3 frames, collision void): a sky-blue channel cut through the cloud with soft banks where the next cell is not a lane; drawn by E6-world over cloudbank on every LIVE lane cell (calm cells stay plain cloud); the shimmer points nowhere: the movement is the gust_streak object (frames by direction) and the chevrons (code)",
+   "sheet": "ep6.png",
+   "order": 38
+  },
+  "gust_duct": {
+   "x": 0,
+   "y": 192,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "flow": "wind",
+   "note": "the indoor lane bed (F2 ducts, A1, collision void): a brass grille over the dark shaft, wind light glinting through; drawn over duct_shaft on every live duct cell, the streaks and chevrons on top",
+   "sheet": "ep6.png",
+   "order": 39
+  },
+  "sea_foam": {
+   "x": 96,
+   "y": 192,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "flow": "sea",
+   "note": "the sea at the Airstair's foot (A1, collision water): surf breaking white on whatever it meets",
+   "sheet": "ep6.png",
+   "order": 40
+  }
+ },
+ "walls": {
+  "causeway_rail": {
+   "top": [
+    0,
+    240
+   ],
+   "face": [
+    32,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     240
+    ],
+    [
+     144,
+     240
+    ],
+    [
+     160,
+     240
+    ],
+    [
+     176,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    7,
+    2,
+    2,
+    1
+   ],
+   "note": "E6 wall band (causeway_rail_top) and inner face (causeway_rail_face), a 2-row face; faceStyles per room (tools/art/tiles/ep6_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      240
+     ]
+    ],
+    [
+     [
+      0,
+      432
+     ],
+     [
+      32,
+      432
+     ]
+    ],
+    [
+     [
+      64,
+      432
+     ],
+     [
+      96,
+      432
+     ],
+     [
+      128,
+      432
+     ]
+    ],
+    [
+     [
+      160,
+      432
+     ],
+     [
+      192,
+      432
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep6_obs_f1": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      3,
+      0,
+      2
+     ]
+    }
+   },
+   "sheet": "ep6.png"
+  },
+  "causeway_rail_out": {
+   "top": [
+    64,
+    240
+   ],
+   "face": [
+    96,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     240
+    ],
+    [
+     208,
+     240
+    ],
+    [
+     224,
+     240
+    ],
+    [
+     240,
+     240
+    ],
+    [
+     256,
+     240
+    ],
+    [
+     272,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (causeway_rail_out_top, no edges) and the outer face under a band's south lip (causeway_rail_out_face)",
+   "sheet": "ep6.png"
+  },
+  "relay_hall": {
+   "top": [
+    0,
+    288
+   ],
+   "face": [
+    32,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     288
+    ],
+    [
+     144,
+     288
+    ],
+    [
+     160,
+     288
+    ],
+    [
+     176,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    7,
+    2,
+    2,
+    1
+   ],
+   "note": "E6 wall band (relay_hall_top) and inner face (relay_hall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep6_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      288
+     ]
+    ],
+    [
+     [
+      224,
+      432
+     ],
+     [
+      256,
+      432
+     ]
+    ],
+    [
+     [
+      288,
+      432
+     ],
+     [
+      320,
+      432
+     ]
+    ],
+    [
+     [
+      352,
+      432
+     ],
+     [
+      384,
+      432
+     ]
+    ],
+    [
+     [
+      416,
+      432
+     ],
+     [
+      448,
+      432
+     ],
+     [
+      480,
+      432
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep6_obs_f2": {
+     "cycle": [
+      1,
+      2,
+      0,
+      3,
+      4,
+      2,
+      0
+     ]
+    }
+   },
+   "sheet": "ep6.png"
+  },
+  "relay_hall_out": {
+   "top": [
+    64,
+    288
+   ],
+   "face": [
+    96,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     288
+    ],
+    [
+     208,
+     288
+    ],
+    [
+     224,
+     288
+    ],
+    [
+     240,
+     288
+    ],
+    [
+     256,
+     288
+    ],
+    [
+     272,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (relay_hall_out_top, no edges) and the outer face under a band's south lip (relay_hall_out_face)",
+   "sheet": "ep6.png"
+  },
+  "spire": {
+   "top": [
+    0,
+    336
+   ],
+   "face": [
+    32,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     336
+    ],
+    [
+     144,
+     336
+    ],
+    [
+     160,
+     336
+    ],
+    [
+     176,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E6 wall band (spire_top) and inner face (spire_face), a 2-row face; faceStyles per room (tools/art/tiles/ep6_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      336
+     ]
+    ],
+    [
+     [
+      0,
+      464
+     ],
+     [
+      32,
+      464
+     ],
+     [
+      64,
+      464
+     ]
+    ],
+    [
+     [
+      96,
+      464
+     ],
+     [
+      128,
+      464
+     ]
+    ],
+    [
+     [
+      160,
+      464
+     ],
+     [
+      192,
+      464
+     ],
+     [
+      224,
+      464
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep6_obs_f3": {
+     "cycle": [
+      0,
+      1,
+      2,
+      0,
+      3,
+      1
+     ]
+    },
+    "ep6_obs_eyrie": {
+     "cycle": [
+      2,
+      0,
+      2,
+      3
+     ]
+    }
+   },
+   "sheet": "ep6.png"
+  },
+  "spire_out": {
+   "top": [
+    64,
+    336
+   ],
+   "face": [
+    96,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     336
+    ],
+    [
+     208,
+     336
+    ],
+    [
+     224,
+     336
+    ],
+    [
+     240,
+     336
+    ],
+    [
+     256,
+     336
+    ],
+    [
+     272,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (spire_out_top, no edges) and the outer face under a band's south lip (spire_out_face)",
+   "sheet": "ep6.png"
+  },
+  "basalt_stack": {
+   "top": [
+    0,
+    384
+   ],
+   "face": [
+    32,
+    384
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     384
+    ],
+    [
+     144,
+     384
+    ],
+    [
+     160,
+     384
+    ],
+    [
+     176,
+     384
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    3,
+    2,
+    2
+   ],
+   "note": "E6 wall band (basalt_stack_top) and inner face (basalt_stack_face), a 2-row face; faceStyles per room (tools/art/tiles/ep6_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      384
+     ]
+    ],
+    [
+     [
+      256,
+      464
+     ],
+     [
+      288,
+      464
+     ],
+     [
+      320,
+      464
+     ],
+     [
+      352,
+      464
+     ]
+    ],
+    [
+     [
+      384,
+      464
+     ],
+     [
+      416,
+      464
+     ],
+     [
+      448,
+      464
+     ],
+     [
+      480,
+      464
+     ],
+     [
+      0,
+      496
+     ]
+    ],
+    [
+     [
+      32,
+      496
+     ],
+     [
+      64,
+      496
+     ],
+     [
+      96,
+      496
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep6_airstair": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      0,
+      3
+     ]
+    }
+   },
+   "sheet": "ep6.png"
+  },
+  "basalt_stack_out": {
+   "top": [
+    64,
+    384
+   ],
+   "face": [
+    96,
+    384
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     384
+    ],
+    [
+     208,
+     384
+    ],
+    [
+     224,
+     384
+    ],
+    [
+     240,
+     384
+    ],
+    [
+     256,
+     384
+    ],
+    [
+     272,
+     384
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (basalt_stack_out_top, no edges) and the outer face under a band's south lip (basalt_stack_out_face)",
+   "sheet": "ep6.png"
+  }
+ },
+ "tiles": {
+  "rope_stair": {
+   "x": 0,
+   "y": 1168,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "a rope stair hung on a basalt face (collision none: overrides the face so the stair walks); stack it",
+   "sheet": "ep6.png"
+  },
+  "rope_rail": {
+   "x": 16,
+   "y": 1168,
+   "w": 128,
+   "h": 32,
+   "collision": "solid",
+   "autotile": "line16",
+   "note": "a deck railing (posts and a rope run); line16 index N*1+E*2+S*4+W*8",
+   "sheet": "ep6.png"
+  },
+  "isles_far": {
+   "x": 0,
+   "y": 1200,
+   "w": 160,
+   "h": 96,
+   "collision": "none",
+   "note": "160 x 96 decal of the floating isles from environments cell 5 (transparent sky) for the overhead layer at the Airstair's top (mark isles_far)",
+   "sheet": "ep6.png"
+  },
+  "storm_far": {
+   "x": 160,
+   "y": 1200,
+   "w": 128,
+   "h": 80,
+   "collision": "none",
+   "note": "128 x 80 decal of the storm knot (cell 5 cloud shapes re-graded to storm slate) for the overhead layer on Zephyr Landing's north-east skyline (mark storm_far)",
+   "sheet": "ep6.png"
+  }
+ },
+ "objects": {
+  "vane": {
+   "rect": [
+    0,
+    544,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     544,
+     16,
+     32
+    ],
+    [
+     16,
+     544,
+     16,
+     32
+    ],
+    [
+     32,
+     544,
+     16,
+     32
+    ],
+    [
+     48,
+     544,
+     16,
+     32
+    ],
+    [
+     64,
+     544,
+     16,
+     32
+    ],
+    [
+     80,
+     544,
+     16,
+     32
+    ],
+    [
+     96,
+     544,
+     16,
+     32
+    ],
+    [
+     112,
+     544,
+     16,
+     32
+    ]
+   ],
+   "dirs": [
+    "up",
+    "right",
+    "down",
+    "left"
+   ],
+   "note": "weathervane (event vane): frame = state * 4 + dir, dirs up, right, down, left (the way its group blows); state 0 white arrow with a blue tail, state 1 gold arrow with a rust tail (the chevron colours of its lanes); the dial is on the tile ABOVE the pole, so the party never covers it",
+   "sheet": "ep6.png"
+  },
+  "fan_vane": {
+   "rect": [
+    128,
+    544,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     544,
+     16,
+     32
+    ],
+    [
+     144,
+     544,
+     16,
+     32
+    ],
+    [
+     160,
+     544,
+     16,
+     32
+    ],
+    [
+     176,
+     544,
+     16,
+     32
+    ],
+    [
+     192,
+     544,
+     16,
+     32
+    ],
+    [
+     208,
+     544,
+     16,
+     32
+    ],
+    [
+     224,
+     544,
+     16,
+     32
+    ],
+    [
+     240,
+     544,
+     16,
+     32
+    ]
+   ],
+   "dirs": [
+    "up",
+    "right",
+    "down",
+    "left"
+   ],
+   "note": "indoor fan and lever (event vane with sprite fan_vane, F2): frame = state * 4 + dir as vane; the lever up in state 0, down in state 1",
+   "sheet": "ep6.png"
+  },
+  "gust_mooring": {
+   "rect": [
+    0,
+    576,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     576,
+     16,
+     32
+    ],
+    [
+     16,
+     576,
+     16,
+     32
+    ],
+    [
+     32,
+     576,
+     16,
+     32
+    ],
+    [
+     48,
+     576,
+     16,
+     32
+    ],
+    [
+     64,
+     576,
+     16,
+     32
+    ],
+    [
+     80,
+     576,
+     16,
+     32
+    ],
+    [
+     96,
+     576,
+     16,
+     32
+    ],
+    [
+     112,
+     576,
+     16,
+     32
+    ],
+    [
+     128,
+     576,
+     16,
+     32
+    ],
+    [
+     144,
+     576,
+     16,
+     32
+    ],
+    [
+     160,
+     576,
+     16,
+     32
+    ],
+    [
+     176,
+     576,
+     16,
+     32
+    ]
+   ],
+   "dirs": [
+    "up",
+    "right",
+    "down",
+    "left"
+   ],
+   "flutterFrames": 3,
+   "flutterMs": 180,
+   "note": "mooring post (event mooring, collision none: a ride stops on its cell): frame = dir * 3 + flutter, dir = the way the lane under it blows (the pennant streams downwind); cycle the 3 flutter frames",
+   "sheet": "ep6.png"
+  },
+  "gust_streak": {
+   "rect": [
+    0,
+    608,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     608,
+     16,
+     16
+    ],
+    [
+     16,
+     608,
+     16,
+     16
+    ],
+    [
+     32,
+     608,
+     16,
+     16
+    ],
+    [
+     48,
+     608,
+     16,
+     16
+    ],
+    [
+     64,
+     608,
+     16,
+     16
+    ],
+    [
+     80,
+     608,
+     16,
+     16
+    ],
+    [
+     96,
+     608,
+     16,
+     16
+    ],
+    [
+     112,
+     608,
+     16,
+     16
+    ],
+    [
+     128,
+     608,
+     16,
+     16
+    ],
+    [
+     144,
+     608,
+     16,
+     16
+    ],
+    [
+     160,
+     608,
+     16,
+     16
+    ],
+    [
+     176,
+     608,
+     16,
+     16
+    ]
+   ],
+   "dirs": [
+    "up",
+    "right",
+    "down",
+    "left"
+   ],
+   "note": "the streaks of a live lane cell (translucent white, period 16 so a run joins up): frame = dir * 3 + k, k cycling 0, 1, 2 with the bed; drawn over the gust_lane / gust_duct bed, under the chevrons",
+   "sheet": "ep6.png"
+  },
+  "gust_chevron": {
+   "rect": [
+    192,
+    608,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     192,
+     608,
+     16,
+     16
+    ],
+    [
+     208,
+     608,
+     16,
+     16
+    ],
+    [
+     224,
+     608,
+     16,
+     16
+    ],
+    [
+     240,
+     608,
+     16,
+     16
+    ],
+    [
+     256,
+     608,
+     16,
+     16
+    ],
+    [
+     272,
+     608,
+     16,
+     16
+    ],
+    [
+     288,
+     608,
+     16,
+     16
+    ],
+    [
+     304,
+     608,
+     16,
+     16
+    ]
+   ],
+   "dirs": [
+    "up",
+    "right",
+    "down",
+    "left"
+   ],
+   "note": "the chevron as art (E6-world draws the same in code, one every other cell along a lane): frame = state * 4 + dir; 9 x 9 px with its outline, state 0 white on dark blue, state 1 gold on dark brown",
+   "sheet": "ep6.png"
+  },
+  "signal_lamp": {
+   "rect": [
+    0,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     624,
+     16,
+     32
+    ],
+    [
+     16,
+     624,
+     16,
+     32
+    ]
+   ],
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.4
+   },
+   "note": "a signal lamp on a post (F2 relays, F3 landings): frames 0 dark, 1 lit; light only while lit",
+   "sheet": "ep6.png"
+  },
+  "lamp_storm": {
+   "rect": [
+    32,
+    624,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     32,
+     624,
+     16,
+     48
+    ],
+    [
+     48,
+     624,
+     16,
+     48
+    ]
+   ],
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.6
+   },
+   "note": "F3's tall white-stone signal lamp (lamp_anchor, lamp_listen, lamp_return): frames 0 dark, 1 lit",
+   "sheet": "ep6.png"
+  },
+  "relay": {
+   "rect": [
+    64,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     624,
+     16,
+     32
+    ],
+    [
+     80,
+     624,
+     16,
+     32
+    ],
+    [
+     96,
+     624,
+     16,
+     32
+    ]
+   ],
+   "note": "a relay cabinet (F2): frames by dial state 0 needle left (red lamp), 1 up (amber), 2 right (green)",
+   "sheet": "ep6.png"
+  },
+  "speaking_tube": {
+   "rect": [
+    112,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a brass speaking tube on a pipe (F2, solid)",
+   "sheet": "ep6.png"
+  },
+  "chimes": {
+   "rect": [
+    128,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     624,
+     16,
+     32
+    ],
+    [
+     144,
+     624,
+     16,
+     32
+    ],
+    [
+     160,
+     624,
+     16,
+     32
+    ]
+   ],
+   "note": "wind chimes (chimes_a to chimes_c, F1 posts): frame 0 tied with black thread (silent), 1 and 2 ringing (cycle 1, 2 at about 220 ms after isles_restored)",
+   "sheet": "ep6.png"
+  },
+  "crate_dash": {
+   "rect": [
+    176,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     176,
+     624,
+     16,
+     32
+    ],
+    [
+     192,
+     624,
+     16,
+     32
+    ]
+   ],
+   "note": "a Dash-cracked crate: 0 cracked (solid), 1 broken (rubble decor; the cell opens)",
+   "sheet": "ep6.png"
+  },
+  "lift_brass": {
+   "rect": [
+    208,
+    624,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Observatory lift (lift_up, lift_f2_short): a brass cage, the door cell is (0,0)",
+   "sheet": "ep6.png"
+  },
+  "feather_grille": {
+   "rect": [
+    224,
+    624,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the black feather caught in a grille (F2 crown relay, prop feather_grille), collision none",
+   "sheet": "ep6.png"
+  },
+  "supply_coffer": {
+   "rect": [
+    0,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     672,
+     32,
+     32
+    ],
+    [
+     32,
+     672,
+     32,
+     32
+    ]
+   ],
+   "note": "the Star-Sail Supply Coffer (F1 D): frames 0 closed, 1 open",
+   "sheet": "ep6.png"
+  },
+  "font_wind": {
+   "rect": [
+    64,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 240
+   },
+   "light": {
+    "color": "#b4e4f2",
+    "radius": 2.6
+   },
+   "note": "the wind font (rest and save: font_w1 to font_w3, font_w2b, beacon_font): a brass basin, a whirl of air",
+   "sheet": "ep6.png"
+  },
+  "first_shelf": {
+   "rect": [
+    160,
+    672,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     160,
+     672,
+     32,
+     32
+    ],
+    [
+     192,
+     672,
+     32,
+     32
+    ]
+   ],
+   "note": "the shelf with the first page (the Cloud Library, first_shelf): 0 under glass, 1 the glass lifted",
+   "sheet": "ep6.png"
+  },
+  "quills": {
+   "rect": [
+    224,
+    672,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 260
+   },
+   "note": "quills hanging in the air over the Eyrie's desk (decor, collision none, all overhead)",
+   "sheet": "ep6.png"
+  },
+  "wind_script": {
+   "rect": [
+    0,
+    704,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 48,
+    "ms": 300
+   },
+   "note": "the Wind Script banners (overhead, 3 x 2, after scribe_defeated), collision none",
+   "sheet": "ep6.png"
+  },
+  "sky_keyhole_closed": {
+   "rect": [
+    144,
+    704,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Sky Compass Keyhole (door_scribe, needs compass_key), door_boss style, 3 wide in a 2-row face",
+   "sheet": "ep6.png"
+  },
+  "sky_keyhole_open": {
+   "rect": [
+    192,
+    704,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "open: cell (1,0) is the doorway, the storm beyond",
+   "sheet": "ep6.png"
+  },
+  "scribe_desk": {
+   "rect": [
+    240,
+    704,
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     240,
+     704,
+     64,
+     64
+    ],
+    [
+     304,
+     704,
+     64,
+     64
+    ]
+   ],
+   "note": "the stormglass desk in the Eyrie (4 x 4): frame 0 perched (the storm coiled round it: the Scribe's actor scribe_avatar stands over it), 1 gone (still, after scribe_defeated)",
+   "sheet": "ep6.png"
+  },
+  "inn_cloudhouse": {
+   "rect": [
+    0,
+    784,
+    118,
+    96
+   ],
+   "kind": "building",
+   "note": "the Cloudhouse Inn (bed sign, hammock, pennants); door to ep6_zl_inn",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "tower_signal": {
+   "rect": [
+    118,
+    784,
+    70,
+    96
+   ],
+   "kind": "building",
+   "note": "the Signal Beacon tower (white stone, brass bands); door to ep6_zl_charts; set the beacon prop on its top",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -5
+    ],
+    [
+     1,
+     -5
+    ],
+    [
+     2,
+     -5
+    ],
+    [
+     3,
+     -5
+    ],
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "house_sky_b": {
+   "rect": [
+    188,
+    784,
+    86,
+    80
+   ],
+   "kind": "building",
+   "note": "a skyport house with a brass dome",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "shop_aeris": {
+   "rect": [
+    274,
+    784,
+    86,
+    80
+   ],
+   "kind": "building",
+   "note": "Aeris Flight Provisions (potion sign, goggles, a blue awning); door to ep6_zl_shop",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "workshop_galewing": {
+   "rect": [
+    360,
+    784,
+    102,
+    80
+   ],
+   "kind": "building",
+   "note": "the Galewing Workshop (hammer sign, the forge glow, the great propeller); door to ep6_zl_workshop",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "house_sky_a": {
+   "rect": [
+    0,
+    880,
+    70,
+    64
+   ],
+   "kind": "building",
+   "note": "a skyport house with a roof rotor",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep6.png"
+  },
+  "departure_board": {
+   "rect": [
+    0,
+    944,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     944,
+     48,
+     48
+    ],
+    [
+     48,
+     944,
+     48,
+     48
+    ],
+    [
+     96,
+     944,
+     48,
+     48
+    ],
+    [
+     144,
+     944,
+     48,
+     48
+    ]
+   ],
+   "shiftFrames": [
+    0,
+    1,
+    2
+   ],
+   "note": "the Skyport Departure Board (object board): state 0 = every flight ARRIVED, the rows clacking (cycle frames 0, 1, 2 at about 160 ms while isles_restored is unset); state 1 = one line lit, LANDED DOCK FOUR (frame 3); drawn glyph bars, never legible; the posts' cells are solid",
+   "sheet": "ep6.png"
+  },
+  "post_rack": {
+   "rect": [
+    192,
+    944,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "Piri's post rack (object post_rack), a grey bird on top",
+   "sheet": "ep6.png"
+  },
+  "beacon": {
+   "rect": [
+    224,
+    944,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     224,
+     944,
+     32,
+     48
+    ],
+    [
+     256,
+     944,
+     32,
+     48
+    ]
+   ],
+   "light": {
+    "color": "#f9d77a",
+    "radius": 4.0
+   },
+   "note": "the Signal Beacon on the tower's roof (2 x 3, all overhead, collision none): 0 dark, 1 lit (beacon_lit; light only while lit)",
+   "sheet": "ep6.png"
+  },
+  "cargo_net": {
+   "rect": [
+    288,
+    944,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "cargo under a net on the north dock (Aeris sits here)",
+   "sheet": "ep6.png"
+  },
+  "kestrel": {
+   "rect": [
+    0,
+    992,
+    96,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the Kestrel, Aeris's airship (6 x 3, all overhead, collision none: moor it over cloud beside a dock; the gangway is a map door)",
+   "sheet": "ep6.png"
+  },
+  "great_chain": {
+   "rect": [
+    96,
+    992,
+    32,
+    128
+   ],
+   "anchor": [
+    0,
+    7
+   ],
+   "footprint": [],
+   "overheadRows": 8,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the great chain up the Airstair (2 x 8, overhead, collision none); its links repeat every 32 px, so stack copies 2 tiles apart in rows for any height",
+   "sheet": "ep6.png"
+  },
+  "windsock": {
+   "rect": [
+    0,
+    1120,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 200
+   },
+   "note": "a windsock on a pole (decor, solid), streaming east",
+   "sheet": "ep6.png"
+  },
+  "rotor": {
+   "rect": [
+    48,
+    1120,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 120
+   },
+   "note": "a wind rotor on a pole (decor, solid), turning",
+   "sheet": "ep6.png"
+  },
+  "windstone": {
+   "rect": [
+    96,
+    1120,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a windstone (canon decor): a carved spiral, a blue ribbon",
+   "sheet": "ep6.png"
+  },
+  "bridge_post": {
+   "rect": [
+    112,
+    1120,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a rope bridge's anchor post (solid): set at each end of a skywalk",
+   "sheet": "ep6.png"
+  },
+  "bollard": {
+   "rect": [
+    128,
+    1120,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a dock bollard with a rope turn (solid)",
+   "sheet": "ep6.png"
+  },
+  "skyflowers": {
+   "rect": [
+    144,
+    1120,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "skyflowers (floor decor, collision none)",
+   "sheet": "ep6.png"
+  },
+  "flower_bed": {
+   "rect": [
+    160,
+    1120,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a floating flower bed of the cloud gardens (solid; set it over cloud beside a walkway)",
+   "sheet": "ep6.png"
+  },
+  "lamp_sky": {
+   "rect": [
+    192,
+    1120,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.0
+   },
+   "note": "a skyport street lamp (brass post, glass lantern, a red pennant)",
+   "sheet": "ep6.png"
+  }
+ },
+ "overlays": {}
+}

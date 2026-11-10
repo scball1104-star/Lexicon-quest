@@ -1,0 +1,27 @@
+{
+ "image": "ep6_portraits.png",
+ "frames": {
+  "scribe_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "scribe_32": [
+   48,
+   0,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "scribe": {
+   "48": "scribe_48",
+   "32": "scribe_32"
+  }
+ },
+ "sources": {
+  "scribe": "battle frame scribe (The Wind Script; 1x crop, E6-sprites)"
+ },
+ "notes": "Episode 6 pack atlas, merged into portraits. scribe: the bone mask with its blue eye and hooked beak, the far wing and a quill (48), the mask and beak alone (32), cropped at 1x from The Wind Script battle frame. Aeris has no portrait (plan 9.5)."
+}

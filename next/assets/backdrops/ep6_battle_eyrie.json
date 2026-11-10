@@ -1,0 +1,71 @@
+{
+ "image": "ep6_battle_eyrie.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "the Storm Scribe: the storm's ring round an open eye (environments cell 5's sky in the eye), the stormglass desk, a round white deck (composed)",
+ "extraColors": [],
+ "colors": 48,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep6_build.py (eyrie); palette.json plus the ep6 sheet colours (ep6_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.48,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep6_eyrie",
+ "fallback": "boss",
+ "meanLuma": 0.4251,
+ "grades": {
+  "storm": "as composed, with the rain layer (`rain`) over rows 0..bandY",
+  "clear": {
+   "tone": {
+    "lift": 2.3,
+    "warm": 0.0,
+    "chroma": 1.1,
+    "cast": 0.022,
+    "hue": 1.2
+   },
+   "rows": [
+    0,
+    118
+   ],
+   "rain": false
+  },
+  "how": "clear: over rows clear.rows the Episode 5 DAY_TONE pixel path (src/data/ep5/scene.js dayTone) with clear.tone (warm 0: no violet turn; the lift and a warm cast), the rain layer off; cross-fade storm to clear over 20 frames when the ward tears. Never a screen or multiply over the storm (CRITIQUE_7 item 1). storm: as composed plus the rain.",
+  "meanLuma": {
+   "storm": 0.4259,
+   "clear": 0.5933
+  },
+  "skyLuma": {
+   "storm": 0.4577,
+   "clear": 0.7654
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ },
+ "rain": {
+  "color": "#b5c3da",
+  "alpha": 0.22,
+  "slope": 0.35,
+  "spacing": 9,
+  "length": 7,
+  "speed": 5,
+  "rows": "bandY",
+  "how": "storm grade only: every `spacing` px along x (offset per row band by a hash), a 1 px streak `length` px long leaning `slope` px right per px down, falling `speed` px a frame, drawn over rows 0..bandY at `alpha`; off in the clear grade and under reduceMotion (then drawn still)"
+ },
+ "lightning": {
+  "color": "#e8fffb",
+  "peakLumaRise": 0.12,
+  "minIntervalMs": 4000,
+  "riseFrames": 3,
+  "fallFrames": 9,
+  "how": "a soft far-wall flash over the storm backdrop only: add `color` x k x falloff(d / r) to every pixel inside the circle (x, y, r), falloff (1 - d)^2, k chosen so no pixel's luma rises more than peakLumaRise; at most once in any minIntervalMs (a hard rule, plan 5.2); off under reduceMotion; never a full-screen white",
+  "at": [
+   70,
+   60,
+   110
+  ],
+  "measured": {
+   "maxPixelLumaRise": 0.12,
+   "meanLumaRise": 0.0086
+  }
+ }
+}
