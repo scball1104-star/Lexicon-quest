@@ -683,7 +683,7 @@ the LEGACY Vex scene "The Empty Seat" and his line "The sky routes are being rew
 **Changed, with reasons.**
 - **Word and order puzzles are gone** (DESIGN hard rule 2; Episodes 3 to 5 did the same). F1's three wind rudders with a
   printed answer chart (WEST faces SOUTH...), Suri's testimony that names the settings, F2's relay cycling with a diagram
-  and its Across/Down crossword, the ordered flight logs, and F3's recited pilot oaths (wrong order resets) are all
+  and its Across/Down word grid, the ordered flight logs, and F3's recited pilot oaths (wrong order resets) are all
   replaced: the floors open by gust lanes and vanes (plan 5.1), the logs are found in any order, and the oaths are the
   spire's three landings in the order of the climb, never an answer to get right.
 - **Gust lane damage is gone** (no damage tiles: phone players). Gust lanes carry the party; they never hurt it. The
@@ -757,6 +757,43 @@ registry: plan section 2 (grepped 2026-11-09).
 
 Reserved for E6-story (wave 6a): what the built script does beyond the beat sheet (deltas only, as EPISODE5 section 9).
 
+Built by E6-story, 2026-11-09 (`src/data/ep6/{flags,npcs,quests,text,story,ledger}.js`, staging in
+`docs/story/STAGING_EP6.md`, tests `qa/content/ep6_story.test.mjs` and `ep6_data.test.mjs`). 39 scenes registered (32 main
+and chained, 7 side), main path 194 boxes (budget about 200; `ep6_morning` 5, `vex_falls` 15, `scribe_after` 16,
+`cloud_library` 16). Deltas from section 1:
+
+- **Under 40 scenes.** `aeris_turns` is chained from `obs_f3_arrival` and `testimony_suri` from `beacon_start` (Suri is
+  her own witness, as Kamal was); neither is a registered scene, since no map event starts either.
+- **Staging.** Every scene with a speaker outside the party walks the hero to a mark two tiles from the speaker, Mira one
+  tile left and Bram one tile right (`X`, `X_m`, `X_b`, listed in STAGING_EP6 section 3). Apart on purpose: `mira_asks`
+  (Bram a landing below) and `anchor_lesson` (Mira thrown to the edge, Bram beside her).
+- **No twins in town.** Aeris is the record `aeris` on Zephyr Landing; a scene moves the record itself (`spawn('aeris')`)
+  and a reload puts her back. Elsewhere she is the spawn `aeris_t`. Her record stands down from `aeris_came` until
+  `library_reached` (`AERIS_AWAY`). Yara at the berth and Liora at dock four are their own records too.
+- **Bennet keeps two posts**: `bennet` on the docks (the witness) and `bennet_winch` at the Airstair's winch stall (shop
+  `winch`), Ledger-excluded as "see bennet".
+- **`ep6_board`** does not move the party: two boxes, the tint drops to dusk, and the berth's boat door does the
+  crossing. `airstair_foot` opens on one narration box of the night at sea, then dawn lifts to day.
+- **`ep6_morning`** keeps the bible's order with the slip open through "Four seats. There are three of us." (silence on
+  it); Mira's compass line is the last box, as she folds the slip away.
+- **Bram's question at the relay** says the name: "Who asked you to keep {hero}? In writing. You said."
+- **The Sky Compass** is given at `east_gate` with the Windward Pass (one narration box), so the party carries it
+  spinning; in `scribe_after` it goes still in the bag and the hero holds it out to Aeris, who names the shelf.
+- **The pledges** each open on the lamp lighting with its carved line of the charter (canon words), then the voice and
+  Aeris's line.
+- **`vex_falls`**: the letter is two narration boxes; Vex's fourteen line is two boxes; he walks on up the spire at the
+  end. The rope is the pack helper `s.rope` (E6-scene-ui); until it exists the narration says the line holds.
+- **The Scribe answers each choice** before the fight with one new line ("EVERY WAY UP IS STRUCK. THAT IS THE COURSE." /
+  "NOTHING HOLDS. THE WIND TAKES THE SHORTEST WAY."). The Engine's and the Scribe's intros say their arc lines.
+- **`cloud_library`**: the page in three modes; under `torn` the torn line first and "Keep this one." last. Mira's truth
+  exchange is the bible's two boxes on each path.
+- **`pippa_home`** is set in `ep6_ending` once the spawn `pippa_t` is gone, so the record never doubles her.
+- **New flags** `engine_tried`, `scribe_tried` (a retried boss intro is the pan, Bram's tip and the card).
+- **Music** has no volume control in the cutscene API, so the "softer" cues play their tracks as is.
+- **Talk.** While `EP6_LIVE`, an Episode 5 finisher hears "the Dune Lantern, then the water stairs", and on the Haven's
+  maps every older hint is held until the party boards (the Episode 5 morning's fix). The Airstair choice changes one
+  Mira line in the F1 banter.
+
 ---
 
 ## 10. Choices that are Scott's or Stephen's
@@ -786,7 +823,7 @@ Stephen may change any of them; the story is joint.
 9. **Aeris's first memory re-aimed from "turned back for one" to "did not turn back", with her turn on the spire.**
    [default: yes] Episode 5 already told the turn-back story; the inversion gives Aeris a beat of her own.
 10. **Renames and drops for canon conflicts:** the Orrery of Broken Signals to the Hall of Broken Signals, pilot oaths as
-    `pledge_*` landings, four phases to three, no gust damage, no rudders, relays, crossword, ordered logs or recited
+    `pledge_*` landings, four phases to three, no gust damage, no rudders, relays, word grid, ordered logs or recited
     oaths, Ren folded into Bennet, the Flight Oath bond into a gift and Anchor. [default: as listed] Each follows a hard
     rule, an id collision or an asset fact (section 8).
 11. **Small threads touched, not pulled: Sel stays in Saffron Haven (one farewell line); Piri gives the hero an unopened

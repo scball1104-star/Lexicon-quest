@@ -30,7 +30,8 @@
     "tier": 0.3,
     "ep3": 0.2,
     "ep4": 1.0,
-    "ep5": 1.0
+    "ep5": 1.0,
+    "ep6": 1.0
   },
   "tapPromptHistory": {
     "after-XP-packs": 2.32,

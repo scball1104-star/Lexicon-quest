@@ -8,7 +8,7 @@ import { bindGlyphs } from '../ui/glyphs.js';
 import { UiStageScene } from '../ui/stage.js';
 import { animFrameAt } from '../core/assets.js';
 import { createGame, setFlag, give, addMember, setStatsProvider, START_MAP, START_POS, addGear, newGameEp2, newGameEp3, cleanName, EP2_START, EP3_START } from '../game/state.js';
-import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP, EP4_LIVE, EP5_LIVE, newestWith } from '../game/episodes.js';
+import { episodeOffers, ep2Offer, pickRunSlot, EP3_ROW_LABEL, EP3_ROW_HELP, EP4_LIVE, EP6_LIVE, EP5_LIVE, newestWith } from '../game/episodes.js';
 import { NameEntryScene } from './nameEntry.js';
 import { packsToAwait, awaitPacks, packEnabled, ensurePack, forcePack } from '../game/packs.js';
 import { memberStats } from '../battle/rules.js';
@@ -64,6 +64,7 @@ export class TitleScene {
     if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print
     if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4\b/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4', { engine: e }).then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4
     if ((EP5_LIVE && newestWith(e.save, 'ep4_complete')) || /[?&]ep=5\b/.test(globalThis.location ? location.search : '')) { forcePack('ep5'); ensurePack('ep4', { engine: e }); ensurePack('ep5', { engine: e }).then(() => globalThis.LQ_EP5 && LQ_EP5.title(this)); }   // Episode 5
+    if ((EP6_LIVE && newestWith(e.save, 'ep5_complete')) || /[?&]ep=6\b/.test(globalThis.location ? location.search : '')) { forcePack('ep6'); ensurePack('ep5', { engine: e }); ensurePack('ep6', { engine: e }).then(() => globalThis.LQ_EP6 && LQ_EP6.title(this)); }
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);

@@ -178,3 +178,42 @@ map. Wanted from `ep4_complete` or `ep5_started`. While `EP5_LIVE` is false noth
   Empty, every Episode 1 to 4 battle is bit-identical (`qa/core/ep5_rule_ext.test.mjs`; `simulate.mjs --check` output identical
   before and after). Paid for by comment trims in `src/game/cave.js` and `src/game/episodes.js`: the pre-tap load went from
   2,445,728 to 2,445,451 wire bytes (seams +235, trims -512, gzipped).
+
+## The ep6 pack (2026-11-09, E6-pack)
+
+`ep6` (prefix `ep6_`, entry `src/data/ep6/index.js`, asset fragment `assets/ep6_manifest.json`, audio pack `ep6`, cap 1.0 MB)
+holds all of Episode 6 (`docs/EPISODE6_PLAN.md` 13): every file under `src/data/ep6/`, `src/data/maps/ep6_*.js` (the eleven
+maps and `ep6_patches.js`), `assets/{tiles,sprites,ui,backdrops}/ep6_*`, `assets/tiles/ep6.png`, and the sounds
+`assets/audio/{sfx,ambience}/ep6_*` (`build_pwa.py` `LAZY_PREFIXES`). Its switch is `EP6_LIVE` in `src/game/episodes.js` (no
+`live.js`), **false** until E6-integrate. `hard: true`, `touches: ['ep5_sh_inn', 'ep5_saffron']`: the field waits for both ep5
+and ep6 before loading either map. Wanted from `ep5_complete` or `ep6_started` (an Episode 4 save never wants it). While
+`EP6_LIVE` is false nothing is fetched, except with `?pack=ep6` or `?ep=6` (the title hook forces it on; the pack adds its row
+only once its `EP6_MAPS_LISTED` is true).
+
+- **The chain ep3, ep4, ep5, ep6.** The ep6 entry awaits `ensurePack('ep5', { engine })` (which awaits ep4, which awaits ep3)
+  before any ep6 module is evaluated. Only registration is ordered: the title hook starts the ep5 and ep6 fetches at once, the
+  field starts every pack of `packsForMap` at once, and the entry starts its own code (`prefetchCode()`) and map files
+  (`maps.js` `prefetch()`) before it waits. Measured on the phone profile (844x390 at 3x, CPU 4x slower, 10 Mbps and 40 ms;
+  `qa/ui/ep6_saves_headless.py`, 2026-11-09, two runs, with two other build agents loading the CPU and the pack a skeleton
+  whose not-yet-written modules answer 404): entry to the inn with ep4, ep5 and ep6 ready **11.1 to 11.9 s cold, 4.7 to 5.1 s
+  warm**; the ep4 pack alone takes 8.4 s cold and 2.8 to 2.9 s warm, and the ep5 chain measured beside it the same hour
+  10.7 s cold and 3.7 s warm. Plan 3.3's targets (under 8 s cold, under 3 s warm) are missed by the ep4 pack itself; ep6 adds
+  about 0.5 to 1.2 s cold and 1 s warm, part of it the 32 prefetch 404s that go away as the modules and maps land.
+- **`register(engine)`.** ORDER `flags, enemies, items, skills, loot, encounters, gale, shops, ai, npcs, quests, text, story,
+  ledger, audio, world, pages, maps, hooks, start, scene`; `title` is loaded on first use by `hooks.js`. A missing module is
+  skipped and reported; a broken one is not swallowed. Idempotent.
+- **Audio.** `src/data/ep6/audio.js` (E6-audio) is merged into `engine.audio.manifest` (never overwriting an id, `pack` as
+  `manifest.packs.ep6`) on every path that brings the pack up. The quick start calls `readyPacks(engine)` (the ep5 hooks'
+  `readyPacks`, so ep4 and ep5 through `ensurePack` and their `register(engine)`, then ep6 the same way) before the fade in.
+  `qa/pwa/precache.test.mjs` resolves sfx ids named under `src/data/ep6/` against the ep6 fragment, then the ep5 and ep4 ones
+  (listed as waiting until `audio.js` exists).
+- **Maps and the order trap.** `src/data/ep6/maps.js` awaits the ep5 maps registry's `register()` first, then registers the
+  eleven maps by a guarded list and patches the registered `ep5_sh_inn` / `ep5_saffron` with `ep6_patches.js` `withEp6Wake` /
+  `withSkyBerth` (identity until that file exists). `qa/core/ep6_maps_order.test.mjs`.
+- **Hooks** (`src/data/ep6/hooks.js`): `CREDITS_HANDOFF[6]` (from text.js `CREDITS_EP6`), `CREDITS_HANDOFF[5].endCard` =
+  `END_CARD_EP5_LIVE` while live (unchanged while off), `QUEST_EXT` (Episode 6 first), `globalThis.LQ_EP6` (`title`, `offer`,
+  `start`, `pickRunSlot`), `LQ_DEBUG.newGameEp6` (async), and the cold-entry re-landing on the patched maps (`relandPatched`).
+- **Core seams** (plan 13.2): the table entry; `EP6_LIVE`; one title line beside Episode 5's; the landing regex `ep[456]_` in
+  `packFallback.js`. Paid for by comment trims in `src/game/packs.js` (the header, the cave note and four long doc comments
+  whose content is in this file): the pre-tap load went from 2,443,506 to 2,442,935 wire bytes (seams about +100, trims about
+  -670, gzipped); the initial download from 6,663,018 to 6,662,447.

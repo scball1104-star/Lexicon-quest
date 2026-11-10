@@ -1,11 +1,9 @@
-// Expansion packs (x1, x2): files with a prefix that are kept out of the initial download and loaded by ensurePack(id) on first need;
-// their data registers by mutation (src/data/<id>/index.js). API and rules: docs/PWA_PACKS.md. Pure enough for Node (opts.importer).
-// ensurePack never rejects and never blocks boot; while X1_LIVE / X2_LIVE are false nothing here fetches anything.
+// Lazy packs: prefixed files kept out of the first download, loaded by ensurePack(id) on first need. docs/PWA_PACKS.md.
 
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
 import { CAVE_LIVE } from '../data/cave/live.js';
-import { EP3_LIVE, EP4_LIVE, EP5_LIVE } from './episodes.js';
+import { EP3_LIVE, EP4_LIVE, EP5_LIVE, EP6_LIVE } from './episodes.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -14,12 +12,11 @@ export const PACKS = {
   x2: { entry: '../data/x2/index.js', prefix: 'x2_', assets: 'assets/x2_manifest.json', audioPack: 'ep2',
         touches: ['east_road', 'nameless_hollow', 'nh_chapel', 'court_f1', 'court_f2', 'court_f3'],
         wanted: (flags) => !!flags.ep1_complete, enabled: () => X2_LIVE },
-  // The Deep Stacks (docs/DEEP_STACKS_PLAN.md): all cave code and data stay out of the first download; the generator registers
-  // floors at run time. No audio pack of its own (bands reuse existing tracks). C2-world wires the entrance; until CAVE_LIVE nothing loads.
+  // The Deep Stacks: the generator registers floors at run time
   cave: { entry: '../data/cave/index.js', prefix: 'cave_', assets: 'assets/cave_manifest.json', audioPack: null,
           touches: [],
           wanted: (flags) => !!flags.ep1_complete, enabled: () => CAVE_LIVE },
-  // Episode 3's maps (docs/MAPS.md 8). hard: unplayable unpatched, the field waits as for a prefixed map
+  // hard: unplayable unpatched, the field waits as for a prefixed map
   ep3: { entry: '../data/maps/ep3/index.js', prefix: 'ep3/', assets: null, audioPack: 'ep3', hard: true,
          touches: ['sand_road', 'emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse', 'foundry_f1', 'foundry_f2', 'foundry_f3', 'foundry_heart', 'nameless_hollow', 'nh_inn'],
          wanted: (f) => !!(f.ep2_started || f.ep2_complete || f.ep3_started), enabled: () => EP3_LIVE },
@@ -27,6 +24,8 @@ export const PACKS = {
          wanted: (f) => !!(f.ep3_complete || f.ep4_started), enabled: () => EP4_LIVE },
   ep5: { entry: '../data/ep5/index.js', prefix: 'ep5_', assets: 'assets/ep5_manifest.json', audioPack: 'ep5', hard: true, touches: ['ep4_vw_inn', 'ep4_valewyn'],
          wanted: (f) => !!(f.ep4_complete || f.ep5_started), enabled: () => EP5_LIVE },
+  ep6: { entry: '../data/ep6/index.js', prefix: 'ep6_', assets: 'assets/ep6_manifest.json', audioPack: 'ep6', hard: true, touches: ['ep5_sh_inn', 'ep5_saffron'],
+         wanted: (f) => !!(f.ep5_complete || f.ep6_started), enabled: () => EP6_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
 };
 
@@ -125,12 +124,7 @@ export function awaitPacks(ids, ms = GUARD_MS, opts) {
   });
 }
 
-// ---------------------------------------------------------------- tiles fragment
-/**
- * Merge a pack's tile fragment (assets/tiles/<id>_tiles.json, same shape as tiles.json) into the live tile database, IN
- * PLACE (the tile map holds the object). Never overwrites an id the database already has (reported in `clashes`).
- * terrainOrder is appended without duplicates. Pure. Returns { added, clashes: ['terrains.peat', ...] }.
- */
+/** Merge a pack's tile fragment into the live tile database in place; never overwrites an id. Returns { added, clashes }. */
 export function mergeTileFragment(db, frag) {
   const out = { added: 0, clashes: [] };
   if (!db || !frag || typeof frag !== 'object') return out;
@@ -159,7 +153,6 @@ export function mergeTileFragment(db, frag) {
   return out;
 }
 
-// ---------------------------------------------------------------- ensurePack
 function filesUrl(engine) {
   return engine && engine.assets && engine.assets.url ? engine.assets.url(PACK_FILES_PATH) : new URL('../../' + PACK_FILES_PATH, import.meta.url).href;
 }
@@ -257,13 +250,7 @@ function warm(res, opts) {
   } else idle();
 }
 
-/**
- * Load a pack: import its entry, register its data, load its asset fragment, merge its tiles, start its audio pack, then
- * (idle) warm every file so the service worker's runtime cache holds the whole pack for offline play.
- * Idempotent: repeat calls return the same promise while it is loading or has succeeded. After a failure the next call
- * (and one automatic retry after 5 s) tries again. Resolves { id, ok, failed, skipped, ms }; never rejects.
- * opts (tests and QA): engine, importer(path), packFiles, table, enabled, warm:false, retryMs, quiet.
- */
+/** Load a pack (entry, data, assets, tiles, audio, then an idle warm). Idempotent; retried after a failure; never rejects. */
 export function ensurePack(id, opts = {}) {
   opts = { ...defaults, ...opts };
   const def = defOf(id, opts);
@@ -298,7 +285,6 @@ export function ensurePack(id, opts = {}) {
   return p;
 }
 
-// ---------------------------------------------------------------- the watchers (main.js)
 function slotFlags(engine) {
   const out = [];
   const save = engine && engine.save;
@@ -309,11 +295,7 @@ function slotFlags(engine) {
   return out;
 }
 
-/**
- * Warm in the background: once after the title is up for every pack any save slot wants, and again the moment a running game
- * first satisfies wanted(flags) (checked on every scene change and every 3 s). Does nothing at all, not even a timer, while
- * every pack is disabled. `params` is a URLSearchParams: ?pack=x1,x2 forces packs on (QA). Returns a stop() function.
- */
+/** Warm every pack a save or the running game wants (?pack=x1,x2 forces packs on). No timer while all are off. Returns stop(). */
 export function startPackWatch(engine, params) {
   bindPacks(engine);
   const q = params && params.get ? params.get('pack') : null;

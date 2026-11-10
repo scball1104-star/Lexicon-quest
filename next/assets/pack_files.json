@@ -236,6 +236,27 @@
   "src/data/maps/ep5_sh_smithy.js",
   "src/data/maps/ep5_ship.js"
  ],
+ "ep6": [
+  "assets/ep6_manifest.json",
+  "src/data/ep6/ai.js",
+  "src/data/ep6/encounters.js",
+  "src/data/ep6/enemies.js",
+  "src/data/ep6/flags.js",
+  "src/data/ep6/gale.js",
+  "src/data/ep6/hooks.js",
+  "src/data/ep6/index.js",
+  "src/data/ep6/items.js",
+  "src/data/ep6/ledger.js",
+  "src/data/ep6/loot.js",
+  "src/data/ep6/maps.js",
+  "src/data/ep6/npcs.js",
+  "src/data/ep6/quests.js",
+  "src/data/ep6/shops.js",
+  "src/data/ep6/skills.js",
+  "src/data/ep6/start.js",
+  "src/data/ep6/story.js",
+  "src/data/ep6/text.js"
+ ],
  "tier": [
   "assets/tier_manifest.json",
   "src/data/tier/index.js",
