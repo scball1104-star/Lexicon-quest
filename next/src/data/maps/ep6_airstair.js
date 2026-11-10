@@ -115,7 +115,7 @@ const events = [
   sign('sea_stack_sign', 14, 42, 'ep6_sea_stack', { solid: false }),
   sign('chain_sign', 11, 42, 'ep6_great_chain', { solid: false }),
   sign('rope_sign', 9, 42, 'ep6_rope_stair', { solid: false }),
-  chest('chest_foot', 20, 43, 'wood', { item: 'hi_potion', qty: 2 }),
+  chest('chest_foot', 20, 43, 'wood', { item: 'hi_potion', qty: 2, gold: 1500 }),
   // ---- landing 1: mira_asks (the whole column x 12)
   trigger('mira_trig', 12, 37, 1, 3, 'mira_asks'),
   // ---- landing 2: the scripted fight (the whole column x 11), the plan anchor never stands, the group after the fight

@@ -45,6 +45,7 @@ const armor = (id, slot, tier, ilvl, name, price, who, stats, desc) =>
 export const EP6_EQUIPMENT = Object.fromEntries([
   // Tier 11 (ilvl 25): Zephyr Landing from arrival. E6-fixes A4 (PLAYTEST_REVIEW_8 item 4): about 30% off the first prices, so the
   // arrival gold (about 3,800 to 4,800) buys two pieces (a helm and boots, 3,900; a hood and a charm, 3,650), as plan 7.6 asks.
+  // The Airstair's foot chest adds 1,500 G (chest_foot), so an Episode 5 save that carries little gold still buys two.
   armor('skysteel_mail', 'body', 11, 25, 'Skysteel Mail', 4300, HB, { def: 44, spr: 8 }, 'Light plate hammered from a ship\'s keel. It does not catch the wind.'),
   armor('windweave_robe', 'body', 11, 25, 'Windweave Robe', 4200, ['mira'], { def: 28, spr: 22, mag: 10 }, 'Cloud-white cloth that moves a moment before the wind does.'),
   armor('aviator_helm', 'head', 11, 25, 'Aviator Helm', 2100, HB, { def: 19, spr: 5 }, 'Leather and brass, with glass for the eyes.'),
