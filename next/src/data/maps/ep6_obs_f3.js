@@ -134,7 +134,7 @@ const events = [
   enemy('e_p', 26, 3, 'storm_page', 'e6o3_mixed', 'guard'),
   object('keyhole_shut', 21, 2, 'sky_keyhole_closed', { w: 3, text: 'ep6_sky_keyhole', ifNot: 'scribe_door_open' }),
   lockedDoor('door_scribe', 21, 2, 'compass_key', ['ep6_obs_eyrie', 11, 18, 'up'],
-    { w: 3, sprite: 'door_boss', text: 'ep6_sky_keyhole', if: 'scribe_door_open' }),
+    { w: 3, sprite: 'sky_keyhole', text: 'ep6_sky_keyhole', if: 'scribe_door_open' }),
   glow('l_beacon', 14, 4, 3),
 ];
 
@@ -162,7 +162,7 @@ export default {
     vex_edge: [17, 12], vex_hang: [19, 13], bram_line: [18, 13], vex_ahead: [17, 11],
     party_stop_fall: [17, 15], party_stop_fall_m: [16, 15], party_stop_fall_b: [18, 15],
     vane_r_w: [17, 11], stone: [17, 7], return: [25, 8], return_stage: [24, 10], return_stage_m: [23, 10], return_stage_b: [25, 10],
-    aeris_wait_3: [24, 8], east_deck: [22, 10],
+    aeris_wait_3: [26, 8], east_deck: [22, 10],   // (24,8) is the one cell up to the stair and (25,9) faces the lamp
     pippa_spot: [15, 3], aeris_beacon: [17, 3], beacon_stage: [15, 5], beacon_stage_m: [14, 5], beacon_stage_b: [16, 5],
     keyhole: [22, 3],
   },

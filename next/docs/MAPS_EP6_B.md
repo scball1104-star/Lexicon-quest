@@ -127,8 +127,8 @@ Marks: `arrival` (18,35), `font` (24,34), `spire_top` (16,4), `lift_down` (10,33
 +b (19,26), `aeris_wait_1` (18,24), `vane_listen` (12,25), `listen_in` (16,24), `listen` (14,16), `listen_stage` (15,18) +m
 (14,18) +b (16,18), `aeris_wait_2` (15,16), `west_ledge` (13,21), `lantern_at` (11,22), `vex_edge` (17,12), `vex_hang`
 (19,13, over cloud), `bram_line` (18,13), `vex_ahead` (17,11), `party_stop_fall` (17,15) +m (16,15) +b (18,15) (two clear
-rows), `vane_r_w` (17,11), `stone` (17,7), `return` (25,8), `return_stage` (24,10) +m (23,10) +b (25,10), `aeris_wait_3`
-(24,8), `east_deck` (22,10), `pippa_spot` (15,3), `aeris_beacon` (17,3), `beacon_stage` (15,5) +m (14,5) +b (16,5), `keyhole`
+rows), `vane_r_w` (17,11), `stone` (17,7), `return` (25,8), `return_stage` (24,10) +m (23,10) +b (25,10), `aeris_wait_3` (26,8, off the stair cell)
+`east_deck` (22,10), `pippa_spot` (15,3), `aeris_beacon` (17,3), `beacon_stage` (15,5) +m (14,5) +b (16,5), `keyhole`
 (22,3).
 
 ## 4. `ep6_obs_eyrie` The Scribe's Eyrie (24 x 20, tint `storm` until scribe_defeated then `none`, dark 0.3)

@@ -8296,6 +8296,1060 @@
     }
    ],
    "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "story_ep6_morning_slip",
+   "note": "E6: ep6_morning, the boarding slip close-up in the Dune Lantern Rest: four seats, three of us (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { (await import('./src/data/ep6/story.js')).GATE.live = true; return true; })()"
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Four seats. There are three of us\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep6_morning_slip: Bram counts the seats"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_mira_asks",
+   "note": "E6: mira_asks, the first rope landing of the Airstair: Mira's question, the first truth choice (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_airstair",
+      14,
+      38,
+      "left"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"mira_asks\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Are you scared of what it says\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_mira_asks: Mira asks"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "battle_airstair_first_gust",
+   "note": "E6: the Airstair teaching fight: two Storm Harriers Aloft, the Gust marker three actions out",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e6a_first",
+      {
+       "seed": 1,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (LQ_ENGINE.scene.b.state.gale && LQ_ENGINE.scene.b.state.gale.gustIn <= 3)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "!!LQ_ENGINE.scene.b.state.gale",
+     "message": "the fight has a Gale"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "battle_gale_gust",
+   "note": "E6: an F1 fight after the Gust has fallen: the party blown back, the marker reset",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 26; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e6o1_harriers",
+      {
+       "seed": 2,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (LQ_ENGINE.scene.b.state.gale && LQ_ENGINE.scene.b.state.gale.gusts >= 1)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.state.gale.gusts >= 1",
+     "message": "a Gust has fallen"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_lane_a",
+   "note": "E6: the Airstair's third landing: lane A streaming white across the gap to the east ledge",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_airstair",
+      4,
+      24,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.wind().active && LQ_DEBUG.wind().live > 0",
+     "message": "the lanes are live"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_post_b",
+   "note": "E6: lane B on the Airstair: the mooring post with its pennant, the side ledge and its chest",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_airstair",
+      15,
+      15,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep6_post_b: the field is on top"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_zephyr_board",
+   "note": "E6: Zephyr Landing, the board plaza: the departure board, the tied chimes, the storm on the skyline",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zephyr",
+      22,
+      19,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep6_zephyr_board: the field is on top"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_chart_room_manifest",
+   "note": "E6: chart_room, the struck manifest close-up: eleven names and one line scratched out (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zl_charts",
+      9,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"chart_room\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"eleven names\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_chart_room_manifest: the manifest"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_anchor_lesson",
+   "note": "E6: anchor_lesson, the east dock: Bram drives his spear through the planks and holds Mira (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zephyr",
+      42,
+      16,
+      "right"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"anchor_lesson\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Bram drives his spear\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_anchor_lesson: Bram holds"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_obs_f1_vane",
+   "note": "E6: F1 the Windward Causeways: vane_c turned, the boardwalk's lane blowing west to the relay deck",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f1",
+      35,
+      7,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const r = await LQ_DEBUG.turnVane(\"vane_c\"); if (!r || !r.ok) throw new Error('the vane was refused'); for (let i = 0; i < 200; i++) { await new Promise((ok) => setTimeout(ok, 40)); const w = LQ_DEBUG.wind(); if (w && !w.busy && w.anim == null && LQ_DEBUG.scene() === 'field') return w.turned; } throw new Error('the vane never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.wind().turned.includes('a')",
+     "message": "group a is turned"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_obs_f2_ducts",
+   "note": "E6: F2 the Hall of Broken Signals: the fan vane, the ducts through the grilles, the dark hall",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f2",
+      9,
+      18,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep6_obs_f2_ducts: the field is on top"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_vex_relay",
+   "note": "E6: vex_relay, the crown relay: Vex with both arms in the relay, the sixth list (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f2",
+      20,
+      7,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_relay\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Six lists\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_relay: Vex shows the list"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "battle_gale_engine",
+   "note": "E6: the Gale Engine in the bellows hall, the Gust marker on its timeline",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"anchor_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 26; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "gale_engine",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (b.round >= 2)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'battle'",
+     "message": "in the fight"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_ep6_obs_f3_ring",
+   "note": "E6: F3 the Eye of the Storm: the Anchor ring round its block, the post, the dark lamp, lightning off the cloud",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f3",
+      16,
+      32,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep6_obs_f3_ring: the field is on top"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_vex_falls_letter",
+   "note": "E6: vex_falls, the broken causeway: the letter close-up, a Keeper's warm hand (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f3",
+      17,
+      16,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"vex_falls\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"A short letter in a warm, hurried hand\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_vex_falls_letter: the letter"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_fifth_voice",
+   "note": "E6: fifth_voice, the beacon platform: Mira reads the name off the letter, Pippa Voss (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\", \"vex_held\", \"asker_known\", \"pledge_return\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; g.items[\"liora_letter\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_f3",
+      22,
+      4,
+      "left"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"fifth_voice\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Pippa. Pippa Voss.\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_fifth_voice: the name"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "battle_scribe_rewrite",
+   "note": "E6: the Storm Scribe rewrites the course: a Rewrite pinned to the Gust marker, Bram able to Anchor",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"anchor_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 27; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "scribe",
+      {
+       "seed": 6,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (open && (LQ_ENGINE.scene.b.state.gale && !!LQ_ENGINE.scene.b.state.gale.pinned)) return i; if (open) LQ_DEBUG.battleAct({ type: 'defend' }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 4
+    },
+    {
+     "assert": "!!LQ_ENGINE.scene.b.state.gale.pinned",
+     "message": "a Rewrite is pinned"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "battle_scribe_ward",
+   "note": "E6: the Storm Scribe, phase 2: the Storm Script Ward with the False Beacon and the Broken Compass",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"anchor_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(() => { for (const m of LQ_ENGINE.game.party) m.level = 27; return true; })()"
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "scribe",
+      {
+       "seed": 6,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 60
+    },
+    {
+     "eval": "(() => { const S = () => LQ_ENGINE.scene.b.units().find(u => u.alive && u.id === 'scribe'); for (let i = 0; i < 12000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle') return -2; const b = LQ_DEBUG.state().battle; const open = b && b.menu !== 'closed' && !b.fast; if (!open) { LQ_DEBUG.advance(5); continue; } if (s.b.units().some(u => u.alive && (u.id === 'false_beacon' || u.id === 'broken_compass'))) return i; const o = S(); if (!o) return -3; o.hp = Math.min(o.hp, Math.floor(o.maxHp * 0.685)); LQ_DEBUG.battleAct({ type: 'attack', target: o.uid }); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 90
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => u.alive && (u.id === 'false_beacon' || u.id === 'broken_compass'))",
+     "message": "the ward lights are up"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_scribe_after_script",
+   "note": "E6: scribe_after, the Wind Script unrolls: every name of the realm on the sail-cloth (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\", \"vex_held\", \"asker_known\", \"pledge_return\", \"pippa_found\", \"told_aeris\", \"scribe_door_open\", \"scribe_tried\", \"scribe_defeated\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_obs_eyrie",
+      11,
+      17,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"every name of the realm\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_scribe_after_script: the Wind Script"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_cloud_library_page",
+   "note": "E6: cloud_library, the first page under glass, torn: Keep this one. (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\", \"vex_held\", \"asker_known\", \"pledge_return\", \"pippa_found\", \"told_aeris\", \"scribe_door_open\", \"scribe_tried\", \"scribe_defeated\", \"wind_script_restored\", \"fragment6_get\", \"compass_restored\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_library",
+      10,
+      11,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Keep this one\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_cloud_library_page: the page"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_isles_return",
+   "note": "E6: isles_return, dawn over Zephyr Landing: the chimes ring, LANDED, DOCK FOUR (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\", \"vex_held\", \"asker_known\", \"pledge_return\", \"pippa_found\", \"told_aeris\", \"scribe_door_open\", \"scribe_tried\", \"scribe_defeated\", \"wind_script_restored\", \"fragment6_get\", \"compass_restored\", \"library_reached\", \"first_page_read\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zephyr",
+      22,
+      5,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"the chimes of Zephyr Landing ring\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_isles_return: the chimes"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "story_ep6_ending",
+   "note": "E6: ep6_ending, the chart tower roof at night: the needle swings north, and stays (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep6_morning_done\", \"ep6_started\", \"ep6_boarded\", \"airstair_arrived\", \"mira_asked\", \"mira_told\", \"airstair_fight_done\", \"saw_gust\", \"saw_isles\", \"zephyr_arrived\", \"liora_met\", \"met_aeris\", \"charts_seen\", \"anchor_learned\", \"windward_pass\", \"obs_entered\", \"obs_f1_arrived\", \"aeris_memory_1\", \"compass_key_found\", \"obs_f1_done\", \"obs_f2_arrived\", \"aeris_memory_2\", \"vex_relay_met\", \"sixth_list_get\", \"engine_tried\", \"engine_defeated\", \"obs_f2_done\", \"obs_f3_arrived\", \"aeris_came\", \"pledge_anchor\", \"pledge_listen\", \"vex_held\", \"asker_known\", \"pledge_return\", \"pippa_found\", \"told_aeris\", \"scribe_door_open\", \"scribe_tried\", \"scribe_defeated\", \"wind_script_restored\", \"fragment6_get\", \"compass_restored\", \"library_reached\", \"first_page_read\", \"isles_restored\"]) g.flags[f] = true; g.items[\"boarding_slip\"] = 1; g.items[\"compass_key\"] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zephyr",
+      12,
+      4,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"ep6_ending\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"The needle swings north\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep6_ending: the needle"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "ui_title_ep6",
+   "note": "E6: the title with an Episode 5 finish in slot 0: the Episode 6 row offered, its help line beside it",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { await LQ_DEBUG.newGameEp6('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 36000, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()",
+     "timeout": 90000
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep6')",
+     "timeout": 30000
+    },
+    {
+     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep6'); return m.index; })()"
+    },
+    {
+     "frames": 90
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
   }
  ]
 }

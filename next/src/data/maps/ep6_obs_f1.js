@@ -182,7 +182,7 @@ export default {
   music: 'storm_observatory', ambience: 'sky_wind', tileset: 'ep6',
   lighting: { tint: 'none', dark: 0 },
   under: 'cloudbank',
-  legend: { c: 'cloudbank', p: 'skyplank', g: 'stormglass', b: 'skybridge' },
+  legend: { c: 'cloudbank', p: 'skyplank', g: 'stormglass', b: 'skybridge', '.': 'skyplank' },   // '.': the floor a Dash carves (carveOpenings), never the cloud
   ground: R.ground,
   wind: { kind: 'open', lanes: R.lanes, turned: R.turned },
   overlays: [],

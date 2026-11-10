@@ -102,18 +102,17 @@ test('an Episode 5 credits save loads, rolls the Episode 5 credits with the unch
   const h = CREDITS_HANDOFF[5];
   assert.equal(h.map, 'ep5_sh_inn');
   assert.equal(h.mark, 'inn_bed');
-  assert.equal(EP6_LIVE, false);
-  assert.deepEqual(h.endCard, END_CARD_EP5, 'the Episode 5 end card is unchanged while EP6_LIVE is false');
-  assert.equal(h.endCard.sub, 'Episode 6 is not playable yet.');
+  if (!EP6_LIVE) assert.deepEqual(h.endCard, END_CARD_EP5, 'the Episode 5 end card is unchanged while EP6_LIVE is false');
+  assert.equal(h.endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch (E6-integrate flipped it on the branch)');
   markCreditsRolled(g, 5);
   setPosition(g, h.map, 17, 7, 'down');
   assert.equal(creditsPending(g, has), 0, 'no Episode 6 credits entry is due');
-  assert.ok(!packsToAwait(g.flags).includes('ep6'), 'the wake does not wait for the ep6 pack while it is off');
+  assert.equal(packsToAwait(g.flags).includes('ep6'), EP6_LIVE, 'the wake waits for the ep6 pack only while it is live');
   autosave(save, g);
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
   assert.equal(save.load(1).map, 'ep5_sh_inn');
   assert.equal(save.load(1).counters.credits5_rolled, 1);
-  assert.ok(!save.load(1).flags.ep6_started, 'nothing here runs ep6_morning');
+  assert.ok(!save.load(1).flags.ep6_started, 'nothing here runs ep6_morning (the field does, on the inn wake trigger)');
 });
 
 test('an Episode 4 save (no ep5_complete) never wants the pack, even with the switch on', () => {
@@ -139,10 +138,5 @@ test('an old save without any Episode 6 field (any slot) loads and autosaves to 
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-0']);
 });
 
-// Plan 10.8's cases that need the real story (E6-story's ep6_morning and its guard), the patches and the maps (E6-maps-a/b)
-// and the field system (E6-world). E6-integrate turns each on.
-const WAIT = 'needs story.js ep6_morning, src/data/maps/ep6_patches.js and the ep6 maps (waves 6a to 6c); E6-integrate turns this on';
-test('an Episode 5 credits save reaches ep6_morning on the next enter of ep5_sh_inn with EP6_LIVE on, and not with it off', { skip: WAIT }, () => {});
-test('a Fine Print (tier_1) save never reaches ep6_morning', { skip: WAIT }, () => {});
-test('an Episode 4 save (no ep5_complete) never reaches ep6_morning', { skip: WAIT }, () => {});
-test('a save made on a lane cell after a blocked stop reloads on that cell with the authored lanes, the party able to step off', { skip: 'needs src/data/ep6/field/** (E6-world, wave 6b) and a map with a wind block (wave 6c); E6-integrate turns this on' }, () => {});
+// Plan 10.8's cases that need the real story (ep6_morning and its guard), the patches, the maps and the field system are in
+// qa/integrate/ep6_integrate.test.mjs (E6-integrate).

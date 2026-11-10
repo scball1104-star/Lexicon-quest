@@ -42,7 +42,7 @@ const PARTY = ['hero', 'mira', 'bram'];
 const MAP_ACTORS = ['scribe'];   // the Storm Scribe's map actor in ep6_obs_eyrie (sprite scribe_avatar, E6-maps-b)
 const EP6_MUSIC = ['zephyr', 'storm_observatory', 'boss_scribe', 'saffron'];   // plan 2.7 (saffron rides the ep5 fragment)
 const EP6_SFX = ['gust_carry', 'gust_land', 'vane_turn', 'mooring_catch', 'gale_gust', 'anchor_set', 'rewrite_read', 'rewrite_break', 'signal_lamp'];
-const EP6_SPRITES = ['npc_aeris', 'npc_liora', 'npc_bennet', 'npc_suri', 'npc_ilex', 'npc_nova', 'npc_piri', 'npc_thea', 'npc_pippa',
+const EP6_SPRITES = ['npc_aeris', 'npc_aeris_young', 'npc_liora', 'npc_bennet', 'npc_suri', 'npc_ilex', 'npc_nova', 'npc_piri', 'npc_thea', 'npc_pippa',
   'npc_deckhand', 'npc_vex', 'npc_yara', 'storm_harrier'];
 const PAGE_IDS = ['ep6_slip', 'ep6_manifest', 'ep6_letter', 'ep6_page'];
 const TINTS = ['none', 'dawn', 'dusk', 'night'];

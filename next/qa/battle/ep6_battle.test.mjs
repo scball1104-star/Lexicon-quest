@@ -76,10 +76,10 @@ test('Episode 6 ids are registered, unlisted until the maps exist, and Episodes 
   assert.equal(E6.enemies.EP6_FOES.length, 7);
   for (const id of [...E6.enc.EP6_GROUP_IDS, ...E6.enc.EP6_BOSS_IDS]) assert.ok(ENCOUNTERS[id], id);
   assert.equal(E6.enc.EP6_GROUP_IDS.length, 13);
-  assert.equal(E6.enc.EP6_MAPS_LISTED, false, 'E6-maps-b lists the zones');
+  assert.equal(E6.enc.EP6_MAPS_LISTED, true, 'the Observatory maps exist: the zones are listed (E6-integrate)');
   for (const z of E6.enc.EP6_ZONE_ORDER) {
     assert.ok(ZONES[z], z); assert.equal(ZONES[z].episode, 6);
-    assert.ok(!Object.keys(ZONES).includes(z), `${z} stays out of Object.keys(ZONES) until EP6_MAPS_LISTED`);
+    assert.ok(Object.keys(ZONES).includes(z), `${z} is listed in Object.keys(ZONES) once EP6_MAPS_LISTED`);
   }
   assert.deepEqual(E6.enc.GALE_START, { e6a_first: { gustIn: 3 } });
   for (const z of before.zones) assert.ok(Object.keys(ZONES).includes(z), z);

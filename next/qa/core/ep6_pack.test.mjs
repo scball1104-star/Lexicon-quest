@@ -22,7 +22,7 @@ const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const read = (rel) => fs.readFileSync(path.join(NEXT, rel), 'utf8');
 const exists = (rel) => fs.existsSync(path.join(NEXT, rel));
 
-test('pack table: the ep6 entry is exactly plan 13.2 seam 1, behind EP6_LIVE (false)', () => {
+test('pack table: the ep6 entry is exactly plan 13.2 seam 1, behind EP6_LIVE', () => {
   const d = PACKS.ep6;
   assert.ok(d, 'PACKS.ep6');
   assert.equal(d.entry, '../data/ep6/index.js');
@@ -36,7 +36,7 @@ test('pack table: the ep6 entry is exactly plan 13.2 seam 1, behind EP6_LIVE (fa
   assert.equal(d.wanted({ ep6_started: true }), true);
   assert.equal(d.wanted({ ep4_complete: true, ep5_started: true }), false, 'an Episode 5 run before its credits does not want it');
   assert.equal(d.enabled(), EP6_LIVE);
-  assert.equal(EP6_LIVE, false, 'seam 2: the switch ships off; E6-integrate flips it on the branch');
+  assert.equal(typeof EP6_LIVE, 'boolean', 'seam 2: the switch (E6-integrate flips it on the branch; shipping stays with Scott or Stephen)');
   assert.equal(EP5_LIVE, true);
   // ep5 comes first in the table, so packForMap still names ep5 for the two shared maps; packsForMap names both
   assert.equal(packForMap('ep5_sh_inn').id, 'ep5');
@@ -55,13 +55,16 @@ test('pack table: the ep6 entry is exactly plan 13.2 seam 1, behind EP6_LIVE (fa
 test('nothing is fetched while EP6_LIVE is false: ensurePack skips without importing, the call sites do not wait for it', async () => {
   resetPacks();
   let calls = 0;
-  const r = await ensurePack('ep6', { importer: async () => { calls++; return {}; }, quiet: true });
+  // the off state is asserted through the `enabled` override the switch feeds, so this holds before and after the flip
+  const r = await ensurePack('ep6', { importer: async () => { calls++; return {}; }, quiet: true, enabled: false });
   assert.equal(r.skipped, true);
   assert.equal(calls, 0, 'the entry was not imported');
-  assert.equal(packEnabled('ep6'), false);
+  assert.equal(packEnabled('ep6', { enabled: false }), false);
+  assert.equal(packEnabled('ep6'), EP6_LIVE);
   const done5 = { ep5_complete: true, ep4_complete: true, ep3_complete: true, ep2_complete: true, ep1_complete: true };
-  assert.ok(!packsToAwait(done5).includes('ep6'), 'an Episode 5 finisher does not wait for the pack while it is off');
-  assert.ok(!packsToAwait({ ep6_started: true }).includes('ep6'));
+  assert.ok(!packsToAwait(done5, { enabled: false }).includes('ep6'), 'an Episode 5 finisher does not wait for the pack while it is off');
+  assert.ok(!packsToAwait({ ep6_started: true }, { enabled: false }).includes('ep6'));
+  assert.equal(packsToAwait(done5).includes('ep6'), EP6_LIVE, 'an Episode 5 finisher waits for the pack only while live');
   assert.ok(packsToAwait(done5, { enabled: true }).includes('ep6'), 'and does once the switch is on');
   const done4 = { ep4_complete: true, ep3_complete: true, ep2_complete: true, ep1_complete: true };
   assert.ok(!packsToAwait(done4, { enabled: true }).includes('ep6'), 'an Episode 4 save (no ep5_complete) never wants the pack');
@@ -134,10 +137,10 @@ test('pack entry: ORDER, missing modules skipped, idempotent, the ep5 pack regis
   assert.ok(CREDITS_HANDOFF[5], 'the ep5 hooks ran before the ep6 hooks');
   assert.ok(globalThis.LQ_EP6 && typeof globalThis.LQ_EP6.title === 'function' && typeof globalThis.LQ_EP6.start === 'function'
     && typeof globalThis.LQ_EP6.offer === 'function');
-  assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'EP6_LIVE false: the Episode 5 end card is unchanged');
-  assert.equal(CREDITS_HANDOFF[5].endCard.sub, 'Episode 6 is not playable yet.');
+  if (!EP6_LIVE) assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'EP6_LIVE false: the Episode 5 end card is unchanged');
+  assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch');
   assert.equal(ep6.EP6_MAPS_LISTED, ep6.mapsListed());
-  assert.equal(ep6.EP6_MAPS_LISTED, false, 'the maps are not listed in wave 6a');
+  assert.equal(ep6.EP6_MAPS_LISTED, true, 'the maps are listed (E6-integrate, wave 6d)');
   const src = read('src/data/ep6/index.js');
   assert.ok(src.indexOf('await ensureEp5(engine)') < src.indexOf('for (const name of ORDER)'), 'run() awaits ep5 before the first ep6 module');
   assert.ok(src.indexOf('prefetchCode()') < src.indexOf('await ensureEp5(engine)'), 'the ep6 fetches start before the wait');

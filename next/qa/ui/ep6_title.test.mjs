@@ -49,8 +49,7 @@ test('live: shown once any base-game slot has ep5_complete, naming the newest; n
   assert.equal(o.slot, 3);
   assert.equal(o.name, 'Wren');
   assert.equal(ep6Offer(save, '', { live: false }).show, false, 'off: nothing, whatever the saves hold');
-  assert.equal(EP6_LIVE, false);
-  assert.equal(ep6Offer(save, '').show, false, 'the real switch is off in wave 6a');
+  assert.equal(ep6Offer(save, '').show, EP6_LIVE, 'the real switch decides');
 });
 
 test('the row text matches plan 10.5 and 5.3', () => {
@@ -82,10 +81,10 @@ test('hooks: credits entry 6 only with text.js CREDITS_EP6; the Episode 5 end ca
   const r = registerHooks(null, { text: { CREDITS_EP6: cards }, quests: { MAIN_QUEST_EP6: Q6 } });
   try {
     assert.ok(r.installed.includes('credits6') && r.installed.includes('quest'));
-    assert.ok(!r.installed.includes('endcard5'), 'the end card is left alone while EP6_LIVE is false');
+    assert.equal(r.installed.includes('endcard5'), EP6_LIVE, 'the end card is left alone while EP6_LIVE is false');
     assert.equal(CREDITS_HANDOFF[6].flag, 'ep6_complete');
-    assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'off: unchanged');
-    assert.equal(CREDITS_HANDOFF[5].endCard.sub, 'Episode 6 is not playable yet.');
+    if (!EP6_LIVE) assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'off: unchanged');
+    assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.');
     assert.deepEqual(QUEST_EXT[0], ['ep6_started', Q6], 'Episode 6 is asked before Episode 5');
     assert.equal(globalThis.LQ_EP6, HOOKS);
     registerHooks(null, { text: { CREDITS_EP6: cards }, quests: { MAIN_QUEST_EP6: Q6 } });

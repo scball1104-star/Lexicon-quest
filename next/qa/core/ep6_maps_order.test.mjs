@@ -84,6 +84,5 @@ test('a broken map module (not a missing one) is not swallowed', async () => {
   assert.equal(isMissing(new SyntaxError('Unexpected token'), '/ep6_zephyr.js'), false);
 });
 
-// Plan 3.4's map cases with the real patches (with EP6_LIVE off no trigger fires and no ship is drawn at the water stairs; the
-// berth's door lands on a walkable cell) need ep6_patches.js and ep6_airstair.js (E6-maps-a, wave 6c): E6-integrate turns them on.
-test('plan 3.4 with the real patches: no trigger or ship while EP6_LIVE is off, the berth door lands on open ground', { skip: 'needs src/data/maps/ep6_patches.js and ep6_airstair.js (E6-maps-a, wave 6c); E6-integrate turns this on' }, () => {});
+// Plan 3.4's map cases with the real patches (no trigger or ship while EP6_LIVE is off, the berth doors land on open ground)
+// are in qa/integrate/ep6_integrate.test.mjs (E6-integrate), with the real patches and maps.

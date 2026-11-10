@@ -286,6 +286,7 @@ async function chart_room(s) {
   await say(s, 'mira', "It's still there. Just barely.");
   await say(s, 'bram', 'Somebody wrote her off the wind.');
   await say(s, 'aeris_t', 'Somebody wrote her off everything.');
+  await s.despawn('liora_t');   // she goes back to dock four: liora_door (9,12) is the one cell in front of the exit
   await s.camera.follow('hero');
   await s.setFlag('charts_seen');
 }
@@ -370,7 +371,7 @@ async function memoryOut(s, ids) {
 async function aeris_memory_1(s) {
   await stage(s, 'relay_stage');
   await memoryIn(s, 'relay_old');
-  await s.spawn('aeris_m', { sprite: 'npc_aeris', name: 'Aeris', at: 'relay_aeris', dir: 'up' });
+  await s.spawn('aeris_m', { sprite: 'npc_aeris_young', name: 'Aeris', at: 'relay_aeris', dir: 'up' });
   await s.spawn('apprentice_v', { sprite: 'npc_pippa', name: 'The Signal Apprentice', at: 'relay_lamp', dir: 'down' });
   await narrate(s, 'The relay crackles, and replays the wind of a month ago: a fleet in a rising storm, and a lamp on a beacon deck.');
   await say(s, 'scribe_v', 'THE SHORTEST COURSE IS WRITTEN. TAKE IT.');
@@ -401,7 +402,7 @@ async function obs_f2_arrival(s) {
 async function aeris_memory_2(s) {
   await stage(s, 'manifest_stage');
   await memoryIn(s, 'relay_manifest');
-  await s.spawn('aeris_m', { sprite: 'npc_aeris', name: 'Aeris', at: 'manifest_aeris', dir: 'down' });
+  await s.spawn('aeris_m', { sprite: 'npc_aeris_young', name: 'Aeris', at: 'manifest_aeris', dir: 'down' });
   await s.spawn('deckhand_m', { sprite: 'npc_deckhand', name: 'A Deckhand', at: 'manifest_deck', dir: 'left' });
   await narrate(s, 'The relay replays a night: a quill drawing one line through one name, on every manifest at once.');
   await say(s, 'scribe_v', 'AN EXTRA NAME. A BEACON POINTS AT THE EYE. A BEACON IS A ROAD. STRUCK.');
@@ -519,7 +520,8 @@ async function aeris_turns(s) {
   await say(s, 'aeris_t', 'I followed the chart home once. Not twice.');
   await say(s, 'bram', 'Long way, then?');
   await say(s, 'aeris_t', 'Long way.');
-  await s.walk('aeris_t', 'aeris_wait_1');
+  // the first landing and the Anchor deck are joined only by the ring (no walk path): she takes the Kestrel's rope up
+  await spawnAeris(s, 'aeris_wait_1', 'down');
   await s.setFlag('aeris_came');
 }
 

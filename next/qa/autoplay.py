@@ -52,6 +52,14 @@ The Sand Oracle's prophecies are logged with how each ended. Writes <device>-ep5
 
     python next/qa/autoplay.py --episode 5 [--start new] [--device phone]
 
+Episode 6 (E6-integrate, EPISODE6_PLAN 12): the same two starts from <device>-ep5-credits-save.json (built from the last finished
+Episode 5 game): Continue on it in record 1, or the title's "Episode 6: new party" with it in slot 0. Gust lanes follow the map
+agents' solutions (docs/MAPS_EP6_A.md, MAPS_EP6_B.md): a ride is one press from a named cell with its landing checked, a vane one
+confirm with its group checked on the live wind. The Storm Scribe's Rewrites are logged with how each ended. Writes <device>-ep6-*
+files; --all-fights hunts every placed foe once (-all); --from-all continues the Episode 5 --all-fights finish (-from-all).
+
+    python next/qa/autoplay.py --episode 6 [--start new] [--device phone] [--all-fights] [--from-all]
+
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
 Episode 2 runs write <device>-ep2-* files instead. Exit code 1 on any console error, page error, engine error,
@@ -136,9 +144,14 @@ FIELD_JS = """() => {
     for (let i = 0; i < S.m.N; i++) if (S.m.sand[i]) { const x = i % W, y = Math.floor(i / W); cells.push([x, y, f.map.collisionAt(x, y)]); }
     shade = { hour: S.hour, start: S.m.hour, cells, latched: [...S.latched].sort(), busy: !!S.busy || !!S.anim || !!S.revealing };
   }
+  // E6: gust lanes: a ride, the followers catching up or a vane swinging is busy; which groups are turned; is the leader on a live lane
+  let wind = null;
+  const Wd = f.wind;
+  if (Wd && Wd.active && Wd.m) wind = { busy: !!(Wd.carry || Wd.settle || Wd.busy || Wd.anim), turned: Wd.m.groups.filter((_, k) => Wd.mask & (1 << k)),
+    onLane: L ? Wd.isLive(L.tx, L.ty) : false };
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, bridges, crust, tide, shade, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    lantern: f.lantern, ents, actors, bridges, crust, tide, shade, wind, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
     busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
@@ -480,7 +493,7 @@ class Bot:
                 calm = 0
                 continue
             f = self.field()
-            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy') and not (f.get('shade') or {}).get('busy'):
+            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy') and not (f.get('shade') or {}).get('busy') and not (f.get('wind') or {}).get('busy'):
                 calm += 1
                 if calm >= 2:
                     return f
@@ -5228,6 +5241,753 @@ class Episode5(Episode4):
         b.notes.append('warnings: no "unknown ... id", "no actor", "no path" or "no scene" line in the run')
 
 
+def ep6_fixture(device, src_tag=''):
+    """The Episode 5 credits save (EPISODE6_PLAN 10.2): built from the newest finished Episode 5 game (<device>-ep5<src_tag>-last-game.json,
+    else the desktop one) by putting the party where the Episode 5 credits wake it: ep5_sh_inn, inn_bed (17, 7), facing down.
+    Written to <device>-ep5<src_tag>-credits-save.json. Returns the path."""
+    path = OUT / f'{device}-ep5{src_tag}-credits-save.json'
+    if path.exists():
+        return path
+    for src in (OUT / f'{device}-ep5{src_tag}-last-game.json', OUT / f'desktop-ep5{src_tag}-last-game.json'):
+        if src.exists():
+            g = json.loads(src.read_text(encoding='utf-8'))
+            if not (g.get('flags') or {}).get('ep5_complete') or not (g.get('counters') or {}).get('credits5_rolled'):
+                continue
+            if any(k in EP6_FLAG_HINTS for k, v in (g.get('flags') or {}).items() if v):
+                continue
+            g['map'] = 'ep5_sh_inn'
+            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['autosaveSlot'] = 1
+            path.write_text(json.dumps(g), encoding='utf-8')
+            return path
+    raise Fail('no finished Episode 5 game to build the credits save from: run python qa/autoplay.py --episode 5 first')
+
+
+EP6_FLAG_HINTS = ('ep6_started', 'ep6_morning_done', 'ep6_boarded')
+# QA only: a RULE_EXT entry that records the Gale as each battle opens and every Rewrite event of the Storm Scribe (pinned, moved,
+# broken by Anchor or a Break, gone with the Scribe, landed), with Bram's state as a Rewrite lands (plan 12: the bot notes every
+# rewrite and how it was answered).
+GALE_LOG_JS = """(async () => {
+  const R = await import('./src/battle/rules.js');
+  if (R.RULE_EXT.some((h) => h && h.id === 'qa_gale_log')) return true;
+  window.__lqGale = window.__lqGale || [];
+  R.RULE_EXT.push({ id: 'qa_gale_log', start(ctx) {
+    const st = ctx.state || {}, o = st.options || {}, enc = o.encounterId || o.encounter || o.id || null, G = st.gale || null;
+    window.__lqGale.push({ type: 'start', enc, gale: !!G, gustIn: G ? G.gustIn : null });
+    if (typeof ctx.emit !== 'function' || ctx.__qaGale) return;
+    ctx.__qaGale = true;
+    const emit = ctx.emit.bind(ctx);
+    ctx.emit = (ev) => {
+      if (ev && typeof ev.type === 'string' && (/^rewrite/.test(ev.type) || ev.type === 'anchored' || ev.type === 'gust')) {
+        let bram = null;
+        try { const m = (typeof ctx.all === 'function' ? ctx.all() : []).find((u) => u.id === 'bram'); if (m) bram = { alive: !!m.alive, mp: m.mp }; } catch (e) {}
+        window.__lqGale.push({ type: ev.type, enc, reason: ev.reason || null, moved: !!ev.moved, skill: ev.skill || null, on: ev.on, bram });
+      }
+      return emit(ev);
+    };
+  } });
+  return true;
+})()"""
+WIND_JS = "LQ_DEBUG.wind ? LQ_DEBUG.wind() : null"
+
+
+class Episode6(Episode5):
+    """Episode 6, "The Skybound Isles" (docs/story/EPISODE6.md, STAGING_EP6.md, MAPS_EP6_A.md, MAPS_EP6_B.md): from the morning
+    after the Episode 5 credits (Continue on the credits save, or the title's Episode 6 quick start) to the Episode 6 credits and
+    the wake in the Cloudhouse Inn. Gust lanes follow the map agents' reported solutions: a ride is one press from a named
+    ground cell (Episode6.ride, the landing checked against the solution), a vane is turned by confirm from a named cell
+    (Episode6.vane, the group checked on the field's live wind); the walk model never enters a lane (every lane cell is void
+    in the static grid). Fights are Auto at 2x. Each Rewrite of the Storm Scribe is recorded with how it ended (Anchor, a
+    Break, landed). The quick start is checked to write no save slot it does not own, and no run may log an "unknown ... id"
+    warning."""
+
+    # The EXP each zone is left at on the plan's route (tools/sim/ep6.mjs progression(1), from the quick start's 13,300): optional
+    # fights stop there, so a Continue run (an Episode 5 save arrives at Lv 25) and the quick start meet the Scribe near Lv 27.
+    # F2's cap is before the Gale Engine (240 EXP), which is always fought.
+    ZONE_EXP = {'ep6_airstair': 13875, 'ep6_obs_f1': 15031, 'ep6_obs_f2': 15784, 'ep6_obs_f3': 16834}
+
+    def __init__(self, bot, side=True, until=None, start='save'):
+        super().__init__(bot, side=side, until=until, start=start)
+
+    def hunt(self, limit, label):
+        """Optional fights up to the zone's plan EXP; a foe the bot's own save-and-reload check brought back is never hunted again,
+        in either mode (BATTLE 13.7: a run that refights a reloaded floor makes the Scribe look easy), so the level is one honest pass."""
+        f = self.b.settle()
+        exp = ((self.b.game() or {}).get('party') or [{}])[0].get('exp') or 0
+        if exp >= self.ZONE_EXP.get(f['map'], 10 ** 9):
+            return
+        self.b.hunt(limit=limit, label=label, skip=self.beaten[f['map']])
+
+    # ---- gust lanes
+    def wind(self):
+        return self.b.js(WIND_JS) or {}
+
+    def wind_quiet(self, timeout=30000):
+        self.b.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); const w = f && f.wind; "
+                                      "return !f || !w || !w.active || (!w.carry && !w.settle && !w.busy && !w.anim); })()", timeout=timeout, polling=20)
+
+    def leader(self, f=None):
+        f = f or self.b.settle()
+        return (f['leader']['x'], f['leader']['y'])
+
+    def ride(self, start, d, expect, label, puzzle=None):
+        """One ride: stand on `start` (ground, or a stopped lane cell), press `d` once (held a few frames, as a thumb does), and
+        check the ride stops on one of `expect` (the map agent's solution; read from the ride itself, since a step trigger on the
+        landing may stage the party elsewhere at once). One decision of `puzzle`."""
+        b = self.b
+        start, expect = tuple(start), [tuple(c) for c in (expect if isinstance(expect[0], (list, tuple)) else [expect])]
+        for attempt in range(3):
+            if self.leader() != start:
+                self.walk([start], f'{label}: to {start}')
+            if self.leader() != start:
+                raise Fail(f'{label}: could not stand on {start} (at {self.leader()})')
+            n0 = self.wind().get('rides') or 0
+            b.press(d, 10)
+            b.frames(14)
+            self.wind_quiet()
+            w = self.wind()
+            last = w.get('lastRide') or {}
+            end = tuple(int(v) for v in last['path'][-1].split(',')) if (w.get('rides') or 0) > n0 and last.get('path') else None
+            f = b.settle(max_s=900)
+            if end is None and self.leader(f) in expect and self.leader(f) != start:
+                end = self.leader(f)                  # a step onto a post: the ride stops where it starts (no ride counted)
+            if end in expect:
+                self.decisions[puzzle or label] += 1
+                b.notes.append(f'ride {label}: {start} {d} -> {end} ({last.get("stop")}, {len(last["path"])} cells)')
+                return f
+            if end is None and self.leader(f) == start:
+                b.notes.append(f'ride {label}: the press at {start} did not ride (attempt {attempt + 1})')
+                continue
+            raise Fail(f'{label}: the ride from {start} {d} stopped on {end} (leader {self.leader(f)}), not {expect} ({last})')
+        raise Fail(f'{label}: no ride from {start} {d}')
+
+    def vane(self, vane_id, spot, d, label, puzzle=None):
+        """Turn a vane by confirm from `spot` facing `d`; its group must flip on the live wind. One decision."""
+        b = self.b
+        before = set(self.wind().get('turned') or [])
+        if self.leader() != tuple(spot):
+            self.walk([tuple(spot)], f'{label}: to {vane_id}')
+        b.face(d)
+        b.tap('confirm', 3)
+        b.frames(10)
+        self.wind_quiet()
+        b.settle()
+        after = set(self.wind().get('turned') or [])
+        if after == before:
+            raise Fail(f'{label}: {vane_id} did not turn its group (turned {sorted(before)} -> {sorted(after)})')
+        self.decisions[puzzle or label] += 1
+        b.notes.append(f'vane {vane_id}: turned {sorted(before)} -> {sorted(after)}')
+
+    def puzzle_done(self, label):
+        n = self.decisions.pop(label, 0)
+        if n:
+            self.b.notes.append(f'lane {label}: {n} decisions')
+
+    def try_chest(self, ent_id, label=''):
+        try:
+            return self.chest(ent_id)
+        except Fail as e:
+            self.b.notes.append(f'{label or ent_id} skipped: {e}')
+            return False
+
+    def round_trip(self, label):
+        """Save to this run's own slot only, quit, load it back, and check the Episode 6 world state came back (EPISODE6_PLAN 12,
+        saves): opened doors kept, every vane group at its authored state (no new save field)."""
+        b = self.b
+        before = b.field() or {}
+        b.round_trip(self.run_slot or 1, label)
+        after = b.settle()
+        foes = lambda f: {a['id'] for a in f.get('actors') or [] if a['kind'] == 'enemy'}
+        back = foes(after) - foes(before)
+        if back and after.get('map') == before.get('map'):
+            self.beaten[after['map']] |= back
+            b.notes.append(f'reload at {label}: {len(back)} beaten foes back on {after["map"]} ({sorted(back)})' + ('; not hunted again' if self.once else ''))
+        opened = lambda f: sorted(e['id'] for e in f['ents'] if e['type'] in ('gate', 'locked_door') and e.get('state') == 'open')
+        if not set(opened(before)) <= set(opened(after)):
+            raise Fail(f'after the reload at {label}: doors {opened(before)} -> {opened(after)}')
+        w = self.wind()
+        if w.get('active') and w.get('turned'):
+            raise Fail(f'after the reload at {label}: vane groups {w.get("turned")} still turned (vanes reset on every arrival)')
+        b.notes.append(f'reload at {label}: lanes authored ({w.get("live")} live cells), doors {opened(after)}')
+
+    def inn_if_hurt(self, frac=0.7):
+        b = self.b
+        vit = b.party_vitals()
+        if not vit or min(v['hp'] / max(1, v['maxHp']) for v in vit) >= frac:
+            return
+        f = b.settle()
+        if f['map'] != 'ep6_zephyr':
+            return
+        b.through('door_inn')
+        self.ensure_map('ep6_zl_inn')
+        b.rest_at_inn('ep6_innkeeper')
+        b.through('inn_exit', exact=False)
+
+    def keep(self, label='', reserve=2, frac=0.3):
+        b = self.b
+        b.menu_optimize_all()
+        if self.ethers() > reserve:
+            b.top_up_mp(frac)
+        b.maybe_rest_at_fonts()
+
+    def gale_log(self):
+        return self.b.js('window.__lqGale || []') or []
+
+    def gear(self, gold_floor=400):
+        """What a player buys at the Galewing Workshop with the gold in hand (plan 7.6): the best tier 11 body piece that leaves
+        `gold_floor`, else a tier 11 hood or helm."""
+        gold = (self.b.game() or {}).get('gold') or 0
+        for item, price in (('windweave_robe', 6000), ('skysteel_mail', 6100), ('gale_hood', 3000), ('aviator_helm', 3000)):
+            if gold - price >= gold_floor:
+                return [(item, 1)]
+        return []
+
+    def shop_town(self):
+        """Nova's provisions (Ballast Stones, Ethers), then the Galewing Workshop (the gear the gold buys, plan 7.6)."""
+        b = self.b
+        b.through('door_shop')
+        self.ensure_map('ep6_zl_shop')
+        b.visit_shop('nova', [('ballast_stone', 2), ('ether', 2)])
+        b.through('shop_exit', exact=False)
+        self.ensure_map('ep6_zephyr')
+        b.through('door_workshop')
+        self.ensure_map('ep6_zl_workshop')
+        b.visit_shop('ilex', self.gear())
+        b.through('workshop_exit', exact=False)
+        b.menu_optimize_all()
+
+    # ---- phases
+    def title_start(self):
+        """Title -> Continue on the Episode 5 credits save (record 1), or Title -> Episode 6: new party -> the slot notice ->
+        Start -> name -> the inn. The quick start's row and slot notice are answered with real key presses."""
+        b = self.b
+        if b.scene() != 'title':
+            return
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'title' && !LQ_DEBUG.state().transition", timeout=30000, polling=30)
+        b.frames(10)
+        for n in EP3_SLOTS:
+            self.slots0[n] = self.slot_raw(n)
+        if b.resume and self.start == 'save':
+            b.shot('title')
+            b.title_continue(1)
+            self.run_slot = 1
+            b.notes.append(f'resumed from {b.resume} (record 1)')
+            b.mark('resume')
+            return
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep6')); })()", timeout=60000, polling=50)
+        b.frames(6)
+        items = [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
+        if 'ep6' not in items:
+            raise Fail(f'the title does not offer Episode 6 (items {items})')
+        b.shot('title_ep6')
+        want = items.index('ep6')
+        cols = b.js('LQ_ENGINE.scene.menu.columns') or 1
+        rows = b.js('LQ_ENGINE.scene.menu.rows') or len(items)
+        for _ in range(16):
+            idx = b.js('LQ_ENGINE.scene.menu.index') or 0
+            if idx == want:
+                break
+            if cols > 1 and idx // rows != want // rows:
+                b.page.keyboard.press('ArrowRight' if want // rows > idx // rows else 'ArrowLeft')
+            else:
+                b.page.keyboard.press('ArrowDown' if want > idx else 'ArrowUp')
+            b.frames(4)
+        b.page.keyboard.press('KeyZ')
+        b.frames(10)
+        if self.slots0.get(0) is not None:
+            b.page.wait_for_function("LQ_DEBUG.scene() === 'ep6Ask'", timeout=10000, polling=30)
+            st = b.scene_state()['ss'] or {}
+            if st.get('options') != ['back', 'start']:
+                raise Fail(f'slot 0 is taken but the quick start showed no slot notice: {st}')
+            b.notes.append(f'quick start notice: {st.get("notice")!r}')
+            b.shot('ep6_slot_notice')
+            b.page.keyboard.press('ArrowDown')
+            b.frames(4)
+            b.page.keyboard.press('KeyZ')
+        b.page.wait_for_function("LQ_DEBUG.scene() === 'nameEntryEp6' && !LQ_DEBUG.state().transition", timeout=20000, polling=30)
+        b.frames(10)
+        for _ in range(8):
+            b.page.keyboard.press('Backspace')
+        b.page.keyboard.type(b.hero, delay=30)
+        b.frames(6)
+        b.shot('name_entry_ep6')
+        b.page.keyboard.press('Enter')
+        b.page.wait_for_function("LQ_DEBUG.state().scenes.includes('field')", timeout=60000, polling=30)
+        b.frames(30)
+        g = b.game() or {}
+        if g.get('heroName') != b.hero:
+            raise Fail(f'hero name is {g.get("heroName")!r}, typed {b.hero!r}')
+        self.run_slot = g.get('autosaveSlot')
+        b.notes.append(f'quick start: the run saves to slot {self.run_slot} (slot 0 was {"taken" if self.slots0.get(0) else "empty"})')
+        if self.slots0.get(0) is not None and self.run_slot == 0:
+            raise Fail('the quick start took slot 0 although it holds another game')
+        # PLAYTEST_REVIEW_6 fix 3: every pack's sounds are in the manifest before the fade in
+        missing = b.js("(() => { const a = LQ_ENGINE.audio, m = a.manifest || (a.real && a.real.manifest) || {}; "
+                       "const has = (k, id) => !!((m[k] || {})[id]); return ['saffron:music', 'zephyr:music', 'storm_observatory:music', 'boss_scribe:music', "
+                       "'gust_carry:sfx', 'anchor_set:sfx', 'rewrite_break:sfx', 'signal_lamp:sfx', 'sky_wind:ambience', 'storm_rumble:ambience']"
+                       ".filter((s) => { const [id, k] = s.split(':'); return !has(k, id); }); })()")
+        if missing:
+            raise Fail(f'the quick start party is missing sounds {missing}')
+        b.mark('ep6_new_game')
+
+    def morning(self):
+        b = self.b
+        f = b.settle()
+        if not self.has('ep6_started'):
+            raise Fail(f'ep6_morning did not run (on {f["map"]} at {f["leader"]})')
+        b.mark('ep6_morning')
+        if not b.items().get('boarding_slip'):
+            raise Fail('ep6_morning did not give the boarding slip')
+        g = b.game() or {}
+        b.notes.append(f'Episode 6 arrival: Lv {self.level()}, {(g.get("party") or [{}])[0].get("exp")} EXP, {g.get("gold")} G '
+                       f'({"the quick start" if self.start == "new" else "the Episode 5 save"})')
+        if f['map'] == 'ep5_sh_inn':
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')
+        self.ensure_map('ep5_saffron')
+        b.menu_talk()
+        self.check_slots('the morning')
+
+    def berth(self):
+        b = self.b
+        if self.has('airstair_arrived'):
+            return
+        self.ensure_map('ep5_saffron')
+        if not self.has('ep6_boarded'):
+            self.trigger([(10, 28)], 'ep6_boarded', 'sky_berth_trig')          # down the gangway (the berth object answers confirm too)
+        b.mark('sky_berth')
+        if b.settle()['map'] == 'ep5_saffron':
+            b.through('berth_north', exact=False)
+        self.ensure_map('ep6_airstair')
+        b.settle()
+        if not self.has('airstair_arrived'):
+            raise Fail('airstair_foot did not run')
+        b.mark('airstair')
+
+    def airstair(self):
+        b = self.b
+        if self.has('saw_isles') and b.settle()['map'] != 'ep6_airstair':
+            return
+        self.ensure_map('ep6_airstair')
+        if self.side:
+            self.try_chest('chest_foot')
+        self.trigger([(12, y) for y in range(37, 40)], 'mira_asked', 'mira_trig')
+        b.notes.append(f'mira_asks: {"Yes (mira_told)" if self.has("mira_told") else "No (mira_spared)"}')
+        self.trigger([(11, y) for y in range(30, 34)], 'airstair_fight_done', 'fight_row', max_s=900)
+        b.mark('first_fight_done')
+        self.hunt(2, label='landing 2')
+        self.trigger([(6, y) for y in range(22, 27)], 'saw_gust', 'first_trig')
+        b.mark('first_gust')
+        self.ride((8, 23), 'right', (15, 23), 'Airstair lane A', puzzle='the Airstair')
+        self.hunt(2, label='landing 4')
+        if self.side and not b.opened('ep6_airstair', 'chest_outcrop'):
+            try:
+                if b.dash_break('crack_outcrop', label='the outcrop'):
+                    self.chest('chest_outcrop')
+            except Fail as e:
+                b.notes.append(f'outcrop chest skipped: {e}')
+        self.keep('landing 4')
+        self.ride((15, 15), 'up', (15, 12), 'Airstair lane B to the post', puzzle='the Airstair')
+        post_chest = 'chest_post_letter' if self.has('letters_started') else 'chest_post'
+        if self.side and not b.opened('ep6_airstair', post_chest):
+            self.try_chest(post_chest, 'the post ledge chest')
+            if self.leader() != (15, 12):
+                self.ride((14, 12), 'right', (15, 12), 'back onto the post', puzzle='the Airstair')
+        self.ride((15, 12), 'up', (15, 6), 'Airstair lane B to the top', puzzle='the Airstair')
+        self.puzzle_done('the Airstair')
+        self.trigger([(x, 4) for x in range(13, 21)], 'saw_isles', 'isles_trig')
+        b.visit_shop('bennet_winch', [('ballast_stone', 1)])
+        b.exit_to((16, 0), label='to Zephyr Landing')
+        self.ensure_map('ep6_zephyr')
+        b.settle()
+        if not self.has('zephyr_arrived'):
+            raise Fail('zephyr_arrival did not run')
+        b.mark('zephyr')
+
+    def town(self):
+        b = self.b
+        if self.has('windward_pass'):
+            return
+        f = b.settle()
+        for door in ('charts_exit', 'shop_exit', 'workshop_exit', 'inn_exit'):      # a resumed game inside a town interior
+            if b.ent(f, door):
+                if door == 'inn_exit' and f['leader']['x'] >= 13:
+                    b.through('inn_down')
+                b.through(door, exact=False)
+                break
+        self.ensure_map('ep6_zephyr')
+        if not self.has('met_aeris'):
+            self.talk('aeris')
+            if not self.has('met_aeris'):
+                raise Fail('meet_aeris did not set met_aeris')
+            b.mark('met_aeris')
+        if not self.has('liora_met'):
+            self.talk('liora')
+        if not self.has('charts_seen') or not getattr(self, '_shopped', False):
+            self._shopped = True
+            self.shop_town()
+        self.ensure_map('ep6_zephyr')
+        if not self.has('charts_seen'):
+            b.through('door_tower')
+            self.ensure_map('ep6_zl_charts')
+            self.trigger([(x, 11) for x in range(1, 11)], 'charts_seen', 'charts_trig', max_s=900)
+            b.mark('chart_room')
+            b.interact_no_settle(ent_id='save_bell_charts')
+            self.save_from_bell(self.run_slot or 1)
+            b.close_menu()
+            b.through('charts_exit', exact=False)
+        self.ensure_map('ep6_zephyr')
+        self.inn_if_hurt(0.8)
+        self.ensure_map('ep6_zephyr')
+        if not self.has('anchor_learned'):
+            self.trigger([(40, y) for y in range(15, 18)], 'anchor_learned', 'anchor_trig', max_s=900)
+            b.mark('anchor_lesson')
+        self.trigger([(41, y) for y in range(5, 8)], 'windward_pass', 'east_trig')
+        b.mark('east_gate')
+        b.through('east_airstair', exact=False)
+        self.ensure_map('ep6_obs_f1')
+        b.settle()
+        if not self.has('obs_f1_arrived'):
+            raise Fail('obs_f1_arrival did not run')
+        b.mark('obs_f1')
+
+    def obs_f1(self):
+        b = self.b
+        if self.has('obs_f1_done'):
+            return
+        self.ensure_map('ep6_obs_f1')
+        P = 'F1 the Windward Causeways'
+        if self.side:
+            self.try_chest('chest_a')
+        self.hunt(2, label='two ways in')
+        # B: the west arm north onto the north deck
+        if self.leader()[1] > 12:
+            if (self.once or self.side) and not b.opened('ep6_obs_f1', 'chest_es'):
+                # the east spur (optional): the south arm east, the chest and its guard, home along the spur's gust
+                try:
+                    self.ride((16, 20), 'up', (24, 19), 'F1 the south arm', puzzle=P)
+                    self.hunt(2, label='the east spur')
+                    self.try_chest('chest_es')
+                    self.ride((26, 20), 'down', (22, 22), 'F1 the spur home', puzzle=P)
+                except Fail as e:
+                    b.notes.append(f'east spur skipped: {e}')
+            self.ride((12, 20), 'up', (12, 12), 'F1 the west arm', puzzle=P)
+        self.hunt(2, label='the north deck')
+        if self.side:
+            self.try_chest('chest_b')
+        # C: the first vane, then west onto the relay deck (the memory)
+        if not self.has('aeris_memory_1'):
+            self.vane('vane_c', (35, 7), 'up', 'F1 vane_c', puzzle=P)
+            self.hunt(2, label='the near deck')
+            self.ride((34, 7), 'left', (29, 7), 'F1 to the relay deck', puzzle=P)
+            b.settle(max_s=900)
+            if not self.has('aeris_memory_1'):
+                raise Fail('aeris_memory_1 did not run on the relay deck')
+            b.mark('aeris_memory_1')
+        # D: the Run west, vane_cw back, the Run east into the post, the key
+        if not b.items().get('compass_key'):
+            if 'a' not in (self.wind().get('turned') or []):
+                # a reload on the relay deck put the vanes back: over to the near deck, turn vane_c again, back
+                self.ride((29, 7), 'right', (34, 7), 'F1 back to the near deck', puzzle=P)
+                self.vane('vane_c', (35, 7), 'up', 'F1 vane_c', puzzle=P)
+                self.ride((34, 7), 'left', (29, 7), 'F1 to the relay deck', puzzle=P)
+            self.ride((24, 7), 'left', (7, 7), 'F1 the Run west', puzzle=P)
+            self.hunt(2, label='the west deck')
+            if self.side and not b.opened('ep6_obs_f1', 'coffer_d'):
+                self.try_chest('coffer_d', 'the supply coffer')
+            if not b.opened('ep6_obs_f1', 'chest_boots'):
+                try:
+                    if b.dash_break('crate_d', label='the cracked neck'):
+                        self.chest('chest_boots')
+                except Fail as e:
+                    b.notes.append(f'Skyhand Boots skipped: {e}')
+            self.keep('the west deck')
+            self.vane('vane_cw', (5, 9), 'up', 'F1 vane_cw', puzzle=P)
+            self.ride((7, 7), 'right', (18, 6), 'F1 the Run east to the post', puzzle=P)
+            self.chest('chest_key')
+            if not b.items().get('compass_key'):
+                raise Fail('the key deck chest did not give the Sky Compass Key')
+            self.ride((19, 6), 'left', (18, 6), 'F1 back onto the post', puzzle=P)
+        if self.leader()[1] > 3:
+            self.ride((18, 6), 'up', (18, 3), 'F1 the post north', puzzle=P)
+        self.puzzle_done(P)
+        self.hunt(2, label='the upper deck')
+        self.keep('end of F1')
+        self.round_trip('F1 upper deck')
+        self.ensure_map('ep6_obs_f1')
+        self.check_slots('F1')
+        self.trigger([(21, 2)], 'obs_f1_done', 'lift_trig')
+        f = b.settle()
+        if f['map'] == 'ep6_obs_f1':
+            b.through('lift_up', exact=False)
+        self.ensure_map('ep6_obs_f2')
+        b.settle()
+        if not self.has('obs_f2_arrived'):
+            raise Fail('obs_f2_arrival did not run')
+        b.mark('obs_f2')
+
+    def obs_f2(self):
+        b = self.b
+        if self.has('obs_f2_done'):
+            return
+        self.ensure_map('ep6_obs_f2')
+        P = 'F2 the Hall of Broken Signals'
+        if not self.has('vex_relay_met'):
+            self.hunt(2, label='the stair foot')
+            if not self.has('aeris_memory_2'):
+                self.vane('vane_b1', (9, 18), 'up', 'F2 vane_b1', puzzle=P)
+                self.ride((10, 18), 'right', (14, 18), 'F2 the fan duct east', puzzle=P)
+                self.hunt(2, label='the south-east hall')
+                self.vane('vane_b2', (20, 18), 'up', 'F2 vane_b2', puzzle=P)
+                self.ride((18, 16), 'up', (18, 13), 'F2 the shaft to the manifest', puzzle=P)
+                b.settle(max_s=900)
+                if not self.has('aeris_memory_2'):
+                    raise Fail('aeris_memory_2 did not run at the manifest relay')
+                b.mark('aeris_memory_2')
+            # the north-west platform (its guard and the iron chest): west on the always duct, home by the south duct and the fans
+            exp = ((b.game() or {}).get('party') or [{}])[0].get('exp') or 0
+            if (self.side or self.once) and exp < self.ZONE_EXP.get('ep6_obs_f2', 10 ** 9) and not b.opened('ep6_obs_f2', 'chest_b'):
+                try:
+                    self.ride((14, 12), 'left', (10, 12), 'F2 the duct west', puzzle=P)
+                    self.hunt(2, label='the north-west platform')
+                    self.try_chest('chest_b')
+                    self.ride((5, 13), 'down', (5, 16), 'F2 the duct home', puzzle=P)
+                    self.ride((10, 18), 'right', (14, 18), 'F2 the fan duct east again', puzzle=P)
+                    self.ride((18, 16), 'up', (18, 13), 'F2 the shaft again', puzzle=P)
+                except Fail as e:
+                    b.notes.append(f'north-west platform skipped: {e}')
+            self.ride((18, 10), 'up', (18, 7), 'F2 the shaft to the crown room', puzzle=P)
+            self.trigger([(19, y) for y in range(2, 8)], 'vex_relay_met', 'vex_trig', max_s=900)
+            b.mark('vex_relay')
+            if not b.items().get('sixth_list'):
+                raise Fail('vex_relay did not give the sixth list')
+        if b.settle()['map'] == 'ep6_obs_f2' and self.leader()[0] < 27 and self.leader()[1] < 10:
+            self.walk([(30, 9)], 'the side decks')
+            self.hunt(2, label='the side decks')
+            if self.side:
+                for c in ('log_1', 'log_2', 'log_3', 'chest_d'):
+                    self.try_chest(c)
+            self.keep('the side decks')
+            self.ride((30, 9), 'down', (30, 14), 'F2 the side duct down', puzzle=P)
+        self.puzzle_done(P)
+        self.hunt(2, label='the bellows hall')
+        f = b.settle()
+        if b.ent(f, 'font_w2b'):
+            try:
+                b.rest_at_font('font_w2b', label='font F2')
+            except Fail as e:
+                b.notes.append(f'font F2 skipped: {e}')
+        self.round_trip('F2 bellows hall')
+        self.ensure_map('ep6_obs_f2')
+        self.check_slots('F2')
+        for attempt in range(5):
+            if self.has('engine_defeated'):
+                break
+            if attempt:
+                b.notes.append(f'Gale Engine attempt {attempt + 1} (Lv {self.level()})')
+                self.keep('before the Engine again')
+            b.mark('gale_engine')
+            b.walk_to([(x, 18) for x in range(24, 38)], label='engine_trig')
+            b.settle(max_s=900)
+        if not self.has('engine_defeated'):
+            raise Fail('the Gale Engine did not fall in 5 attempts')
+        self.keep('after the Engine')
+        self.trigger([(24, 15)], 'obs_f2_done', 'lift_trig')
+        f = b.settle()
+        if f['map'] == 'ep6_obs_f2':
+            b.through('lift_up', exact=False)
+        self.ensure_map('ep6_obs_f3')
+        b.settle()
+        if not self.has('aeris_came'):
+            raise Fail('obs_f3_arrival / aeris_turns did not run')
+        b.mark('obs_f3')
+
+    def obs_f3(self):
+        b = self.b
+        if self.has('scribe_door_open'):
+            return
+        self.ensure_map('ep6_obs_f3')
+        P = 'F3 the Eye of the Storm'
+        self.hunt(2, label='the first landing')
+        # Anchor: the ring clockwise to the post, the lamp
+        if not self.has('pledge_anchor'):
+            self.ride((16, 32), 'up', (17, 27), 'F3 the Anchor ring', puzzle=P)
+            self.interact_lamp('lamp_anchor', 'pledge_anchor')
+        self.hunt(2, label='the Anchor deck')
+        if self.side and not b.opened('ep6_obs_f3', 'chest_spear'):
+            try:
+                b.reveal_near([(8, 22), (9, 22), (10, 22)], label='the Keeper lane')
+                self.chest('chest_spear')
+            except Fail as e:
+                b.notes.append(f'Windborne Spear skipped: {e}')
+        self.keep('the Anchor deck')
+        # Listen: the vane turns the ring counter-clockwise onto its post, the lamp
+        if not self.has('pledge_listen'):
+            self.vane('vane_listen', (12, 25), 'up', 'F3 vane_listen', puzzle=P)
+            self.ride((16, 24), 'up', (17, 19), 'F3 the Listen ring', puzzle=P)
+            self.interact_lamp('lamp_listen', 'pledge_listen')
+        self.hunt(2, label='the Listen deck')
+        # the broken causeway: Vex falls
+        self.trigger([(x, 15) for x in range(16, 19)], 'vex_held', 'fall_trig', max_s=900)
+        b.mark('vex_falls')
+        # Return: two vanes, the stone, the east half onto its post, the lamp
+        if not self.has('pledge_return'):
+            self.vane('vane_r_w', (17, 11), 'right', 'F3 vane_r_w', puzzle=P)
+            self.ride((16, 11), 'left', (17, 7), 'F3 the west half to the stone', puzzle=P)
+            self.vane('vane_r_e', (17, 7), 'up', 'F3 vane_r_e', puzzle=P)
+            self.ride((18, 7), 'right', (21, 10), 'F3 the east half to the post', puzzle=P)
+            self.walk([(22, 10)], 'the east deck')
+            self.hunt(2, label='the east deck')
+            if self.side:
+                self.try_chest('chest_r')
+            self.interact_lamp('lamp_return', 'pledge_return')
+        self.puzzle_done(P)
+        self.keep('the Return deck')
+        self.walk([(24, 6), (25, 6)], 'up the stair to the beacon platform')
+        self.hunt(2, label='the beacon platform')
+        if self.side:
+            self.try_chest('chest_ballast')
+        self.trigger([(23, y) for y in range(3, 6)], 'scribe_door_open', 'beacon_trig', max_s=900)
+        b.notes.append(f'fifth_voice: {"told Aeris (told_aeris)" if self.has("told_aeris") else "kept (kept_from_aeris)"}')
+        b.mark('fifth_voice')
+
+    def interact_lamp(self, lamp, flag):
+        b = self.b
+        if self.has(flag):
+            return
+        b.interact(ent_id=lamp, label=lamp)
+        b.settle(max_s=900)
+        if not self.has(flag):
+            raise Fail(f'{lamp} did not set {flag}')
+        b.mark(flag)
+
+    def scribe(self):
+        b = self.b
+        if self.has('scribe_defeated'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep6_obs_f3':
+            fonts = [e['id'] for e in f['ents'] if e['type'] == 'font' and e['id'] == 'beacon_font']
+            if fonts:
+                try:
+                    b.rest_at_font('beacon_font', label='the beacon font')
+                except Fail as e:
+                    b.notes.append(f'beacon font skipped: {e}')
+            self.keep('the keyhole', reserve=0, frac=0.9)
+            b.notes.append(f'into the Eyrie with {self.ethers()} Ethers, {b.items().get("ballast_stone", 0)} Ballast Stones, '
+                           f'Bram MP {[(v["mp"], v["maxMp"]) for v in b.party_vitals() if v["id"] == "bram"]}')
+            self.round_trip('before the Storm Scribe')
+            self.ensure_map('ep6_obs_f3')
+        for attempt in range(5):
+            f = b.settle()
+            if f['map'] == 'ep6_obs_f3':
+                b.through('door_scribe', exact=False)
+            self.ensure_map('ep6_obs_eyrie')
+            if attempt == 0:
+                b.mark('storm_scribe')
+            b.notes.append(f'Storm Scribe attempt {attempt + 1}: Lv {self.level()}')
+            b.walk_to([(x, 14) for x in range(1, 23)], label='scribe_trig')
+            b.settle(max_s=1500)
+            if self.has('scribe_defeated'):
+                break
+            f = b.settle()
+            if f['map'] == 'ep6_obs_eyrie':
+                b.through('stair_f3')
+            self.ensure_map('ep6_obs_f3')
+            self.keep('before the Scribe again')
+        if not self.has('scribe_defeated'):
+            raise Fail('the Storm Scribe did not fall in 5 attempts')
+        b.settle(max_s=900)
+        if not self.has('compass_restored') or not b.items().get('name_fragment_6'):
+            raise Fail('scribe_after did not restore the compass and give the sixth fragment')
+        b.mark('scribe_after')
+        log = self.gale_log()
+        ended = collections.Counter(e.get('reason') or '?' for e in log if e.get('type') == 'rewrite_broken' and e.get('enc') == 'scribe')
+        landed = sum(1 for e in log if e.get('type') == 'rewrite_land' and e.get('enc') == 'scribe')
+        read = sum(1 for e in log if e.get('type') == 'rewrite' and not e.get('moved') and e.get('enc') == 'scribe')
+        anchors = sum(1 for e in log if e.get('type') == 'anchored' and e.get('on') and e.get('enc') == 'scribe')
+        b.notes.append(f'Storm Scribe rewrites: {read} pinned; broken {dict(ended)} (anchor = Anchor, break = a Break, gone = the Scribe fell); '
+                       f'{landed} landed; Anchor set {anchors} times')
+
+    def library(self):
+        b = self.b
+        if self.has('library_reached') and b.settle()['map'] != 'ep6_obs_eyrie':
+            return
+        f = b.settle()
+        if f['map'] == 'ep6_obs_eyrie':
+            b.through('kestrel_up', exact=False)
+        self.ensure_map('ep6_library')
+        b.settle(max_s=900)
+        if not self.has('library_reached'):
+            raise Fail('cloud_library did not run')
+        b.mark('cloud_library')
+
+    def ending(self):
+        b = self.b
+        if self.has('ep6_complete') and (b.game() or {}).get('counters', {}).get('credits6_rolled'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep6_library':
+            b.through('kestrel_down', exact=False)
+        b.settle(max_s=900)                                          # isles_return, ep6_ending, the credits
+        if not self.has('ep6_complete'):
+            raise Fail(f'ep6_complete was not set (on {b.settle()["map"]})')
+        for _ in range(500):
+            sc = b.handle()
+            fs = b.field() or {}
+            if sc == 'field' and fs.get('map') == 'ep6_zl_inn' and not fs.get('locked'):
+                break
+        f = b.settle()
+        if f['map'] != 'ep6_zl_inn':
+            raise Fail(f'after the Episode 6 credits the party woke on {f["map"]}, not ep6_zl_inn')
+        if not (b.game() or {}).get('counters', {}).get('credits6_rolled'):
+            raise Fail('credits6_rolled was not counted')
+        b.mark('ep6_credits_done')
+        self.check_slots('the credits')
+
+    def epilogue6(self):
+        b = self.b
+        if not self.side or not self.has('ep6_complete'):
+            return
+        f = self.ensure_map('ep6_zl_inn')
+        if f['leader']['x'] >= 13:
+            b.through('inn_down')
+        self.talk('ep6_innkeeper')
+        b.through('inn_exit', exact=False)
+        self.ensure_map('ep6_zephyr')
+        b.menu_talk()
+        b.mark('ep6_epilogue')
+
+    def run(self):
+        b = self.b
+        b.mark('boot')
+        phases = [('ep6_start', self.title_start), ('ep6_morning', self.morning), ('berth', self.berth), ('airstair', self.airstair),
+                  ('town', self.town), ('obs_f1', self.obs_f1), ('obs_f2', self.obs_f2), ('obs_f3', self.obs_f3), ('scribe', self.scribe),
+                  ('library', self.library), ('ending', self.ending), ('epilogue6', self.epilogue6)]
+        for step_id, fn in phases:
+            print(f'-- {step_id}', flush=True)
+            if step_id == 'ep6_morning' and self.has('ep6_boarded'):
+                continue                                          # a resumed game past the morning
+            fn()
+            if step_id == 'ep6_start':
+                b.js(GALE_LOG_JS)
+            if b.resume and step_id == 'ep6_start':
+                b.resume = None
+                self.ensure_any()
+            b.check_errors()
+            if self.until == step_id:
+                print(f'stopping after {step_id} (--until)', flush=True)
+                return
+        self.check_slots('the end')
+        starts = [e for e in self.gale_log() if e.get('type') == 'start']
+        b.notes.append('battles with a Gale: ' + ', '.join(f'{e.get("enc")}{"" if e.get("gale") else " (calm)"}' for e in starts[:30]))
+        bad = sorted({w for w in b.warnings if re.search(r'unknown .*\bid\b|unknown (object|target|sprite|map|item|npc|encounter|scene)|no actor|no path|no scene', w, re.I)})
+        if bad:
+            raise Fail(f'{len(bad)} unknown-id or staging warnings: {bad[:6]}')
+        b.notes.append('warnings: no "unknown ... id", "no actor", "no path" or "no scene" line in the run')
+
+
 # ================================================================================================ the Deep Stacks (C3-sim-bot)
 CAVE_OUT = HERE / 'cave' / 'out'
 CAVE_JS = 'LQ_DEBUG.state().cave'
@@ -5837,15 +6597,17 @@ def main(argv):
     ap.add_argument('--name', default='Arden')
     ap.add_argument('--until', default=None)
     ap.add_argument('--no-side', action='store_true')
-    ap.add_argument('--all-fights', action='store_true', help='Episode 5: no EXP cap on optional fights (every hunt runs; output tagged -all; PLAYTEST_REVIEW_7 item 3)')
+    ap.add_argument('--from-all', action='store_true', help='Episode 6: Continue on the Episode 5 --all-fights finish (desktop-ep5-all-last-game.json)')
+    ap.add_argument('--all-fights', action='store_true', help='Episodes 5 and 6: no EXP cap on optional fights (every hunt runs; output tagged -all; PLAYTEST_REVIEW_7 item 3)')
     ap.add_argument('--hollow', action='store_true', help='W13: also play Whisperwood Hollow after the Lantern (Episode 1; off by default)')
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
-    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4, 5],
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4, 5, 6],
                     help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0; '
                          '4: Episode 4 (E4-integrate), the same two starts from the Episode 3 credits save; '
-                         '5: Episode 5 (E5-integrate), the same two starts from the Episode 4 credits save')
+                         '5: Episode 5 (E5-integrate), the same two starts from the Episode 4 credits save; '
+                         '6: Episode 6 (E6-integrate), the same two starts from the Episode 5 credits save')
     ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
@@ -5906,6 +6668,18 @@ def main(argv):
                 return 2
         if a.start == 'new':
             seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
+    if a.episode == 6 and not a.tier:
+        tag, ep3 = '-ep6' + ('-new' if a.start == 'new' else '') + ('-from-all' if a.from_all else '') + ('-all' if a.all_fights else ''), True
+        for env in ('LQ_EP4_LIVE', 'LQ_EP5_LIVE', 'LQ_EP6_LIVE'):
+            os.environ[env] = '1'             # episodes.js served with EP4 to EP6_LIVE forced on (a local copy of the switch)
+        if not resume:
+            try:
+                resume = str(ep6_fixture(a.device, '-all' if a.from_all else ''))
+            except Fail as e:
+                print(e)
+                return 2
+        if a.start == 'new':
+            seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
     if a.episode == 3 and not a.tier:
         tag, ep3 = '-ep3' + ('-new' if a.start == 'new' else ''), True
         if not resume:
@@ -5930,6 +6704,12 @@ def main(argv):
             Episode3(bot, side=not a.no_side, until=a.until, start=a.start).run()
         elif a.episode == 4:
             Episode4(bot, side=not a.no_side, until=a.until, start=a.start).run()
+        elif a.episode == 6:
+            ep = Episode6(bot, side=not a.no_side, until=a.until, start=a.start)
+            if a.all_fights:
+                ep.ZONE_EXP = {}
+                ep.once = True
+            ep.run()
         elif a.episode == 5:
             ep = Episode5(bot, side=not a.no_side, until=a.until, start=a.start)
             if a.all_fights:

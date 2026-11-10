@@ -10,7 +10,7 @@
 import { enc, ENCOUNTERS, ZONES } from '../encounters.js';
 
 /** E6-maps-b (wave 6c): set to true once the Observatory maps exist (lists the five zones in ZONES for qa/maps). */
-export const EP6_MAPS_LISTED = false;
+export const EP6_MAPS_LISTED = true;
 
 export const EP6_ZONE_ORDER = ['ep6_airstair', 'ep6_obs_f1', 'ep6_obs_f2', 'ep6_obs_f3', 'ep6_obs_eyrie'];
 

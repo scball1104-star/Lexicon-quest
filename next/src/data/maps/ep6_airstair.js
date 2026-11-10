@@ -150,6 +150,7 @@ export default {
   legend: {
     '~': 'cloudbank', 's': 'sea_foam', 'p': 'skyplank', 'c': 'skyplank', 'k': 'skyport_paving',
     '#': 'basalt_stack_top', '|': 'basalt_stack_face',
+    '.': 'skyplank',   // not in the ground: the floor a Dash-broken crack is carved to (events.js carveOpenings; else `under`, the cloud)
   },
   ground,
   wind: { kind: 'open', lanes },

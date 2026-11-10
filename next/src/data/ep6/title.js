@@ -26,28 +26,35 @@ export function offerRow(scene, offer = {}, hooks = {}) {
   const e = scene.engine;
   scene.ep6 = offer;
   const m = scene.menu;
-  if (!m.items.some((it) => it.id === ROW_ID)) {
-    const last = m.items.findLastIndex((it) => /^ep\d$/.test(it.id)), cfg = m.items.findIndex((it) => it.id === 'config');
-    const at = last >= 0 ? last + 1 : cfg < 0 ? m.items.length : cfg;
-    const cur = m.items[m.index];
-    m.items.splice(at, 0, { id: ROW_ID, label: EP6_ROW_LABEL });
-    const measure = (s) => (e && e.renderer && e.renderer.measure ? e.renderer.measure(s) : String(s).length * 5);
-    const L = layoutRows(m.items, m.rowH, measure);
-    if (L.columns > 1) foldTitleRows(m.items);
-    scene.win = L.win;
-    Object.assign(m, { x: L.win.x + 6, y: L.win.y + 7, w: L.win.w - 12, rows: L.rows, columns: L.columns, columnMajor: L.columns > 1,
-      colW: L.columns > 1 ? L.colW : Math.floor(L.win.w - 12) });
-    m.index = Math.max(0, m.items.indexOf(cur));
-    if (typeof m.ensureVisible === 'function') m.ensureVisible();
-  }
+  if (!m.items.some((it) => it.id === ROW_ID)) place(scene, null);
   if (!scene.__ep6) {
     scene.__ep6 = true;
     const update = scene.update.bind(scene), draw = scene.draw.bind(scene);
-    scene.update = (dt) => { catchConfirm(scene, hooks); update(dt); };
+    // the Episode 5 row can land after this one (its pack hook may resolve later): keep Episode 6 after Episode 5 (E6-integrate)
+    scene.update = (dt) => { const M = scene.menu, i6 = M ? M.items.findIndex((it) => it.id === ROW_ID) : -1;
+      if (i6 >= 0 && M.items.findIndex((it) => it.id === 'ep5') > i6) place(scene, i6);
+      catchConfirm(scene, hooks); update(dt); };
     scene.draw = (r) => { draw(r); drawNote(scene, r); };
     if (e && e.hasScene && !e.hasScene('nameEntryEp6')) e.registerScene('nameEntryEp6', NameEntryEp6Scene);
   }
   return true;
+}
+
+/** Put the row after the last episode row (taking it out of `from` first) and lay the title menu out again. */
+function place(scene, from) {
+  const e = scene.engine, m = scene.menu;
+  const cur = m.items[m.index];
+  const row = from != null ? m.items.splice(from, 1)[0] : { id: ROW_ID, label: EP6_ROW_LABEL };
+  const last = m.items.findLastIndex((it) => /^ep\d$/.test(it.id)), cfg = m.items.findIndex((it) => it.id === 'config');
+  m.items.splice(last >= 0 ? last + 1 : cfg < 0 ? m.items.length : cfg, 0, row);
+  const measure = (s) => (e && e.renderer && e.renderer.measure ? e.renderer.measure(s) : String(s).length * 5);
+  const L = layoutRows(m.items, m.rowH, measure);
+  if (L.columns > 1) foldTitleRows(m.items);
+  scene.win = L.win;
+  Object.assign(m, { x: L.win.x + 6, y: L.win.y + 7, w: L.win.w - 12, rows: L.rows, columns: L.columns, columnMajor: L.columns > 1,
+    colW: L.columns > 1 ? L.colW : Math.floor(L.win.w - 12) });
+  m.index = Math.max(0, m.items.indexOf(cur));
+  if (typeof m.ensureVisible === 'function') m.ensureVisible();
 }
 
 /** Wrap the List the title holds now (another pack may have rebuilt it) so confirm on the row opens the ask. */

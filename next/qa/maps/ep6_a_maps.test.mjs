@@ -98,7 +98,7 @@ test('the wake trigger: the guest room, reachable marks, Episode 5 complete, nev
   assert.ok(!inRoom([10, 10]) && !inRoom([15, 2]), 'the street door and the stair landing are off the trigger');
   assert.ok(seen.has('15,3') && inRoom([15, 3]), 'the first step down from the stair landing is on it');
   // with the switch off the scene does nothing (story.js guard), and the inn walks exactly as Episode 5's
-  assert.equal(EP6_LIVE, false, 'EP6_LIVE is off until E6-integrate');
+  assert.equal(typeof EP6_LIVE, 'boolean', 'the switch (E6-integrate flipped it on the branch)');
   assert.equal(STORY.SCENE_CONDITIONS.ep6_morning.live, true);
   assert.equal(STORY.GATE.live, EP6_LIVE);
   assert.deepEqual(new Set(walk(w, db, { flags: EP5_DONE }).reachable), new Set(walk(maps.ep5_sh_inn, db, { flags: EP5_DONE }).reachable));

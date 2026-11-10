@@ -10,13 +10,15 @@
 // lighting.draw (the storm's soft lightning) and debugState, the way Episode 5's shade attaches. Every create() above
 // attaches first, and ../world.js attaches every field the engine enters (maps with lanes and no vane).
 
-import { EXT, INTERACT_TYPES } from '../../../world/events.js';
+import { EXT, INTERACT_TYPES, GATE_SPRITES } from '../../../world/events.js';
 import { Wind } from './system.js';
 import { compile, live, vaneArrow } from './wind.js';
 import { ensureArt } from './art.js';
 import { flashLevel, drawFlash } from './storm.js';
 
 INTERACT_TYPES.add('vane');
+// the Sky Compass Keyhole on F3 (3 wide, the ep5 sun_keyhole pattern; art in ep6_tiles.json)
+if (!GATE_SPRITES.sky_keyhole) GATE_SPRITES.sky_keyhole = ['sky_keyhole_closed', 'sky_keyhole_open'];
 
 const prop = (field, ent, t, state) => {
   const map = field.map;

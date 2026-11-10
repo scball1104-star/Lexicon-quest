@@ -50,6 +50,7 @@ export { hasWind };
 export function install(h) {
   H = h;
   for (const t of WIND_TYPES) h.EVENT_TYPES.add(t);
+  if (!h.GATE_SPRITE_IDS.includes('sky_keyhole')) h.GATE_SPRITE_IDS.push('sky_keyhole');   // the Sky Compass Keyhole (E6-integrate)
   const walk = (map, db, opts = {}) => (hasWind(map) ? analyse(map, db, opts).report : h.walk(map, db, opts));
   const buildGrid = (map, db) => {
     const g = h.buildGrid(map, db);
