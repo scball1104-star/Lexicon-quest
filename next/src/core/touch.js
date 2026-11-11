@@ -397,7 +397,7 @@ export class TouchControls {
       this._placePill(e.run, 'run', lcx, cy - dp / 2 - 34, Math.min(56, Math.max(40, lw * 0.44)), base);
       this._place(e.fullscreen, 'fullscreen', lcx, s.t + 24, 24, base * 0.8, 8, R);
     } else if (v.touchMode === 'below') {
-      // Under the game (portrait): a handheld layout, under the lens pad (renderer.js PAD) when there is one.
+      // Under the game (portrait), and under the lens pad: a handheld layout.
       const top = v.cssY + v.cssH + (v.pad ? v.pad.h + 2 * PAD.gap : 0), bottom = H - s.b;
       const room = bottom - top;
       const cy = top + room * 0.55;

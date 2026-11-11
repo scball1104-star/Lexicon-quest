@@ -99,7 +99,11 @@ class Rig:
         return self.ev('LQ_DEBUG.state().sceneState')
 
     def battle(self):
-        return self.ev('LQ_DEBUG.state().battle')
+        b = self.ev('LQ_DEBUG.state().battle')
+        if b is not None:   # the portrait lens (core/renderer.js) and the open sub-list, read straight off the engine
+            b.update(self.ev("(() => { const s = LQ_ENGINE.scene, m = s.menu && s.menu.sub; return { lens: LQ_ENGINE.renderer._lens,"
+                             " sub: s.menu && s.menu.state === 'sub' && m ? { index: m.index, rowH: m.rowH, rects: m.items.map((_, i) => m.rowRect(i)) } : null }; })()"))
+        return b
 
     def shot(self, name, crop=True):
         OUT.mkdir(parents=True, exist_ok=True)

@@ -51,8 +51,7 @@ export class CommandMenu {
   get b() { return this.scene.b; }
   get actors() { return this.scene.actors; }
   get rowH() { return this.touch ? TOUCH_CMD_ROW_H : CMD_ROW_H; }
-  /** Sub-list rows: the portrait lens draws them twice as big, so there they are LENS_SUB_ROW_H (44 css px in the lens). */
-  get subRowH() { const v = this.touch && this.scene.engine.renderer && this.scene.engine.renderer.view; return v && v.pad ? LENS_SUB_ROW_H : this.rowH; }
+  get subRowH() { const r = this.scene.engine.renderer; return this.touch && r && r.view.pad ? LENS_SUB_ROW_H : this.rowH; }
 
   /** Pick the window rects for the current layout. */
   syncLayout() {

@@ -13,9 +13,7 @@ export const CMD_COLS = 2;
 export const CMD_ROW_H = 11;
 export const CMD_COL_W = 52;          // glove (16) + the longest label ("Attack", "Defend") + air
 export const TOUCH_CMD_ROW_H = 18;
-// Portrait (core/renderer.js placeLens): the lens shows the command window at 8/3 (rows 48 css px) and a sub-list at 2
-// (188 px wide fills the 390 css px phone), so sub-list rows there are 22 px (44 css px in the lens; three show, not four).
-export const LENS_SUB_ROW_H = 22;
+export const LENS_SUB_ROW_H = 22;   // portrait sub-list rows: 44 css px in the lens (#88)
 export const STATUS_ROW_H = 17;
 // Touch (W5): the command window grows upward to keep four rows; the sub-list moves up with it.
 export const CMD_WIN_TOUCH = { x: 4, y: 132, w: 126, h: 80 };
@@ -74,8 +72,7 @@ const HELP_HIT_SPAN = (() => {
 })();
 const helpHit = ([x0, x1]) => ({ get x() { return x0 + helpOrigin().x - HELP_WIN.x; }, get y() { return helpOrigin().y - HELP_HIT_PAD; }, w: x1 - x0, h: HELP_WIN.h + 2 * HELP_HIT_PAD });
 export const HELP_TOUCH_HITS = Object.fromEntries(Object.entries(HELP_HIT_SPAN).map(([k, v]) => [k, helpHit(v)]));
-/** The portrait lens's strip of those three buttons: their targets' columns, the help window's first line plus 2 px. Its
- *  rowH asks the lens for 6 device px per game px on a 3x phone, so the strip is 46 css px tall. */
+/** The portrait lens strip of those buttons (46 css px tall on a 3x phone). */
 export function helpLensRect() {
   const h = HELP_TOUCH_HITS, o = helpOrigin();
   return { x: h.flee.x, y: o.y - 2, w: h.speed.x + h.speed.w - h.flee.x, h: HELP_WIN.h + 4, rowH: HELP_WIN.h + 3 };

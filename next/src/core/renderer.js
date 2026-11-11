@@ -57,12 +57,12 @@ export function computeLayout(p) {
   }
 
   const w = Math.round(gameW * scale), h = Math.round(gameH * scale);
-  // Portrait touch: a pad under the game for the lens (placeLens), as tall as PAD.want when the controls keep PAD.controls
-  let padH = 0;
-  if (touchMode === 'below') padH = Math.max(0, Math.min((p.touch.pad ?? PAD.want) * dpr, availH - h - (PAD.controls + 2 * PAD.gap) * dpr));
+  // portrait: the lens pad under the game (ui/firstuse/lens.js); the top margin never takes the controls' room
+  const ctl = (PAD.controls + 2 * PAD.gap) * dpr;
+  const padH = touchMode === 'below' ? Math.max(0, Math.min((p.touch.pad ?? PAD.want) * dpr, availH - h - ctl)) : 0;
+  const rest = availH - h - padH;
   const x = sl + Math.round((availW - w) / 2);
-  const rest = availH - h - padH;   // the top margin never takes the room the portrait controls need
-  const y = st + Math.round(padH ? Math.min(rest * anchorY, Math.max(0, rest - (PAD.controls + 2 * PAD.gap) * dpr)) : rest * anchorY);
+  const y = st + Math.round(padH ? Math.min(rest * anchorY, Math.max(0, rest - ctl)) : rest * anchorY);
   return {
     scale, x, y, w, h, dpr, devW, devH,
     cssScale: scale / dpr, cssX: x / dpr, cssY: y / dpr, cssW: w / dpr, cssH: h / dpr,
@@ -73,44 +73,10 @@ export function computeLayout(p) {
     pad: padH ? { x: (sl + 4 * dpr) / dpr, y: (y + h) / dpr + PAD.gap, w: (availW - 8 * dpr) / dpr, h: padH / dpr } : null,
   };
 }
-
-/**
- * The portrait pad (css px): `want` tall under the game while `controls` px stay for RUN, MENU, the d-pad and A / B
- * (core/touch.js lays them out under the pad), `gap` between the game, the pad and the controls.
- */
+/** The portrait pad (css px): `want` tall, `controls` left under it for the touch controls. */
 export const PAD = { want: 274, controls: 230, gap: 8 };
-/** The finger floor the lens aims its rows at (css px). */
-export const LENS_ROW_CSS = 44;
-
-/**
- * The portrait lens (docs/ACCESSIBILITY.md item 8): game rects { x, y, w, h, rowH } drawn again, bigger, in the pad under the
- * game, and tapped there (Renderer.toGame maps a tap back into the rect). Each rect gets the smallest whole number of
- * device px per game px that makes its `rowH` LENS_ROW_CSS css px tall, no wider than the pad; while the stack is taller
- * than the pad, the biggest scale steps down. Stacked top down, centred, `PAD.gap` / 2 apart. Pure: [{ src, k, x, y, w, h }]
- * in device px, k = device px per game px. Rects that do not fit at k = 1 are dropped.
- */
-export function placeLens(rects, view) {
-  const pad = view && view.pad, dpr = (view && view.dpr) || 1;
-  if (!pad || !rects || !rects.length) return [];
-  const pw = Math.floor(pad.w * dpr), ph = Math.floor(pad.h * dpr), gap = Math.round((PAD.gap / 2) * dpr);
-  const ks = rects.map((r) => Math.min(Math.ceil((LENS_ROW_CSS * dpr) / Math.max(1, r.rowH || r.h)), Math.floor(pw / r.w)));
-  const total = () => rects.reduce((n, r, i) => n + r.h * ks[i], 0) + gap * (rects.length - 1);
-  while (total() > ph) {
-    const i = ks.reduce((b, k, j) => (k * rects[j].h > ks[b] * rects[b].h ? j : b), 0);
-    if (ks[i] <= 1) break;
-    ks[i]--;
-  }
-  const out = [];
-  let y = Math.round(pad.y * dpr);
-  rects.forEach((r, i) => {
-    const k = ks[i];
-    if (k < 1 || y + r.h * k > Math.round(pad.y * dpr) + ph) return;
-    const w = r.w * k, x = Math.round(pad.x * dpr + (pw - w) / 2);
-    out.push({ src: { x: r.x, y: r.y, w: r.w, h: r.h }, k, x, y, w, h: r.h * k });
-    y += r.h * k + gap;
-  });
-  return out;
-}
+let lensMod = null, lensLoad = null;
+const loadLens = () => lensLoad || (lensLoad = import('../ui/firstuse/lens.js').then((m) => { lensMod = m; }, () => {}));
 
 // ------------------------------------------------------------------ color helpers
 
@@ -193,9 +159,7 @@ export class Renderer {
     this._ambient = null;           // { small, mid, frame }
     this._safe = { l: 0, t: 0, r: 0, b: 0 };
     this._listeners = new Set();
-    this._lens = [];                // the portrait lens as drawn (placeLens), read by toGame
-    this._lensWant = null;
-    this._lensSig = '';
+    this._lens = []; this._lensWant = null; this._lensSig = '';
     this.frame = 0;
     this._initResize();
   }
@@ -257,6 +221,7 @@ export class Renderer {
     if (c.width !== devW || c.height !== devH) { c.width = devW; c.height = devH; this.vctx.imageSmoothingEnabled = false; }
     const changed = JSON.stringify(view) !== JSON.stringify(this.view);
     this.view = view;
+    if (view.pad) loadLens();   // portrait touch: the lens is ready before the first battle
     this._backdropDirty = true;
     if (changed) for (const fn of this._listeners) { try { fn(view); } catch (e) { console.warn(e); } }
   }
@@ -277,21 +242,17 @@ export class Renderer {
     const v = this.view;
     const rect = this.visible.getBoundingClientRect();
     const cx = clientX - rect.left, cy = clientY - rect.top;
-    // a touch on the portrait lens lands where that part of the game is
-    for (const L of this._lens) {
+    for (const L of this._lens) {   // a tap on the portrait lens lands where that part of the game is
       const dx = cx * v.dpr - L.x, dy = cy * v.dpr - L.y;
       if (dx >= 0 && dy >= 0 && dx < L.w && dy < L.h) return { x: L.src.x + dx / L.k, y: L.src.y + dy / L.k };
     }
     return { x: (cx - v.cssX) / v.cssScale, y: (cy - v.cssY) / v.cssScale };
   }
 
-  /**
-   * The portrait lens for this frame (placeLens): a scene's draw() names the game rects { x, y, w, h, rowH } a finger needs
-   * bigger; nothing named this frame clears it. Ignored without the portrait pad.
-   */
-  setLens(rects) { this._lensWant = rects; }
-  /** The placed lens (device px), for QA. */
-  get lens() { return this._lens.map((L) => ({ ...L, src: { ...L.src } })); }
+  /** This frame's portrait lens: the game rects { x, y, w, h, rowH } a finger needs bigger (ui/firstuse/lens.js). */
+  setLens(rects) {
+    this._lensWant = rects;
+  }
 
   // ---------------------------------------------------------------- backdrop
   // Layers, back to front: body background (CSS) -> back canvas (128x72 glow: theme gradient + a blurred
@@ -457,27 +418,7 @@ export class Renderer {
       g.imageSmoothingEnabled = false;
       g.drawImage(this.canvas, 0, 0, this.W, this.H, v.x, v.y, v.w, v.h);
     }
-    this._presentLens();
-  }
-
-  /** Draw the portrait lens under the game; a changed lens repaints the bars it leaves first. */
-  _presentLens() {
-    const v = this.view, g = this.vctx;
-    const lens = placeLens(this._lensWant, v);
-    const sig = lens.map((L) => `${L.src.x},${L.src.y},${L.src.w},${L.src.h},${L.k},${L.y}`).join(';');
-    if (sig !== this._lensSig) {
-      if (this._lensSig) { this._drawBars(); g.imageSmoothingEnabled = false; g.drawImage(this.canvas, 0, 0, this.W, this.H, v.x, v.y, v.w, v.h); }
-      this._lensSig = sig;
-    }
-    this._lens = lens;
-    if (!lens.length) return;
-    g.imageSmoothingEnabled = false;
-    const o = Math.max(1, Math.round(v.dpr));
-    g.fillStyle = '#4b4675';   // opaque: it is drawn every frame
-    for (const L of lens) {
-      g.fillRect(L.x - o, L.y - o, L.w + 2 * o, L.h + 2 * o);
-      g.drawImage(this.canvas, L.src.x, L.src.y, L.src.w, L.src.h, L.x, L.y, L.w, L.h);
-    }
+    if (lensMod) lensMod.presentLens(this);
   }
 
   // ---------------------------------------------------------------- screen fx

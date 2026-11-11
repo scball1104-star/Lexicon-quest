@@ -3,11 +3,12 @@
 // and split each gap at its middle. Pure node checks: sizes in css px on the phone profiles qa/shots.json uses, no overlap
 // between the three or with the menus beside them, every tap goes to the nearest button, and the scene reads the targets.
 // Issue #88: portrait (one game px = one css px) gets the lens, a pad under the game that draws FLEE / AUTO / x1 and the
-// command window or the open sub-list again, bigger, and maps taps there back into the game (core/renderer.js placeLens).
+// command window or the open sub-list again, bigger, and maps taps there back into the game (ui/firstuse/lens.js).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, placeLens, PAD, LENS_ROW_CSS, Renderer } from '../../src/core/renderer.js';
+import { computeLayout, PAD, Renderer } from '../../src/core/renderer.js';
+import { placeLens, LENS_ROW_CSS } from '../../src/ui/firstuse/lens.js';
 import { BattleScene } from '../../src/scenes/battle.js';
 import { CommandMenu } from '../../src/battle/scene/menu.js';
 import * as L from '../../src/battle/scene/layout.js';

@@ -827,14 +827,12 @@ export class BattleScene {
     void e;
   }
 
-  /** Portrait (core/renderer.js placeLens): FLEE / AUTO / x1, then the command window or the open sub-list, bigger under the game. */
+  /** Portrait lens (#88): FLEE / AUTO / x1, then the command window or the open sub-list. */
   lensRects() {
-    const v = this.engine.renderer && this.engine.renderer.view;
+    const v = this.engine.renderer && this.engine.renderer.view, m = this.menu;
     if (!this.touchButtons() || !v || !v.pad) return null;
-    const m = this.menu, out = [helpLensRect()];
-    if (m.state === 'root' && m.root) out.push({ ...m.cmdRect, rowH: m.root.rowH });
-    else if (m.state === 'sub' && m.sub) out.push({ ...m.subRect, rowH: m.sub.rowH });
-    return out;
+    const sub = m.state === 'sub' && m.sub, root = m.state === 'root' && m.root;
+    return [helpLensRect(), ...(root ? [{ ...m.cmdRect, rowH: root.rowH }] : sub ? [{ ...m.subRect, rowH: sub.rowH }] : [])];
   }
 
   /** Where each shown enemy row goes this frame: */
@@ -1045,8 +1043,6 @@ export class BattleScene {
       menuItems: this.menu.root ? this.menu.root.items.map((it) => it.id) : [], menuIndex: this.menu.root ? this.menu.root.index : -1,
       menuCols: this.menu.root ? this.menu.root.columns : 0, rootRects: this.menu.root ? this.menu.root.items.map((_, i) => this.menu.root.rowRect(i)) : [],
       fleeArmed: this.menu.fleeArmed, fleeBtn: this.menu.fleeCmd ? { enabled: this.menu.fleeCmd.enabled } : null, helpBtns: this.touchButtons(), helpHits: this.touchButtons() && HELP_TOUCH_HITS,
-      sub: this.menu.state === 'sub' && this.menu.sub ? { index: this.menu.sub.index, rowH: this.menu.sub.rowH, rows: this.menu.sub.rows, rects: this.menu.sub.items.map((_, i) => this.menu.sub.rowRect(i)) } : null,
-      lens: this.engine.renderer && this.engine.renderer.lens ? this.engine.renderer.lens : [],
     };
   }
 }

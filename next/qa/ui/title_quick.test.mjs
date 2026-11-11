@@ -6,7 +6,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { List } from '../../src/ui/list.js';
-import { TitleScene, foldQuickRows, titleMenuLayout, isQuickRow, QUICK_ROW_ID, QUICK_ROW_LABEL } from '../../src/scenes/title.js';
+import { TitleScene } from '../../src/scenes/title.js';
+import { install, foldQuickRows, titleMenuLayout, isQuickRow, QUICK_ROW_ID, QUICK_ROW_LABEL } from '../../src/ui/firstuse/titleQuick.js';
+
+install(TitleScene);   // what scenes/title.js foldQuick does on first use
 import { offerRow as offerEp4 } from '../../src/data/ep4/title.js';
 import { offerRow as offerEp5 } from '../../src/data/ep5/title.js';
 import { offerRow as offerEp6 } from '../../src/data/ep6/title.js';
@@ -64,7 +67,7 @@ function titleScene(list, rowH = 20) {
     get scene() { return s; },
   };
   const items = rows(...list);
-  Object.assign(s, { engine: e, name: 'title', quick: [], quickRow: party(), mainMenu: null, menuSig: null, guard: null, hooksSettled: true, busy: false, hasSaves: true });
+  Object.assign(s, { engine: e, name: 'title', quick: [], quickRow: party(), mainMenu: null, menuSig: null, guard: null, busy: false, hasSaves: true });
   foldQuickRows(items, s.quick, s.quickRow);
   s.menu = new List({ x: 0, y: 0, w: 100, rowH, rows: items.length, items, textX: 18, index: 1 });
   s.update = () => {};   // the packs wrap update(); the real one draws key art (the browser checks run it: realplay title.py)
@@ -93,7 +96,7 @@ test('after Episode 5: the pack rows fold as they land, in any order, and the me
   onScreen(s);
 });
 
-test('the row opens the list in the menu\'s place; a pack row confirmed there reaches the pack\'s own start; back closes it', () => {
+test('the row opens the list in the menu\'s place; a pack row confirmed there reaches the pack\'s own start; back closes it', async () => {
   const { s, faded } = titleScene(['new', 'continue', 'ep2', 'ep3', 'config']);
   const o = { show: true, url: false, name: 'Wren', slot: 0 };
   offerEp4(s, o, {}); offerEp5(s, o, {}); offerEp6(s, o, {}); s.tidyMenu();
@@ -104,7 +107,6 @@ test('the row opens the list in the menu\'s place; a pack row confirmed there re
   assert.deepEqual(ids(s.menu.items), ['ep2', 'ep3', 'ep4', 'ep5', 'ep6']);
   assert.equal(s.menu.columns, 1);
   onScreen(s);
-  assert.equal(s.debugState === undefined, false);
   // the packs wrap whichever List the title holds on their next update: Episode 5's confirm opens its name entry
   s.update(0);
   s.menu.moveTo(s.menu.items.findIndex((it) => it.id === 'ep5'));
@@ -120,9 +122,9 @@ test('the row opens the list in the menu\'s place; a pack row confirmed there re
   assert.equal(s.mainMenu, null);
   onScreen(s);
   // QA's way in: the cursor on one quick start, the list opened for it
-  assert.equal(s.showQuickStart('ep3'), true);
+  assert.equal(await s.showQuickStart('ep3'), true);
   assert.equal(s.menu.item.id, 'ep3');
-  assert.equal(s.showQuickStart('ep9'), false);
+  assert.equal(await s.showQuickStart('ep9'), false);
 });
 
 test('a pack row that lands while the list is open joins it in order', () => {
@@ -177,4 +179,16 @@ test('a tap well clear of the open list closes it; one inside or within a row of
   assert.equal(s.outsideQuick({ x: w.x - 10, y: w.y + 4 }), false, 'within one row of slop');
   assert.equal(s.outsideQuick({ x: 4, y: 4 }), true);
   assert.equal(s.outsideQuick({ x: 4, y: 400 }), false, 'below the game (the portrait controls): not a tap on the title');
+});
+
+test('the fold and the portrait lens load on first use: out of the precache and the preload, runtime-cached by the pack pattern', async () => {
+  const fs = await import('node:fs');
+  const sw = fs.readFileSync(new URL('../../sw.js', import.meta.url), 'utf8');
+  const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+  const pre = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const pattern = new RegExp(JSON.parse(sw.match(/const PACK_PATTERN = (".*");/)[1]));
+  for (const f of ['src/ui/firstuse/titleQuick.js', 'src/ui/firstuse/lens.js']) {
+    assert.ok(!pre.includes(f) && !html.includes(f), `${f} is not in the first download`);
+    assert.ok(pattern.test(f), `${f} is runtime-cached once fetched`);
+  }
 });
