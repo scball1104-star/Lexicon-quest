@@ -217,3 +217,23 @@ only once its `EP6_MAPS_LISTED` is true).
   `packFallback.js`. Paid for by comment trims in `src/game/packs.js` (the header, the cave note and four long doc comments
   whose content is in this file): the pre-tap load went from 2,443,506 to 2,442,935 wire bytes (seams about +100, trims about
   -670, gzipped); the initial download from 6,663,018 to 6,662,447.
+
+## The worldmap pack (2026-11-11, issue #97, WORLD_MAP_PLAN wave 2)
+
+`worldmap` (prefix `worldmap_`, entry `src/data/worldmap/index.js`, asset fragment `assets/worldmap_manifest.json`, no audio
+pack, cap 0.3 MB; about 0.04 MB on the wire) holds the world map: `src/data/worldmap/` (`data.js` the places, regions and the
+flag reading, `layout.js` generated, `scene.js` the map screen, `field.js` the map stones, `index.js`),
+`assets/ui/worldmap_map.png` (the painting: colour, ink and paper layers and a sprite strip), `assets/tiles/worldmap.png` and
+`assets/tiles/worldmap_tiles.json` (the stone object, merged into the tile db like every fragment). The art is built by
+`tools/art/worldmap/build_worldmap.py`. Not hard, `touches: []`: no map module is patched; the stones join a map's entities at
+run time (the field's `glass.reset` seam, as Episode 4 attaches). Always enabled (its row in `packs.js` is the switch, so no
+`live.js`); wanted from `ep1_complete`, exactly when the field menu shows its Map row.
+
+- **Nothing is written to a save.** What the map shows is derived on every read from flags every save already has, so old saves
+  of every episode open the right map and `SAVE_VERSION` does not move.
+- **Core seams:** the table row in `packs.js` (+37 B gzipped) and the Map row in `src/scenes/menu.js` (+165 B gzipped after
+  moving the header's touch-layout prose to `docs/UI.md`, which paid about 210 B of it). The pre-tap load went from 2,448,126
+  to 2,448,328 wire bytes (+202).
+- **Offline:** `qa/pwa/offline_reload.py` brings the pack up with ep6 on the returning visit and requires `ensurePack('worldmap')`
+  to resolve from the cache after the cut (whenever the target's `pack_files.json` lists it); `pwa.py --only packoffline`
+  covers it with every other pack.

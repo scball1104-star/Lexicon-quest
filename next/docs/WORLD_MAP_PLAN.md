@@ -1,7 +1,8 @@
 # One growing world map: a design proposal (issue #93)
 
-Status: **PROPOSAL, docs only.** No game code, data or shipped art changes with this file. Nothing here is built until Scott
-and Stephen agree in issue #93 (section 8 lists the choices, each with a default). Written 2026-11-11 by Scott's Claude.
+Status: **APPROVED by Scott 2026-11-11 ("Approve, use defaults": the plan, the brief and the three stills, every choice of
+section 8 at its default).** Written 2026-11-11 by Scott's Claude. Wave 2 built on `scott/wm-wave2-map` (issue #97): the
+`worldmap` pack, `docs/PWA_PACKS.md` has it as built; travel (wave 3) is not built, the map screen is view only.
 
 Mock-up stills (not game art, not in the repo): `G:\My Drive\Personal Knowledge Assistant\reports\lexicon_quest_world_map\`
 (`wm_contact_sheet.png` plus the three stills at x1 and x4, and the two scripts that composed them from `next/assets`).
