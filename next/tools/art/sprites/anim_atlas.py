@@ -69,3 +69,15 @@ def save_indexed(a, path):
     im = Image.fromarray(idx, 'P')
     im.putpalette(uniq[:, :3].reshape(-1).tolist())
     im.save(path, optimize=True, transparency=bytes(uniq[:, 3].tolist()))
+
+
+def indexed_readback(a):
+    """The float image that reading back save_indexed(a, path) would give (pix.from_pil of the file), without a file.
+    Keep in step with save_indexed: the same rounding, and clear pixels zeroed only on the indexed path."""
+    import numpy as np
+    q = (np.clip(a, 0, 1) * 255 + 0.5).astype(np.uint8)
+    z = q.copy()
+    z[z[..., 3] == 0] = 0
+    if len(np.unique(z.reshape(-1, 4), axis=0)) <= 256:
+        q = z
+    return q.astype(np.float32) / 255.0

@@ -1,12 +1,17 @@
 """Rebuild every sprite sheet, atlas, contact sheet and the README.
 
-    python build_all.py            (about 10 seconds; deterministic)
+    python build_all.py                    (about 4 minutes; deterministic: a clean run rewrites the committed files
+                                            byte for byte, which check_repro.py proves)
+    python build_all.py --skip portraits   (the SDF portraits are about 140 s of it; skipping a step keeps its files)
 
 Outputs: next/assets/sprites/*.png + *.json + README.md, next/assets/ui/heads.png/.json (timeline head icons),
 previews in tools/art/sprites/out/.
 Reads next/assets/palette.json (W1-tiles) at build time; re-run after palette tweaks.
 Bram's grey beard, temples and crown (E3-sprites, plan 9.2) are ON by default; the one flag is bram_grey.ENABLED, off for a
-build with the environment variable LQ_BRAM_GREY=0 (bram_grey.py also writes the before/after preview).
+build with the environment variable LQ_BRAM_GREY=0 (bram_grey.py also writes the before/after preview). Bram's
+Reflection (refl_bram) stays brown either way: ep2_reflections.REFL_BRAM_GREY (issue #61).
+Later steps read atlases that earlier steps wrote (x1 and ep5 read enemies_field and npcs, ep4 reads portraits), so
+keep the order.
 """
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -16,11 +21,10 @@ from pix import DST, OUT
 import pal as P
 
 
-def main():
-    t0 = time.time()
+def steps():
     import build_party_field, build_party_battle, build_npcs, build_props, build_enemies, build_bosses
     import build_portraits, build_misc, build_heads
-    steps = [
+    return [
         ('party_field', build_party_field.build),
         ('party_battle', build_party_battle.build),
         ('npcs', build_npcs.build),
@@ -36,7 +40,23 @@ def main():
         ('ep5', lambda: __import__('ep5_build').build()),
         ('ep6', lambda: __import__('ep6_build').build()),
     ]
-    for name, fn in steps:
+
+
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(description='Rebuild every sprite atlas.')
+    ap.add_argument('--skip', action='append', default=[], metavar='STEP',
+                    help='leave this step out (repeatable); its files on disk stay as they are')
+    a = ap.parse_args(argv)
+    t0 = time.time()
+    todo = steps()
+    bad = set(a.skip) - {n for n, _ in todo}
+    if bad:
+        ap.error('unknown step(s): %s' % ', '.join(sorted(bad)))
+    for name, fn in todo:
+        if name in a.skip:
+            print('%-15s skipped' % name)
+            continue
         t = time.time()
         fn()
         print('%-15s %.1fs' % (name, time.time() - t))

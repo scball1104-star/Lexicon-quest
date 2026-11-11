@@ -1,7 +1,7 @@
 """The Other Selves (E2-sprites): the party's reflections, stepped out of the great mirror of the Court's F2.
 
 Battle (`refl_hero`, `refl_mira`, `refl_bram`, packed into enemies_battle): each party member's own battle frames
-(party_battle, built just before this runs) flipped to face RIGHT and recoloured into clear glass (W12,
+(party_battle, built in memory by _sheet with Bram brown, REFL_BRAM_GREY) flipped to face RIGHT and recoloured into clear glass (W12,
 recolour_glass: an eight-step indigo-violet-cyan-white ramp by lightness, a light rim, glint stripes, the owner's
 signature accent kept); the hero's reflection has a blank face (no eyes, no mouth: "Nameless Reflection"). The
 W11-era flat violet `recolour` is kept for reference and no longer used. Weapons follow the owner's first weapon: hero sword, Mira staff, Bram spear.
@@ -162,10 +162,26 @@ def recolour_glass(a, pid, ox, oy, blank_face=False):
     return out
 
 
+# Bram's Reflection keeps BROWN hair: the committed (and shipped) refl_bram frames in npcs, enemies_battle and
+# enemies_field were drawn from the brown Bram of 10/25, before Bram's grey went on by default (17b7b87, 11/3).
+# Issue #61: this module used to read party_field.png / party_battle.png back from disk, so every build after 11/3
+# saw the grey Bram and quietly redrew his reflection. It now builds the party atlases in memory with the grey
+# pinned here, so the result no longer depends on the flag, the step order or what is on disk. Turning the
+# reflection grey is an art change for Scott and Stephen: set True, rebuild, commit the three atlases.
+REFL_BRAM_GREY = False
+_SHEETS = {}
+
+
 def _sheet(name):
-    m = json.load(open(os.path.join(DST, name + '.json'), encoding='utf-8'))
-    sh = from_pil(Image.open(os.path.join(DST, m['image'])))
-    return m, sh
+    """-> (meta, sheet) of a party atlas exactly as the png on disk reads back (anim_atlas.indexed_readback),
+    built in memory with Bram's grey = REFL_BRAM_GREY"""
+    if name not in _SHEETS:
+        import anim_atlas as AA
+        mod = {'party_field': 'build_party_field', 'party_battle': 'build_party_battle'}[name]
+        m, sheet = __import__(mod).atlas(grey=REFL_BRAM_GREY)[:2]
+        _SHEETS[name] = (m, AA.indexed_readback(sheet))
+    m, sh = _SHEETS[name]
+    return m, sh.copy()
 
 
 def _frame(m, sh, n):
