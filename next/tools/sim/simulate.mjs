@@ -38,18 +38,22 @@ const EXTENSIONS = [X1];
 export const TARGETS = {
   ordinary: { roundsMin: 3, roundsMax: 5, winMin: 0.97, hpLossMax: 0.5, naiveWorse: 1.2 },
   echo_warden: { roundsMin: 6, roundsMax: 8, winMin: 0.9 },
-  archivore: { roundsMin: 8, roundsMax: 12, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15 },
+  // #87 (2026-11-11, Scott: "tougher, not necessarily longer"): the main bosses lost HP and gained ATK/MAG (BATTLE.md 15);
+  // hpLossMin guards the toughness (careful HP lost at the plan level, set under both the 400-fight suite and the tests' 60);
+  // the round bands moved down, never up (the Archivore's and the King's stay: Fine Print plays them with the same TARGETS).
+  // The Archivore stays the gentle first main boss: careful play wins 90% (winMin).
+  archivore: { roundsMin: 8, roundsMax: 12, winMin: 0.9, naiveWinMax: 0.6, recklessWorse: 0.15, hpLossMin: 0.25 },
   // W6-content: the Briar Alpha (Whisperwood Hollow mini-boss) at Lv 6-7; naive play (attack only) loses often.
   whisperwood_alpha: { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6 },
   // Episode 2 (EPISODE2_PLAN.md 6.4, 6.5, 6.8). keptMax: careful play averages one Kept member or fewer per fight.
   other_selves: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
-  nameless_king: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, keptMax: 1, winMinAt: { 12: 0.9 } },
+  nameless_king: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, keptMax: 1, winMinAt: { 12: 0.9 }, hpLossMin: 0.12 },
   // Episode 3 (EPISODE3_PLAN.md 6.6). The Specter: 7 to 9 rounds, careful play wins, ignoring the telegraph costs 10 points.
   // The Warden: 9 to 13 rounds, careful play turns at least half the Last Hammers with Tempered Oath (oathMin). Foundry F3
   // is the tightest ordinary floor (PLAYTEST_REVIEW_4 fix 8): careful play loses 18 to 24% HP a fight, attack-only wins
   // 70 to 85% (zone averages).
   bellows_specter: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
-  cinder_warden: { roundsMin: 9, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, oathMin: 0.5 },
+  cinder_warden: { roundsMin: 9, roundsMax: 12, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, oathMin: 0.5, hpLossMin: 0.15 },
   tightFloor: { zone: 'foundry_f3', hpLoss: [0.18, 0.24], naiveWin: [0.70, 0.85] },
   // Party level on entering and leaving each zone if the player fights each zone's plan once
   // (brief: valley Lv 2-3, Archive F1 Lv 4, F2 Lv 5-6, F3 Lv 7, Archivore Lv 8). Also checked at 80%
@@ -298,6 +302,8 @@ export function checkTargets(rows, prog = [...progression(1), ...progression(0.8
         const winMin = Math.max(t.winMin, (t.winMinAt && t.winMinAt[level]) || 0);
         if (ac.win < winMin) fails.push(`${tag}: competent win ${pct(ac.win)} < ${pct(winMin)}`);
         if (ac.rounds < t.roundsMin || ac.rounds > t.roundsMax) fails.push(`${tag}: rounds ${ac.rounds.toFixed(2)} outside ${t.roundsMin}-${t.roundsMax}`);
+        // #87: careful play must be pushed (HP lost at the plan level, the first listed; a full clear's level may lose less)
+        if (t.hpLossMin !== undefined && level === BOSS_LEVELS[id]?.[0] && ac.hpLoss < t.hpLossMin) fails.push(`${tag}: careful HP lost ${pct(ac.hpLoss)} < ${pct(t.hpLossMin)} (too soft)`);
         if (t.keptMax !== undefined && ac.kept > t.keptMax) fails.push(`${tag}: careful play is Kept ${ac.kept.toFixed(2)} times per fight (want <= ${t.keptMax})`);
       }
       if (an && an.win > t.naiveWinMax) fails.push(`${tag}: naive wins ${pct(an.win)} > ${pct(t.naiveWinMax)}`);

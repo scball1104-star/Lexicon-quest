@@ -14,6 +14,8 @@ import { EXP_TABLE, newMember } from '../../src/data/party.js';
 import { runBattle, progression } from '../../tools/sim/simulate.mjs';
 import { X1_GROUP_IDS, X1_BOSS_IDS } from '../../src/data/x1/encounters.js';
 
+// #87 (2026-11-11): the Archivore, Nameless King and Cinder Warden rows' `fights` (outcome, rounds, EXP) were rewritten after their
+// stats changed (BATTLE.md 15); their rewards and every other row are untouched.
 const BASE = JSON.parse(fs.readFileSync(new URL('./x1_baseline_rewards.json', import.meta.url), 'utf8'));
 const party = () => ['hero', 'mira', 'bram'].map((id) => newMember(id, { level: 5 }));
 const MODES = [['plain', { noElite: true }], ['elite', { forceElite: ['swift', 'stoneskin'] }], ['elite1', { forceElite: ['cursed'] }]];
