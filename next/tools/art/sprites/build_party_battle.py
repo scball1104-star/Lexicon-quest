@@ -258,7 +258,9 @@ def frames_for(c):
     return out
 
 
-def build():
+def atlas(grey=None):
+    """-> (meta, sheet, allf, extra, per_char) of the party_battle atlas, in memory. grey: Bram's grey on or off
+    (None = the bram_grey.ENABLED flag). ep2_reflections.py reads this, not the png on disk (issue #61)."""
     allf = []
     per_char = {}
     for c in ('hero', 'mira', 'bram'):
@@ -276,14 +278,12 @@ def build():
             else:
                 extra.append((f'{c}_{n}', f))
     import bram_grey as BG
-    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
+    if BG.ENABLED if grey is None else grey:   # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
         allf = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in allf]
         extra = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in extra]
     sheet, rects = pack_rows(allf + extra, CELL, cols)
     for k, v in alias.items():
         rects[k] = list(rects[v])
-    import anim_atlas as AA
-    AA.save_indexed(sheet, os.path.join(DST, 'party_battle.png'))
     anims = {}
     for c in ('hero', 'mira', 'bram'):
         for w in WEAPONS_OF[c]:
@@ -293,6 +293,13 @@ def build():
             'weapons': WEAPONS_OF,
             'poses': 'per weapon: <char>_<weapon>_{idle_0,idle_1,ready,windup,strike,victory,crit,combo,levelup}; shared: <char>_{cast,hurt,defend,kneel,ko,combo,levelup} (combo and levelup alias the primary weapon frame)',
             'frames': rects, 'anims': anims}
+    return meta, sheet, allf, extra, per_char
+
+
+def build():
+    meta, sheet, allf, extra, per_char = atlas()
+    import anim_atlas as AA
+    AA.save_indexed(sheet, os.path.join(DST, 'party_battle.png'))
     write_json(os.path.join(DST, 'party_battle.json'), meta)
     contact([(n, f) for n, f in allf + extra], os.path.join(OUT, 'party_battle_4x.png'), scale=4, cols=11,
             title='party_battle 32x40 at 4x (facing left)')

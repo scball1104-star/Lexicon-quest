@@ -37,7 +37,9 @@ def char_frames(name):
     return out
 
 
-def build():
+def atlas(grey=None):
+    """-> (meta, sheet, frames, names) of the party_field atlas, in memory. grey: Bram's grey on or off
+    (None = the bram_grey.ENABLED flag). ep2_reflections.py reads this, not the png on disk (issue #61)."""
     frames = []
     anims = {}
     names = {}
@@ -51,14 +53,19 @@ def build():
             anims[f'{c}_walk_{d}'] = {'frames': [f'{c}_{d}_1', f'{c}_{d}_0', f'{c}_{d}_2', f'{c}_{d}_0'], 'fps': 8, 'loop': True}
             anims[f'{c}_idle_{d}'] = {'frames': [f'{c}_{d}_0'] * 22 + [f'{c}_{d}_blink'] + [f'{c}_{d}_0'], 'fps': 8, 'loop': True}
     import bram_grey as BG
-    if BG.ENABLED:          # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
+    if BG.ENABLED if grey is None else grey:   # the single Bram-grey flag (bram_grey.py; default ON since 11/2, LQ_BRAM_GREY=0 for brown)
         frames = [(n, BG.apply(f) if n.startswith('bram_') else f) for n, f in frames]
     sheet, rects = pack_rows(frames, CELL, 4)
-    import anim_atlas as AA
-    AA.save_indexed(sheet, os.path.join(DST, 'party_field.png'))   # paletted: about half the RGBA bytes
     meta = {'image': 'party_field.png', 'cell': list(CELL), 'origin': [12, 31],
             'layout': 'per character a 4-row block (down, left, right, up); columns stand, stepA, stepB, blink',
             'frames': rects, 'anims': anims}
+    return meta, sheet, frames, names
+
+
+def build():
+    meta, sheet, frames, names = atlas()
+    import anim_atlas as AA
+    AA.save_indexed(sheet, os.path.join(DST, 'party_field.png'))   # paletted: about half the RGBA bytes
     write_json(os.path.join(DST, 'party_field.json'), meta)
     # contact sheets
     items = [(n, f) for n, f in frames]
