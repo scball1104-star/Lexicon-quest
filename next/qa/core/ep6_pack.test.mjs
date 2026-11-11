@@ -80,7 +80,7 @@ test('register(engine): a forced ensurePack hands the engine to the entry and st
   const r = await ensurePack('ep6', { engine, importer: async () => ({ register: (e) => { got = e; return { id: 'ep6', loaded: [], skipped: [] }; } }), packFiles: null, warm: false, quiet: true });
   assert.equal(r.ok, true, JSON.stringify(r));
   assert.equal(got, engine);
-  assert.deepEqual(loaded, ['ep6']);
+  assert.deepEqual(loaded, ['ep3', 'ep4', 'ep5', 'ep6'], 'ep3 to ep5 start with it (#96: every hard pack above at once)');
   resetPacks();
 });
 
@@ -119,7 +119,7 @@ test('seam 4: an Episode 6 save lands where an Episode 4 or 5 one does (Emberpea
 
 test('pack entry: ORDER, missing modules skipped, idempotent, the ep5 pack registered first, maps and hooks run', async () => {
   assert.deepEqual(ep6.ORDER, ['flags', 'enemies', 'items', 'skills', 'loot', 'encounters', 'gale', 'shops', 'ai', 'npcs', 'quests',
-    'text', 'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene']);
+    'text', 'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene', 'errands']);
   assert.ok(!ep6.ORDER.includes('title'), 'title is loaded on first use by hooks.js');
   const p1 = ep6.register();
   const p2 = ep6.register();

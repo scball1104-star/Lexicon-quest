@@ -217,3 +217,66 @@ only once its `EP6_MAPS_LISTED` is true).
   `packFallback.js`. Paid for by comment trims in `src/game/packs.js` (the header, the cave note and four long doc comments
   whose content is in this file): the pre-tap load went from 2,443,506 to 2,442,935 wire bytes (seams about +100, trims about
   -670, gzipped); the initial download from 6,663,018 to 6,662,447.
+
+## The worldmap pack (2026-11-11, issue #97, WORLD_MAP_PLAN wave 2)
+
+`worldmap` (prefix `worldmap_`, entry `src/data/worldmap/index.js`, asset fragment `assets/worldmap_manifest.json`, no audio
+pack, cap 0.3 MB; about 0.04 MB on the wire) holds the world map: `src/data/worldmap/` (`data.js` the places, regions and the
+flag reading, `layout.js` generated, `scene.js` the map screen, `field.js` the map stones, `index.js`),
+`assets/ui/worldmap_map.png` (the painting: colour, ink and paper layers and a sprite strip), `assets/tiles/worldmap.png` and
+`assets/tiles/worldmap_tiles.json` (the stone object, merged into the tile db like every fragment). The art is built by
+`tools/art/worldmap/build_worldmap.py`. Not hard, `touches: []`: no map module is patched; the stones join a map's entities at
+run time (the field's `glass.reset` seam, as Episode 4 attaches). Always enabled (its row in `packs.js` is the switch, so no
+`live.js`); wanted from `ep1_complete`, exactly when the field menu shows its Map row.
+
+- **Nothing is written to a save.** What the map shows is derived on every read from flags every save already has, so old saves
+  of every episode open the right map and `SAVE_VERSION` does not move.
+- **Core seams:** the table row in `packs.js` (+37 B gzipped) and the Map row in `src/scenes/menu.js` (+165 B gzipped after
+  moving the header's touch-layout prose to `docs/UI.md`, which paid about 210 B of it). The pre-tap load went from 2,448,126
+  to 2,448,328 wire bytes (+202).
+- **Offline:** `qa/pwa/offline_reload.py` brings the pack up with ep6 on the returning visit and requires `ensurePack('worldmap')`
+  to resolve from the cache after the cut (whenever the target's `pack_files.json` lists it); `pwa.py --only packoffline`
+  covers it with every other pack.
+
+### Travel (2026-11-11, issue #103, WORLD_MAP_PLAN wave 3)
+
+`src/data/worldmap/travel.js`, in the same pack (nothing new at startup: no core file changed, `sw.js` kept its version).
+Confirm on a town in the map's list travels there; the rules are Scott's defaults of 2026-11-11.
+
+- **Destinations** (`destinations`): visited towns only (`data.js` `TOWN_MAP`, the map each town's stones stand on), never a
+  road or a dungeon floor. A town only heard of stays disabled; the town the party stands on says "You are already here."
+- **Arrival** (`arrivalOf`, `data.js` `STONES[*].at`): the open cell beside the town's gate stone (a dock or ferry stone when
+  the trip's last leg is by sea or air), facing away from it, with two open cells behind it: the field lines the followers up
+  before the stones join the map, so their trail must not cross a stone. Thornfold (`x1_downs`) has its own stone now.
+- **Route** (`routeOf`): along `WAYS` (the roads, the sea lane by Yara's ship, the Airstair), or one straight leg by the
+  Kestrel once Episode 6 opened it (`aeris_came` or `library_reached`). 2 to 3 s by length; Reduce motion: a cut and a
+  0.6 s hold. Free, no battles.
+- **Packs** (`packsFor`, `readyPacks`): the arrival map's prefixed pack, any pack that patches it and that the save wants,
+  `tier` for a Fine Print save (its shop rows), and every hard pack above those (the #96 chain). They start when the trip
+  starts; opening the map warms every open town's packs at idle and resting 300 ms on a row starts that town's (never while
+  the browser is offline). A pack that fails (not cached, network down) or is still loading at 8 s cancels the trip: the
+  party stays and the info box says "That road is not ready yet. Try again with a connection." (plan 5.2 item 5).
+- **Guard rails** (`blockOf`): no travel during a scene or the cold open, while the field loads or warps, in a dungeon from
+  the menu row (the map is view only there; stones stand only in towns), in a Deep Stacks run, or aboard the ship
+  mid-crossing (`ep5_ship`: the story's own crossing, plan 2.3 item 5). There is no Kestrel deck map in Episodes 1 to 6;
+  Episode 7's deck gets a stone, or an `ABOARD` entry if it is a crossing.
+- **Arrival** (`arrive`): one fade, the map screen and the menu popped, then the field's own `loadMap` as a landmark: music,
+  the banner, the safe point and the autosave (to `game.autosaveSlot`, never another run's slot) are those of any map
+  change. No flag or quest is written.
+- **Tests:** `qa/worldmap/travel.test.mjs` (node); `qa/realplay/worldmap.py` (real keys and touch: Valewyn to Willowmere
+  and back, the offline refusal; desktop, phone, portrait).
+
+## Fetch every hard pack at once (2026-11-11, issue #96, world map wave 1)
+
+`ensurePack(id)` of a hard pack first calls `ensurePack` for every hard pack listed above it in `PACKS` (ep6 starts ep5, ep4
+and ep3), so one call fetches the whole chain at once; the entries still register in order (each awaits the one before, as
+above). The table order of the hard packs is therefore the chain order (`qa/core/pack_ensure.test.mjs`). Packs that load at
+once share one in-flight `assets/pack_files.json` fetch (it is fetched fresh once that settles). The #57 cache skip, the
+side-pack hold, the retries and #63's refetch are unchanged. Pre-tap load +188 gzipped bytes (2,448,126 to 2,448,314).
+
+Measured (`qa/ui/ep6_saves_headless.py` timing, GPU on, phone profile, three runs each, cold / warm in s):
+CPU x4 before 9.47 to 9.73 / 2.07 to 2.23, after 9.25 to 9.67 / 2.11 to 2.36; CPU x1 before 8.48 to 8.94 / 1.12 to 1.17,
+after 8.56 to 8.64 / 1.15 to 1.59. All four packs' code now starts within 70 ms (before: ep5, ep6, ep3, ep4 over 1.8 s), but
+the entry is not faster: it is held by the shared 10 Mbps line. The entry starts about 3.4 MB of audio (one 2.36 MB mp3, 17
+sfx) at the same moment, `pack_files.json` (1.9 KB) arrives about 2.7 s after the entry behind it, and the ep4 pack's own
+load (about 7.2 s cold, import and register one module at a time) is the critical path.

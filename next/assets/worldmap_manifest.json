@@ -1,0 +1,12 @@
+{
+  "$comment": "The world map (worldmap) pack's art (issue #97): the painting, the map stone and its tile fragment. Built by tools/art/worldmap/build_worldmap.py. Paths are relative to next/.",
+  "images": {
+    "worldmap": "assets/tiles/worldmap.png",
+    "worldmap_map": "assets/ui/worldmap_map.png"
+  },
+  "atlases": {},
+  "json": {
+    "worldmap_tiles": "assets/tiles/worldmap_tiles.json"
+  },
+  "fonts": {}
+}

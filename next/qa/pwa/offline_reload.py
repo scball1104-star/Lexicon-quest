@@ -4,7 +4,9 @@
      finishes the precache (every PRECACHE entry of sw.js is in the shell cache) and controls the page.
   2. A returning visit (a second page load, the worker in control from the start) opens the Episode 6 content:
      ?pack=ep5,ep6&ep=6 forces the packs, as a save past Episode 5 would want them. It waits for LQ_PACKS.packReady('ep6')
-     and for every ep6 file in assets/pack_files.json (sound files aside) to sit in the worker's runtime cache.
+     and for every ep6 file in assets/pack_files.json (sound files aside) to sit in the worker's runtime cache. The world map
+     pack (issue #97) rides along the same way (`worldmap` added to ?pack=, its files to the wait) whenever the target's
+     pack_files.json lists it, so a build without it (--live before it ships) is checked as before.
   3. The network is cut, then the page reloads. context.set_offline(True) alone is NOT enough: it takes the page offline,
      but the service worker's own fetch() still reaches the network (measured 2026-11-10 with Playwright 1.60: 382 server
      hits after set_offline), so a worker that fell through to the network would pass. So the cut is real as well: locally
@@ -14,7 +16,8 @@
      _offline.py, shared with pwa.py check_offline and check_packoffline.
      PASS when: the loading bar reaches the tap prompt and the title draws (canvas not blank); zero page errors and zero
      console errors; no missing assets; the page is still controlled and its one shell cache is named after the
-     SHELL_VERSION in sw.js; ensurePack('ep6') resolves ok from the cache; no shell or ep6 request failed. Every failed
+     SHELL_VERSION in sw.js; ensurePack('ep6') (and ensurePack('worldmap') when listed) resolves ok from the cache; no shell,
+     ep6 or world map request failed. Every failed
      request is listed. Two failures are expected and not counted: the probe itself, and the browser's own update check of
      sw.js (always from the network, by spec). The HTTP cache is cleared before the cut (Cache Storage stays): Pages sends
      max-age=600, which would otherwise hide a worker cache miss for ten minutes.
@@ -70,12 +73,12 @@ CACHED_JS = """async (want) => { const c = await caches.open('%s'); const keys =
   const missing = want.filter((w) => !keys.some((k) => k.endsWith('/next/' + w))); return { have: want.length - missing.length, missing: missing.slice(0, 8) }; }""" % RUNTIME_CACHE
 COVER_JS = """async (lists) => { const c = await caches.open('%s');
   const keys = new Set((await c.keys()).map((r) => new URL(r.url).pathname.replace(/^.*?\\/next\\//, '')));
-  const out = {}; for (const id of ['ep3', 'ep4', 'ep5', 'ep6']) { const w = (lists[id] || []).filter((f) => !/\\.(mp3|ogg|wav)$/.test(f));
+  const out = {}; for (const id of ['ep3', 'ep4', 'ep5', 'ep6', 'worldmap']) { const w = (lists[id] || []).filter((f) => !/\\.(mp3|ogg|wav)$/.test(f));
     out[id] = (w.length - w.filter((f) => !keys.has(f)).length) + '/' + w.length; }
   out['assets/pack_files.json'] = keys.has('assets/pack_files.json'); return out; }""" % RUNTIME_CACHE
-ENSURE_JS = """async () => { const P = window.LQ_PACKS; if (!P) return { error: 'no LQ_PACKS' };
-  const r = await Promise.race([P.ensurePack('ep6'), new Promise((ok) => setTimeout(() => ok({ timeout: true }), 30000))]);
-  return { result: r, ready: P.packReady('ep6'), state: P.packState('ep6') }; }"""
+ENSURE_JS = """async (id) => { const P = window.LQ_PACKS; if (!P) return { error: 'no LQ_PACKS' };
+  const r = await Promise.race([P.ensurePack(id), new Promise((ok) => setTimeout(() => ok({ timeout: true }), 30000))]);
+  return { result: r, ready: P.packReady(id), state: P.packState(id) }; }"""
 
 
 def log(*a):
@@ -153,7 +156,7 @@ def run(args, base, disk_version, want):
         t0 = time.time()
 
         # ---- 1. first visit, online: the worker installs, precaches and takes control
-        first = base + '/next/' + (QUERY if args.first_visit else '')
+        first = base + '/next/' + (args.query if args.first_visit else '')
         page.goto(first, wait_until='load', timeout=60000)
         res['gpu'] = page.evaluate(fieldlab.GPU_JS)
         log(f'[offline_reload] first visit {first}  gpu: {res["gpu"]}')
@@ -170,10 +173,12 @@ def run(args, base, disk_version, want):
 
         # ---- 2. the Episode 6 pack, as a returning player's visit leaves it: a second visit, the worker in control from the start
         if not args.first_visit:
-            page.goto(base + '/next/' + QUERY, wait_until='load', timeout=60000)
-            log(f'[online] returning visit {base}/next/{QUERY}')
+            page.goto(base + '/next/' + args.query, wait_until='load', timeout=60000)
+            log(f'[online] returning visit {base}/next/{args.query}')
             to_prompt_then_title(page, 60)
         poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('ep6'))", 60)
+        if args.worldmap:
+            poll(page, "() => !!(window.LQ_PACKS && window.LQ_PACKS.packReady('worldmap'))", 60)
         try:
             c = poll(page, "async (want) => { const r = await (%s)(want); return r.have === want.length ? r : null; }" % CACHED_JS, 60, arg=want)
         except TimeoutError:
@@ -207,7 +212,9 @@ def run(args, base, disk_version, want):
         res['offline_canvas'] = {'blank': blank, 'distinct_colours': distinct, 'stddev': sd}
         res['offline_worker'] = page.evaluate(WORKER_JS)
         res['offline_assets'] = page.evaluate("() => ({ missing: [...window.LQ_ENGINE.assets.missing], critical: window.LQ_ENGINE.assets.criticalMissing() })")
-        res['offline_ep6'] = page.evaluate(ENSURE_JS)
+        res['offline_ep6'] = page.evaluate(ENSURE_JS, 'ep6')
+        if args.worldmap:
+            res['offline_worldmap'] = page.evaluate(ENSURE_JS, 'worldmap')
         res['offline_probe'] = page.evaluate(PROBE_JS)
         page.wait_for_timeout(2000)   # anything the title or the pack fires late lands in the lists
         res['elapsed_s'] = round(time.time() - t0, 1)
@@ -258,11 +265,14 @@ def verdict(res, want_version):
     e = res['offline_ep6']
     if not (e.get('ready') and isinstance(e.get('result'), dict) and e['result'].get('ok')):
         reasons.append(f'ensurePack(ep6) offline: {json.dumps(e)[:300]}')
+    m = res.get('offline_worldmap')
+    if m is not None and not (m.get('ready') and isinstance(m.get('result'), dict) and m['result'].get('ok')):
+        reasons.append(f'ensurePack(worldmap) offline: {json.dumps(m)[:300]}')
     pr = res.get('offline_probe') or {}
     if pr.get('status') != 503:
         reasons.append(f'network not really cut: an uncacheable pack probe answered {pr.get("status")} (want 503 from the worker)')
     # A failed request matters when it is the shell, the ep6 pack, or the page itself.
-    shellish = re.compile(r'/next/(index\.html|sw\.js|manifest\.webmanifest|src/|assets/(manifest|palette|pack_files|ep6_)|$)|/ep6_')
+    shellish = re.compile(r'/next/(index\.html|sw\.js|manifest\.webmanifest|src/|assets/(manifest|palette|pack_files|ep6_|worldmap)|$)|/ep6_|/worldmap')
     bad = [f for f in res['failed_requests']['offline'] if shellish.search(f.split(' (')[0].split('?')[0])]
     if bad:
         reasons.append(f'{len(bad)} shell or ep6 requests failed offline, first: {bad[0]}')
@@ -309,9 +319,11 @@ def main():
     precache = sw_text[sw_text.find('const PRECACHE = ['):]
     precache = precache[:precache.find('];')]
     args.precache_n = len(re.findall(r"^\s*'[^']+',?\s*$", precache, re.M))
-    want = sorted(f for f in lists.get('ep6', []) if not f.endswith(('.mp3', '.wav')))
+    args.worldmap = 'worldmap' in lists
+    args.query = QUERY.replace('ep6&', 'ep6,worldmap&') if args.worldmap else QUERY
+    want = sorted(f for f in lists.get('ep6', []) + (lists.get('worldmap', []) if args.worldmap else []) if not f.endswith(('.mp3', '.wav')))
     log(f'[offline_reload] {"live" if args.live else "local"}{" (fresh sw)" if args.fresh_sw else ""}{" (first visit only)" if args.first_visit else ""}: SHELL_VERSION {version}, '
-        f'{args.precache_n} precache entries, {len(want)} ep6 pack files')
+        f'{args.precache_n} precache entries, {len(want)} ep6{" and worldmap" if args.worldmap else ""} pack files')
 
     try:
         res = run(args, base, version, want)
@@ -322,6 +334,8 @@ def main():
     log(f'[online] runtime cache before the cut: {res["online_runtime_cover"]}')
     log(f'[offline] tap prompt + title in {res["offline_title_s"]} s, canvas {res["offline_canvas"]}, worker {res["offline_worker"]}')
     log(f'[offline] assets {res["offline_assets"]}, ensurePack(ep6) -> {json.dumps(res["offline_ep6"])[:200]}')
+    if 'offline_worldmap' in res:
+        log(f'[offline] ensurePack(worldmap) -> {json.dumps(res["offline_worldmap"])[:200]}')
     split_expected(res)
     for k in ('online', 'offline'):
         log(f'[{k}] {len(res["errors"][k])} page/console errors' + ''.join(f'\n    {e[:200]}' for e in res['errors'][k]))

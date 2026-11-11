@@ -1,0 +1,50 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/worldmap/build_worldmap.py",
+ "note": "The worldmap pack tile fragment: the map stone (waystone) at town gates and docks. Merged into the live tile database by ensurePack; never appended to tiles.json.",
+ "objects": {
+  "worldmap_stone": {
+   "rect": [
+    0,
+    0,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     0,
+     16,
+     32
+    ],
+    [
+     16,
+     0,
+     16,
+     32
+    ]
+   ],
+   "light": {
+    "color": "#8af0e8",
+    "radius": 1.6
+   },
+   "note": "the map stone (src/data/worldmap/field.js): frame 0 dim, 1 lit while the party stands by it",
+   "sheet": "worldmap.png"
+  }
+ }
+}

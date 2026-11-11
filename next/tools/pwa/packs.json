@@ -89,5 +89,12 @@
     "assets": "assets/tier_manifest.json",
     "audioPack": null,
     "touches": []
+  },
+  "worldmap": {
+    "entry": "../data/worldmap/index.js",
+    "prefix": "worldmap_",
+    "assets": "assets/worldmap_manifest.json",
+    "audioPack": null,
+    "touches": []
   }
 }

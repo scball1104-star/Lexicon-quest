@@ -132,6 +132,8 @@
   "src/data/ep4/audio.js",
   "src/data/ep4/encounters.js",
   "src/data/ep4/enemies.js",
+  "src/data/ep4/errands.js",
+  "src/data/ep4/errands_field.js",
   "src/data/ep4/field/_testtide.js",
   "src/data/ep4/field/events.js",
   "src/data/ep4/field/seams.js",
@@ -199,6 +201,7 @@
   "src/data/ep5/audio.js",
   "src/data/ep5/encounters.js",
   "src/data/ep5/enemies.js",
+  "src/data/ep5/errands.js",
   "src/data/ep5/field/_testshade.js",
   "src/data/ep5/field/art.js",
   "src/data/ep5/field/events.js",
@@ -268,6 +271,7 @@
   "src/data/ep6/audio.js",
   "src/data/ep6/encounters.js",
   "src/data/ep6/enemies.js",
+  "src/data/ep6/errands.js",
   "src/data/ep6/field/_testwind.js",
   "src/data/ep6/field/art.js",
   "src/data/ep6/field/events.js",
@@ -313,5 +317,17 @@
   "src/data/tier/text.js",
   "src/data/tier/tier.js",
   "src/data/tier/title.js"
+ ],
+ "worldmap": [
+  "assets/tiles/worldmap.png",
+  "assets/tiles/worldmap_tiles.json",
+  "assets/ui/worldmap_map.png",
+  "assets/worldmap_manifest.json",
+  "src/data/worldmap/data.js",
+  "src/data/worldmap/field.js",
+  "src/data/worldmap/index.js",
+  "src/data/worldmap/layout.js",
+  "src/data/worldmap/scene.js",
+  "src/data/worldmap/travel.js"
  ]
 }
