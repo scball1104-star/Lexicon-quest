@@ -74,6 +74,7 @@ node next/tools/sim/simulate.mjs --cave --check   # Deep Stacks balance
 python next/qa/shots.py              # screenshot sweep (needs: pip install playwright pillow numpy; python -m playwright install chromium)
 python next/qa/autoplay.py           # a bot plays Episode 1 start to credits
 python next/qa/realplay/run.py       # real keys and touch, no LQ_DEBUG actions (under 10 min, local only, not in CI)
+python next/qa/pwa/offline_reload.py # offline reload after a returning visit to Episode 6 (under 1 min; --live: the published game, read only)
 ```
 
 The same checks run automatically on every pull request (`.github/workflows/next-gate.yml`). Under heavy CPU
