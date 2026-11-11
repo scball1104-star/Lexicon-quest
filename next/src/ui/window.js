@@ -296,10 +296,12 @@ export function drawDivider(r, x, y, w, o = {}) {
 /**
  * The advance mark of a text box: one bobbing triangle everywhere (CRITIQUE_2 D10), whether more pages follow
  * ('more') or the box closes on the next press ('end'). `kind` is kept for callers; both draw the same mark.
+ * Reduce motion: it rests on its first frame, as the scroll arrows below do.
  */
+const restFrame = (r, frame) => (r && r.settings && r.settings.reduceMotion ? 0 : frame ?? r.frame);
 export function drawTextMark(r, kind, x, y, o = {}) {
   const ui = uiAtlas(r);
-  const frame = o.frame ?? r.frame;
+  const frame = restFrame(r, o.frame);
   const name = ui && ui.anims.more && animFrameAt(ui.anims.more, frame / 60);
   const f = name && ui.frames[name];
   if (f) { r.sprite(ui, f, x, y, { topLeft: true, alpha: o.alpha }); return; }
@@ -312,7 +314,7 @@ export function drawTextMark(r, kind, x, y, o = {}) {
 export function drawScrollArrow(r, dir, cx, y, o = {}) {
   const ui = uiAtlas(r);
   const f = ui && ui.frames['arrow_' + dir];
-  const bob = Math.floor((o.frame ?? r.frame) / 15) % 2 ? (dir === 'up' ? -1 : 1) : 0;
+  const bob = Math.floor(restFrame(r, o.frame) / 15) % 2 ? (dir === 'up' ? -1 : 1) : 0;
   if (f) r.sprite(ui, f, Math.round(cx - f.w / 2), y + bob, { topLeft: true, alpha: o.alpha });
   else r.text(dir === 'up' ? '▲' : '▼', cx, y - 2 + bob, { align: 'center', color: 'white', alpha: o.alpha });
 }

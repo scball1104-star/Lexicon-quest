@@ -3,6 +3,7 @@
 //   const cam = new Camera(field);
 //   cam.follow(actor)                 lock onto an actor (snaps unless a pan is in flight)
 //   await cam.panTo(cx, cy, frames)   ease the view center to a world pixel (frames 0 = cut)
+//                                     Reduce motion: a cut, then a hold for the same frames, so a scene's pacing is unchanged
 //   await cam.returnTo(actor, frames) ease back to an actor, then follow it
 //   cam.update()                      once per logic frame, after the actors moved
 //   cam.x, cam.y                      top-left of the view in world pixels (whole numbers)
@@ -21,6 +22,7 @@ export class Camera {
     this.pan = null;                 // { fromX, fromY, toX, toY, t, dur, resolve, thenFollow }
   }
 
+  get still() { const s = this.field.engine.settings; return !!(s && s.reduceMotion); }
   get W() { return this.r.W; }
   get H() { return this.r.H; }
 
@@ -77,7 +79,7 @@ export class Camera {
     if (this.pan) {
       const p = this.pan;
       p.t++;
-      const k = ease.inOutSine(Math.min(1, p.t / p.dur));
+      const k = this.still ? 1 : ease.inOutSine(Math.min(1, p.t / p.dur));   // Reduce motion: cut on the first frame, then hold
       if (p.thenFollow) { const [tx, ty] = this.clampCenter(...this.actorCenter(p.thenFollow)); p.toX = tx; p.toY = ty; }
       this.cx = p.fromX + (p.toX - p.fromX) * k;
       this.cy = p.fromY + (p.toY - p.fromY) * k;

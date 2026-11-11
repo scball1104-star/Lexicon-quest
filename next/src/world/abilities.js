@@ -702,11 +702,12 @@ export class FieldAbilities {
     const ui = r.assets && r.assets.has('ui') ? r.assets.atlas('ui') : null;
     const b = x.to;
     const cx = b.feetX, cy = b.feetY - 8;
+    const still = !!(r.settings && r.settings.reduceMotion);   // Reduce motion: no blink, no shrink; it fades in and out in place
     if (ui && ui.frames.reticle_0) {
-      const fr = ui.frames[Math.floor(x.t / 6) % 2 ? 'reticle_1' : 'reticle_0'];
+      const fr = ui.frames[!still && Math.floor(x.t / 6) % 2 ? 'reticle_1' : 'reticle_0'];
       r.withAlpha(Math.min(1, x.t / 6) * (1 - Math.max(0, k - 0.8) * 5), () => r.sprite(ui, fr, cx - (fr.w >> 1), cy - (fr.h >> 1), { topLeft: true }));
     } else {
-      const s = Math.max(5, 14 - x.t);
+      const s = still ? 5 : Math.max(5, 14 - x.t);
       r.withAlpha(0.8, () => { r.rect(cx - s, cy - s, s * 2, 1, '#8af0e8'); r.rect(cx - s, cy + s, s * 2, 1, '#8af0e8'); r.rect(cx - s, cy - s, 1, s * 2, '#8af0e8'); r.rect(cx + s, cy - s, 1, s * 2 + 1, '#8af0e8'); });
     }
   }

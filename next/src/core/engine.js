@@ -182,7 +182,7 @@ export class BootScene {
     }
     if (this.sparkle) { this.sparkle.t += dt; if (this.sparkle.t > 0.34) this.sparkle = null; }
     this.nextSparkle -= dt;
-    if (!this.sparkle && this.nextSparkle <= 0 && (this.shown < this.target || this.phase === 'ready')) {
+    if (motion && !this.sparkle && this.nextSparkle <= 0 && (this.shown < this.target || this.phase === 'ready')) {   // reduce: no twinkle
       this.nextSparkle = this.phase === 'ready' ? 0.9 + this.rand() * 0.8 : 0.35 + this.rand() * 0.5;
       const x = Math.round((GAME_W - BAR.w) / 2) + Math.round(BAR.w * this.shown);
       this.sparkle = { x: this.phase === 'ready' ? x - 2 - Math.round(this.rand() * 20) : x, y: BAR.y + 1 + Math.round(this.rand() * 4), t: 0 };
@@ -200,6 +200,7 @@ export class BootScene {
 
   draw(r) {
     const W = r.W, H = r.H;
+    const lit = this.engine.settings.reduceMotion || (this.frame % 56) < 42;   // reduce: no blink
     r.gradientV(0, 0, W, H, '#1b1638', BOOT_INK.deep, 9);
     r.ditherEllipse(W / 2, 66, 176, 52, '#241d4a', 0.4);
     r.ditherEllipse(W / 2, 66, 120, 32, '#2b2458', 0.3);
@@ -237,7 +238,7 @@ export class BootScene {
       r.rect(bx, by + bh - 1, fill, 1, BOOT_GOLD.dark);
       if (fill < bw) r.rect(bx + fill - 1, by, 1, bh, BOOT_GOLD.pale);
       if (this.phase === 'ready') {
-        const pulse = 0.5 + 0.5 * Math.sin(this.t * 4);
+        const pulse = this.engine.settings.reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(this.t * 4);   // reduce: at its mean
         r.withAlpha(0.35 * pulse, () => r.rect(bx, by, bw, bh, BOOT_GOLD.pale));
       }
     }
@@ -251,11 +252,11 @@ export class BootScene {
     if (this.phase === 'error') {
       const n = this.failed.length;
       r.text(`${BOOT_STATUS.error}${n ? ` (${n})` : ''}`, W / 2, sy, { align: 'center', color: BOOT_TEXT.red });
-      if (this.waiting && (this.frame % 56) < 42) r.text('Tap or press any key to retry', W / 2, sy + 13, { align: 'center', color: BOOT_GOLD.light });
+      if (this.waiting && lit) r.text('Tap or press any key to retry', W / 2, sy + 13, { align: 'center', color: BOOT_GOLD.light });
       const first = this.failed[0] ? String(this.failed[0]).replace(/^[a-z]+:/, '') : '';
       if (first) r.text(`Missing: ${first}${n > 1 ? ' and more' : ''}`, W / 2, sy + 28, { align: 'center', color: BOOT_TEXT.dim });
     } else if (this.phase === 'ready' && this.waiting) {
-      if ((this.frame % 56) < 42) r.text(BOOT_STATUS.ready, W / 2, sy, { align: 'center', color: BOOT_GOLD.light });
+      if (lit) r.text(BOOT_STATUS.ready, W / 2, sy, { align: 'center', color: BOOT_GOLD.light });
       // W15: held upright on a phone the game is a small strip; say so under the prompt (the title repeats it once).
       const v = this.engine.renderer && this.engine.renderer.view;
       if (v && v.touchMode === 'below' && !(this.engine.settings && this.engine.settings.rotateHintSeen)) {

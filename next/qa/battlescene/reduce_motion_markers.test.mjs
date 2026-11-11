@@ -9,6 +9,12 @@ import { HELP_TOUCH_BTNS } from '../../src/battle/scene/layout.js';
 import { BattleScene } from '../../src/scenes/battle.js';
 import { Actor } from '../../src/battle/scene/actors.js';
 import { drawCursor } from '../../src/ui/cursor.js';
+import { BattleFx, REDUCED_TRAVEL } from '../../src/battle/fx.js';
+import { NumberPopups } from '../../src/ui/numberPopup.js';
+import { BootScene } from '../../src/core/engine.js';
+import { drawTextMark, drawScrollArrow } from '../../src/ui/window.js';
+import { FieldAbilities } from '../../src/world/abilities.js';
+import { Camera } from '../../src/world/camera.js';
 
 const { registerData } = await import('../../tools/sim/ep6.mjs');
 registerData();
@@ -149,4 +155,173 @@ test('the last movers: the target reticle and arrow, the menu glove, the rewards
     party: () => [],
   };
   steady('rewards confirm glyph', (r, f) => { scene.frame = f; BattleScene.prototype.drawRewards.call(scene, r); });
+});
+
+// --- the rest (docs/ACCESSIBILITY.md section 6, the items still open after the tail) --------------------------------------
+/** The distinct drawings over frames [from, to) (a marker whose alpha fades is checked over its full-alpha span). */
+function looksOver(reduce, from, to, draw) {
+  const seen = new Set();
+  for (let f = from; f < to; f++) { const { r, log } = recorder(reduce); draw(r, f); assert.ok(log.length > 0); seen.add(JSON.stringify(log)); }
+  return seen.size;
+}
+const fxEngine = (reduce) => ({ settings: { reduceMotion: reduce }, assets: { has: () => false } });
+/** One fx spawned on a fresh BattleFx: how many particles, how far the farthest travels from its start, any blink or sway. */
+function flight(reduce, spawn) {
+  const fx = new BattleFx(fxEngine(reduce));
+  spawn(fx);
+  const start = new Map(fx.parts.map((q) => [q, [q.x, q.y]]));
+  let far = 0;
+  const n = fx.parts.length, blink = fx.parts.some((q) => q.blink), drift = fx.parts.some((q) => q.drift), items = fx.items.length;
+  for (let t = 0; t < 120 && fx.parts.length; t++) {
+    fx.update();
+    for (const q of fx.parts) { const [x0, y0] = start.get(q); far = Math.max(far, Math.hypot(q.x - x0, q.y - y0)); }
+  }
+  return { n, far, blink, drift, items };
+}
+
+test('battle particles: a third of them, a third of the travel, no blink or sway; the impact star stays', () => {
+  const at = { x: 100, y: 146, h: 40, w: 32 };
+  const cases = [
+    ['hit spark', (fx) => fx.spawn('hit_spark', at), 5],
+    ['big hit spark', (fx) => fx.spawn('hit_spark', { ...at, big: true }), 10],
+    ['Break burst', (fx) => fx.spawn('break_burst', at), 18],
+    ['quake', (fx) => fx.spawn('quake', at), 16],
+    ['hush (blinking motes)', (fx) => fx.spawn('hush', at), 6],
+    ['embers (swaying)', (fx) => fx.particles(100, 120, 9, { speed: 1, life: 20, drift: 0.6 }), 9],
+  ];
+  for (const [name, spawn, full] of cases) {
+    const off = flight(false, spawn), on = flight(true, spawn);
+    assert.equal(off.n, full, `${name}: unchanged with Reduce motion off`);
+    assert.equal(on.n, Math.ceil(full / 3), `${name}: a third of the particles`);
+    assert.ok(on.far <= off.far * REDUCED_TRAVEL + 0.75, `${name}: travel ${on.far.toFixed(1)} px vs ${off.far.toFixed(1)} px`);
+    assert.equal(on.blink || on.drift, false, `${name}: no blink or sway under Reduce motion`);
+    assert.equal(on.items, off.items, `${name}: the star, ring or sprite parts are all still there`);
+  }
+  assert.ok(flight(false, cases[4][1]).blink && flight(false, cases[5][1]).drift, 'blink and sway still run with Reduce motion off');
+});
+
+test('battle rings and rays hold their halfway shape and fade in place', () => {
+  const at = { x: 100, y: 146, h: 40 };
+  const shapes = (reduce, spawn, frames, kind) => {
+    const fx = new BattleFx(fxEngine(reduce));
+    spawn(fx);
+    const seen = new Set();
+    for (let t = 0; t < frames; t++) {
+      const { r, log } = recorder(reduce);
+      for (const it of fx.items) it.draw(r, t, it);
+      seen.add(JSON.stringify(log.filter((c) => c[0] === kind)));
+    }
+    return seen.size;
+  };
+  const ring = (fx) => fx.fx_ring(at, { color: '#fff', r0: 4, r1: 60, frames: 14 });
+  const rays = (fx) => fx.fx_rays(at, { color: '#fff', n: 8, len: 30, frames: 16 });
+  assert.equal(shapes(true, ring, 14, 'ellipse'), 1, 'ring: one size under Reduce motion');
+  assert.ok(shapes(false, ring, 14, 'ellipse') > 5, 'ring: still grows with it off');
+  assert.equal(shapes(true, rays, 16, 'line'), 1, 'rays: one shape under Reduce motion');
+  assert.ok(shapes(false, rays, 16, 'line') > 5, 'rays: still reach out and turn with it off');
+});
+
+test('damage numbers appear at rest and fade, with no bounce; the column and the timing are unchanged', () => {
+  const run = (reduce) => {
+    const pops = new NumberPopups();
+    pops.spawn(100, 120, 37);
+    pops.spawn(100, 120, 0, { text: '120', kind: 'crit' });
+    pops.word(100, 110, 'WEAK');
+    const ys = new Set(), alive = [];
+    for (let t = 0; t < 60; t++) {
+      const { r, log } = recorder(reduce);
+      pops.draw(r);
+      const tops = log.filter((c) => c[0] === 'text').map((c) => c[3]);
+      if (tops.length) ys.add(JSON.stringify(tops));
+      alive.push(pops.active);
+      pops.update();
+    }
+    return { ys: ys.size, alive: alive.join() };
+  };
+  const on = run(true), off = run(false);
+  assert.equal(on.ys, 1, 'every frame draws the numbers at the same height under Reduce motion');
+  assert.ok(off.ys > 5, 'they still pop and bounce with it off');
+  assert.equal(on.alive, off.alive, 'the same numbers live the same frames either way');
+  // the resting place is where the bounce ends, so nothing jumps when Reduce motion is turned on mid-fight
+  const pops = new NumberPopups();
+  const p = pops.spawn(100, 120, 5);
+  for (let t = 0; t < 30; t++) pops.update();
+  assert.equal(pops.layout(true).get(p), pops.layout(false).get(p));
+});
+
+test('the boot screen: "Tap or press any key" and the retry line stay lit, the bar glow holds, no twinkle', () => {
+  const bootFor = (reduce, phase) => {
+    const engine = { settings: { reduceMotion: reduce }, assets: { has: () => false }, renderer: { view: null },
+      input: { anyPressed: () => false, pointer: { pressed: false }, consumeAll() {} } };
+    const b = new BootScene(engine);
+    Object.assign(b, { phase, waiting: true, target: 1, ceiling: 1, shown: 1, failed: phase === 'error' ? ['img:ui'] : [] });
+    return b;
+  };
+  for (const phase of ['ready', 'error']) {
+    const scenes = new Map([[true, bootFor(true, phase)], [false, bootFor(false, phase)]]);
+    steady(`boot ${phase}`, (r) => {
+      const b = scenes.get(r.settings.reduceMotion);
+      b.update(1 / 60); b.flavorT = 1;   // the story line's own fade is text timing, not motion: held here
+      b.draw(r);
+    });
+    const lit = (reduce) => {
+      const b = bootFor(reduce, phase);
+      let n = 0;
+      for (let f = 0; f < 112; f++) {
+        b.update(1 / 60);
+        const { r, log } = recorder(reduce);
+        b.draw(r);
+        if (log.some((c) => c[0] === 'text' && /Tap or press/.test(c[1]))) n++;
+      }
+      return n;
+    };
+    assert.equal(lit(true), 112, `${phase}: the prompt shows on every frame under Reduce motion`);
+    assert.ok(lit(false) < 112 && lit(false) > 0, `${phase}: it still blinks with it off`);
+  }
+});
+
+test('the text box advance mark and the list scroll arrows rest', () => {
+  steady('advance mark (box frame)', (r, f) => drawTextMark(r, 'more', 300, 180, { frame: f }));
+  steady('advance mark (renderer frame)', (r, f) => { r.frame = f; drawTextMark(r, 'end', 300, 180); });
+  steady('scroll arrow up', (r, f) => drawScrollArrow(r, 'up', 100, 30, { frame: f }));
+  steady('scroll arrow down', (r, f) => { r.frame = f; drawScrollArrow(r, 'down', 100, 170); });
+  // the font fallback (no ui atlas) bobs the same way
+  const bare = (draw) => (r, f) => { r.assets = { has: () => false }; draw(r, f); };
+  steady('advance mark, no atlas', bare((r, f) => drawTextMark(r, 'more', 300, 180, { frame: f })));
+  steady('scroll arrow, no atlas', bare((r, f) => drawScrollArrow(r, 'down', 100, 170, { frame: f })));
+});
+
+test('the field lock-on reticle holds its first frame and size (it still fades in and out)', () => {
+  const foe = { feetX: 120, feetY: 90 };
+  const draw = (r, t) => FieldAbilities.prototype.drawReticle.call({}, r, { to: foe, t }, t / 34);
+  // full alpha from frame 6 (faded in) to frame 27 (the fade out starts at k 0.8)
+  assert.equal(looksOver(true, 6, 27, draw), 1, 'reticle: one look under Reduce motion');
+  assert.ok(looksOver(false, 6, 27, draw) > 1, 'reticle: still blinks with it off');
+  const bare = (r, t) => { r.assets = { has: () => false }; draw(r, t); };
+  assert.equal(looksOver(true, 0, 27, bare), 1, 'fallback box: one size under Reduce motion');
+  assert.ok(looksOver(false, 0, 27, bare) > 1, 'fallback box: still closes in with it off');
+});
+
+test('cutscene camera pans cut, then hold for the same frames, so a scene keeps its pacing', async () => {
+  const run = async (reduce, back) => {
+    const field = { map: { pixelW: 2000, pixelH: 1000 }, engine: { settings: { reduceMotion: reduce }, renderer: { W: 384, H: 216 } } };
+    const cam = new Camera(field);
+    const hero = { px: 200, py: 300 };
+    if (back) { cam.panTo(1200, 500, 0); } else cam.follow(hero);
+    const xs = [];
+    let done = -1;
+    const p = (back ? cam.returnTo(hero, 30) : cam.panTo(1200, 500, 30)).then(() => { done = xs.length; });
+    for (let t = 0; t < 40; t++) { cam.update(); xs.push(cam.x); await Promise.resolve(); await Promise.resolve(); }
+    await p;
+    return { xs, done, follows: cam.target === hero };
+  };
+  for (const back of [false, true]) {
+    const name = back ? 'returnTo' : 'panTo';
+    const on = await run(true, back), off = await run(false, back);
+    assert.equal(new Set(on.xs).size, 1, `${name}: the first frame is already there under Reduce motion`);
+    assert.ok(new Set(off.xs.slice(0, 30)).size > 10, `${name}: it still eases with Reduce motion off`);
+    assert.equal(on.xs[0], off.xs[39], `${name}: the same place either way`);
+    assert.equal(on.done, off.done, `${name}: the scene waits the same frames either way`);
+    assert.equal(on.follows, back, `${name}: returnTo follows the actor afterwards`);
+  }
 });
