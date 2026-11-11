@@ -21,6 +21,9 @@ reading, with the check that would settle it). Sizes: **S** hours, **M** about a
 (`next/qa/pwa/budget_ratchet.json`); every S fix below is a few dozen gzipped bytes of code in a startup module, which still
 has to be reported in its pull request.
 
+**Status, 2026-11-11:** the top five (section 5) shipped in PR #81 (issue #74) and the next motion and touch work in PR #83
+(issue #82). Section 6 says what each item now stands at; the findings below are the review as written on 2026-11-10.
+
 ## 1. Verdict
 
 The game is kinder than most pixel JRPGs to slow, motor-limited and hearing-impaired players: battles are turn based with
@@ -253,3 +256,23 @@ All five are S, touch no hot file, change the startup budget by bytes only, and 
 
 Next in line, each with a light design nod: the Ink window colour (item 3), a mark for low HP (item 5), the Ledger star and
 the rarity word (item 11).
+
+## 6. Status after #74 and #82 (2026-11-11)
+
+What the fixes changed, by item. "Open" means the review's finding still holds. Fact: each line names the commit or the code.
+
+| Item | Status | What changed, or what is left |
+|---|---|---|
+| 1. OS reduce motion | **Fixed**, PR #81 | The device setting applies until the player sets Reduce motion (`save.js` `bootSettings`, `reduceMotionSet`); Reset to defaults hands it back to the device. |
+| 2. Reduce motion promise | **Mostly fixed**, PR #81, PR #83, `scott/a11y-tail` | PR #81: flashes at most 0.1 alpha, the battle entry dims to ink, READY, the shield count, the weakness frame, Heat pips and the Fury glow steady, the flare tint at its mean, a held white is a 4-frame tint. PR #83: the timeline head, the turn bar and ring, the telegraph "!", the Episode 3 to 6 battle marks, touch FLEE and AUTO (`hud.js` `steadyFrame`). `scott/a11y-tail`: the target reticle and arrow, the menu glove (`ui/cursor.js`, every list), the rewards confirm glyph. **Open:** battle particles (Break burst, page burst, rays, rings, quake), the damage number bounce and hit-stop, the boot "Tap or press any key" blink (`core/engine.js` 254, 258), the text box advance mark and list scroll arrows (`ui/window.js` `drawTextMark`, `drawScrollArrow`), the field lock-on reticle (`world/abilities.js` `drawReticle`), cutscene camera pans. The glove's one-shot nudge after a missed tap (`ui/list.js` `nudge`) is kept on purpose: it answers a tap, it does not loop. |
+| 3. Contrast, Ink window colour | Open | Needs the light design nod. |
+| 4. Bigger text, portrait | Open | The rotate hint still shows once ever (`settings.rotateHintSeen`). |
+| 5. Low HP by colour only | Open | Needs the choice of mark. |
+| 6. Skipped pages | **Guard fixed**, PR #81; backlog open | `READ_GUARD` (10 frames) in `ui/dialog.js`. The "Said" backlog is a design call. |
+| 7. Text on a clock | **Fixed**, PR #81 | `textHold` (`ui/text.js`) doubles toasts, toll captions and title cards at Slow. |
+| 8. Touch targets | **Partly fixed**, PR #83 | FLEE / AUTO / x1 are tapped on `HELP_TOUCH_HITS`: 62 / 53 / 55 x 45 css px in phone landscape. **Open:** battle command rows stay 18 px (30 css px), dense lists 20 px (33 css px), portrait help buttons 27 css px tall (a layout call). |
+| 9. Timed Flee | **Fixed**, PR #81 | The arm holds until the second tap or another input. |
+| 10. Remapping | Open | |
+| 11. Colour-only cues | Open | |
+| 12. The thirteenth bell | Open | Wording is Scott's and Stephen's. |
+| 13. Difficulty | Open | A design call. |
