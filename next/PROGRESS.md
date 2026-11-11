@@ -547,4 +547,8 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
   run with the graphics chip on; without it they over-measured by about 40%. Live, slow phone (4x slower processor, 10 Mbps):
   first visit 6.6 to 6.8 s (target 8), files stored 2.1 to 2.3 s (target 3, was 3.0 to 4.2). Bundling stays on hold.
 - GitHub's publish step timed out three times in the afternoon; one fresh run at 7:00 PM went through in 3 minutes.
+- Re-timed after the floor 2 fix (bot run on desktop from the Episode 5 save, 0 game overs): first play 75 to 102 minutes
+  against 60 to 90 (was 72 to 108); the first fight comes 3.7 to 4.4 minutes after the morning scene. The plan's Cut 1 (drop
+  Piri's Dead Letters and the floor 1 crate) is for when the top stays over 95; it is now live content, so it waits for you.
+- The Gale Engine still beats a party that only attacks, like every main boss since Episode 1; left as is (docs/BATTLE.md).
 - Still open: Stephen has played neither Episode 5 nor 6; a full live playthrough of Episode 6; an offline reload.
