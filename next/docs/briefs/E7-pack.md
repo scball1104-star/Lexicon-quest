@@ -27,7 +27,7 @@ line only), `qa/pwa/precache.test.mjs` (the ep7 fragment), `qa/core/ep7_*`, `qa/
    bytes down (plan 13.1 has 2026-11-10's: 2,443,421 pre-tap of 2,453,667; 6,662,933 initial of 6,689,914). Your report
    gives before and after, gzipped.
 2. **The four core seams** of plan 13.2, exactly as listed: the `ep7` table entry (`touches: ['ep6_zl_inn',
-   'ep6_zephyr']`, `wanted` on `ep6_complete` or `ep7_started`), `EP7_LIVE = false`, the title hook line (await ep6, then
+   'ep6_zl_charts', 'ep6_zephyr']`, `wanted` on `ep6_complete` or `ep7_started`), `EP7_LIVE = false`, the title hook line (await ep6, then
    ep7, then `LQ_EP7.title`), and the `ep[4567]_` landing regex. Then **trim** comments and dead code in precached core JS
    until the pre-tap load is at or below step 1's number. Never trim behavior; rerun the suites.
 3. **The pack skeleton** `src/data/ep7/index.js`: the ep6 entry pattern with ORDER `flags, enemies, items, skills, loot,
@@ -39,7 +39,7 @@ line only), `qa/pwa/precache.test.mjs` (the ep7 fragment), `qa/core/ep7_*`, `qa/
    guarded list (the 11 names of plan 2.1) and the patches from `ep7_patches.js` (`withEp7Wake`, `withNorthBerth`; identity
    if the file is missing). Start every pack's fetch at once and order only registration; measure the cold and warm time to
    the inn on the phone profile (five chained packs now, with ep3).
-   `hooks.js`: `CREDITS_HANDOFF[7]`, the live end card for 6 (`END_CARD_EP6_LIVE`, "Episode 7 begins in the morning."),
+   `hooks.js`: `CREDITS_HANDOFF[7]` (map `ep7_ph_watch`, mark `watch_cot`: plan 5.3, 2026-11-11), the live end card for 6 (`END_CARD_EP6_LIVE`, "Episode 7 begins in the morning."),
    `QUEST_EXT` push (guarded until E7-story's quest exists), `globalThis.LQ_EP7` (`title`, `offer`, `start`),
    `LQ_DEBUG.newGameEp7`.
 4. **`start.js`**: `EP7_START` and `newGameEp7(name, { slot })` per plan 10.4, built on `pickRunSlot`, awaiting ep6 (and
@@ -70,7 +70,7 @@ its reason).
 
 ## Traps
 
-- **The order trap.** `registerMap` overwrites by id; patching `ep6_zl_inn` or `ep6_zephyr` before the ep6 pack has
+- **The order trap.** `registerMap` overwrites by id; patching `ep6_zl_inn`, `ep6_zl_charts` or `ep6_zephyr` before the ep6 pack has
   registered them loses the patch silently. Await ep6 first; test both orders.
 - **The cold chain.** If the cold entry to the inn on the phone profile is over 8 s, do not edit `packs.js` beyond your
   seam to fix it: PLAYTEST_REVIEW_8 item 8's fix touches a hot file and waits for Scott's or Stephen's word. Report the

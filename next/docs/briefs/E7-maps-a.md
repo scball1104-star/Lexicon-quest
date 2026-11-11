@@ -12,11 +12,12 @@ interiors and `ep6_patches.js` (the patch pattern); the `ep7_` prefix is what ke
 `src/data/maps/ep7_white_road.js`, `ep7_waystation.js`, `ep7_palehaven.js`, `ep7_ph_inn.js`, `ep7_ph_shop.js`,
 `ep7_ph_armory.js`, `ep7_ph_watch.js`, `ep7_patches.js`, `qa/maps/ep7_a_*`, `docs/MAPS_EP7_A.md`,
 `tools/maps/previews/ep7_white_road*`, `ep7_waystation*`, `ep7_palehaven*`, `ep7_ph_*`, `ep6_zephyr_ep7*`,
-`ep6_zl_inn_ep7*`. Never `src/data/maps/ep6_*.js` or any earlier episode's map file.
+`ep6_zl_inn_ep7*`, `ep6_zl_charts_ep7*`. Never `src/data/maps/ep6_*.js` or any earlier episode's map file.
 
 ## Outputs (items, in order)
 
-1. **`ep7_patches.js`**: `withEp7Wake(ep6_zl_inn)` and `withNorthBerth(ep6_zephyr)` per plan 3, pure, every Episode 6
+1. **`ep7_patches.js`**: `withEp7Wake(ep6_zl_inn)`, `withEp7Charts(ep6_zl_charts)` (2026-11-11: the morning is staged in the
+   Chart Room, not the inn room) and `withNorthBerth(ep6_zephyr)` per plan 3, pure, every Episode 6
    cell, event, mark and walk result unchanged (`isles_return`'s north-dock arrival untouched; the Kestrel prop already
    there). E7-pack's `maps.js` applies them after the ep6 pack.
 2. **The maps** of plan 4.1 to 4.4 (`ep7_white_road`, `ep7_waystation`, `ep7_palehaven`, `ep7_ph_inn`, `ep7_ph_shop`,
@@ -39,7 +40,7 @@ interiors and `ep6_patches.js` (the patch pattern); the `ep7_` prefix is what ke
    every chest reachable in some state; no loop home; STAGING_EP7 marks present, walkable and inside the camera rule on your
    maps, none on a path or frost cell; no event uses an Episode 1 text key.
 7. **Previews** in `tools/maps/previews/` (the road with each gap before and after its read; the town before and after
-   `doors_reopened`; the Waystation; the four interiors; Zephyr's north dock and the inn patched), viewed; `docs/MAPS_EP7_A.md`
+   `doors_reopened`; the Waystation; the four interiors; Zephyr's north dock, the inn and the Chart Room patched; the Watch before and after `doors_reopened`, with `watch_cot`), viewed; `docs/MAPS_EP7_A.md`
    in the house style with exact cells, the decision count per gap and the road's route as step and read sequences for the
    autoplay bot (where it rests: the Waystation stove).
 

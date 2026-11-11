@@ -48,6 +48,10 @@ rule), `src/battle/ai.js` (`SCRIPTS`, `POLICY_EXT`, `special()`), and the Episod
    a plain hit and says "A farewell is not a decree." `POLICY_EXT` entries per 6.3's Auto rules.
 5. **The boss is never slowed by its own rule** (PLAYTEST_REVIEW_8 item 1): no foe ever holds Rime; assert it, and assert
    the Lantern and the Phantom act at least once every two party rounds.
+   **Tougher, not longer (Scott, 2026-11-11; plan 6.4 to 6.6):** the Lantern's careful rounds no higher than the Gale
+   Engine's 8.88 and the Phantom's no higher than the Storm Scribe's 14.55, each losing more HP than its Episode 6
+   counterpart (13%, 17%), careful win 85%+; harder by what a boss does each round, never by more HP. Add the
+   `toughNotLong` check and report its three numbers per boss.
 6. **Items** (plan 7): `ember_tea`, the key items of 2.3, `white_road_letter`'s second desc (`descAfter`, by flag, from this
    pack: never an `ep6` file), tier 13 and 14 bases, the six uniques (both Nox gifts), the Winterwatch set, affix tier 9,
    rare names through `RARE_NAME_EXT`, `ZONE_LOOT`, `BOSS_LOOT.pale_lantern` and `.white_phantom`, the three shops,

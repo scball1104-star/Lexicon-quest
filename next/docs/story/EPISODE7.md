@@ -10,6 +10,16 @@ in `src/data/ep7/quests.js`, lore, books, banners and inspect lines in `src/data
 `docs/story/STAGING_EP7.md` (written by E7-story, the shape of `STAGING_EP6.md`). Nothing of it goes into the core files
 (plan section 13).
 
+**Decisions, 2026-11-11 (revision 2).** Scott answered the open choices: "just use the defaults", with Tess's father dead
+confirmed in so many words (choice 6). On the First Keeper's name (choice 10) he asked that it be taken from Scott's and
+Stephen's novel, *The Thirteenth Bell*, Book One; choice 10 is revised toward it (section 8, "Novel canon"). Two directions
+from the same answers apply to every episode: bosses are **tougher, not longer** (plan 6.4 to 6.6), and an episode does not
+open in the inn room Episodes 3 to 6 opened in (this one opens in the Chart Room: beat 1, plan 3). A third is noted and not
+designed here: each episode expands the world map, places stay revisitable and the party travels between them, like Final
+Fantasy; a separate world-map proposal is coming, and nothing in this bible should close that door. Every choice in section
+10 is marked with its decision. **The story is joint: Stephen may still change any line, name or choice**, and a change of
+his wins over a default here.
+
 **Sources.** `EPISODE1.md` sections 3 and 5 (Tess, Hazel, the thirteenth bell), `EPISODE2.md` sections 1, 2 and 5 (the
 Last Route, "Then north, by the White Road", the Court's forgotten Keeper), `EPISODE3.md` sections 1 and 5 (Mara, Ilya's
 seed "And one down in your valley, once"), `EPISODE4.md` scene 20 (Vex's "There's a name on it I'm not ready to hand
@@ -48,7 +58,7 @@ follow." And the hero's answer, without a speech: their name, said out loud.
 
 **Target length.** 60 to 90 minutes first play, planned at about 72, which is under Episode 6's plan on purpose: Episode 6
 was planned at 75 and timed at 75 to 102 (PLAYTEST_REVIEW_8 item 3, re-timed in PROGRESS 2026-11-10), most of the overrun
-from 31 lane decisions and a loop that sent the party home. Planned minutes: the Cloudhouse Inn and the flight north 3,
+from 31 lane decisions and a loop that sent the party home. Planned minutes: the Chart Room and the flight north 3,
 the White Road 14, Palehaven 10, Vault F1 11, F2 with the Pale Lantern 13, F3 10, the White Phantom 7, the page, the doors
 and the ending 6. Optional content adds 10 to 14 (three side stories, revisits). Budgets: 15 ordinary fights plus the
 scripted first (Episode 6 had 16 plus the first and met its boss a level high), at most 12 boxes per main scene (six set
@@ -106,21 +116,28 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
 
 | Time | What the player sees and does |
 |---|---|
-| 0:00 | Fade in on the Cloudhouse Inn at dawn. The Sky Compass on the sill, needle north, humming. Frost on the inside of a warm window. Three boxes. |
-| 0:20 | Aeris at the door with a chart. The close-up: the realm, and the north of it going pale while you look, one valley's name lifting off the paper. Aeris: "That was a valley last night." |
+| 0:00 | Fade in on the Chart Room at the top of the Signal Beacon tower, at dawn (not the Cloudhouse Inn: the save wakes there, and the scene moves before the fade). The Sky Compass on the brass skychart table, needle north, humming. Frost on the inside of the north window, and only that one. Three boxes. |
+| 0:20 | Aeris at the table with a chart. The close-up: the realm, and the north of it going pale while you look, one valley's name lifting off the paper. Aeris: "That was a valley last night." |
 | 0:35 | Mira: "Then we go now." Control. |
-| 0:40 to 1:20 | Out through Zephyr Landing (Pippa, Liora, Bennet say one line each if spoken to) to the north dock, where the Kestrel waits with Vex in the fourth seat. |
+| 0:40 to 1:20 | Down the tower and out through Zephyr Landing (Pippa, Liora, Bennet say one line each if spoken to) to the north dock, where the Kestrel waits with Vex in the fourth seat. |
 | 1:20 | The flight north as one cut: clouds, white mountains, a valley that flickers out under the hull. The Kestrel sets down on a frozen lake at the foot of a pale road. Banner. Control. |
 | 2:00 | Twenty steps up, a wall of ice carved with travelers' names. Vex kneels and carves his own. Half the letters go while he watches. |
 | 2:40 | Vex: "Read it to me. What's left?" The choice: `Half of it.` / `All of it.` |
 | 3:30 | Wolves out of the snow: two Rime Wolves. The first fight; each bite frosts a name on the party's row. |
 | 4:30 | Bram's name frosts over and he misses a turn; Mira Defends and shakes hers off. Win. The road goes on up. |
 
-1. **The chart that forgets** [`ep7_morning`, `ep6_zl_inn`, on enter with `ep6_complete`, counter `credits6_rolled`,
-   `EP7_LIVE`, not `ep7_morning_done`, not `tier_1`; sets `ep7_morning_done`, `ep7_started`; gives `white_road_letter` if
-   the party does not hold it]. (new; canon "Mountains flicker in and out of being. Villages have become gaps in the map.")
-   - Narration: the compass on the sill, needle north, humming. Frost on the inside of the glass.
-   - Aeris, in the doorway: "Brought you something. Look fast." The close-up `ep7_chart`, mode `fading`: the realm's
+1. **The chart that forgets** [`ep7_morning`, triggered on enter of `ep6_zl_inn` (where the Episode 6 credits wake the
+   save) with `ep6_complete`, counter `credits6_rolled`, `EP7_LIVE`, not `ep7_morning_done`, not `tier_1`; staged in
+   `ep6_zl_charts`, the Chart Room: the scene's first step, still on black, moves the party there, so the player never sees
+   the inn room again; sets `ep7_morning_done`, `ep7_started`; gives `white_road_letter` if the party does not hold it].
+   (new; canon "Mountains flicker in and out of being. Villages have become gaps in the map.") **Opening room (Scott,
+   2026-11-11: "open them in a different room").** Episodes 3 to 6 each opened in an inn room; Episode 7 opens in the
+   Chart Room Episode 6 already built (plan 3), re-dressed by a pack patch for the North: the north window frosted from
+   the inside, the skychart table's north edge gone pale, a draught that lifts the pinned manifests. No new map; the art
+   needs are listed in plan 9.6 for a later visual brief.
+   - Narration: Dawn in the Chart Room. The compass on the skychart table, needle north, humming. Frost on the inside of
+     the north window, and on no other.
+   - Aeris, at the table: "Couldn't sleep. Look at this. Look fast." The close-up `ep7_chart`, mode `fading`: the realm's
      chart, the north pale, and one valley's name lifting off the paper as the camera holds.
    - Aeris: "That was a valley last night. A road, two farms, a mill. Now it's paper."
    - Mira: "Then we go now." Bram: "Before breakfast. Of course before breakfast."
@@ -236,7 +253,7 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
     - Vex: "You wrote me a letter. Fourteen years old, and a Keeper wrote to me." The Keeper: "I asked a boy who mended
       bindings, in a house I won't name here. You grew."
     - Vex: "You signed it. The name came off." The Keeper: "I signed it. The ink would not stay. It hasn't stayed in
-      twenty-six years."
+      sixteen years."
     - Mira, at an empty frame on the wall: "Whose was this?" The Keeper: "Mine. I kept a house of mirrors once. I left
       my face there." (Episode 2's empty portrait; open choice 5, one line only)
     - The hero holds out the compass; the needle points past her, north, at the cathedral. The Keeper: "Half a page. It's in
@@ -361,19 +378,21 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
 27. **Every name, moving** [`phantom_after`, `ep7_stillheart`, after the win; sets `stillheart_restored`, `fragment7_get`,
     `seventh_list_get`; the encounter sets `phantom_defeated`]. The order matters; the story agent keeps it:
     1. The Phantom goes down on one knee over the heart. Its crown cracks. The Phantom: "I KEPT THEM SAFE. I NEVER LET THEM
-       GO." (a beat) "I WAS TOLD TO KEEP THE NORTH FROM SAYING A NAME."
+       GO." (a beat) "I WAS TOLD TO KEEP THE NORTH FROM READING A PAGE."
     2. The heart of ice thaws from the inside: the North's share of the Book, the Stillheart, every name of the realm
        pressed into ice, running clear and bright. The frozen names in the nave write themselves back (`name_restore`
        flash), a wave of them out through the broken roof and down the mountain.
     3. Under the hero's line, the counter-seal and "Keep this one." A seventh fragment, a seventh time. Gives
        `name_fragment_7`. Bram: "Seven." Mira: "Seven. And this time we know whose hand."
-    4. Where the Phantom knelt, a list frozen into the floor: cheap paper, the cold hand, the empty-book seal, older than
-       any they have seen. The close-up `ep7_seventh`: THE NORTH. LET IT FORGET EVERY SOUL WHO CAN SAY THE FIRST KEEPER'S
-       NAME. (canon "the First Library demanded that the North forget every soul who could still speak the First Keeper's
-       true name", re-aimed as the seventh list: section 8) Gives `seventh_list`.
-    5. Mira: "This one's older than Emberpeak's." The Keeper: "Twenty-six years. It came the winter I was made Keeper. I
-       can say that name. So they took mine." Bram: "Say it, then." The Keeper: "Not here. A name like that is a door. We
-       open it where it was written." (Episode 8 keeps the name.)
+    4. Where the Phantom knelt, a list frozen into the floor: cheap paper, the cold hand, the empty-book seal. The
+       close-up `ep7_seventh`: THE NORTH. LET IT FORGET EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE. (root canon's
+       "the North forget every soul who could still speak the First Keeper's true name", re-aimed toward the novel: what
+       the North was made to forget is whoever could still read the first page ever erased. Section 8, choice 10.) Gives
+       `seventh_list`.
+    5. Mira: "Every other list names people. This one names a page." The Keeper: "Sixteen years. It came up the road the
+       spring you did. I could read that page. So they took my name." Bram: "Read it, then." The Keeper: "Not here. A page
+       like that is a door. We open it where it was written." (Episode 8 keeps the page, what is on it, and why the
+       spring. Nobody in Episode 7 says "fire", "Concordance" or whose page it is.)
     6. Beside the heart, frozen into a block of ice by her own hands years ago, half a page. The close-up `ep7_page`, mode
        `half`: a torn top edge, a few lines in the warm hand, all of them frosted white and unreadable.
     7. Far below, the bell. The Listening Bell rings, thawed, a long note for every name it was stopped from ringing: the
@@ -429,11 +448,13 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
     - Vex: "I know where that goes. I mended bindings there." (open choice 14) Mira: "The First Library." Vex: "Don't say it
       loud. It listens."
     - Nox: "I'll say the name you'll need up there. Up there." Bram: "Then you're coming." Nox: "...Ask me at the top."
-    - End cards: `End of Episode 7` / sub `The Vanishing World`; then `Episode 8: The First Library` / sub (placeholder,
-      section 10) `The lists were written here.`
+    - End cards: `End of Episode 7` / sub `The Vanishing World`; then `Episode 8: The Last Word` / sub `The lists were
+      written here.` (the root region title, EPISODE8 ask 1; section 10 choice 16)
 
-31. **Credits** (`CREDITS_EP7` in the pack's `text.js`, `palehaven` music), then the next morning at the Thawlight Lodge
-    (`ep7_ph_inn`, mark `inn_bed`). Every Palehaven resident has new lines with the Keeper's name in them (canon lines
+31. **Credits** (`CREDITS_EP7` in the pack's `text.js`, `palehaven` music), then the next morning in the Keeper's Watch
+    (`ep7_ph_watch`, mark `watch_cot`: Nox has given the party the cots by her stove; the letters on every wall now face
+    up). Not the Thawlight Lodge: Episode 8 opens where this wakes, and it must not open in an inn room (Scott,
+    2026-11-11; EPISODE8 ask 4, the room declined, the counter kept). The Lodge stays an inn to rest at. Every Palehaven resident has new lines with the Keeper's name in them (canon lines
     restored: section 3); the iced doors are open; Snowrest is back on Aeris's chart; Zephyr Landing, Saffron Haven,
     Valewyn, Emberpeak, Hollowmere and Willowmere residents have Episode 7 lines; the end card says Episode 8 is not
     playable yet.
@@ -484,8 +505,9 @@ he grew up with her. Humor: snow, breakfast, his name being cold.
 caused her grief"). Seventies, small and straight-backed, a long blue Keeper's coat with frost on the hem, white hair
 pinned up, ink on her right hand that never quite washes off. She writes in the warm hand that has written "Keep this one."
 under the hero's name in every fragment since Episode 1, taught Ishra her letters (Episode 5), asked a fourteen-year-old
-binding-mender to hide a page (Episode 6), and wrote the hero's first page. Twenty-six years ago the first list of all came
-north and took her name, because she can say another name the list-writer wants forgotten. Fifteen years ago her brother
+binding-mender to hide a page (Episode 6), and wrote the hero's first page. Sixteen years ago, the spring a child came to her
+step, a list came north and took her name, because she could still read a page the list-writer wants forgotten (what page,
+and how she read it, is Episode 8's). Fifteen years ago her brother
 died on the White Road going home; the bell rang his name, she stopped it with her hands and shut the Vault, and the
 Phantom took her quiet for an order. Dry, kind, tired, exact about small things, unable to say goodbye. She does not fight:
 a scene actor who meets the party in the square and the Watch, opens the gate, and from `keeper_comes` walks the Sanctum
@@ -555,9 +577,9 @@ remembers her mother waiting through a blizzard, refusing to close the town gate
 bosses cell 6, "skeletal icy spectral sentinel with antler crown and ragged frozen cloak"; nature inference). The Keepers'
 Warden of the Stillheart: a Keeper construct made to keep the North's share of the Book (the Stillheart, every name of the
 realm pressed into one heart of ice) safe through the long northern winters, and to copy names from it onto every doorway
-and waystone so the North would always know who lived where. Twenty-six years ago the first list in the cold hand came up
-the White Road with one order: THE NORTH. LET IT FORGET EVERY SOUL WHO CAN SAY THE FIRST KEEPER'S NAME. The Phantom began
-freezing those names, the Keeper's first. Fifteen years ago the Keeper stopped the Listening Bell and shut the Vault so
+and waystone so the North would always know who lived where. Sixteen years ago a list in the cold hand came up the White
+Road with one order: THE NORTH. LET IT FORGET EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE. The Phantom began
+freezing the names of those who could, the Keeper's first. Fifteen years ago the Keeper stopped the Listening Bell and shut the Vault so
 no one would grieve, and the Phantom took her stillness for a second order: keep everyone safe by keeping them still. Since
 then it freezes the names of anyone who leaves, and then the paths they walked, and then the places they lived. The fading
 of the North is the Phantom being kind too hard. Not evil: a tool given a bad order, and then a sad one, like Moth, the
@@ -636,18 +658,20 @@ nobody saying who left.
 that a reading is not a record. Episode 6, that a course is only ink but a hand can hold. Episode 7 adds: a frozen name is
 not a lost one. Say it, and it comes back. **Call, then open the door.**
 
-**The Listening Bell and the thirteenth bell.** Twenty-six years ago, the winter the first list came north, the Keeper
-asked Mara of the First Bell to tune Willowmere's thirteenth bell (the Keepers' oldest alarm, which "rings whenever a name is
-taken": Episode 1) to a twin she hung in the cathedral, so that when a name went missing in the valley the North would hear
-it. Mara did, once (Episode 3's "And one down in your valley, once"). The next year Emberpeak burned. Fifteen years ago
-the Listening Bell rang Marten's name; the Keeper stopped it with her hands and it froze. Since then the North has heard
-nothing, and has said nothing.
+**The Listening Bell and the thirteenth bell.** Twenty-six years ago, the winter she was made Keeper, the Keeper asked
+Mara of the First Bell to tune Willowmere's thirteenth bell (the Keepers' oldest alarm, which "rings whenever a name is
+taken": Episode 1) to a twin she hung in the cathedral, so that when a name went missing in the valley the North would
+hear it. Mara did, once (Episode 3's "And one down in your valley, once"). The next year Emberpeak burned. Fifteen years
+ago the Listening Bell rang Marten's name; the Keeper stopped it with her hands and it froze. Since then the North has
+heard nothing, and has said nothing.
 
-**The seven lists.** Vex now counts seven, in one hand under one seal: the North's (twenty-six years ago, the first), then
-Emberpeak's (twenty-five), the desert's (twenty), the Hollow's (fifteen), Valewyn's (twelve, renewed a month before Episode
-4, with Vex's name on it), Willowmere's (a month before Episode 1), and the sky's (a month before Episode 6). The first list
-did not name a person or a page: it named a name. THE NORTH. LET IT FORGET EVERY SOUL WHO CAN SAY THE FIRST KEEPER'S NAME.
-The list-writer's first fear was not the hero. It was someone saying a name out loud.
+**The seven lists.** Vex now counts seven, in one hand under one seal: Emberpeak's (twenty-five years ago), the desert's
+(twenty), the North's (sixteen), the Hollow's (fifteen), Valewyn's (twelve, renewed a month before Episode 4, with Vex's
+name on it), Willowmere's (a month before Episode 1), and the sky's (a month before Episode 6). The North's is not the
+oldest; it is the odd one. Every other list names people or a place. The North's names a page: THE NORTH. LET IT FORGET
+EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE. It came the spring the hero came north, and after it the lists come
+faster (Episode 4's "It's getting faster."). The list-writer's fear here was not a name said out loud. It was someone
+reading what had been rubbed out. (Episode 8 says what the page is.)
 
 **The first page, whole.** The hero's name in the warm hand, the counter-seal, "Keep this one.", and the line the Episode 6
 half broke off: "Carried down the White Road by Marten, courier of Willowmere, at his sister's asking." Under it, Marten's
@@ -663,20 +687,21 @@ road going home.
 also, for the first time, a rule the player can see: the Phantom cannot bid the hero farewell.
 
 ### What the player knows by the credits
-The warm hand is Nox, the Keeper of the Hollow North, whose name was taken twenty-six years ago by the first list of all
-because she can say the First Keeper's name. She wrote the hero into the Book the first time, and her brother Marten,
+The warm hand is Nox, the Keeper of the Hollow North, whose name was taken sixteen years ago, the spring the hero came to
+her, by a list against anyone who could still read "the first erased page". She wrote the hero into the Book the first time, and her brother Marten,
 Tess's father, carried the hero down the White Road to Hazel. He died on that road the next winter. The first page is whole and
 Vex keeps it. Mara tuned the North's bell to Willowmere's so the North could hear when a name was taken. The lists come from
 a place up a staircase of written light, and Vex once mended bindings there.
 
 ### Held back for later episodes (consistent with the root game)
 **Kept for Episode 8:** who writes the lists (root canon: the Eraser, once the First Keeper, the First Library; Episode 7
-names "the First Keeper's name" as a thing someone wants forgotten and never says whose hand writes the lists or that the
-First Keeper and the list-writer are one); the First Keeper's name itself (Nox: "Not here."); why the hero, where the child
-came from before Nox, and what the list-writer wants with their beginning (Nox: "It's written somewhere I can't go."); the
-mural's eighth star with no symbol; Vex's "I kept one thing from the Eraser: your beginning. You keep the ending." (LEGACY
-"The Last Margin", Episode 8; Episode 7 keeps it possible word for word: Vex leaves with the whole first page). The First
-Library itself (Episode 8).
+never says whose hand writes the lists, and the words "First Keeper" do not appear in it); what "the first erased page" is,
+what was on it, and how Nox could still read it (Nox: "Not here."); why the list came "the spring you did"; why the hero,
+where the child came from before Nox, and what the list-writer wants with their beginning (Nox: "It's written somewhere I
+can't go."); the mural's eighth star with no symbol; Vex's "I kept one thing from the Eraser: your beginning. You keep the
+ending." (LEGACY "The Last Margin", Episode 8; Episode 7 keeps it possible word for word: Vex leaves with the whole first
+page). The First Library itself (Episode 8). Everything of the novel's that Episode 8 pays (the fire, the Concordance, the
+cracked-key seal, the hero's mother) is absent from Episode 7 on purpose (section 8, "Novel canon").
 
 ---
 
@@ -689,11 +714,30 @@ Library itself (Episode 8).
   beginning before either of them that nobody will say.
 - **The rival.** Vex has handed over his own name, has it back whole, and carries the whole page toward the house where he
   mended bindings. The LEGACY Episode 8 scene ("Vex arrives at the First Library carrying the first page") needs only that.
-- **The guide.** Nox can say the First Keeper's name and has promised to, "up there". Whether she climbs the stair with
-  them is Scott's and Stephen's call then.
+- **The guide.** Nox can still read the first erased page, and has promised to say "the name you'll need up there". Episode
+  8 (proposal) has her climb the stair with them.
 - **The party.** Unchanged: three, each with a center behind them, the hero twice now.
-- **What Episode 8 must still pay.** The Eraser, the First Keeper and the name, the First Library, why the hero and what
-  came before Nox, the eighth star, and Vex's last margin.
+- **What Episode 8 must still pay.** The Eraser and the First Keeper, the first erased page and the name Nox will say, the
+  First Library, why the hero and what came before Nox, why "the spring you did", the eighth star, and Vex's last margin.
+
+### Episode 8's nine asks of Episode 7 (EPISODE8 section 0.2), as applied 2026-11-11
+1. Retitle the Episode 8 card to "Episode 8: The Last Word": **applied** (beat 30, choice 16).
+2. Do not use the root's Nox after-clear line in Episode 7: **applied** (choice 19; section 8).
+3. Keep the roof's `stair_foot` mark, the `star_stair` prop, and the `nave_door` open from `doors_reopened`: **applied**
+   (plan 4.9 and 5.4, unchanged and now marked as kept).
+4. Keep the credits wake at `ep7_ph_inn` mark `inn_bed` and the counter `credits7_rolled`: **the counter applied, the room
+   declined.** Scott's 2026-11-11 direction is that an episode does not open in the inn room, and Episode 8 opens where this
+   wakes, so the wake moves to the Keeper's Watch (`ep7_ph_watch`, mark `watch_cot`: beat 31, plan 5.3, choice 23).
+   EPISODE8 is updated to match on its own branch.
+5. Keep Nox's record ids `keeper` / `nox_t`, sprite `npc_keeper`, and Vex's `vex`: **applied** (unchanged).
+6. Keep Nox's three held lines word for word: **applied** ("Where you came from is not mine to tell. It's written somewhere I
+   can't go.", "I'll say the name you'll need up there. Up there.", "...Ask me at the top." are unchanged; only the
+   unrelated "A name like that is a door" became "A page like that is a door" with choice 10).
+7. Keep `hooded_sage`, environments cell 7 and bosses cell 7 unused: **applied** (plan 9.0, unchanged).
+8. Leave the hero's Ledger row unkept: **applied** (choice 11, unchanged).
+9. Nox never says where the blanket came from: **applied, with new content.** The first ask said the cloth was Scriptorium
+   book-cloth; with the novel it is the First Library's infirmary wool with a sealed linen tag (EPISODE8). No Episode 7 line
+   changes and none mentions the tag.
 
 ---
 
@@ -738,8 +782,8 @@ Letter weak to piercing and resisting ice, canon), reduced damage and a 33% floo
 fire exposed, +25 Focus as +25 Fury) and the Stillheart Blizzard's charged attacks; the brother's final letter, word for
 word: "Do not freeze my life into a single farewell. Open the door for those who follow."; the chapter ending "The Doors
 Reopen" (Nox reads her brother's letter aloud, the roads return) and the region ending "A staircase of written light leads
-into the First Library itself."; the memory crystals' "oldest order yet", the First Library's demand "that the North forget
-every soul who could still speak the First Keeper's true name" (as the seventh list); the root enemy names Frostbound
+into the First Library itself."; the First Library's demand "that the North forget every soul who could still speak the
+First Keeper's true name" (as the seventh list, re-aimed from a name to a page: "Changed" below); the root enemy names Frostbound
 Revenant, Hollow Ice Knight and Pale Lantern Shade; environments cell 6 (frozen cathedral and pine forest, cold aurora and
 snow, luminous icy pale blue) for the Vault, the backdrops and the key art; the Runway scene briefs chapter-7 and boss-7
 (the frozen cathedral, sparse snow, a soft aurora; the Phantom's antler crown and ragged cloak in the snowfall) as staging
@@ -795,11 +839,15 @@ the village that comes back on the chart.
 - **The Pale Lantern is new.** Root Chapter VII has no mini-boss; NEXT episodes have one on the middle floor. It grows from
   the canon ordinary foe "Pale Lantern Shade" and the canon floor name "The Hall of Borrowed Light", so the floor's keeper
   is the floor's own idea.
-- **The seventh list is the first list** (inference). Canon's ending says the memory crystals hold "the oldest order yet:
-  the First Library demanded that the North forget every soul who could still speak the First Keeper's true name". NEXT
-  keeps the words as the seventh list in the cold hand under the empty-book seal, twenty-six years old: older than
-  Emberpeak's twenty-five (Episode 3), so "the oldest order yet" holds. The player already knows the lists come from the
-  First Library (Episode 2 section 5), so nothing is lost, and who writes them stays Episode 8's.
+- **The seventh list names a page, not a name** (revised 2026-11-11, choice 10: Scott asked for the novel's answer).
+  Root canon's ending says the memory crystals hold "the oldest order yet: the First Library demanded that the North forget
+  every soul who could still speak the First Keeper's true name". The first proposal kept those words. The novel (section
+  "Novel canon" below) puts the beginning of all the erasing on one night and one page, so the list now reads THE NORTH.
+  LET IT FORGET EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE, and is dated sixteen years ago, the spring the hero came
+  north. It is no longer the oldest list (Emberpeak's and the desert's are older, Episodes 3 and 5), so root's "oldest
+  order yet" and Mira's old "older than Emberpeak's" are dropped; the list is the odd one instead, the only one that names
+  a page. The words "First Keeper" no longer appear in Episode 7. The player already knows the lists come from the First
+  Library (Episode 2 section 5), so nothing is lost, and who writes them, and what the page is, stay Episode 8's.
 - **Vex's withheld name is his own** (inference, LEGACY). Episode 4's "There's a name on it I'm not ready to hand anyone"
   (Mira: "Yours?" Vex smiles.) and LEGACY "Vex carves his own name into the frozen road, then watches half the letters
   disappear." are one beat: his name is on Valewyn's list and has been half taken for twelve years. No new name is invented
@@ -811,8 +859,8 @@ the village that comes back on the chart.
   not.
 - **Nox is the warm hand** (inference). Basis: six episodes in which nobody can name the hand; Episode 6's "The other half
   went north with whoever wrote it"; canon Torr's "Keeper Nox taught me to press names into iceglass" (she teaches
-  letters, as the warm hand taught Ishra); canon "the North forget every soul who could still speak the First Keeper's
-  true name" (why her own name would be taken); canon Nox's grief and her sealing (why the page half is in the Vault).
+  letters, as the warm hand taught Ishra); the seventh list against anyone who "can still read the first erased page"
+  (why her own name would be taken: she could; Episode 8 says how); canon Nox's grief and her sealing (why the page half is in the Vault).
 - **Nox was the Court's forgotten Keeper** (inference, open choice 5). Episode 2's empty portrait and Episodes 2 to 6's
   "the Court's forgotten Keeper" point at a Keeper whose name is gone; a Keeper with no name is what Nox is. One line only
   ("I kept a house of mirrors once. I left my face there.") in `keeper_and_vex`, cut if Scott or Stephen prefer the Court's
@@ -834,18 +882,40 @@ the village that comes back on the chart.
   in the Sanctum; the Phantom that cannot bid the hero farewell; the seventh list as the first; the whole page and its three
   steps; the restored address; Torr's Missing Streets; the stair of written light as the Episode 8 hook.
 
+**Novel canon (The Thirteenth Bell, Book One).** Added 2026-11-11 at Scott's asking. The novel is Scott's and Stephen's and
+is unpublished; this repo is public. So these are used as facts and motifs only: no line of the game quotes the book, and no
+book wording appears beyond a few short terms. Episode 7 uses only what it needs to point at Episode 8, and pays none of it:
+- **A name is a promise, and a Keeper never erases a soul** (the Keepers' oath in the novel). The game already says the
+  first half on its cold-open card ("In Aethelgard, every name is a promise."). Episode 7 adds the oath in the game's own
+  words as an inscription over Nox's door in the Keeper's Watch (an inspect line, `ep7_watch_oath`: "A NAME IS A PROMISE.
+  A KEEPER ERASES NO SOUL."), which Nox has broken in spirit by freezing the North's grief. Stephen may reword it.
+- **There was a first erased page, and what it began has spread from book to book** (the novel's stain, which keeps spreading
+  from one book into others). Episode 7 names only the page, on the seventh list, and lets Nox say she can
+  still read it. It never says where the page is, what was on it, or what spread.
+- **The foundling came in spring.** The novel's hero is found in spring. Here the North's list comes "the spring you did".
+- **Held for Episode 8, and absent from Episode 7 on purpose:** the fire in the First Library's lantern-oil vaults on the
+  night of the hero's birth; the Concordance (the book every entry in the Library passes through) and the old Keeper who
+  held its key; the three warnings and the cause rewritten as "nobody's doing"; the ink that would not lie still and ran
+  from the sworn page into a birth entry; the infirmary blanket of fine grey Library wool and its linen tag with the
+  cracked-key seal (EPISODE8 ask 9: Nox still never says where the blanket came from); the hero's mother, Elowen, Keeper of
+  the Scriptorium; and the bell's oldest rule, "Keep one."
+- **Where the novel and the shipped game differ** (listed, not changed: Episodes 1 to 6 stand as shipped): EPISODE8 section
+  8, "Novel canon", keeps the full list, since most of the differences land there.
+
 **Root canon this bible could not reconcile, and leaves open.**
 - **The root's after-clear dialogue** has Nox say "I kept every door closed because I could not endure another farewell.
   Palehaven has opened the gates. The last truth lies in the First Library." and the region record's `talk` says "The Eraser
   has nearly reached the First Library. Only the names you recovered can hold reality together." The first is kept in
-  spirit across `doors_reopen`; the second names the Eraser, which Episode 8 holds, and is not used. Scott and Stephen may
-  want Nox's canon line word for word somewhere after the credits (open choice 19).
+  spirit across `doors_reopen`; the second names the Eraser, which Episode 8 holds, and is not used. Nox's canon line is
+  said word for word by Episode 8's first scene (EPISODE8 ask 2), so Episode 7's post-credits Talk does not use it (choice
+  19).
 - **The root cinematics `assets/cinematics/chapter-7.mp4` and `boss-7.mp4` exist** (Fact: both files are in the repo root's
   `assets/cinematics/`) but neither is named in `RUNWAY_PROVENANCE.json` (Fact: grepped 2026-11-10). The build does not use
   them; whether they may be used in a game that may be sold is Scott's call (plan 9.5).
-- **Timeline.** Canon never dates the North's lists or the hero's birth. The dates here (26, 16, 15 and 12 years) are fitted to
-  Episodes 2 to 6's dates and Vex's "fourteen"; they make Vex about thirty and the hero about sixteen, neither of which is
-  ever said on screen.
+- **Timeline.** Root canon never dates the North's lists or the hero's birth. The dates here are fitted to Episodes 2 to 6's
+  dates and Vex's "fourteen": Nox made Keeper and the Listening Bell tuned twenty-six years ago, the North's list and the
+  hero's coming sixteen, Marten's death fifteen, Valewyn's list twelve. They make Vex about thirty and the hero about
+  sixteen, neither of which is ever said on screen (the novel's hero is seventeen; the novel canon note below).
 
 **Name collisions to respect.** Episode 1 owns `oren`, `tess`, `hazel`; Episode 2 owns `corin`, `vow_*`, `testimony_*` for
 the Hollow witnesses, `vex_mirror`, `black_feather*`, `rook`; Episode 3 owns the map prefix `pk_`, every `foundry_` and
@@ -872,61 +942,99 @@ Reserved for E7-story (wave 7a): what the built script does beyond the beat shee
 
 ## 10. Choices that are Scott's or Stephen's
 
-None of these blocks the build; the default is what the build agents use. Each is one line of why. Either Scott or
-Stephen may change any of them; the story is joint.
+None of these blocks the build; the default is what the build agents use. Each is one line of why. **Scott answered on
+2026-11-11: "just use the defaults."** Each choice below carries that decision. Choice 10 is revised toward the novel at his
+asking ("take a look at the 13th Bell book and see what you want to use"); choices 16, 19 and 22 to 24 record what this
+revision changed or added, and are defaults pending Stephen. **The story is joint: Stephen may still change any of them**, and
+his change wins over a default.
 
 1. **Whose episode: the hero's, with Nox as a non-fighting guest in the Sanctum and Vex as a non-fighting guest on the
-   road.** [default: yes] The rotation (Mira, Bram, hero, Mira, Bram) comes back to the hero, Episode 6 kept the hero's
-   beginning for here, and guests avoid the fourth party slot the engine cannot pay for.
-2. **Aeris flies them north on the Kestrel, waits at the landing, and carries the letters south.** [default: yes] It is
-   one cut, no new airship art, and it gives the ending a way to reach Tess without a trip to Willowmere.
+   road.** [default: yes] **[Scott 2026-11-11: default]** The rotation (Mira, Bram, hero, Mira, Bram) comes back to the
+   hero, Episode 6 kept the hero's beginning for here, and guests avoid the fourth party slot the engine cannot pay for.
+2. **Aeris flies them north on the Kestrel, waits at the landing, and carries the letters south.** [default: yes]
+   **[Scott 2026-11-11: default]** It is one cut, no new airship art, and it gives the ending a way to reach Tess without a
+   trip to Willowmere.
 3. **Vex rides the fourth seat and walks the White Road with them; he waits on the Vault's step and never fights.**
-   [default: yes] The LEGACY "Name Under Ice" needs him on the road, and Episode 6 ended with him in the fourth seat.
+   [default: yes] **[Scott 2026-11-11: default]** The LEGACY "Name Under Ice" needs him on the road, and Episode 6 ended
+   with him in the fourth seat.
 4. **The warm hand is the Keeper of the Hollow North, and her lost name, restored at the hearth, is Nox.** [default: yes]
-   It pays six episodes of "who wrote Keep this one", keeps root canon's name exactly, and makes the name itself the payoff.
-5. **Nox was the Court's forgotten Keeper (one line; the empty portrait fills after the credits).** [default: yes, one line]
-   It closes Episode 2's thread with almost no cost; cut the line to keep the Court's Keeper a separate person.
+   **[Scott 2026-11-11: default]** It pays six episodes of "who wrote Keep this one", keeps root canon's name exactly, and
+   makes the name itself the payoff.
+5. **Nox was the Court's forgotten Keeper (one line; the empty portrait fills after the credits).** [default: yes, one
+   line] **[Scott 2026-11-11: default]** It closes Episode 2's thread with almost no cost; cut the line to keep the Court's
+   Keeper a separate person.
 6. **Tess's father is Nox's brother, the courier who carried the hero down the White Road; he died on the road years ago,
-   never shown.** [default: as written] It joins three canon threads into one family and gives Tess a name, not a reunion;
-   the alternative (he is alive, frozen in the Vault) repeats Episode 6's Pippa.
-7. **The brother's name is Marten** (root Corin, renamed for the Hollowmere Corin). [default: Marten] Any free name works;
-   "Marten" is short, northern and grepped free.
+   never shown.** [default: as written] **[Scott 2026-11-11: default, confirmed in words: "Tessa's father being dead is
+   fine."]** It joins three canon threads into one family and gives Tess a name, not a reunion; the alternative (he is
+   alive, frozen in the Vault) repeats Episode 6's Pippa.
+7. **The brother's name is Marten** (root Corin, renamed for the Hollowmere Corin). [default: Marten] **[Scott 2026-11-11:
+   default]** Any free name works; "Marten" is short, northern and grepped free.
 8. **Mara tuned the North's Listening Bell to Willowmere's thirteenth bell at the Keeper's asking, the year before the
-   fire; the link to the fire is never said.** [default: yes] It answers "one down in your valley, once" with a picture and
-   gives Bram a beat without a third center.
+   fire; the link to the fire is never said.** [default: yes] **[Scott 2026-11-11: default]** It answers "one down in your
+   valley, once" with a picture and gives Bram a beat without a third center. ("The fire" here is Emberpeak's, as in
+   Episodes 1 and 3; the novel's fire is another one, and Episode 8 never calls it plain "the fire": EPISODE8 section 8.)
 9. **Vex's withheld name is his own: he carves it in the first minutes, hands over the Valewyn list with it on top, and the
-   road gives it back whole at the end. No new name is invented.** [default: yes] It pays Episode 4 and the LEGACY scene
-   with what the player already knows.
-10. **The seventh list is the first list, and it names "the First Keeper's name"; Nox can say that name and will not
-    until the Library.** [default: yes, root canon's words] It sets Episode 8's door without opening it; the alternative
-    ("LET THE NORTH FORGET THE HAND THAT WROTE THE FIRST PAGE") keeps the words "First Keeper" out of the game until then.
+   road gives it back whole at the end. No new name is invented.** [default: yes] **[Scott 2026-11-11: default]** It pays
+   Episode 4 and the LEGACY scene with what the player already knows.
+10. **The seventh list names a page: THE NORTH. LET IT FORGET EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE. It is
+    sixteen years old, it came "the spring you did", and Nox can still read the page and will not until the Library.**
+    [revised 2026-11-11; was: the seventh list is the first list, twenty-six years old, and names "the First Keeper's
+    name"] **[Scott 2026-11-11: "Maybe you take a look at the 13th Bell book and see what you want to use for that
+    there."]** The novel starts the erasing on one night and one page, so what the North was made to forget is whoever could
+    still read that page. It keeps every other default: Nox is still the warm hand who lost her name for what she knows,
+    still holds it for "up there", and her three held lines stand word for word. It pays nothing early: no fire, no
+    Concordance, no seal, no mother, and the words "First Keeper" are out of Episode 7. Episode 8 (proposal, section 0.1) is
+    written against this version. The old alternative (THE HAND THAT WROTE THE FIRST PAGE) is retired.
 11. **The first page is whole and Nox gives it to Vex to keep; the hero's Ledger row stays unkept.** [default: as written]
-    The LEGACY Episode 8 scene stays possible word for word and the hero's own keep is still saved for the last episode.
+    **[Scott 2026-11-11: default]** The LEGACY Episode 8 scene stays possible word for word and the hero's own keep is still
+    saved for the last episode (EPISODE8 ask 8).
 12. **Truth choices: two, Vex at the wall ("What's left?", one line later) and Nox in the Sanctum ("Do you remember?", one
-    line and her gift).** [default: two, small and honest] RESPONSIBILITY_ARC decision D; Episode 6's two landed.
+    line and her gift).** [default: two, small and honest] **[Scott 2026-11-11: default]** RESPONSIBILITY_ARC decision D;
+    Episode 6's two landed.
 13. **The name stones carry real names (the LEGACY Snowrest names) as flavor, never as answers.** [default: names, flavor
-    only] DESIGN hard rule 2 bans name puzzles; a stone is read by confirm and the puzzle is which two paths, seen on the
-    floor. If Scott or Stephen read the rule more strictly, the stones become plain lamp cairns with no names.
-14. **Vex's line at the stair: "I know where that goes. I mended bindings there."** [default: this line] It points Vex at
-    the First Library for Episode 8 without saying who writes the lists; cut it to keep his past wholly for Episode 8.
-15. **The hero is heard twice (the whiteout, the battle), always shown, never a speech box.** [default: yes] The hero stays
-    silent in every box; Call is a sound and a picture.
+    only] **[Scott 2026-11-11: default]** DESIGN hard rule 2 bans name puzzles; a stone is read by confirm and the puzzle is
+    which two paths, seen on the floor. If Scott or Stephen read the rule more strictly, the stones become plain lamp cairns
+    with no names.
+14. **Vex's line at the stair: "I know where that goes. I mended bindings there."** [default: this line] **[Scott
+    2026-11-11: default]** It points Vex at the First Library for Episode 8 without saying who writes the lists; cut it to
+    keep his past wholly for Episode 8.
+15. **The hero is heard twice (the whiteout, the battle), always shown, never a speech box.** [default: yes] **[Scott
+    2026-11-11: default]** The hero stays silent in every box; Call is a sound and a picture.
 16. **Cards.** Episode 7's title card stays as Episode 6 shipped it ("Episode 7: The Vanishing World / The other half of
     the page lies north."); the end title is "End of Episode 7 / The Vanishing World" (the root title); the Episode 8 card is
-    "Episode 8: The First Library / The lists were written here." [default: placeholder] All within 42 characters and naming
-    only canon places.
+    **"Episode 8: The Last Word / The lists were written here."** [default: placeholder, now filled] **[Scott 2026-11-11:
+    default; the Episode 8 title is EPISODE8 ask 1, the root region title, pending Stephen]** All within 42 characters and
+    naming only canon places.
 17. **Fine Print and Episode 7.** A Fine Print run does not enter Episode 7 (`ep7_morning` needs `not tier_1`). [default:
-    base game only] The same call as Episode 4 decision 6, Episode 5 decision 11 and Episode 6 decision 13.
+    base game only] **[Scott 2026-11-11: default]** The same call as Episode 4 decision 6, Episode 5 decision 11 and
+    Episode 6 decision 13.
 18. **Nox has no portrait, and there is no paid art or music** unless Scott approves the optional items (plan 9.5: one
     Runway still for Nox, one for a painted Stillheart, one Suno track; the root cinematics only with their provenance).
-    [default: none; the build ships without them] Scott's accounts need his own go, and he makes those generations himself.
+    [default: none; the build ships without them] **[Scott 2026-11-11: default]** Scott's accounts need his own go, and he
+    makes those generations himself.
 19. **Renames and drops for canon conflicts:** Corin to Marten, Oren's testimony to Sol, the two Eiras as one, "Nox" held out
     of canon lines until her name returns, "The Winter Nox Could Not End" retitled, four phases to three, no frost damage, no
     beacons, lenses, crossword, ordered pages or recited promises, the Thawlight Oath bond into a gift and Call, the First
-    Key dropped, the root's Eraser line unused. [default: as listed] Each follows a hard rule, an id collision or a payoff's
-    order (section 8).
+    Key dropped, the root's Eraser line unused, and the root's Nox after-clear line not used anywhere in Episode 7 (Episode
+    8's first scene says it word for word: EPISODE8 ask 2). [default: as listed] **[Scott 2026-11-11: default]** Each follows
+    a hard rule, an id collision or a payoff's order (section 8).
 20. **Shipping.** Episode 7 is built behind `EP7_LIVE` on a build branch; E7-integrate flips it on the branch only after the
-    full gate list. Shipping to players stays Scott's or Stephen's explicit word.
+    full gate list. Shipping to players stays Scott's or Stephen's explicit word. **[Scott 2026-11-11: default]**
 21. **A Ledger row for Vex** (place "The Road", kept on `vex_name_whole`: "His own name, whole in the ice."). [default:
-    yes] The Ledger has no Vex row today (Fact, `src/data/ledger.js` and the pack ledgers); if he was kept out on purpose,
-    drop it.
+    yes] **[Scott 2026-11-11: default]** The Ledger has no Vex row today (Fact, `src/data/ledger.js` and the pack ledgers);
+    if he was kept out on purpose, drop it.
+22. **The opening room is the Chart Room, not the inn** (new 2026-11-11, from Scott's "open them in a different room"). The
+    Episode 6 save still wakes in the Cloudhouse Inn (shipped, unchanged); `ep7_morning` moves the party to the Chart Room
+    before its first fade-in, re-dressed for the North by a pack patch. [default: the Chart Room; pending Stephen] It reuses a
+    shipped map, fits a scene about a chart, and costs only a patch. The alternative, the Kestrel's cabin already in flight,
+    needs a new interior and cuts the walk to the dock.
+23. **The credits wake in the Keeper's Watch, not the Thawlight Lodge** (new 2026-11-11), so Episode 8 opens in a room no
+    episode has opened in. [default: the Watch, mark `watch_cot`; pending Stephen] The Lodge stays an inn.
+24. **Bosses are tougher, not longer** (new 2026-11-11, Scott: "tougher, not necessarily longer"). The Lantern and the
+    Phantom keep Episode 6's rounds bands at most and take more of the party's HP doing it (plan 6.4 to 6.6). [default: as
+    the plan; pending Stephen] The win line stays careful 85%+, so it is harder without being a wall.
+
+**A direction to keep open, not a choice here.** Scott, 2026-11-11: "Each episode really just expands the world map",
+places revisitable, travel around, "like Final Fantasy". A separate world-map proposal is coming. Episode 7 already keeps its
+places reachable after the credits (the Kestrel's berth, the White Road both ways, Palehaven's gates, the Vault's two-way
+lifts: plan 3 and 5.4) and adds nothing that would need undoing for an overworld.

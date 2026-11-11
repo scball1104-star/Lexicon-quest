@@ -18,6 +18,14 @@ through the existing pipelines in `tools/art/**`. Music comes from the in-repo t
 tracks; SFX from the existing generator (`tools/audio`). **No new Suno or Runway generations** in the build: section 9.5
 lists the optional paid items with their cost, for Scott to approve and make himself.
 
+**Revision 2, 2026-11-11.** Scott took every default in EPISODE7 section 10 ("just use the defaults"), asked that the seventh
+list follow the novel (choice 10, revised), and gave three directions for every episode: bosses **tougher, not longer** (6.4
+to 6.6 now cap rounds at Episode 6's bands and raise the HP the party loses), **no episode opens in the inn room** Episodes 3
+to 6 opened in (the morning is staged in Episode 6's Chart Room, 3; the credits wake in the Keeper's Watch, 4.4), and each
+episode **expands a world map** the party can travel and revisit, like Final Fantasy (a separate proposal is coming; this
+plan only keeps every place reachable after the credits, 3 and 5.4). The changes are marked "(2026-11-11)". Stephen may still
+change any of it.
+
 ---
 
 ## 0. Summary
@@ -149,13 +157,14 @@ map id. E7-battle and E7-story regrep every new id before use (the item, unique 
 | `ep7_ph_inn` | The Thawlight Lodge | interior | as `inn` | interior | town | none | none |
 | `ep7_ph_shop` | Northwind Provisions | interior | as `item_shop` | interior | town | none | none |
 | `ep7_ph_armory` | The Glass-Ice Armory | interior | as `smithy` | interior | town | none | none |
-| `ep7_ph_watch` | The Keeper's Watch | interior | as `chapel` | interior | `mystery` (0.6) | none | dark 0.2, one lamp pool |
+| `ep7_ph_watch` | The Keeper's Watch | interior | as `chapel` | interior | `mystery` (0.6); after `doors_reopened` `palehaven` (0.6) | none | dark 0.2, one lamp pool; after `doors_reopened` the shutter open, morning light |
 | `ep7_vault_f1` | The Frostbound Vault / I. The Vanishing Steps | dungeon | 40 x 30 | `ep7` | `frostbound_vault` | `vault_hush` | none, a cold blue cast |
 | `ep7_vault_f2` | The Frostbound Vault / II. The Hall of Borrowed Light | dungeon | 40 x 30 | `ep7` | `frostbound_vault` | `vault_hush` | dark 0.45, a lamp pool over each held stone |
 | `ep7_vault_f3` | The Frostbound Vault / III. The Stillheart Sanctum | dungeon | 34 x 40 | `ep7` | `mystery` | `vault_hush` | tint `aurora` (pack), dark 0.3, aurora bands overhead |
 | `ep7_stillheart` | The Stillheart | dungeon | 26 x 22 | `ep7` | none until the scene | `vault_hush` (0.5) | tint `aurora`, dark 0.25; after `phantom_defeated` the thaw grade |
 
-Patches (pack-side, never edits to `src/data/maps/ep6_*.js`): `ep6_zl_inn` gains the `ep7_morning` enter trigger;
+Patches (pack-side, never edits to `src/data/maps/ep6_*.js`): `ep6_zl_inn` gains the `ep7_morning` enter trigger (the
+save still wakes there); `ep6_zl_charts` gains the North dressing and the marks the morning is staged on (2026-11-11);
 `ep6_zephyr` gains the Kestrel's gangway north at the north dock (section 3).
 
 ### 2.2 Story flags (all pushed onto `FLAG_IDS` and declared in the pack's `flags.js` with a one-line meaning)
@@ -181,7 +190,7 @@ flag): `credits7_rolled`. Stones and frost doors carry no flag (they reset on ev
 |---|---|---|---|
 | `valewyn_list` | The Valewyn List | letter | Cheap paper, the cold hand. At the top, Vex's own name, half gone. |
 | `stillheart_key` | Stillheart Crystal Key | key | A key of clear ice that does not melt in the hand. Opens the Stillheart's inner grate. |
-| `seventh_list` | The Seventh List | letter | The oldest yet. THE NORTH. LET IT FORGET EVERY SOUL WHO CAN SAY THE FIRST KEEPER'S NAME. |
+| `seventh_list` | The Seventh List | letter | Sixteen years old. THE NORTH. LET IT FORGET EVERY SOUL WHO CAN STILL READ THE FIRST ERASED PAGE. |
 | `name_fragment_7` | Seventh Name Fragment | book | The Stillheart: every name of the realm, pressed into ice. |
 | `witness_page` | Witness Page (counted, 3) | letter (reuse) | A page from the Keeper Book. |
 | `street_plaque` | Street Plaque (counted, 3) | key (reuse) | A street name, half frosted. Torr wants it back. |
@@ -205,7 +214,7 @@ Enemies: `rime_wolf`, `snow_wisp`, `hush_owl`, `crystal_crawler`, `frostbound_re
 
 | Scene | Map | Trigger |
 |---|---|---|
-| `ep7_morning` | ep6_zl_inn | enter trigger from the pack patch (`if: ep6_complete`, counter `credits6_rolled`, `EP7_LIVE`, not `ep7_morning_done`, not `tier_1`) |
+| `ep7_morning` | triggered in ep6_zl_inn, staged in ep6_zl_charts | enter trigger from the pack patch on the inn (`if: ep6_complete`, counter `credits6_rolled`, `EP7_LIVE`, not `ep7_morning_done`, not `tier_1`); the scene's first step, on black, is a map change to `ep6_zl_charts` mark `charts_dawn`, the way `ep7_board` owns its flight (2026-11-11: not the inn room) |
 | `ep7_board` | ep6_zephyr | the gangway object at the north dock (`if: ep7_started`, `ifNot: ep7_boarded`) |
 | `road_landing`, `name_under_ice`, `road_fight`, `first_stone`, `whiteout`, `palehaven_view` | ep7_white_road | on enter; step trigger at the Traveler's Wall; step row above it (after `vex_carved`); step trigger at the first gap; step trigger on the high stretch (after `first_stone_read`); step trigger at the Icegate |
 | `waystation` | ep7_waystation | on first enter |
@@ -254,14 +263,21 @@ sparkle kinds (snowfall on the road and in town, ice motes in the Vault, the tha
 
 ---
 
-## 3. The world link: the Cloudhouse Inn and the north dock
+## 3. The world link: the Cloudhouse Inn, the Chart Room and the north dock
 
-Episode 6 ends with the party waking at the Cloudhouse Inn (`ep6_zl_inn`, mark `inn_bed`). Episode 7 patches the
+Episode 6 ends with the party waking at the Cloudhouse Inn (`ep6_zl_inn`, mark `inn_bed`; shipped, unchanged). Episodes 3
+to 6 each opened in an inn room; Scott (2026-11-11): "open them in a different room". So the inn only fires the trigger, and
+the morning is staged in the Chart Room Episode 6 built at the top of the Signal Beacon tower. Episode 7 patches the
 **registered** Episode 6 maps from inside the `ep7` pack (`src/data/maps/ep7_patches.js`, the `ep6_patches.js` pattern),
 never the files `src/data/maps/ep6_*.js`:
 
-1. **`withEp7Wake(ep6_zl_inn)`**: an enter trigger `ep7_wake` at (0, 0) with `script: 'ep7_morning'`, `on: 'enter'`, and
-   marks `compass_sill`, `aeris_door7` beside the existing `inn_bed`.
+1. **`withEp7Wake(ep6_zl_inn)`**: an enter trigger `ep7_wake` at (0, 0) with `script: 'ep7_morning'`, `on: 'enter'`. No
+   new marks: the scene leaves the inn on black before its first fade-in, and the player never sees the inn room.
+1a. **`withEp7Charts(ep6_zl_charts)`** (2026-11-11): marks `charts_dawn` (the party's arrival, two tiles below the table),
+   `compass_table`, `aeris_table7` and `north_window`, and, only while `ep7_started` is unset and `ep6_complete` is set, an
+   overlay `north_frost` (the north window frosted from the inside, the table's north edge pale). Every Episode 6 mark,
+   event and walk result unchanged; `charts_trig` and the save bell keep their Episode 6 behavior. The scene ends by
+   walking the party out of the Chart Room's door; Act I's walk to the north dock then starts from the tower door.
 2. **`withNorthBerth(ep6_zephyr)`**: at the north dock (mark `north_dock`, where the Kestrel is already moored as Episode 6's
    prop), the gangway object `north_gangway` (`script: 'ep7_board'`, `if: ep7_started`, `ifNot: ep7_boarded`) and a
    boat-kind door `berth_white_road` on the same cell to `ep7_white_road` `lake_landing` (`if: ep7_boarded`). Every Episode
@@ -269,14 +285,14 @@ never the files `src/data/maps/ep6_*.js`:
    `cloud_library` and has long run).
 3. **Order trap (must not miss).** `registerMap` overwrites by id and the `ep6` pack registers both maps itself (after
    awaiting ep5). The ep7 pack's `maps.js` therefore **awaits the ep6 pack first** (`await ensurePack('ep6')`), then reads
-   each registered module with `peekMap(id)` and registers the patched one. `packs.js` `ep7.touches` lists `ep6_zl_inn`
-   and `ep6_zephyr` so `world/maps.js` waits on both packs (`packsForMap`). The chain is now ep4, ep5, ep6, ep7 (and ep3 for
+   each registered module with `peekMap(id)` and registers the patched one. `packs.js` `ep7.touches` lists `ep6_zl_inn`,
+   `ep6_zl_charts` and `ep6_zephyr` so `world/maps.js` waits on both packs (`packsForMap`). The chain is now ep4, ep5, ep6, ep7 (and ep3 for
    Emberpeak): E7-pack keeps every fetch starting at once and orders only registration, and measures the worst-case entry
    time to the inn on the phone profile (target: under 3 s warm, under 8 s cold; PR #57 measured 2.1 to 2.3 s warm and 6.6
    to 6.8 s first visit live with Episodes 4 to 6, PROGRESS 2026-11-10). If the cold entry is over 8 s, PLAYTEST_REVIEW_8
    item 8 (fetch every pack at once on a resume, in the hot file `src/game/packs.js`) is the fix, and it waits for Scott's
    or Stephen's word.
-4. Tests: the two maps load unpatched with the ep6 pack only and patched with both; with `EP7_LIVE` off no trigger fires
+4. Tests: the three maps load unpatched with the ep6 pack only and patched with both; with `EP7_LIVE` off no trigger fires
    and no gangway is drawn; the berth's door lands on a walkable cell.
 5. The return route: `ep7_white_road`'s landing holds a boat-kind door back to Zephyr Landing's north dock (the Kestrel,
    present from `road_arrived`). Palehaven's south gate leads down the White Road; revisits use the road and the Kestrel.
@@ -363,10 +379,10 @@ never faster than once in 3 s). The hearth sits at about (23, 18), at least 12 t
 
 | id | from | contents |
 |---|---|---|
-| `ep7_ph_inn` | `inn` | the North Watchkeeper (inn, 140 gold), fur bedrolls, a stove, frosted windows, mark `inn_bed` (the post-credits wake point). |
+| `ep7_ph_inn` | `inn` | the North Watchkeeper (inn, 140 gold), fur bedrolls, a stove, frosted windows, mark `inn_bed` (a rest, no longer the post-credits wake: 2026-11-11). |
 | `ep7_ph_shop` | `item_shop` | Maera (shop `northwind`), drying herbs, a kettle always on. |
 | `ep7_ph_armory` | `smithy` | Eira at the forge (`eira_forge`, shop `glassice_armory`), a glass furnace, lenses on cords. |
-| `ep7_ph_watch` | `chapel` | the Keeper's Watch: letters face down on every surface (inspect), an empty frame on the wall (inspect; filled after `nox_named`), a cold lamp, the save bell with **its own** text key `ep7_watch_bell` (PLAYTEST_REVIEW_8 item 7), `watch_trig` two tiles in. Marks `watch_stage`, `keeper_chair`, `vex_door`, `frame`. |
+| `ep7_ph_watch` | `chapel` | the Keeper's Watch: letters face down on every surface (inspect; face up after `doors_reopened`), an empty frame on the wall (inspect; filled after `nox_named`), a cold lamp, the Keepers' oath over the inner door (inspect `ep7_watch_oath`, the game's own words for the novel's oath: EPISODE7 section 8), the save bell with **its own** text key `ep7_watch_bell` (PLAYTEST_REVIEW_8 item 7), `watch_trig` two tiles in, and from `doors_reopened` three cots by the stove (object `watch_cots`, a rest). Marks `watch_stage`, `keeper_chair`, `vex_door`, `frame`, `watch_cot` (**the post-credits wake point**, 2026-11-11: Episode 8 opens here, not in an inn room; EPISODE8 ask 4). Every staged mark at least 12 tiles from the sides or the room is widened (the camera rule): copy `chapel` and widen it if it is narrower. |
 
 ### 4.5 The `remember` block (how a map declares name stones)
 
@@ -463,7 +479,9 @@ frames: frozen, opened), the thaw grade (tint off, a warm lift), the door `nave_
 and the door `square_return` straight to `ep7_palehaven` `vault_door` (its arrival runs `whole_page`). For the ending
 (`ep7_ending`, on enter from `nave_door` after `doors_reopened`): night, the staircase of written light as an overhead prop
 (`star_stair`, 3 frames, rising out of the roof), actors `nox_t`, `vex`, `aeris_t` at marks. Marks: `entry`, `heart`,
-`party_stop`, `nox_enter`, `list_spot`, `page_block`, `roof`, `stair_foot`, `vex_rail`, `aeris_rail`.
+`party_stop`, `nox_enter`, `list_spot`, `page_block`, `roof`, `stair_foot`, `vex_rail`, `aeris_rail`. **Kept for Episode 8
+(EPISODE8 ask 3):** the `stair_foot` mark, the `star_stair` prop and the `nave_door` from Palehaven's square, open from
+`doors_reopened`, stay as named here; Episode 8's pack patch adds its door at `stair_foot`.
 
 ### 4.10 The decision budget (counted before any map is drawn; E7-integrate times against it)
 
@@ -483,11 +501,11 @@ another map of the same table, never adds, and says so.
 
 | Map | Marks / named events |
 |---|---|
-| `ep6_zl_inn` (patch) | `ep7_wake`, `compass_sill`, `aeris_door7`; `ep6_zephyr` (patch): `north_gangway`, `berth_white_road`, mark `vex_seat` |
+| `ep6_zl_inn` (patch) | `ep7_wake`; `ep6_zl_charts` (patch): `charts_dawn`, `compass_table`, `aeris_table7`, `north_window`, overlay `north_frost`; `ep6_zephyr` (patch): `north_gangway`, `berth_white_road`, mark `vex_seat` |
 | `ep7_white_road` | as 4.1; triggers `wall_trig`, `fight_row`, `first_trig`, `whiteout_trig`, `icegate_trig`; stones `ns_asta`, `ns_bo`, `ns_nyx`, `ns_ilka`, `ns_senna`; door `kestrel_back` |
 | `ep7_waystation` | as 4.2; NPC `sol_waystation`; trigger `tally_trig`; object `stove` |
 | `ep7_palehaven` | as 4.3; NPCs `keeper bryn eira torr mirael`; objects `hearth`, `vanishing_mark`, `iced_a` to `iced_f`, `beacon_north`, `vault_gate_obj` |
-| `ep7_ph_*` | as 4.4; NPCs `maera`, `eira_forge`, `ep7_innkeeper` |
+| `ep7_ph_*` | as 4.4; NPCs `maera`, `eira_forge`, `ep7_innkeeper`; the Watch's `watch_cot`, `watch_cots`, inspect `ep7_watch_oath` |
 | `ep7_vault_f1` | as 4.6; stones `ns_arvo`, `ns_liesl`, `ns_oskar` and C's two; chest `stillheart_key`; lift `lift_f1_up` |
 | `ep7_vault_f2` | as 4.7; stones `ns_dagny`, `ns_hob`, `ns_runa`, `ns_tuva`, `ns_kell`; frost doors `D`, `R`; object `reliquary_obj`; trigger `bell_trig` |
 | `ep7_vault_f3` | as 4.8; stones per landing (5 at most), the hidden stone; doors `round_door`, `grate` |
@@ -595,7 +613,8 @@ first."), `first_grip` (Bram: "That door's holding on to somebody."), `would_fad
 - The pack's `story.js` hands its scenes, lines and conditions to `registerStory`; a content test asserts ids unique across
   all seven episodes and the X1, cave and tier packs.
 - The `ep7_complete` handoff: the pack adds `CREDITS_HANDOFF[7] = { cards: CREDITS_EP7, music: 'palehaven', map:
-  'ep7_ph_inn', mark: 'inn_bed', counter: 'credits7_rolled', endCard: END_CARD_EP7, flag: 'ep7_complete' }` and, while
+  'ep7_ph_watch', mark: 'watch_cot', counter: 'credits7_rolled', endCard: END_CARD_EP7, flag: 'ep7_complete' }` (the
+  Watch, not the Lodge: 2026-11-11; the counter is the one EPISODE8 ask 4 reads) and, while
   `EP7_LIVE`, replaces `CREDITS_HANDOFF[6].endCard` with `END_CARD_EP6_LIVE` ("Episode 7 begins in the morning.").
 - `mainQuestFor` switches to the pack's `MAIN_QUEST_EP7` on `ep7_started` through `QUEST_EXT`; `epilogue6` Talk and journal
   point at the inn's door and the north dock while `EP7_LIVE`, and list only that step (PLAYTEST_REVIEW_7 item 10).
@@ -751,8 +770,9 @@ Silence. `cold: true`.
   first: one idea, taught twice.)
 - At 50% it opens its hood and calls two **Snow Wisps** (cold adds, 2 shields each). Kill them or keep Defending; their
   Flurry stacks Rime fast.
-- Targets: careful 7 to 9 rounds, win 85%+; attack-only 0% (the house rule for every main boss since Episode 1, BATTLE
-  14.6); ignoring the pin costs at least 10 points.
+- Targets (**tougher, not longer**, Scott 2026-11-11): careful 7 to 9 rounds (Episode 6's Gale Engine band; the Engine ran
+  8.88, BATTLE 14.6), win 85%+ and below 100%, careful HP lost 20 to 28% (the Engine took 13%); attack-only 0% (the house
+  rule for every main boss since Episode 1); ignoring the pin costs at least 10 points.
 - Rewards: EXP 280, gold 1,600, mastery 24. Drops: unique `borrowed_flame`, 1 rare roll (ilvl 29), hi_potion 2.
 - Art: `enemies.webp` cell 1 (the wraith) recolored to frost white and ice blue with a great lantern drawn into the hood
   where the glow was; under-the-feet HUD row from day one.
@@ -796,8 +816,11 @@ back.
 
 - **Hearth bonus:** with `hearth_lit` the party starts with +20 Fury (the existing `startFury` option, as Episode 6's
   `beacon_lit`).
-- Targets: careful 12 to 16 rounds, win 85%+; attack-only 0%; ignoring telegraphs costs at least 15 points; careful play
-  breaks at least half the Farewells with Call; the Phantom acts at least once every two party rounds (the Engine lesson).
+- Targets (**tougher, not longer**, Scott 2026-11-11): careful 11 to 15 rounds, mean no higher than the Storm Scribe's
+  14.55 (Episode 6's band and its real mean, BATTLE 14.6; the first proposal's 12 to 16 was longer and is withdrawn), win
+  85%+ and no higher than 95% (the Scribe ran 97%), careful HP lost 24 to 32% (the Scribe took 17 to 20%); attack-only 0%;
+  ignoring telegraphs wins 55% or less (the Scribe 64%) and costs at least 15 points; careful play breaks at least half the
+  Farewells with Call; the Phantom acts at least once every two party rounds (the Engine lesson).
 - Rewards: EXP 1,500, gold 1,800, mastery 36. `BOSS_LOOT.white_phantom`: unique `stillheart_shard`, 2 rare rolls (ilvl
   30), phoenix_feather 1, hi_ether 2. Nox's gift is staged in `doors_reopen`.
 - **HUD rows (CRITIQUE_8 item 1).** The Phantom's row keeps one anchor (over its crown, top-left of its body) in all three
@@ -822,7 +845,15 @@ Winterwatch Boots (Bram); F3 plus two tier 14 pieces (Iceglass Sword, Aurora Sta
 mastery up one step; 2 to 4 Ember Teas); `TARGETS` (ordinary as Episodes 1 to 6, with F3 the tightest ordinary floor:
 careful HP lost 18 to 24%, attack-only win 70 to 85%; the Lantern and the Phantom as 6.4 and 6.5; `levels` from 6.1);
 `SUITE_LEVELS_EP7` and `BOSS_LEVELS_EP7` (the Lantern 29 and 30, the Phantom 30 and 31: the second level is a full clear's
-and the Continue arrival's). The policies learn Rime and Call. Tune until `--check` prints "All targets met" for all seven
+and the Continue arrival's).
+
+**Tougher, not longer (2026-11-11).** Scott: bosses should be "tougher, not necessarily longer". The rule for E7-battle: a
+boss gets harder by what it does each round, never by more HP or more rounds. In order: raise the cost of a missed answer
+(the Farewell's Stilled turns, the Borrowed Light's heal, the Blizzard's charge), then ATK and MAG, then the adds' pressure;
+HP is the last knob and may only go **down** to pull a long fight back into band. The new check **`toughNotLong`** fails if a
+boss's careful mean rounds is above its Episode 6 counterpart's (the Lantern against the Gale Engine's 8.88, the Phantom
+against the Storm Scribe's 14.55), or its careful HP lost is not above it (13% and 17%), or careful win is under 85%; it
+prints all three numbers side by side. The policies learn Rime and Call. Tune until `--check` prints "All targets met" for all seven
 episodes; `--cave --check` and `--tier 1 --check` unchanged. The tuning knobs, in this order: the Frozen push (1.0) and
 damage (x1.4), the Rime per cold move, the cold share of each group.
 
@@ -950,7 +981,7 @@ Reused: `mystery` (F3 and the Keeper's Watch: the house rule, the last floor bef
 
 | Map | Track |
 |---|---|
-| ep6_zl_inn, ep6_zephyr (Act I) | `zephyr` |
+| ep6_zl_charts, ep6_zephyr (Act I) | `zephyr` (the Chart Room at 0.6 with `snow_wind` at 0.2 under the north window, 2026-11-11) |
 | ep7_white_road, ep7_waystation (0.5) | `high_moor` |
 | ep7_palehaven and `ep7_ph_*` (the Watch: `mystery` 0.6) | `palehaven` |
 | ep7_vault_f1, ep7_vault_f2 | `frostbound_vault` |
@@ -1072,7 +1103,7 @@ strength only on the box that says it.
 | `ep7_carving` | `fading` (VEX QUILL cut fresh, half the letters going white one by one), `whole` (every letter, cut deep) | `name_under_ice`, `doors_reopen` |
 | `ep7_tally` | one (the doorframe tally, every seventh stroke crossed, a white patch where a name was) | `waystation` |
 | `ep7_tag` | one (Mara's tag in a strong square hand, her maker's stamp) | `listening_bell` |
-| `ep7_seventh` | one (the oldest list: cheap paper, the cold hand, the empty-book seal) | `phantom_after` |
+| `ep7_seventh` | one (the North's list: cheap paper, the cold hand, the empty-book seal; the line about the page is the brightest thing on it) | `phantom_after` |
 | `ep7_page` | `half` (the bottom half, frosted white, unreadable), `joined` (the two halves meeting, the torn line running on), `mark` (Marten's mark and the crossed seven), `signed` (the signature, "Nox.") | `phantom_after`, `whole_page` |
 | `ep7_letter` | `restored` (TESS, AT WILLOWMERE; MARTEN in the corner, a crossed seven in the date) | `doors_reopen` |
 
@@ -1093,6 +1124,18 @@ bar; Mara's hand on the tag strong and square, unlike either. Something to look 
 Total if all approved: 8 Runway credits and 1 Suno download. Default: none; the episode ships without them (the plan's
 fallbacks in 8.1 and 9.3 are the shipped versions). Scott's Runway and Suno accounts stay with Scott: an agent never routes
 around a denied or gated generation path, and asks in an issue instead.
+
+### 9.5a Art needs for a later visual brief (2026-11-11; nothing is made yet)
+
+The two room changes add art the first proposal did not list. They go into one visual brief, with stills approved before
+anything is built, alongside the 9.1 to 9.4 work:
+- **The Chart Room, dressed for the North** (`ep6_zl_charts` patch, overlay `north_frost`): the north window frosted from
+  the inside, a pale band creeping over the skychart table's north edge, a few manifests lifting in a draught. Made in code
+  over Episode 6's room; Episode 6's room art is unchanged. One still: the room at dawn with the compass on the table.
+- **The Keeper's Watch after the thaw** (`ep7_ph_watch` states): letters turned face up, the shutter open on morning light,
+  three cots by the stove, and the oath inscription over the inner door (glyph bars in the game font, readable as the
+  inspect line, not as painted text). Two stills: the Watch before (`keeper_and_vex`) and after (the post-credits wake and
+  Episode 8's first scene, which is staged here).
 
 ### 9.6 What Episode 7 does not need
 
@@ -1311,7 +1354,7 @@ finds as zero.
 
 | # | File | Change | Why |
 |---|---|---|---|
-| 1 | `src/game/packs.js` | add `ep7: { entry: '../data/ep7/index.js', prefix: 'ep7_', assets: 'assets/ep7_manifest.json', audioPack: 'ep7', hard: true, touches: ['ep6_zl_inn', 'ep6_zephyr'], wanted: (f) => !!(f.ep6_complete \|\| f.ep7_started), enabled: () => EP7_LIVE }` and the import | the pack itself |
+| 1 | `src/game/packs.js` | add `ep7: { entry: '../data/ep7/index.js', prefix: 'ep7_', assets: 'assets/ep7_manifest.json', audioPack: 'ep7', hard: true, touches: ['ep6_zl_inn', 'ep6_zl_charts', 'ep6_zephyr'], wanted: (f) => !!(f.ep6_complete \|\| f.ep7_started), enabled: () => EP7_LIVE }` and the import | the pack itself |
 | 2 | `src/game/episodes.js` | `export const EP7_LIVE = false;` | the switch |
 | 3 | `src/scenes/title.js` | the Episode 6 hook line generalized to Episodes 6 and 7 (or one more line beside it): when `EP7_LIVE` and a slot has `ep6_complete`, or `?ep=7`, `ensurePack('ep6')` then `ensurePack('ep7')`, then `globalThis.LQ_EP7 && LQ_EP7.title(this)` | the row, picker and name entry live in the pack (`src/data/ep7/title.js`) |
 | 4 | `src/game/packFallback.js` | the `ep[456]_` landing regex becomes `ep[4567]_` | an Episode 7 save never lands on Test Town |
@@ -1347,9 +1390,9 @@ sprites about 0.26 (Episode 5 shipped 0.484 MB in all; Episode 6 sits under its 
 ## 14. Risks, assumptions and decisions
 
 **Assumptions.**
-1. The White Phantom is a Keeper construct and the seventh fragment the Stillheart; the seventh list is the first list,
-   twenty-six years old, and names "the First Keeper's name"; the warm hand is Nox's; Tess's father is her brother
-   (EPISODE7 section 8).
+1. The White Phantom is a Keeper construct and the seventh fragment the Stillheart; the seventh list is sixteen years old and
+   names "the first erased page" (revised 2026-11-11 toward the novel); the warm hand is Nox's; Tess's father is her
+   brother (EPISODE7 section 8).
 2. Three tracker tracks and a song-local instrument are within the pipeline's proven range (Episodes 5 and 6 each shipped
    three and one instrument).
 3. Rime fits on the existing `RULE_EXT` and `keep` bridge with Episode 6's clamped `push()`. If neither call point sees a
@@ -1399,11 +1442,12 @@ sprites about 0.26 (Episode 5 shipped 0.484 MB in all; Episode 6 sits under its 
 - Cut 3: merge F2 into F1 (the grip, the bell bay, `keeper_memory_2` and the Pale Lantern move to F1's upper galleries) for a
   two-floor Vault plus the Sanctum; the Waystation interior becomes an outdoor post on the road (the tally close-up stays).
 
-**Open for Scott and Stephen** (none blocks the build; defaults in brackets; full list with reasons in EPISODE7.md section
-10): the hero's episode with Nox and Vex as guests [yes]; Aeris flies them and carries the letters [yes]; Vex on the road
+**Decided by Scott, 2026-11-11: every default below, with choice 10 revised toward the novel.** Stephen may still change
+any of them. The list, defaults in brackets (full list with reasons in EPISODE7.md section 10): the hero's episode with Nox and Vex as guests [yes]; Aeris flies them and carries the letters [yes]; Vex on the road
 [yes]; the warm hand is Nox [yes]; Nox was the Court's Keeper [one line]; Tess's father is her brother and died on the road
-[as written]; his name [Marten]; Mara's bell [yes]; Vex's own name, none invented [yes]; the seventh list names the First
-Keeper's name [yes]; Vex keeps the whole page, the hero's row unkept [as written]; two truth choices [yes]; names on the
+[as written]; his name [Marten]; Mara's bell [yes]; Vex's own name, none invented [yes]; the seventh list names the first
+erased page [revised]; Vex keeps the whole page, the hero's row unkept [as written]; two truth choices [yes]; names on the
 stones as flavor [yes]; Vex's binding-mender line at the stair [this line]; the hero heard, never in a box [yes]; the cards
-[placeholder]; Fine Print does not enter Episode 7 [base game only]; no portrait and no paid media [none]; the canon renames
-[as listed]; shipping [Scott's or Stephen's word]; a Ledger row for Vex [yes, drop if Vex was kept out on purpose].
+[Episode 8 card "The Last Word"]; Fine Print does not enter Episode 7 [base game only]; no portrait and no paid media [none]; the canon renames
+[as listed]; shipping [Scott's or Stephen's word]; a Ledger row for Vex [yes, drop if Vex was kept out on purpose]; the Chart Room opening [yes]; the credits
+wake in the Watch [yes]; bosses tougher, not longer [yes].
