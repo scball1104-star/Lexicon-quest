@@ -80,7 +80,7 @@ test('register(engine): a forced ensurePack hands the engine to the entry and st
   const r = await ensurePack('ep6', { engine, importer: async () => ({ register: (e) => { got = e; return { id: 'ep6', loaded: [], skipped: [] }; } }), packFiles: null, warm: false, quiet: true });
   assert.equal(r.ok, true, JSON.stringify(r));
   assert.equal(got, engine);
-  assert.deepEqual(loaded, ['ep6']);
+  assert.deepEqual(loaded, ['ep3', 'ep4', 'ep5', 'ep6'], 'ep3 to ep5 start with it (#96: every hard pack above at once)');
   resetPacks();
 });
 

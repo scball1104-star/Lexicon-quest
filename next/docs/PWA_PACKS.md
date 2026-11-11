@@ -217,3 +217,18 @@ only once its `EP6_MAPS_LISTED` is true).
   `packFallback.js`. Paid for by comment trims in `src/game/packs.js` (the header, the cave note and four long doc comments
   whose content is in this file): the pre-tap load went from 2,443,506 to 2,442,935 wire bytes (seams about +100, trims about
   -670, gzipped); the initial download from 6,663,018 to 6,662,447.
+
+## Fetch every hard pack at once (2026-11-11, issue #96, world map wave 1)
+
+`ensurePack(id)` of a hard pack first calls `ensurePack` for every hard pack listed above it in `PACKS` (ep6 starts ep5, ep4
+and ep3), so one call fetches the whole chain at once; the entries still register in order (each awaits the one before, as
+above). The table order of the hard packs is therefore the chain order (`qa/core/pack_ensure.test.mjs`). Packs that load at
+once share one in-flight `assets/pack_files.json` fetch (it is fetched fresh once that settles). The #57 cache skip, the
+side-pack hold, the retries and #63's refetch are unchanged. Pre-tap load +188 gzipped bytes (2,448,126 to 2,448,314).
+
+Measured (`qa/ui/ep6_saves_headless.py` timing, GPU on, phone profile, three runs each, cold / warm in s):
+CPU x4 before 9.47 to 9.73 / 2.07 to 2.23, after 9.25 to 9.67 / 2.11 to 2.36; CPU x1 before 8.48 to 8.94 / 1.12 to 1.17,
+after 8.56 to 8.64 / 1.15 to 1.59. All four packs' code now starts within 70 ms (before: ep5, ep6, ep3, ep4 over 1.8 s), but
+the entry is not faster: it is held by the shared 10 Mbps line. The entry starts about 3.4 MB of audio (one 2.36 MB mp3, 17
+sfx) at the same moment, `pack_files.json` (1.9 KB) arrives about 2.7 s after the entry behind it, and the ep4 pack's own
+load (about 7.2 s cold, import and register one module at a time) is the critical path.
