@@ -477,6 +477,8 @@ async function vex_furnace(s) {
   await s.despawn('vex');
   await narrate(s, 'The fire gutters. When it rights itself, the ledge is empty. The feather stays.');
   await say(s, 'bram', 'He tore my father off a list. I want to thank him and hit him.');
+  // #86 (CRITIQUE_9 item 3): "either" keeps the first page in the player's hand between Episodes 2 and 5
+  await say(s, 'mira', "He said \"either.\" He's looked in other fires for it, {hero}.");
   await s.camera.follow('hero');
   await s.setFlag('vex_furnace_met');
 }

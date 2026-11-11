@@ -799,6 +799,8 @@ async function vex_mirror(s) {
   await s.flash('#ffffff', 8);
   await s.despawn('vex');
   await s.music('court');
+  // #86 (CRITIQUE_9 item 3): the first page as a thing in the world, not yet an answer
+  await say(s, 'mira', 'A first page. He said it as if it were somewhere you could go.');
   await s.camera.follow('hero');
   await s.setFlag('vex_met');
 }

@@ -604,6 +604,9 @@ async function regent_after(s) {
   await say(s, 'bram', 'Keep who?');
   await say(s, 'mira', 'You, I think. Somebody wrote you down and asked the Book to keep you.');
   await say(s, 'mira', "Not the list's hand. That one's cold. This one was in a hurry.");
+  // #86 (CRITIQUE_9 item 3): the question Episode 6 answers, asked out loud and left open
+  await say(s, 'bram', "Vex's first page. Is that this hand too?");
+  await say(s, 'mira', "I don't know. I'd like to.");
   await s.closeup(null);
   await s.give(REWARDS_EP4.fragment.item, REWARDS_EP4.fragment.qty);
   await s.setFlag('fragment4_get');
