@@ -18,7 +18,9 @@
 //   -> chosen index, or undefined when there were no choices.
 //
 // Confirm (or a tap on the window) finishes the typewriter, then turns the page, then closes. Cancel acts
-// like confirm on plain text and picks the cancel option on choices. Text speed comes from settings
+// like confirm on plain text and picks the cancel option on choices. Read guard (#74, docs/ACCESSIBILITY.md
+// item 6): for READ_GUARD frames after a page is complete (typed out, skipped, or shown at once) presses are
+// swallowed, so a double tap cannot turn a page nobody read; the skip press itself still works at once. Text speed comes from settings
 // (1 slow, 2 normal, 3 fast, 4 instant: the whole page appears at once and the blips stay quiet).
 // Pages end on word boundaries (text.js paginate + hardBreaks); the per-speaker blip voice is voiceFor(who).
 //
@@ -34,6 +36,7 @@ import { fillHero, paginate, hardBreaks, charsPerFrame, voiceFor } from './text.
 import { speakerName, NPCS } from '../data/npcs.js';
 
 export const DIALOG_ROWS = 3;
+export const READ_GUARD = 10;          // frames after a page completes in which presses do not turn it
 export const DIALOG_PAD_TOP = 7;       // text starts 7 px under the window's top edge (the name tab overlaps 4)
 export const DIALOG_PAD_BOT = 5;       // plus the line box, so the ink keeps about 6 to 7 px below it
 export const DIALOG_LINE_H = 11;
@@ -194,6 +197,7 @@ export class DialogScene {
     this.pageText = this.pages[this.page].join('\n');
     this.total = font.length(this.pageText);
     this.shown = instant ? this.total : 0;
+    this.readyIn = instant ? READ_GUARD : 0;
     this.blipCount = 0;
     this.blipEvery = 2;
     this.holdFrames = 0;
@@ -236,12 +240,18 @@ export class DialogScene {
         if (this.blipCount >= this.blipEvery) { this.blipCount = 0; this.blipEvery = this.blipEvery === 2 ? 3 : 2; audio.sfx('text_blip_' + this.voice); }
       }
       if (this.typing) {
-        // Still typing after this frame's characters: a press skips to the full page.
-        if (this._advancePressed()) { this.shown = this.total; input.consume('confirm'); input.consume('cancel'); }
+        // Still typing after this frame's characters: a press skips to the full page (and starts the read guard).
+        if (this._advancePressed()) { this.shown = this.total; this.readyIn = READ_GUARD; input.consume('confirm'); input.consume('cancel'); }
         return;
       }
-      // The page completed on this frame (instant text): fall through so a press advances at once.
-      if (this.lastPage && this.choices) { this._openChoices(); return; }
+      // The page completed on this frame (it typed out, or Instant text): the read guard starts now.
+      this.readyIn = READ_GUARD;
+    }
+
+    if (this.readyIn > 0) {
+      this.readyIn--;
+      if (this._advancePressed()) { input.consume('confirm'); input.consume('cancel'); }
+      return;
     }
 
     if (this.lastPage && this.choices && !this.choiceBox) { this._openChoices(); return; }
@@ -317,7 +327,7 @@ export class DialogScene {
 
   debugState() {
     return { who: this.who, speaker: this.speaker, portrait: this.portrait, position: this.position, rect: { ...this.rect }, lines: this.lines, page: this.page, pages: this.pages.length, shown: Math.floor(this.shown), total: this.total,
-      typing: this.typing, done: this.done, choices: this.choices, choiceIndex: this.choiceBox ? this.choiceBox.index : null, box: this.boxIndex, boxes: this.boxes.length };
+      typing: this.typing, readyIn: this.readyIn, done: this.done, choices: this.choices, choiceIndex: this.choiceBox ? this.choiceBox.index : null, box: this.boxIndex, boxes: this.boxes.length };
   }
 }
 
