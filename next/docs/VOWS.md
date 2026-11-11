@@ -73,7 +73,7 @@ break both read "Vow ended" (dim) until the next rest clears it. H6 (CRITIQUE_AR
 ## The reward and its bound
 
 A kept vow pays **mastery points on the current weapon** of the member the vow concerns (the first of the table's
-`to` list who is in the party, else the leader): `VOW_REWARD = { 1: 4, 2: 8, 3: 12 }` points by chapter, `grantMastery`
+`to` list who is in the party, else the leader): `VOW_REWARD = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24 }` points by chapter (chapters 4 to 6 added 2026-11-11, below), `grantMastery`
 from `data/party.js`, so a tech the points unlock is learned and named in the box ("Cleave learned!").
 
 Why mastery and not a stat point or max HP: the engine has no permanent per-member stat field. `memberStats` (rules.js)
@@ -91,6 +91,18 @@ The bound, checked by `qa/battle/h3_vows.test.mjs`:
 | 1 (Episode 1) | 4 | 5 | 20 | level 1 to 2 is 25 wide (`MASTERY_XP` 0, 25, 70, 140, 240, 380, 560, 800) | 20 < 25: no vow run alone earns a tech |
 | 2 | 8 | 5 | 40 | the quick start's lowest main weapon (Mira's staff 160) sits in level 4, 100 wide | 40 < 100 |
 | 3 | 12 | 5 | 60 | the quick start's lowest main weapon (staff 350) sits in level 5, 140 wide | 60 < 140 |
+| 4 | 16 | 5 | 80 | the Episode 4 quick start's lowest main weapon (Mira's staff 480) sits in level 6, 180 wide | 80 < 180 |
+| 5 | 20 | 5 | 100 | the Episode 5 quick start's lowest main weapon (staff 620) sits in level 7, 240 wide | 100 < 240 |
+| 6 | 24 | 5 | 120 | the Episode 6 quick start's lowest main weapon (staff 770) sits in level 7, 240 wide | 120 < 240 |
+
+Chapters 4 to 6 (Scott, 2026-11-11: "chapters 4 to 6 should pay more for vow rewards"). Before this a chapter past 3 paid the
+chapter 3 rate, 12. The new rows keep the curve's one rule, 4 points more a chapter, so a kept vow still grows with the
+chapter's weapons, and the bound holds with room: a whole chapter of kept vows is 44%, 42% and 50% of the level the
+quick start's lowest main weapon is in (chapters 1 to 3: 80%, 40%, 43%). A chapter past 6 pays the chapter 6 rate.
+Known limit (Fact, not changed here): from the Episode 5 quick start on, the hero's sword and Bram's spear are already at
+mastery 8 (800 points, the top of `MASTERY_XP`; the Episode 6 start stores 1,000), so a vow paid to either of them adds no
+level; `grantMastery` caps the points at 800. Four of the five vows pay the hero or Bram first. Mira's vow and any vow
+paid while a member carries a lower weapon still pay in full.
 
 For scale: an ordinary Episode 1 victory pays 2 to 6 mastery points split across the weapons used, so a kept vow is
 worth about one fight, and five kept vows about one floor's worth of practice. No stat, HP, EXP or gold moves.

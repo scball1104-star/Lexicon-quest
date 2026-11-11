@@ -15,6 +15,9 @@ import { PARTY_IDS, MASTERY_XP, masteryLevel } from '../../src/data/party.js';
 import { CONSUMABLES } from '../../src/data/items.js';
 import { fits, boxLines, CHOICE_COLS } from '../../src/data/story/dialogue.js';
 import { EP2_START, EP3_START } from '../../src/game/state.js';
+import { EP4_START } from '../../src/data/ep4/start.js';
+import { EP5_START } from '../../src/data/ep5/start.js';
+import { EP6_START } from '../../src/data/ep6/start.js';
 import { battle, party, untilTurn, ofType } from './_helpers.mjs';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -81,8 +84,18 @@ test('every reward is in bounds: a chapter of kept vows is less than one mastery
   assert.ok(lo2 >= 4 && lo3 >= 5, `the quick starts hold mastery ${lo2} and ${lo3}`);
   assert.ok(VOW_REWARD[2] * VOW_PAID_CAP < width(lo2), `chapter 2: ${VOW_REWARD[2] * VOW_PAID_CAP} < level ${lo2} width ${width(lo2)}`);
   assert.ok(VOW_REWARD[3] * VOW_PAID_CAP < width(lo3), `chapter 3: ${VOW_REWARD[3] * VOW_PAID_CAP} < level ${lo3} width ${width(lo3)}`);
-  for (const [c, n] of Object.entries(VOW_REWARD)) assert.ok(Number.isInteger(n) && n > 0 && n <= 12, `chapter ${c}: ${n}`);
-  assert.equal(rewardPoints(1), 4); assert.equal(rewardPoints(3), 12); assert.equal(rewardPoints(9), 12); assert.equal(rewardPoints(0), 4);
+  // Chapters 4 to 6 (Scott, 2026-11-11: "chapters 4 to 6 should pay more"): the same rule against the Episode 4, 5 and 6 quick
+  // starts. Their lowest main weapon is Mira's staff each time (480: level 6, 180 wide; 620 and 770: level 7, 240 wide).
+  for (const [c, S] of [[4, EP4_START], [5, EP5_START], [6, EP6_START]]) {
+    const lo = masteryLevel(lowMain(S));
+    assert.ok(lo >= 6 && lo < MASTERY_XP.length, `chapter ${c}: the quick start holds mastery ${lo}`);
+    assert.ok(VOW_REWARD[c] * VOW_PAID_CAP < width(lo), `chapter ${c}: ${VOW_REWARD[c] * VOW_PAID_CAP} < level ${lo} width ${width(lo)}`);
+  }
+  // the curve keeps its one step: 4 points more a chapter, every chapter (was 4, 8, 12 with a cap of 12, before 2026-11-11)
+  for (const [c, n] of Object.entries(VOW_REWARD)) assert.ok(Number.isInteger(n) && n > 0 && n === 4 * Number(c), `chapter ${c}: ${n}`);
+  assert.deepEqual(Object.keys(VOW_REWARD).map(Number), [1, 2, 3, 4, 5, 6]);
+  assert.equal(rewardPoints(1), 4); assert.equal(rewardPoints(3), 12); assert.equal(rewardPoints(4), 16); assert.equal(rewardPoints(5), 20);
+  assert.equal(rewardPoints(6), 24); assert.equal(rewardPoints(9), 24); assert.equal(rewardPoints(0), 4);
 });
 
 test('healing items are the ones that restore HP or revive; ethers, cures and the flask are not', () => {
