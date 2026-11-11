@@ -3,7 +3,7 @@
 
 import { List, touchUi } from '../../ui/list.js';
 import { drawWindow } from '../../ui/window.js';
-import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox, helpDock } from './layout.js';
+import { CMD_ROW_H, CMD_ROWS, CMD_COLS, CMD_COL_W, TOUCH_CMD_ROW_H, LENS_SUB_ROW_H, cmdWin, subWin, cmdRowsFor, unitBox, helpDock } from './layout.js';
 import { SKILLS } from '../../data/skills.js';
 
 const ELEMS = ['fire', 'ice', 'thunder', 'light'], ARMS = ['sword', 'spear', 'staff', 'axe', 'bow'];
@@ -51,6 +51,8 @@ export class CommandMenu {
   get b() { return this.scene.b; }
   get actors() { return this.scene.actors; }
   get rowH() { return this.touch ? TOUCH_CMD_ROW_H : CMD_ROW_H; }
+  /** Sub-list rows: the portrait lens draws them twice as big, so there they are LENS_SUB_ROW_H (44 css px in the lens). */
+  get subRowH() { const v = this.touch && this.scene.engine.renderer && this.scene.engine.renderer.view; return v && v.pad ? LENS_SUB_ROW_H : this.rowH; }
 
   /** Pick the window rects for the current layout. */
   syncLayout() {
@@ -148,7 +150,7 @@ export class CommandMenu {
     this.subCmd = cmd;
     this.showHelp = true;
     const d = this.touch && helpDock();
-    const win = this.subRect = d ? { ...this.subRect, w: d.x - 6 } : this.subRect, rowH = this.rowH;
+    const win = this.subRect = d ? { ...this.subRect, w: d.x - 6 } : this.subRect, rowH = this.subRowH;
     this.sub = new List({ x: win.x + 18, y: win.y + 6, w: win.w - 24, rows: cmdRowsFor(win, rowH), rowH, items: list, bar: true,
       textX: icons ? 15 : 2, icons, iconX: 1, confirmSfx: false, cancelSfx: false, rightPad: 4 });
     this.state = 'sub';

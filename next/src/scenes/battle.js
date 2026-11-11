@@ -14,7 +14,7 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, enemyRowAnchor,
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, helpLensRect, enemyRowAnchor,
   touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H, helpDock } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
@@ -823,7 +823,18 @@ export class BattleScene {
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
     if (this.bossIntro && this.bossIntro.t < this.bossIntro.frames && this.phase !== 'rewards') HUD.drawBossCard(r, this.bossIntro);
     if (this.phase === 'rewards') this.drawRewards(r);
+    if (touch && r.setLens) r.setLens(this.lensRects());
     void e;
+  }
+
+  /** Portrait (core/renderer.js placeLens): FLEE / AUTO / x1, then the command window or the open sub-list, bigger under the game. */
+  lensRects() {
+    const v = this.engine.renderer && this.engine.renderer.view;
+    if (!this.touchButtons() || !v || !v.pad) return null;
+    const m = this.menu, out = [helpLensRect()];
+    if (m.state === 'root' && m.root) out.push({ ...m.cmdRect, rowH: m.root.rowH });
+    else if (m.state === 'sub' && m.sub) out.push({ ...m.subRect, rowH: m.sub.rowH });
+    return out;
   }
 
   /** Where each shown enemy row goes this frame: */
@@ -1034,6 +1045,8 @@ export class BattleScene {
       menuItems: this.menu.root ? this.menu.root.items.map((it) => it.id) : [], menuIndex: this.menu.root ? this.menu.root.index : -1,
       menuCols: this.menu.root ? this.menu.root.columns : 0, rootRects: this.menu.root ? this.menu.root.items.map((_, i) => this.menu.root.rowRect(i)) : [],
       fleeArmed: this.menu.fleeArmed, fleeBtn: this.menu.fleeCmd ? { enabled: this.menu.fleeCmd.enabled } : null, helpBtns: this.touchButtons(), helpHits: this.touchButtons() && HELP_TOUCH_HITS,
+      sub: this.menu.state === 'sub' && this.menu.sub ? { index: this.menu.sub.index, rowH: this.menu.sub.rowH, rows: this.menu.sub.rows, rects: this.menu.sub.items.map((_, i) => this.menu.sub.rowRect(i)) } : null,
+      lens: this.engine.renderer && this.engine.renderer.lens ? this.engine.renderer.lens : [],
     };
   }
 }

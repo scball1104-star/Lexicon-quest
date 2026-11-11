@@ -270,7 +270,7 @@ What the fixes changed, by item. "Open" means the review's finding still holds. 
 | 5. Low HP by colour only | Open | Needs the choice of mark. |
 | 6. Skipped pages | **Guard fixed**, PR #81; backlog open | `READ_GUARD` (10 frames) in `ui/dialog.js`. The "Said" backlog is a design call. |
 | 7. Text on a clock | **Fixed**, PR #81 | `textHold` (`ui/text.js`) doubles toasts, toll captions and title cards at Slow. |
-| 8. Touch targets | **Partly fixed**, PR #83 | FLEE / AUTO / x1 are tapped on `HELP_TOUCH_HITS`: 62 / 53 / 55 x 45 css px in phone landscape. **Open:** battle command rows stay 18 px (30 css px), dense lists 20 px (33 css px), portrait help buttons 27 css px tall (a layout call). |
+| 8. Touch targets | **Partly fixed**, PR #83, #88 | FLEE / AUTO / x1 are tapped on `HELP_TOUCH_HITS`: 62 / 53 / 55 x 45 css px in phone landscape. #88, portrait: the lens under the game (`core/renderer.js` `placeLens`, `BattleScene.lensRects`) draws FLEE / AUTO / x1 and the command window or the open sub-list again, bigger, and takes taps there: on the 390 x 844 profile command rows 18 -> 48, sub-list rows 18 -> 44 (22 px rows in portrait), FLEE / AUTO / x1 27 -> 46 tall (74 / 64 / 66 wide) css px. Smaller phones get what fits: 375 x 667 command rows 36, sub-list 33; 360 x 640 command 42, sub-list 37 (the sub-list is as wide as the phone allows). **Open:** battle command rows in landscape stay 18 px (30 css px); dense lists outside battle (items, equip, Config, journal) stay 20 px (33 css px landscape, 20 portrait); targeting a foe or ally by tap is on the sprites, not in the lens. |
 | 9. Timed Flee | **Fixed**, PR #81 | The arm holds until the second tap or another input. |
 | 10. Remapping | Open | |
 | 11. Colour-only cues | Open | |

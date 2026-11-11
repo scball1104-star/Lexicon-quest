@@ -26,7 +26,7 @@ missing, so nothing here can crash a build that lacks it.
 
 | Name | Push | Resolves |
 |---|---|---|
-| `title` | boot | New Game -> `nameEntry`; Continue -> `loadGame`; Config -> `config`; 20 s idle -> prologue attract and back. |
+| `title` | boot | New Game -> `nameEntry`; Continue -> `loadGame`; Config -> `config`; 20 s idle -> prologue attract and back. Quick starts (#88, CRITIQUE_9 item 7): two or more `Episode N: new party` rows (the title's ep2 / ep3 and each pack's, in any arrival order) fold into one **New party…** row before Config (`foldQuickRows`, `tidyMenu` every update and draw); confirm opens them as a list in the menu's place (`openQuick`, the old menu kept in `mainMenu`; a pack row that lands while it is open joins it in order, and a List a pack rebuilds meanwhile, as Fine Print does, becomes the title menu: `adoptMenu`), cancel / B / a tap well clear of it closes it. Each row keeps its own path (the save guard, the slot picker, the packs' asks, `?ep=N`). One quick start stays its own row. The title lays every menu out itself (`titleMenuLayout`: one centred column, two only when one would climb over the logo). QA: `scene.quickStarts()`, `scene.showQuickStart(id)`. |
 | `nameEntry` | `replace` from title | `createGame(name)` on `engine.game`, then `replace('prologue')`. Keyboard typing via `input.startText()`. |
 | `prologue` | `{ attract? }` | cards from `PROLOGUE`; confirm advances, start skips; then `reset('field', { map: START_MAP, x, y, dir })` (or the UI stage). |
 | `titleCard` | `pushAwait('titleCard', { text, sub, frames, backdrop?: id | false, bg? })` | `true` when gone (confirm/start cuts the hold). Draws `dialog_keyart` darkened under the text (flat `bg` when `backdrop: false` or the atlas is missing). |
@@ -119,6 +119,13 @@ Source: `docs/CRITIQUE_3.md` items 1, 2, 5, 6, 7, 9 (the phone is the bar). Veri
   fights. The three are tapped on `HELP_TOUCH_HITS` (#82), not their art: 4 px above and below the one-line help window
   (27 px = 45 css px on the phone) and each gap split at its middle, so they never overlap and a tap goes to the nearest. That keeps the grid at four rows even for Mira (Magic and Swap). Swap's label is plain "Swap" (its help line names
   the weapon). Keyboard and pad keep Flee in the grid (a ninth command grows the window by one row).
+- **Portrait lens (#88).** Upright, one game px is one css px, so the 18 px command rows and the 27 px FLEE / AUTO / x1 targets
+  are 18 and 27 css px. The renderer keeps a pad under the game in portrait (`core/renderer.js` `PAD`, 274 css px; the touch
+  controls move under it) and the battle names the rects a finger needs each frame (`BattleScene.lensRects`: FLEE / AUTO / x1,
+  then the command window or the open sub-list); `placeLens` draws them again there at whole device px per game px, sized for
+  44 css px rows, and `Renderer.toGame` maps a tap on the lens back into the game, so every List and tap target works there
+  unchanged. Sub-lists are 22 px rows in portrait (`LENS_SUB_ROW_H`, three show). On the 390 x 844 profile: command rows 48,
+  sub-list rows 44, FLEE 74 x 46, AUTO 64 x 46, x1 66 x 46 css px. Landscape has no pad and no lens.
 - **Battle log (item 5).** While nobody is choosing a command (enemy turns, the victory and level-up pages) the command window
   shows the last three lines the help window said (`BattleScene.log`, fed by `setHelp`, plus the rewards: EXP and gold,
   drops, "Arden reaches Lv 2", "Mira learns Ember"), the newest at the bottom, older ones dimmer. Nothing is drawn until

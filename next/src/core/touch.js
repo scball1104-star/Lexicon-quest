@@ -2,6 +2,7 @@
 // 'overlay'). Pixel-art placeholder skin; input.setTouchSkin({...}) swaps in real art (URL or { src, rect }).
 
 import { createFonts } from './font.js';
+import { PAD } from './renderer.js';
 
 const ART = { dpad: 33, button: 19, pillH: 16 };
 /** RUN and MENU are finger targets: never under this many css px tall (CRITIQUE_2 D8). */
@@ -396,8 +397,8 @@ export class TouchControls {
       this._placePill(e.run, 'run', lcx, cy - dp / 2 - 34, Math.min(56, Math.max(40, lw * 0.44)), base);
       this._place(e.fullscreen, 'fullscreen', lcx, s.t + 24, 24, base * 0.8, 8, R);
     } else if (v.touchMode === 'below') {
-      // Under the game (portrait): a handheld layout.
-      const top = v.cssY + v.cssH, bottom = H - s.b;
+      // Under the game (portrait): a handheld layout, under the lens pad (renderer.js PAD) when there is one.
+      const top = v.cssY + v.cssH + (v.pad ? v.pad.h + 2 * PAD.gap : 0), bottom = H - s.b;
       const room = bottom - top;
       const cy = top + room * 0.55;
       const dp = Math.min(170, room * 0.6, W * 0.42);
