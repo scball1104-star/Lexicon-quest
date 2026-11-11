@@ -406,7 +406,6 @@ export const NPCS = {
       ] },
       { lines: [
         'Mael. Lantern Square. By the well. Go on.',
-        "And if you see Pip, tell him I believe him about the bells. He'll want somebody to.",
       ] },
     ],
   },

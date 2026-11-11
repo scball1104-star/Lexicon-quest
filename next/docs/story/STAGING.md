@@ -227,7 +227,18 @@ Cue sheet (W8, CRITIQUE_3 #12), in story order:
   desk, able to see both Mira and the door.
 - Mark **`mira_meet`**: an open tile about two tiles in front of the entrance, between Mira and the door.
 - Camera: pan to Mira, then follow hero. Mira walks to `mira_meet`, later to the hero, despawns, joins.
-- Sets `mira_joined`.
+- Sets `mira_joined`, then chains `library_ink` at once.
+
+### library_ink (#86: the second fight, in the library)
+- Map: `library`. No trigger of its own: `mira_joins` chains it after `mira_joined` (condition: `mira_joined`, not
+  `ink_fight_done`, not `bram_joined`), so a save past the opening never meets it.
+- Marks **`ink_a`** (12,11) and **`ink_b`** (8,11): open floor below the east stack and on the reading-room floor. The
+  scene spawns `ink_a` and `ink_b` (sprite `ink_slime`, name "Ink Slime") there, pans to `ink_a` (24 frames), both hop,
+  one narration box, camera back, the hero's `!`, two boxes from Mira, then `battle('library_ink', { canFlee: false })`:
+  the hero and Mira against two soft Ink Slimes (encounters.js `library_ink`: power 0.6, speed 0.8, hp 0.6, no elite,
+  the `archive` stage). Mira's Ember on a fire-weak foe is the hint; nothing new is taught in words.
+- On a win: both despawn, one box from Mira, `ink_fight_done`. A loss is the engine's Game Over; the reload is the
+  library autosave from before Mira joined, so `mira_joins` plays again.
 
 ### south_gate (Bram joins)
 - Map: `willowmere`. Step trigger across the road two tiles north of the gate (mark **`gate_inner`**). Talking

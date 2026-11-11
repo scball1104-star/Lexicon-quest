@@ -1720,6 +1720,11 @@ class Episode:
             self.talk('mira')
         if not self.has('mira_joined'):
             raise Fail('mira_joins did not set mira_joined')
+        # #86: mira_joins chains library_ink (the second fight); the generic battle handler wins it with Auto battle
+        b.settle()
+        if not self.has('ink_fight_done'):
+            raise Fail('library_ink did not set ink_fight_done')
+        b.mark('ink_fight')
         b.mark('south_gate')
         b.interact(ent_id='book_tales', label='book')
         b.through('library_exit')

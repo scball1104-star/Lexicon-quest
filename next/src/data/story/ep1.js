@@ -53,6 +53,7 @@ export const H1_FLAGS = {
   yard_fight_done: 'The yard slime in the bakery lane is beaten (yard_slime); the Ledger (H2) reads it.',
   oren_truth: "Told Oren what his sign said (fading_sign); his starter line remembers it.",
   oren_lie: "Told Oren you could not remember either (fading_sign); his starter line remembers it.",
+  ink_fight_done: 'The ink that left the library books is beaten in the reading room (library_ink, chained from mira_joins; #86).',
 };
 export const TOLL_NAMES = ['Hazel', 'Mael', 'Oren', 'Pip', 'Tess', 'Iris', 'Holt', 'Garrick', 'Nella', 'Wick', 'Edda', 'Bram'];
 export const TOLL_FLAGS = TOLL_NAMES.map((_, i) => `toll_${i + 1}`);
@@ -123,8 +124,7 @@ async function wake_up(s) {
 
 // Optional: talk to Hazel after meeting Mael, before leaving town. Gives a knitted mantle once.
 async function hazel_farewell(s) {
-  await say(s, 'hazel', 'So. The Archive.');
-  await say(s, 'hazel', "Mael told me. Don't look at me like that. He tells me everything eventually, and usually first.");
+  await say(s, 'hazel', 'So. The Archive. Mael told me.');
   // H4 (RESPONSIBILITY_ARC 3.4): the true answer is the awkward one. Remembered once she has you home (npcs.js hazel).
   await say(s, 'hazel', 'Are you frightened?');
   const c = await s.choice(['Yes.', 'No.']);
@@ -223,7 +223,6 @@ async function mael_intro(s) {
   await say(s, 'mael', 'Twelve bells up there. I have counted them for sixty years. They say a thirteenth tolls for a name taken from the world.');
   await s.camera.follow('hero');
   await s.emote('mael', '...');
-  await say(s, 'mael', 'I would very much like that to be only a saying.');
   await say(s, 'mael', 'If something is eating our names, it eats at the Rootbound Archive, north of the valley. I need someone to go and look.');
   const c2 = await s.choice(['Why me?', "I'll go."]);
   if (c2 === 0) {
@@ -255,14 +254,10 @@ async function mira_joins(s) {
   await s.face('mira', 'hero');
   await s.emote('mira', '!');
   await s.camera.follow('hero');
-  await say(s, 'mira', "Oh. You're the Elder's errand. He didn't say you'd be on time. I had a whole speech about patience ready.");
   await s.walk('mira', 'mira_meet');
   await s.face('mira', 'hero');
   await say(s, 'mira', 'Mira. Archivist apprentice. I reshelve, I copy, and I correct people. Mostly the last one.');
   await say(s, 'mira', "You're going to the Archive. I'd like to come. I know its floor plans, its seals, and which end of a staff to hold.");
-  await s.face('iris', 'mira');
-  await say(s, 'iris', 'Absolutely not. That place has been sealed for a hundred years, and you get lost in our reading room.');
-  await say(s, 'mira', 'Once. And the reading room has two doors that look exactly alike.');
   await s.face('iris', 'hero');
   await say(s, 'iris', 'Forgive us. This girl is the finest apprentice I have taught in thirty years. Her name is...');
   await s.wait(40);
@@ -284,6 +279,32 @@ async function mira_joins(s) {
   // device's own button: a key cap, a pad button, or the MENU cap on a phone).
   await say(s, 'mira', 'If we ever lose the thread, ask me: {i:btn_menu}, then Talk. I keep notes.');
   await s.setFlag('mira_joined');
+  await library_ink(s);   // #86 (CRITIQUE_9 item 2): the second fight, minutes after the first, before the town errands
+}
+
+// ------------------------------------------------------------------------------------------------
+// 4b. The ink comes back (library; #86, CRITIQUE_9 item 2). Chained at the end of mira_joins, so only a game that sees
+// Mira join meets it: a save past the opening never does (it has mira_joined, and nothing else starts this scene). The
+// ink that left the forty-one books pulls itself up out of the stacks: two soft slimes, the hero and Mira, no flee. It
+// teaches nothing new in words (Mira's Ember on a fire-weak foe is the hint); a loss is a Game Over and the reload replays
+// Mira's scene, as the yard slime's does. Sets ink_fight_done.
+// ------------------------------------------------------------------------------------------------
+async function library_ink(s) {
+  await s.sfx('ink_gurgle');
+  await s.spawn('ink_a', { sprite: 'ink_slime', name: 'Ink Slime', at: 'ink_a', dir: 'down' });
+  await s.spawn('ink_b', { sprite: 'ink_slime', name: 'Ink Slime', at: 'ink_b', dir: 'down' });
+  await s.camera.panTo('ink_a', 24);
+  await all(s.jump('ink_a'), s.jump('ink_b'));
+  await narrate(s, 'Ink seeps out from under the stacks, black and wet, and pulls itself up into two shapes.');
+  await s.camera.follow('hero');
+  await s.emote('hero', '!');
+  await say(s, 'mira', "That's our ink. The page about the door, and it's come back hungry.");
+  await say(s, 'mira', "Ink hates fire. Keep them off me, {hero}, and I'll Ember them.");
+  const result = await s.battle('library_ink', { canFlee: false });
+  if (result !== 'win') return;
+  await all(s.despawn('ink_a'), s.despawn('ink_b'));
+  await say(s, 'mira', "Noted: the ink fights back. That's going on my other sleeve.");
+  await s.setFlag('ink_fight_done');
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -307,32 +328,25 @@ async function bram_joins_body(s) {
   await s.face('bram', 'hero');
   await say(s, 'bram', 'Halt! Nobody... Mira?');
   await s.emote('bram', '?');
-  await say(s, 'bram', "Mira, you've got a pack on. You get winded climbing the library ladder.");
-  await say(s, 'mira', 'Eleven rungs. And I was carrying an atlas. A large one.');
   await say(s, 'bram', "So it really is the Archive. Then I'm coming. Somebody has to stop you two reading the monsters to death.");
   await say(s, 'holt', 'You are on watch until noon, son.');
-  await say(s, 'bram', "Put me down for leave, Sergeant. My father'll understand. He always says...");
-  await say(s, 'bram', 'He says a guard who never leaves his gate is just a very tall gate.');
+  await say(s, 'bram', "Put me down for leave, Sergeant. My father always says a guard who never leaves his gate is just a very tall gate.");
   await say(s, 'bram', 'If you see my father at the forge, tell him... tell...');
   await s.music('sorrow'); // enters under the silence, holds through Holt's promise
   await s.wait(40);
   await s.emote('bram', '...');
   await s.wait(40);
-  await say(s, 'bram', "His name. My father's name. I said it at breakfast.");
-  await say(s, 'bram', "I've said it my whole life. It's right there, and I can't...");
+  await say(s, 'bram', "His name. My father's name. I said it at breakfast. It's right there, and I can't...");
   await s.emote('mira', 'sweat');
   await s.wait(50);
   await say(s, 'holt', 'Garrick. Your father is Garrick, son.');
-  await say(s, 'bram', 'Garrick.');
   await s.wait(30);
   await say(s, 'bram', 'Garrick. I know that.');
   await s.face('bram', 'down');
   await say(s, 'bram', "I lost my mother's name years ago, in the fire at Emberpeak. Her face, I've still got. Her name went with the smoke.");
   await say(s, 'bram', "I am not losing his.");
   await s.face('bram', 'hero');
-  await say(s, 'bram', "I'm coming with you. That wasn't a question.");
   await say(s, 'holt', 'I will tell Garrick. I will tell him twice. And I will say his name every hour until you are back.');
-  await say(s, 'bram', '...Thank you, Sergeant.');
   await s.music('willowmere');
   await s.walk('bram', 'hero');
   await s.despawn('bram');
@@ -378,9 +392,7 @@ async function leave_town(s) {
   await s.camera.panTo('town_sign', 30);
   await s.sfx('sign_fade');
   await s.flash('#ffffff', 4);
-  await say(s, 'mira', 'The town sign.');
-  await say(s, 'bram', "Don't.");
-  await say(s, 'mira', "It's still there. Mostly. I can read it if I squint.");
+  await say(s, 'mira', "The town sign. It's still there, mostly. I can read it if I squint.");
   await say(s, 'bram', "Then don't squint. Walk.");
   await s.camera.follow('hero');
   await s.setFlag('left_town');
@@ -390,7 +402,6 @@ async function leave_town(s) {
 // 7. Willowmere Valley. Arrival (first entry) and the milestone (inspect, first time).
 // ------------------------------------------------------------------------------------------------
 async function valley_arrival(s) {
-  await say(s, 'bram', 'Smell that? Rain on the way. And sheep. Mostly sheep.');
   await say(s, 'mira', 'Over the bridge, then the pilgrim road north to the Archive. Two hours on foot, assuming nothing eats us.');
   await say(s, 'bram', "Anything out here tries to eat you, you hit it first. That's the whole secret.");
   await s.setFlag('valley_arrived');
@@ -1001,7 +1012,6 @@ async function tess_letters(s) {
 async function oren_starter(s) {
   if (!(await s.hasFlag('starter_quest_started'))) {
     await say(s, 'oren', 'Have you seen my starter? My sourdough starter. Big, pale, about so wide. Answers to nothing.');
-    await say(s, 'oren', "It crawled out of its crock in the night. They do that when they're happy. Or offended.");
     await say(s, 'oren', "There's a trail of flour out the back door, heading for the warm side of town. Find it, would you?");
     await s.setFlag('starter_quest_started');
     return;
@@ -1242,6 +1252,7 @@ export const SCENE_CONDITIONS = {
   yard_slime: { if: 'saw_fading_sign', ifNot: ['yard_fight_done', 'met_mael'] },   // never after Mael: old saves and the Episode 2 start skip it (CRITIQUE_ARC 1)
   mael_intro: { if: 'intro_done', ifNot: 'met_mael' },
   mira_joins: { if: 'met_mael', ifNot: 'mira_joined' },
+  library_ink: { if: 'mira_joined', ifNot: ['ink_fight_done', 'bram_joined'] },   // chained from mira_joins only (#86)
   south_gate: { ifNot: 'bram_joined' },
   garrick_farewell: { if: 'bram_joined', ifNot: ['garrick_farewell_done', 'archivore_defeated'] },
   leave_town: { if: 'bram_joined', ifNot: 'left_town' },
@@ -1281,7 +1292,7 @@ export const SCENE_CONDITIONS = {
 };
 
 const RAW = {
-  prologue, ...TOLL_SCENES, thirteenth_toll, wake_up, hazel_farewell, fading_sign, yard_slime, mael_intro, mira_joins, south_gate, garrick_farewell,
+  prologue, ...TOLL_SCENES, thirteenth_toll, wake_up, hazel_farewell, fading_sign, yard_slime, mael_intro, mira_joins, library_ink, south_gate, garrick_farewell,
   leave_town, valley_arrival, milestone, first_fight, campfire_rest, archive_door, archive_f1_arrival, find_letter_1, archive_f1_bell,
   archive_f2_arrival, find_letter_2, echo_warden, lantern_get, archive_f2_exit, archive_f3_arrival,
   find_letter_3, thirteenth_bell, boss_door, archivore, return_to_willowmere, ending_hook,
