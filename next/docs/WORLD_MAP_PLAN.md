@@ -2,7 +2,8 @@
 
 Status: **APPROVED by Scott 2026-11-11 ("Approve, use defaults": the plan, the brief and the three stills, every choice of
 section 8 at its default).** Written 2026-11-11 by Scott's Claude. Wave 2 built on `scott/wm-wave2-map` (issue #97): the
-`worldmap` pack, `docs/PWA_PACKS.md` has it as built; travel (wave 3) is not built, the map screen is view only.
+`worldmap` pack, `docs/PWA_PACKS.md` has it as built. Wave 3 (travel, issue #103) built on `scott/wm-wave3-travel`:
+`src/data/worldmap/travel.js`, as built in `docs/PWA_PACKS.md` (the worldmap pack, "Travel").
 
 Mock-up stills (not game art, not in the repo): `G:\My Drive\Personal Knowledge Assistant\reports\lexicon_quest_world_map\`
 (`wm_contact_sheet.png` plus the three stills at x1 and x4, and the two scripts that composed them from `next/assets`).

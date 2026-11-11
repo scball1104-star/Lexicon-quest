@@ -238,6 +238,34 @@ run time (the field's `glass.reset` seam, as Episode 4 attaches). Always enabled
   to resolve from the cache after the cut (whenever the target's `pack_files.json` lists it); `pwa.py --only packoffline`
   covers it with every other pack.
 
+### Travel (2026-11-11, issue #103, WORLD_MAP_PLAN wave 3)
+
+`src/data/worldmap/travel.js`, in the same pack (nothing new at startup: no core file changed, `sw.js` kept its version).
+Confirm on a town in the map's list travels there; the rules are Scott's defaults of 2026-11-11.
+
+- **Destinations** (`destinations`): visited towns only (`data.js` `TOWN_MAP`, the map each town's stones stand on), never a
+  road or a dungeon floor. A town only heard of stays disabled; the town the party stands on says "You are already here."
+- **Arrival** (`arrivalOf`, `data.js` `STONES[*].at`): the open cell beside the town's gate stone (a dock or ferry stone when
+  the trip's last leg is by sea or air), facing away from it, with two open cells behind it: the field lines the followers up
+  before the stones join the map, so their trail must not cross a stone. Thornfold (`x1_downs`) has its own stone now.
+- **Route** (`routeOf`): along `WAYS` (the roads, the sea lane by Yara's ship, the Airstair), or one straight leg by the
+  Kestrel once Episode 6 opened it (`aeris_came` or `library_reached`). 2 to 3 s by length; Reduce motion: a cut and a
+  0.6 s hold. Free, no battles.
+- **Packs** (`packsFor`, `readyPacks`): the arrival map's prefixed pack, any pack that patches it and that the save wants,
+  `tier` for a Fine Print save (its shop rows), and every hard pack above those (the #96 chain). They start when the trip
+  starts; opening the map warms every open town's packs at idle and resting 300 ms on a row starts that town's (never while
+  the browser is offline). A pack that fails (not cached, network down) or is still loading at 8 s cancels the trip: the
+  party stays and the info box says "That road is not ready yet. Try again with a connection." (plan 5.2 item 5).
+- **Guard rails** (`blockOf`): no travel during a scene or the cold open, while the field loads or warps, in a dungeon from
+  the menu row (the map is view only there; stones stand only in towns), in a Deep Stacks run, or aboard the ship
+  mid-crossing (`ep5_ship`: the story's own crossing, plan 2.3 item 5). There is no Kestrel deck map in Episodes 1 to 6;
+  Episode 7's deck gets a stone, or an `ABOARD` entry if it is a crossing.
+- **Arrival** (`arrive`): one fade, the map screen and the menu popped, then the field's own `loadMap` as a landmark: music,
+  the banner, the safe point and the autosave (to `game.autosaveSlot`, never another run's slot) are those of any map
+  change. No flag or quest is written.
+- **Tests:** `qa/worldmap/travel.test.mjs` (node); `qa/realplay/worldmap.py` (real keys and touch: Valewyn to Willowmere
+  and back, the offline refusal; desktop, phone, portrait).
+
 ## Fetch every hard pack at once (2026-11-11, issue #96, world map wave 1)
 
 `ensurePack(id)` of a hard pack first calls `ensurePack` for every hard pack listed above it in `PACKS` (ep6 starts ep5, ep4
