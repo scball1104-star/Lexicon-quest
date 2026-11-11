@@ -21,13 +21,30 @@ export const DEFAULT_SETTINGS = Object.freeze({
   equipPrompts: true,         // offer to equip better gear when it is found (W5)
   battleCursor: 'last',       // battle menu starts on: last (each character's last command) | attack
   alwaysRun: false,           // when true, holding run walks instead
-  reduceMotion: false,        // no screen shake, softer flashes (defaults to the OS preference)
+  reduceMotion: false,        // no screen shake, softer flashes (follows the OS preference until the player sets it: bootSettings)
   scaleMode: 'integer',       // integer | fit | sharp
   backdrop: 'ambient',        // ambient | plain
   touchControls: 'auto',      // auto | on | off
   touchOpacity: 0.75,
   showFps: false,
 });
+
+/** The device's "reduce motion" request (a matchMedia-like function; false when there is none or it throws). */
+export function prefersReducedMotion(matchMedia = globalThis.matchMedia) {
+  try { return !!(matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch { return false; }
+}
+
+/**
+ * The settings a boot starts with: `stored` (the raw object in storage, or null) over DEFAULT_SETTINGS, with
+ * reduceMotion following the device (`osReduce`) unless the player chose it. A choice is marked
+ * `reduceMotionSet` (engine.setSetting); a settings object saved before the mark existed counts as a choice only
+ * when it holds reduceMotion true (until this fix the device value never applied, so only a player could set it).
+ */
+export function bootSettings(stored, osReduce) {
+  const s = stored && typeof stored === 'object' ? stored : {};
+  const chosen = s.reduceMotionSet === true || (s.reduceMotionSet === undefined && s.reduceMotion === true);
+  return { ...DEFAULT_SETTINGS, ...s, reduceMotion: chosen ? !!s.reduceMotion : !!osReduce };
+}
 
 function memoryStorage() {
   const m = new Map();

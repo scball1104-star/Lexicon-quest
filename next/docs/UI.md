@@ -115,7 +115,7 @@ Source: `docs/CRITIQUE_3.md` items 1, 2, 5, 6, 7, 9 (the phone is the bar). Veri
   the column, left / right keep the row. The command window is 126 px wide; the party status window gives up 34 px
   (`statusRow` packs the HP gauge, the MP block and the Fury gauge tighter). **Touch:** 18 px rows (30 css px,
   `TOUCH_CMD_ROW_H`), the window rises to y 132, and **Flee is a FLEE button in the help window** next to AUTO and x1
-  (`HELP_TOUCH_BTNS.flee`): the first tap arms it ("Tap FLEE again to run."), a second tap within a second runs; dim on boss
+  (`HELP_TOUCH_BTNS.flee`): the first tap arms it ("Tap FLEE again to run."), a second tap runs, with no time limit (the arm holds until another menu input, #74); dim on boss
   fights. That keeps the grid at four rows even for Mira (Magic and Swap). Swap's label is plain "Swap" (its help line names
   the weapon). Keyboard and pad keep Flee in the grid (a ninth command grows the window by one row).
 - **Battle log (item 5).** While nobody is choosing a command (enemy turns, the victory and level-up pages) the command window

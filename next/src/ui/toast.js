@@ -1,4 +1,4 @@
-// Top-center toast strip: "Received Potion x2" with an icon, queued, 1.5 s each, optional jingle.
+// Top-center toast strip: "Received Potion x2" with an icon, queued, 1.5 s each (3 s at Text speed Slow), optional jingle.
 // Drawn on top of every scene from the engine's postdraw hook, so nothing else needs to call it.
 //
 //   installToasts(engine)                                  once at boot (title.js install does it)
@@ -21,6 +21,7 @@ import { drawWindow, drawIcon, drawIcon16, uiAtlas } from './window.js';
 import { ITEMS, KEY_ITEMS, RARITIES } from '../data/items.js';
 import { baseOf, itemName } from '../battle/loot.js';
 import { animFrameAt } from '../core/assets.js';
+import { textHold } from './text.js';
 
 const SLIDE = 8;      // frames in / out
 const HOLD = 90;      // 1.5 s
@@ -99,6 +100,7 @@ export class Toasts {
     if (!this.current && this.queue.length) {
       this.current = this.queue.shift();
       this.current.start = e.frame;
+      this.current.hold = textHold(this.current.hold, e.settings);   // Text speed Slow doubles it
       if (this.current.sfx) e.audio.sfx(this.current.sfx);
       if (this.current.jingle) e.audio.jingle(this.current.jingle);
       if (this.current.beam && !e.settings.reduceMotion) e.renderer.flash('#fff7d6', 4, 0.35);

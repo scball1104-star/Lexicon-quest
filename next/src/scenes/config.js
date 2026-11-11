@@ -45,6 +45,13 @@ export const ROWS = [
 /** The settings keys the Config screen edits (every non-action row). */
 export const SETTING_KEYS = ROWS.filter((r) => r.kind !== 'action').map((r) => r.key);
 
+/** Reset to defaults: DEFAULT_SETTINGS for every edited key, and Reduce motion back to following the device. */
+export function resetSettings(engine) {
+  for (const key of SETTING_KEYS) if (key in DEFAULT_SETTINGS) engine.setSetting(key, key === 'reduceMotion' ? !!engine.osReduceMotion : DEFAULT_SETTINGS[key]);
+  engine.settings.reduceMotionSet = false;
+  engine.save.saveSettings(engine.settings);
+}
+
 export class ConfigScene {
   constructor(engine) { this.engine = engine; this.name = 'config'; this.transparent = true; }
   enter() {
@@ -81,14 +88,15 @@ export class ConfigScene {
     e.setSetting(row.key, v);
     e.audio.sfx(row.key === 'music' ? 'cursor' : 'confirm');
   }
-  /** Reset every setting the screen edits to DEFAULT_SETTINGS (after a confirmation choice). */
+  /** Reset every setting the screen edits to DEFAULT_SETTINGS (after a confirmation choice). Reduce motion goes back to
+   *  following the device (resetSettings). */
   async reset() {
     const e = this.engine;
     this.busy = true;
     const i = await e.pushAwait('choice', { options: ['Reset', 'Keep mine'], x: e.renderer.W / 2, y: e.renderer.H / 2, anchor: 'center', cancel: 1, dim: true });
     this.busy = false;
     if (i !== 0) return;
-    for (const key of SETTING_KEYS) if (key in DEFAULT_SETTINGS) e.setSetting(key, DEFAULT_SETTINGS[key]);
+    resetSettings(e);
     e.audio.sfx('equip');
     this.note = 'Settings are back to their defaults.'; this.noteT = 120;
   }

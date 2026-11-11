@@ -112,6 +112,11 @@ function ctx2d(c, opts) {
 
 // ------------------------------------------------------------------ renderer
 
+/** Reduce motion's ceiling on a full-screen flash (docs/ACCESSIBILITY.md item 2): a hint of the colour, never a flash. */
+export const REDUCED_FLASH = 0.1;
+/** The alpha a flash draws at: `a` clamped to 1, and to REDUCED_FLASH under reduce motion. */
+export function flashAlpha(a, reduce) { return Math.max(0, Math.min(reduce ? REDUCED_FLASH : 1, a)); }
+
 export class Renderer {
   /**
    * @param {HTMLCanvasElement} canvas the visible canvas (#game)
@@ -341,15 +346,14 @@ export class Renderer {
     } else { s.x = 0; s.y = 0; }
   }
 
-  /** End a game frame: draws the screen flash. */
+  /** End a game frame: draws the screen flash (at most REDUCED_FLASH alpha under reduceMotion). */
   endFrame() {
     const f = this._flash;
     if (f.frames > 0) {
       const k = f.frames / Math.max(1, f.total);
-      const reduce = this.settings.reduceMotion ? 0.3 : 1;
       const g = this.ctx;
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
-      g.globalAlpha = Math.min(1, f.alpha * k * reduce);
+      g.globalAlpha = flashAlpha(f.alpha * k, this.settings.reduceMotion);
       g.fillStyle = f.color; g.fillRect(0, 0, this.W, this.H);
       g.restore();
     }
@@ -402,7 +406,7 @@ export class Renderer {
       this._shake = { mag, frames, total: frames, x: 0, y: 0 };
     }
   }
-  /** Full-screen flash that fades out over `frames`. Softened when reduceMotion is on. */
+  /** Full-screen flash that fades out over `frames`. Held to REDUCED_FLASH alpha when reduceMotion is on. */
   flash(color = '#ffffff', frames = 8, alpha = 0.85) { this._flash = { color, frames, total: frames, alpha }; }
   get shakeOffset() { return { x: this._shake.x, y: this._shake.y }; }
 

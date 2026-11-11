@@ -182,6 +182,8 @@ def check_battle_phone(rigs):
     assert d.battle()['fleeArmed'] > 0, 'first tap arms the FLEE button'
     assert d.battle()['menu'] == 'root', 'arming does not run'
     d.shot('battle_flee_armed')
+    d.frames(150)
+    assert d.battle()['fleeArmed'] > 0, 'the arm has no clock: still armed 2.5 s later (#74)'
     d.tap(*center(btn), wait=3)
     d.frames(120)
     st = d.ev('LQ_DEBUG.state()')

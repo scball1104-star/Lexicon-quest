@@ -219,6 +219,7 @@ export function drawTimeline(r, order, actors, preview, frame) {
 /** Party status window rows: name, HP numbers + gauge, MP, Fury (READY glow), status badges. */
 export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
   const sw = STATUS_WIN;
+  const still = stillHud(r);
   drawWindow(r, sw.x, sw.y, sw.w, sw.h, { alpha: opts.alpha ?? 1 });
   const ui = uiAtlas(r);
   party.forEach((a, i) => {
@@ -248,8 +249,8 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     const full = a.fury >= 100 && !ko;
     // READY sits beside the gauge on the gauge line (D11): the gauge gives up 25 px for the 21 px label.
     const furyW = L.furyGauge[2] - (full ? 25 : 0);
-    drawGauge(r, L.furyGauge[0], L.furyGauge[1], furyW, Math.min(1, a.shownFury / 100), 'fury', { thin: true, glow: full, frame });
-    if (full && (a.furyFlash === 0 || Math.floor(frame / 4) % 2 === 0)) drawLabel(r, 'ready', L.furyGauge[0] + furyW + 4, L.furyGauge[1] - 1);
+    drawGauge(r, L.furyGauge[0], L.furyGauge[1], furyW, Math.min(1, a.shownFury / 100), 'fury', { thin: true, glow: full, frame: still ? 0 : frame });
+    if (full && (still || a.furyFlash === 0 || Math.floor(frame / 4) % 2 === 0)) drawLabel(r, 'ready', L.furyGauge[0] + furyW + 4, L.furyGauge[1] - 1);
     let ix = L.status[0];
     const ids = PARTY_STATUS_ORDER.filter((s) => a.statuses[s]);
     for (const s of ids.slice(0, 5)) {
@@ -267,6 +268,7 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
 export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = {}) {
   const ui = uiAtlas(r);
   if (!ui) return null;
+  const still = stillHud(r);
   // opts.at: the spot the scene planned (touch layout: layout.touchRowSpot); else the W5 anchor under the feet.
   const anchor = opts.at || enemyRowAnchor(actor, touch, opts.cw || null);
   const x = anchor.x, y = anchor.y - (opts.lift || 0);
@@ -275,7 +277,7 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
     r.sprite(ui, badge, x, y, { topLeft: true });
     if (!(unit && unit.broken)) {
       const n = String(unit ? unit.shields : actor.shields);
-      const flash = actor.shieldFlash > 0 && Math.floor(frame / 3) % 2 === 0;
+      const flash = actor.shieldFlash > 0 && (still || Math.floor(frame / 3) % 2 === 0);
       r.text(n, x + 6, y + 1, { align: 'center', color: flash ? 'gold' : 'white', shadow: false });
     }
   }
@@ -293,7 +295,7 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
   const resist = (know && know.resist) || [];
   const unknown = know ? know.unknown : 0;
   const slots = [];
-  for (const t of weak) slots.push({ icon: `icon_${t}`, frame: actor.rowFlash > 0 && Math.floor(frame / 4) % 2 === 0 ? 'weak_frame_hit' : 'weak_frame' });
+  for (const t of weak) slots.push({ icon: `icon_${t}`, frame: actor.rowFlash > 0 && (still || Math.floor(frame / 4) % 2 === 0) ? 'weak_frame_hit' : 'weak_frame' });
   for (let i = 0; i < unknown; i++) slots.push({ icon: 'weak_unknown', frame: 'weak_frame' });
   for (const t of resist.slice(0, 4 - slots.length)) if (WEAK_TYPES.includes(t)) slots.push({ icon: `icon_${t}`, frame: 'weak_frame_resist', nullified: true });
   for (const s of slots.slice(0, 4)) {
@@ -309,7 +311,8 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
   if (hm) {
     const pw = 3 + hm * 6, pip = PIPS[unit && unit.heatQuench] || drawPip;
     r.rect(ex, y - 1, pw, 14, actor.flare ? '#8a2a2a' : '#4b2a2a'); r.rect(ex + 1, y, pw - 2, 12, '#14101e');
-    for (let i = 0; i < hm; i++) pip(r, ex + 2 + i * 6, y + 2, i < actor.heat, actor.flare, actor.heatFlash > 0 && i === actor.heat - 1, frame);
+    // Reduce motion: frame STILL_PIP_FRAME is the lit phase with no flame flicker, so the pips hold steady.
+    for (let i = 0; i < hm; i++) pip(r, ex + 2 + i * 6, y + 2, i < actor.heat, actor.flare, actor.heatFlash > 0 && i === actor.heat - 1, still ? STILL_PIP_FRAME : frame);
     ex += pw + 1;
   }
   // Status badges above the row (W11: below it when the row is tucked under the help window, opts.top, as the King's
@@ -327,6 +330,9 @@ export function drawEnemyRow(r, actor, know, unit, frame, touch = false, opts = 
   return { x, y, w: ex - x };
 }
 export const PIPS = {};
+export const STILL_PIP_FRAME = 4;   // (frame >> 2) odd: the hot white core on; (frame >> 3) even: no flicker
+/** Reduce motion (docs/ACCESSIBILITY.md item 2): READY, the shield count, the weakness frame and Heat pips hold steady. */
+export function stillHud(r) { return !!(r && r.settings && r.settings.reduceMotion); }
 const PIP = ['..o..', '..oo.', '.oao.', '.oaao', 'oabao', 'oabbo', 'oabbo', '.ooo.'];
 function drawPip(r, x, y, lit, hot, pop, frame) {
   const w = hot && (frame >> 2) % 2;

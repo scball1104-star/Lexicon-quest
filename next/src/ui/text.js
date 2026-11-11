@@ -66,6 +66,12 @@ export function charsPerFrame(textSpeed) {
   return { 1: 0.5, 2: 1, 3: 2, 4: 999 }[textSpeed] ?? 1;
 }
 
+/** Text on a clock (toasts, the toll captions, title cards) at settings.textSpeed: Slow doubles the hold, the
+ *  others keep it (#74, docs/ACCESSIBILITY.md item 7). */
+export function textHold(frames, settings) {
+  return settings && settings.textSpeed === 1 ? frames * 2 : frames;
+}
+
 /** Typewriter voice for a speaker id. */
 export function voiceFor(who) {
   if (who == null) return null;

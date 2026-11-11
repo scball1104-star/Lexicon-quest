@@ -1006,15 +1006,17 @@ export class SliceTransition {
   draw(r) {
     const g = r.ctx;
     const t = this.t;
+    // Reduce motion: no mosaic and no white; the field dims to ink and the battle comes up out of it.
     if (t < this.mosaicFrames) {
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.drawImage(this.snap, 0, 0);
       g.restore();
+      if (this.reduce) { r.fade('#14101e', Math.min(1, (t + 1) / this.mosaicFrames)); return; }
       r.mosaic(t < 4 ? 2 : 4);
       r.fade('#ffffff', Math.min(0.6, t / 12));
       return;
     }
-    if (this.reduce) { r.fade('#ffffff', Math.max(0, 1 - (t - this.mosaicFrames) / 12)); return; }
+    if (this.reduce) { r.fade('#14101e', Math.max(0, 1 - (t - this.mosaicFrames) / 12)); return; }
     const H = this.H;
     g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
     for (let i = 0; i < this.cols; i++) {
