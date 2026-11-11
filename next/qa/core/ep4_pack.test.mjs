@@ -135,7 +135,7 @@ test('seam 3: the title hook line forces and loads the pack only when live with 
 
 test('pack entry: ORDER, missing modules skipped, idempotent, maps and hooks run, LQ_EP4 installed', async () => {
   assert.deepEqual(ep4.ORDER, ['flags', 'enemies', 'items', 'skills', 'loot', 'encounters', 'shops', 'ai', 'npcs', 'quests', 'text',
-    'story', 'ledger', 'audio', 'world', 'maps', 'hooks', 'start', 'title']);
+    'story', 'ledger', 'audio', 'world', 'maps', 'hooks', 'start', 'errands', 'title']);
   const p1 = ep4.register();
   const p2 = ep4.register();
   assert.equal(p1, p2, 'the same promise');

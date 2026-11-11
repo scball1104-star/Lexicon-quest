@@ -5,7 +5,7 @@
 // register(engine) imports each module of this folder behind a guard and calls its register (named export `register`, or the
 // default export when that is a function) as fn(engine, modules()), in this fixed order:
 //     flags, enemies, items, skills, loot, encounters, shops, ai, npcs, quests, text, story, ledger, audio, world, maps,
-//     hooks, start, title
+//     hooks, start, errands, title
 // A module that does not exist yet is skipped (listed in the result's `skipped`), so the agents that write the modules plug
 // in just by exporting register(). A module that exists but throws is NOT swallowed: the error reaches the caller.
 // `audio` needs no register(): its fragment ({ music, sfx, ambience, jingles, pack }, the assets/audio/manifest.json shape) is
@@ -16,7 +16,7 @@
 
 export const ID = 'ep4';
 export const ORDER = ['flags', 'enemies', 'items', 'skills', 'loot', 'encounters', 'shops', 'ai', 'npcs', 'quests', 'text',
-  'story', 'ledger', 'audio', 'world', 'maps', 'hooks', 'start', 'title'];
+  'story', 'ledger', 'audio', 'world', 'maps', 'hooks', 'start', 'errands', 'title'];
 /** Loaded on first use by hooks.js, never imported by register() (the title code is only needed on the title screen). */
 const LAZY = new Set(['title']);
 

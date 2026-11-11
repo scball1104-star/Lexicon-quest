@@ -328,3 +328,68 @@ Section 8, items 1, 5, 6 and 12.
 - **Inference (check before building):** the `world` pack size (60 to 120 KB painting, 10 to 15 KB code) is an estimate; the
   check is to build the painting and gzip the scene in wave 2. The menu seam's size is unknown until written; the check is the
   ratchet in `qa/pwa/budget_ratchet.json`. The wave sizes are judgement.
+
+---
+
+## 12. Wave 5 as built (issue #100): errands, Penny's cart, restocks
+
+Built 2026-11-11 on `scott/wm-wave5-errands`. All of it lives in the lazy `ep4` pack (`src/data/ep4/errands.js`, the data and the
+rules; `src/data/ep4/errands_field.js`, Penny on the field); `src/data/ep5/errands.js` and `src/data/ep6/errands.js` re-export
+`register`, so each later pack adds what it made possible (its NPCs, items, shops) and puts the errand talk back in front of its
+own lines. `errands` is the last module of each pack's ORDER. No core file, no map module and no save key changes; the startup
+bytes do not move.
+
+**Rules.** An errand opens when the episode of its *source* town is complete (the source then has no story scene left to shadow).
+It can start at either end: the giver asks (`xr_<id>_started`), or the source hands the item over first (`_started` and `_got`);
+delivering takes the key item, pays the reward once and sets `_done`. Each errand is a side quest (journal, Talk hints). Talk
+entries sit in front of the NPC's lines but after any leading story scene, so a live story scene always answers first.
+
+| Errand | Giver, place | Source, place | Item | Opens | Reward |
+|---|---|---|---|---|---|
+| A Rope That Sings | Nella, Willowmere | Hale, Flood Road | Flood Rope | `ep4_complete` | 400 gold, 2 Hi-Potions |
+| What the Sea Looks Like | Tovin, Hollowmere | Yara, Saffron Haven | Sea Shell | `ep5_complete` | 600 gold, 2 Hi-Ethers |
+| Desert Spice | Bess, Emberpeak | Yasmin, Saffron Haven | Desert Spice | `ep5_complete` | 600 gold, 3 Hi-Potions |
+| News from the Desert | Lyra, Valewyn | Nasrin, Saffron Haven | The Road Reading | `ep5_complete` | 800 gold, a Phoenix Feather |
+| A Sky from Above | Laleh, Saffron Haven | Suri, Zephyr Landing | Cloud Chart | `ep6_complete` | 1,000 gold, 2 Phoenix Feathers |
+| Sky Brass | Sella, Emberpeak | Ilex, Zephyr Landing | Sky Brass | `ep6_complete` | 1,000 gold, 2 Hi-Ethers |
+| Glass That Floats | Vessa, Hollowmere | Thea, Zephyr Landing | Cloudglass | `ep6_complete` | 1,000 gold, 3 Hi-Potions |
+
+**Penny's travelling cart** (`penny_t`, shop `travel_cart`, road prices): one town behind the party. Emberpeak from `ep3_complete`
+(27,29), Valewyn from `ep4_complete` (14,18), Saffron Haven from `ep5_complete` (13,24), Zephyr Landing from `ep6_complete` (19,20).
+Ten road consumables from the start, plus Quench Flask, Lamp Oil, Hourglass Sand and Ballast Stone as she crosses each region
+(12, 13, 14, 15 rows); one pair of boots at a time, the newest region's. Her sand road record (`penny_s`) steps aside at
+`ep3_complete`, as `penny_e` did at `sand_gate_open`. She joins a map's entities at run time (the field's `glass.reset` seam,
+like the worldmap stones), with her stop's flags on the event.
+
+**Restocks** ("the carts run again", list price, each town gains the next tier, never newer than the frontier):
+
+| Opens | Shop | Adds |
+|---|---|---|
+| `ep3_complete` | Willowmere Goods | Hi-Ether, Silver Salve, Lantern Charm, Mirror Charm |
+| `ep3_complete` | Willowmere Forge | tier 4: the five Silverglass weapons, Silver Mail, Mirrorweave Robe, Glass Helm |
+| `ep3_complete` | Hollow Provisioner | Quench Flask, Coalheart Charm, Bellchime Charm, Carter Mantle |
+| `ep3_complete` | Silverglass Smithy | tier 5: Ashsteel Cuirass, Ashsteel Helm, Cinder Boots |
+| `ep4_complete` | Ventworks Supplies | Lamp Oil, Waxseal Charm, Tidemark Charm, Ferry Mantle |
+| `ep4_complete` | Emberpeak Weaponsmith | tier 7: Riverguard Plate and Helm, Scribe's Robe, Oilskin Hood, Wader Boots |
+| `ep5_complete` | Riverbank Provisioner | Hourglass Sand, Shade Charm, Lodestar Charm, Dune Mantle |
+| `ep5_complete` | Crown Guard Forge | tier 9: Dunewalker Mail, Starweave Robe, Copper Helm, Saffron Hood, Sandstrider Boots |
+| `ep6_complete` | Saffron Caravan Supplies | Ballast Stone, Ballast Charm, Signal Charm, Sailcloth Mantle |
+| `ep6_complete` | Copperwind Smithy | tier 11: Skysteel Mail, Windweave Robe, Aviator Helm, Gale Hood, Cloudstep Boots |
+
+Willowmere and Hollowmere both open at `ep3_complete`, the moment the ep4 pack first loads (Willowmere one step later than the
+plan's rule, which keeps the data out of the first download).
+
+**The map hook (for waves 2 and 3).** All pure, reading `game.flags` (or a flag map), writing nothing:
+
+```js
+const X = globalThis.LQ_ERRANDS;   // set when the ep4 pack registers; undefined before Episode 3 is done (nothing to show then)
+X.errandsFor(game, placeId)   // [{ id, title, state: 'open'|'fetch'|'deliver', mark: '!'|'?', label, npc }] for a data.js place/point id
+X.errandLedger(game)          // every unlocked errand, done ones too: [{ id, title, state, giver, source }] (the post-game ledger)
+X.merchantAt(game)            // Penny's stop: { place, map, x, y, dir, index } or null
+X.errandState(game, id)       // 'locked'|'open'|'fetch'|'deliver'|'done'
+```
+
+`'!'` marks the giver's place for an open errand and for one ready to deliver, `'?'` the source's place while fetching. Place ids
+are data.js PLACES / layout.js POINTS ids (`willowmere`, `hollowmere`, `emberpeak`, `flood_road`, `valewyn`, `saffron`,
+`zephyr`). Labels are at most 26 characters ("! Bess wants desert spice"). The worldmap scene can also `import('../ep4/errands.js')`
+for the same functions. Tests: `qa/content/xref_errands.test.mjs`; shots `story_xr_bess_spice`, `field_xr_penny_cart`.
