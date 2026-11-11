@@ -55,11 +55,15 @@ only), `qa/content/ep7_*`. Never a core data file and never an `ep6` file: every
 8. **`text.js`**: 10 banners (Palehaven's conditional), books `keeper_book`, `missing_streets`, `keeper_charter`, barks of
    plan 5.1, bestiary for the 11 new foes (each names its cold moves), `CREDITS_EP7`, `END_CARD_EP7` ("To be continued" /
    "Episode 8 is not playable yet."), `END_CARD_EP6_LIVE`, `END_TITLE_EP7` ("End of Episode 7" / "The Vanishing World"),
-   `EPISODE8_CARD` ("Episode 8: The First Library" / "The lists were written here."), the boss cards and arc lines
+   `EPISODE8_CARD` ("Episode 8: The Last Word" / "The lists were written here.": 2026-11-11, EPISODE8 ask 1), the boss cards and arc lines
    (`EP7_BOSS_CARDS`, `EP7_ARC_LINES`, `EP7_BATTLE_TEXT` exported for E7-scene-ui, including the Defend help "Shake off the
    cold." and every Rime and Farewell message of plan 6.3 to 6.5), every inspect line of plan 4 and EPISODE7 section 7, the
    stone names (one text key per stone, plan 4.11), and **the Watch's and the Waystation's own save-bell keys**
-   (`ep7_watch_bell`, `ep7_stove`: PLAYTEST_REVIEW_8 item 7).
+   (`ep7_watch_bell`, `ep7_stove`: PLAYTEST_REVIEW_8 item 7), and the Watch's oath inscription `ep7_watch_oath`.
+   **Revision 2 (2026-11-11):** `ep7_morning` is staged in the Chart Room (it changes map on black before its first box);
+   the seventh list and Nox's lines in `phantom_after` follow EPISODE7 beat 27 as revised (a page, sixteen years, "the
+   spring you did"); no line of Episode 7 says "First Keeper", "Concordance" or names the hero's mother; nothing quotes
+   the novel (EPISODE7 section 8, "Novel canon"); Nox's root after-clear line is not used (Episode 8 says it).
 9. **`ledger.js`**: the rows, `PLACES.palehaven`, `REACHED.palehaven` of plan 5.3 (counted only when `EP7_LIVE`), the
    proposed `vex` row (EPISODE7 choice 21); the hero's row stays unkept.
 10. **`docs/story/STAGING_EP7.md`** (the shape of `STAGING_EP6.md`), and EPISODE7 section 9 (build notes, deltas only).
