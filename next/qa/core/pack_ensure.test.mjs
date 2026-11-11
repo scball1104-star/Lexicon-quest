@@ -93,8 +93,9 @@ test('a failed import resolves ok:false, then a retry (the next call, and one au
   assert.equal(r1.ok, false);
   assert.ok(r1.failed[0].startsWith('entry:'));
   assert.equal(packReady('t1'), false);
-  // the automatic retry (20 ms here, 5 s for real) loads it without anyone asking again
-  await new Promise((r) => setTimeout(r, 120));
+  // the automatic retry (20 ms here, 5 s for real) loads it without anyone asking again. Wait on the condition, not a
+  // fixed 120 ms sleep, which a busy CPU could outrun (issue #76); the 3 s ceiling only bounds a real failure.
+  for (const end = Date.now() + 3000; !packReady('t1') && Date.now() < end;) await new Promise((r) => setTimeout(r, 10));
   assert.equal(packReady('t1'), true, 'the automatic retry succeeded');
   assert.equal(n, 2);
 
@@ -133,7 +134,9 @@ test('boot timing: a hung import never blocks the caller, and awaitPacks gives u
   const hang = () => new Promise(() => {});
   const t0 = Date.now();
   const p = ensurePack('t1', { ...quiet, importer: hang });       // returns at once, pending
-  assert.ok(Date.now() - t0 < 50, 'ensurePack returns immediately');
+  // ensurePack is synchronous up to its promise: getting here at all proves the hung import did not block it. The clock
+  // only catches a gross stall; 50 ms was within reach of a preempted thread on a busy CPU (issue #76).
+  assert.ok(Date.now() - t0 < 500, 'ensurePack returns immediately');
   assert.ok(p instanceof Promise);
   const r = await awaitPacks(['t1'], 60, { table, enabled: true });
   assert.equal(r, 'timeout');

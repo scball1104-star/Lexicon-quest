@@ -9,6 +9,7 @@ import { PREFAB_SETS, LEGENDS, parsePrefab, PROPS } from '../../src/data/cave/pr
 import { LANDINGS } from '../../src/data/cave/landing.js';
 import { loadDb, isTileId, isObjectId, objectCells } from '../../tools/maps/mapcheck.mjs';
 import { SEEDS, FLOORS } from './gen_helpers.mjs';
+import { within } from '../_perf.mjs';
 
 const man = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
 
@@ -181,10 +182,12 @@ test('registerBand: bands three to five borrow the cellars kit until C2 plugs th
 
 test('performance: a fresh floor (plus its stairs target layout) generates in under 30 ms on average', () => {
   for (const floor of [3, 55, 99]) {
-    const t0 = performance.now();
     const N = 12;
-    for (let i = 0; i < N; i++) generateFloor(500000 + i * 7919 + floor, floor);
-    const ms = (performance.now() - t0) / N;
-    assert.ok(ms < 30, `B${floor}: ${ms.toFixed(1)} ms per floor`);
+    const r = within(30, () => {   // qa/_perf.mjs: best of a few tries, budget scaled by a calibration loop (issue #76)
+      const t0 = performance.now();
+      for (let i = 0; i < N; i++) generateFloor(500000 + i * 7919 + floor, floor);
+      return (performance.now() - t0) / N;
+    }, { tries: 3 });
+    assert.ok(r.ok, r.msg(`B${floor} per floor`));
   }
 });

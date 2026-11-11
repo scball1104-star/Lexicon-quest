@@ -7,9 +7,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+// Sized from the work (issue #76): the three labs take about 130 s together under a busy CPU. The old caps (110, 150,
+// 170 s) summed past the runner's 300 s for the file, so a slow morning timed the FILE out. The runner's cap for this
+// file (qa/run.mjs LIMITS) is the sum of these plus a margin.
+const LAB_MS = { e2: 200_000, w15: 240_000, e3: 280_000 };
 
 function hasPlaywright() {
-  const r = spawnSync('python', ['-c', 'import playwright.sync_api, PIL'], { timeout: 20000, encoding: 'utf8' });
+  // 60 s: under a busy CPU the import alone came near 20 s, and a timeout here SKIPS the walk instead of failing it
+  const r = spawnSync('python', ['-c', 'import playwright.sync_api, PIL'], { timeout: 60000, encoding: 'utf8' });
   return r.status === 0;
 }
 
@@ -19,7 +24,7 @@ function hasPlaywright() {
 // music, gated overlays, fog and Keeper mirror doors, newGameEp2, gold from a scene, flags into the battle, the
 // Episode 2 credits handoff. Solo slot, after the parallel batch.
 test('the Episode 2 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.join(HERE, 'e2_lab.py')], { timeout: 110000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const r = spawnSync('python', [path.join(HERE, 'e2_lab.py')], { timeout: LAB_MS.e2, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
   const out = (r.stdout || '') + (r.stderr || '');
   assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
   assert.match(out, /E2_LAB: PASS/);
@@ -29,7 +34,7 @@ test('the Episode 2 field systems work in the game with zero console errors', { 
 // an Episode 1 credits save in the autosave, the title's Episode 2 quick start and one door leave slot 0 untouched unless
 // the player confirms; "Copy it, then start" keeps the run in a record. Solo slot.
 test('the Episode 2 quick start never overwrites a finished run without asking', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.resolve(HERE, '..', 'integrate', 'w15_save_trap.py')], { timeout: 150000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const r = spawnSync('python', [path.resolve(HERE, '..', 'integrate', 'w15_save_trap.py')], { timeout: LAB_MS.w15, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
   const out = (r.stdout || '') + (r.stderr || '');
   assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
   assert.match(out, /W15_SAVE_TRAP: PASS/);
@@ -39,7 +44,7 @@ test('the Episode 2 quick start never overwrites a finished run without asking',
 // the cooling front, dams and Shove, latched basins and AND gates, the hot grate and lift doors, crust kept across a round
 // trip, slag light and draw time, the ash_haze luminance, the memory vignette, the Bell Gate. Solo slot, as above.
 test('the Episode 3 field systems work in the game with zero console errors', { skip: !hasPlaywright() && 'playwright for python not installed' }, () => {
-  const r = spawnSync('python', [path.join(HERE, 'e3_lab.py')], { timeout: 170000, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
+  const r = spawnSync('python', [path.join(HERE, 'e3_lab.py')], { timeout: LAB_MS.e3, encoding: 'utf8', cwd: path.resolve(HERE, '..', '..') });
   const out = (r.stdout || '') + (r.stderr || '');
   assert.equal(r.status, 0, out.split('\n').slice(-30).join('\n'));
   assert.match(out, /E3_LAB: PASS/);

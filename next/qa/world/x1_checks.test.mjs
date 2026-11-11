@@ -9,6 +9,7 @@ import { Particles } from '../../src/world/particles.js';
 import { createRng } from '../../src/core/rng.js';
 import { loadDb, loadAll, walk, validate, NEXT } from '../../tools/maps/mapcheck.mjs';
 import { makeField, FIXTURE } from './x1_fixture.mjs';
+import { within } from '../_perf.mjs';
 
 const FIELD_JS = fs.readFileSync(path.join(NEXT, 'src', 'scenes', 'field.js'), 'utf8');
 /** The source of one method of FieldScene (from its name to the next method at the same indent). */
@@ -118,12 +119,15 @@ test('5c: ambient motes cost the same on a 72 x 36 field as anywhere: capped at 
   assert.ok(fx.count('mote') >= 10, 'and it does fill the view');
   for (const p of fx.list) assert.ok(p.x >= cam.x - 20 && p.x <= cam.x + cam.W + 20 && p.y >= cam.y - 20 && p.y <= cam.y + cam.H + 20, 'spawned in view');
   const N = 3000;
-  const t0 = performance.now();
-  for (let i = 0; i < N; i++) { fx.update(cam); fx.draw(r, cam, 'above'); }
-  const per = (performance.now() - t0) / N;
+  // qa/_perf.mjs: best of a few tries, budget scaled by a calibration loop (issue #76)
+  const pr = within(0.3, () => {
+    const t0 = performance.now();
+    for (let i = 0; i < N; i++) { fx.update(cam); fx.draw(r, cam, 'above'); }
+    return (performance.now() - t0) / N;
+  });
   rects = 0; fx.draw(r, cam, 'above');
   assert.ok(rects <= 26 * 2, `at most about 52 one-pixel fills a frame (saw ${rects})`);
-  assert.ok(per < 0.3, `update + draw (${per.toFixed(4)} ms) under the 0.3 ms budget, in node with a stub canvas`);
+  assert.ok(pr.ok, pr.msg('update + draw, in node with a stub canvas'));
   // the cost has no map-size term: the same code on a small map spawns and draws exactly the same way
   field.map = { ...field.map, W: 20, H: 20 };
   const fy = new Particles(field);

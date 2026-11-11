@@ -155,8 +155,9 @@ def case_dark(lab):
     perf = lab.run('LQ_DEBUG.state().perf')
     print('  perf', perf)
     lab.shot('e2_dark_beam')
-    # measure the field draw alone, many times
-    ms = lab.run(field_js('const r = LQ_ENGINE.renderer; const t0 = performance.now(); for (let i = 0; i < 60; i++) f.draw(r); return (performance.now() - t0) / 60;'))
+    # measure the field draw alone, many times: the fastest of five runs of sixty, since load only adds time (one run
+    # of sixty failed under a busy CPU, issue #76); a real slowdown is slow on all five
+    ms = lab.run(field_js('const r = LQ_ENGINE.renderer; let best = 1e9; for (let k = 0; k < 5; k++) { const t0 = performance.now(); for (let i = 0; i < 60; i++) f.draw(r); best = Math.min(best, (performance.now() - t0) / 60); } return best;'))
     print('  field draw ms (dark, beam lit):', round(ms, 3))
     check(ms < 3.0, f'draw time stays low ({ms:.3f} ms)')
     return ms

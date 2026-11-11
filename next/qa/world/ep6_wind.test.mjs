@@ -23,6 +23,7 @@ import { peekMap } from '../../src/world/maps.js';
 import { compile, live, ride, follow, canTurn, toggled, vaneArrow, changed, maskOf, MAX_RIDE } from '../../src/data/ep6/field/wind.js';
 import { attach } from '../../src/data/ep6/field/events.js';
 import { RIDE_FRAMES, SWING_FRAMES } from '../../src/data/ep6/field/system.js';
+import { within } from '../_perf.mjs';
 import { ensureArt, FALLBACK_OBJECTS, CHEVRON } from '../../src/data/ep6/field/art.js';
 import { STORM_TINT, LIGHTNING, FLASH_ALPHA, flashLevel, flashStarts, luma } from '../../src/data/ep6/field/storm.js';
 import { TEST_WIND } from '../../src/data/ep6/field/_testwind.js';
@@ -241,18 +242,23 @@ test('rule: 42 x 40 with 3 vane groups and 300 lane cells: live + a ride + canTu
   assert.ok(n >= 300, `${n} lane cells`);
   const blocked = (x, y, lane) => !lane && x > 0 && x < W - 1;
   for (let i = 0; i < 20; i++) ride(m, i & 7, [0, 1], 'right', blocked);
-  const t0 = performance.now();
   const K = 400;
-  for (let i = 0; i < K; i++) { const s = i & 7; live(m, s); ride(m, s, [0, 1 + 4 * (i % 10)], 'right', blocked); canTurn(m, s, 'abc'[i % 3], [[3, 1], [5, 5]]); }
-  const ms = (performance.now() - t0) / K;
-  assert.ok(ms < 1, `${ms.toFixed(3)} ms per state`);
-  // a toggle's recompute from cold (no cached state): changed() builds both arrays
-  const cold = compile({ ...mod });
-  const t1 = performance.now();
-  changed(cold, 0, 1); changed(cold, 1, 3); changed(cold, 3, 7);
-  const tm = (performance.now() - t1) / 3;
-  assert.ok(tm < 1, `toggle recompute ${tm.toFixed(3)} ms`);
-  console.log(`  # wind.js 42x40, 3 groups, ${n} lane cells: ${ms.toFixed(4)} ms per state, toggle ${tm.toFixed(4)} ms`);
+  // qa/_perf.mjs: best of a few tries, budget scaled by a calibration loop measured now (issue #76)
+  const st = within(1, () => {
+    const t0 = performance.now();
+    for (let i = 0; i < K; i++) { const s = i & 7; live(m, s); ride(m, s, [0, 1 + 4 * (i % 10)], 'right', blocked); canTurn(m, s, 'abc'[i % 3], [[3, 1], [5, 5]]); }
+    return (performance.now() - t0) / K;
+  });
+  assert.ok(st.ok, st.msg('live + a ride + canTurn per state'));
+  // a toggle's recompute from cold (no cached state): changed() builds both arrays; a fresh compile each try
+  const tg1 = within(1, () => {
+    const cold = compile({ ...mod });
+    const t1 = performance.now();
+    changed(cold, 0, 1); changed(cold, 1, 3); changed(cold, 3, 7);
+    return (performance.now() - t1) / 3;
+  });
+  assert.ok(tg1.ok, tg1.msg('toggle recompute'));
+  console.log(`  # wind.js 42x40, 3 groups, ${n} lane cells: ${st.best.toFixed(4)} ms per state, toggle ${tg1.best.toFixed(4)} ms`);
 });
 
 // ---------------------------------------------------------------- the field
@@ -404,7 +410,17 @@ test('field: a vane toggle swings for 20 frames (input held only then), every va
   assert.equal(v2.prop.state, 5, 'the other vane of group a moved with it');
   assert.ok(f.sfx.includes('vane_turn'));
   assert.ok(f.barks.includes('first_vane'));
-  assert.ok(f.wind.lastTurn.ms < 1, `recompute ${f.wind.lastTurn.ms} ms`);
+  // the turn's recompute (changed() inside turn()) under 1 ms: the reading from this turn first; on a busy PC a few
+  // more tries time the same recompute on a fresh compile of the map (qa/_perf.mjs, issue #76)
+  let firstTry = true;
+  const rc = within(1, () => {
+    if (firstTry) { firstTry = false; return f.wind.lastTurn.ms; }
+    const cold = compile({ ...T });
+    const t0 = performance.now();
+    changed(cold, 0, 1);
+    return performance.now() - t0;
+  });
+  assert.ok(rc.ok, rc.msg('vane turn recompute'));
   assert.equal(f.wind.isLive(25, 9), false);
   assert.equal(f.wind.isLive(27, 12), true);
   // reduceMotion: instant
@@ -512,12 +528,21 @@ test('storm: the tint, and the lightning limits (at most +0.12 luma, at most onc
 });
 
 test('field: timings: an update frame and a ride step under 3 ms; the drawing pass runs headless', () => {
-  const f = makeField(T, null, {}, [6, 19, 'right']);
-  f.engine.input.hold('right');
-  let worst = 0;
-  for (let i = 0; i < 80; i++) { const t0 = performance.now(); frame(f); worst = Math.max(worst, performance.now() - t0); }
-  assert.ok(worst < 3, `worst frame ${worst.toFixed(3)} ms`);
-  assert.ok(f.wind.stats.maxUpdateMs < 1, `wind update ${f.wind.stats.maxUpdateMs} ms`);
+  // Both numbers are the WORST of 80 frames, so one preempted frame on a busy PC failed it (41.8 ms seen, issue #76):
+  // each try rides a fresh field and the best try's worst frame must be inside the budget (qa/_perf.mjs).
+  let f;
+  const ride80 = () => {
+    f = makeField(T, null, {}, [6, 19, 'right']);
+    f.engine.input.hold('right');
+    let w = 0;
+    for (let i = 0; i < 80; i++) { const t0 = performance.now(); frame(f); w = Math.max(w, performance.now() - t0); }
+    return w;
+  };
+  const fr = within(3, ride80);
+  assert.ok(fr.ok, fr.msg('worst field frame'));
+  const worst = fr.best;
+  const wu = within(1, () => { ride80(); return f.wind.stats.maxUpdateMs; });
+  assert.ok(wu.ok, wu.msg('worst wind update'));
   f.wind.drawLow(f.engine.renderer, 0.5);
   f.wind.drawVaneHeads(f.engine.renderer);
   assert.ok(f.wind.layers && f.wind.layers.length === 3);

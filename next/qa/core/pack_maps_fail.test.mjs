@@ -7,6 +7,12 @@ import { setPackDefaults, packReady, GUARD_MS } from '../../src/game/packs.js';
 
 const base = { enabled: true, quiet: true, warm: false, packFiles: null, retryMs: 100000 };
 
+// The clocks below time the GUARD (the wait for a pack), not a cold import of the map file that follows it. Under a
+// busy CPU that first import alone took 1.5 s (waited 3076 ms against 1500 + 600, issue #76), so the two maps the
+// tests load are imported once up front; loadMap's own import then hits the module cache.
+await import('../../src/data/maps/willowmere.js');
+await import('../../src/data/maps/east_road.js');
+
 test('the import fails: a prefixed map is not reachable, a touched map loads unpatched, quickly', async () => {
   let n = 0;
   setPackDefaults({ ...base, importer: async () => { n++; throw new Error('offline'); } });

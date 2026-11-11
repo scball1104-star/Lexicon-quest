@@ -164,8 +164,27 @@ export function cleanName(s) {
 
 // ---- flags -------------------------------------------------------------------------------------
 export function hasFlag(g, flag) { return !!g.flags[flag]; }
-export function setFlag(g, flag, value = true) { if (value === false) delete g.flags[flag]; else g.flags[flag] = value; return value; }
+export function setFlag(g, flag, value = true) {
+  if (value === false) delete g.flags[flag]; else g.flags[flag] = value;
+  if (value !== false && /^ep\d_complete$/.test(flag)) advanceChapter(g);   // #71: an episode's credits open the next chapter
+  return value;
+}
 export function flagValue(g, flag) { return g.flags[flag]; }
+
+// ---- chapter (#71) -------------------------------------------------------------------------------
+/** The last chapter: Episode 6's. */
+export const LAST_CHAPTER = 6;
+/** The chapter a game's story flags have reached: 1 + the highest N with `epN_complete`, at most LAST_CHAPTER. Pure. */
+export function chapterFromFlags(g) {
+  let c = 1;
+  for (let n = 1; n <= LAST_CHAPTER; n++) if (g && g.flags && g.flags[`ep${n}_complete`]) c = Math.min(LAST_CHAPTER, n + 1);
+  return c;
+}
+/** Raise g.chapter to what its flags have reached; never lowers it (kept vows keep their own chapter). Returns it. */
+export function advanceChapter(g) {
+  g.chapter = Math.max(Number(g.chapter) || 1, chapterFromFlags(g));
+  return g.chapter;
+}
 
 // ---- consumables and key items -----------------------------------------------------------------
 export function isKeyItem(id) { return !!KEY_ITEMS[id]; }
@@ -246,6 +265,7 @@ export function deserialize(data) {
   const base = createGame(g.heroName || 'Hero');
   for (const k of Object.keys(base)) if (g[k] === undefined) g[k] = base[k];
   g.autosaveSlot = normSlot(g.autosaveSlot);
+  advanceChapter(g);   // #71: an old save that finished episodes at chapter 1 loads in the chapter its flags reached
   return g;
 }
 export function saveMeta(g) {
