@@ -43,8 +43,12 @@ flag `last_silence`), `src/data/ep5/scene.js` (`holdForMira`), `src/battle/rules
 6. **`items.js`, `loot.js`, `shops.js`**: Fresh Ink, the 16 bases, the uniques and set of 7.3, affix tier 10, `RARE_NAME_EXT`
    names, `ZONE_LOOT`, `BOSS_LOOT`, the three shops, the key items of plan 2.3.
 7. **`tools/sim/ep8.mjs`** and the one `simulate.mjs` line: plan 6.6 (loadouts, targets, suite and boss levels, F3 the tightest
-   floor) and the checks `economy8`, `erasureOn`, `noFoeErased`, `readShare`, `answerShare`, `telegraphCount`, and the EXP
-   margin. Tune in the order 6.6 names; tune chest and foe gold before any price (7.6's first-pass line is 140 G short on
+   floor) and the checks `economy8`, `erasureOn`, `noFoeErased`, `readShare`, `answerShare`, `telegraphCount`, `toughNotLong`
+   (2026-11-11) and the EXP margin. **Tougher, not longer (Scott, 2026-11-11; plan 6.4 to 6.6):** the Sentry's careful rounds
+   no higher than the Gale Engine's 8.88 and the Eraser's, all four phases, no higher than the Storm Scribe's 14.55 (band 11
+   to 15, not the first proposal's 14 to 18), each losing more HP than its Episode 6 counterpart (13%, 17%), careful win 85%+;
+   harder by what a boss does each round, never by more HP. If four phases cannot fit, report it and take EPISODE8 choice
+   17's three-phase fallback. Tune in the order 6.6 names; tune chest and foe gold before any price (7.6's first-pass line is 140 G short on
    purpose).
 8. **Tests** `qa/battle/ep8_*`: the rule's every clause (pure), the hero never rubbed, Defend slides, the two-turn count and
    reset, at most two rubs, Read Aloud from a rubbed Magic row, self-target, Unwritten and its three ends, the throwbacks,

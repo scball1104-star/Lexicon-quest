@@ -32,7 +32,10 @@ as your models, the earlier list close-ups (the cold hand) and `ep5_page` to `ep
    The `library_far` and `library_cliff` decals, quantized.
 4. **`pages.js`**: the seven kinds and twelve modes of plan 9.4 on `PAGE_KINDS`, each step's text reaching full alpha only on
    its box (expose a per-mode `reveal` the scene calls); the cold hand drawn as the lists were; the blanket's corner matching
-   EPISODE1's inspect ("worn soft", the name in river-water thread); the eighth star's sign the brightest thing on `star`.
+   EPISODE1's inspect ("worn soft", the name in river-water thread) on grey wool, and the tag's seal (a key laid across an
+   open book, the bow cracked) the same on the card's stamp, the tag and the seal on the door with the key taken out; the
+   `run` modes of `ep8_seal`, `ep8_could_not` and `ep8_shelf` (plan 9.4), the First Keeper's own name a smudge the camera
+   never resolves; the eighth star's sign the brightest thing on `star`.
 5. `node qa/core/sync-manifest.mjs --pack ep8`.
 6. **Tests**: the fragment loads; every object id resolves; no id collides with any `assets/tiles/*.json`; every page kind
    draws each mode; the reveal timing; the contrast pairs of plan 5.1 measured on 844x390 mocks with their numbers printed.

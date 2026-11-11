@@ -7,14 +7,14 @@ Build the open half of Episode 8: the climb, the town, and the ending's map.
 The repo's `AGENTS.md`, `docs/briefs/COMMON.md`, `DESIGN.md` 5.1, `docs/MAPS.md`, plan `docs/EPISODE8_PLAN.md` sections 2.1, 3,
 4.1 to 4.4, 4.9 to 4.11 and 5.4 (your contract), `docs/story/EPISODE8.md` Acts I to III and VI, `docs/story/STAGING_EP8.md`
 (E8-story's marks), `docs/WORLD_EP8.md` (the `popbooks` block), E8-tiles' report (object ids), the built Episode 7 maps
-`ep7_ph_inn` and `ep7_stillheart` and `src/data/maps/ep7_patches.js` (your patch model), `src/data/maps/bell_tower.js` and the
+`ep7_ph_watch` (2026-11-11: the credits wake there, not the Thawlight Lodge) and `ep7_stillheart` and `src/data/maps/ep7_patches.js` (your patch model), `src/data/maps/bell_tower.js` and the
 Willowmere interiors you copy from.
 
 ## Owned paths
 
 `src/data/maps/ep8_stair.js`, `ep8_scriptorium.js`, `ep8_sc_inn.js`, `ep8_sc_shop.js`, `ep8_sc_atelier.js`, `ep8_sc_index.js`,
 `ep8_bell_night.js`, `ep8_patches.js`, `qa/maps/ep8_a_*`, `docs/MAPS_EP8_A.md`, `tools/maps/previews/ep8_stair*`,
-`ep8_scriptorium*`, `ep8_sc_*`, `ep8_bell_night*`, `ep7_ph_inn_ep8*`, `ep7_stillheart_ep8*`.
+`ep8_scriptorium*`, `ep8_sc_*`, `ep8_bell_night*`, `ep7_ph_watch_ep8*`, `ep7_stillheart_ep8*`.
 
 ## Outputs (items, in order)
 

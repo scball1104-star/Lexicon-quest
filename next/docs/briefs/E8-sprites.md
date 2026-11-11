@@ -18,9 +18,11 @@ and CRITIQUE_8 item 1 (boss rows).
 ## Outputs (items, in order)
 
 1. **NPC specs** of plan 9.2 (12) through the paper-doll builder: the Librarian (hood up, face in shadow) and the First Keeper
-   (hood back; very old, straight, gold eyes, a book clasp) as one man in two sprites, his younger memory self, Sable (forties,
-   apron, a curved needle) and her younger self, Ione, Fen, Quinn, Sorel, Arun, Meya (a child, ink on her nose), the Rootbound
-   Keeper in memory (a green-bronze lantern); the two counter recolors; the baby bundle prop in the blanket's blue-green.
+   (hood back; very old, straight, gold eyes, a book clasp) as one man in two sprites, his younger memory self, Elowen (forties,
+   a Keeper's grey, ink to the wrists, a quill behind one ear) and her younger self in an infirmary bed, an infirmary nurse
+   (`npc_nurse_m`, a recolor), Ione, Fen, Quinn, Sorel, Arun, Meya (a child, ink on her nose), the Rootbound
+   Keeper in memory (a green-bronze lantern); the two counter recolors; the baby bundle prop in fine grey infirmary wool with a pale linen tag, and the nurse's
+   empty blanket (2026-11-11, plan 9.2).
 2. **Enemy battle and field sprites** for the 7 foes of 6.2 from `enemies.webp` cells and the Lost Page sprite, recolored to ink,
    violet, cream and gold so none reads as an Episode 7 cousin, each with a dark outline and a warm rim; field sprites checked on
    parchment, marble, white page and over the void at phone scale.

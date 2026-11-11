@@ -27,9 +27,9 @@ sections), `src/game/packs.js`, the whole Episode 7 skeleton you are copying (`s
 ## Outputs (items, in order)
 
 1. **Measure first.** `node qa/integrate/x1_budget.mjs` and `node qa/pwa/precache.test.mjs`; write the pre-tap and initial bytes
-   down. Measure the cold and warm entry to Episode 7's lodge on the phone profile (`fieldlab.GPU_ARGS`): this is the evidence
+   down. Measure the cold and warm entry to Episode 7's Keeper's Watch (`ep7_ph_watch`, 2026-11-11) on the phone profile (`fieldlab.GPU_ARGS`): this is the evidence
    for plan 13.5. Your report gives before and after, gzipped.
-2. **The five core seams** of plan 13.2, exactly as listed: the `ep8` table entry (`touches: ['ep7_ph_inn', 'ep7_stillheart']`,
+2. **The five core seams** of plan 13.2, exactly as listed: the `ep8` table entry (`touches: ['ep7_ph_watch', 'ep7_stillheart']`,
    `wanted` on `ep7_complete` or `ep8_started`), `EP8_LIVE = false`, the title hook (await ep7, then ep8, then `LQ_EP8.title`),
    the `ep[45678]_` landing regex, and `if (RULE_EXT.commands) RULE_EXT.commands(state, u, out);` at the end of the commands
    builder in `rules.js` (with `RULE_EXT.commands` documented beside `start` and `afterAction`). Then **trim** until the pre-tap
@@ -73,7 +73,7 @@ autosaves to its own slot and shows the unchanged Episode 7 end card with `EP8_L
 
 - **Hot files.** `rules.js` and `packs.js` are on AGENTS.md's hot list: the orchestrator has said so in issue #68 before your
   wave; if not, stop and ask. Your seam in `rules.js` is one line, nothing else.
-- **The order trap.** Patching `ep7_ph_inn` or `ep7_stillheart` before ep7 registers them loses the patch silently. Test both
+- **The order trap.** Patching `ep7_ph_watch` or `ep7_stillheart` before ep7 registers them loses the patch silently. Test both
   orders.
 - **The cold chain.** Do not fix it beyond your seam: PLAYTEST_REVIEW_8 item 8's fix waits for Scott's or Stephen's word (plan
   13.5). Report the number.

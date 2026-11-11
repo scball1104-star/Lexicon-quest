@@ -23,7 +23,7 @@ the agents' build reports before your own first play: you are the read that is n
    minutes against the bible's table; pop-up books (clarity without text, is it another dial, did a pair ever strand or confuse);
    Erasure, Read Aloud and Answer (did you understand why a command went away; did the hero's immunity read as a clue; did you
    ever see two telegraphs at once; did the Eraser act often enough); the twist (when did you guess it; did it feel earned or
-   cheap; did the name stay yours); Sable, Hazel and the bell (did the ending land, was anything too much for a child); pacing
+   cheap; did the name stay yours); Elowen, Hazel and the bell (did the ending land, was anything too much for a child); pacing
    (minutes by act, decisions, the ending's length); saves (the ended save, Fine Print carry, reload after the end); sound; ten to
    protect; top ten to fix.
 3. **`CRITIQUE_10.md`** (the shape of CRITIQUE_8): the art and UX rows of plan 0.1, fixed or not; ten findings ranked by player

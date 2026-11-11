@@ -22,30 +22,30 @@ on `src/data/ep7/story.js`, `npcs.js`, `quests.js`, `text.js`, `ledger.js` (regi
    `ep8_morning` also requires `EP8_LIVE`, counter `credits7_rolled` and not `tier_1`; every other scene needs a flag only an
    Episode 8 scene sets. The speaker swap across **three** records ("The Librarian" `ep8_librarian`, "The Eraser" `eraser_v`,
    "The First Keeper" `first_keeper`). The three truth choices set `afraid_yes`/`afraid_no` (one line in `the_name`),
-   `told_sable`/`spared_sable` (Sable's gift), `told_hazel`/`spared_hazel` (Hazel's post-game line). `last_choice` sets
+   `told_elowen`/`spared_elowen` (Elowen's gift), `told_hazel`/`spared_hazel` (Hazel's post-game line). `last_choice` sets
    `ending_return` or `ending_choose`, asks once more before it commits (plan 14), and never runs again.
 3. **The first five minutes** (the bible's table) are the spec: control by about 0:45, the note by 0:30, Nox's choice by 2:20,
    the fight by 4:00. Keep `ep8_morning` to 6 boxes.
 4. **Staging, camera, showing:** marks two tiles from the speaker first; focus marks at least 12 tiles from a map's sides and 7
    from top and bottom (list them in STAGING_EP8 with their distances); the seven payoffs call `s.closeup('ep8_note' |
-   'ep8_card' | 'ep8_cloth' | 'ep8_first_word' | 'ep8_could_not' | 'ep8_shelf' | 'ep8_last_page', { mode })` behind a
+   'ep8_card' | 'ep8_seal' | 'ep8_first_word' | 'ep8_could_not' | 'ep8_shelf' | 'ep8_last_page', { mode })` behind a
    `PAGE_KINDS[kind]` guard (narration fallback until E8-tiles lands them), each mode on the box that says it.
    `thirteenth_name` reuses the cold open's toll scripts' shape (`src/data/story/ep1.js`) as new `ep8_toll_*` scripts on
    `ep8_bell_night`: no box, the twelve names in the cold open's order, the hero's name at the thirteenth, the two cards.
-5. **Box budgets**: at most 12 per main scene, except `sable_bindery` 14, `keeper_memory_c` 14, `the_name` 16, `eraser` 16,
-   `eraser_after` 18, `last_page` 14, `scriptorium_open` 16, `home` 14; about 215 on the main path. Count them in a test.
-6. **`npcs.js`**: the Scriptorium cast (`sable`, `ione`, `fen`, `quinn`, `sorel`, `arun`, `meya`, `ep8_innkeeper`,
+5. **Box budgets**: at most 12 per main scene, except `elowen_scriptorium` 14, `keeper_memory_c` 16, `the_name` 16, `eraser` 16,
+   `eraser_after` 18, `last_page` 16, `scriptorium_open` 16, `home` 14; about 215 on the main path. Count them in a test.
+6. **`npcs.js`**: the Scriptorium cast (`elowen`, `ione`, `fen`, `quinn`, `sorel`, `arun`, `meya`, `ep8_innkeeper`,
    `ep8_shopkeeper`, `ep8_librarian`) with stages (`scriptorium_arrived`, `read_learned`, `library_open`, `keeper_named`,
    `scriptorium_open`, `ep8_complete`); the held canon lines of bible section 3 (Ione's, Arun's, Meya's thirds) on their flags;
    Quinn's backwards line never used. Episode 8 and post-game lines for every earlier town through `prependTalk` (Palehaven,
    Zephyr Landing, Saffron Haven, Valewyn, Emberpeak, Hollowmere, Willowmere: Hazel's two lines by `told_hazel`, Tess's, Mael's;
    Bram's LEGACY kitchen line word for word as his post-game Talk; Hollis's line in the Deep Stacks; Hesper's only when X1 is
    live). The First Keeper as a post-game resident at the Index with the canon after-clear line.
-7. **`quests.js`**: `MAIN_QUEST_EP8` (steps `up` (the lodge, the roof), `stair`, `scriptorium` (the word, the Librarian, the
+7. **`quests.js`**: `MAIN_QUEST_EP8` (steps `up` (the Watch, the roof), `stair`, `scriptorium` (the word, the Librarian, the
    door), `library_f1`, `library_f2`, `library_f3`, `eraser`, `ending`, `home`, `epilogue8`), map-aware Talk in Mira's and Bram's
    voices that **names the action** ("Open the willow book from this side; its pages fall away from you"), the three side quests
    with plan 7 rewards, `epilogue8` naming post-game things (the Deep Stacks, Fine Print, missed quests, the Ledger's faded
-   names); while `EP8_LIVE`, `epilogue7` Talk points at the lodge door and the nave door only. The finished journal's last
+   names); while `EP8_LIVE`, `epilogue7` Talk points at the Watch's door and the nave door only. The finished journal's last
    entry: "Your closing chapter is written in the Journal." with the chosen ending's title.
 8. **`text.js`**: 9 banners (the Scriptorium's conditional), books `keeper_hid`, `living_charter` (the canon Charter, word for
    word), `concordance_folio`, barks of plan 5.1, bestiary for the 11 new foes (each names its erasing moves), the boss cards
@@ -69,7 +69,7 @@ reachable with `EP8_LIVE` false; `node qa/run.mjs content` is green; the preview
 
 ## Tests to run
 
-`node qa/run.mjs content`; `python qa/content/preview_dialogue.py` on `ep8_morning`, `sable_bindery`, `keeper_memory_c`,
+`node qa/run.mjs content`; `python qa/content/preview_dialogue.py` on `ep8_morning`, `elowen_scriptorium`, `keeper_memory_c`,
 `the_name`, `eraser`, `eraser_after`, `last_page`, `home`; read them aloud against the tone guide. Tests you add: ids unique
 across eight episodes and the X1, cave and tier packs; flags declared; every box within 3 x 42 **with the longest hero name
 the name entry allows**; music cues return to the map track; inspect ids resolve; STAGING marks and edge distances; budgets;
@@ -80,16 +80,22 @@ E8-battle lands).
 
 ## Traps
 
-- **Collisions** (plan 2): X1 owns `tamsin` (yours is `sable`); Episode 7 owns `keeper_memory_1` to `_3`, `nox_t`, `vex`
+- **Collisions** (plan 2): X1 owns `tamsin` (yours is `elowen`); Episode 7 owns `keeper_memory_1` to `_3`, `nox_t`, `vex`
   records (spawn them, never redefine); Episode 1 owns `hazel`, `tess`, `oren`, `mael` (lines through `prependTalk`).
-- **The name is the player's.** Never write the First Keeper's name as a word; it is `{hero}` everywhere. Never make it an
-  answer, a riddle or a spelling (DESIGN hard rule 2).
+- **The name is the player's.** The name the lists hunt is the hero's own birth name; it is `{hero}` everywhere. Never make
+  it an answer, a riddle or a spelling (DESIGN hard rule 2). The First Keeper's own name is never written: on the sworn page
+  it is a smudge only he reads (EPISODE8 choice 26).
+- **The novel (revision 2, 2026-11-11).** The twist follows Scott's and Stephen's unpublished novel (EPISODE8 section 8,
+  "Novel canon"). Use its facts; never quote it; its wording appears only as the few short terms that section names. The
+  vault fire is always "the vault fire" or "the fire in the east wing", never plain "the fire" (Emberpeak's since Episode 1).
+  The birth line reads "A child", never a son. Elowen is "Keeper of the Scriptorium", never a bookbinder.
 - **The hero never speaks in a box**, not even at the bell.
 - **Canon lines are word for word** (bible section 8 lists them): the root's region talk, Nox's after-clear line, the final
   choice's labels and conclusions, the witness lines, the canon townsfolk and witness lines, "{hero} turns the final page...",
   the LEGACY Vex line, the BOSS_SCENES lines, the camp lines. Curly apostrophes become straight; em dashes and middle dots
   become commas or colons.
-- **Sable and grief are small.** No tears described, no father, no death added; humor never in a memory or at her stall.
+- **Elowen and grief are small.** No tears described, no father, no death added on screen; the vault fire's dead are never
+  counted, named or shown; humor never in a memory, at her desk, or near the fire.
 - House rules: no git; LF endings; no em dashes; owned paths only; bound every command; never edit `src/data/text.js` or any
   `ep7` file.
 

@@ -13,6 +13,15 @@ levels, tiers and gold. Every Episode 7 number below is a plan number (EPISODE7_
 E8-pack, E8-battle and E8-integrate re-read them from the built Episode 7 before tuning. Bible section 0 lists the Episode 7
 defaults Episode 8 depends on and its asks of Episode 7.
 
+**Revision 2, 2026-11-11.** Scott approved the finale (choice 1) and the twist that the name the lists hunt is the hero's own
+(choice 3: "yeah, that's fine"), and asked that the story follow Scott's and Stephen's novel. The bible's twist is reworked
+to the novel (the Concordance, its key and seal, the vault fire, the ink that ran into the hero's birth line, the mother
+Elowen, Keeper of the Scriptorium; EPISODE8 section 8, "Novel canon"), and Sable is renamed Elowen in every id. Three
+directions for every episode: bosses **tougher, not longer** (6.4 to 6.6); **no inn-room opening** (Episode 7's credits now
+wake in the Keeper's Watch, and this episode opens there: 3); and a world map the party travels and revisits, like Final
+Fantasy, is coming as its own proposal (6.4's post-game keeps every place open for it). Changes are marked "(2026-11-11)".
+Everything but choices 1 and 3 is a default pending Stephen.
+
 **Usage guard.** Up to three agents at once, in the waves of section 11, with disjoint owned paths inside every wave. The
 orchestrator checks weekly usage before each wave: under 75%, launch the wave; 75 to 85%, one agent at a time; over 85%,
 stop and leave the branch publishable (Scott's standing guard). Each agent is sized to finish in one sitting: 11 build
@@ -129,7 +138,7 @@ PLAYTEST_REVIEW_9 before building**, and the orchestrator adds any new row here.
 | Sprites | about 30 frame sets | recolor and derive pipelines, pack atlas merge | NPCs, 7 recolors, the Sentry, Grief and Change, the Eraser x4, avatar, a baby bundle prop |
 | Portraits | 1 crop + 1 held cell | portrait pipeline | `eraser` (crop); `first_keeper` = `hooded_sage` (built, first use) |
 | Backdrops | 5 + key art | backdrop builder (environments cell 7) | 9.3 |
-| Close-ups | 7 kinds, 12 modes | `PAGE_KINDS`, the ep7 pages approach | `ep8_note`, `ep8_card`, `ep8_cloth`, `ep8_first_word`, `ep8_could_not`, `ep8_shelf`, `ep8_last_page` |
+| Close-ups | 7 kinds, 12 modes | `PAGE_KINDS`, the ep7 pages approach | `ep8_note`, `ep8_card`, `ep8_seal`, `ep8_first_word`, `ep8_could_not`, `ep8_shelf`, `ep8_last_page` (modes revised 2026-11-11: 9.4) |
 | Credits | the whole game's | `CREDITS_HANDOFF`, the credits scene, every realm's key art | `CREDITS_EP8`, `END_TITLE_EP8` |
 
 ---
@@ -138,7 +147,7 @@ PLAYTEST_REVIEW_9 before building**, and the orchestrator adds any new row here.
 
 Every id below was grepped on 2026-11-10 against `src/`, `assets/` (every `tiles/*.json` and every `*manifest.json`),
 `tools/sim/` and `docs/` (the Episode 7 proposal's ids included). No collisions in the list below. Collisions found and
-avoided: `tamsin` (X1's weaver: canon Tamsin is Sable), `smudge` (an Episode 6 skill), `strikethrough` (Fine Print; the Page's
+avoided: `tamsin` (X1's weaver: canon Tamsin is Elowen), `smudge` (an Episode 6 skill), `strikethrough` (Fine Print; the Page's
 charge is `struck_line`), `keeper_note` (an Episode 4 sign; the note is `could_not`), `nameplate` (taken; the Sentry's unique
 is `blank_faceplate`), `popup`/`popups` (`src/ui/numberPopup.js`; the event is `popbook`, the block `popbooks`), `grief`
 (Episode 2's add; Episode 8's are `truth_grief`, `truth_change`), the word `scriptorium` (an Episode 4 map mark and text key:
@@ -164,7 +173,8 @@ names. E8-battle and E8-story regrep every new id before use.
 | `ep8_last_word` | The Last Word | dungeon | 28 x 24 | `ep8` | none until the scene | `library_hush` (0.5) | tint `violet` (pack), dark 0.2; after `eraser_defeated` the gold grade |
 | `ep8_bell_night` | (no banner) | town interior | as `bell_tower` | as `bell_tower` | none | none | the cold open's night and lantern pool |
 
-Patches (pack-side, never edits to `src/data/maps/ep7_*.js`): `ep7_ph_inn` gains the `ep8_morning` enter trigger;
+Patches (pack-side, never edits to `src/data/maps/ep7_*.js`): `ep7_ph_watch` gains the `ep8_morning` enter trigger (the
+Watch, not the Thawlight Lodge: 2026-11-11, EPISODE7 choice 23);
 `ep7_stillheart` gains the stair door at mark `stair_foot` (section 3). `ep8_bell_night` is a new map module that imports
 `src/data/maps/bell_tower.js` read-only and returns a copy with its own id, night lighting, marks for Mira and Bram on the
 bell beam, and the `thirteenth_name` enter trigger: no core map is patched, so no core map ever waits on the ep8 pack.
@@ -172,17 +182,18 @@ bell beam, and the `thirteenth_name` enter trigger: no core map is patched, so n
 ### 2.2 Story flags (all pushed onto `FLAG_IDS` and declared in the pack's `flags.js` with a one-line meaning)
 
 Main: `ep8_started`, `ep8_roofed`, `stair_arrived`, `first_rub_done`, `eraser_seen`, `saw_scriptorium`,
-`scriptorium_arrived`, `read_learned`, `librarian_met`, `card_read`, `sable_met`, `library_open`, `library_entered`,
+`scriptorium_arrived`, `read_learned`, `librarian_met`, `card_read`, `elowen_met`, `library_open`, `library_entered`,
 `ink_key_found` (chest flag), `library_f1_done`, `sentry_defeated` (encounter flag), `library_f2_done`, `beginning_seen`,
 `name_told`, `vex_arrived`, `eraser_defeated` (encounter flag), `lexicon_restored`, `fragment8_get`, `keeper_named`,
-`ending_return` or `ending_choose` (permanent), `page_shelved`, `eighth_star`, `hero_kept`, `scriptorium_open`,
+`ending_return` or `ending_choose` (permanent), `page_shelved`, `night_read` (the Concordance's run read back in
+`last_page`, 2026-11-11), `eighth_star`, `hero_kept`, `scriptorium_open`,
 `home_reached`, `ep8_complete`.
 
 Beats and world state: `ep8_morning_done`, `afraid_yes`, `afraid_no`, `first_book_read`, `f1_arrived`, `f2_arrived`,
-`f3_arrived`, `keeper_memory_a`, `keeper_memory_b`, `keeper_memory_c`, `told_sable`, `spared_sable`, `answered_yes`,
+`f3_arrived`, `keeper_memory_a`, `keeper_memory_b`, `keeper_memory_c`, `told_elowen`, `spared_elowen`, `answered_yes`,
 `answered_page`, `told_hazel`, `spared_hazel`.
 
-Side: the Concordance `concordance_started`, `testimony_ione`, `testimony_fen`, `testimony_sable`, `concordance_lit`,
+Side: the Concordance `concordance_started`, `testimony_ione`, `testimony_fen`, `testimony_elowen`, `concordance_lit`,
 `concordance_done`; the Archive `page_names_found`, `page_order_found`, `page_correction_found` (chest flags),
 `archive_open`; Quinn's pages `drift_started`, `drift_1_found`, `drift_2_found`, `drift_3_found` (chest flags),
 `drift_done`. Counter (not a flag): `credits8_rolled`. Books carry no flag (they reset on every arrival: 5.1).
@@ -213,10 +224,10 @@ Enemies: `index_hound`, `margin_imp`, `paper_crane`, `gnawing_bookworm`, `catalo
 
 | Scene | Map | Trigger |
 |---|---|---|
-| `ep8_morning` | ep7_ph_inn | enter trigger from the pack patch (`if: ep7_complete`, counter `credits7_rolled`, `EP8_LIVE`, not `ep8_morning_done`, not `tier_1`) |
+| `ep8_morning` | ep7_ph_watch | enter trigger from the pack patch (`if: ep7_complete`, counter `credits7_rolled`, `EP8_LIVE`, not `ep8_morning_done`, not `tier_1`) |
 | `ep8_roof` | ep7_stillheart | on enter by the nave door (`if: ep8_started`, `ifNot: ep8_roofed`); owns the map change to the stair |
 | `stair_arrival`, `first_rub`, `first_book`, `rubbed_steps`, `south_margin` | ep8_stair | on enter; step row above the landing; step trigger at the first gap; step trigger high on the stair (after `first_book_read`); step trigger at the top gate |
-| `scriptorium_arrival`, `first_word`, `sable_bindery`, `library_door`, `scriptorium_open` | ep8_scriptorium | on first enter; step trigger in the square; Sable's talk entry (first time, after `read_learned`); step trigger at the Library door (after `card_read`); on arrival through the Library door after `page_shelved` |
+| `scriptorium_arrival`, `first_word`, `elowen_scriptorium`, `library_door`, `scriptorium_open` | ep8_scriptorium | on first enter; step trigger in the square; Elowen's talk entry (first time, after `read_learned`); step trigger at the Library door (after `card_read`); on arrival through the Library door after `page_shelved` |
 | `meet_librarian` | ep8_sc_index | step trigger two tiles in (after `read_learned`) |
 | `catalog_arrival`, `keeper_memory_a` | ep8_library_f1 | on enter; step trigger at the doorway alcove |
 | `palimpsest_arrival`, `keeper_memory_b`, `unnamed_sentry`, `uncensored_archive` | ep8_library_f2 | on enter; step trigger in the printing room; arena trigger; the Archive object |
@@ -224,21 +235,22 @@ Enemies: `index_hound`, `margin_imp`, `paper_crane`, `gnawing_bookworm`, `catalo
 | `eraser`, `eraser_after`, `last_choice`, `last_page` | ep8_last_word | trigger row at the entry; after the battle; chained; chained |
 | `home` | (the scene owns time and place: roof, flight, `hero_home`) | chained from `scriptorium_open` once the party walks to the South Margin (Talk names it) |
 | `thirteenth_name` | ep8_bell_night | on enter (from `home`) |
-| `concordance_start` (chains `testimony_ione`), `testimony_fen`, `testimony_sable`, `concordance_light`, `drift_start`, `drift_done` | ep8_scriptorium | NPC talk entries and the folio object |
+| `concordance_start` (chains `testimony_ione`), `testimony_fen`, `testimony_elowen`, `concordance_light`, `drift_start`, `drift_done` | ep8_scriptorium | NPC talk entries and the folio object |
 | silent: `library_f1_lift`, `library_f2_lift` | F1, F2 | step triggers that set `library_f1_done`, `library_f2_done` |
 
 Count: 27 main and chained registered (the bible's 30 numbered beats less the optional farewells, the key chest and the
-credits; `uncensored_archive` counted with the side), 8 side (`concordance_start`, `testimony_fen`, `testimony_sable`,
+credits; `uncensored_archive` counted with the side), 8 side (`concordance_start`, `testimony_fen`, `testimony_elowen`,
 `concordance_light`, `uncensored_archive`, `drift_start`, `drift_done`, and `testimony_ione` chained but registered for its
 Talk replay), 2 silent: 37. Under 40.
 
 ### 2.6 NPC ids (the pack's `npcs.js`, merged into `NPCS`)
 
-New: `sable` (the stall), `ione` (the Living Codex), `fen`, `quinn`, `sorel` (shop `glyphsmith`), `arun`, `meya`,
+New: `elowen` (the register house desk in the square; Keeper of the Scriptorium), `ione` (the Living Codex), `fen`, `quinn`, `sorel` (shop `glyphsmith`), `arun`, `meya`,
 `ep8_innkeeper` (the Scriptorium Host, Ledger-excluded), `ep8_shopkeeper` (the Archive Keeper, shop `bibliotheca`,
 Ledger-excluded), `ep8_librarian` (the Index; present until `library_open`). Scene spawns: `eraser_v` (the stair figure, the
 Last Word), `first_keeper` (after `keeper_named`: the Last Word, then the Index door as a resident with post-game lines),
-`first_keeper_m`, `sable_m`, `rootbound_keeper_m` (memory tint), `nox_t` and `vex` and `aeris_t` (Episode 7's and earlier
+`first_keeper_m`, `elowen_m` ("A Young Keeper"), `nurse_m` ("A Nurse", the infirmary in `keeper_memory_c`; 2026-11-11),
+`rootbound_keeper_m` (memory tint), `nox_t` and `vex` and `aeris_t` (Episode 7's and earlier
 records, reused, never redefined), `hazel` (core record, spawned by `home`). Returning NPCs keep their ids and get Episode 8
 entries through `prependTalk`.
 
@@ -263,23 +275,24 @@ void, page flutter in the Library, ink drips after `scriptorium_open`).
 
 ---
 
-## 3. The world link: the Thawlight Lodge and the Stillheart roof
+## 3. The world link: the Keeper's Watch and the Stillheart roof
 
-Episode 7 ends with the party waking at the Thawlight Lodge (`ep7_ph_inn`, mark `inn_bed`; Episode 7 plan). Episode 8 patches
+Episode 7 ends with the party waking in the Keeper's Watch (`ep7_ph_watch`, mark `watch_cot`; EPISODE7_PLAN 4.4 and 5.3, as
+revised 2026-11-11: no episode opens in an inn room, and Episode 7's first proposal woke at the Thawlight Lodge). Episode 8 patches
 the **registered** Episode 7 maps from inside the `ep8` pack (`src/data/maps/ep8_patches.js`, the `ep7_patches.js` pattern),
 never the files `src/data/maps/ep7_*.js`:
 
-1. **`withEp8Wake(ep7_ph_inn)`**: an enter trigger `ep8_wake` at (0, 0), `script: 'ep8_morning'`, `on: 'enter'`, and a mark
-   `nox_door8` beside the existing `inn_bed`.
+1. **`withEp8Wake(ep7_ph_watch)`**: an enter trigger `ep8_wake` at (0, 0), `script: 'ep8_morning'`, `on: 'enter'`, and a mark
+   `nox_table8` beside the existing `watch_cot` (Nox at her table with the lamp; the shutter open on the line of light).
 2. **`withStairDoor(ep7_stillheart)`**: at Episode 7's mark `stair_foot`, a door `stair_up` to `ep8_stair` `stair_bottom`
    (`if: ep8_roofed`; `ep8_roof` itself owns the first crossing), and a mark `aeris_roof` beside the Kestrel's mooring (if
    Episode 7's map has no Kestrel there, the patch places the ep6 `kestrel` prop, reused, never redefined). Every Episode 7
    mark, event and walk result unchanged; `ep7_ending` is untouched (it needs `doors_reopened` and has long run).
 3. **Order trap (must not miss).** `registerMap` overwrites by id and the `ep7` pack registers both maps itself. The ep8
    pack's `maps.js` **awaits the ep7 pack first** (`await ensurePack('ep7')`), then `peekMap(id)` and registers the patched
-   one. `packs.js` `ep8.touches` lists `ep7_ph_inn` and `ep7_stillheart`. The chain is now ep4, ep5, ep6, ep7, ep8 (and ep3 for
+   one. `packs.js` `ep8.touches` lists `ep7_ph_watch` and `ep7_stillheart`. The chain is now ep4, ep5, ep6, ep7, ep8 (and ep3 for
    Emberpeak): E8-pack starts every fetch at once, orders only registration, and measures the worst-case entry time to the
-   lodge on the phone profile (target: under 3 s warm, under 8 s cold). Over 8 s cold: 13.5.
+   Watch on the phone profile (target: under 3 s warm, under 8 s cold). Over 8 s cold: 13.5.
 4. Tests: both maps load unpatched with ep7 only and patched with both; with `EP8_LIVE` off no trigger fires and no stair door
    exists; the stair door lands on a walkable cell.
 5. **The return route.** `ep8_stair`'s bottom holds a door back to the roof; the roof's nave door leads to Palehaven; the
@@ -345,15 +358,16 @@ the north end under the cliff of shelves (the `library_cliff` decal in the overh
 sits at about (23, 18), at least 12 tiles from each side.
 - **South Margin gate** (from the Stair; mark `south_gate`; Quinn at `quinn_gate`). **The square:** the Living Codex
   `codex` (inscription, canon words), the Concordance folio `folio` (object `concordance`, 2 states: closed; open and lit
-  after `concordance_lit`, then a rest and save with key `ep8_folio`), Sable's bindery stall `stall` (awning, bolts; Sable at
-  `sable_stall`), the school steps (Meya at `meya_steps`), six half-signs `sign_a` to `sign_f` (two states: the word stops
+  after `concordance_lit`, then a rest and save with key `ep8_folio`), the Scriptorium's register house `stall` (Elowen's desk and register under an
+  awning, the bindery behind it, the infirmary door beside it, and a line of grey infirmary blankets airing with linen tags:
+  2026-11-11; Elowen at `elowen_stall`), the school steps (Meya at `meya_steps`), six half-signs `sign_a` to `sign_f` (two states: the word stops
   halfway; finished after `scriptorium_open`), Arun's candle posts along the script-road (two states).
 - **The north end:** the First Library Index (door to `ep8_sc_index`), the Library's great door `library_gate` (the empty
   seal; open from `library_open`; after `page_shelved` its seal shows one line) to `ep8_library_f1` `arrival`, and from
   `page_shelved` a second door `lexicon_door` straight to `ep8_last_word` `dais` (the post-game way).
 - **West:** the Keeper's Quiet Rooms. **East:** Bibliotheca Supplies. **South-east:** the Glyphsmith Atelier (Sorel).
   **South-west:** Ione at the Codex's west side, Fen by the Index steps.
-- Marks: `south_gate`, `quinn_gate`, `codex`, `codex_n`, `codex_s`, `codex_w`, `codex_e`, `stall`, `sable_stall`,
+- Marks: `south_gate`, `quinn_gate`, `codex`, `codex_n`, `codex_s`, `codex_w`, `codex_e`, `stall`, `elowen_stall`,
   `meya_steps`, `index_door`, `library_gate`, `lexicon_door`, `inn_door`, `shop_door`, `atelier_door`, `ione_spot`,
   `fen_spot`, `crowd_a` to `crowd_f`, `nox_codex`, `vex_step`, `library_cliff`.
 
@@ -487,9 +501,9 @@ on books. A map author who needs more takes them from another map in this table 
 
 | Map | Marks / named events |
 |---|---|
-| `ep7_ph_inn` (patch) | `ep8_wake`, `nox_door8`; `ep7_stillheart` (patch): `stair_up`, `aeris_roof` |
+| `ep7_ph_watch` (patch) | `ep8_wake`, `nox_table8`; `ep7_stillheart` (patch): `stair_up`, `aeris_roof` |
 | `ep8_stair` | as 4.1; triggers `rub_row`, `first_trig`, `rubbed_trig`, `margin_trig`; books `pb_willow`, `pb_ledge`, `pb_b`, `pb_c` |
-| `ep8_scriptorium` | as 4.2; NPCs `sable ione fen quinn arun meya`; objects `codex`, `folio`, `stall`, `sign_a` to `sign_f`, `library_gate` |
+| `ep8_scriptorium` | as 4.2; NPCs `elowen ione fen quinn arun meya`; objects `codex`, `folio`, `stall`, `sign_a` to `sign_f`, `library_gate` |
 | `ep8_sc_*` | as 4.3; NPCs `sorel`, `ep8_innkeeper`, `ep8_shopkeeper`, `ep8_librarian` |
 | `ep8_library_f1` | as 4.5; books incl. `pb_hollow`, `pb_ember`; chest `ink_key`; lift `lift_l1_up` |
 | `ep8_library_f2` | as 4.6; books incl. `pb_valewyn`, `pb_desert` and their pairs; object `archive_obj`; trigger `sentry_trig` |
@@ -599,12 +613,12 @@ stand."), `would_fold` (Mira: "Not while we're standing on it.").
   `hearth_lit`, Episode 8 `concordance_lit`; Inference: E8-story confirms each flag and lists them in STAGING_EP8). Five or more:
   canon's council line; fewer: canon's seven councils line.
 - **Ledger rows:** the hero's existing row gains its keep on `hero_kept` (why: "Answered to their own name, and kept it.");
-  new rows `first_keeper` (place `first_library`, kept on `keeper_named`: "Said a name he took, and meant it."), `sable` (on
-  `concordance_lit` or `scriptorium_open`), `ione` (`testimony_ione` or `scriptorium_open`), `fen`
+  new rows `first_keeper` (place `first_library`, kept on `night_read`: "Read his own line, and said it was his."; revised
+  2026-11-11), `elowen` (on `concordance_lit` or `scriptorium_open`; why: "Remembered a name she gave."), `ione` (`testimony_ione` or `scriptorium_open`), `fen`
   (`testimony_fen` or `scriptorium_open`), `quinn` (`drift_done` or `scriptorium_open`), `sorel`, `arun`, `meya` (on
   `scriptorium_open`); `PLACES.scriptorium` and `PLACES.first_library`, `REACHED.scriptorium = 'scriptorium_arrived'`,
   `REACHED.first_library = 'library_entered'`. Excluded: `ep8_innkeeper`, `ep8_shopkeeper`. The First Keeper's row shows "The
-  First Keeper" (the name is the hero's).
+  First Keeper" (his own name is never shown: EPISODE8 choice 26).
 - **Rows whose canon line names a person before their payoff:** Ione's third line, Arun's third and Meya's third are held to
   their flags (bible section 3); a content test asserts no Scriptorium line before `keeper_named` names the Librarian as the
   First Keeper.
@@ -757,8 +771,9 @@ thunder; immune Silence. `erasing: true`.
   Sentry is thrown back a full turn); **Break** (cancels, the charge rule). It never unwrites the hero ("It cannot find that
   name to unwrite.").
 - At 50% its faceplate cracks and it calls two **Struck-Out Pages** (adds, 2 shields each).
-- Targets: careful 7 to 9 rounds, win 85%+; attack-only 0%; ignoring the pin costs at least 10 points; at least two Unwrites
-  in a careful fight.
+- Targets (**tougher, not longer**, Scott 2026-11-11): careful 7 to 9 rounds, mean no higher than the Gale Engine's 8.88
+  (Episode 6, BATTLE 14.6), win 85%+ and below 100%, careful HP lost 20 to 28% (the Engine took 13%); attack-only 0%;
+  ignoring the pin costs at least 10 points; at least two Unwrites in a careful fight.
 - Rewards: EXP 320, gold 1,700, mastery 26. Drops: unique `blank_faceplate`, 1 rare roll (ilvl 32), hi_potion 2.
 - Art: `enemies.webp` cell 5 recolored to ink and gilt with a blank faceplate drawn in; under-the-feet HUD row from day one.
 
@@ -810,7 +825,11 @@ a charge bar on the Eraser's HUD row. They are never up together. Each names its
 him back." / "{hero} can answer it."). No earlier battle rule (Heat, Decrees, Turning Sky, Gale, Rime) runs in this fight.
 
 - **Concordance bonus:** with `concordance_lit` the party starts with +25 Fury (`startFury`).
-- Targets: careful 14 to 18 rounds, win 85%+; attack-only 0%; ignoring telegraphs costs at least 15 points; careful play
+- Targets (**tougher, not longer**, Scott 2026-11-11; the first proposal's 14 to 18 is withdrawn): careful 11 to 15 rounds,
+  mean no higher than the Storm Scribe's 14.55 (Episode 6's band and real mean, BATTLE 14.6), with all four phases inside it
+  (phases 1 and 4 short: the 70% lock and the 26% Last Silence come sooner, not later), win 85%+ and no higher than 95% (the
+  Scribe ran 97%), careful HP lost 26 to 34% (the Scribe took 17 to 20%; the finale hits hardest); attack-only 0%; ignoring
+  telegraphs wins 50% or less and costs at least 15 points; careful play
   breaks at least half the Unwrites with Read Aloud and at least half the Last Silences with Answer; at least three Unwrites
   and two Last Silences in a careful fight; the Eraser acts at least once every two party rounds.
 - Rewards: EXP 2,000, gold 2,500, mastery 40. `BOSS_LOOT.eraser`: unique `last_word_pen`, 2 rare rolls (ilvl 33),
@@ -833,7 +852,11 @@ Erasure lives in `src/data/ep8/erasure.js` (pure) and runs in the sim as in the 
 Glyphweave Robe on Mira) and `read_learned`; F2 plus the Margin set boots (Bram); F3 plus two tier 16 pieces (Quillsteel Sword,
 Lexicon Staff); the Eraser plus the Blank Faceplate and mastery up one step; 2 to 4 Fresh Inks. `TARGETS`: ordinary as
 Episodes 1 to 7, with **F3 the tightest ordinary floor: careful HP lost 18 to 24%, attack-only win 70 to 85%**; the Sentry and
-the Eraser as 6.4 and 6.5; `levels` from 6.1. `SUITE_LEVELS_EP8` and `BOSS_LEVELS_EP8` (the Sentry 32 and 33, the Eraser 33
+the Eraser as 6.4 and 6.5; `levels` from 6.1. **`toughNotLong`** (2026-11-11, the Episode 7 check's twin): fails if the
+Sentry's or the Eraser's careful mean rounds is above its Episode 6 counterpart's (8.88, 14.55), or careful HP lost is not
+above it (13%, 17%), or careful win is under 85%; a boss gets harder by what it does each round (the cost of a missed Read
+Aloud or Answer first, then ATK and MAG, then the adds), and HP may only go down to pull a long fight back into band. If four
+phases cannot fit 11 to 15 rounds, EPISODE8 choice 17's fallback (three phases) is taken and reported. `SUITE_LEVELS_EP8` and `BOSS_LEVELS_EP8` (the Sentry 32 and 33, the Eraser 33
 and 34). Tune until `--check` prints "All targets met" for all eight episodes; `--cave --check` and `--tier 1 --check`
 unchanged. Knobs, in this order: the rub-out length (2 turns), the share of erasing moves in each foe's table, the Unwritten
 damage (x1.3), then HP.
@@ -885,8 +908,8 @@ Prices follow the gold, not the tier number (the Episode 7 rule): two pieces at 
 
 | id | Name | Rarity | Slot | Stats | Source |
 |---|---|---|---|---|---|
-| `binders_awl` | The Binder's Awl | legendary | charm | SPD +4, SPR +6, Fury gain +12%, Blind resist 30% | Sable in `scriptorium_open`, truth path (`told_sable`) |
-| `riverwater_thread` | Riverwater Thread | legendary | charm | MAG +8, DEF +5, Silence resist 50% | Sable, kind path (`spared_sable`) |
+| `binders_awl` | The Binder's Awl | legendary | charm | SPD +4, SPR +6, Fury gain +12%, Blind resist 30% | Elowen in `scriptorium_open`, truth path (`told_elowen`) |
+| `riverwater_thread` | Riverwater Thread | legendary | charm | MAG +8, DEF +5, Silence resist 50% | Elowen, kind path (`spared_elowen`) |
 | `last_word_pen` | The Last Word | legendary | charm | MAG +11, SPR +7, Fury gain +12% | the Eraser (guaranteed) |
 | `blank_faceplate` | The Blank Faceplate | legendary | charm | ATK +8, DEF +7, Silence resist 50% | the Unnamed Sentry (guaranteed) |
 | `quill_of_return` | Quill of Return | legendary | sword (hero) | ATK +96, crit +8, light +15% | F3 SEE, Lantern secret |
@@ -894,7 +917,7 @@ Prices follow the gold, not the tier number (the Episode 7 rule): two pieces at 
 | `margin_boots_set` | Margin-Walker Boots | set | boots | SPD +5, DEF +8, Stun resist 10% | F1 D, Dash secret |
 | `bookcloth_coat` | Bookcloth Coat | set | mantle | DEF +11, SPR +8, Silence resist 30% | the Living Concordance |
 
-Set `margin_walker` (2 pieces): MAG +4, SPD +1. Sable's two gifts are a pair of shape, not power (decision D). Nox's and
+Set `margin_walker` (2 pieces): MAG +4, SPD +1. Elowen's two gifts are a pair of shape, not power (decision D). Nox's and
 Hazel's choices change lines only. Names are proposals. E8-battle greps every id first and checks every stat named exists
 ("light +15%" follows Episode 6's "thunder +15%").
 
@@ -960,7 +983,7 @@ still ships.
 
 | Map | Track |
 |---|---|
-| ep7_ph_inn, ep7_stillheart roof (Act I) | `palehaven` |
+| ep7_ph_watch, ep7_stillheart roof (Act I) | `palehaven` (the Watch at 0.6) |
 | ep8_stair | `orrery` |
 | ep8_scriptorium and `ep8_sc_*` (the Index: `mystery` 0.6) | `scriptorium_town` |
 | ep8_library_f1, ep8_library_f2 | `first_library` |
@@ -981,7 +1004,7 @@ still ships.
 | `south_margin` | `mystery`, softer |
 | `first_word` | silence on the rub-out; `read_cast` as Mira reads; `scriptorium_town` back as the word returns |
 | `meet_librarian` | `mystery` (0.6); silence on the card close-up |
-| `sable_bindery` | `scriptorium_town` (0.5); silence under the choice |
+| `elowen_scriptorium` | `scriptorium_town` (0.5); silence under the choice |
 | `keeper_memory_a` to `_c` | `sorrow` with a distant `bell_toll`; back to the map track |
 | `the_name` | silence; one `bell_thirteenth` on the name; `mystery` (0.5) after |
 | `unnamed_sentry` | silence for the intro, then `battle` |
@@ -1042,9 +1065,9 @@ After Episode 8, every painted source cell has shipped (Inference: true if Episo
 
 | Asset | Reuse | New |
 |---|---|---|
-| NPCs `npc_librarian` (hood up), `npc_first_keeper` (hood back), `npc_first_keeper_m` (younger), `npc_sable`, `npc_sable_m` (younger), `npc_ione`, `npc_fen`, `npc_quinn`, `npc_sorel`, `npc_arun`, `npc_meya`, `npc_rootbound_keeper_m` (a green-bronze lantern) | paper-doll builder; bodies: robe for the Librarian and Ione; apron for Sable and Sorel; courier for Quinn; child for Meya; scholar for Fen; elder for Arun | 12 specs (the First Keeper: very old, straight, violet robe, book clasp, gold eyes; Sable: forties, apron, curved needle; ages must read, CRITIQUE_6 item 10) |
+| NPCs `npc_librarian` (hood up), `npc_first_keeper` (hood back), `npc_first_keeper_m` (younger), `npc_elowen` (forties, a Keeper's grey, ink to the wrists, a quill behind one ear), `npc_elowen_m` (younger, in an infirmary bed), `npc_nurse_m` (an infirmary nurse, a recolor), `npc_ione`, `npc_fen`, `npc_quinn`, `npc_sorel`, `npc_arun`, `npc_meya`, `npc_rootbound_keeper_m` (a green-bronze lantern) | paper-doll builder; bodies: robe for the Librarian and Ione; apron for Elowen and Sorel; courier for Quinn; child for Meya; scholar for Fen; elder for Arun | 12 specs (the First Keeper: very old, straight, violet robe, book clasp, gold eyes; Elowen: forties, apron, curved needle; ages must read, CRITIQUE_6 item 10) |
 | The Scriptorium Host, the Archive Keeper | `npc_innkeeper`, `npc_shopkeeper` recolors | palettes |
-| A baby bundle prop (blue-green blanket) | none | one small sprite, carried by `first_keeper_m` and `sable_m` |
+| A baby bundle prop (fine grey infirmary wool, a pale linen tag at one corner) and an empty-blanket prop for the nurse | none | two small sprites: the bundle carried by `elowen_m` and `first_keeper_m`, the empty blanket held by `nurse_m` (2026-11-11) |
 | Enemy battle sprites, the 7 of 6.2 | enemies.webp cells, the Lost Page sprite, the recolor and derive pipeline | recipes; a dark outline and a warm rim on every foe |
 | `unnamed_sentry` | enemies.webp cell 5 | ink and gilt recolor, the blank faceplate, a cracked frame |
 | `eraser` x4 looks, `eraser_avatar` | bosses.webp cell 7, `build_bosses.py`, the `scribe`/`phantom` approach | the four looks and the avatar |
@@ -1077,11 +1100,11 @@ new images.
 | kind | modes | Used in |
 |---|---|---|
 | `ep8_note` | one (Vex's slanting hand) | `ep8_morning` |
-| `ep8_card` | `card` (the reader's card in the cold hand), `beside` (the card beside a page of the order, the same hand) | `meet_librarian`, `keeper_memory_b` |
-| `ep8_cloth` | `bolt` (the blue-green weave), `match` (beside the blanket's corner with the name in river-water thread) | `sable_bindery` |
+| `ep8_card` | `card` (the reader's card in the cold hand, the desk's stamp in the corner: a key across an open book, the bow cracked), `beside` (the card beside a page of the order, the same hand) | `meet_librarian`, `keeper_memory_b` |
+| `ep8_seal` | `tag` (a linen tag on grey wool: a key laid across an open book, the key's bow cracked), `match` (beside the corner of Hazel's blanket: the same wool and tag, the name in river-water thread), `run` (Elowen's register line, a brown run nobody can read) | `elowen_scriptorium` |
 | `ep8_first_word` | `rubbed` (the word lifting off), `read` (it returning) | `first_word` |
-| `ep8_could_not` | one ("I could not." in the cold hand, tucked in the blanket) | `keeper_memory_c` |
-| `ep8_shelf` | `shelved` (the first page in its place), `star` (the eighth star taking the counter-seal) | `last_page` |
+| `ep8_could_not` | `run` (the Concordance's sworn page: "nobody's doing" written over the cause, then the ink running across the warnings, the account and eleven names, and off the page), `note` ("I could not." in the cold hand, tucked in the blanket) | `keeper_memory_c` |
+| `ep8_shelf` | `shelved` (the first page in its place), `run` (the Concordance's ink running back up its page in three steps: the birth line "A child, to Elowen, Keeper of the Scriptorium"; the eleven names; the warnings and the cause, "nobody's doing" lifting off and his own name under it, drawn as a smudge the camera never resolves), `star` (the eighth star taking the counter-seal) | `last_page` |
 | `ep8_last_page` | one (the final page, empty, turning) | `last_page` |
 
 The cold hand is drawn as Episodes 1 to 7 drew the lists (Fact: the list pages in earlier packs); the warm hand's "k" as
@@ -1093,12 +1116,22 @@ The eighth star's sign reaches full alpha only on the box that says it.
 | Item | Service | Cost | What it lifts |
 |---|---|---|---|
 | A painted Scriptorium street (marble pages, ink canals, book towers) | Runway still | 4 credits | the town's one image as key art; the build composes it from cell 7 |
-| Sable's portrait (forties, binder's apron, curved needle) | Runway still | 4 credits | the episode's emotional scene has no face without it |
+| Elowen's portrait (forties, a Keeper's grey, ink to the wrists, a quill behind one ear) | Runway still | 4 credits | the episode's emotional scene has no face without it |
 | `the_last_word` credits theme from the region-8 brief | Suno Pro | 1 monthly download | a real recording for the game's only full credits |
 | The root's `assets/cinematics/chapter-8.mp4` and `boss-8.mp4` (frames as stills) | none (already made) | 0 | only if Scott confirms their source: neither is named in `RUNWAY_PROVENANCE.json` (Fact, grepped 2026-11-10), and the game may be sold |
 
 Default: none; the episode ships without them. Scott's Runway and Suno accounts stay with Scott: an agent never routes around
 a denied or gated generation path, and asks in an issue instead.
+
+### 9.6a Art needs for a later visual brief (2026-11-11; nothing is made yet)
+
+This revision adds art the first proposal did not list; it goes into one visual brief, stills approved before anything is
+built: the opening in the Keeper's Watch (Episode 7's 9.5a room after the thaw, plus the line of light through the open
+shutter: one still); Elowen's register house in the square (the desk, the bindery behind, the infirmary door, the line of
+grey blankets with tags: one still); `keeper_memory_c`'s four pictures (the desk and the warnings, the burning vault and the
+Concordance on its stand, the infirmary and the empty blanket, the baby in the smoke: one still each, drawn as tinted
+vignettes, never frightening); the `ep8_shelf` `run` close-up; and KEEP ONE on the bell beam in `ep8_bell_night` (an inspect
+and a close-up, carved letters worn smooth). Elowen's sprite changes from a binder's apron to a Keeper's grey.
 
 ### 9.6 What Episode 8 does not need
 
@@ -1113,8 +1146,8 @@ Unwritten are battle state), no new ui-atlas icon (pips, smudges, ribbons and Re
 
 1. **Per-run autosave stays.** `g.autosaveSlot` is honored by everything Episode 8 adds; Episode 8 adds no new write path.
 2. **The main entry is Continue.** A run that finished Episode 7 continues from its own save: after the Episode 7 credits it
-   wakes at `ep7_ph_inn` and `ep8_morning` runs (only while `EP8_LIVE`); a save made later in Palehaven starts it on the next
-   enter of the lodge. A save from before Episode 7's credits is untouched in every way.
+   wakes at `ep7_ph_watch` and `ep8_morning` runs (only while `EP8_LIVE`); a save made later in Palehaven starts it on the next
+   enter of the Watch. A save from before Episode 7's credits is untouched in every way.
 3. **The quick start, `newGameEp8(name, { slot })`**, lives in the pack (`src/data/ep8/start.js`) and uses `pickRunSlot(save)`
    exactly as Episodes 3 to 7: slot 0 if empty; otherwise the first empty manual slot, shown before starting; if every slot is
    full it does not start and shows the existing refusal with only Back. Never Replace; never an occupied slot.
@@ -1122,7 +1155,7 @@ Unwritten are battle state), no new ui-atlas icon (pips, smudges, ribbons and Re
    plus `ep7_complete`, `nox_named`, `doors_reopened`, `vex_name_whole`, `page_whole`; counters `credits_rolled` to
    `credits7_rolled`; key items `name_fragment_1` to `name_fragment_7`, `lantern_of_recall`, `mirror_sigil`, `sky_compass`;
    the skills `answer` and `read_aloud` not yet (`read_learned` unset), `answer` learned; 4,300 gold; potion 6, hi_potion 8,
-   hi_ether 6, phoenix_feather 3, silver_salve 3, fresh_ink 2; starts at `ep7_ph_inn` `inn_bed`. One truth-choice flag of each
+   hi_ether 6, phoenix_feather 3, silver_salve 3, fresh_ink 2; starts at `ep7_ph_watch` `watch_cot`. One truth-choice flag of each
    Episode 7 pair is set to its truth side (stated in the start file). The quick start **awaits ep4 to ep7, then ep8, and merges
    every audio fragment it needs (ep6 for `sky_wind`, ep7 for `palehaven`, ep8), before the fade in** (PLAYTEST_REVIEW_6 fix 3).
    Exposed as `LQ_DEBUG.newGameEp8(name, { slot })`.
@@ -1255,9 +1288,9 @@ duplicate on retry).
   walks the bridge with the direction held; goes round Gap B and reads from the far side; opens Gap C's book, crosses, closes
   it from the far side; tries a read that would wall the party's own cell and asserts the refusal and that nothing changed;
   then one read by a touch tap. A held direction neither drops nor adds a step across any read.
-- **Autoplay route.** `qa/autoplay.py --episode 8` plays from an Episode 7 credits save and from `newGameEp8`: the lodge, the
+- **Autoplay route.** `qa/autoplay.py --episode 8` plays from an Episode 7 credits save and from `newGameEp8`: the Watch, the
   roof and its choice, the Stair (the first rub, A, B, the desk, the figure, C, the Margin), the town (the first word, the
-  Librarian, Sable and her choice, the door), F1 (B, C, the key), F2 (the pair, the wrong version; the Sentry on Auto), F3
+  Librarian, Elowen and her choice, the door), F1 (B, C, the key), F2 (the pair, the wrong version; the Sentry on Auto), F3
   (memory 3, SEE, SHELTER, CHOOSE both ways in two runs, the name), the Eraser on Auto (Read Aloud and Answer used by the
   competent policy; each Unwrite and Silence recorded with how it was answered), both endings in two runs, the last page, the
   open street, home and Hazel's choice, the bell (the walk up, all twelve tolls, the thirteenth), the credits, the wake at home.
@@ -1273,7 +1306,7 @@ duplicate on retry).
 - **Shots** (append to `qa/shots.json`, LF, zero CR bytes; zero console errors; desktop 1920x1080 and phone 844x390):
   `story_ep8_morning_note`, `story_ep8_roof`, `battle_stair_first_rub`, `battle_rubbed_row`, `field_ep8_gap_a`,
   `field_ep8_gap_c_wall`, `story_rubbed_steps`, `story_south_margin`, `story_first_word`, `story_meet_librarian_card`,
-  `story_sable_cloth`, `field_ep8_library_f1_crossing`, `field_ep8_library_f2_pair`, `battle_sentry_unwrite`,
+  `story_elowen_seal`, `field_ep8_library_f1_crossing`, `field_ep8_library_f2_pair`, `battle_sentry_unwrite`,
   `field_ep8_library_f3_choose`, `story_keeper_memory_c`, `story_the_name`, `story_last_margin`, `battle_eraser_unwrite`,
   `battle_eraser_ward`, `battle_eraser_remembers`, `battle_eraser_silence`, `story_eraser_after`, `story_last_choice`,
   `story_last_page_star`, `story_scriptorium_open`, `story_home_hazel`, `story_thirteenth_name`, `ui_credits_ep8`,
@@ -1320,7 +1353,7 @@ pre-tap load and **no bytes** to the initial download.
 
 | # | File | Change | Why |
 |---|---|---|---|
-| 1 | `src/game/packs.js` | `ep8: { entry: '../data/ep8/index.js', prefix: 'ep8_', assets: 'assets/ep8_manifest.json', audioPack: 'ep8', hard: true, touches: ['ep7_ph_inn', 'ep7_stillheart'], wanted: (f) => !!(f.ep7_complete \|\| f.ep8_started), enabled: () => EP8_LIVE }` and the import | the pack |
+| 1 | `src/game/packs.js` | `ep8: { entry: '../data/ep8/index.js', prefix: 'ep8_', assets: 'assets/ep8_manifest.json', audioPack: 'ep8', hard: true, touches: ['ep7_ph_watch', 'ep7_stillheart'], wanted: (f) => !!(f.ep7_complete \|\| f.ep8_started), enabled: () => EP8_LIVE }` and the import | the pack |
 | 2 | `src/game/episodes.js` | `export const EP8_LIVE = false;` | the switch |
 | 3 | `src/scenes/title.js` | the Episode 7 hook line generalized to 7 and 8 (or one line beside it): when `EP8_LIVE` and a slot has `ep7_complete`, or `?ep=8`, `ensurePack('ep7')` then `ensurePack('ep8')`, then `globalThis.LQ_EP8 && LQ_EP8.title(this)` | the row lives in the pack |
 | 4 | `src/game/packFallback.js` | `ep[4567]_` becomes `ep[45678]_` | an Episode 8 save never lands on Test Town |
@@ -1384,11 +1417,16 @@ is a known risk, not a blocker.
 - **Two telegraphs in the last fight.** Never up together; each names its answerer; no earlier battle rule runs.
 - **The menu paths** (self-target, a rubbed row that still offers one spell, Answer floating on a new flag). The scene test and
   realplay casts are gate items.
-- **The twist could land wrong** (a player feels the name was taken from them). Mitigation: the First Keeper gives it back
-  explicitly ("It's your name now. You wear it better."); the hero's Ledger row is kept; the bell tolls it as the hero's. Open
-  choice 3 offers the alternative.
-- **A parent in a kids' game.** Sable is alive, kind, and does not take the hero from Hazel; no father is mentioned; no death
-  is added. Open choices 5 and 6 offer the alternatives.
+- **The twist could land wrong** (a player feels their name was someone else's). Mitigation (revised 2026-11-11): the name
+  was always theirs, given by their mother; nobody else owns it. The First Keeper says so ("It stayed on you anyway."), Elowen
+  says it in the square, the hero's Ledger row is kept, and the bell tolls it as the hero's.
+- **A fire in a kids' game** (2026-11-11, the novel's vault fire). Mitigation: it is shown as smoke under a door and a lamp
+  glow in a vignette, never people in it; its dead are never counted, named or shown; the eleven sworn names come back as
+  names, not graves; no humor near it (EPISODE8 section 4).
+- **Novel text in a public repo** (2026-11-11). Mitigation: facts and a few short terms only, never a quotation; E8-story and
+  E8-review check every line against EPISODE8 section 8, "Novel canon"; Stephen may keep any fact for the book.
+- **A parent in a kids' game.** Elowen is alive, kind, forgot through no fault of hers, remembers, and does not take the hero
+  from Hazel; no father is mentioned; no death is added on screen. Open choices 5 and 6 offer the alternatives.
 - **A villain who is a sad old man.** No threat to a child on screen; memory 3 is tender, not frightening; the fight is the
   party refusing to let him vanish.
 - **The finale's length.** Planned at 84 with the ending's 11 minutes; the timer gate and the cut lines.
@@ -1408,9 +1446,12 @@ page, the hero's Ledger keep and the bell bookend are never cut):
   two-floor Library plus the Unwritten Page; the Glyphsmith Atelier becomes a stall in the square (Sorel's shop unchanged);
   `rubbed_steps` folds into `south_margin`.
 
-**Open for Scott and Stephen** (none blocks the build; full list with reasons in EPISODE8.md section 11): the finale [yes];
-Mira's episode with the hero at the twist [yes]; the First Keeper's name is the hero's [yes]; one man in three records [yes];
-born to Sable, carried by the First Keeper [yes]; Sable alive and does not ask [yes]; Tamsin to Sable [Sable]; Iona into Ione
+**Decided by Scott, 2026-11-11:** the finale [yes] and the hero's own name as the one the lists hunt [yes, reworked to the
+novel: their birth name]. **Open for Stephen** (defaults; full list with reasons in EPISODE8.md section 11): Mira's episode
+with the hero at the twist [yes]; one man in three records, the old Keeper of the Concordance key [yes]; born to Elowen in the
+Library's infirmary the night of the vault fire, carried out by the First Keeper [yes]; Elowen alive, forgot, remembers,
+does not ask [yes]; the mother named Elowen, Keeper of the Scriptorium [Elowen]; the novel's night as the spine [yes]; his own
+name never shown [yes]; KEEP ONE on the bell beam [yes]; the Watch opening [yes]; bosses tougher, not longer [yes]; Iona into Ione
 [yes]; Nox climbs and says the name [yes]; Vex's Last Margin and he stays [yes]; three truth choices [yes]; the canon final
 choice, permanent [kept]; the eighth star's sign [yes]; the bell bookend [yes]; the witness count [yes]; "rubbed out" [yes];
 four phases [four]; Answer returns, no earlier rule does [yes]; Fine Print base game only [yes]; 84 minutes [84]; the cards
