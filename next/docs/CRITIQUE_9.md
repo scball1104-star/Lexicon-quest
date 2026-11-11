@@ -63,7 +63,8 @@ a document arriving at breakfast**. Item 1 is an agent fix today; items 2, 3 and
   `grep "chapter ="`). Readers: `src/scenes/loadGame.js` 112 (the save card's "Chapter N"), `src/scenes/menu.js` 204 (the
   field menu's Chapter line), `src/game/vows.js` 94 to 130 (vow pay by chapter, and the cap of 5 paid vows per chapter).
 - **Seen (Fact):** the bot's straight-through saves at the end of Episode 5 and of Episode 6 both hold `chapter: 1`
-  (`D:\LexiconQuest\next\qa\out\autoplay\phone-ep5-last-game.json`, `D:\lq-ep6\next\qa\out\autoplay\phone-ep6-last-game.json`).
+  (`D:\LexiconQuest\next\qa\out\autoplay\phone-ep5-last-game.json`, `D:\lq-ep6\next\qa\out\autoplay\phone-ep6-last-game.json`), as does tonight's Episode 1 credits save
+  (`next/qa/out/autoplay/phone-last-game.json`).
   The quick-start party for the same episode holds `chapter: 6` (`qa/saves/ep6_saves.test.mjs` line 43 asserts it). So the
   player who played every minute sees "Chapter I" on the save card in the Cloud Library, and the one who took the shortcut
   sees "Chapter VI".
