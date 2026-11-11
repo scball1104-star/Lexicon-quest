@@ -20,6 +20,7 @@ export const BREATHE = 36;             // game frames per idle beat (2-frame bre
 export const DIE_STEP = 4;             // game frames per die_0..2 step
 export const STANCE_FLASH = 20;        // frames the Warden shows its new stance charged (_cast) after a swap
 export const LEVELUP_FRAMES = 26;      // the level-up hop
+export const REDUCED_HOLD = 4;         // reduce motion: frames a held white (a foe's death) shows before the plain sprite
 export const ENTER_FRAMES = 22;
 
 /** Origin of a frame: per-frame origin table (object `origin` in the JSON) wins, else the normalized one. */
@@ -181,6 +182,8 @@ export class Actor {
     if (this.stanceT > 0) this.stanceT--;
     if (this.pose === 'levelup' && this.poseT >= LEVELUP_FRAMES) this.pose = 'victory';
     if (this.flash && !this.flash.hold) { this.flash.frames--; if (this.flash.frames <= 0) this.flash = null; }
+    // Reduce motion: a held white (a foe's death, 70 frames on a boss) is a REDUCED_HOLD-frame tint, then the plain sprite.
+    else if (this.flash && this.reduce && (this.flash.held = (this.flash.held || 0) + 1) >= REDUCED_HOLD) this.flash = null;
     if (this.move) {
       const m = this.move; m.t++;
       const k = Math.min(1, m.t / m.frames);
@@ -209,10 +212,11 @@ export class Actor {
   }
   startMove(toX, toY, frames) { this.move = { fromX: this.x, fromY: this.y, toX, toY, t: 0, frames: Math.max(1, frames) }; }
   startDissolve(frames) { this.dissolve = { t: 0, frames: Math.max(1, frames) }; this.flash = null; this.ko = true; }
+  get reduce() { const s = this.engine && this.engine.settings; return !!(s && s.reduceMotion); }
 
   /** The resting tint (no flash): a variant or borrowed-art tint at 0.35, else the elite gold at 0.14, else none. */
   baseTint() {
-    if (this.flare && this.alive && !this.boss) return { tint: '#fff7d6', amount: (this.engine.frame >> 3) % 2 ? 0.2 : 0.08 };   // the flare: it glows white
+    if (this.flare && this.alive && !this.boss) return { tint: '#fff7d6', amount: this.reduce ? 0.14 : (this.engine.frame >> 3) % 2 ? 0.2 : 0.08 };   // the flare: it glows white (steady at its mean under reduce motion)
     if (this.tint) return { tint: this.tint, amount: 0.35 };
     if (this.elite) return { tint: '#ffd34d', amount: 0.14 };
     return { tint: null, amount: 0 };
