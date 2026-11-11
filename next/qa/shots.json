@@ -9995,6 +9995,219 @@
     }
    ],
    "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "ui_worldmap_errands",
+   "note": "#100 errand marks on the world map after Episode 6 at Valewyn: '!' bubbles at the givers, a '?' on the Flood Road (Nella's rope being fetched), Emberpeak chosen: '! 2 errands open.' in the info box",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep4_valewyn",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1,
+        "xr_nella_rope_started": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('ep4')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('ep4') && !!globalThis.LQ_ERRANDS",
+     "timeout": 30000
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; const i = s.list.items.findIndex((it) => it.id === 'emberpeak'); s.list.moveTo(i, { silent: true }); s.select('emberpeak'); return s.sel; })()"
+    },
+    {
+     "frames": 30
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.errandsOk && s.errands.emberpeak === '!' && s.errands.flood_road === '?' && s.errands.hollowmere === '!' && s.infoLines[0] === '! 2 errands open.'; })()",
+     "message": "the marks and the info line"
+    }
+   ]
+  },
+  {
+   "name": "ui_worldmap_penny",
+   "note": "#100 the world map after Episode 6 at Zephyr Landing: Penny's cart line in the info box, the givers' '!' bubbles",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep6_zephyr",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('ep4')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('ep4') && !!globalThis.LQ_ERRANDS",
+     "timeout": 30000
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.penny === 'zephyr' && s.sel === 'zephyr' && s.infoLines.includes(\"Penny's travelling cart is here.\") && Object.keys(s.bubbles).length >= 3; })()",
+     "message": "Penny's line and the bubbles"
+    }
+   ]
   }
  ]
 }

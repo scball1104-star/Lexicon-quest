@@ -164,9 +164,11 @@ test('the worldmap pack: lazy, declared once, wanted with Episode 1 done, nothin
     assert.ok(!html.includes(f), `not preloaded: ${f}`);
   }
   const shell = [];
+  // the lazy packs' own folders are not startup files (the ep4 errands name the map in comments, wave 5)
+  const lazy = new Set(Object.values(PACKS).map((p) => path.posix.join('src/game', path.posix.dirname(p.entry))));
   const walk = (dir) => { for (const e of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
     const rel = path.posix.join(dir, e.name);
-    if (e.isDirectory()) { if (rel !== 'src/data/worldmap') walk(rel); } else if (rel.endsWith('.js') && read(rel).includes('worldmap')) shell.push(rel);
+    if (e.isDirectory()) { if (!lazy.has(rel)) walk(rel); } else if (rel.endsWith('.js') && read(rel).includes('worldmap')) shell.push(rel);
   } };
   walk('src');
   assert.deepEqual(shell.sort(), ['src/game/packs.js', 'src/scenes/menu.js'], 'the only startup files that know the map');

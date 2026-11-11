@@ -125,6 +125,10 @@ export const TEXT = {
   road: 'By road', sea: 'By sea', air: 'By air',
   going: 'On the road...',
   offline: 'That road is not ready yet. Try again with a connection.',
+  // errands (wave 5 hook, issue #100): the extra info box lines of a chosen place
+  errandsOpen: (n) => `! ${n} errands open.`,
+  errandsFetch: (n) => `? ${n} things to fetch here.`,
+  penny: "Penny's travelling cart is here.",
   why: {
     rumour: 'Heard of, never seen. Walk the roads to get there.',
     here: 'You are already here.',
@@ -209,3 +213,51 @@ export function regionAt(x, y) {
 /** States compared: does `a` know at least as much as `b`? (tests: the map only ever grows with the story) */
 export function atLeast(a, b) { return RANK[a] >= RANK[b]; }
 export { RANK };
+
+// ------------------------------------------------------------------------------------------------- errand marks (wave 5)
+// The ep4 pack installs globalThis.LQ_ERRANDS when it registers (src/data/ep4/errands.js, WORLD_MAP_PLAN section 12). Before
+// that (a save short of Episode 3's end, or the pack still loading) the map shows no marks. The map reads it, never imports it.
+const errandsHook = (X) => {
+  const E = X === undefined ? (typeof globalThis !== 'undefined' ? globalThis.LQ_ERRANDS : null) : X;
+  return E && typeof E.errandsFor === 'function' ? E : null;
+};
+
+/** Is the errand hook there (the ep4 pack registered)? */
+export function errandsReady(X) { return !!errandsHook(X); }
+
+/**
+ * The errand marks of every map point for a game: { pointId: [{ id, title, state, mark, label, npc }] }, only points with a
+ * mark. {} when the hook is absent or throws. Pure: reads game.flags through the hook, writes nothing.
+ */
+export function errandMarks(game = {}, X) {
+  const E = errandsHook(X), out = {};
+  if (!E) return out;
+  for (const id of Object.keys(POINTS)) {
+    let list = null;
+    try { list = E.errandsFor(game, id); } catch (e) { list = null; }
+    if (Array.isArray(list) && list.length) out[id] = list;
+  }
+  return out;
+}
+
+/** The one mark a point shows for its errands: '!' when any is to ask or deliver, else '?', '' for none. Pure. */
+export function markOf(list) {
+  if (!list || !list.length) return '';
+  return list.some((e) => e.mark === '!') ? '!' : '?';
+}
+
+/** The info box line for a point's errands: the errand's own label for one, a count for more, '' for none. Pure. */
+export function errandLine(list) {
+  if (!list || !list.length) return '';
+  if (list.length === 1) return list[0].label || `${list[0].mark} ${list[0].title}`;
+  return markOf(list) === '!' ? TEXT.errandsOpen(list.length) : TEXT.errandsFetch(list.length);
+}
+
+/** Penny's stop as a map point id, or null (no hook, or before Episode 3 is done). Pure. */
+export function pennyAt(game = {}, X) {
+  const E = errandsHook(X);
+  if (!E || typeof E.merchantAt !== 'function') return null;
+  let at = null;
+  try { at = E.merchantAt(game); } catch (e) { at = null; }
+  return at && POINTS[at.place] ? at.place : null;
+}

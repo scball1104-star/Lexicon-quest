@@ -393,3 +393,11 @@ X.errandState(game, id)       // 'locked'|'open'|'fetch'|'deliver'|'done'
 are data.js PLACES / layout.js POINTS ids (`willowmere`, `hollowmere`, `emberpeak`, `flood_road`, `valewyn`, `saffron`,
 `zephyr`). Labels are at most 26 characters ("! Bess wants desert spice"). The worldmap scene can also `import('../ep4/errands.js')`
 for the same functions. Tests: `qa/content/xref_errands.test.mjs`; shots `story_xr_bess_spice`, `field_xr_penny_cart`.
+
+**On the map (branch `scott/wm-errand-marks`).** The map screen reads the hook through `data.js` (`errandMarks`, `markOf`,
+`errandLine`, `pennyAt`; never an import of the ep4 pack): a small cream speech bubble with a red "!" or a blue "?" by each
+marked point (one bubble per point, "!" wins), placed clear of the label plates, the leader, the banner and the list
+(`scene.js` `bubbleSpot`), bobbing a pixel unless Reduce motion is on. The chosen place's info box grows a gold line (the
+errand's own label, or "! 2 errands open." / "? 3 things to fetch here.") and a line "Penny's travelling cart is here." where
+she stands; at the bottom the box grows upward. No hook: no marks and no error, rechecked twice a second while the map is open.
+Tests: `qa/worldmap/errand_marks.test.mjs`; shots `ui_worldmap_errands`, `ui_worldmap_penny`.

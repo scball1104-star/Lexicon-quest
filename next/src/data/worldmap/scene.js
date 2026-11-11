@@ -19,12 +19,18 @@
 // arrive). Packs still loading when the route ends: "On the road..." for up to 8 s; a pack that cannot load (not cached and
 // the network down) cancels the trip with one line and the party stays where it was. Input is ignored for the trip.
 // Reduce motion: the pan snaps, the marker arrow and the leader stand still, the trip is a cut to the town with a short hold.
+//
+// Errands (wave 5 hook, issue #100): once the ep4 pack has installed globalThis.LQ_ERRANDS, a small speech bubble by a place
+// shows its errands ("!" to ask or deliver, "?" an item to fetch there), placed clear of the label plates; the info box of a
+// chosen place gains a line ("! Bess wants desert spice", "! 2 errands open.") and one when Penny's cart stands there. No
+// hook yet (the pack is still loading, or Episode 3 is not done): no marks, rechecked about twice a second.
 
 import { drawWindow, drawBanner } from '../../ui/window.js';
 import { List, rowHeightFor, touchUi } from '../../ui/list.js';
 import { btn } from '../../ui/glyphs.js';
 import { SIZE, POINTS, SPRITES, REGIONS as GRID } from './layout.js';
-import { PLACES, PLACE, mapState, placeName, VISITED, HEARD, UNKNOWN, TEXT, RANK } from './data.js';
+import { PLACES, PLACE, mapState, placeName, VISITED, HEARD, UNKNOWN, TEXT, RANK, regionAt, errandsReady, errandMarks, markOf, errandLine,
+  pennyAt } from './data.js';
 import { destinations, travelCtx, routeFrames, routeAt, packsFor, readyPacks, arrive, fieldOf, CUT_HOLD } from './travel.js';
 import { ensurePack } from '../../game/packs.js';
 
@@ -32,13 +38,32 @@ export const IMG = 'worldmap_map';
 export const VIEW = { w: 384, h: 216 };
 export const MAX_OX = SIZE.w - VIEW.w;                  // the painting is 40 px wider than the screen: it pans
 export const LIST = { x: 284, y: 4, w: 96 };
-export const INFO = { x: 4, w: 276, h: 34, low: 178, high: 30 };
+export const INFO = { x: 4, w: 276, h: 34, low: 178, high: 30, line: 13 };
+export const BUBBLE = { w: 10, h: 12 };        // an errand bubble: 10 x 11 and a 1 px tail
 const LANE = '#6a4532';
 export const HERO_DX = 13, HERO_DY = 13;     // the leader stands south-east of the place, its label goes west
 const PLATE = '#14101e';
 const INK = '#3a2418', PREFETCH = 18;          // the route's ink; frames of rest on a town before its packs start
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const BANNER = { x: 82, y: 2, w: 120, h: 24 };   // about where drawBanner puts the title: bubbles keep clear of it
+const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+/**
+ * Where an errand bubble goes for a point (view pixels): the first of above-right, above-left, above, right, left, low right
+ * and low left of the glyph that stays on screen and clear of every box in `avoid`; the first on-screen spot when none is. Pure.
+ */
+export function bubbleSpot(px, py, avoid = []) {
+  const spots = [[px + 4, py - 20], [px - 14, py - 20], [px - 5, py - 22], [px + 9, py - 12], [px - 19, py - 12], [px + 10, py - 4], [px - 20, py - 4]];
+  let first = null;
+  for (const [x, y] of spots) {
+    const b = { x, y, w: BUBBLE.w, h: BUBBLE.h };
+    if (x < 1 || y < 1 || x + b.w > VIEW.w - 1 || y + b.h > VIEW.h - 1) continue;
+    if (!first) first = b;
+    if (!avoid.some((o) => hits(b, o))) return b;
+  }
+  return first || { x: clamp(px - 5, 1, VIEW.w - BUBBLE.w - 1), y: clamp(py - 22, 1, VIEW.h - BUBBLE.h - 1), w: BUBBLE.w, h: BUBBLE.h };
+}
 
 /** Where the view pans for a chosen point: keep it in the middle of the part the list does not cover. Pure. */
 export function panFor(x) { return clamp(Math.round(x - 150), 0, MAX_OX); }
@@ -67,6 +92,7 @@ export class WorldMapScene {
     this.trip = null;
     this.rest = 0;
     this.fetched = new Set();
+    this.readErrands();
     const st = this.state;
     this.ctx = travelCtx(e, this.from);
     this.dests = Object.fromEntries(destinations(this.g, this.ctx).map((d) => [d.id, d]));
@@ -83,6 +109,22 @@ export class WorldMapScene {
     if (e.audio && e.audio.sfx) e.audio.sfx('menu_open');
     // warm on open (plan 5.2 item 2): every town travel could reach, at idle, never offline
     if (!this.blocked) setTimeout(() => { for (const d of Object.values(this.dests)) if (d.ok) this.prefetch(d.id); }, 600);
+  }
+
+  /** The errand marks and Penny's stop for this save, from globalThis.LQ_ERRANDS (none while it is absent). */
+  readErrands() {
+    this.errandsOk = errandsReady();
+    this.marks = errandMarks(this.g);
+    this.penny = pennyAt(this.g);
+  }
+
+  /** The extra info box lines of a place: its errands, then Penny's cart: [{ text, color }]. */
+  extraLines(id) {
+    const out = [];
+    const e = errandLine(this.marks && this.marks[id]);
+    if (e) out.push({ text: e, color: 'gold' });
+    if (id && id === this.penny) out.push({ text: TEXT.penny, color: 'cream' });
+    return out;
   }
 
   /** Is every row shut from here (a dungeon from the menu, a scene, aboard)? */
@@ -173,6 +215,7 @@ export class WorldMapScene {
     const e = this.engine;
     const { input, audio } = e;
     this.frame++;
+    if (!this.errandsOk && this.frame % 30 === 0) this.readErrands();   // the ep4 pack finished loading while the map was open
     if (this.trip) { this.updateTrip(); return; }
     if (this.closing) return;
     if (this.note > 0) this.note--;
@@ -316,10 +359,12 @@ export class WorldMapScene {
     y = clamp(Math.round(y), 2, VIEW.h - 13);
     r.withAlpha(0.66, () => r.rect(x - 2, y, w + 4, 11, PLATE));
     r.text(s, x, y, { color });
+    return { x: x - 2, y, w: w + 4, h: 11 };
   }
 
   drawLabels(r, ox) {
     const st = this.state;
+    this.plates = [];
     for (const pl of PLACES) {
       const s = st.places[pl.id];
       const text = labelOf(pl, s, this.flags);
@@ -329,8 +374,57 @@ export class WorldMapScene {
       const color = here ? 'gold' : s === VISITED ? 'white' : 'gray';
       // the party's own place: the label sits west of the glyph, clear of the leader standing east of it
       const lx = here ? x - r.measure(text) - 9 : x + pl.label[0], ly = here ? y + 4 : y + pl.label[1];
-      this.plate(r, text, lx - ox, ly, color);
+      this.plates.push(this.plate(r, text, lx - ox, ly, color));
     }
+  }
+
+  /** Can the map show a mark at this point (its place, or the region of a road point, is known)? */
+  known(id) {
+    if (PLACE[id]) return this.state.places[id] !== UNKNOWN;
+    const p = POINTS[id], reg = p && regionAt(p[0], p[1]);
+    return !!reg && this.state.regions[reg] !== UNKNOWN;
+  }
+
+  /** The errand bubbles: "!" or "?" by each marked place, clear of the plates, the leader, the banner and the list. */
+  drawErrands(r, ox) {
+    const ids = Object.keys(this.marks || {}).filter((id) => POINTS[id] && this.known(id));
+    this.bubbles = {};
+    if (!ids.length) return;
+    const avoid = (this.plates || []).slice();
+    avoid.push(this.bannerBox || BANNER);
+    if (!this.trip) avoid.push(this.win);
+    const h = this.state.hereAt;
+    if (h && !this.trip) avoid.push({ x: h[0] - ox + HERO_DX - 8, y: h[1] + HERO_DY - 24, w: 16, h: 24 });
+    const bob = this.reduce ? 0 : Math.floor(this.frame / 30) % 2;
+    for (const id of ids) {
+      const [px, py] = POINTS[id];
+      if (px - ox < -8 || px - ox > VIEW.w + 8) continue;
+      const b = bubbleSpot(px - ox, py, avoid);
+      avoid.push(b);
+      this.bubbles[id] = [b.x + ox, b.y];
+      this.bubble(r, b.x, b.y - bob, markOf(this.marks[id]));
+    }
+  }
+
+  /** One bubble at view (x, y): a cream speech bubble, ink rim, a tail below, a red "!" or a blue "?". */
+  bubble(r, x, y, mark) {
+    r.rect(x, y, 10, 11, PLATE);
+    r.rect(x + 1, y + 1, 8, 9, '#fff7d6');
+    r.rect(x + 4, y + 10, 2, 1, '#fff7d6');
+    r.rect(x + 4, y + 11, 2, 1, PLATE);
+    if (mark === '!') {
+      r.rect(x + 4, y + 2, 2, 5, '#d0452a');
+      r.rect(x + 4, y + 8, 2, 1, '#d0452a');
+      return;
+    }
+    const c = '#2f5f9e';
+    r.rect(x + 3, y + 2, 4, 1, c);
+    r.rect(x + 2, y + 3, 2, 1, c);
+    r.rect(x + 6, y + 3, 2, 1, c);
+    r.rect(x + 6, y + 4, 2, 1, c);
+    r.rect(x + 4, y + 5, 3, 1, c);
+    r.rect(x + 4, y + 6, 2, 1, c);
+    r.rect(x + 4, y + 8, 2, 1, c);
   }
 
   /** The chosen place: four gold corner brackets around its glyph (they pulse in and out; still under Reduce motion). */
@@ -358,13 +452,17 @@ export class WorldMapScene {
   /** The info box sits at the bottom, or under the banner when the chosen place or the party is low on the map. */
   get infoY() {
     const low = (p) => !!p && p[1] > 150;
-    return low(this.pointOf(this.sel)) || low(this.state.hereAt) ? INFO.high : INFO.low;
+    return low(this.pointOf(this.sel)) || low(this.state.hereAt) ? INFO.high : INFO.low - (this.infoH - INFO.h);
   }
+
+  /** The info box grows a line for the chosen place's errands and one for Penny's cart. */
+  get infoH() { return INFO.h + INFO.line * this.extraLines(this.sel).length; }
 
   drawInfo(r) {
     const pl = PLACE[this.sel];
     const y = this.infoY;
-    drawWindow(r, INFO.x, y, INFO.w, INFO.h, { alpha: 0.94 });
+    const extra = this.extraLines(this.sel);
+    drawWindow(r, INFO.x, y, INFO.w, INFO.h + INFO.line * extra.length, { alpha: 0.94 });
     const x = INFO.x + 8, rx = INFO.x + INFO.w - 8;
     if (!pl) { r.text(TEXT.here, x, y + 5, { color: 'white' }); return; }
     const s = this.state.places[pl.id];
@@ -374,6 +472,7 @@ export class WorldMapScene {
     r.text(status, rx, y + 5, { align: 'right', color: t || (d && d.ok) ? 'cream' : 'gray' });
     const line = this.note > 0 ? this.noteText : t && t.t >= t.T && !t.hold && !t.res ? TEXT.going : pl.about;
     r.text(line, x, y + 18, { color: this.note > 0 ? 'cream' : 'white', width: INFO.w - 16 });
+    extra.forEach((l, i) => r.text(l.text, x, y + 18 + INFO.line * (i + 1), { color: l.color }));
   }
 
   draw(r) {
@@ -386,8 +485,9 @@ export class WorldMapScene {
     this.drawVehicles(r, ox);
     this.drawLeader(r, ox);
     this.drawLabels(r, ox);
+    this.drawErrands(r, ox);
     this.drawMarker(r, ox);
-    drawBanner(r, TEXT.title, 142, 4);
+    this.bannerBox = drawBanner(r, TEXT.title, 142, 4);
     if (!this.trip) this.drawList(r);
     this.drawInfo(r);
   }
@@ -398,6 +498,8 @@ export class WorldMapScene {
       trip: t ? { id: t.id, t: t.t, T: t.T, mode: t.d.route.mode, at: at ? [Math.round(at.x), Math.round(at.y), at.mode] : null,
         waiting: t.t >= t.T && !t.hold && !t.res, res: t.res, going: t.going, arrive: t.d.arrive } : null,
       note: this.note > 0 ? this.noteText : '', ok: Object.fromEntries(Object.values(this.dests).map((d) => [d.id, d.why || 'ok'])),
+      errands: Object.fromEntries(Object.entries(this.marks || {}).map(([id, l]) => [id, markOf(l)])), errandsOk: !!this.errandsOk,
+      penny: this.penny || null, infoLines: this.extraLines(this.sel).map((l) => l.text), infoY: this.infoY, bubbles: { ...(this.bubbles || {}) },
       regions: { ...this.state.regions }, places: { ...this.state.places }, index: this.list ? this.list.index : null, touch: !!this.touch };
   }
 }

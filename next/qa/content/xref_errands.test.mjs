@@ -250,8 +250,12 @@ test('copy: house rules (ASCII, no em dash, short boxes), nothing of it in a cor
   const core = [];
   const walk = (dir) => { for (const ent of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
     const rel = path.posix.join(dir, ent.name);
-    if (ent.isDirectory()) { if (!/^src\/data\/ep[456]$/.test(rel)) walk(rel); } else if (rel.endsWith('.js') && /ep4\/errands|LQ_ERRANDS|xr_|penny_t|travel_cart/.test(read(rel))) core.push(rel);
+    if (ent.isDirectory()) { if (!/^src\/data\/(ep[456]|worldmap)$/.test(rel)) walk(rel); } else if (rel.endsWith('.js') && /ep4\/errands|LQ_ERRANDS|xr_|penny_t|travel_cart/.test(read(rel))) core.push(rel);
   } };
   walk('src');
   assert.deepEqual(core, [], 'no startup file knows the errands');
+  // the lazy worldmap pack reads globalThis.LQ_ERRANDS and never imports the ep4 pack (the map opens before Episode 4)
+  for (const f of fs.readdirSync(path.join(NEXT, 'src/data/worldmap'))) {
+    assert.ok(!/^import\b[^;]*ep4\/|\bimport\(\s*['"][^'"]*ep4\//m.test(read(`src/data/worldmap/${f}`)), `${f} never imports the ep4 pack`);
+  }
 });
