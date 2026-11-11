@@ -8,6 +8,7 @@
 import { ATTRACT, TOLL_NAMES, TOLL_FLAGS, TOLL_HOLD, COLD_OPEN_LINE } from '../data/story/ep1.js';
 import { KeyArt, DARK } from '../ui/keyart.js';
 import { deviceOf } from '../ui/glyphs.js';
+import { textHold } from '../ui/text.js';
 import { START_MAP, START_POS, COLD_OPEN_START, createGame } from '../game/state.js';
 
 // LINE_Y (H6): the opening line sits in the dark above the hero, under the toll captions.
@@ -52,14 +53,15 @@ export class ColdOpenOverlay {
     if (!f || !g || !f.map || f.map.id !== COLD_OPEN_START.map || f.dead) { if (this.game) this.reset(); return; }
     if (this.game !== g) { this.reset(); this.game = g; }
     const n = latestToll(g.flags);
-    if (n > this.lastToll) { this.lastToll = n; this.caption = { text: tollCaption(n), at: e.frame, total: TOLL_HOLD }; }
+    // Text speed Slow doubles how long a caption stays (textHold); the next toll still replaces it.
+    if (n > this.lastToll) { this.lastToll = n; this.caption = { text: tollCaption(n), at: e.frame, total: textHold(TOLL_HOLD, e.settings) }; }
     if (this.caption) {
       const a = captionAlpha(e.frame - this.caption.at, this.caption.total);
       if (a == null) this.caption = null;
       else if (a > 0 && f.fadeAlpha < 0.5) this.drawCaption(r, this.caption.text, a, CAPTION_Y, 'large');
     }
     if (!this.handedOff) {
-      const a = captionAlpha(f.frame - LINE_AT, LINE_TOTAL, 12, 30);
+      const a = captionAlpha(f.frame - LINE_AT, textHold(LINE_TOTAL, e.settings), 12, 30);
       if (a != null && a > 0 && f.fadeAlpha < 0.5) this.drawCaption(r, COLD_OPEN_LINE, a, LINE_Y, 'main');
     }
     if (g.flags.cold_open_done && !this.handedOff) {

@@ -1,10 +1,11 @@
 // Full-screen title card: engine.pushAwait('titleCard', { text, sub, frames, backdrop, bg }) -> resolves when
-// it is gone. Fades the text in (20 frames), holds `frames` (default 240; confirm or start cuts the hold),
+// it is gone. Fades the text in (20 frames), holds `frames` (default 240, doubled at Text speed Slow; confirm or start cuts the hold),
 // fades out. Draws the quantized `dialog_keyart` backdrop (darkened further so the text reads) under the
 // text, so it looks the same over the field, the prologue or a black fade; `backdrop: false` or a missing
 // atlas gives the flat `bg` color (default near-black).
 
 import { drawBackdrop, backdropImage, DARK } from '../ui/keyart.js';
+import { textHold } from '../ui/text.js';
 
 const FADE = 20;
 
@@ -13,7 +14,7 @@ export class TitleCardScene {
   enter(data = {}) {
     this.text = String(data.text || '');
     this.sub = data.sub ? String(data.sub) : '';
-    this.hold = data.frames ?? 240;
+    this.hold = textHold(data.frames ?? 240, this.engine.settings);
     this.color = data.color || 'cream';
     this.bg = data.bg || '#000000';
     // Named backdropId, not backdrop: the engine forwards a scene's `backdrop` (an image) to the renderer.
