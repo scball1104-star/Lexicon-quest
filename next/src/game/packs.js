@@ -160,6 +160,7 @@ export function mergeTileFragment(db, frag) {
 function filesUrl(engine) {
   return engine && engine.assets && engine.assets.url ? engine.assets.url(PACK_FILES_PATH) : new URL('../../' + PACK_FILES_PATH, import.meta.url).href;
 }
+let listsP = null;   // #96: one fetch for every pack loading at once (behind the entry's music they each took up to 1.5 s more)
 /** assets/pack_files.json as an object, or null (offline first visit, Node, 404). Never rejects. */
 async function loadFileLists(engine, opts) {
   if (opts.packFiles !== undefined) return opts.packFiles;
@@ -167,8 +168,8 @@ async function loadFileLists(engine, opts) {
   try {
     const href = filesUrl(engine);
     if (!/^https?:/.test(href)) return null;
-    const res = await fetch(href);
-    return res.ok ? await res.json() : null;
+    if (!listsP) listsP = fetch(href).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((v) => { listsP = null; return v; });
+    return await listsP;
   } catch (e) { return null; }
 }
 
@@ -311,6 +312,8 @@ export function ensurePack(id, opts = {}) {
   if (!packEnabled(id, opts)) return Promise.resolve({ id, ok: true, failed: [], skipped: true, ms: 0 });
   const s = st(id);
   if (s.promise) return s.promise;
+  // #96: a hard pack needs every hard pack above it in the table (ep6 > ep5 > ep4 > ep3); start them all now, entries still register in order
+  if (def.hard) for (const [d, x] of Object.entries(tableOf(opts))) { if (d === id) break; if (x.hard) ensurePack(d, opts); }
   const p = attempt(id, def, opts).then((res) => {
     const engine = res.engine;
     const out = { id: res.id, ok: res.ok, failed: res.failed, skipped: false, ms: res.ms };
