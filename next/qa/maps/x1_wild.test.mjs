@@ -12,6 +12,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NEXT, loadAll, loadDb, validate, walk, buildGrid, eventCells, loadStaging } from '../../tools/maps/mapcheck.mjs';
 import { mergeTileFragment } from '../../src/game/packs.js';
+import { CAL_JS, factorFrom, STRICT } from '../_perf.mjs';
 
 const rd = (p) => JSON.parse(fs.readFileSync(path.join(NEXT, p), 'utf8'));
 const db = await loadDb();
@@ -529,6 +530,12 @@ test('cost: no fog, no lighting, no animated layer beyond the shared ones; props
 // with ?pack=x1 and times f.draw() and f.update() in a tight loop (min of five runs of sixty), once at full speed and once with
 // the CPU throttled 4x (a mid-range phone). The baseline is the valley at (30, 30). Budget (plan 3.4): field logic under 3 ms,
 // draw under 1 ms more than the valley at full speed (4 ms more throttled). Skipped when python or Playwright is missing.
+// Issue #76 (it failed under a busy CPU and passed alone): the valley was timed once at the start and each case once
+// later, so load arriving in between landed on the case alone. Now up to three PASSES run every case and the valley
+// again, interleaved, keeping each key's fastest reading (load only adds time), and stop once the plain budgets hold.
+// Each pass also times qa/_perf.mjs's calibration loop in the page at the same throttle; the budgets stretch by the
+// factor it slowed down against the quiet reference PC (1 on a quiet machine, so the budget is the written one).
+// LQ_PERF_STRICT=1: one pass, factor 1.
 import { spawnSync } from 'node:child_process';
 const QA_WORLD = path.join(NEXT, 'qa', 'world').split(path.sep).join('/');
 const PERF_PY = `
@@ -537,22 +544,42 @@ sys.path.insert(0, ${JSON.stringify(QA_WORLD)})
 from fieldlab import Lab
 FIELD = 'LQ_ENGINE.stack.find(s => s.name === "field")'
 CASES = [('valley', 30, 30), ('x1_highmoor', 35, 34), ('x1_highmoor', 50, 15), ('x1_highmoor', 45, 18), ('x1_larchhill', 31, 3), ('x1_larchhill', 36, 30), ('x1_larchhill', 58, 30)]
+CAL_JS = ${JSON.stringify(CAL_JS)}
+PASSES = ${STRICT ? 1 : 3}
+def plain_ok(out):
+    for rate in (1, 4):
+        base = out['%dx valley 30,30' % rate][0]
+        for k, (d, u) in out.items():
+            if k.startswith('%dx x1_' % rate) and (d - base > 1.0 * rate or u >= 3): return False
+    return True
 lab = Lab(device='phone')
 out = {}
+cal = {}
+passes = 0
 try:
     lab.open('?scene=_devTitle&debug=1&fps=0&pack=x1')
     cdp = lab.ctx.new_cdp_session(lab.page)
     for f in ['first_fight_done', 'lantern_get', 'stars_started']:
         lab.call('setFlag', f, True)
-    for rate in (1, 4):
+    for p in range(PASSES):
+      passes += 1
+      for rate in (1, 4):
         cdp.send('Emulation.setCPUThrottlingRate', {'rate': rate})
+        c = lab.run(CAL_JS)
+        cal[rate] = min(cal.get(rate, 1e9), round(c, 3))
         for m, x, y in CASES:
             lab.warp(m, x, y, 'down')
             lab.frames(60)
             js = '(() => { const f = %s; const r = LQ_ENGINE.renderer; let d = 1e9, u = 1e9; for (let k = 0; k < 5; k++) { let t0 = performance.now(); for (let i = 0; i < 60; i++) f.draw(r); d = Math.min(d, (performance.now() - t0) / 60); t0 = performance.now(); for (let i = 0; i < 60; i++) f.update(1/60, false); u = Math.min(u, (performance.now() - t0) / 60); } return [d, u]; })()' % FIELD
             d, u = lab.run(js)
-            out['%dx %s %d,%d' % (rate, m, x, y)] = [round(d, 3), round(u, 3)]
+            key = '%dx %s %d,%d' % (rate, m, x, y)
+            old = out.get(key, [1e9, 1e9])
+            out[key] = [min(old[0], round(d, 3)), min(old[1], round(u, 3))]
+      if plain_ok(out): break
+    cdp.send('Emulation.setCPUThrottlingRate', {'rate': 1})
     out['errors'] = lab.errors[:3]
+    out['cal'] = cal
+    out['passes'] = passes
 finally:
     lab.close()
 print('PERF_JSON ' + json.dumps(out))
@@ -566,10 +593,13 @@ test('timing: field draw and logic on the phone profile stay inside the budget (
   if (PRINT || process.env.X1_WILD_PERF) console.log('PERF', JSON.stringify(p));
   for (const rate of [1, 4]) {
     const base = p[`${rate}x valley 30,30`][0];
-    for (const [k, [d, u]] of Object.entries(p)) {
+    const factor = factorFrom(p.cal[rate], rate);   // the page's calibration loop against the quiet PC at this throttle
+    const note = `best of ${p.passes} pass(es); load factor ${factor.toFixed(2)} (calibration ${p.cal[rate]} ms at ${rate}x)`;
+    for (const [k, v] of Object.entries(p)) {
       if (!k.startsWith(`${rate}x x1_`)) continue;
-      assert.ok(d - base <= 1.0 * rate, `${k}: draw ${d} ms against the valley's ${base} ms (budget +${rate} ms at ${rate}x)`);
-      assert.ok(u < 3, `${k}: logic ${u} ms`);
+      const [d, u] = v;
+      assert.ok(d - base <= 1.0 * rate * factor, `${k}: draw ${d} ms against the valley's ${base} ms (budget +${rate} ms at ${rate}x; ${note})`);
+      assert.ok(u < 3 * factor, `${k}: logic ${u} ms (budget 3 ms; ${note})`);
     }
   }
 });

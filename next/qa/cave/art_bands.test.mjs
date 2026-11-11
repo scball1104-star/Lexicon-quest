@@ -12,6 +12,7 @@ import { PREFAB_SETS, parsePrefab, PROPS, OVERLAY_SIZE } from '../../src/data/ca
 import { LANDINGS, parseLanding } from '../../src/data/cave/landing.js';
 import { loadDb, isTileId, isObjectId, objectCells, tileSize, validate, walk, buildGrid } from '../../tools/maps/mapcheck.mjs';
 import { SEEDS, pairFor } from './gen_helpers.mjs';
+import { within } from '../_perf.mjs';
 
 const MY = ['court', 'ember', 'forge'];
 const FLOORS = [45, 65, 85];
@@ -160,10 +161,12 @@ test('the stairs chain across the band borders (B39 -> B40, B59 -> B60, B79 -> B
 test('deterministic and fast: byte-identical JSON on a second run; under 30 ms a fresh floor', () => {
   for (const seed of SEEDS.slice(0, 20)) for (const floor of FLOORS) assert.equal(JSON.stringify(generateFloor(seed, floor)), JSON.stringify(generateFloor(seed, floor)));
   for (const floor of FLOORS) {
-    const t0 = performance.now();
     const N = 12;
-    for (let i = 0; i < N; i++) generateFloor(700000 + i * 7919 + floor, floor);
-    const ms = (performance.now() - t0) / N;
-    assert.ok(ms < 30, `B${floor}: ${ms.toFixed(1)} ms per floor`);
+    const r = within(30, () => {   // qa/_perf.mjs: best of a few tries, budget scaled by a calibration loop (issue #76)
+      const t0 = performance.now();
+      for (let i = 0; i < N; i++) generateFloor(700000 + i * 7919 + floor, floor);
+      return (performance.now() - t0) / N;
+    }, { tries: 3 });
+    assert.ok(r.ok, r.msg(`B${floor} per floor`));
   }
 });

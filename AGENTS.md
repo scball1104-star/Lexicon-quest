@@ -77,9 +77,17 @@ python next/qa/realplay/run.py       # real keys and touch, no LQ_DEBUG actions 
 python next/qa/pwa/offline_reload.py # offline reload after a returning visit to Episode 6 (under 1 min; --live: the published game, read only)
 ```
 
-The same checks run automatically on every pull request (`.github/workflows/next-gate.yml`). Under heavy CPU
-load a few tests time out or flake (`x1_gate`, `x1_wild`, `walks`, `abilities_walks`, `qa/battle/sim.test.mjs`):
-rerun a failing one alone before treating it as real.
+The same checks run automatically on every pull request (`.github/workflows/next-gate.yml`).
+
+**Timing tests are load-proof (issue #76).** A performance budget never compares one wall-clock sample with an
+absolute limit. Use `next/qa/_perf.mjs`: `within(budgetMs, measure)` keeps the fastest of a few tries (load only adds
+time; a real slowdown is slow on every try) and stretches the budget by a calibration loop timed in the same run
+against the quiet reference PC (factor 1 when quiet, capped at 4). A "worst frame" check builds a fresh field each
+try. Browser timings run the same calibration in the page (`CAL_JS`, `factorFrom`). Wait on a condition, never a fixed
+sleep, and time the thing under test, not a cold import beside it. A file whose work outgrows the runner's 180 s cap
+gets its own cap in `next/qa/run.mjs` `LIMITS`, sized from the work with a note. `LQ_PERF_STRICT=1` restores one try
+and factor 1, for a perf check on a quiet machine. If a timing test still fails under load, treat it as real: the
+code got slower, or the test is not following these rules.
 
 ## Rules that keep us from tripping over each other
 

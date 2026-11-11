@@ -17,6 +17,7 @@ import { TEST_FORGE, TEST_FORGE_DARK } from '../../src/world/ep3/_testforge.js';
 import { SCENES, LINES, storyCollisions, creditsPending, markCreditsRolled, CREDITS_HANDOFF, sceneAllowed } from '../../src/game/story.js';
 import { END_CARD_EP2_LIVE, END_CARD_EP3, CREDITS_EP3 } from '../../src/data/text.js';
 import { scenes as EP3_SCENES } from '../../src/data/story/ep3.js';
+import { within } from '../_perf.mjs';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TILES = JSON.parse(fs.readFileSync(path.join(NEXT, 'assets', 'tiles', 'tiles.json'), 'utf8'));
@@ -219,12 +220,15 @@ test('the ash_haze tint, ash and steam budgets, memory actors', () => {
   assert.ok(TINTS.ash_haze && tintSpec('ash_haze').desat > 0.2);
   const f = makeField(TEST_FORGE);
   f.camera = { x: 0, y: 160, W: 384, H: 216, visible: () => true };
-  f.ep3fx.reset();
-  const t0 = performance.now();
-  for (let i = 0; i < 600; i++) f.ep3fx.update();
-  const ms = (performance.now() - t0) / 600;
+  // qa/_perf.mjs: best of a few tries (each from a reset), budget scaled by a calibration loop (issue #76)
+  const r = within(0.3, () => {
+    f.ep3fx.reset();
+    const t0 = performance.now();
+    for (let i = 0; i < 600; i++) f.ep3fx.update();
+    return (performance.now() - t0) / 600;
+  });
   assert.ok(f.ep3fx.ash.length > 24 && f.ep3fx.ash.length <= 64, `${f.ep3fx.ash.length} flakes (CRITIQUE_5 #3: 2 to 3 times the old 24)`);
-  assert.ok(ms < 0.3, `ash update ${ms.toFixed(4)} ms a frame`);
+  assert.ok(r.ok, r.msg('ash update a frame'));
   for (let i = 0; i < 30; i++) f.ep3fx.steam(100, 100, 5);
   assert.ok(f.ep3fx.puffs.length <= 40);
   f.engine.settings.reduceMotion = true;

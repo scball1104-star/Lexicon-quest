@@ -1,5 +1,5 @@
 // Test runner: finds every next/qa/**/*.test.mjs and runs each file with `node --test` in its own
-// child process (180 s timeout each, a few in parallel), prints a summary table, exits 1 on any failure.
+// child process (180 s timeout each unless LIMITS below says more, a few in parallel), prints a summary table, exits 1 on any failure.
 //
 //   node next/qa/run.mjs                 run everything
 //   node next/qa/run.mjs core battle     only files whose path contains "core" or "battle"
@@ -15,8 +15,15 @@ import { fileURLToPath } from 'node:url';
 const QA = path.dirname(fileURLToPath(import.meta.url));
 const NEXT = path.dirname(QA);
 const TIMEOUT_MS = 180_000;
-// E5-integrate: the solo browser walks visit every map (60 of them with Episode 5), about 170 s alone
-const SOLO_TIMEOUT_MS = 300_000;
+// Files whose work is known to outgrow the 180 s cap on a busy CPU get their own cap, sized from the work and noted
+// beside the spawn limits inside each file (issue #76). The solo browser walks run alone after the parallel batch.
+const LIMITS = {
+  'qa/world/walks.test.mjs': 510_000,            // walks.py every map: ~170 s alone, ~240 s under load; spawn cap 480 s
+  'qa/world/labs_walks.test.mjs': 750_000,       // three labs: ~130 s together under load; spawn caps 200 + 240 + 280 s
+  'qa/world/abilities_walks.test.mjs': 330_000,  // abilities_lab.py: ~35 s alone, ~65 s under load; spawn cap 300 s
+  'qa/battle/sim.test.mjs': 420_000,             // deterministic balance sims: ~36 s alone, past 180 s beside three agents
+};
+const limitFor = (f) => LIMITS[path.relative(NEXT, f).split(path.sep).join('/')] || TIMEOUT_MS;
 
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose') || args.includes('-v');
@@ -68,7 +75,7 @@ async function main() {
   const worker = async () => {
     while (next < files.length) {
       const f = files[next++];
-      const r = await runFile(f, SOLO.test(f) ? SOLO_TIMEOUT_MS : TIMEOUT_MS);
+      const r = await runFile(f, limitFor(f));
       results.push(r);
       const ok = r.code === 0 && !r.timedOut;
       process.stdout.write(`${ok ? 'PASS' : 'FAIL'}  ${path.relative(NEXT, r.file).split(path.sep).join('/')}  (${r.ms} ms)\n`);
@@ -88,7 +95,7 @@ async function main() {
   const failed = results.filter((r) => r.code !== 0 || r.timedOut);
   for (const r of results) {
     if (verbose || r.code !== 0 || r.timedOut) {
-      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? `(TIMED OUT after ${SOLO.test(r.file) ? SOLO_TIMEOUT_MS / 1000 : TIMEOUT_MS / 1000} s)` : ''}`);
+      console.log(`\n----- ${path.relative(NEXT, r.file)} ${r.timedOut ? `(TIMED OUT after ${limitFor(r.file) / 1000} s)` : ''}`);
       // TAP output: show failing assertions and diagnostics, not the full green list.
       const lines = r.output.split('\n');
       const shown = verbose ? lines : lines.filter((l) => /not ok|^\s+(error|expected|actual|operator|stack|at |location|message|code|failureType)|Error|^\s{4,}\S/.test(l));
