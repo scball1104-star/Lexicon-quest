@@ -94,7 +94,7 @@ export const EP4_ENEMIES = {
   // Stamps every turn (its sleeves are full of paper); Objection at 3 Seals; at 50% it calls a witness that stamps it too.
   barrister: {
     name: 'The Inkbound Barrister', family: 'spirit', level: 19, size: 'large', boss: true, ai: 'barrister',
-    hp: 2125, atk: 360, def: 26, mag: 672, spr: 28, spd: 18, luk: 8,
+    hp: 2125, atk: 360, def: 26, mag: 520, spr: 28, spd: 15, luk: 8,
     shields: 8, weak: ['fire', 'light', 'spear'], resist: ['ice', 'thunder'], statusImmune: ['silence'],
     heat: decree('objection'),
     exp: 220, gold: 800, masteryPts: 18,

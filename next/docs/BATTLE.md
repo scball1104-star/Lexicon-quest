@@ -1330,7 +1330,7 @@ Archivore's and the King's bands keep their old ceilings (12, 13) because Fine P
 | Archivore (Ep1) | 820 / 70 / 72 / 12 | 697 / 98 / 101 / 12 | 8-12 / 8-12 | 25% | Room under the one-hit rule (Gnash 84% of Mira at Lv 7): HP -15%, x1.4 both, no speed. 31% HP lost, careful 95% for a new player. |
 | Nameless King (Ep2) | 1,400 / 158 / 149 / 13 | 1,120 / 190 / 179 / 13 | 9-13 / 9-13 | 12% | Held by the Lv 12 floor (90%, the 80% route and the bot): x1.25 put Lv 12 at exactly 90%, so x1.2. The weakest change; HP lost reads 16% at the tests' 60 fights, so its guard is low. |
 | Cinder Warden (Ep3) | 2,300 / 230 / 200 / 18 | 1,955 / 248 / 300 / 18 | 9-13 / 9-12 | 15% | Hammerfall sat at 86% of Mira: ATK x1.08 only, MAG x1.5, HP -15%. Tempered Oath must still turn half the Last Hammers (oathMin) at 400 fights and at the tests' 60: any SPD gain (+1 to +3) or more MAG put that at 34 to 49%. So the Warden gets the smallest lift: a round and a third shorter, HP lost 19 -> 22%, items 1.9 -> 2.2. |
-| Barrister (Ep4 F2) | 2,500 / 300 / 320 / 13 | 2,125 / 360 / 672 / 18 | 7-9 / 7-9 | 12% | Careful play keeps it Broken much of the fight; SPD +5 gives it turns back, MAG x2.1 (Cross-Examine) makes them count. Items 0.25 -> 2.5 a fight; ignoring telegraphs 73% -> 23%. |
+| Barrister (Ep4 F2) | 2,500 / 300 / 320 / 13 | 2,125 / 360 / 520 / 15 | 7-9 / 7-9 | 12% | Careful play keeps it Broken much of the fight; SPD +2 gives it turns back, MAG x1.6 (Cross-Examine) makes them count. First pick was 672 / 18; the real-input bot (qa/realplay boss.py, Lv 20, heals under 50%, answers decrees) lost it every run, so it was softened on 11/11 (Scott: "Soften the Barrister"). SPD is the cliff: 520 / 16 loses to the bot; 480 / 15 drops careful HP lost to 11%, under the guard. |
 | Paper Regent (Ep4) | 2,950 / 330 / 300 / 13 | 2,213 / 393 / 480 / 16 | 10-14 / 10-13 | 20% | HP -25%, ATK x1.19 (Trident Sweep at the ceiling), MAG x1.6, SPD +3: shorter, 4.5 items a fight. |
 | Mirage Knight (Ep5 F2) | 2,450 / 420 / 220 / 13 | 1,838 / 521 / 550 / 16 | 7-9 / 6-9 | 17% | Was the softest boss (8% HP lost, 100% win). HP -25%, ATK x1.24, MAG x2.5 (Glare hits everyone), SPD +3; band floor to 6 so a fast win is not a miss. |
 | Sand Oracle (Ep5) | 4,000 / 380 / 420 / 14 | 3,000 / 441 / 798 / 17 | 11-15 / 10-13 | 22% | HP -25%, ATK x1.16 (Stinger at the ceiling), MAG x1.9 (Sandfall, the Last Prophecy), SPD +3: 1.6 rounds shorter. |
@@ -1347,8 +1347,8 @@ all nine, before and after; ignoring telegraphs at the plan level):
 | nameless_king | 12 | 96% / 12.24 / 25% / 2.65 | 92% / 11.29 / 28% / 3.08 | - |
 | cinder_warden | 16 | 99% / 12.73 / 19% / 1.94 | 98% / 11.42 / 22% / 2.22 | 71% -> 76% |
 | cinder_warden | 17 | 99% / 11.64 / 21% / 1.78 | 100% / 10.75 / 20% / 1.79 | - |
-| barrister | 19 | 100% / 7.40 / 11% / 0.25 | 96% / 7.60 / 16% / 2.46 | 73% -> 23% |
-| barrister | 20 | 100% / 7.52 / 11% / 0.18 | 96% / 7.51 / 14% / 1.89 | - |
+| barrister | 19 | 100% / 7.40 / 11% / 0.25 | 99% / 7.11 / 12% / 1.20 | 73% -> 41% |
+| barrister | 20 | 100% / 7.52 / 11% / 0.18 | 100% / 7.15 / 10% / 0.77 | - |
 | paper_regent | 20 | 99% / 13.52 / 16% / 2.93 | 92% / 12.89 / 24% / 4.52 | 74% -> 23% |
 | paper_regent | 21 | 100% / 12.53 / 15% / 2.26 | 95% / 11.89 / 23% / 3.79 | - |
 | mirage_knight | 23 | 100% / 8.75 / 8% / 0.58 | 91% / 8.19 / 24% / 1.46 | 86% -> 35% |
