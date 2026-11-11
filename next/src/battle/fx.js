@@ -21,6 +21,7 @@ const STATUS_COLORS = { poison: ['#a77bff', '#6a54b0'], burn: FIRE, chill: ICE, 
 function sin(a) { return Math.sin(a); }
 function cos(a) { return Math.cos(a); }
 const TAU = Math.PI * 2;
+export const REDUCED_TRAVEL = 1 / 3;   // Reduce motion: how far a battle particle travels, as a share of its full flight
 
 /** Simple deterministic jitter so effects look the same every run of a seeded battle. */
 function jit(seed, i, k = 0) { return hash2d(i, k, seed) * 2 - 1; }
@@ -95,17 +96,21 @@ export class BattleFx {
     return it;
   }
   /** Burst of particles: n, from (cx, cy), opts { speed, spread (radians), dir (radians), gravity, life, colors, size, drift, rise } */
+  // Reduce motion: a third of the particles (at least one), a third of the travel (speed and gravity scaled together, so
+  // each mote stays near where it was born), no sway and no blink. The impact star and the numbers carry the hit.
   particles(cx, cy, n, o = {}) {
     const seed = this.seed++;
     const colors = o.colors || [C.white];
+    const still = this.reduce, go = still ? REDUCED_TRAVEL : 1;
+    if (still && n > 0) n = Math.ceil(n / 3);
     for (let i = 0; i < n; i++) {
       const ang = (o.dir ?? -Math.PI / 2) + (o.spread ?? TAU) * (hash2d(i, 1, seed) - 0.5);
-      const sp = (o.speed ?? 1.5) * (0.5 + hash2d(i, 2, seed));
+      const sp = (o.speed ?? 1.5) * (0.5 + hash2d(i, 2, seed)) * go;
       this.parts.push({
         x: cx + (o.radius ? jit(seed, i, 3) * o.radius : 0), y: cy + (o.radius ? jit(seed, i, 4) * (o.radiusY ?? o.radius) : 0),
-        vx: cos(ang) * sp + (o.vx || 0), vy: sin(ang) * sp + (o.vy || 0), g: o.gravity || 0, drift: o.drift || 0,
+        vx: cos(ang) * sp + (o.vx || 0) * go, vy: sin(ang) * sp + (o.vy || 0) * go, g: (o.gravity || 0) * go, drift: still ? 0 : o.drift || 0,
         t: -(o.delay ? Math.floor(hash2d(i, 5, seed) * o.delay) : 0), life: Math.round((o.life ?? 20) * (0.7 + 0.6 * hash2d(i, 6, seed))),
-        color: colors[i % colors.length], size: o.size ?? 1, shrink: !!o.shrink, blink: !!o.blink, seed: seed * 31 + i,
+        color: colors[i % colors.length], size: o.size ?? 1, shrink: !!o.shrink, blink: !still && !!o.blink, seed: seed * 31 + i,
       });
     }
   }
@@ -348,20 +353,22 @@ export class BattleFx {
   fx_ring(o, p = {}) {
     const { cx, cy } = this.center(o);
     const frames = p.frames || 12, r0 = p.r0 ?? 2, r1 = p.r1 ?? 20, color = p.color || o.color || C.white;
+    const still = this.reduce;   // Reduce motion: the ring holds its halfway size and fades in place
     this.add(frames, (r, t) => {
-      const k = t / frames;
-      const rad = Math.round(r0 + (r1 - r0) * (1 - (1 - k) * (1 - k)));
+      const k = t / frames, g = still ? 0.5 : k;
+      const rad = Math.round(r0 + (r1 - r0) * (1 - (1 - g) * (1 - g)));
       r.withAlpha(1 - k * 0.8, () => r.ellipse(cx, cy + (p.dy || 0), rad, Math.round(rad * (p.squash ?? 0.8)), color, false));
     }, p.layer || 'over');
   }
   fx_rays(o, p = {}) {
     const { cx, cy } = this.center(o);
     const n = p.n || 8, len = p.len || 24, frames = p.frames || 14, color = p.color || C.white;
+    const still = this.reduce;   // Reduce motion: the rays hold their halfway reach, with no turn, and fade in place
     this.add(frames, (r, t) => {
-      const k = t / frames;
-      const inner = Math.round(len * k), outer = Math.round(len * Math.min(1, k + 0.3));
+      const k = t / frames, g = still ? 0.5 : k;
+      const inner = Math.round(len * g), outer = Math.round(len * Math.min(1, g + 0.3));
       for (let i = 0; i < n; i++) {
-        const a = i * TAU / n + k * 0.4;
+        const a = i * TAU / n + g * 0.4;
         r.withAlpha(1 - k, () => r.line(cx + cos(a) * inner, cy + sin(a) * inner * 0.8, cx + cos(a) * outer, cy + sin(a) * outer * 0.8, color));
       }
     });

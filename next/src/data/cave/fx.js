@@ -2,9 +2,10 @@
 // Nameless King's veil breaks as glass. Cave pack only: register() adds `fx_page_burst` to the battle fx table (BattleFx.spawn
 // looks a kind up as `fx_<kind>`), and the animator asks for it on a phase that has a Binder sting (o.big carries the phase).
 // Phase 2 (Loose Leaves): the spine splits and the leaves storm out and flutter down. Phase 3 (The Last Binding): the same
-// tear, but each leaf catches at its lower edge, burns up into itself and ends as rising embers. Reduced motion: fewer leaves.
+// tear, but each leaf catches at its lower edge, burns up into itself and ends as rising embers. Reduced motion: fewer leaves,
+// a third of their flight (REDUCED_TRAVEL), and the scraps and embers thinned by BattleFx.particles itself.
 
-import { BattleFx, C } from '../../battle/fx.js';
+import { BattleFx, C, REDUCED_TRAVEL } from '../../battle/fx.js';
 import { hash2d } from '../../core/rng.js';
 
 const FIRE = ['#fff1a8', '#ffcf5a', '#eba14d', '#e06b39', '#8a2a2a'];
@@ -49,7 +50,7 @@ export function fx_page_burst(o) {
   for (let i = 0; i < n; i++) {
     const side = i % 2 ? 1 : -1;
     const ang = (hash2d(i, 1, seed) - 0.5) * 2.1;          // mostly sideways, out of the split spine
-    const sp = 2.6 + hash2d(i, 2, seed) * 3;
+    const sp = (2.6 + hash2d(i, 2, seed) * 3) * (this.reduce ? REDUCED_TRAVEL : 1);
     leaves.push({
       x0: cx + side * Math.round(hash2d(i, 3, seed) * 6), y0: Math.round(cy - h * 0.3 + hash2d(i, 4, seed) * h * 0.6),
       vx: side * Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 0.6,
@@ -84,9 +85,9 @@ export function fx_page_burst(o) {
     }
   }, 'top');
   // torn scraps, and for the last binding the embers each leaf leaves behind
-  this.particles(cx, cy, this.reduce ? 8 : 22, { colors: [PAGE, PAGE_LIT, PAGE_DIM, C.white], speed: 2.6, life: 26, gravity: 0.1, size: 2, shrink: true, radius: 4, radiusY: Math.round(h * 0.3) });
+  this.particles(cx, cy, 22, { colors: [PAGE, PAGE_LIT, PAGE_DIM, C.white], speed: 2.6, life: 26, gravity: 0.1, size: 2, shrink: true, radius: 4, radiusY: Math.round(h * 0.3) });
   if (burn) {
-    this.particles(cx, cy, this.reduce ? 10 : 30, { colors: FIRE.slice(0, 4), speed: 1.6, life: 44, gravity: -0.04, drift: 0.6, size: 2, shrink: true, radius: hw, radiusY: Math.round(h * 0.35), delay: 26 });
+    this.particles(cx, cy, 30, { colors: FIRE.slice(0, 4), speed: 1.6, life: 44, gravity: -0.04, drift: 0.6, size: 2, shrink: true, radius: hw, radiusY: Math.round(h * 0.35), delay: 26 });
     this.particles(cx, cy + Math.round(h * 0.2), 12, { colors: [FIRE[4], '#3a2a3a'], speed: 0.6, life: 50, gravity: -0.03, drift: 0.4, size: 3, radius: hw, delay: 34 });
   }
   this.fx_ring({ ...o, y: cy + 4 }, { color: burn ? FIRE[1] : PAGE, r0: 4, r1: hw + 26, frames: 14, squash: 0.5 });

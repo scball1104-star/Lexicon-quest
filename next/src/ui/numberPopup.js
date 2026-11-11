@@ -8,7 +8,8 @@
 //   pops.word(x, y, 'MISS' | 'WEAK' | 'BREAK' | 'RESIST' | 'IMMUNE' | 'GUARD' | 'DODGE' | 'CRITICAL')
 //   pops.update()  (once per logic frame)   pops.draw(r)   pops.active (count)   pops.clear()
 //
-// Motion: numbers pop up 14 px, fall and bounce twice (SNES style), hold, then vanish.
+// Motion: numbers pop up 14 px, fall and bounce twice (SNES style), hold, then vanish. Under Reduce motion (the renderer's
+// settings) they appear at their resting place, hold and fade, with no bounce: the column and its timing are unchanged.
 //
 // Stacking (W4b): popups aimed at the same target (a spawn within 14 x 28 px of a live group's anchor) form a
 // column. Each new number lands one slot ABOVE the previous one (10 px pitch for the small digits, newest on
@@ -123,8 +124,9 @@ export class NumberPopups {
    * Resolve every entry's bottom y for this frame: the static column plus the bounce, then relaxed from the
    * oldest (lowest) entry upward so nothing overlaps while bouncing. Returns a Map(entry -> bottom).
    */
-  layout() {
+  layout(still = false) {
     const out = new Map();
+    const lift = (p) => (still ? 0 : NumberPopups.offsetAt(p.t, p.font === 'num_big'));
     const place = (p, bottom) => {
       out.set(p, bottom);
       if (p.word2 && p.word2.t < p.word2.life) out.set(p.word2, bottom - p.word2.above);
@@ -133,7 +135,7 @@ export class NumberPopups {
       let prevTop = null;
       for (const m of g.members) {
         if (m.t >= m.life) continue;
-        const dy = NumberPopups.offsetAt(m.t, m.font === 'num_big');
+        const dy = lift(m);
         let bottom = m.y + m.stack + dy;
         if (prevTop != null && bottom > prevTop + 1) bottom = prevTop + 1;
         place(m, bottom);
@@ -141,12 +143,12 @@ export class NumberPopups {
       }
     }
     // Entries that belong to no group (never happens in practice; defensive).
-    for (const p of this.list) if (!out.has(p)) place(p, p.y + p.stack + NumberPopups.offsetAt(p.t, p.font === 'num_big'));
+    for (const p of this.list) if (!out.has(p)) place(p, p.y + p.stack + lift(p));
     return out;
   }
 
   draw(r) {
-    const pos = this.layout();
+    const pos = this.layout(!!(r.settings && r.settings.reduceMotion));
     for (const p of this.list) {
       if (p.t < 0) continue;
       const bottom = pos.get(p);
