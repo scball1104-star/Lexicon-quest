@@ -352,6 +352,15 @@ export const BARKS = {
   flee: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'We can come back better prepared. A retreat is not forgetting.' }] },
   ],
+  // #86 (CRITIQUE_9 item 9): Fury and Combo in words, the way the wolves' scene teaches Lunge and Appraise. Spoken on the
+  // field after the first won fight in which the command lit (scenes/battle.js `lessons`, field.js startBattle).
+  first_fury: [
+    { if: 'bram_joined', lines: [{ who: 'bram', text: 'Fury filled up back there. When it lights, take Fury and let it all out.' }] },
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Fury filled up back there. When it lights, take Fury and spend it.' }] },
+  ],
+  first_combo: [
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Combo lit up back there. When it does, take it: two of us, one blow.' }] },
+  ],
 };
 
 // ------------------------------------------------------------------------------------------------
