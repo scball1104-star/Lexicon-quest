@@ -43,7 +43,7 @@ const MAP_ACTORS = ['scribe'];   // the Storm Scribe's map actor in ep6_obs_eyri
 const EP6_MUSIC = ['zephyr', 'storm_observatory', 'boss_scribe', 'saffron'];   // plan 2.7 (saffron rides the ep5 fragment)
 const EP6_SFX = ['gust_carry', 'gust_land', 'vane_turn', 'mooring_catch', 'gale_gust', 'anchor_set', 'rewrite_read', 'rewrite_break', 'signal_lamp'];
 const EP6_SPRITES = ['npc_aeris', 'npc_aeris_young', 'npc_liora', 'npc_bennet', 'npc_suri', 'npc_ilex', 'npc_nova', 'npc_piri', 'npc_thea', 'npc_pippa',
-  'npc_deckhand', 'npc_vex', 'npc_yara', 'storm_harrier'];
+  'npc_deckhand', 'npc_vex', 'npc_yara', 'storm_harrier', 'npc_grey_bird'];   // npc_grey_bird: the opening's messenger bird (issue #99)
 const PAGE_IDS = ['ep6_slip', 'ep6_manifest', 'ep6_letter', 'ep6_page'];
 const TINTS = ['none', 'dawn', 'dusk', 'night'];
 const KNOWN = (f) => f in FLAGS || f === 'tier_1';   // tier_1: the Fine Print pack's flag (src/data/tier)
@@ -307,7 +307,7 @@ test('the first five minutes: the slip before any line, Bram on four seats, Mira
   const kinds = Object.keys(PAGE_KINDS);
   PAGE_KINDS.ep6_slip = () => ({});
   try {
-    const log = await one('ep6_morning', [], { mapId: 'ep5_sh_inn' });
+    const log = await one('ep6_morning', [], { mapId: 'ep5_sh_observatory' });   // issue #99: the tower at night
     const opened = log.findIndex((e) => e.op === 'closeup' && e.args[0] === 'ep6_slip');
     assert.ok(opened >= 0 && says(log.slice(0, opened)).length === 1, 'the slip is the second box (one narration of the bird)');
     assert.deepEqual(log[opened].args[1], { mode: 'burned' });
@@ -405,7 +405,7 @@ test('the switch: with EP6_LIVE false nothing in Episode 6 is reachable; Fine Pr
 
 // Each map's track (plan 8.2). A scene that changes the music puts its map's track back before it ends.
 const SCENE_TRACK = {
-  ep6_morning: 'saffron', isles_view: 'high_moor', zephyr_arrival: 'zephyr', chart_room: 'mystery', anchor_lesson: 'zephyr',
+  ep6_morning: 'orrery', isles_view: 'high_moor', zephyr_arrival: 'zephyr', chart_room: 'mystery', anchor_lesson: 'zephyr',
   aeris_memory_1: 'storm_observatory', aeris_memory_2: 'storm_observatory', vex_relay: 'storm_observatory',
   gale_engine: 'storm_observatory', vex_falls: 'mystery', fifth_voice: 'mystery', scribe: null, cloud_library: null,
 };
@@ -416,7 +416,7 @@ test('music cues follow the cue sheet and return to the map track (plan 8.3)', a
     if (m.length && !lost) assert.equal(m.at(-1), track, `${id} ends on ${m.at(-1)}`);
   }
   const mus = async (id, flags) => musics(await one(id, flags));
-  assert.deepEqual(await mus('ep6_morning', []), [null, 'saffron']);
+  assert.deepEqual(await mus('ep6_morning', []), [null, 'orrery']);   // issue #99: the tower's track, not the street's
   assert.deepEqual(await mus('isles_view', ['airstair_arrived']), ['mystery', 'high_moor']);
   assert.deepEqual(await mus('zephyr_arrival', ['airstair_arrived']), [null, 'zephyr']);
   assert.deepEqual(await mus('chart_room', ['met_aeris']), [null, 'mystery']);

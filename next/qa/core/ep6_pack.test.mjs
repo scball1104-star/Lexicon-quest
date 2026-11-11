@@ -138,7 +138,7 @@ test('pack entry: ORDER, missing modules skipped, idempotent, the ep5 pack regis
   assert.ok(globalThis.LQ_EP6 && typeof globalThis.LQ_EP6.title === 'function' && typeof globalThis.LQ_EP6.start === 'function'
     && typeof globalThis.LQ_EP6.offer === 'function');
   if (!EP6_LIVE) assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'EP6_LIVE false: the Episode 5 end card is unchanged');
-  assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch');
+  assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins that night.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch');
   assert.equal(ep6.EP6_MAPS_LISTED, ep6.mapsListed());
   assert.equal(ep6.EP6_MAPS_LISTED, true, 'the maps are listed (E6-integrate, wave 6d)');
   const src = read('src/data/ep6/index.js');

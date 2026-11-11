@@ -113,12 +113,22 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
 
 ## 3. Scenes, map by map
 
+### `ep5_sh_observatory` (issue #99 patch `withObsWake`: enter trigger `ep6_wake_obs`; marks `obs_stage6`, `obs_mira6`, `obs_bram6`, `bird_window`, `bird_perch`)
+
+- `ep6_morning`, the Armillary Tower at night, where Laleh read the sky (issue #99, `docs/WORLD_MAP_PLAN.md` section 4). The
+  Episode 5 credits and the quick start put the party at `obs_stage6` (7,8) and `ep6_wake_obs` runs the scene; from the inn
+  (an old save's wake room, `ep6_wake` below) or any other tile it fades out and moves the party to `obs_stage6` first
+  (`s.leaderAt`, `s.openingTint` from the ep3 pack's `opening_stage`). Tint `night`. Fades in; Mira walks to `obs_mira6`,
+  Bram to `obs_bram6`. The grey bird (`npc_grey_bird`, a scene spawn, not solid) appears at `bird_window` under the high
+  window and flies down to `bird_perch` on top of the great rings (`page_flutter`); the camera pans to `bird_perch`. Opens
+  `ep6_slip` (`burned`). The bird flies back to `bird_window` and is despawned after the slip goes in the bag. Music: the
+  tower's track `orrery`, silence on "Four seats.", `orrery` again before Mira's last line. 5 boxes (budget 6). Gives
+  `boarding_slip`.
+
 ### `ep5_sh_inn` (patch: trigger `ep6_wake`; marks `bird_sill`, `mira_window6`, `inn_stage6`, `inn_stage6_b`, existing `inn_bed`)
 
-- `ep6_morning`, enter trigger `ep6_wake`. Fades in; the hero walks to `inn_stage6`, Mira to `mira_window6`, Bram to
-  `inn_stage6_b` (all reachable from `inn_bed` and from the street door). Pans to `bird_sill` (the bird is narration;
-  `page_flutter`). Opens `ep6_slip` (`burned`). Music: the map track `saffron`, silence on "Four seats.", `saffron` again
-  when the slip goes in the bag. 5 boxes (budget 6). Gives `boarding_slip`.
+- The old wake room (until issue #99 the morning played here, the bird narration at the sill). `ep6_wake` stays for a save
+  made here after the Episode 5 credits: `ep6_morning` moves the party to the tower. The marks stay unused.
 
 ### `ep5_saffron` (patch: `ship_moored`, `sky_berth`, `berth_north`; marks `berth_stage6`, `berth_stage6_m`, `berth_stage6_b`, existing `water_stairs`)
 

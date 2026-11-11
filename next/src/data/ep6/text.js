@@ -358,7 +358,7 @@ export const EP6_BATTLE_TEXT = {
 // ep6_ending (placeholder wording, Scott's or Stephen's to change: EPISODE6.md section 10.12).
 // ------------------------------------------------------------------------------------------------
 export const END_CARD_EP6 = { text: 'To be continued', sub: 'Episode 7 is not playable yet.', frames: 300, backdrop: 'ep6_dialog_keyart' };
-export const END_CARD_EP5_LIVE = { ...END_CARD_EP5, sub: 'Episode 6 begins in the morning.' };
+export const END_CARD_EP5_LIVE = { ...END_CARD_EP5, sub: 'Episode 6 begins that night.' };
 export const END_TITLE_EP6 = { text: 'End of Episode 6', sub: 'Words on the Wind' };
 export const EPISODE7_CARD = { text: 'Episode 7: The Vanishing World', sub: 'The other half of the page lies north.' };
 

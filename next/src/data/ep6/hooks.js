@@ -24,7 +24,10 @@ import { newGameEp6, EP6_START } from './start.js';
 import { mapsListed, isMissing, register as registerEp6 } from './index.js';
 
 /** The Episode 5 end card once Episode 6 is live (EPISODE6_PLAN 5.3). */
-export const END_CARD_EP5_LIVE = { ...END_CARD_EP5, sub: 'Episode 6 begins in the morning.' };
+export const END_CARD_EP5_LIVE = { ...END_CARD_EP5, sub: 'Episode 6 begins that night.' };
+/** Where the Episode 5 credits wake the party while Episode 6 is live (issue #99), and where they did before. */
+export const OPENING6 = { map: 'ep5_sh_observatory', mark: 'obs_stage6' };
+export const EP5_WAKE_OFF = { map: 'ep5_sh_inn', mark: 'inn_bed' };
 export const EP6_ROW_LABEL = 'Episode 6: new party';
 export const EP6_ROW_HELP = 'A ready party at Lv 25. Your own save stays under Continue.';
 
@@ -131,13 +134,13 @@ function installDebug(engine) {
  * the unpatched module is re-entered where the party stands (the same-map dither), when it matters: the inn while ep6_morning
  * is still to come, Saffron Haven once Episode 6 has started. Waits for the field to be idle (bounded). True when it re-entered.
  */
-export const PATCHED_MAPS = ['ep5_sh_inn', 'ep5_saffron'];
+export const PATCHED_MAPS = ['ep5_sh_inn', 'ep5_saffron', 'ep5_sh_observatory'];
 export function relandPatched(engine, tries = 40) {
   const f = engine && (engine.stack || []).find((sc) => sc && sc.name === 'field');
   if (!f || f.dead || !f.map || !f.game || !PATCHED_MAPS.includes(f.mapId)) return false;
   const mod = peekMap(f.mapId), fl = f.game.flags || {};
   if (!mod || f.map.mod === mod) return false;
-  if (f.mapId === 'ep5_sh_inn' ? !fl.ep5_complete || fl.ep6_morning_done : !fl.ep6_started) return false;
+  if (f.mapId === 'ep5_saffron' ? !fl.ep6_started : !fl.ep5_complete || fl.ep6_morning_done) return false;   // the inn and the tower: the morning
   const L = f.leader;
   if (f.loading || f.pendingWarp || f.inputLocked || (f.cutscene && f.cutscene.running) || engine.scene !== f || !L || L.moving) {
     if (tries > 0 && typeof engine.after === 'function') engine.after(30, () => relandPatched(engine, tries - 1));
@@ -159,6 +162,9 @@ export function register(engine, mods = {}) {
     if (card5Off === undefined) card5Off = CREDITS_HANDOFF[5].endCard;
     CREDITS_HANDOFF[5].endCard = (mods.text && mods.text.END_CARD_EP5_LIVE) || END_CARD_EP5_LIVE;
     installed.push('endcard5');
+    // issue #99: the Episode 5 credits wake the party in the Armillary Tower at night, not in the Dune Lantern Rest
+    Object.assign(CREDITS_HANDOFF[5], OPENING6);
+    installed.push('opening6');
   }
   const q = mods.quests && mods.quests.MAIN_QUEST_EP6;
   if (q) { if (!QUEST_EXT.some(([f]) => f === 'ep6_started')) QUEST_EXT.unshift(['ep6_started', q]); installed.push('quest'); }
@@ -176,7 +182,7 @@ export function register(engine, mods = {}) {
 /** Tests: take the global hooks away again and put the Episode 5 end card back (the tables keep entry 6, as a loaded pack's do). */
 export function unregister() {
   if (globalThis.LQ_EP6 === HOOKS) delete globalThis.LQ_EP6;
-  if (card5Off !== undefined && CREDITS_HANDOFF[5]) CREDITS_HANDOFF[5].endCard = card5Off;
+  if (card5Off !== undefined && CREDITS_HANDOFF[5]) Object.assign(CREDITS_HANDOFF[5], { endCard: card5Off }, EP5_WAKE_OFF);
   card5Off = undefined;
   done = false;
 }

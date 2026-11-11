@@ -28,7 +28,25 @@
 //     (the quay cell below her is the sea), and berth_land6 (10,27), where the Airstair's boat lands.
 //   With EP6_LIVE off nothing sets ep6_started, so no gangway, no trigger and no door exist.
 
+// withObsWake(ep5_sh_observatory) (issue #99, WORLD_MAP_PLAN 4): Episode 6 opens here at night, where Laleh read the sky.
+//   The Episode 5 credits and the quick start put the party at obs_stage6 (7,8) on the blue runner below the rings; the
+//   enter trigger ep6_wake_obs (if ep5_complete, ifNot ep6_morning_done) runs ep6_morning; marks obs_mira6 (6,7),
+//   obs_bram6 (8,8), bird_window (6,3) under the high window where the bird comes in, bird_perch (6,5) on the rings' east band.
+//   `opening_stage` (ep3/_opening.js) gives the scene leaderAt and openingTint. ep6_wake in the inn stays for old saves.
+import { STAGE } from './ep3/_opening.js';
+
 const has = (m, id) => (m.events || []).some((e) => e.id === id);
+
+export function withObsWake(base) {
+  if (!base || base.id !== 'ep5_sh_observatory' || has(base, 'ep6_wake_obs')) return base;
+  return {
+    ...base,
+    events: [...base.events,
+      { id: 'ep6_wake_obs', type: 'trigger', x: 0, y: 0, w: 1, h: 1, script: 'ep6_morning', on: 'enter', if: 'ep5_complete', ifNot: 'ep6_morning_done' },
+      STAGE],
+    marks: { ...base.marks, obs_stage6: [7, 8], obs_mira6: [6, 7], obs_bram6: [8, 8], bird_window: [6, 3], bird_perch: [6, 5] },
+  };
+}
 
 export const BERTH = { x: 10, y: 28, land: [10, 27] };
 export const STACK_FOOT = [12, 43];

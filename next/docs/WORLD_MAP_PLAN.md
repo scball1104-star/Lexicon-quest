@@ -161,6 +161,15 @@ their own places (the bell tower cold open, `hero_home`) and stay.
 For a carried-on save, the credits hand-off places the party in the new start room instead of an inn bed. For a quick start
 the same room is the start. Re-staging Episodes 3 to 6 touches shipped content, so it gets its own wave and a playtest.
 
+**Built for Episodes 3 to 6 (wave 4, issue #99, 2026-11-11), playtest still to come.** The rooms: `nameless_hollow`
+`wall_wake` (a wall walk added by the ep3 pack's `hollow_gate.js`, its tiles and the glow strip drawn by
+`tools/art/tiles/ep3_wall.py`), `emberpeak` `dawn_stage`, `ep5_ship` `deck_start`, `ep5_sh_observatory` `obs_stage6` (the bird
+`npc_grey_bird`, `tools/art/sprites/chars/wm4_bird.py`). Each pack points the previous episode's credits hand-off and its own
+quick start there. An old save sitting in the old inn (or anywhere else before the morning) is moved to the new room by the
+morning scene itself, which then plays there; a save past the morning never replays it (the scene guards are unchanged). The
+ship needs no new night art: `ep5_ship` was already a night deck. Staging per episode: `docs/story/STAGING_EP3.md` to
+`STAGING_EP6.md`.
+
 ---
 
 ## 5. Save compatibility and loading

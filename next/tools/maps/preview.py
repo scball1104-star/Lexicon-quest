@@ -549,6 +549,23 @@ def walk_report(map_id, mp):
     return r
 
 
+
+def merge_ep3_tiles(db):
+    """The ep3 pack's own tiles (the Episode 3 opening's wall walk and far glow, issue #99): read from the generated module
+    src/data/maps/ep3/_open_tiles.js (tools/art/tiles/ep3_wall.py writes it one entry a line), as the pack merges them."""
+    import re
+    path = os.path.join(NEXT, 'src', 'data', 'maps', 'ep3', '_open_tiles.js')
+    if not os.path.exists(path):
+        return
+    rx = re.compile(r"^\s+(\w+): \{ sheet: '([^']+)', x: (\d+), y: (\d+), w: (\d+), h: (\d+), collision: '(\w+)' \},?$")
+    tiles = db.db.setdefault('tiles', {})
+    for line in open(path, encoding='utf-8'):
+        m = rx.match(line)
+        if m and m.group(1) not in tiles:
+            tiles[m.group(1)] = {'sheet': m.group(2), 'x': int(m.group(3)), 'y': int(m.group(4)), 'w': int(m.group(5)),
+                                 'h': int(m.group(6)), 'collision': m.group(7)}
+
+
 def main(argv):
     args = [a for a in argv[1:] if not a.startswith('--')]
     flags = [a for a in argv[1:] if a.startswith('--')]
@@ -580,6 +597,7 @@ def main(argv):
         db = X1DB()
     except Exception:  # noqa: BLE001
         db = TileDB()
+    merge_ep3_tiles(db)
     spr = SpriteDB()
     atl = Atlases()
     npc_map = npc_sprites()

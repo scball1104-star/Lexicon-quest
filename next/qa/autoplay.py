@@ -2908,11 +2908,11 @@ class Episode2(Episode):
         for _ in range(400):
             sc = b.handle()
             fs = b.field() or {}
-            if sc == 'field' and fs.get('map') == 'nh_inn' and not fs.get('locked'):
+            if sc == 'field' and fs.get('map') in ('nh_inn', 'nameless_hollow') and not fs.get('locked'):
                 break
         f = b.settle()
-        if f['map'] != 'nh_inn':
-            raise Fail(f'after the Episode 2 credits the party woke on {f["map"]}, not nh_inn')
+        if f['map'] not in ('nh_inn', 'nameless_hollow'):   # issue #99: with the ep3 pack, the east wall walk
+            raise Fail(f'after the Episode 2 credits the party woke on {f["map"]}, not the wall walk or nh_inn')
         if not (b.game() or {}).get('counters', {}).get('credits2_rolled'):
             raise Fail('credits2_rolled was not counted')
         b.mark('ep2_credits_done')
@@ -2922,12 +2922,14 @@ class Episode2(Episode):
         b = self.b
         if not self.side or not self.has('ep2_complete'):
             return
-        self.ensure_map('nh_inn')
         f = b.settle()
-        if f['leader']['x'] >= 13:
-            b.through('inn_down')                                    # the guest room is up the inn's stair
-        self.talk('wren')
-        b.through('inn_exit')
+        if f['map'] == 'nh_inn':                                     # without the ep3 pack the credits still wake in the inn
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')                                # the guest room is up the inn's stair
+            self.talk('wren')
+            b.through('inn_exit')
+        else:
+            b.notes.append('epilogue2: woke on the east wall walk (issue #99); Wren in the inn not visited')
         self.ensure_map('nameless_hollow')
         if not self.has('letter_answer_started'):
             b.through('door_hall')
@@ -2980,7 +2982,8 @@ SLOT_JS = "(n) => { try { return localStorage.getItem('lq-next-slot-' + n); } ca
 def ep3_fixture(device):
     """The Episode 2 credits save (EPISODE3_PLAN 10.7): <device>-ep2-credits-save.json when an Episode 2 run left one, else built
     from the newest finished Episode 2 game (<device>-ep2-last-game.json, else the desktop one) by putting the party where the
-    Episode 2 credits wake it: nh_inn, inn_bed, facing down. Returns the path."""
+    Episode 2 credits wake it: nameless_hollow, wall_wake (41, 21), facing up (issue #99; before it, nh_inn inn_bed). Returns
+    the path."""
     path = OUT / f'{device}-ep2-credits-save.json'
     if path.exists():
         return path
@@ -2989,8 +2992,8 @@ def ep3_fixture(device):
             g = json.loads(src.read_text(encoding='utf-8'))
             if not (g.get('flags') or {}).get('ep2_complete') or not (g.get('counters') or {}).get('credits2_rolled'):
                 continue
-            g['map'] = 'nh_inn'
-            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['map'] = 'nameless_hollow'
+            g['pos'] = {'x': 41, 'y': 21, 'dir': 'up'}
             g['autosaveSlot'] = 0
             path.write_text(json.dumps(g), encoding='utf-8')
             return path
@@ -3689,11 +3692,11 @@ class Episode3(Episode):
         for _ in range(500):
             sc = b.handle()
             fs = b.field() or {}
-            if sc == 'field' and fs.get('map') == 'pk_inn' and not fs.get('locked'):
+            if sc == 'field' and fs.get('map') in ('pk_inn', 'emberpeak') and not fs.get('locked'):
                 break
         f = b.settle()
-        if f['map'] != 'pk_inn':
-            raise Fail(f'after the Episode 3 credits the party woke on {f["map"]}, not pk_inn')
+        if f['map'] not in ('pk_inn', 'emberpeak'):   # issue #99: with the ep4 pack live, the washout
+            raise Fail(f'after the Episode 3 credits the party woke on {f["map"]}, not the washout or pk_inn')
         if not (b.game() or {}).get('counters', {}).get('credits3_rolled'):
             raise Fail('credits3_rolled was not counted')
         b.mark('ep3_credits_done')
@@ -3703,12 +3706,12 @@ class Episode3(Episode):
         b = self.b
         if not self.side or not self.has('ep3_complete'):
             return
-        self.ensure_map('pk_inn')
         f = b.settle()
-        if f['leader']['x'] >= 13:
-            b.through('inn_down')
-        self.talk('bess')
-        b.through('inn_exit')
+        if f['map'] == 'pk_inn':
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            self.talk('bess')
+            b.through('inn_exit')
         self.ensure_map('emberpeak')
         self.talk('rusk')
         b.menu_talk()
@@ -3735,7 +3738,8 @@ class Episode3(Episode):
 
 def ep4_fixture(device):
     """The Episode 3 credits save (EPISODE4_PLAN 10.2): built from the newest finished Episode 3 game (<device>-ep3-last-game.json,
-    else the desktop one) by putting the party where the Episode 3 credits wake it: pk_inn, inn_bed (17, 7), facing down.
+    else the desktop one) by putting the party where the Episode 3 credits wake it: emberpeak, dawn_stage (35, 15), facing right
+    (issue #99; before it, pk_inn inn_bed).
     Written to <device>-ep3-credits-save.json. Returns the path."""
     path = OUT / f'{device}-ep3-credits-save.json'
     if path.exists():
@@ -3747,8 +3751,8 @@ def ep4_fixture(device):
                 continue
             if any(k.startswith('ep4_') for k, v in (g.get('flags') or {}).items() if v):
                 continue
-            g['map'] = 'pk_inn'
-            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['map'] = 'emberpeak'
+            g['pos'] = {'x': 35, 'y': 15, 'dir': 'right'}
             g['autosaveSlot'] = 1
             path.write_text(json.dumps(g), encoding='utf-8')
             return path
@@ -4467,11 +4471,11 @@ class Episode4(Episode3):
         for _ in range(500):
             sc = b.handle()
             fs = b.field() or {}
-            if sc == 'field' and fs.get('map') == 'ep4_vw_inn' and not fs.get('locked'):
+            if sc == 'field' and fs.get('map') in ('ep4_vw_inn', 'ep5_ship') and not fs.get('locked'):
                 break
         f = b.settle()
-        if f['map'] != 'ep4_vw_inn':
-            raise Fail(f'after the Episode 4 credits the party woke on {f["map"]}, not ep4_vw_inn')
+        if f['map'] not in ('ep4_vw_inn', 'ep5_ship'):   # issue #99: with the ep5 pack live, aboard Yara's ship
+            raise Fail(f'after the Episode 4 credits the party woke on {f["map"]}, not the ship or ep4_vw_inn')
         if not (b.game() or {}).get('counters', {}).get('credits4_rolled'):
             raise Fail('credits4_rolled was not counted')
         b.mark('ep4_credits_done')
@@ -4480,6 +4484,11 @@ class Episode4(Episode3):
     def epilogue4(self):
         b = self.b
         if not self.side or not self.has('ep4_complete'):
+            return
+        f = b.settle()
+        if f['map'] == 'ep5_ship':
+            b.notes.append('epilogue4: the credits woke the party aboard the ship (issue #99); the Valewyn talks are not on the path')
+            b.mark('ep4_epilogue')
             return
         f = self.ensure_map('ep4_vw_inn')
         if f['leader']['x'] >= 13:
@@ -4515,7 +4524,8 @@ class Episode4(Episode3):
 # ================================================================================================ Episode 5
 def ep5_fixture(device):
     """The Episode 4 credits save (EPISODE5_PLAN 10.2): built from the newest finished Episode 4 game (<device>-ep4-last-game.json,
-    else the desktop one) by putting the party where the Episode 4 credits wake it: ep4_vw_inn, inn_bed (17, 7), facing down.
+    else the desktop one) by putting the party where the Episode 4 credits wake it: ep5_ship, deck_start (5, 7), facing right
+    (issue #99; before it, ep4_vw_inn inn_bed).
     Written to <device>-ep4-credits-save.json. Returns the path."""
     path = OUT / f'{device}-ep4-credits-save.json'
     if path.exists():
@@ -4527,8 +4537,8 @@ def ep5_fixture(device):
                 continue
             if any(k in EP5_FLAG_HINTS for k, v in (g.get('flags') or {}).items() if v):
                 continue
-            g['map'] = 'ep4_vw_inn'
-            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['map'] = 'ep5_ship'
+            g['pos'] = {'x': 5, 'y': 7, 'dir': 'right'}
             g['autosaveSlot'] = 1
             path.write_text(json.dumps(g), encoding='utf-8')
             return path
@@ -4798,6 +4808,10 @@ class Episode5(Episode4):
         g = b.game() or {}
         b.notes.append(f'Episode 5 arrival: Lv {self.level()}, {(g.get("party") or [{}])[0].get("exp")} EXP, {g.get("gold")} G '
                        f'({"the quick start" if self.start == "new" else "the Episode 4 save"})')
+        if f['map'] == 'ep5_ship':                                   # issue #99: the morning plays on the deck, ship_night after it
+            b.menu_talk()
+            self.check_slots('the morning')
+            return
         if f['map'] == 'ep4_vw_inn':
             if f['leader']['x'] >= 13:
                 b.through('inn_down')
@@ -5207,11 +5221,11 @@ class Episode5(Episode4):
         for _ in range(500):
             sc = b.handle()
             fs = b.field() or {}
-            if sc == 'field' and fs.get('map') == 'ep5_sh_inn' and not fs.get('locked'):
+            if sc == 'field' and fs.get('map') in ('ep5_sh_inn', 'ep5_sh_observatory') and not fs.get('locked'):
                 break
         f = b.settle()
-        if f['map'] != 'ep5_sh_inn':
-            raise Fail(f'after the Episode 5 credits the party woke on {f["map"]}, not ep5_sh_inn')
+        if f['map'] not in ('ep5_sh_inn', 'ep5_sh_observatory'):   # issue #99: with the ep6 pack live, the Armillary Tower
+            raise Fail(f'after the Episode 5 credits the party woke on {f["map"]}, not the tower or ep5_sh_inn')
         if not (b.game() or {}).get('counters', {}).get('credits5_rolled'):
             raise Fail('credits5_rolled was not counted')
         b.mark('ep5_credits_done')
@@ -5221,11 +5235,15 @@ class Episode5(Episode4):
         b = self.b
         if not self.side or not self.has('ep5_complete'):
             return
-        f = self.ensure_map('ep5_sh_inn')
-        if f['leader']['x'] >= 13:
-            b.through('inn_down')
-        self.talk('ep5_innkeeper')
-        b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')
+        f = b.settle()
+        if f['map'] == 'ep5_sh_observatory':
+            b.through('tower_exit', exact=False)
+        else:
+            f = self.ensure_map('ep5_sh_inn')
+            if f['leader']['x'] >= 13:
+                b.through('inn_down')
+            self.talk('ep5_innkeeper')
+            b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')
         self.ensure_map('ep5_saffron')
         self.talk('yara')
         b.menu_talk()
@@ -5239,8 +5257,8 @@ class Episode5(Episode4):
                   ('lab_f3', self.lab_f3), ('oracle', self.oracle), ('ending', self.ending), ('epilogue5', self.epilogue5)]
         for step_id, fn in phases:
             print(f'-- {step_id}', flush=True)
-            if step_id == 'ep5_morning' and self.has('ship_boarded'):
-                continue                                          # a resumed game past the morning
+            if step_id == 'ep5_morning' and self.has('ship_boarded') and b.settle()['map'] != 'ep5_ship':
+                continue                                          # a resumed game past the morning (issue #99: the morning boards)
             fn()
             if step_id == 'ep5_start':
                 b.js(SKY_LOG_JS)
@@ -5262,7 +5280,8 @@ class Episode5(Episode4):
 
 def ep6_fixture(device, src_tag=''):
     """The Episode 5 credits save (EPISODE6_PLAN 10.2): built from the newest finished Episode 5 game (<device>-ep5<src_tag>-last-game.json,
-    else the desktop one) by putting the party where the Episode 5 credits wake it: ep5_sh_inn, inn_bed (17, 7), facing down.
+    else the desktop one) by putting the party where the Episode 5 credits wake it: ep5_sh_observatory, obs_stage6 (7, 8), facing
+    up (issue #99; before it, ep5_sh_inn inn_bed).
     Written to <device>-ep5<src_tag>-credits-save.json. Returns the path."""
     path = OUT / f'{device}-ep5{src_tag}-credits-save.json'
     if path.exists():
@@ -5274,8 +5293,8 @@ def ep6_fixture(device, src_tag=''):
                 continue
             if any(k in EP6_FLAG_HINTS for k, v in (g.get('flags') or {}).items() if v):
                 continue
-            g['map'] = 'ep5_sh_inn'
-            g['pos'] = {'x': 17, 'y': 7, 'dir': 'down'}
+            g['map'] = 'ep5_sh_observatory'
+            g['pos'] = {'x': 7, 'y': 8, 'dir': 'up'}
             g['autosaveSlot'] = 1
             path.write_text(json.dumps(g), encoding='utf-8')
             return path
@@ -5583,7 +5602,9 @@ class Episode6(Episode5):
         g = b.game() or {}
         b.notes.append(f'Episode 6 arrival: Lv {self.level()}, {(g.get("party") or [{}])[0].get("exp")} EXP, {g.get("gold")} G '
                        f'({"the quick start" if self.start == "new" else "the Episode 5 save"})')
-        if f['map'] == 'ep5_sh_inn':
+        if f['map'] == 'ep5_sh_observatory':                         # issue #99: the morning plays in the tower at night
+            b.through('tower_exit', exact=False)
+        elif f['map'] == 'ep5_sh_inn':
             if f['leader']['x'] >= 13:
                 b.through('inn_down')
             b.through('inn_exit', exact=False) if b.ent(b.settle(), 'inn_exit') else b.exit_to((10, 11), label='inn door')

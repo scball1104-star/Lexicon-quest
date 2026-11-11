@@ -23,6 +23,7 @@ import npc_specs as S
 import x1_npc_parts as XP
 import ep5_npc_parts as E5P
 import ep6_npc_parts as EP
+import wm4_bird as BIRD
 
 XP.register()
 E5P.register()
@@ -132,6 +133,7 @@ ORDER = list(EP6_NPCS)
 
 def build(write=True):
     blocks = {nid: BN.npc_frames(nid, spec) for nid, spec in EP6_NPCS.items()}
+    blocks['npc_grey_bird'] = BIRD.frames()   # issue #99: the Episode 6 opening's messenger bird (chars/wm4_bird.py), last
     rects, anims = {}, {}
     per = 3
     rows = (len(blocks) + per - 1) // per
@@ -147,12 +149,13 @@ def build(write=True):
                 i += 1
             anims[f'{nid}_walk_{d}'] = {'frames': [f'{nid}_{d}_1', f'{nid}_{d}_0', f'{nid}_{d}_2', f'{nid}_{d}_0'], 'fps': 6, 'loop': True}
             anims[f'{nid}_idle_{d}'] = {'frames': [f'{nid}_{d}_0'] * 26 + [f'{nid}_{d}_blink'] + [f'{nid}_{d}_0'], 'fps': 8, 'loop': True}
-    sprites = {nid: {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid, sp in EP6_NPCS.items()}
+    sprites = {nid: {'name': sp['name'], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid, sp in {**EP6_NPCS, 'npc_grey_bird': BIRD.SPEC}.items()}
     meta = {'image': 'ep6_npcs.png', 'cell': [24, 32],
             'layout': 'Episode 6 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols '
                       'stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. '
                       'npc_cloud_host is npc_innkeeper recoloured for the Cloudhouse Inn; npc_deckhand_b is the second '
-                      'deckhand recolour; npc_aeris_young is Aeris in the memories (dark hair, no compass).',
+                      'deckhand recolour; npc_aeris_young is Aeris in the memories (dark hair, no compass); npc_grey_bird '
+                      'is the Episode 6 opening messenger bird (chars/wm4_bird.py: 1 and 2 are wing beats).',
             'sprites': sprites, 'frames': rects, 'anims': anims}
     if write:
         import anim_atlas as AA

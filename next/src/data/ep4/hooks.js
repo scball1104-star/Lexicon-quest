@@ -22,6 +22,9 @@ import { register as registerScene } from './scene.js';
 /** The Episode 3 end card once Episode 4 is live (EPISODE4_PLAN 5.3). */
 export const END_CARD_EP3_LIVE = { ...END_CARD_EP3, sub: 'Episode 4 begins in the morning.' };
 export const EP3_END_CARD_OFF = END_CARD_EP3;
+/** Where the Episode 3 credits wake the party while Episode 4 is live (issue #99), and where they did before. */
+export const OPENING4 = { map: 'emberpeak', mark: 'dawn_stage' };
+export const EP3_WAKE_OFF = { map: 'pk_inn', mark: 'inn_bed' };
 export const EP4_ROW_LABEL = 'Episode 4: new party';
 export const EP4_ROW_HELP = 'A ready party at Lv 17. Your own save stays under Continue.';
 
@@ -120,6 +123,9 @@ export function register(engine, mods = {}) {
   if (EP4_LIVE) {
     CREDITS_HANDOFF[3].endCard = (mods.text && mods.text.END_CARD_EP3_LIVE) || END_CARD_EP3_LIVE;
     installed.push('endcard3');
+    // issue #99: the Episode 3 credits wake the party at the washout (ep4_patches.js dawn_stage), not in the Signless Inn
+    Object.assign(CREDITS_HANDOFF[3], OPENING4);
+    installed.push('opening4');
   }
   const q = mods.quests && mods.quests.MAIN_QUEST_EP4;
   if (q) { if (!QUEST_EXT.some(([f]) => f === 'ep4_started')) QUEST_EXT.unshift(['ep4_started', q]); installed.push('quest'); }
@@ -137,6 +143,7 @@ export function register(engine, mods = {}) {
 export function unregister() {
   if (globalThis.LQ_EP4 === HOOKS) delete globalThis.LQ_EP4;
   CREDITS_HANDOFF[3].endCard = EP3_END_CARD_OFF;
+  Object.assign(CREDITS_HANDOFF[3], EP3_WAKE_OFF);
   done = false;
 }
 export function hooksInstalled() { return done; }

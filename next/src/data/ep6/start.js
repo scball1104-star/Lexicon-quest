@@ -30,11 +30,11 @@ export const EP6_LOADOUT = { source: 'ep6_airstair' };
 
 /**
  * Lv 25 at 13,300 EXP, every Episode 1 to 5 main flag plus ep5_complete, star_restored and sel_walked_in, the five credits
- * counters, the Episode 1 to 5 key items, 3,600 gold, awake in the Dune Lantern Rest at `inn_bed` (ep5_sh_inn (17, 7)) so
- * ep6_morning runs (while EP6_LIVE).
+ * counters, the Episode 1 to 5 key items, 3,600 gold, in the Armillary Tower at night at `obs_stage6` (ep5_sh_observatory
+ * (7, 8), issue #99) so ep6_morning runs (while EP6_LIVE).
  */
 export const EP6_START = {
-  level: 25, exp: 13300, gold: 3600, map: 'ep5_sh_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
+  level: 25, exp: 13300, gold: 3600, map: 'ep5_sh_observatory', mark: 'obs_stage6', pos: { x: 7, y: 8, dir: 'up' },
   items: { potion: 6, hi_potion: 8, hi_ether: 6, phoenix_feather: 3, silver_salve: 3, hourglass_sand: 2,
     name_fragment_1: 1, name_fragment_2: 1, name_fragment_3: 1, name_fragment_4: 1, name_fragment_5: 1, lantern_of_recall: 1,
     mirror_sigil: 1 },

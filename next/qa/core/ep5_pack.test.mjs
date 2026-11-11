@@ -137,8 +137,8 @@ test('pack entry: ORDER, missing modules skipped, idempotent, the ep4 pack regis
   assert.equal(ep4.EP4_READY, true, 'the ep4 pack registered first (Valewyn NPCs, Episode 4 maps)');
   assert.ok(CREDITS_HANDOFF[4], 'the ep4 hooks ran before the ep5 hooks');
   assert.ok(globalThis.LQ_EP5 && typeof globalThis.LQ_EP5.title === 'function' && typeof globalThis.LQ_EP5.start === 'function');
-  assert.equal(CREDITS_HANDOFF[4].endCard.sub, EP5_LIVE ? 'Episode 5 begins in the morning.' : END_CARD_EP4.sub,
-    'the Episode 4 end card says Episode 5 begins in the morning while EP5_LIVE, unchanged while off');
+  assert.equal(CREDITS_HANDOFF[4].endCard.sub, EP5_LIVE ? 'Episode 5 begins at sea.' : END_CARD_EP4.sub,
+    'the Episode 4 end card says Episode 5 begins at sea while EP5_LIVE (issue #99), unchanged while off');
   assert.equal(ep5.EP5_MAPS_LISTED, ep5.mapsListed());
   if (!exists('src/data/ep5/encounters.js')) assert.equal(ep5.EP5_MAPS_LISTED, false);
   const src = read('src/data/ep5/index.js');

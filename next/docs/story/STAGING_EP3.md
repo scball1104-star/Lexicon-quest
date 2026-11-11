@@ -72,7 +72,7 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
 | `pk_shop` | `taro` (shop `ventworks`) |
 | `pk_smithy` | `sella` at `anvil` (shop `pk_smithy`), `garrick_e` then `garrick_n` at `forge` (two records, same spot, mutually exclusive) |
 | `pk_bellhouse` | `ilya` at `ilya_spot` |
-| `nh_inn` | `wren_up` (a scene Wren, spawned at `inn_door` at the head of the stair; the map's Wren stays at the counter) walks to `wren_wake` in `ep3_morning` and back |
+| `nameless_hollow` | `wren_up` (a scene Wren, spawned at `wall_stair` at the foot of the east wall walk; the inn's Wren stays at the counter) walks to `wren_wall` in `ep3_morning` and back down. Until issue #99 she came up the inn stair (`inn_door` to `wren_wake`, marks kept for old saves) |
 
 ---
 
@@ -83,12 +83,17 @@ chains `warden_after` and `first_bell` and the ending.
 
 ### Act I: Hollowmere
 
-**`ep3_morning`** (`nh_inn`, on enter; also on enter of `nameless_hollow` for saves that left the inn; needs
-`ep2_complete`, not `ep3_morning_done`, and `EP3_LIVE`). The hero wakes in bed at `inn_bed`, Mira and Bram are
-followers in the room, Wren behind the counter. The Smith is spawned at `smith_seat` by the guest-room wall (facing left); Wren
-walks to `wren_wake` and wakes the hero; the camera pans to `smith_seat`; Bram walks up to the Smith. One choice; the
-hero's answer box is always "...". At the end the Smith walks out through `inn_door` and is despawned. Music: `sorrow`
-when Bram cannot say the name, `hollowmere` at the end. 14 boxes. Sets `ep3_morning_done` and `ep3_started`.
+**`ep3_morning`** (`nameless_hollow`, the east wall walk at dawn, issue #99 and `docs/WORLD_MAP_PLAN.md` section 4; on
+enter; needs `ep2_complete`, not `ep3_morning_done`, and `EP3_LIVE`). The Episode 2 credits and the quick start put the party
+at `wall_wake` (41,21) on the wall walk, the glow of Emberpeak along the top of the mere. Anywhere else (an old save in
+`nh_inn`, whose enter trigger stays, or a save made in town) the scene fades out and moves the party to `wall_wake`, and
+the morning plays on that arrival (`s.leaderAt` from the pack's `opening_stage` event, `src/data/maps/ep3/_opening.js`).
+`openingTint('dawn')` holds the handoff's black screen until the credits handoff has set its own light. The hero dozes on
+the wall; Wren comes up the stair (`wall_stair`) to `wren_wall`; the Smith follows her up to `smith_wall` at the parapet
+(facing right, towards the glow); Bram walks up to him. One choice; the hero's answer box is always "...". Before "I'm
+going home." the camera pans to `emberpeak_glow` and back. At the end the Smith and then Wren go down `wall_stair` and are
+despawned; the scene fades out and warps to the gate (40,26), where `sand_gate` runs on landing. Music: `sorrow` when Bram
+cannot say the name, `hollowmere` at the end. 14 boxes. Sets `ep3_morning_done` and `ep3_started`.
 
 **`sand_gate`** (`nameless_hollow`, step trigger two tiles west of the chain; needs `ep3_started`, not
 `sand_gate_open`, `EP3_LIVE`). Spawns Vessa (`vessa_gate`), Penny's cart with Penny and the Smith (`penny_cart_h`); the
@@ -230,8 +235,8 @@ remind, deliver (takes `glass_sand`, gives `emberglass_charm`). Sets `sand_start
 
 | Map | Marks the script uses |
 |---|---|
-| `nh_inn` | `inn_bed` (exists), `smith_seat` (new, by the guest-room wall), `wren_wake` (new, beside the bed), `inn_door` (new, the door) |
-| `nameless_hollow` | `sand_gate`, `vessa_gate`, `penny_cart_h` |
+| `nh_inn` | `inn_bed` (exists), `smith_seat` (new, by the guest-room wall), `wren_wake` (new, beside the bed), `inn_door` (new, the door); kept for old saves, the morning now moves the party to the wall |
+| `nameless_hollow` | `sand_gate`, `vessa_gate`, `penny_cart_h`; issue #99: `wall_wake` (41,21), `wren_wall` (41,22), `smith_wall` (42,19), `wall_stair` (40,22), `emberpeak_glow` (exists) |
 | `sand_road` | `slag`, `emberpeak_far`, `town_gate`, `smith_crate` (new, a crate at the shelter), `rise_smith` (new, a tile on the last rise); enemy `e_sr_first` |
 | `emberpeak` | `gate_in`, `gate_smith` (new, one tile inside the gate), `coolant`, `memorial`, `memorial_smith` (new, beside the wall), `bellhouse_door`, `bell_tower`, `bell_rope`, `east_road`, `night_view`, `crowd_a`, `crowd_b`, `crowd_c`, `crowd_d`, `gather_veyra`, `gather_ilya`, `gather_rusk`, `gather_bess`, `gather_garrick` (new), `gather_view` (E3-fixes-world: the camera's frame of tower, town and memorial for the gathering lines) |
 | `pk_bellhouse` | `ilya_spot`, `bellhouse_in` (new, two tiles inside the door) |
