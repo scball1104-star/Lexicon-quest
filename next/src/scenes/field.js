@@ -669,6 +669,11 @@ export class FieldScene {
         e.fadeTo(() => this.loadMap(s.map, s.pos.x, s.pos.y, s.pos.dir, { landmark: true }), { duration: 1.0, hold: 0.3 });
       } else if (e.scene === this && e.hasScene('gameover')) e.push('gameover');
     }
+    // #86 (CRITIQUE_9 item 9): the first won fight in which Fury or Combo lit queues its one line (spoken once the field is idle)
+    const lessons = e.lastBattleLessons; e.lastBattleLessons = null;
+    if (result === 'win' && lessons && !this.dead) {
+      for (const k of ['fury', 'combo']) if (lessons[k] && !this.game.counters[`bark:first_${k}`] && !this.pendingBarks.includes(`first_${k}`)) this.pendingBarks.push(`first_${k}`);
+    }
     if (result === 'flee') await this.bark('flee');
     return result;
   }

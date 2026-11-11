@@ -59,13 +59,16 @@ def title(page, slots):
         page.evaluate(f"({SAVE})({n}, ['ep1_complete', 'ep2_complete'])")
     page.evaluate("LQ_DEBUG.settings({ rotateHintSeen: true }); LQ_ENGINE.game = null; LQ_DEBUG.reset('title', { ep3Live: true }); true")
     adv(page, 30)
+    # #88: Episode 2 and 3 fold into New party...; the rows below are checked in its open list
+    check(page.evaluate("LQ_ENGINE.scene.showQuickStart('ep3')"), 'the New party... list opens on the row')
+    adv(page, 2)
     s = page.evaluate('LQ_DEBUG.state().sceneState')
     check('ep3' in s['items'], f"Episode 3 row listed: {s['labels']}")
     win = s['win']
     check(win['y'] >= 0 and win['y'] + win['h'] <= 216, f"menu window inside the screen: {win}")
     rows = page.evaluate("LQ_ENGINE.scene.menu.items.map((_, i) => LQ_ENGINE.scene.menu.rowRect(i))")
     check(all(r['y'] >= 0 and r['y'] + r['h'] <= 216 for r in rows), 'every row inside the screen')
-    page.evaluate("LQ_ENGINE.scene.menu.moveTo(LQ_ENGINE.scene.menu.items.findIndex((it) => it.id === 'ep3')); true")
+    page.evaluate("LQ_ENGINE.scene.showQuickStart('ep3')")
     adv(page, 4)
     return s
 

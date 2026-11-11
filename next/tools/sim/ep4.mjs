@@ -94,9 +94,10 @@ export const SUITE_LEVELS_EP4 = {
 // The first level is where the plan meets the boss (reckless play is measured there); the second is a full clear's.
 export const BOSS_LEVELS_EP4 = { barrister: [19, 20], paper_regent: [20, 21] };
 export const TARGETS_EP4 = {
-  barrister: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
+  // #87 (2026-11-11): both bosses lost HP and gained ATK/MAG/SPD (BATTLE.md 15); hpLossMin pins it, the Regent's band moved down
+  barrister: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10, hpLossMin: 0.12 },
   // answerMin: careful play Answers at least half of the Strikes from the Roll it sees (check() below)
-  paper_regent: { roundsMin: 10, roundsMax: 14, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, answerMin: 0.5 },
+  paper_regent: { roundsMin: 10, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, answerMin: 0.5, hpLossMin: 0.2 },
   // Keep F3 is the tightest ordinary floor (as Foundry F3): careful play loses 18 to 24% HP a fight, attack-only wins 70 to 85%
   tightFloor: { zone: 'ep4_keep_f3', hpLoss: [0.18, 0.24], naiveWin: [0.70, 0.85] },
   // Plan 6.1: road 17 -> 18, F1 18 -> 19, F2 19 (near 20), F3 19 -> 20, the Regent at 20 -> 21

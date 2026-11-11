@@ -21,7 +21,7 @@
 'use strict';
 
 // build_pwa:begin
-const SHELL_VERSION = 'dc45c588bae1';
+const SHELL_VERSION = 'd39ff7c9d033';
 const PRECACHE = [
   'index.html',
   'manifest.webmanifest',
@@ -372,7 +372,7 @@ const PRECACHE = [
   'assets/audio/jingles/save.mp3',
   'assets/audio/jingles/victory_fanfare.mp3',
 ];
-const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|src/data/ep3/|src/data/maps/ep3/|assets/(tiles|sprites|ui|backdrops)/ep3(_|\\.)|assets/ep3_manifest\\.json|src/data/ep4/|src/data/maps/ep4_|assets/(tiles|sprites|ui|backdrops)/ep4(_|\\.)|assets/ep4_manifest\\.json|src/data/ep5/|src/data/maps/ep5_|assets/(tiles|sprites|ui|backdrops)/ep5(_|\\.)|assets/ep5_manifest\\.json|src/data/ep6/|src/data/maps/ep6_|assets/(tiles|sprites|ui|backdrops)/ep6(_|\\.)|assets/ep6_manifest\\.json|src/data/tier/|src/data/maps/tier_|assets/(tiles|sprites|ui|backdrops)/tier(_|\\.)|assets/tier_manifest\\.json|assets/pack_files\\.json|assets/backdrops/paint_|src/world/ep3/|assets/clips/|src/ui/clips/|assets/audio/sfx/ep4_|assets/audio/ambience/ep4_|assets/audio/sfx/ep5_|assets/audio/ambience/ep5_|assets/audio/sfx/ep6_|assets/audio/ambience/ep6_)";
+const PACK_PATTERN = "^(src/data/x1/|src/data/maps/x1_|assets/(tiles|sprites|ui|backdrops)/x1(_|\\.)|assets/x1_manifest\\.json|src/data/x2/|src/data/maps/x2_|assets/(tiles|sprites|ui|backdrops)/x2(_|\\.)|assets/x2_manifest\\.json|src/data/cave/|src/data/maps/cave_|assets/(tiles|sprites|ui|backdrops)/cave(_|\\.)|assets/cave_manifest\\.json|src/data/ep3/|src/data/maps/ep3/|assets/(tiles|sprites|ui|backdrops)/ep3(_|\\.)|assets/ep3_manifest\\.json|src/data/ep4/|src/data/maps/ep4_|assets/(tiles|sprites|ui|backdrops)/ep4(_|\\.)|assets/ep4_manifest\\.json|src/data/ep5/|src/data/maps/ep5_|assets/(tiles|sprites|ui|backdrops)/ep5(_|\\.)|assets/ep5_manifest\\.json|src/data/ep6/|src/data/maps/ep6_|assets/(tiles|sprites|ui|backdrops)/ep6(_|\\.)|assets/ep6_manifest\\.json|src/data/tier/|src/data/maps/tier_|assets/(tiles|sprites|ui|backdrops)/tier(_|\\.)|assets/tier_manifest\\.json|assets/pack_files\\.json|assets/backdrops/paint_|src/world/ep3/|assets/clips/|src/ui/clips/|src/ui/firstuse/|assets/audio/sfx/ep4_|assets/audio/ambience/ep4_|assets/audio/sfx/ep5_|assets/audio/ambience/ep5_|assets/audio/sfx/ep6_|assets/audio/ambience/ep6_)";
 
 self.addEventListener('message', (event) => {
   if (event.data !== 'lq-apply-update') return;

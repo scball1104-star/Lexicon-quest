@@ -14,7 +14,7 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, enemyRowAnchor,
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, helpLensRect, enemyRowAnchor,
   touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H, helpDock } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
@@ -221,6 +221,17 @@ function drawStageBand(g, band) {
   g.globalAlpha = 1;
 }
 
+/** #86 (CRITIQUE_9 item 9): note a lit Fury or Combo command, once per party turn (as the menu opens, or as Auto acts);
+ *  skipped once both first-time lines were spoken. A plain function, so tests that drive updatePlay on a bare scene object
+ *  (qa/battlescene) need no method of ours. */
+function noteLessons(scene, u) {
+  const c = scene.engine && scene.engine.game && scene.engine.game.counters;
+  if (!c || !scene.lessons || (c['bark:first_fury'] && c['bark:first_combo'])) return;
+  for (const cmd of scene.b.commands(u)) {
+    if (cmd.id === 'fury' && cmd.enabled) scene.lessons.fury = true;
+    if (cmd.id === 'combo' && cmd.enabled) scene.lessons.combo = true;
+  }
+}
 export class BattleScene {
   constructor(engine) {
     this.engine = engine;
@@ -306,6 +317,9 @@ export class BattleScene {
     if (data.auto != null) e.settings.autoBattle = !!data.auto;
     this.fast = data.fast || null;
     e.lastBattleDrops = null;        // gear uids of this fight's drops, left for the field's equip prompt (W5)
+    // #86 (CRITIQUE_9 item 9): did Fury or Combo light for a party member this fight? The field says one line after a win
+    this.lessons = { fury: false, combo: false };
+    e.lastBattleLessons = null;
   }
   exit() {
     this.engine.renderer.setBackdrop(null);
@@ -433,11 +447,12 @@ export class BattleScene {
     if (this.auto) {
       // A short beat so the player can read the timeline, and a chance to cancel Auto.
       if (input.pressed('cancel')) { e.setSetting('autoBattle', false); audio.sfx('cancel'); input.consume('cancel'); }
-      else if (++this.autoHold >= this.scaled(12)) { this.autoHold = 0; this.performParty(this.autoAction()); }
+      else if (++this.autoHold >= this.scaled(12)) { this.autoHold = 0; noteLessons(this, u); this.performParty(this.autoAction()); }
       return;
     }
     if (this.menu.state === 'closed') {
       this.timeline = this.b.timeline(8);
+      noteLessons(this, u);
       this.menu.open(u);
       audio.sfx('cursor', { volume: 0.4 });
       const a = this.actor(u.uid);
@@ -748,6 +763,7 @@ export class BattleScene {
     e.fadeTo(() => {
       if (result === 'lose') e.audio.stopMusic(0.1); else e.audio.popMusic(0.8);
       // the field (under us) offers to equip what dropped once the rewards are closed and the fade is in
+      e.lastBattleLessons = result === 'win' && this.lessons ? { ...this.lessons } : null;
       e.lastBattleDrops = result === 'win' && this.summary && this.summary.items.length ? this.summary.items.map((it) => it.uid).filter((u) => u != null) : null;
       e.pop(result);
       if (result === 'lose' && this.data.gameover !== false && !this.data.scripted && e.hasScene('gameover') && !(e.cave && e.cave.inRun(e.game))) e.push('gameover');
@@ -823,7 +839,16 @@ export class BattleScene {
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
     if (this.bossIntro && this.bossIntro.t < this.bossIntro.frames && this.phase !== 'rewards') HUD.drawBossCard(r, this.bossIntro);
     if (this.phase === 'rewards') this.drawRewards(r);
+    if (touch && r.setLens) r.setLens(this.lensRects());
     void e;
+  }
+
+  /** Portrait lens (#88): FLEE / AUTO / x1, then the command window or the open sub-list. */
+  lensRects() {
+    const v = this.engine.renderer && this.engine.renderer.view, m = this.menu;
+    if (!this.touchButtons() || !v || !v.pad) return null;
+    const sub = m.state === 'sub' && m.sub, root = m.state === 'root' && m.root;
+    return [helpLensRect(), ...(root ? [{ ...m.cmdRect, rowH: root.rowH }] : sub ? [{ ...m.subRect, rowH: sub.rowH }] : [])];
   }
 
   /** Where each shown enemy row goes this frame: */

@@ -138,7 +138,7 @@ export const EP4_NPCS = {
     ],
   },
   linn: {
-    name: 'Linn', sprite: 'npc_linn', map: 'ep4_vw_shop', spot: 'Behind the Provisioner counter, among waxed ledgers (mark counter)',
+    name: 'Linn', sprite: 'npc_linn', map: 'ep4_vw_shop', spot: 'Behind the Provisioner counter, among waxed account books (mark counter)',
     move: 'turn', service: { type: 'shop', id: 'riverbank' },
     about: 'Linn the Archivist, helping at the Riverbank Provisioner. Carries records to high shelves when the canal rises.',
     talk: [

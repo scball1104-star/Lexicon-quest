@@ -178,7 +178,7 @@ export const BOOKS = {
 
   // Rootbound Archive
   catalog_ledger: {
-    title: 'Catalog Ledger, Hall Three', where: 'archive_f1',
+    title: 'Catalog Index, Hall Three', where: 'archive_f1',
     pages: [
       'Names indexed this day: four hundred and twelve.',
       'Names removed this day: none. Names are never removed. See the Oath.',
@@ -352,6 +352,15 @@ export const BARKS = {
   flee: [
     { if: 'mira_joined', lines: [{ who: 'mira', text: 'We can come back better prepared. A retreat is not forgetting.' }] },
   ],
+  // #86 (CRITIQUE_9 item 9): Fury and Combo in words, the way the wolves' scene teaches Lunge and Appraise. Spoken on the
+  // field after the first won fight in which the command lit (scenes/battle.js `lessons`, field.js startBattle).
+  first_fury: [
+    { if: 'bram_joined', lines: [{ who: 'bram', text: 'Fury filled up back there. When it lights, take Fury and let it all out.' }] },
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Fury filled up back there. When it lights, take Fury and spend it.' }] },
+  ],
+  first_combo: [
+    { if: 'mira_joined', lines: [{ who: 'mira', text: 'Combo lit up back there. When it does, take it: two of us, one blow.' }] },
+  ],
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -522,7 +531,7 @@ Object.assign(BESTIARY, {
 // Books. Map events: { type: 'book', book: '<id>' }.
 Object.assign(BOOKS, {
   nh_ledger: {
-    title: "Elian's Ledger", where: 'nh_hall',
+    title: "Elian's Daybook", where: 'nh_hall',
     pages: [
       'Every name in town, written fresh each morning in the same young hand. Every page, the same list.',
       'Some mornings a name is written, crossed out, and written again, harder.',
@@ -530,7 +539,7 @@ Object.assign(BOOKS, {
     ],
   },
   court_ledger: {
-    title: 'The Ledger of the Court', where: 'court_f2',
+    title: 'The Court Roll', where: 'court_f2',
     pages: [
       "The Keepers kept names in the Book and faces in the glass. A reflection is a name's shadow.",
       'While someone keeps your reflection, your name has somewhere to rest. That is what this Court is for.',
@@ -713,9 +722,9 @@ for (const [id, entry] of Object.entries(BESTIARY_EP3)) if (ENEMIES[id]) BESTIAR
 // Books. Map events: { type: 'book', book: '<id>' }. Nothing here names the founder or the Smith (read before the reveal).
 Object.assign(BOOKS, {
   foundry_ledger: {
-    title: 'The Foundry Ledger', where: 'foundry_f2',
+    title: 'The Foundry Shift Book', where: 'foundry_f2',
     pages: [
-      'A burned ledger, read by the Lantern. Every row is a name and a shift, in the same careful hand.',
+      'A burned shift book, read by the Lantern. Every row is a name and a shift, in the same careful hand.',
       "The last shift's list runs for three pages. At the end the hand changes, pressing harder: ALL OUT.",
       'In one row, where a name should be, there is only a stamp: a small bell, pressed so hard it cut the page.',
     ],
@@ -723,7 +732,7 @@ Object.assign(BOOKS, {
   pk_records: {
     title: "The Bell House Records", where: 'pk_bellhouse',
     pages: [
-      'Emberpeak kept three kinds of record: the foundry ledger, the memorial plates, and the Bell House book.',
+      'Emberpeak kept three kinds of record: the foundry shift book, the memorial plates, and the Bell House book.',
       'The Bell House book lists every bell on the mountain: when it was cast, who tuned it, and what it was tuned to say.',
       'The newest entry stops mid-line. The ink runs out, and below it someone has pressed a thumb into the paper, once.',
     ],

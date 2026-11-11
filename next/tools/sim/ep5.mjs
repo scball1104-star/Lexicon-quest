@@ -96,9 +96,10 @@ export const SUITE_LEVELS_EP5 = {
 // The first level is where the plan meets the boss (reckless play is measured there); the second is a full clear's.
 export const BOSS_LEVELS_EP5 = { mirage_knight: [23, 24], oracle: [24, 25] };
 export const TARGETS_EP5 = {
-  mirage_knight: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
+  // #87 (2026-11-11): both bosses lost HP and gained ATK/MAG/SPD (BATTLE.md 15); hpLossMin pins it, the Oracle's band moved down
+  mirage_knight: { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10, hpLossMin: 0.17 },
   // breakMin: careful play breaks at least half the Last Prophecies it sees with Turn the Sky (check() below)
-  oracle: { roundsMin: 11, roundsMax: 15, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, breakMin: 0.5 },
+  oracle: { roundsMin: 10, roundsMax: 13, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, breakMin: 0.5, hpLossMin: 0.22 },
   // Well F3 is the tightest ordinary floor (as Foundry F3 and Keep F3): careful play loses 18 to 24% HP, attack-only wins 70 to 85%
   tightFloor: { zone: 'ep5_lab_f3', hpLoss: [0.18, 0.24], naiveWin: [0.70, 0.85] },
   // Plan 6.1: ship 21, road 21 -> 22, F1 22 -> 23, F2 23 (near 24), F3 23 to 24 -> 24, the Oracle at 24 -> 25

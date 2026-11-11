@@ -41,7 +41,10 @@ export const TIER_TABLE = {
       // Episode 1, the main route
       valley_wolves: { hp: 1.5 }, valley_scarab: { hp: 1.11 }, f1_mites: { hp: 1.32 }, f1_mixed: { hp: 1.33 },
       echo_warden: { hp: 1.42 }, f3_ink: { hp: 1.3 }, f3_wraiths: { hp: 1.39 }, f3_mixed: { hp: 0.72 },
-      archivore: { hp: 1.32, pow: 1.95 },
+      // #87 (2026-11-11): the base bosses lost HP and gained ATK/MAG; these terms divide that back out so Fine Print's three
+      // bosses keep the numbers they were tuned at (was archivore 1.32 / 1.95, nameless_king 0.72 / 1.3, cinder_warden 0.72 / 1;
+      // one pow term covers ATK and MAG, so the Warden's 0.93 keeps its ATK and leaves its MAG about 40% up (the Warden is outside the tier check, which covers Episodes 1 and 2))
+      archivore: { hp: 1.55, pow: 1.39 },
       // Whisperwood Hollow and the Wider Valley
       hollow_wolves: { hp: 1.11 }, whisperwood_alpha: { pow: 1.15 }, dn_scarab: { hp: 1.11 }, mo_wolves: { hp: 1.24 }, mo_scarabs: { hp: 0.79 },
       mo_wraiths: { hp: 1.12 }, bw_shades: { hp: 1.38 }, bw_mixed: { hp: 1.29 }, barrow_reeve: { hp: 1.49, pow: 1.52 },
@@ -49,10 +52,10 @@ export const TIER_TABLE = {
       cv_wraith: { hp: 1.25 },
       // Episode 2
       road_wolves: { hp: 1.22 }, c1_quick: { hp: 0.87 }, other_selves: { hp: 0.91, pow: 1.34 }, c3_mixed: { hp: 0.66 },
-      nameless_king: { hp: 0.72, pow: 1.3 },
+      nameless_king: { hp: 0.9, pow: 1.08 },
       // Episode 3 (E3-switch: a Fine Print run plays on into it now that the unlock is ep3_complete)
       fo1_beetles: { hp: 0.7 }, fo2_constructs: { hp: 0.85 }, fo2_mixed: { hp: 0.85 }, fo3_defenders: { pow: 0.8 },
-      fo3_mixed: { hp: 0.8, pow: 0.75 }, fo3_furnace: { hp: 0.65, pow: 0.75 }, bellows_specter: { hp: 0.85 }, cinder_warden: { hp: 0.72 },
+      fo3_mixed: { hp: 0.8, pow: 0.75 }, fo3_furnace: { hp: 0.65, pow: 0.75 }, bellows_specter: { hp: 0.85 }, cinder_warden: { hp: 0.85, pow: 0.93 },
     },
     exp: 1.5,                                      // EXP x1.5
     gold: 1.5,                                     // battle gold x1.5 (the economy check runs with it)

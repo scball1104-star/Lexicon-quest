@@ -908,7 +908,7 @@ const EP2_BANTER = {
     ] },
   ],
   nh_hall: [{ if: BOTH, lines: [
-    m("Elian's ledger has every name in town in it. Every day. In the same order."),
+    m("Elian's daybook has every name in town in it. Every day. In the same order."),
     b("He'd get on with Holt."),
   ] }],
   nh_chapel: [{ if: BOTH, lines: [m('Forty-one. I keep counting them. I keep getting forty-one.')] }],
@@ -1008,7 +1008,7 @@ export const EP3_FLAGS = {
   coolant_done: 'The station is open and the reward paid (coolant_check). +25 Fury when the Warden fight starts.',
 
   // Side quest: What the Ash Kept (a Lantern secret on F2)
-  ledger_found: "Raised the Lantern over the burned ledger pages (ledger_ash). The apprentice's cache chest appears.",
+  ledger_found: "Raised the Lantern over the burned shift-book pages (ledger_ash). The apprentice's cache chest appears.",
 
   // Side quest: Vessa's Sand
   sand_started: 'Vessa asked for a sack of Emberpeak glass sand (vessa_sand). The sand hopper chest appears on F1.',
@@ -1245,7 +1245,7 @@ export const SIDE_QUESTS_EP3 = [
         id: 'ink', done: 'ledger_found',
         journal: 'Paper burns, but ink remembers. In the records cage on the second floor, raise the Lantern over what is left.',
         chat: [
-          { map: 'foundry_f2', lines: [m('The records cage is in the north gallery. Ink remembers. Raise the Lantern over the ledger.')] },
+          { map: 'foundry_f2', lines: [m('The records cage is in the north gallery. Ink remembers. Raise the Lantern over the burned pages.')] },
           { lines: [m("The second floor's records cage may still hold something. The Lantern will tell.")] },
         ],
       },

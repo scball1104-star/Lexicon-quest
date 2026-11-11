@@ -71,7 +71,7 @@ export const X1_FLAGS = {
   // Things Not To Forget
   list_started: 'Iris asked for three remembrances for her list (list_start).',
   list_rhyme: 'Brindle\'s counting rhyme was heard (list_rhyme).',
-  list_ledger: 'The oldest name in Hal\'s ledger was read (list_ledger).',
+  list_ledger: 'The oldest name in Hal\'s account book was read (list_ledger).',
   list_song: 'Odo\'s chime song was heard (list_song).',
   list_done: 'Iris wrote the three down; 200 gold, 3 Ethers and 8 EXP given (list_done).',
 

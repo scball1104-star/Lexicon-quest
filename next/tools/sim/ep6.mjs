@@ -96,9 +96,10 @@ export const SUITE_LEVELS_EP6 = {
 // arrival's (BATTLE 13.7: a save that fought every placed foe arrives a level up).
 export const BOSS_LEVELS_EP6 = { gale_engine: [26, 27], scribe: [27, 28] };
 export const TARGETS_EP6 = {
-  gale_engine: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10 },
+  // #87 (2026-11-11): both bosses lost HP and gained ATK/MAG/SPD (BATTLE.md 15); hpLossMin pins it, the Scribe's band moved down
+  gale_engine: { roundsMin: 7, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.10, hpLossMin: 0.14 },
   // anchorMin: careful play breaks at least half the Rewrites it sees with Anchor (check() below)
-  scribe: { roundsMin: 11, roundsMax: 15, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, anchorMin: 0.5 },
+  scribe: { roundsMin: 11, roundsMax: 14, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15, anchorMin: 0.5, hpLossMin: 0.17 },
   // the Eye of the Storm is the tightest ordinary floor: careful play loses 18 to 24% HP, attack-only wins 70 to 85%
   tightFloor: { zone: 'ep6_obs_f3', hpLoss: [0.18, 0.24], naiveWin: [0.70, 0.85] },
   // Plan 6.1: the Airstair 25, F1 25 -> 26, F2 26 -> 27 (just), F3 27, the Scribe at 27 -> 28

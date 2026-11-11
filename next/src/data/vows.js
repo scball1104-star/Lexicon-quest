@@ -3,8 +3,9 @@
 // to (reward recipients in preference order), keptLine / brokenLine ([{ who, text }], the first speaker in the party is
 // said, who: null is the fallback), offerIf(game, ctx) }. Box rules: 3 lines of 42, ASCII, no em dashes.
 
-/** Mastery points a kept vow pays, by chapter: a chapter's five never add up to one mastery level (docs/VOWS.md). */
-export const VOW_REWARD = { 1: 4, 2: 8, 3: 12 };
+/** Mastery points a kept vow pays, by chapter: a chapter's five never add up to one mastery level (docs/VOWS.md). Chapters 4
+ * to 6 continue the same step of 4 a chapter (Scott, 2026-11-11: "chapters 4 to 6 should pay more"). */
+export const VOW_REWARD = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24 };
 /** Kept vows that pay per chapter; later ones keep their line but pay no points. */
 export const VOW_PAID_CAP = 5;
 

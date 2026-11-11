@@ -79,6 +79,6 @@ export default {
     book('book_history', 19, 3, 'willowmere_history', { solid: false }),
   ],
   exits: [],
-  marks: { mira_meet: [10, 12] },
+  marks: { mira_meet: [10, 12], ink_a: [12, 11], ink_b: [8, 11] },   // #86: where the ink pulls itself up (ep1.js library_ink)
   start: { x: 10, y: 13, dir: 'up' },
 };

@@ -22,6 +22,7 @@ enc('valley_scarab', { zone: 'valley', leader: 'moss_scarab', enemies: ['moss_sc
 enc('valley_mixed', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'moss_scarab'] });
 enc('valley_pack', { zone: 'valley', leader: 'briar_wolf', enemies: ['briar_wolf', 'briar_wolf', 'ink_slime'] });
 enc('yard_slime', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime'], noFlee: true, noElite: true, power: 0.5, speed: 0.7, hp: 0.55, stage: 'willowmere' });   // H1: the Lv 1 hero alone (ep1.js yard_slime); not in a plan, proved by qa/content/h1_opening.test.mjs
+enc('library_ink', { zone: 'valley', leader: 'ink_slime', enemies: ['ink_slime', 'ink_slime'], noFlee: true, noElite: true, power: 0.6, speed: 0.8, hp: 0.6, stage: 'archive' });   // #86: the hero and Mira (ep1.js library_ink); not in a plan, proved by qa/content/h1_opening.test.mjs
 
 // ---------------------------------------------------------------- Archive F1: The Catalog Halls
 enc('f1_slimes', { zone: 'archive_f1', leader: 'ink_slime', enemies: ['ink_slime', 'ink_slime', 'bookmite'] });

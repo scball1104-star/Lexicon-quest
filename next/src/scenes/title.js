@@ -25,6 +25,8 @@ export const STACKS_RESUME_LABEL = 'Resume the Deep Stacks (B{n})';
 export const STACKS_RESUME_HELP = 'Back to your reading, at the floor you left.';
 export const STACKS_RESUME_FAILED = 'The Stacks could not be reopened.';
 const AUTO_SLOT = 0;
+const isQuickRow = (it) => /^ep\d$/.test(it.id);
+let quickState = 0, quickLoad;   // the quick start fold (ui/firstuse/titleQuick.js): 0 not loaded, 1 loading, 2 in, 3 failed (rows stay unfolded)
 
 export class TitleScene {
   constructor(engine) { this.engine = engine; this.name = 'title'; }
@@ -60,6 +62,7 @@ export class TitleScene {
     const w = Math.max(100, tw + 34);
     this.win = { x: Math.round(192 - w / 2), y: bottom - h, w, h };
     this.guard = null;
+    this.quick = []; this.mainMenu = null; this.menuSig = null;
     this.menu = new List({ x: this.win.x + 6, y: this.win.y + 7, w: this.win.w - 12, rowH, rows: items.length, items, textX: 18, index: this.hasSaves && data.index == null ? 1 : (data.index || 0), confirmSfx: true });
     if (this.ep3.slot != null) ensurePack('tier').then(() => globalThis.LQ_TIER && LQ_TIER.title(this));   // Fine Print
     if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4\b/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4', { engine: e }).then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4
@@ -83,8 +86,24 @@ export class TitleScene {
     this.idle = 0; this.busy = false;
     this.hasSaves = this.anySave();
     this.ledger = this.ledgerCount();
-    const cont = this.menu.items.find((it) => it.id === 'continue');
+    const cont = (this.mainMenu || this.menu).items.find((it) => it.id === 'continue');
     if (cont) cont.disabled = !this.hasSaves;
+  }
+
+  /** Two or more quick starts fold into one row: load the fold on first use (#88). Resolves when it is in. */
+  foldQuick() {
+    if (quickState || (this.mainMenu || this.menu).items.filter(isQuickRow).length < 2) return quickLoad;
+    quickState = 1;
+    return (quickLoad = import('../ui/firstuse/titleQuick.js').then((m) => { m.install(TitleScene); quickState = 2; }, () => { quickState = 3; }));
+  }
+  /** QA: every quick start offered, folded or not. */
+  quickStarts() { return [...new Set([...this.quick, ...(this.mainMenu || this.menu).items].filter(isQuickRow).map((it) => it.id))].sort(); }
+  /** QA: the cursor on quick start `id` (the list opened when folded). */
+  async showQuickStart(id) {
+    await this.foldQuick();
+    if (this.showQuick) return this.showQuick(id);
+    const i = this.menu.items.findIndex((it) => it.id === id);
+    return i >= 0 && (this.menu.moveTo(i), true);
   }
 
   samplePoints(r) {
@@ -118,7 +137,7 @@ export class TitleScene {
     }
     for (const s of this.sparkles) s.t += dt;
     this.sparkles = this.sparkles.filter((s) => s.t < 0.4);
-    const act = this.menu.update(input, audio);
+    const act = this.quickStep ? this.quickStep(input, audio) : this.foldQuick() && quickState === 1 ? null : this.menu.update(input, audio);
     if (act === 'confirm') {
       const id = this.menu.item.id;
       if (id === 'new' || id === 'ep2') {
@@ -243,6 +262,7 @@ export class TitleScene {
     const e = this.engine;
     // The quantized backdrop already has its sky shaded for the logo and its vignette is dithered to its own
     // palette (keyart.js); the painted crop fallback needs the extra alpha dark.
+    if (this.tidyMenu) this.tidyMenu(); else this.foldQuick();
     this.art.draw(r, { dark: this.art.usesBackdrop ? DARK.none : 0.18, vignette: true });
     const logo = e.assets.has('logo') ? e.assets.atlas('logo') : null;
     const f = logo && logo.frames.logo;
@@ -262,7 +282,7 @@ export class TitleScene {
     }
     // Opaque: a translucent window over the key art would blend hundreds of off-palette colours (D1).
     // The save guard stands in for the menu while it asks (two stacked menus read as one muddle).
-    if (!this.guard) {
+    if (!this.guard && quickState !== 1) {
       drawWindow(r, this.win.x, this.win.y, this.win.w, this.win.h);
       // Only the page on top shows a finger: under Load Game or Config the title's would read as a second cursor.
       this.menu.draw(r, { frame: this.frame, bar: false, cursor: e.scene === this });
@@ -273,7 +293,7 @@ export class TitleScene {
     if (this.stacks && this.stacks.cleared) drawStacksMark(r, 4 + r.measure(VERSION) + 7, vy);
     this.drawLedgerCount(r);
     const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
-    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP : null;
+    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP : this.quickNote ? this.quickNote(noteId) : null;
     if (note) {
       const lines = r.wrap(note, 108);
       const nh = lines.length * 11 + 10, nx = this.win.x + this.win.w + 6;
@@ -312,7 +332,7 @@ export class TitleScene {
   }
 
   debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, ledger: this.ledger, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
-    items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2, stacks: this.stacks,
+    items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2, stacks: this.stacks, quickOpen: !!this.mainMenu, quick: this.quickStarts(),
     guard: this.guard ? { id: this.guard.id, line: this.guard.auto ? this.guard.auto.line : this.guard.lines[0].text, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
 }
 

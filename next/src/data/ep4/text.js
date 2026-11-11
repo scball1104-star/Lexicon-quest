@@ -178,7 +178,7 @@ export const EP4_BOOKS = {
     ],
   },
   keep_ledger: {
-    title: 'The Keep Ledger', where: 'ep4_keep_f2',
+    title: 'The Coffer Accounts', where: 'ep4_keep_f2',
     pages: [
       'The Public Coffer, in Keeper ink: what the city paid in, what it paid out, and who signed for each.',
       'The last true entry: relief for the river quarter, by charter of the king. Paid out: nothing.',
