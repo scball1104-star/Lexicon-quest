@@ -94,7 +94,7 @@ export const EP4_ENEMIES = {
   // Stamps every turn (its sleeves are full of paper); Objection at 3 Seals; at 50% it calls a witness that stamps it too.
   barrister: {
     name: 'The Inkbound Barrister', family: 'spirit', level: 19, size: 'large', boss: true, ai: 'barrister',
-    hp: 2500, atk: 300, def: 26, mag: 320, spr: 28, spd: 13, luk: 8,
+    hp: 2125, atk: 360, def: 26, mag: 672, spr: 28, spd: 18, luk: 8,
     shields: 8, weak: ['fire', 'light', 'spear'], resist: ['ice', 'thunder'], statusImmune: ['silence'],
     heat: decree('objection'),
     exp: 220, gold: 800, masteryPts: 18,
@@ -116,7 +116,7 @@ export const EP4_ENEMIES = {
   // ---------------------------------------------------------------- the Paper Regent (Lv 20) and the Forged Writs
   paper_regent: {
     name: 'The Paper Regent', family: 'construct', level: 20, size: 'boss', boss: true, ai: 'paper_regent',
-    hp: 2950, atk: 330, def: 26, mag: 300, spr: 24, spd: 13, luk: 10,
+    hp: 2213, atk: 393, def: 26, mag: 480, spr: 24, spd: 16, luk: 10,
     shields: 7, weak: ['fire', 'spear'], resist: ['ice', 'thunder'], statusImmune: ['stun', 'poison', 'blind'],
     heat: decree('flood_decree'),
     exp: 800, gold: 1100, masteryPts: 28,

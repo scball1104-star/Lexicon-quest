@@ -91,7 +91,7 @@ export const EP5_ENEMIES = {
   mirage_knight: {
     name: 'The Mirage Knight', family: 'construct', level: 23, size: 'large', boss: true, ai: 'mirage_knight', sky: 'sun',
     mirrorTurn: 'mirror_turn',
-    hp: 2450, atk: 420, def: 34, mag: 220, spr: 26, spd: 13, luk: 8,
+    hp: 1838, atk: 521, def: 34, mag: 550, spr: 26, spd: 16, luk: 8,
     shields: 7, weak: ['ice', 'axe'], resist: ['fire', 'sword'], statusImmune: ['silence'],
     exp: 220, gold: 900, masteryPts: 20,
     moves: [{ skill: 'mirage_slash', weight: 60 }, { skill: 'glare', weight: 40 }],
@@ -112,7 +112,7 @@ export const EP5_ENEMIES = {
   // ---------------------------------------------------------------- the Sand Oracle (Lv 24) and the False Futures
   oracle: {
     name: 'The Sand Oracle', family: 'construct', level: 24, size: 'boss', boss: true, ai: 'oracle', sky: 'sun',
-    hp: 4000, atk: 380, def: 30, mag: 420, spr: 28, spd: 14, luk: 10,
+    hp: 3000, atk: 441, def: 30, mag: 798, spr: 28, spd: 17, luk: 10,
     shields: 8, weak: ['ice', 'spear'], resist: ['fire', 'thunder'], statusImmune: ['stun', 'poison', 'blind'],
     exp: 1000, gold: 1400, masteryPts: 32,
     moves: [{ skill: 'stinger', weight: 55 }, { skill: 'sandfall', weight: 45 }],

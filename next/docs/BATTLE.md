@@ -1299,3 +1299,76 @@ Turn the Sky against a Rewrite, Turn the Sky with no sky, the Engine, the Scribe
   it is used on (today: its user).
 - `src/battle/rules.js` commands(): a `RULE_EXT` `commands(ctx, unit, list)` filter, so Turn the Sky with no sky could stay listed and
   disabled ("No sky to turn.") without the scene's wrap (today: `SKILL_GATE` plus `gateCommands`).
+
+## 15. Main bosses: tougher, not longer (#87, 2026-11-11)
+
+Scott, 2026-11-11: the bosses "perhaps need to get tougher, not necessarily longer". CRITIQUE_9 item 4 measured careful play at
+16 to 24% HP lost while the rounds grew every episode. Every main boss named in #87 now has less HP and hits harder or more often.
+Data only (`src/data/enemies.js`, `src/data/ep4..6/enemies.js`); no rule, AI or skill changed.
+
+**Three limits shaped the numbers (Fact).**
+1. **DESIGN 7: a full-HP party survives any single ordinary (non-telegraphed) action** (`qa/battle/data.test.mjs`,
+   `ep4_battle.test.mjs`; checked here for all nine). Each boss's single-target physical move already took 75 to 86% of Mira's HP at
+   the entry level, so ATK could rise only 1.08x to 1.24x on most of them (the worst hit is now 84 to 94% of her HP). Their MAG moves
+   (often hitting the whole party) had room, so most of the extra punch is MAG, and SPD (more turns). A first pass with ATK x1.4 to
+   x2.1 one-shot Mira from full HP on five bosses and was thrown out.
+2. **The Warden's Tempered Oath target** (careful play turns half the Last Hammers) fell under 50% with any Warden SPD gain.
+3. **Auto heals at 50% in boss fights**, so careful HP lost at the end of a fight tops out near 30% before the win rate falls; the
+   extra pressure shows up as items and KOs. Careful HP lost is now 16 to 31% at the plan level (was 8 to 23%), items up on every
+   boss (about 1.2x to 10x), and every fight but the Barrister's (7.40 -> 7.60) is shorter.
+
+The search (scratch scripts, 200 fights a point): HP at 75 or 85%, SPD +0, +3 or +5, ATK at the one-hit ceiling, and the highest MAG
+(or both) that kept careful play at 89% or more at every level the suite plays the boss (92% for the Archivore; 90% at Lv 12 for the
+King), then each pick checked at 400 fights and at the tests' 60 or 100.
+
+New targets: each boss gains `hpLossMin`, a guard on careful HP lost at the plan level (set under both the 400-fight and the test
+reading), and the long bands moved down, never up. The Archivore's careful win floor is 90% (the first main boss stays gentle). The
+Archivore's and the King's bands keep their old ceilings (12, 13) because Fine Print plays them with the same TARGETS.
+
+| Boss | Was (HP / ATK / MAG / SPD) | Now | Band was / now | hpLossMin | Why this lever |
+|---|---|---|---|---|---|
+| Archivore (Ep1) | 820 / 70 / 72 / 12 | 697 / 98 / 101 / 12 | 8-12 / 8-12 | 25% | Room under the one-hit rule (Gnash 84% of Mira at Lv 7): HP -15%, x1.4 both, no speed. 31% HP lost, careful 95% for a new player. |
+| Nameless King (Ep2) | 1,400 / 158 / 149 / 13 | 1,120 / 190 / 179 / 13 | 9-13 / 9-13 | 12% | Held by the Lv 12 floor (90%, the 80% route and the bot): x1.25 put Lv 12 at exactly 90%, so x1.2. The weakest change; HP lost reads 16% at the tests' 60 fights, so its guard is low. |
+| Cinder Warden (Ep3) | 2,300 / 230 / 200 / 18 | 1,955 / 248 / 300 / 18 | 9-13 / 9-12 | 15% | Hammerfall sat at 86% of Mira: ATK x1.08 only, MAG x1.5, HP -15%. Tempered Oath must still turn half the Last Hammers (oathMin) at 400 fights and at the tests' 60: any SPD gain (+1 to +3) or more MAG put that at 34 to 49%. So the Warden gets the smallest lift: a round and a third shorter, HP lost 19 -> 22%, items 1.9 -> 2.2. |
+| Barrister (Ep4 F2) | 2,500 / 300 / 320 / 13 | 2,125 / 360 / 672 / 18 | 7-9 / 7-9 | 12% | Careful play keeps it Broken much of the fight; SPD +5 gives it turns back, MAG x2.1 (Cross-Examine) makes them count. Items 0.25 -> 2.5 a fight; ignoring telegraphs 73% -> 23%. |
+| Paper Regent (Ep4) | 2,950 / 330 / 300 / 13 | 2,213 / 393 / 480 / 16 | 10-14 / 10-13 | 20% | HP -25%, ATK x1.19 (Trident Sweep at the ceiling), MAG x1.6, SPD +3: shorter, 4.5 items a fight. |
+| Mirage Knight (Ep5 F2) | 2,450 / 420 / 220 / 13 | 1,838 / 521 / 550 / 16 | 7-9 / 6-9 | 17% | Was the softest boss (8% HP lost, 100% win). HP -25%, ATK x1.24, MAG x2.5 (Glare hits everyone), SPD +3; band floor to 6 so a fast win is not a miss. |
+| Sand Oracle (Ep5) | 4,000 / 380 / 420 / 14 | 3,000 / 441 / 798 / 17 | 11-15 / 10-13 | 22% | HP -25%, ATK x1.16 (Stinger at the ceiling), MAG x1.9 (Sandfall, the Last Prophecy), SPD +3: 1.6 rounds shorter. |
+| Gale Engine (Ep6 F2) | 1,750 / 750 / 200 / 14 | 1,400 / 1,350 / 360 / 17 | 7-9 / 7-9 | 14% | Its ordinary moves were cut on 11/10 (Fan Blade 40, Piston 25: 67% of Mira at most), and careful play Anchors the Full Blast, so damage saturates. x1.8 and SPD +3: Full Blast is now close to a wipe when ignored (71% -> 18%). |
+| Storm Scribe (Ep6) | 3,900 / 520 / 520 / 15 | 2,925 / 598 / 598 / 18 | 11-15 / 11-14 | 17% | The most sensitive (x1.4 alone dropped careful to 85%): HP -25%, x1.15, SPD +3. 1.5 rounds shorter. |
+
+Before and after (`simulate.mjs` suite seeds, 400 fights a row; careful win / rounds / HP lost / items; attack-only stays 0% on
+all nine, before and after; ignoring telegraphs at the plan level):
+
+| Boss | Lv | Before | After | Ignoring telegraphs before -> after |
+|---|---|---|---|---|
+| archivore | 8 | 100% / 10.41 / 23% / 1.30 | 95% / 9.80 / 31% / 1.99 | 80% -> 53% |
+| nameless_king | 13 | 99% / 11.37 / 22% / 1.83 | 96% / 10.21 / 24% / 2.23 | 84% -> 76% |
+| nameless_king | 12 | 96% / 12.24 / 25% / 2.65 | 92% / 11.29 / 28% / 3.08 | - |
+| cinder_warden | 16 | 99% / 12.73 / 19% / 1.94 | 98% / 11.42 / 22% / 2.22 | 71% -> 76% |
+| cinder_warden | 17 | 99% / 11.64 / 21% / 1.78 | 100% / 10.75 / 20% / 1.79 | - |
+| barrister | 19 | 100% / 7.40 / 11% / 0.25 | 96% / 7.60 / 16% / 2.46 | 73% -> 23% |
+| barrister | 20 | 100% / 7.52 / 11% / 0.18 | 96% / 7.51 / 14% / 1.89 | - |
+| paper_regent | 20 | 99% / 13.52 / 16% / 2.93 | 92% / 12.89 / 24% / 4.52 | 74% -> 23% |
+| paper_regent | 21 | 100% / 12.53 / 15% / 2.26 | 95% / 11.89 / 23% / 3.79 | - |
+| mirage_knight | 23 | 100% / 8.75 / 8% / 0.58 | 91% / 8.19 / 24% / 1.46 | 86% -> 35% |
+| mirage_knight | 24 | 100% / 8.68 / 7% / 0.64 | 96% / 8.11 / 19% / 1.41 | - |
+| oracle | 24 | 99% / 13.14 / 23% / 0.90 | 91% / 11.55 / 28% / 1.68 | 79% -> 39% |
+| oracle | 25 | 100% / 12.88 / 21% / 0.62 | 95% / 11.20 / 24% / 1.29 | - |
+| gale_engine | 26 | 100% / 8.94 / 14% / 0.55 | 97% / 8.38 / 18% / 0.71 | 71% -> 18% |
+| gale_engine | 27 | 100% / 8.72 / 15% / 0.53 | 98% / 8.38 / 16% / 0.57 | - |
+| scribe | 27 | 98% / 14.73 / 16% / 2.40 | 91% / 13.22 / 22% / 2.70 | 63% -> 22% |
+| scribe | 28 | 98% / 14.14 / 18% / 1.94 | 94% / 12.38 / 19% / 2.24 | - |
+
+Fine Print (`src/data/tier/tier.js` terms): the Archivore, the King and the Warden have tier terms that divide the base change back
+out (archivore hp 1.55 pow 1.39, nameless_king hp 0.9 pow 1.08, cinder_warden hp 0.85 pow 0.93), so the tier keeps the fights it was
+tuned at; without them the tier's Archivore fell to 81% and its King to 78%. One pow term covers ATK and MAG, so the tier's Warden
+keeps its ATK and carries about 40% more MAG (it is outside the tier check, which covers Episodes 1 and 2).
+
+Tests moved with the data: `qa/battle/x1_baseline_rewards.json` (the three bosses' replayed fights; rewards
+untouched), `qa/battle/x1_levels.test.mjs` (the Archivore's target).
+
+Not touched: the Echo Warden, the Other Selves, the Bellows Specter, the Briar Alpha and the Wider Valley bosses (not in #87's list).
+Open for Scott: careful HP lost of 30 to 45% with 85%+ careful wins is not reachable through boss stats alone, because of the
+limits above. Getting there would mean telegraphs that hit harder than an ordinary blow may (they are exempt from the one-hit rule),
+or Auto healing later in boss fights. Both are design calls for Scott and Stephen.

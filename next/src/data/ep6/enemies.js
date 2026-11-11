@@ -89,7 +89,7 @@ export const EP6_ENEMIES = {
   // ---------------------------------------------------------------- the Gale Engine (F2 mini-boss, Lv 26)
   gale_engine: {
     name: 'The Gale Engine', family: 'construct', level: 26, size: 'large', boss: true, ai: 'gale_engine', wind: 'ground',
-    hp: 1750, atk: 750, def: 42, mag: 200, spr: 24, spd: 14, luk: 6,
+    hp: 1400, atk: 1350, def: 42, mag: 360, spr: 24, spd: 17, luk: 6,
     shields: 7, weak: ['thunder', 'axe'], resist: ['ice', 'bow'], statusImmune: ['silence'],
     exp: 240, gold: 1000, masteryPts: 22,
     moves: [{ skill: 'engine_fan', weight: 60 }, { skill: 'engine_piston', weight: 40 }],
@@ -101,7 +101,7 @@ export const EP6_ENEMIES = {
   // ---------------------------------------------------------------- the Storm Scribe (Lv 27), the False Beacon, the Broken Compass
   scribe: {
     name: 'The Storm Scribe', family: 'construct', level: 27, size: 'boss', boss: true, ai: 'scribe', wind: 'aloft',
-    hp: 3900, atk: 520, def: 32, mag: 520, spr: 30, spd: 15, luk: 10,
+    hp: 2925, atk: 598, def: 32, mag: 598, spr: 30, spd: 18, luk: 10,
     shields: 8, weak: ['spear', 'bow'], resist: ['ice', 'thunder'], statusImmune: ['stun', 'poison', 'blind'],
     exp: 1300, gold: 1600, masteryPts: 34,
     moves: [{ skill: 'quillstorm', weight: 50 }, { skill: 'ink_squall', weight: 50, target: 'lowestHpPct' }],

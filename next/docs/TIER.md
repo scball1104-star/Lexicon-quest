@@ -52,6 +52,11 @@ Episode 3 terms were added (a Fine Print run plays on into Episode 3); the check
 the tier the Warden's Tempered Oath share is 43 to 45% (want 50%: the foe SPD +1 lever puts it before Bram). The section
 above keeps the Episode 2 record's numbers for the record.
 
+**#87 (2026-11-11).** The base Archivore, Nameless King and Cinder Warden lost HP and gained ATK and MAG (BATTLE.md 15). Their
+terms divide that back out so the tier keeps its fights: archivore hp 1.55 pow 1.39, nameless_king hp 0.9 pow 1.08, cinder_warden
+hp 0.85 pow 0.93 (one pow term covers ATK and MAG: the tier's Warden keeps its ATK and carries about 40% more MAG). Without them the tier's Archivore won 81% and
+its King 78%.
+
 ## Legendaries
 
 The twelve placed legendaries (Lanternheart, The First Quill, Pilgrim's Reach, Thornwake, Mirrorguard Mail, Twinfold Charm,

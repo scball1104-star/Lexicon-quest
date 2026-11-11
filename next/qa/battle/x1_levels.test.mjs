@@ -15,7 +15,9 @@ test('the registry: the new zones, bosses and targets are added and no existing 
   assert.deepEqual(BOSS_LEVELS.archivore, [8]); assert.deepEqual(BOSS_LEVELS.echo_warden, [5, 6]);
   assert.ok(BOSS_TARGETS.includes('barrow_reeve') && BOSS_TARGETS.includes('millstone_golem') && BOSS_TARGETS.includes('archivore'));
   assert.deepEqual(TARGETS.barrow_reeve, { roundsMin: 6, roundsMax: 9, winMin: 0.85, naiveWinMax: 0.6 });
-  assert.deepEqual(TARGETS.archivore, { roundsMin: 8, roundsMax: 12, winMin: 0.85, naiveWinMax: 0.6, recklessWorse: 0.15 });
+  // #87 (2026-11-11): the Archivore's own target moved (90% careful win, 25% HP lost at least: tougher, not longer);
+  // the expansion still leaves it as simulate.mjs sets it
+  assert.deepEqual(TARGETS.archivore, { roundsMin: 8, roundsMax: 12, winMin: 0.9, naiveWinMax: 0.6, recklessWorse: 0.15, hpLossMin: 0.25 });
   assert.deepEqual(TARGETS.levels.archive_boss, { start: [8, 8], end: [8, 10] });
   assert.deepEqual(Object.keys(TARGETS.levels).slice(0, 5), ['valley', 'archive_f1', 'archive_f2', 'archive_f3', 'archive_boss']);
   for (const z of X1_ZONES) assert.ok(!(z in TARGETS.levels), `${z} is not on the route`);

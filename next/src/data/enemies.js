@@ -140,7 +140,7 @@ enemy('lost_page', {
 });
 enemy('archivore', {
   name: 'The Archivore', family: 'devourer', level: 8, size: 'boss', boss: true, ai: 'archivore',
-  hp: 820, mp: 99, atk: 70, def: 12, mag: 72, spr: 14, spd: 12, luk: 10,
+  hp: 697, mp: 99, atk: 98, def: 12, mag: 101, spr: 14, spd: 12, luk: 10,
   shields: 6, weak: ['fire', 'spear'], resist: ['ice'],
   statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],
   exp: 400, gold: 500, masteryPts: 20,
@@ -367,7 +367,7 @@ enemy('nameless_king', {
   // W11 (CRITIQUE_4 item 10), presentation only: he floats lower on the stage (feet at y 164, the hem passing behind
   // the bottom windows) so the crown clears the help window, and his weakness row stands beside him, not on the robe
   stageFeet: 164, rowBeside: true,
-  hp: 1400, mp: 99, atk: 158, def: 22, mag: 149, spr: 20, spd: 13, luk: 10,
+  hp: 1120, mp: 99, atk: 190, def: 22, mag: 179, spr: 20, spd: 13, luk: 10,
   shields: 6, weak: ['thunder', 'spear'], resist: ['ice'],
   statusImmune: ['stun', 'silence', 'poison', 'blind', 'chill'],
   exp: 500, gold: 800, masteryPts: 24,
@@ -521,7 +521,7 @@ enemy('bellows_specter', {
 // every third turn). Strike the Name is its Heat flare in every phase.
 enemy('cinder_warden', {
   name: 'The Cinder Warden', family: 'construct', level: 16, size: 'boss', boss: true, ai: 'cinder_warden',
-  hp: 2300, atk: 230, def: 22, mag: 200, spr: 18, spd: 18, luk: 10,
+  hp: 1955, atk: 248, def: 22, mag: 300, spr: 18, spd: 18, luk: 10,
   shields: 9, weak: ['ice', 'spear'], resist: ['fire', 'sword'],
   statusImmune: ['stun', 'silence', 'poison', 'blind'],
   heat: { max: 3, step: 0.15, flare: 'strike_the_name' },
