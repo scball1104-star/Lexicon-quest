@@ -18,6 +18,7 @@ import { attach } from '../../src/data/ep4/field/events.js';
 import { BAND_FRAMES } from '../../src/data/ep4/field/system.js';
 import { TEST_TIDE } from '../../src/data/ep4/field/_testtide.js';
 import * as world from '../../src/data/ep4/world.js';
+import { within, withinAsync } from '../_perf.mjs';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TILES = JSON.parse(fs.readFileSync(path.join(NEXT, 'assets', 'tiles', 'tiles.json'), 'utf8'));
@@ -301,14 +302,23 @@ test('field: a boat door rides with the sound of water', async () => {
 });
 
 test('timing: a level change recomputes under 2 ms, a field frame under 3 ms', async () => {
-  const f = makeField();
-  give(f, 'lock_crank');
-  for (let k = 0; k < 6; k++) await turn(f, 'wh_b');
-  const d = f.tide.debugState();
-  assert.ok(d.maxApplyMs < 2, `apply ${d.maxApplyMs} ms`);
-  let worst = 0;
-  for (let i = 0; i < 120; i++) { frames(f, 1); worst = Math.max(worst, f.tide.stats.updateMs); }
-  assert.ok(worst < 3, `update ${worst} ms`);
+  // Both numbers are the WORST of a run, so one preempted frame on a busy PC or CI runner failed it (issue #76): each
+  // try builds a fresh field and the best try's worst case must be inside the budget (qa/_perf.mjs). A real slowdown
+  // is slow on every try.
+  let f;
+  const a = await withinAsync(2, async () => {
+    f = makeField();
+    give(f, 'lock_crank');
+    for (let k = 0; k < 6; k++) await turn(f, 'wh_b');
+    return f.tide.debugState().maxApplyMs;
+  });
+  assert.ok(a.ok, a.msg('apply (worst of six level changes)'));
+  const u = within(3, () => {
+    let worst = 0;
+    for (let i = 0; i < 120; i++) { frames(f, 1); worst = Math.max(worst, f.tide.stats.updateMs); }
+    return worst;
+  });
+  assert.ok(u.ok, u.msg('update (worst of 120 frames)'));
 });
 
 // ---------------------------------------------------------------- the map tool

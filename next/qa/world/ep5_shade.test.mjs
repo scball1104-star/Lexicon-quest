@@ -18,6 +18,7 @@ import { compile, light, runMask, running, firm, plates, latches, hourFlag, isHo
 import { attach } from '../../src/data/ep5/field/events.js';
 import { SWEEP_FRAMES, fieldHourFor } from '../../src/data/ep5/field/system.js';
 import { ensureArt, FALLBACK_IDS } from '../../src/data/ep5/field/art.js';
+import { within, withinAsync } from '../_perf.mjs';
 import { TEST_SHADE, TEST_SHADE_IN } from '../../src/data/ep5/field/_testshade.js';
 import { getFieldHour, setFieldHour } from '../../src/data/ep5/sky.js';
 import * as world from '../../src/data/ep5/world.js';
@@ -182,12 +183,14 @@ test('rule: 40 x 40 with 12 casters and 4 lamps recomputes under 1 ms', () => {
   const map = { id: 'perf', ground: Array(W).fill('.'.repeat(W)), legend: { '.': 'plaza' }, shade: { hour: 'dawn', sand: Array(W).fill('s'.repeat(W)), roof: Array(W).fill(''.padEnd(20, '.') + ''.padEnd(20, '#')) }, events: ev };
   compile(map);
   for (let i = 0; i < 50; i++) runMask(map, { hour: ['dawn', 'noon', 'dusk'][i % 3] });
-  const t0 = performance.now();
   const n = 300;
-  for (let i = 0; i < n; i++) { const st = { hour: ['dawn', 'noon', 'dusk'][i % 3] }; const L = light(map, st); runMask(map, st, L); plates(map, st, L); }
-  const ms = (performance.now() - t0) / n;
-  assert.ok(ms < 1, `light + run + plates ${ms.toFixed(3)} ms`);
-  console.log(`  # shade.js 40x40, 12 casters, 4 lamps, 4 windows: ${ms.toFixed(3)} ms per state`);
+  const r = within(1, () => {   // qa/_perf.mjs: best of a few tries, budget scaled by a calibration loop (issue #76)
+    const t0 = performance.now();
+    for (let i = 0; i < n; i++) { const st = { hour: ['dawn', 'noon', 'dusk'][i % 3] }; const L = light(map, st); runMask(map, st, L); plates(map, st, L); }
+    return (performance.now() - t0) / n;
+  });
+  assert.ok(r.ok, r.msg('light + run + plates'));
+  console.log(`  # shade.js 40x40, 12 casters, 4 lamps, 4 windows: ${r.best.toFixed(3)} ms per state`);
 });
 
 // ---------------------------------------------------------------- the field
@@ -458,16 +461,25 @@ test("field: shade on paving is the pale style, on sand the violet; a stone's sh
 });
 
 test('timing: an hour change recomputes under 1 ms, a field frame under 3 ms', async () => {
-  const f = makeField();
-  f.leader.tx = 5; f.leader.ty = 20;
-  for (const h of ['dawn', 'dusk', 'noon', 'dawn', 'dusk', 'noon']) await hour(f, h);
-  const d = f.shade.debugState();
-  assert.ok(d.maxApplyMs < 1, `apply ${d.maxApplyMs} ms`);
-  let worst = 0;
-  f.shade.setHour('dusk');
-  for (let i = 0; i < 120; i++) { frames(f, 1); worst = Math.max(worst, f.shade.stats.updateMs); }
-  assert.ok(worst < 3, `update ${worst} ms`);
-  console.log(`  # field: apply max ${d.maxApplyMs} ms, update during a sweep max ${worst} ms`);
+  // Both numbers are the WORST of a run, so one preempted frame on a busy PC used to fail it (issue #76): each try
+  // builds a fresh field and the best try's worst case must be inside the budget (qa/_perf.mjs). A real slowdown is
+  // slow on every try.
+  let f;
+  const a = await withinAsync(1, async () => {
+    f = makeField();
+    f.leader.tx = 5; f.leader.ty = 20;
+    for (const h of ['dawn', 'dusk', 'noon', 'dawn', 'dusk', 'noon']) await hour(f, h);
+    return f.shade.debugState().maxApplyMs;
+  });
+  assert.ok(a.ok, a.msg('apply (worst of six hour changes)'));
+  const u = within(3, () => {
+    let worst = 0;
+    f.shade.setHour(f.shade.debugState().hour === 'dusk' ? 'dawn' : 'dusk');
+    for (let i = 0; i < 120; i++) { frames(f, 1); worst = Math.max(worst, f.shade.stats.updateMs); }
+    return worst;
+  });
+  assert.ok(u.ok, u.msg('update during a sweep (worst of 120 frames)'));
+  console.log(`  # field: apply max ${a.best} ms, update during a sweep max ${u.best} ms`);
 });
 
 // ---------------------------------------------------------------- the map tool
