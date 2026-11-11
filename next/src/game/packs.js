@@ -27,6 +27,7 @@ export const PACKS = {
   ep6: { entry: '../data/ep6/index.js', prefix: 'ep6_', assets: 'assets/ep6_manifest.json', audioPack: 'ep6', hard: true, touches: ['ep5_sh_inn', 'ep5_saffron'],
          wanted: (f) => !!(f.ep5_complete || f.ep6_started), enabled: () => EP6_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
+  worldmap: { entry: '../data/worldmap/index.js', prefix: 'worldmap_', assets: 'assets/worldmap_manifest.json', audioPack: null, touches: [], wanted: (f) => !!f.ep1_complete, enabled: () => true },   // #97
 };
 
 /** Where the generated list of every file of every pack lives (tools/pwa/build_pwa.py writes it). */
