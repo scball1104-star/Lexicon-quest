@@ -535,3 +535,16 @@ The original game stays at https://scball1104-star.github.io/Lexicon-quest/ unti
 - Checked live: title on desktop and phone with no console errors; Episode 5's files load from the live site. Not checked
   from here: an offline reload, a full live playthrough.
 
+## 2026-11-10 (Tue): Episode 6 shipped, then its polish and faster loading
+- On your word ("Just add it to the game"), Episode 6 went live (live main f155893, PR #54): Bram's episode, Aeris as the
+  guest, gust lanes in the field, the Gale in battle, Bram's Anchor, the Gale Engine and the Storm Scribe.
+- Checks before the push: every test (1829), the screenshot sweep (372 of 372), the balance check, the real-keys bot (98 of
+  98), GitHub's own check. Checked live: title on desktop and phone with no console errors, Episode 6's files load.
+- On "Yes, ship them", the polish went live (PR #55, main 6f137b2): the Airstair chest holds 1,500 more gold so the tier 11
+  armor is affordable, and Zephyr Landing is wider so the camera can frame Bram's dock catch.
+- On "Yes, ship it", faster loading went live (PR #57, main 7289bc8, sw 939847589b4e). Files already stored on the phone are
+  fetched once instead of two or three times, and the side packs wait until Episodes 4 to 6 are in. The timing checks now
+  run with the graphics chip on; without it they over-measured by about 40%. Live, slow phone (4x slower processor, 10 Mbps):
+  first visit 6.6 to 6.8 s (target 8), files stored 2.1 to 2.3 s (target 3, was 3.0 to 4.2). Bundling stays on hold.
+- GitHub's publish step timed out three times in the afternoon; one fresh run at 7:00 PM went through in 3 minutes.
+- Still open: Stephen has played neither Episode 5 nor 6; a full live playthrough of Episode 6; an offline reload.

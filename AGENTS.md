@@ -128,6 +128,11 @@ request. Scott's Suno and Runway accounts stay with Scott; ask in an issue if yo
   rewritten by the world suite: restore them with `git checkout -- next/qa/world/out`, do not commit them.
   `*.log` is ignored everywhere.
 - Dev scenes (`src/scenes/_dev*.js`) are lazy-loaded and kept out of the precache. Keep it that way.
+- Headless Chromium draws the canvas in software. Any load or frame timing must launch with `fieldlab.GPU_ARGS`
+  (`next/qa/world/fieldlab.py`) and print `fieldlab.GPU_JS`; without them a slow-phone entry reads about 40% slower than
+  players see.
+- A GitHub Pages deploy that fails at `deploy-pages` with "Timeout reached" is GitHub's side. "Rerun failed jobs" then
+  fails on a duplicate `github-pages` artifact; wait an hour, then run `pages.yml` fresh (workflow_dispatch, ref `main`).
 
 ## Commits
 
