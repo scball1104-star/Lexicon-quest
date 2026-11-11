@@ -179,8 +179,8 @@ SHOTS = [
                {'eval': "(() => { LQ_DEBUG.newGameEp4('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; "
                         "const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 28800, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; "
                         "LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()"},
-               {'waitFor': "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep4')", 'timeout': 20000},
-               {'eval': "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep4'); return m.index; })()"},
+               {'waitFor': "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep4')", 'timeout': 20000},
+               {'eval': "LQ_ENGINE.scene.showQuickStart('ep4')"},
                {'frames': 90}]},
 ]
 for _s in SHOTS:

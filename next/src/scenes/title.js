@@ -24,7 +24,50 @@ export const EP2_ROW_LABEL = 'Episode 2: new party';
 export const STACKS_RESUME_LABEL = 'Resume the Deep Stacks (B{n})';
 export const STACKS_RESUME_HELP = 'Back to your reading, at the floor you left.';
 export const STACKS_RESUME_FAILED = 'The Stacks could not be reopened.';
+/**
+ * Two or more quick starts (the "Episode N: new party" rows, the title's own and the packs') fold into this one row, which
+ * opens them as a small list in the menu's place (CRITIQUE_9 item 7, Scott 2026-11-11). One quick start stays its own row.
+ */
+export const QUICK_ROW_ID = 'party';
+export const QUICK_ROW_LABEL = 'New party…';
+export const QUICK_ROW_HELP = 'Start a later episode with a ready-made party.';
+const LOGO_FLOOR = 91;        // a window may reach up to here: the logo lifts to y 4, its subtitle ends at 89
 const AUTO_SLOT = 0;
+
+/** A quick start row: ep2, ep3, ep4... (the id every pack's title.js uses). */
+export const isQuickRow = (it) => !!it && /^ep\d$/.test(it.id);
+const quickOrder = (a, b) => Number(a.id.slice(2)) - Number(b.id.slice(2));
+
+/**
+ * The title's menu window for `n` rows of `rowH` (widest label `tw`): one centred column, bottom 196 (210 for 4+ touch rows),
+ * or two columns near the left edge when one column would climb over the logo. Pure.
+ */
+export function titleMenuLayout(n, rowH, tw) {
+  const bottomFor = (rows) => (rows > 3 && rowH > 11 ? 210 : 196);
+  let columns = 1, rows = n;
+  if (bottomFor(rows) - (rows * rowH + 13) < LOGO_FLOOR) { columns = 2; rows = Math.ceil(n / 2); }
+  const colW = Math.max(94, tw + 22);
+  const w = columns === 1 ? Math.max(100, tw + 34) : colW * 2 + 12;
+  const h = rows * rowH + 13;
+  return { columns, rows, colW, win: { x: columns === 1 ? Math.round(192 - w / 2) : 20, y: bottomFor(rows) - h, w, h } };
+}
+
+/**
+ * Fold the quick start rows of `items` into `quick` (sorted by episode) and one `row` before Config, in place, when there are
+ * two or more of them in all (or the row is already there). Returns true when anything moved. Pure.
+ */
+export function foldQuickRows(items, quick, row) {
+  const loose = items.filter(isQuickRow);
+  const has = items.some((it) => it.id === row.id);
+  if (!loose.length || (!has && loose.length + quick.length < 2)) return false;
+  for (const it of loose) if (!quick.some((q) => q.id === it.id)) quick.push(it);
+  quick.sort(quickOrder);
+  const keep = items.filter((it) => !isQuickRow(it) && it.id !== row.id);
+  const cfg = keep.findIndex((it) => it.id === 'config');
+  keep.splice(cfg < 0 ? keep.length : cfg, 0, row);
+  items.splice(0, items.length, ...keep);
+  return true;
+}
 
 export class TitleScene {
   constructor(engine) { this.engine = engine; this.name = 'title'; }
@@ -50,6 +93,12 @@ export class TitleScene {
       ...(this.ep3.show ? [{ id: 'ep3', label: EP3_ROW_LABEL }] : []),
       { id: 'config', label: 'Config' },
     ];
+    this.quick = [];                 // the folded quick starts, by episode
+    this.quickRow = { id: QUICK_ROW_ID, label: QUICK_ROW_LABEL };
+    this.mainMenu = null;            // the title menu while the quick start list (quickList) stands in its place
+    this.quickList = null;
+    this.menuSig = null;
+    foldQuickRows(items, this.quick, this.quickRow);
     // Menu window: bottom at 196 (210 for 4+ touch rows), as wide as its rows; a tall one lifts the logo, then tightens rows
     let rowH = rowHeightFor(e, 11);
     const bottom = items.length > 3 && rowH > 11 ? 210 : 196;
@@ -65,6 +114,7 @@ export class TitleScene {
     if ((EP4_LIVE && this.ep3.slot != null) || /[?&]ep=4\b/.test(globalThis.location ? location.search : '')) { forcePack('ep4'); ensurePack('ep4', { engine: e }).then(() => globalThis.LQ_EP4 && LQ_EP4.title(this)); }   // Episode 4
     if ((EP5_LIVE && newestWith(e.save, 'ep4_complete')) || /[?&]ep=5\b/.test(globalThis.location ? location.search : '')) { forcePack('ep5'); ensurePack('ep4', { engine: e }); ensurePack('ep5', { engine: e }).then(() => globalThis.LQ_EP5 && LQ_EP5.title(this)); }   // Episode 5
     if ((EP6_LIVE && newestWith(e.save, 'ep5_complete')) || /[?&]ep=6\b/.test(globalThis.location ? location.search : '')) { forcePack('ep6'); ensurePack('ep5', { engine: e }); ensurePack('ep6', { engine: e }).then(() => globalThis.LQ_EP6 && LQ_EP6.title(this)); }
+    this.menuSig = this.sigOf(this.menu);
     this.busy = false;
     e.audio.music('title');
     e.audio.ambience(null);
@@ -83,8 +133,111 @@ export class TitleScene {
     this.idle = 0; this.busy = false;
     this.hasSaves = this.anySave();
     this.ledger = this.ledgerCount();
-    const cont = this.menu.items.find((it) => it.id === 'continue');
+    const cont = (this.mainMenu || this.menu).items.find((it) => it.id === 'continue');
     if (cont) cont.disabled = !this.hasSaves;
+  }
+
+  // ---------------------------------------------------------------- the quick start row and its list
+  /** What the menu's layout depends on, and what a pack's own layout would have changed. */
+  sigOf(m) { return m ? `${m.items.map((it) => it.id).join(',')}|${m.rowH}|${m.columns},${m.x},${m.y}|${this.mainMenu ? 'quick' : 'title'}` : ''; }
+
+  /**
+   * Every frame (update and draw): fold the quick start rows a pack added (each pack's title.js puts its row straight into
+   * the List the title holds), keep the open list in episode order, and lay out whichever list shows when its rows changed.
+   * The packs' own layout is replaced by the title's (titleMenuLayout), so the window is the same whoever added a row last.
+   */
+  tidyMenu() {
+    if (this.mainMenu && this.menu !== this.quickList) this.adoptMenu();
+    const main = this.mainMenu || this.menu;
+    if (!main) return;
+    const cur = main.item;
+    if (foldQuickRows(main.items, this.quick, this.quickRow)) main.index = Math.max(0, main.items.indexOf(isQuickRow(cur) ? this.quickRow : cur));
+    if (this.mainMenu) {
+      const m = this.menu, at = m.item;
+      for (const it of m.items) if (isQuickRow(it) && !this.quick.includes(it)) this.quick.push(it);
+      this.quick.sort(quickOrder);
+      if (m.items.some((it, i) => it !== this.quick[i]) || m.items.length !== this.quick.length) {
+        m.items.splice(0, m.items.length, ...this.quick);
+        m.index = Math.max(0, m.items.indexOf(at));
+      }
+    }
+    if (this.sigOf(this.menu) !== this.menuSig) { this.layMenu(this.menu); this.menuSig = this.sigOf(this.menu); }
+  }
+
+  /**
+   * A pack rebuilt the List while the quick start list was open (the tier pack puts a new List, holding its row, in scene.menu):
+   * that List becomes the title menu, with the title's rows and the pack's new ones after Continue, and the list stays open.
+   */
+  adoptMenu() {
+    const fresh = this.menu, old = this.mainMenu, list = this.quickList;
+    const items = old.items.slice();
+    for (const it of fresh.items) {
+      if (isQuickRow(it)) { if (!list.items.includes(it)) list.items.push(it); continue; }
+      if (!items.includes(it)) items.splice(Math.max(0, items.findIndex((c) => c.id === 'continue')) + 1, 0, it);
+    }
+    fresh.items = items;
+    fresh.index = Math.max(0, items.indexOf(this.quickRow));
+    this.mainMenu = fresh;
+    this.menu = list;
+  }
+
+  /** Lay `m` out the title's way and make its window the title's. */
+  layMenu(m) {
+    const r = this.engine.renderer;
+    let tw = 0;
+    for (const it of m.items) tw = Math.max(tw, r && r.measure ? r.measure(it.label) : String(it.label).length * 5);
+    const L = titleMenuLayout(m.items.length, m.rowH, tw);
+    this.win = L.win;
+    Object.assign(m, { x: L.win.x + 6, y: L.win.y + 7, w: L.win.w - 12, rows: L.rows, columns: L.columns, columnMajor: L.columns > 1,
+      colW: L.columns > 1 ? L.colW : L.win.w - 12, scroll: 0 });
+    m.ensureVisible();
+  }
+
+  /** A touch or click on the canvas well clear of the open list (one row of slop, as the List itself allows). */
+  outsideQuick(p) {
+    const w = this.win, s = this.menu.rowH;
+    return p.x >= 0 && p.x < 384 && p.y >= 0 && p.y < 216 && (p.x < w.x - s || p.x >= w.x + w.w + s || p.y < w.y - s || p.y >= w.y + w.h + s);
+  }
+
+  /** The quick start list in the menu's place, the cursor on `id` (or the first row). Back or a tap outside closes it. */
+  openQuick(id) {
+    if (this.mainMenu || this.quick.length < 1) return false;
+    const main = this.menu;
+    const items = this.quick.slice();
+    const index = Math.max(0, items.findIndex((it) => it.id === id));
+    this.mainMenu = main;
+    this.menu = this.quickList = new List({ x: main.x, y: main.y, w: main.w, rowH: main.rowH, rows: items.length, items, textX: 18, index, confirmSfx: true });
+    this.quickTapOut = false;
+    this.tidyMenu();
+    return true;
+  }
+
+  closeQuick() {
+    if (!this.mainMenu) return;
+    this.menu = this.mainMenu;
+    this.mainMenu = this.quickList = null;
+    const i = this.menu.items.indexOf(this.quickRow);
+    if (i >= 0) this.menu.index = i;
+    this.tidyMenu();
+  }
+
+  /** Every quick start the title offers, folded or not (QA: wait for a pack row with this). */
+  quickStarts() {
+    const main = this.mainMenu || this.menu;
+    const ids = new Set([...this.quick, ...(main ? main.items : [])].filter(isQuickRow).map((it) => it.id));
+    return [...ids].sort((a, b) => Number(a.slice(2)) - Number(b.slice(2)));
+  }
+
+  /** QA: put the cursor on quick start `id`, opening the list when it is folded. True when the cursor is there. */
+  showQuickStart(id) {
+    this.tidyMenu();
+    const main = this.mainMenu || this.menu;
+    const inline = main.items.findIndex((it) => it.id === id);
+    if (inline >= 0) { this.closeQuick(); this.menu.moveTo(inline); return true; }
+    if (!this.quick.some((it) => it.id === id)) return false;
+    if (!this.mainMenu) this.openQuick(id);
+    this.menu.moveTo(this.menu.items.findIndex((it) => it.id === id));
+    return this.menu.item && this.menu.item.id === id;
   }
 
   samplePoints(r) {
@@ -118,9 +271,20 @@ export class TitleScene {
     }
     for (const s of this.sparkles) s.t += dt;
     this.sparkles = this.sparkles.filter((s) => s.t < 0.4);
+    this.tidyMenu();
+    const p = input.pointer;
+    const outside = !!(this.mainMenu && p && this.outsideQuick(p));
+    if (this.mainMenu && p && p.pressed) this.quickTapOut = outside;
     const act = this.menu.update(input, audio);
+    if (this.mainMenu && act !== 'confirm' && (act === 'cancel' || (p && p.released && this.quickTapOut && outside))) {
+      if (act !== 'cancel') audio.sfx('cancel');
+      this.quickTapOut = false;
+      this.closeQuick();
+      return;
+    }
     if (act === 'confirm') {
       const id = this.menu.item.id;
+      if (id === QUICK_ROW_ID) { this.openQuick(); return; }
       if (id === 'new' || id === 'ep2') {
         const auto = autosaveGuard(e.save);
         if (auto) this.openGuard(id, auto); else this.startFresh(id);
@@ -243,6 +407,7 @@ export class TitleScene {
     const e = this.engine;
     // The quantized backdrop already has its sky shaded for the logo and its vignette is dithered to its own
     // palette (keyart.js); the painted crop fallback needs the extra alpha dark.
+    this.tidyMenu();   // a pack row may have landed since the last update
     this.art.draw(r, { dark: this.art.usesBackdrop ? DARK.none : 0.18, vignette: true });
     const logo = e.assets.has('logo') ? e.assets.atlas('logo') : null;
     const f = logo && logo.frames.logo;
@@ -273,7 +438,8 @@ export class TitleScene {
     if (this.stacks && this.stacks.cleared) drawStacksMark(r, 4 + r.measure(VERSION) + 7, vy);
     this.drawLedgerCount(r);
     const noteId = this.menu.item && !this.guard ? this.menu.item.id : null;
-    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP : null;
+    const note = noteId === 'ep2' ? this.ep2Note() : noteId === 'ep3' ? EP3_ROW_HELP : noteId === 'stacks' ? STACKS_RESUME_HELP
+      : noteId === QUICK_ROW_ID ? this.quickNote() : null;
     if (note) {
       const lines = r.wrap(note, 108);
       const nh = lines.length * 11 + 10, nx = this.win.x + this.win.w + 6;
@@ -302,6 +468,11 @@ export class TitleScene {
     return `Starts Episode 2 with a ready-made Lv ${EP2_START.level} party.${own}`;
   }
 
+  /** The help beside the quick start row. */
+  quickNote() {
+    return QUICK_ROW_HELP + (this.hasSaves ? ' Your own game stays under Continue.' : '');
+  }
+
   drawGuard(r) {
     const g = this.guard;
     r.withAlpha(0.55, () => r.rect(0, 0, r.W, r.H, '#0b0918'));
@@ -313,6 +484,7 @@ export class TitleScene {
 
   debugState() { return { index: this.menu.index, hasSaves: this.hasSaves, ledger: this.ledger, idle: Math.round(this.idle), busy: this.busy, rowH: this.menu.rowH, win: this.win, listY: this.menu.y, backdrop: this.art.usesBackdrop,
     items: this.menu.items.map((it) => it.id), labels: this.menu.items.map((it) => it.label), ep2: this.ep2, stacks: this.stacks,
+    quickOpen: !!this.mainMenu, quick: this.quickStarts(),
     guard: this.guard ? { id: this.guard.id, line: this.guard.auto ? this.guard.auto.line : this.guard.lines[0].text, options: this.guard.options.map((o) => o.id), index: this.guard.box.index, free: this.guard.free } : null }; }
 }
 

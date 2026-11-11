@@ -1,4 +1,5 @@
-"""The title by real input: the tap gate, the Episode 4 row, ?ep=4, name entry, into the field."""
+"""The title by real input: the tap gate, the Episode 4 row (inside the New party... list once two or more quick starts
+fold into it, #88), ?ep=4, name entry, into the field."""
 from driver import in_bounds
 from menus import free, settle
 
@@ -15,15 +16,16 @@ SAVE = """async ([slots]) => {
   LQ_DEBUG.settings({ rotateHintSeen: true, textSpeed: 4 });
 }"""
 TITLE_READY = "LQ_DEBUG.scene() === 'title' && !LQ_ENGINE.transition && !!LQ_ENGINE.scene.menu"
-ROW_UP = "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu.items.some(i => i.id === 'ep4')"
+ROW_UP = "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts().includes('ep4')"
+QUICK_OPEN = "LQ_DEBUG.scene() === 'title' && !!LQ_ENGINE.scene.mainMenu && !LQ_ENGINE.scene.busy"
 
 
 def menu_state(p):
     return p.js("(() => { const s = LQ_ENGINE.scene, m = s.menu; return { items: m.items.map(i => i.id), index: m.index, win: s.win, rows: m.rows, cols: m.columns, rects: m.items.map((_, i) => m.rowRect(i)) }; })()")
 
 
-def to_row(p, row):
-    """Walk the title menu to `row` with direction presses (column major when the title folds to two columns)."""
+def walk(p, row):
+    """Walk the menu the title shows now to `row` with direction presses (column major in two columns)."""
     st = menu_state(p)
     want = st['items'].index(row)
     for _ in range(16):
@@ -36,6 +38,17 @@ def to_row(p, row):
         else:
             p.act('down' if want > i else 'up')
     return menu_state(p)['index'] == want
+
+
+def to_row(p, row):
+    """`row` on the title: walk to it, or to New party... first, open the list with a real confirm, and walk there."""
+    if row in menu_state(p)['items']:
+        return walk(p, row)
+    p.check(walk(p, 'party'), 'the cursor reaches New party...', menu_state(p))
+    p.act('confirm')
+    p.until(QUICK_OPEN, 'the New party... list opens', 6)
+    p.frames(3)
+    return walk(p, row)
 
 
 def seeded_title(p, slots, query='&pack=ep4'):
@@ -158,9 +171,27 @@ def rotate_card(p):
 
 
 def tap_rows(p):
-    """Phone: a tap selects, a tap on the selected row confirms."""
+    """Phone: a tap selects, a tap on the selected row confirms; New party... opens its list, a tap outside closes it."""
     seeded_title(p, [1])
     st = rows_on_screen(p, 'tap')
+    if 'ep4' not in st['items']:
+        j = st['items'].index('party')
+        p.tap_rect(st['rects'][j])
+        p.frames(3)
+        p.check(menu_state(p)['index'] == j, 'a tap selects New party...', menu_state(p)['index'])
+        p.tap_rect(st['rects'][j])
+        p.until(QUICK_OPEN, 'a second tap opens the list', 6)
+        p.frames(3)
+        st = rows_on_screen(p, 'quick list')
+        p.shot('title-quick-list')
+        # a tap well clear of the list closes it, and the cursor is back on the row
+        p.tap_rect({'x': 4, 'y': 4, 'w': 20, 'h': 12})
+        p.frames(4)
+        p.check(not p.js("!!LQ_ENGINE.scene.mainMenu") and menu_state(p)['items'][menu_state(p)['index']] == 'party', 'a tap outside closes the list', menu_state(p))
+        p.tap_rect(rows_on_screen(p, 'tap')['rects'][j])
+        p.until(QUICK_OPEN, 'one tap on the highlighted row opens it again', 6)
+        p.frames(3)
+        st = rows_on_screen(p, 'quick list')
     i = st['items'].index('ep4')
     p.tap_rect(st['rects'][i])
     p.frames(3)

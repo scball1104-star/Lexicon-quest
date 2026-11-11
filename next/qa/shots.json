@@ -6411,7 +6411,7 @@
   },
   {
    "name": "ui_title_ep3",
-   "note": "E3: the title with an Episode 2 finish in slot 0: the Episode 3 row offered (EP3_LIVE)",
+   "note": "E3: the title with an Episode 2 finish in slot 0: the Episode 2 and 3 quick starts folded into the one New party... row (CRITIQUE_9 item 7)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
@@ -6421,7 +6421,7 @@
      "eval": "(() => { LQ_DEBUG.newGameEp3('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 21600, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()"
     },
     {
-     "waitFor": "LQ_DEBUG.scene() === 'title' && ((LQ_DEBUG.state().sceneState || {}).items || []).includes('ep3')",
+     "waitFor": "LQ_DEBUG.scene() === 'title' && ((LQ_DEBUG.state().sceneState || {}).quick || []).includes('ep3')",
      "timeout": 20000
     },
     {
@@ -7246,7 +7246,7 @@
   },
   {
    "name": "ui_title_ep4",
-   "note": "E4: the title with an Episode 3 finish in slot 0: the Episode 4 row offered, its help line beside it",
+   "note": "E4: the title with an Episode 3 finish in slot 0: the Episode 4 row offered in the open New party... list, its help line beside it",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
@@ -7256,11 +7256,11 @@
      "eval": "(() => { LQ_DEBUG.newGameEp4('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 28800, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()"
     },
     {
-     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep4')",
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep4')",
      "timeout": 20000
     },
     {
-     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep4'); return m.index; })()"
+     "eval": "LQ_ENGINE.scene.showQuickStart('ep4')"
     },
     {
      "frames": 90
@@ -8170,7 +8170,7 @@
   },
   {
    "name": "ui_title_ep5",
-   "note": "E5: the title with an Episode 4 finish in slot 0: the Episode 5 row offered, its help line beside it",
+   "note": "E5: the title with an Episode 4 finish in slot 0: the Episode 5 row offered in the open New party... list, its help line beside it",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
@@ -8181,11 +8181,11 @@
      "timeout": 60000
     },
     {
-     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep5')",
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep5')",
      "timeout": 30000
     },
     {
-     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep5'); return m.index; })()"
+     "eval": "LQ_ENGINE.scene.showQuickStart('ep5')"
     },
     {
      "frames": 90
@@ -9328,7 +9328,7 @@
   },
   {
    "name": "ui_title_ep6",
-   "note": "E6: the title with an Episode 5 finish in slot 0: the Episode 6 row offered, its help line beside it",
+   "note": "E6: the title with an Episode 5 finish in slot 0: the Episode 6 row offered in the open New party... list, its help line beside it",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
@@ -9339,11 +9339,36 @@
      "timeout": 90000
     },
     {
-     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.menu && LQ_ENGINE.scene.menu.items.some((i) => i.id === 'ep6')",
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep6')",
      "timeout": 30000
     },
     {
-     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.index = m.items.findIndex((i) => i.id === 'ep6'); return m.index; })()"
+     "eval": "LQ_ENGINE.scene.showQuickStart('ep6')"
+    },
+    {
+     "frames": 90
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "ui_title_quick",
+   "note": "CRITIQUE_9 item 7: after an Episode 5 finish the five quick starts are one row, New party..., its help beside it (the list opens on confirm)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { await LQ_DEBUG.newGameEp6('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 36000, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()",
+     "timeout": 90000
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep6')",
+     "timeout": 30000
+    },
+    {
+     "eval": "(() => { const m = LQ_ENGINE.scene.menu; m.moveTo(m.items.findIndex((i) => i.id === 'party')); return m.item.id; })()"
     },
     {
      "frames": 90
