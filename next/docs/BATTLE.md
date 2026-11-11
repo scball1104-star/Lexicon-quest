@@ -1278,6 +1278,14 @@ pieces. The Defend row's help in a Gale battle reads "Brace against the gust." (
 turn at the latest (`ai.js FIRST_REWRITE_TURN`, item 10; it pulls the Gust in to 2): careful Lv 27 98% / 14.73 rounds / 16% HP lost,
 Lv 28 98% / 14.14, reckless 63%, attack-only 0%; 2.59 Rewrites a fight, 87% broken by Anchor (was 2.17 and 79%).
 
+**The Engine's attack-only 0% stays (2026-11-10, after the ship).** The HP lever was tried (`--zone ep6_obs_f2`, 200 fights a
+row): HP 1,750 / 1,500 / 1,350 / 1,200, each at ATK 750 and 600, left attack-only at 0% every time, and it fell sooner as HP
+dropped because the two Gale Sprites come at 50% HP; ATK 650 to 470 alone also left it at 0% and pushed "ignoring telegraphs"
+under its 10% floor. More to the point, attack-only wins 0% against every main boss since Episode 1 (Archivore, Nameless King,
+Cinder Warden, Barrister, Paper Regent, Mirage Knight, Oracle, Scribe; `out/full_check.txt`); only the optional Whisperwood
+Alpha is tuned to let it through. A 20 to 40% Engine would be the one soft main boss in six episodes, so PLAYTEST_REVIEW_8 item
+1's second half is closed as matching the house rule. Changing that rule for all bosses is a call for Scott and Stephen.
+
 ### 14.7 Tests
 
 `qa/battle/ep6_battle.test.mjs` (17): registration and idempotence, Episodes 1 to 5 untouched (an Episode 4 and an Episode 5 boss replay
