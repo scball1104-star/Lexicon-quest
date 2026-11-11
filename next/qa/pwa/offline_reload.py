@@ -23,7 +23,9 @@
   python next/qa/pwa/offline_reload.py --fresh-sw    local, serving a sw.js generated now by build_pwa.py --out
                                                      (the repo's sw.js is only rebuilt at ship, so it can lag overhaul)
   python next/qa/pwa/offline_reload.py --first-visit the packs load in the same visit that installs the worker (no step 2
-                                                     reload). Known FAIL on 2026-11-10: see issue #60.
+                                                     reload). Waits for packs.js refetchUsed() to finish before the cut:
+                                                     it re-fetches through the worker what the visit used before the
+                                                     worker took control (issue #63). PASS since 2026-11-10.
 
 Last line, machine read: OFFLINE_RELOAD: PASS  or  OFFLINE_RELOAD: FAIL <reason>. Exit code 1 on FAIL, 3 on the overall timeout.
 Writes next/qa/pwa/out/offline-reload{,-live}.json and offline-reload-{online,offline}.png (out/ is git-ignored).
@@ -267,6 +269,11 @@ def run(args, base, disk_version, want):
             raise RuntimeError(f'ep6 runtime cache incomplete online: {c["have"]}/{len(want)}, missing {c["missing"]}')
         res['ep6_runtime_cached'] = c['have']
         page.wait_for_timeout(1500)   # let any idle warm settle so nothing is half fetched when the network drops
+        if args.first_visit:
+            # issue #63: packs.js refetchUsed() re-fetches through the worker what this visit used before it took control
+            # (a build from before the fix, --live until it ships, has no refetchState: nothing to wait for)
+            res['refetch'] = poll(page, "() => { const P = window.LQ_PACKS; if (P && !P.refetchState) return { state: 'absent' }; const r = P && P.refetchState(); return r && r.state === 'done' ? r : null; }", 60)
+            log(f'[online] refetchUsed: {res["refetch"]}')
         res['online_runtime_cover'] = page.evaluate(COVER_JS, args.lists)
         online_png = page.screenshot(path=str(OUT / 'offline-reload-online.png'))
         res['online_blank'] = blank_report(online_png)

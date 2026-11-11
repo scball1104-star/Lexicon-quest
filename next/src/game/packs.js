@@ -46,6 +46,9 @@ function st(id) { return state[id] || (state[id] = { ready: false, promise: null
 function tableOf(opts) { return (opts && opts.table) || defaults.table || PACKS; }
 function defOf(id, opts) { return tableOf(opts)[id] || null; }
 const now = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
+// Issue #63: a first visit loads more than the 250 resource timings a browser keeps by default; keep them all for refetchUsed().
+if (typeof navigator !== 'undefined' && navigator.serviceWorker && !navigator.serviceWorker.controller && performance.setResourceTimingBufferSize) performance.setResourceTimingBufferSize(5000);
+const refetch = { state: 'idle', checked: 0, fetched: 0 };   // refetchUsed() progress (QA: LQ_PACKS.refetchState())
 
 /** Tests: forget every pack's state. */
 export function resetPacks() {
@@ -62,7 +65,7 @@ export function setPackDefaults(o) { defaults = { ...(o || {}) }; }
 /** Give the packs the engine (assets, audio, toasts). main.js calls this once after boot; Node code simply never does. */
 export function bindPacks(engine) {
   engineRef = engine || null;
-  if (typeof window !== 'undefined') window.LQ_PACKS = { PACKS, ensurePack, packReady, packState, forcePack, awaitPacks };
+  if (typeof window !== 'undefined') window.LQ_PACKS = { PACKS, ensurePack, packReady, packState, forcePack, awaitPacks, refetchState: () => ({ ...refetch }) };
 }
 
 /** Turn a pack on regardless of its enabled() switch (QA: ?pack=x1; tests). Content stays gated by x1On()/x2On(). */
@@ -265,6 +268,40 @@ function warm(res, opts) {
   } else idle();
 }
 
+/**
+ * Issue #63: on a first visit the worker takes control seconds after the game is playable, so what loaded before then (title art
+ * and music, early sounds, pack_files.json, the ep3 maps ep4 imports) missed its cache. Fetch again through it each same-origin
+ * game file this visit used that no cache holds, three at a time, low priority. Never rejects. deps: tests.
+ */
+export async function refetchUsed(deps = {}) {
+  const out = { checked: 0, fetched: 0 };
+  try {
+    const root = deps.root || location.origin + new URL('../../../', import.meta.url).pathname;   // the repo root: next/ and ../assets/art
+    const names = deps.names || performance.getEntriesByType('resource').map((e) => e.name);
+    const match = deps.match || ((h) => caches.match(h, { ignoreSearch: true }));
+    const get = deps.fetch || ((h) => fetch(h, { priority: 'low' }));
+    const seen = new Set();
+    const todo = names.filter((h) => {
+      const k = h.split('?')[0];
+      if (!k.startsWith(root) || k.endsWith('/sw.js') || seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+    out.checked = todo.length;
+    const worker = async () => { while (todo.length) { const h = todo.shift(); try { if (!(await match(h))) { out.fetched++; await get(h); } } catch (e) { /* offline */ } } };
+    await Promise.all([worker(), worker(), worker()]);
+  } catch (e) { /* no performance or caches API */ }
+  return out;
+}
+
+/** A first visit (no worker in control at boot): run refetchUsed() once, when the idle page is first controlled. */
+function armRefetch() {
+  const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
+  if (refetch.state !== 'idle' || !sw || sw.controller || typeof caches === 'undefined') return;
+  refetch.state = 'waiting';
+  const go = () => { refetch.state = 'running'; refetchUsed().then((r) => Object.assign(refetch, r, { state: 'done' })); };
+  sw.addEventListener('controllerchange', () => (typeof requestIdleCallback === 'function' ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 1500)), { once: true });
+}
+
 /** Load a pack (entry, data, assets, tiles, audio, then an idle warm). Idempotent; retried after a failure; never rejects. */
 export function ensurePack(id, opts = {}) {
   opts = { ...defaults, ...opts };
@@ -313,6 +350,7 @@ function slotFlags(engine) {
 /** Warm every pack a save or the running game wants (?pack=x1,x2 forces packs on). No timer while all are off. Returns stop(). */
 export function startPackWatch(engine, params) {
   bindPacks(engine);
+  armRefetch();
   const q = params && params.get ? params.get('pack') : null;
   if (q) for (const id of q.split(',')) if (PACKS[id.trim()]) forcePack(id.trim());
   const live = () => packIds().filter((id) => packEnabled(id) && !packReady(id));
