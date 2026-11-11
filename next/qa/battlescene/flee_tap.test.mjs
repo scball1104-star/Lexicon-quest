@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BattleScene } from '../../src/scenes/battle.js';
 import { CommandMenu } from '../../src/battle/scene/menu.js';
-import { HELP_TOUCH_BTNS } from '../../src/battle/scene/layout.js';
+import { HELP_TOUCH_HITS } from '../../src/battle/scene/layout.js';
 import { battle } from '../battle/_helpers.mjs';
 
 function rig({ canFlee = true } = {}) {
@@ -15,7 +15,7 @@ function rig({ canFlee = true } = {}) {
     dir: null,
     repeatDir() { return this.dir; },
     tapIn(x, y, w, h) {
-      const f = HELP_TOUCH_BTNS.flee;
+      const f = HELP_TOUCH_HITS.flee;   // the tap target (#82), bigger than the art
       return tapped && x === f.x && y === f.y && w === f.w && h === f.h;
     },
   };

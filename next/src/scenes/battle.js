@@ -14,7 +14,7 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, enemyRowAnchor,
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, enemyRowAnchor,
   touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H, helpDock } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
@@ -397,7 +397,8 @@ export class BattleScene {
     const { input, audio } = e;
     if (this.below) { this.runOps(); return; }
     // Global toggles: start = Auto, pageR = speed (both persisted settings). Enter (confirm too) is Auto alone here.
-    const tb = this.touchButtons();
+    // Touch: the buttons' tap targets are bigger than their art (HELP_TOUCH_HITS, #82).
+    const tb = this.touchButtons() && HELP_TOUCH_HITS;
     if (input.pressed('start') || (tb && input.tapIn(tb.auto.x, tb.auto.y, tb.auto.w, tb.auto.h))) { e.setSetting('autoBattle', !this.auto); audio.sfx(this.auto ? 'confirm' : 'cancel'); input.consume('start'); input.consume('confirm'); if (!this.auto && this.menu.state === 'closed') this.autoHold = 0; }
     if (input.pressed('pageR') || input.pressed('pageL') || (tb && input.tapIn(tb.speed.x, tb.speed.y, tb.speed.w, tb.speed.h))) { e.setSetting('battleSpeed', this.speed === 1 ? 2 : 1); audio.sfx('cursor'); }
     if (this.menu.state !== 'closed') {
@@ -901,7 +902,8 @@ export class BattleScene {
     const { text, color, right, rightColor, rightW, tb } = this.helpView(r);
     HUD.drawHelp(r, text, color, { right, rightColor, rightW });
     if (tb) {
-      const pulse = Math.floor(this.frame / 20) % 2 === 0;
+      // Reduce motion (#82): an armed FLEE and an on AUTO hold their lit colour instead of pulsing.
+      const pulse = HUD.stillHud(r) || Math.floor(this.frame / 20) % 2 === 0;
       const b1 = tb.auto, b2 = tb.speed, b0 = tb.flee;
       const fleeOk = this.menu.state === 'root' && this.menu.fleeCmd && this.menu.fleeCmd.enabled;
       const armed = this.menu.fleeArmed > 0;
@@ -1031,7 +1033,7 @@ export class BattleScene {
       cmdRect: this.menu.cmdRect, rowH: this.menu.root ? this.menu.root.rowH : null, menuRows: this.menu.root ? this.menu.root.rows : null, touch: !!this.touchButtons(),
       menuItems: this.menu.root ? this.menu.root.items.map((it) => it.id) : [], menuIndex: this.menu.root ? this.menu.root.index : -1,
       menuCols: this.menu.root ? this.menu.root.columns : 0, rootRects: this.menu.root ? this.menu.root.items.map((_, i) => this.menu.root.rowRect(i)) : [],
-      fleeArmed: this.menu.fleeArmed, fleeBtn: this.menu.fleeCmd ? { enabled: this.menu.fleeCmd.enabled } : null, helpBtns: this.touchButtons(),
+      fleeArmed: this.menu.fleeArmed, fleeBtn: this.menu.fleeCmd ? { enabled: this.menu.fleeCmd.enabled } : null, helpBtns: this.touchButtons(), helpHits: this.touchButtons() && HELP_TOUCH_HITS,
     };
   }
 }

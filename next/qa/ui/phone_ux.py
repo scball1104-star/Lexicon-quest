@@ -12,7 +12,8 @@ Checks:
   dialog          window <= 22 % of the screen (3 lines), 1 / 2 / 3 line sizes, flips to the top when the hero or the
                   speaker would be hidden (story_leave_town), stays at the bottom otherwise (story_fading_sign)
   battle_phone    every command on screen in two columns without Flee, taps select / confirm, the FLEE button arms
-                  on the first tap and runs on the second, the touch rows are 18 px (30 css px)
+                  on the first tap and runs on the second, the touch rows are 18 px (30 css px), the FLEE / AUTO / x1
+                  tap targets are 44 css px each way and a tap off the art inside one reaches its button (#82)
   battle_mira     Mira (Magic, Swap): four rows hold every command on both devices
   battle_desktop  two columns incl. Flee, left / right keep the row, up / down stay in the column
   battle_log      the idle command window shows the last three lines (enemy turn, victory, level-up)
@@ -165,6 +166,23 @@ def check_battle_phone(rigs):
         assert cr['x'] <= rc['x'] and rc['x'] + rc['w'] <= cr['x'] + cr['w'] and cr['y'] <= rc['y'] and rc['y'] + rc['h'] <= cr['y'] + cr['h'], f'row {items[i]} inside the window'
     assert b['rowH'] * d.css_scale() >= 29.9, f'rows are 30 css px tall ({b["rowH"]} game px)'
     d.shot('battle_commands_phone')
+    # #82: the help buttons' tap targets are at least 44 css px each way, the art stays as drawn, and a tap off the art
+    # but inside the target reaches the button (x1 below its art, back above it; FLEE below its art).
+    hits = b['helpHits']
+    for k in ('flee', 'auto', 'speed'):
+        h, a = hits[k], b['helpBtns'][k]
+        assert h['w'] * d.css_scale() >= 44 and h['h'] * d.css_scale() >= 44, f'{k} target {h} is 44 css px each way'
+        assert a['h'] == 15, f'{k} art unchanged {a}'
+    speed0 = d.ev('LQ_DEBUG.settings().battleSpeed')
+    sp = b['helpBtns']['speed']
+    d.tap(sp['x'] + sp['w'] / 2, sp['y'] + sp['h'] + 2, wait=3)
+    assert d.ev('LQ_DEBUG.settings().battleSpeed') != speed0, 'a tap under x1 changes the speed'
+    d.tap(sp['x'] + sp['w'] / 2, sp['y'] - 3, wait=3)
+    assert d.ev('LQ_DEBUG.settings().battleSpeed') == speed0, 'a tap over x1 changes it back'
+    fb = b['helpBtns']['flee']
+    d.tap(fb['x'] + 3, fb['y'] + fb['h'] + 2, wait=3)
+    assert d.battle()['fleeArmed'] > 0 and d.battle()['menu'] == 'root', 'a tap under FLEE arms it'
+    print('      targets (css px):', {k: (round(hits[k]['w'] * d.css_scale()), round(hits[k]['h'] * d.css_scale())) for k in hits})
     # Tap Defend (second column): first tap selects, second confirms -> the turn is used.
     i_item = items.index('item')
     d.tap(*center(b['rootRects'][i_item]))

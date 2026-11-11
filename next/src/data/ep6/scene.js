@@ -32,7 +32,7 @@
 import { BACKDROPS, BOSS_CARD, BattleScene } from '../../scenes/battle.js';
 import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor } from '../../battle/scene/actors.js';
-import { drawHead } from '../../battle/scene/hud.js';
+import { drawHead, stillHud, steadyFrame } from '../../battle/scene/hud.js';
 import { SIGNATURE_TECHS, CommandMenu } from '../../battle/scene/menu.js';
 import { TL, timelineSlotX, HELP_WIN, HELP_LINE, HELP_LINES_MAX, STATUS_WIN, ENEMY_ROW_H, W, H, helpDock, spriteBox, topBlocks,
   cmdWin } from '../../battle/scene/layout.js';
@@ -527,24 +527,39 @@ function wrapPlanner(P) {
 
 // ---------------------------------------------------------------------------------------------------- actor marks
 /** The ward: a slow ring of false lamplight behind the Scribe, a faint warm haze inside it, the lamps flickering. */
+// Reduce motion (#82): the ward and the bellows draw at steadyFrame (no orbit, drift or flicker), every lamp lit.
 export function drawWard(r, a, frame) {
+  const still = stillHud(r);
+  frame = steadyFrame(r, frame);
   const cx = a.cx, cy = a.cy, hw = Math.round(a.w / 2) + 6, hh = Math.round(a.h / 2) - 4;
   r.withAlpha(0.14 + ((frame >> 4) % 2) * 0.05, () => r.ditherEllipse(cx, cy, hw + 4, hh + 2, LAMP[0], 0.4));
   for (let i = 0; i < 14; i++) {
     const ang = i * Math.PI * 2 / 14 + frame / 90, wob = Math.sin(frame / 18 + i) * 2;
     const x = Math.round(cx + Math.cos(ang) * (hw + wob)), y = Math.round(cy + Math.sin(ang) * (hh + wob));
-    const lit = ((frame >> 3) + i * 5) % 7 !== 0;
+    const lit = still || ((frame >> 3) + i * 5) % 7 !== 0;
     r.rect(x - 1, y - 1, 4, 4, INK);
     r.rect(x, y, 2, 2, lit ? LAMP[i % 4] : '#8a5a2a');
   }
 }
 /** The bellows while they run: three puffs drifting up off the Engine's back, one every 16 frames. */
 export function drawBellows(r, a, frame) {
+  frame = steadyFrame(r, frame);
   const bx = a.cx - Math.round(a.w * 0.32), by = a.top + Math.round(a.h * 0.32);
   for (let i = 0; i < 3; i++) {
     const p = ((frame + i * 16) % 48) / 48, rad = 2 + Math.round(p * 5);
     const x = Math.round(bx - p * 14), y = Math.round(by - p * 22);
     r.withAlpha(0.7 * (1 - p), () => r.ditherEllipse(x, y, rad, Math.max(2, rad - 1), '#e6f0ff', 0.6));
+  }
+}
+/** Over a head: the pinned Rewrite's quill (Full Blast: a red star) on its source, the anchor on a braced member near a Gust. */
+export function drawHeadMarks(r, a, gv, frame) {
+  const bob = (steadyFrame(r, frame) >> 3) % 2;   // Reduce motion (#82): the marks hold still
+  if (gv.pinned && gv.pinned.source === a.uid) {
+    if (gv.pinned.skill === 'full_blast') drawRedStar(r, a.cx - 3, a.top - 12 - bob);
+    else drawQuill(r, a.cx - 3, a.top - 13 - bob);
+  }
+  if (a.side === 'party' && gv.gustIn <= 2 && (a.anchor6 || a.brace6 || a.defending)) {
+    drawAnchorGlyph(r, a.cx - 3, a.top - 11 - bob, a.anchor6 ? C.gold : '#cfe0f0');
   }
 }
 function wrapActor(A) {
@@ -559,14 +574,7 @@ function wrapActor(A) {
     }
     draw.call(this, r, opts);
     if (!this.alive || this.ko) return;
-    const bob = (f >> 3) % 2;
-    if (gv.pinned && gv.pinned.source === this.uid) {
-      if (gv.pinned.skill === 'full_blast') drawRedStar(r, this.cx - 3, this.top - 12 - bob);
-      else drawQuill(r, this.cx - 3, this.top - 13 - bob);
-    }
-    if (this.side === 'party' && gv.gustIn <= 2 && (this.anchor6 || this.brace6 || this.defending)) {
-      drawAnchorGlyph(r, this.cx - 3, this.top - 11 - bob, this.anchor6 ? C.gold : '#cfe0f0');
-    }
+    drawHeadMarks(r, this, gv, f);
   };
 }
 
@@ -604,7 +612,7 @@ function unswap(scene, r) {
   if (r && scene.gale6) { drawGauge(scene, r, s.at); drawSlides(scene, r, s.at); }
 }
 /** The Gust's slot: the white spiral on a dark ring; a pinned Rewrite puts a red quill on it (Full Blast: a red star). */
-function drawMarker(scene, r, sx, sy, frame, beyond) {
+export function drawMarker(scene, r, sx, sy, frame, beyond) {
   const gv = scene.gale6;
   if (!gv) return;
   const pin = gv.pinned;
@@ -614,7 +622,7 @@ function drawMarker(scene, r, sx, sy, frame, beyond) {
   ringTile(r, sx + 2, sy + 2, pin ? '#ff8a7a' : '#cfe8ff');
   drawGustDisc(r, sx + 3, sy + 3);
   if (pin) {
-    const on = (frame >> 3) % 3 !== 2;
+    const on = stillHud(r) || (frame >> 3) % 3 !== 2;
     if (pin.skill === 'full_blast') drawRedStar(r, sx + 11, sy - 3 + (on ? 0 : 1));
     else drawQuill(r, sx + 11, sy - 4 + (on ? 0 : 1));
   }
@@ -622,19 +630,20 @@ function drawMarker(scene, r, sx, sy, frame, beyond) {
 }
 /** The wind gauge under the timeline's head: a pip per action of the Gust's length, the spent ones lit; brass while the
  * bellows run (the shorter count). A thin line joins it to the Gust's slot. */
-function drawGauge(scene, r, at) {
+export function drawGauge(scene, r, at) {
   const gv = scene.gale6;
   const every = Math.max(1, gv.every | 0), left = Math.max(0, Math.min(every, gv.gustIn | 0));
   const brass = every < GUST_EVERY;
   const x = timelineSlotX(0) + 2, y = TL.y + 19, w = 16 + every * 5 + 2;
-  const ring = gv.flash > 0 && (gv.flash >> 2) % 2 ? '#ffffff' : brass ? '#e0a040' : '#cfe8ff';
+  const still = stillHud(r);   // Reduce motion (#82): a changed gauge's ring is white while it shows, the next pip lit
+  const ring = gv.flash > 0 && (still || (gv.flash >> 2) % 2) ? '#ffffff' : brass ? '#e0a040' : '#cfe8ff';
   const markX = timelineSlotX(at) + 9;   // the marker's centre
   if (markX > x + w + 2) { r.rect(x + w, y + 6, markX - x - w, 3, INK); r.rect(x + w, y + 7, markX - x - w, 1, ring); r.rect(markX - 1, TL.y + 18, 3, y + 9 - TL.y - 18, INK); r.rect(markX, TL.y + 18, 1, y + 8 - TL.y - 18, ring); }
   r.rect(x + 1, y, w - 2, 14, INK); r.rect(x, y + 1, w, 12, INK);
   r.strokeRect(x + 1, y + 1, w - 2, 12, ring);
   // a small swirl: the disc's top-left quarter, enough to say "wind"
   blit(r, ['.www..', 'wssww.', 'swwssw', 'swssws', 'swwwsw', '.ssss.'], x + 4, y + 4, SPIRAL);
-  const pulse = (scene.frame >> 4) % 2 === 0;
+  const pulse = still || (scene.frame >> 4) % 2 === 0;
   for (let i = 0; i < every; i++) {
     const px = x + 13 + i * 5, spent = i < every - left, next = i === every - left;
     r.rect(px, y + 4, 3, 6, spent ? (brass ? '#f9d77a' : '#cfe8ff') : next && left === 1 && pulse ? '#ffffff' : '#3a3458');

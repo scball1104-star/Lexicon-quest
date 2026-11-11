@@ -28,7 +28,7 @@
 import { BACKDROPS, BOSS_CARD, BattleScene } from '../../scenes/battle.js';
 import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor, frameOrigin } from '../../battle/scene/actors.js';
-import { drawHead } from '../../battle/scene/hud.js';
+import { drawHead, stillHud, steadyFrame } from '../../battle/scene/hud.js';
 import { SIGNATURE_TECHS, CommandMenu } from '../../battle/scene/menu.js';
 import { TL, timelineSlotX } from '../../battle/scene/layout.js';
 import { BattleFx, C } from '../../battle/fx.js';
@@ -410,7 +410,7 @@ function wrapPlanner(P) {
 // ---------------------------------------------------------------------------------------------------- actor marks
 const GLOW = { sun: '#ffd34d', star: '#9fd4ff' };
 /** A 1 px glow round an Ascendant foe: its frame drawn four times in the glow colour, one pixel off each way, under it. */
-function drawGlow(a, r, frame, side) {
+export function drawGlow(a, r, frame, side) {
   if (!a.atlas || a.dissolve || a.flash || (a.hurtT > a.hurtMax - 4)) return;
   const f = a.enemyFrame();
   if (!f) return;
@@ -420,7 +420,7 @@ function drawGlow(a, r, frame, side) {
   const x = a.cx, y = Math.round(a.y) + bob, sc = a.scale || 1;
   // a breathing shine: the 1 px ring pulses, and on the bright beat a soft second ring stands 2 px out (the foes' art already
   // carries a thin side-coloured rim, so the Ascendant glow has to move to read as more than the rim)
-  const beat = (frame >> 4) % 2;
+  const beat = stillHud(r) ? 1 : (frame >> 4) % 2;   // Reduce motion (#82): the bright beat, held
   const look = { tint: GLOW[side] || GLOW.sun, tintAmount: 1, alpha: beat ? 1 : 0.6 };
   const br = a.breath();
   const dirs = beat ? [[-1, 0], [1, 0], [0, -1], [0, 1], [-2, 0], [2, 0], [0, -2], [-1, -1], [1, -1]] : [[-1, 0], [1, 0], [0, -1], [0, 1]];
@@ -436,7 +436,9 @@ function drawGlow(a, r, frame, side) {
   for (const [dx, dy] of dirs) r.sprite(a.atlas, fr, x + dx, y + dy, sc !== 1 ? { ...look, scale: sc } : look);
 }
 /** The Mirage Veil: a slow ring of drifting sand behind the Oracle, a faint dithered haze inside it. */
+// Reduce motion (#82): the marks below draw at steadyFrame, their lit phase with no bob, drift or blink.
 export function drawVeil(r, a, frame) {
+  frame = steadyFrame(r, frame);
   const cx = a.cx, cy = a.cy, hw = Math.round(a.w / 2) + 4, hh = Math.round(a.h / 2) - 6;
   r.withAlpha(0.16 + ((frame >> 4) % 2) * 0.05, () => r.ditherEllipse(cx, cy, hw + 4, hh + 2, SAND[1], 0.4));
   for (let i = 0; i < 28; i++) {
@@ -447,7 +449,7 @@ export function drawVeil(r, a, frame) {
   }
 }
 /** The member a foretelling names: a red star over the head, bobbing. */
-export function drawForetold(r, a, frame) { drawRedStar(r, a.cx - 3, a.top - 4 - ((frame >> 3) % 2)); }
+export function drawForetold(r, a, frame) { drawRedStar(r, a.cx - 3, a.top - 4 - ((steadyFrame(r, frame) >> 3) % 2)); }
 
 function wrapActor(A) {
   const draw = A.draw;
@@ -735,7 +737,7 @@ function unswap(scene, r) {
   if (r && scene.sky5) drawHeadDisc(scene, r);
 }
 /** The Turn's slot: the sky it brings on a dark ring; with a foretelling pinned, the named member's head and a red star. */
-function drawMarker(scene, r, sx, sy, frame, beyond) {
+export function drawMarker(scene, r, sx, sy, frame, beyond) {
   const sv = scene.sky5;
   if (!sv) return;
   const next = other(sv.sky);
@@ -746,7 +748,7 @@ function drawMarker(scene, r, sx, sy, frame, beyond) {
     // the named member's head in a red ring (2 px), the red star on its corner: the reading falls here
     r.strokeRect(sx, sy, 18, 18, REDC.r); r.strokeRect(sx + 1, sy + 1, 16, 16, '#b81e2a');
     drawHead(r, who, sx + 3, sy + 3);
-    const on = (frame >> 3) % 3 !== 2;
+    const on = stillHud(r) || (frame >> 3) % 3 !== 2;
     drawRedStar(r, sx + 11, sy - 3 + (on ? 0 : 1));
   } else {
     ringTile(r, sx + 2, sy + 2, next === 'day' ? '#ffcf5a' : '#c8d2f4');
@@ -767,7 +769,7 @@ function drawHeadDisc(scene, r) {
   drawSkyMedallion(r, sv.sky, x, y);
 }
 /** Over each sided foe's weakness row (drawn this frame): the side badge in its slot, and an Exposed shield pale and cracked. */
-function drawSkyRows(scene, r) {
+export function drawSkyRows(scene, r) {
   const sv = scene.sky5, rows = scene._sky5Rows;
   if (!sv || !rows) return;
   const ui = r.assets && r.assets.has('ui') ? r.assets.atlas('ui') : null;
@@ -777,7 +779,7 @@ function drawSkyRows(scene, r) {
     const x = p.rect.x, y = p.rect.y, u = scene.unit(uid);
     if (a.skyExposed && u && !u.broken) {
       const badge = ui && ui.frames.shield_badge;
-      const hot = a.skyShieldFlash > 0 && (a.skyShieldFlash >> 2) % 2 === 0;
+      const hot = a.skyShieldFlash > 0 && (stillHud(r) || (a.skyShieldFlash >> 2) % 2 === 0);
       if (badge) r.sprite(ui, badge, x, y, { topLeft: true, tint: hot ? '#ffffff' : '#dfe6f6', tintAmount: 1 });
       // the crack: a dark zig-zag down the left of the face
       for (const [cx, cy] of [[3, 2], [4, 3], [3, 4], [4, 5], [3, 6], [2, 7], [3, 8], [3, 9]]) r.rect(x + cx, y + cy, 1, 1, '#3a3450');
