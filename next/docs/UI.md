@@ -116,7 +116,8 @@ Source: `docs/CRITIQUE_3.md` items 1, 2, 5, 6, 7, 9 (the phone is the bar). Veri
   (`statusRow` packs the HP gauge, the MP block and the Fury gauge tighter). **Touch:** 18 px rows (30 css px,
   `TOUCH_CMD_ROW_H`), the window rises to y 132, and **Flee is a FLEE button in the help window** next to AUTO and x1
   (`HELP_TOUCH_BTNS.flee`): the first tap arms it ("Tap FLEE again to run."), a second tap runs, with no time limit (the arm holds until another menu input, #74); dim on boss
-  fights. That keeps the grid at four rows even for Mira (Magic and Swap). Swap's label is plain "Swap" (its help line names
+  fights. The three are tapped on `HELP_TOUCH_HITS` (#82), not their art: 4 px above and below the one-line help window
+  (27 px = 45 css px on the phone) and each gap split at its middle, so they never overlap and a tap goes to the nearest. That keeps the grid at four rows even for Mira (Magic and Swap). Swap's label is plain "Swap" (its help line names
   the weapon). Keyboard and pad keep Flee in the grid (a ninth command grows the window by one row).
 - **Battle log (item 5).** While nobody is choosing a command (enemy turns, the victory and level-up pages) the command window
   shows the last three lines the help window said (`BattleScene.log`, fed by `setHelp`, plus the rewards: EXP and gold,

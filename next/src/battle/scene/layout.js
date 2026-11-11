@@ -54,7 +54,23 @@ export function helpOrigin() { return helpDock() || { x: HELP_WIN.x, y: HELP_WIN
 /** The touch layout's AUTO, x2 and FLEE buttons inside the help window (tap targets; the desktop shows glyphs). They
  *  move with the help window (helpOrigin), so the getters always give where they are drawn and tapped. */
 const helpBtn = (x, y, w, h) => ({ get x() { return x + helpOrigin().x - HELP_WIN.x; }, get y() { return y + helpOrigin().y - HELP_WIN.y; }, w, h });
-export const HELP_TOUCH_BTNS = { flee: helpBtn(124, 6, 31, 15), auto: helpBtn(158, 6, 30, 15), speed: helpBtn(190, 6, 28, 15) };
+// [x, y, w, h] of each button's art in the plain (undocked) help window.
+const HELP_BTN_ART = { flee: [124, 6, 31, 15], auto: [158, 6, 30, 15], speed: [190, 6, 28, 15] };
+export const HELP_TOUCH_BTNS = Object.fromEntries(Object.entries(HELP_BTN_ART).map(([k, v]) => [k, helpBtn(...v)]));
+/** Issue #82 (docs/ACCESSIBILITY.md item 8, CRITIQUE_9 item 8): the tap targets of those buttons, bigger than the art. Each
+ *  reaches HELP_HIT_PAD px above and below the help window's one-line height (the screen's top margin above; below, the
+ *  help window's own lines or clear stage, since a foe whose head would sit there docks the window, W13) and splits each
+ *  gap with its neighbour at the middle, so the three never overlap and a tap lands on the nearest button. FLEE takes
+ *  HELP_HIT_PAD px of the help text on its left (a first tap only arms it); x2 reaches the help window's right edge. They
+ *  move with the help window like the art. Phone landscape (5/3 css px per game px): 27 game px = 45 css px tall. */
+export const HELP_HIT_PAD = 4;
+const HELP_HIT_SPAN = (() => {
+  const { flee: f, auto: a, speed: s } = HELP_BTN_ART;
+  const fa = f[0] + f[2] + Math.ceil((a[0] - f[0] - f[2]) / 2), as = a[0] + a[2] + Math.ceil((s[0] - a[0] - a[2]) / 2);
+  return { flee: [f[0] - HELP_HIT_PAD, fa], auto: [fa, as], speed: [as, HELP_WIN.x + HELP_WIN.w] };
+})();
+const helpHit = ([x0, x1]) => ({ get x() { return x0 + helpOrigin().x - HELP_WIN.x; }, get y() { return helpOrigin().y - HELP_HIT_PAD; }, w: x1 - x0, h: HELP_WIN.h + 2 * HELP_HIT_PAD });
+export const HELP_TOUCH_HITS = Object.fromEntries(Object.entries(HELP_HIT_SPAN).map(([k, v]) => [k, helpHit(v)]));
 
 // The stage (W4-battle-polish, CRITIQUE C3): one ground plane. An indigo band darkens the lower part of
 // the backdrop (bandY..216, drawn under the sprites, top edge dithered 2 px); every unit's feet sit on ONE
