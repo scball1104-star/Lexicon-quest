@@ -47,3 +47,35 @@ jobs:
         env:
           LQ_RELEASE: '1'
         run: node next/qa/run.mjs pwa
+
+  # Issue #79: a returning player with no network still gets the game. Its own job, so it runs beside NEXT tests and
+  # does not slow it. Each check is bounded by timeout, and the step fails unless the check exits 0 AND prints its pass
+  # line (a crash that exits 0 by accident still fails). Proof it can fail: pwa.py --only offline,packoffline --sabotage.
+  offline:
+    name: Offline checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Browser and image tools
+        run: |
+          python -m pip install --quiet playwright pillow numpy
+          python -m playwright install --with-deps chromium
+      - name: Offline reload, returning visit (offline_reload.py)
+        run: |
+          set -o pipefail
+          timeout 240 python next/qa/pwa/offline_reload.py 2>&1 | tee offline-returning.log
+          grep -qx 'OFFLINE_RELOAD: PASS' offline-returning.log
+      - name: Offline reload, first visit (offline_reload.py --first-visit)
+        run: |
+          set -o pipefail
+          timeout 240 python next/qa/pwa/offline_reload.py --first-visit 2>&1 | tee offline-first.log
+          grep -qx 'OFFLINE_RELOAD: PASS' offline-first.log
+      - name: Offline and pack offline (pwa.py --only offline,packoffline)
+        run: |
+          set -o pipefail
+          timeout 300 python next/qa/pwa/pwa.py --only offline,packoffline 2>&1 | tee offline-pwa.log
+          grep -qx 'PWA checks: all passed' offline-pwa.log
