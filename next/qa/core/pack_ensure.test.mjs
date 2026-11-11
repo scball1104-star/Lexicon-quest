@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   PACKS, ensurePack, packReady, onPackReady, packWanted, packsToAwait, packForMap, packsForMap, awaitPacks, mergeTileFragment,
-  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST, storedAll, startPackWatch,
+  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST, storedAll, startPackWatch, refetchUsed,
 } from '../../src/game/packs.js';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -270,4 +270,40 @@ test('startPackWatch (issue #56): the side packs wait until no hard pack is load
     stop();
     resetPacks();
   }
+});
+
+test('refetchUsed (issue #63): re-fetches only the same-origin game files no cache holds, once each, three at a time', async () => {
+  const O = 'https://lq.test';
+  const names = [
+    `${O}/Lexicon-quest/next/assets/pack_files.json`,
+    `${O}/Lexicon-quest/next/src/data/maps/ep3/emberpeak.js?v=2`,
+    `${O}/Lexicon-quest/next/src/data/maps/ep3/emberpeak.js`,          // the same file again: one fetch
+    `${O}/Lexicon-quest/assets/art/environments.webp`,                  // the painted title art lives beside next/
+    `${O}/Lexicon-quest/next/src/main.js`,                              // cached (precache): left alone
+    `${O}/Lexicon-quest/next/sw.js`,                                    // the worker script: never through the worker
+    `${O}/other-site/next/a.js`,                                        // outside the game
+    'https://fonts.example/f.woff2',                                    // another origin
+    'not a url',
+  ];
+  const cached = new Set([`${O}/Lexicon-quest/next/src/main.js`]);
+  const got = [];
+  let inFlight = 0;
+  let most = 0;
+  const r = await refetchUsed({
+    names, root: `${O}/Lexicon-quest/`,
+    match: async (h) => cached.has(h.split('?')[0]),
+    fetch: async (h) => { inFlight++; most = Math.max(most, inFlight); await new Promise((ok) => setTimeout(ok, 5)); inFlight--; got.push(h); },
+  });
+  assert.deepEqual(r, { checked: 4, fetched: 3 });
+  assert.deepEqual(got.map((h) => h.split('?')[0].replace(O, '')).sort(),
+    ['/Lexicon-quest/assets/art/environments.webp', '/Lexicon-quest/next/assets/pack_files.json', '/Lexicon-quest/next/src/data/maps/ep3/emberpeak.js']);
+  assert.ok(most <= 3, `at most three fetches at once (saw ${most})`);
+});
+
+test('refetchUsed (issue #63): a failed fetch or match never rejects, and Node with no caches API does nothing', async () => {
+  const O = 'https://lq.test';
+  const r = await refetchUsed({ names: [`${O}/g/next/a.js`, `${O}/g/next/b.js`], root: `${O}/g/`,
+    match: async (h) => { if (h.endsWith('a.js')) throw new Error('boom'); return null; }, fetch: async () => { throw new Error('offline'); } });
+  assert.equal(r.checked, 2);
+  assert.deepEqual(await refetchUsed(), { checked: 0, fetched: 0 }, 'Node: no performance entries of the game, no caches');
 });
