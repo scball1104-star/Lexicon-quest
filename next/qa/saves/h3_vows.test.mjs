@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createGame, addMember, serialize, deserialize, newGameEp2, newGameEp3, saveMeta } from '../../src/game/state.js';
+import { createGame, addMember, serialize, deserialize, newGameEp2, newGameEp3, saveMeta, chapterFromFlags } from '../../src/game/state.js';
 import { takeVow, vowEvent, settleVow, vowLine, activeVow } from '../../src/game/vows.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -62,7 +62,8 @@ test('every old save fixture (no vow fields) loads with vow null and vowsKept []
     // the old fields are untouched: the loaded game, minus the two defaults, is the fixture plus the other defaults it lacked
     const again = deserialize(data);
     delete again.vow; delete again.vowsKept;
-    for (const k of Object.keys(data)) assert.deepEqual(again[k], data[k], `${f}: ${k} unchanged`);
+    for (const k of Object.keys(data)) if (k !== 'chapter') assert.deepEqual(again[k], data[k], `${f}: ${k} unchanged`);
+    assert.equal(again.chapter, Math.max(data.chapter || 1, chapterFromFlags(data)), `${f}: chapter follows its flags (#71)`);
     // and a vow can be taken on it at once
     assert.ok(takeVow(g, 'no_flee'), `${f}: a vow can be taken`);
     assert.equal(vowLine(g), 'Vow: No fleeing');

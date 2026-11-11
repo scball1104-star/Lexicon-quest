@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import register from '../../src/data/cave/index.js';
-import { createGame, addMember, newGameEp2, newGameEp3, serialize, deserialize, saveMeta, setFlag } from '../../src/game/state.js';
+import { createGame, addMember, newGameEp2, newGameEp3, serialize, deserialize, saveMeta, setFlag, chapterFromFlags } from '../../src/game/state.js';
 import { takeVow, vowLine, activeVow, settleVow } from '../../src/game/vows.js';
 import { equipGear } from '../../src/game/inventory.js';
 import {
@@ -95,7 +95,8 @@ test('every old save fixture (no `cave`) loads with cave undefined; ensureCave f
     // every field the fixture had is untouched by ensureCave
     const again = deserialize(data);
     ensureCave(again);
-    for (const k of Object.keys(data)) assert.deepEqual(again[k], data[k], `${f}: ${k} unchanged`);
+    for (const k of Object.keys(data)) if (k !== 'chapter') assert.deepEqual(again[k], data[k], `${f}: ${k} unchanged`);
+    assert.equal(again.chapter, Math.max(data.chapter || 1, chapterFromFlags(data)), `${f}: chapter follows its flags (#71)`);
     // the gate reads the fixture's own story state
     const expect = data.flags && data.flags.ep1_complete ? { ok: true, why: null } : { ok: false, why: 'ep1_incomplete' };
     assert.deepEqual(canEnter(again), expect, `${f}: canEnter`);
@@ -132,8 +133,8 @@ test('H3 vow fields and a cave run survive one round trip together, and both kee
   foundBlue(g, BINDING); foundBookmark(g);
   assert.ok(equipGear(g, g.party[2], 'body', g.gear.find((it) => it.base === BINDING).uid).ok);
   const back = deserialize(serialize(g));
-  // vows intact
-  assert.deepEqual(back.vow, { id: 'mira_stands', chapter: 1, battles: 4, state: 'active', brokenBy: null });
+  // vows intact (taken after ep1_complete, so in chapter 2: #71)
+  assert.deepEqual(back.vow, { id: 'mira_stands', chapter: 2, battles: 4, state: 'active', brokenBy: null });
   assert.deepEqual(back.vowsKept, [{ id: 'no_fury', chapter: 1, paid: true }]);
   assert.equal(vowLine(back), 'Vow: Mira stands'); assert.equal(activeVow(back).id, 'mira_stands');
   // cave intact
@@ -144,14 +145,14 @@ test('H3 vow fields and a cave run survive one round trip together, and both kee
   back.counters.battles = 5;
   const k = settleVow(back);
   assert.equal(k.kind, 'kept');
-  assert.equal(back.party[1].mastery.staff, 4, 'the vow paid mastery to the run party (the Stacks keep what the run earns until exit)');
-  assert.deepEqual(back.vowsKept, [{ id: 'no_fury', chapter: 1, paid: true }, { id: 'mira_stands', chapter: 1, paid: true }]);
+  assert.equal(back.party[1].mastery.staff, 8, 'the vow paid chapter 2 mastery to the run party (the Stacks keep what the run earns until exit)');
+  assert.deepEqual(back.vowsKept, [{ id: 'no_fury', chapter: 1, paid: true }, { id: 'mira_stands', chapter: 2, paid: true }]);
   assert.equal(back.vow, null);
   assert.deepEqual(resumeInfo(back), { floor: 5, seed: 3, blues: 1 }, 'the vow did not touch the run');
   const r = bank(back, { playtime: 70 });
   assert.deepEqual(r, { ok: true, floor: 5, blues: [BINDING], elapsed: 60, bookmarkUsed: true });
   assert.equal(back.party[1].mastery.staff, 0, 'the overworld party is the snapshot: the run\'s mastery, vow pay included, stays in the Stacks');
-  assert.deepEqual(back.vowsKept, [{ id: 'no_fury', chapter: 1, paid: true }, { id: 'mira_stands', chapter: 1, paid: true }], 'the kept list is not snapshotted');
+  assert.deepEqual(back.vowsKept, [{ id: 'no_fury', chapter: 1, paid: true }, { id: 'mira_stands', chapter: 2, paid: true }], 'the kept list is not snapshotted');
   assert.equal(back.vow, null);
   assert.deepEqual(vaultIds(back), [BINDING]);
   const again = deserialize(serialize(back));
