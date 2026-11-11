@@ -236,7 +236,7 @@ async function mael_intro(s) {
   // Mael's hidden fear: the player sees it, the hero only half notices.
   await s.face('mael', 'up');
   await s.emote('mael', '...');
-  await narrate(s, 'Mael opens a heavy ledger, the Town Register, and runs a finger down one page.');
+  await narrate(s, 'Mael opens a heavy book, the Town Register, and runs a finger down one page.');
   await say(s, 'mael', '...Still there. Fainter than yesterday. But still there.');
   await s.emote('hero', '?');
   await s.face('mael', 'hero');
@@ -1413,7 +1413,7 @@ export const lines = {
   chapel_pews: 'Polished pews, smooth from generations of sitting. Someone has carved a tiny duck into the end of one.',
 
   // library
-  library_desk: 'Iris\'s desk. A ledger of borrowed books, a cold cup of tea, and a list headed THINGS NOT TO FORGET.',
+  library_desk: 'Iris\'s desk. A loan book, a cold cup of tea, and a list headed THINGS NOT TO FORGET.',
   library_globe: 'An old globe of Aethelgard. Several towns on it have faded to blank pale circles.',
   library_returns: 'The returns cart. Every book on it is about remembering things. Someone has a sense of humor.',
   mira_desk: [

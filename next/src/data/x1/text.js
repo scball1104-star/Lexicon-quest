@@ -77,7 +77,7 @@ export const X1_BOOKS = {
     ],
   },
   keeper_star_ledger: {
-    title: "The Orrery's Ledger", where: 'x1_orrery',
+    title: "The Orrery's Star Book", where: 'x1_orrery',
     pages: [
       'Nine brass stars to the ring. One star for each Keeper who built on the ridge, the road and the tower.',
       'Three of the nine wrote their names where they worked, in ink that hides: a milestone, a door, a tower.',
@@ -85,7 +85,7 @@ export const X1_BOOKS = {
     ],
   },
   mill_ledger: {
-    title: "Hal's Mill Ledger", where: 'x1_mill',
+    title: "Hal's Account Book", where: 'x1_mill',
     pages: [
       'Thirty years of customers, in a blunt square hand. Barley, oats, a sack at a time.',
       'The first page holds one name: Ebba Corley. One sack of barley. Paid in eggs.',

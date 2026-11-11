@@ -433,7 +433,7 @@ async function foundry_f2_shaft(s) {
 // 21. foundry_f2, object ledger_obj (Lantern secret, side quest What the Ash Kept). Sets ledger_found.
 async function ledger_ash(s) {
   await s.sfx('lantern_reveal');
-  await narrate(s, 'Three ledger pages lie on the floor of the records cage, burned black and curled. Mira raises the Lantern over them.');
+  await narrate(s, 'Three pages lie on the floor of the records cage, burned black and curled. Mira raises the Lantern over them.');
   await narrate(s, "Ink rises out of the ash: the last shift's names, row on row. In one row, a small bell is stamped where a name should be.");
   await say(s, 'mira', "Ink remembers, even when paper burns. That's new. I'm writing that down.");
   await say(s, 'bram', 'A stamp where a name should be. Whose?');
@@ -977,10 +977,10 @@ export const lines = {
   forge_lit: 'The forge, low and orange. It is the right kind of fire: patient, and not in a hurry.',
 
   // foundry_f1, f2
-  records_cage: 'The records cage. Shelves of ledgers, burned to black curls. One shelf is empty and swept.',
+  records_cage: 'The records cage. Shelves of record books, burned to black curls. One shelf is empty and swept.',
   ledger_burned: [
     { if: 'ledger_found', lines: 'Three burned pages. Under the Lantern they read as rows of names, and one small stamp.' },
-    { lines: 'Three burned ledger pages, black and curled. A faint shine on the ash, if you tilt your head.' },
+    { lines: 'Three burned shift-book pages, black and curled. A faint shine on the ash, if you tilt your head.' },
   ],
   fan_great: [
     { if: 'bellows_specter_defeated', lines: 'The great fan has stopped. Soot sifts down from its blades like slow snow.' },

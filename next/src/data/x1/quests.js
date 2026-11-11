@@ -213,13 +213,13 @@ export const X1_SIDE_QUESTS = [
     steps: [
       {
         id: 'gather', done: ['list_rhyme', 'list_ledger', 'list_song'],
-        journal: "Bring Iris a rhyme (Brindle), a name (Hal's ledger) and a song (Odo, on the moor). Lv 3 to 5.",
+        journal: "Bring Iris a rhyme (Brindle), a name (Hal's account book) and a song (Odo, on the moor). Lv 3 to 5.",
         chat: [
           { map: 'x1_downs', ifNot: 'list_rhyme', if: 'mira_joined', lines: [m('Brindle first. A counting rhyme. He will pretend he does not have one.')] },
-          { map: 'x1_mill', ifNot: 'list_ledger', if: 'bram_joined', lines: [b('Hal keeps a ledger on the shelf by the stones. The oldest name, Iris said. Page one.')] },
+          { map: 'x1_mill', ifNot: 'list_ledger', if: 'bram_joined', lines: [b('Hal keeps an account book on the shelf by the stones. The oldest name, Iris said. Page one.')] },
           { map: 'x1_highmoor', ifNot: 'list_song', if: 'mira_joined', lines: [m('Odo, in the hut under the Watchtower. A song he sings to the posts.')] },
-          { if: 'mira_joined', lines: [m("A rhyme from Brindle, a name from Hal's ledger, a song from Odo. Iris will want them in their own words.")] },
-          { lines: [h("(Three things for Iris: Brindle's rhyme, a name in Hal's ledger, Odo's song.)")] },
+          { if: 'mira_joined', lines: [m("A rhyme from Brindle, a name from Hal's account book, a song from Odo. Iris will want them in their own words.")] },
+          { lines: [h("(Three things for Iris: Brindle's rhyme, a name in Hal's account book, Odo's song.)")] },
         ],
       },
       {
