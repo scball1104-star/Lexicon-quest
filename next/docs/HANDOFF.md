@@ -1,4 +1,4 @@
-# Lexicon Quest NEXT: session handoff (updated 2026-11-04, 05:00 ET)
+# Lexicon Quest NEXT: session handoff (updated 2026-11-10, 20:00 ET)
 
 ## What this is
 Scott's SNES-style JRPG, rebuilt from scratch in `D:\LexiconQuest\next\` as a real pixel game. Scott is away
@@ -32,6 +32,16 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   it alone before treating it as real.
 
 ## Status at handoff
+- **Live 2026-11-10 19:03 ET: main 7289bc8 (sw 939847589b4e).** Episode 6 (PR #54, `EP6_LIVE` on, lazy `ep6` pack; design
+  `docs/EPISODE6_PLAN.md`, story `docs/story/EPISODE6.md`, reviews `docs/CRITIQUE_8.md` and `docs/PLAYTEST_REVIEW_8.md`), its
+  polish (PR #55: Airstair chest +1,500 G, `ep6_zephyr` 52 wide) and pack load speed (PR #57, issue #56: `storedAll()` in
+  `src/game/packs.js` skips the up-front code fetch when the service worker cache holds every file; side packs wait for the
+  hard packs). Live slow-phone entry (CPU x4, 10 Mbps, GPU on): cold 6.6 to 6.8 s, warm 2.1 to 2.3 s, under 8 s and 3 s.
+  Bundling the packs is designed (Scott's `cold_start_plan`) and HELD: Step 1 met the targets. TRAPS: (1) headless Chromium
+  draws the canvas in software unless launched with `fieldlab.GPU_ARGS`; any load timing without them over-measures by ~40%;
+  (2) a Pages deploy that times out at `deploy-pages` cannot be fixed with "rerun failed jobs" (duplicate `github-pages`
+  artifact); wait, then start a fresh `workflow_dispatch` of `pages.yml` on main. Open: Stephen has not played Episodes 5
+  or 6; no full live Episode 6 playthrough; offline reload unchecked.
 - **Shipped 2026-11-09 on Scott's word ("Finish episode 5 and ship 4 and 5 together"): live main = d93eef5 (sw a70984db134f).**
   Episode 5 "The Last Prophecy" (PR #51, issue #50; `EP5_LIVE` on, lazy `ep5` pack; design `docs/EPISODE5_PLAN.md`, story
   `docs/story/EPISODE5.md`, reviews `docs/CRITIQUE_7.md` and `docs/PLAYTEST_REVIEW_7.md`) plus the Episode 4 polish held since
