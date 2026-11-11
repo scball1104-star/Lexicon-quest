@@ -90,6 +90,8 @@ https://scball1104-star.github.io/Lexicon-quest/next/ . The old game at the repo
   - Then Wave 10c and 10d per the plan, then a critique + design playtest of Episode 2, a fix pass, the full gate list,
     and publish. Episode 2 shows on the title screen only after `ep1_complete` (or `?ep=2`).
 - Small backlog: drawn Episode 2 portraits are simpler than the painted Episode 1 ones; a 2x Briar Alpha avatar.
+  Status 11/10 (audit): both still open as art, not code. W12 (cf76f31) redrew the five Episode 2 portraits three-quarter
+  and lit, still smoother than Episode 1's; W13 skipped the 2x Briar Alpha avatar because nothing was stretched.
   Done 2026-11-03 (scott/polish-nov3): the reflection timeline heads (build_heads.py glass_head, by role in the owner's
   grid); the Stacks art gaps (the Binder's page burst, src/data/cave/fx.js; Hollis's portrait, cave_portraits.py).
   The Hollow was already in autoplay: `python next/qa/autoplay.py --hollow` (W13).

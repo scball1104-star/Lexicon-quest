@@ -23,14 +23,15 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] W3-integrate: full flow title -> prologue -> town -> valley -> archive -> boss -> ending -> credits; autoplay test; publish /next
 
 ## Wave 4+: polish loops (repeat all week)
-- [ ] critic passes (art, UX, combat feel, story) on qa/out screenshots -> issue lists here
-- [ ] fix passes per issue list
+- [x] critic passes (art, UX, combat feel, story) on qa/out screenshots -> issue lists here (audit 11/10: CRITIQUE_1 to 8, CRITIQUE_ARC, CRITIQUE_STACKS, CRITIQUE_X1, PLAYTEST_REVIEW_1 to 8)
+- [x] fix passes per issue list (audit 11/10: W4b, W5, W11, W13, W15, H6-fixes, C4-fixes, the Episode 3 to 6 fix waves; the last is 91851ab, wave 6e)
 - [ ] balance simulation, mobile/touch pass, performance pass, accessibility/options pass
+  - Audit 11/10: sim (`tools/sim/simulate.mjs --check`), touch (C12, D8, W11 Part A 0f49e22) and load timing (PR #57) are done, and Options has Reduce motion, Text speed, Window color and Screen scaling. Left: no accessibility review has run (contrast, colour-only cues such as the orange telegraph text and the side-coloured timeline frames). Smallest step: one read-only critic pass over qa/out with that brief.
 
 ## Polish backlog (found in review)
-- [ ] Battle timeline face crops (14x14) read as orange squares; use 12x12 head icons drawn for the purpose, plus enemy silhouettes
-- [ ] Enemies have a single battle frame; add a 2-frame idle breathe and a hurt squash in code
-- [ ] Long telegraph sentences get cut with an ellipsis in the help window; wrap to two lines
+- [x] Battle timeline face crops (14x14) read as orange squares; use 12x12 head icons drawn for the purpose, plus enemy silhouettes (audit 11/10: done as C4, efbdf5c: `assets/ui/heads.png`, hud.js `drawHead`, enemy heads by id, glass reflection heads; seen in the battle_boss and W11 formation shots)
+- [x] Enemies have a single battle frame; add a 2-frame idle breathe and a hurt squash in code (audit 11/10: done in W6-anim, 7d402ae: actors.js `BREATHE` idle_0/idle_1, the `hurt` frame and knock-back, a 1 px settle on alternate beats)
+- [x] Long telegraph sentences get cut with an ellipsis in the help window; wrap to two lines (audit 11/10: the help window grows to three lines since 9fa5caa, hud.js `helpLines`; new qa/battlescene/telegraph_fit.test.mjs checks all 43 telegraphs with worst-case names, keyboard and touch: none cut)
 
 ## Wave 4 polish backlog from docs/CRITIQUE_1.md (ranked)
 - [x] C1 Quantize painted backdrops (title, battle, dialogue key art) to palette.json with ordered dither so every scene has one pixel density
@@ -42,10 +43,10 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] C7 Lantern/brazier light: dithered radial falloff with max blend instead of overlapping alpha discs
 - [x] C8 Enemy battle sprites: remove downscale speckle, add selective outlines
 - [x] C9 Plaza cobble contrast lower than actors
-- [ ] C10 Victory window overlaps help bar and timeline (integrator)
+- [x] C10 Victory window overlaps help bar and timeline (integrator) (audit 11/10: the rewards window stands alone at the top, the timeline hidden, the summary in the help box below: `desktop-battle_victory.png`)
 - [x] C11 Slash fx: thicker arc, impact star, visible hit-stop
 - [x] C12 Touch: menu rows too small on phone, add tap-to-select; tablet A/B buttons bigger
-- [ ] C13 Battle shows "Hero" while menus show the chosen name (integrator, bug)
+- [x] C13 Battle shows "Hero" while menus show the chosen name (integrator, bug) (audit 11/10: rules.js takes `m.name` and the debug battle keeps `heroName`; a hero named Wren shows as Wren in the status window and the Archivore's telegraph on desktop and phone; new qa/battle/hero_name.test.mjs)
 - [x] C14 Game over asymmetric black top band
 - [x] C15 Followers spawn stacked on the leader (integrator)
 - [x] C16 Library rug reads as a tile grid
@@ -90,7 +91,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - [x] CRITIQUE_3 #8 Bram's gate sprite is not Bram (data: use the party sprite before he joins)
 - [x] CRITIQUE_3 #10 field Archivore avatar does not match the battle boss (art)
 - [x] CRITIQUE_3 #12 music reuse: mystery/sorrow cues in story scenes, a distinct F3 or boss-door cue (content + audio)
-- [ ] Next big steps (CRITIQUE_3): party field abilities; Lantern upgrade; Episode 2 vertical slice
+- [x] Next big steps (CRITIQUE_3): party field abilities; Lantern upgrade; Episode 2 vertical slice (audit 11/10: W9-abilities, then Episode 2 published 10/21)
 
 ## Wave 9 (running)
 - [x] W9-abilities: Hero Dash Strike, Mira field Appraise + Lantern, Bram Shove; optional uses placed in existing maps
@@ -108,7 +109,9 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
       Kept slot, 3-line telegraphs; 498 tests green; phone and desktop shots viewed). Load budget 6 -> 6.5 MB (b157fd0).
       Fix-pass backlog: on the phone the taller touch command window hides the lower half of the middle foe in
       three-foe fights (predates Episode 2, obvious with Mira's Reflection); assets/ui/heads.png reflection blobs
-      are now unused (runtime glass heads).
+      are now unused (runtime glass heads). Audit 11/10: both done. W11 Part A (0f49e22) moves a foe that meets the
+      touch command window onto a raised back row (layout.js `touchEnemySlot`); the phone formation sheet for
+      valley_slimes, f3_mixed, other_selves and c3_mixed shows every foe clear. The atlas carries the glass heads (11/3).
 - [x] Wave 10d: E2-integrate committed 5f09ee5: autoplay finishes Episode 2 from an Episode 1 save and from
       newGameEp2, desktop and phone, 0 game overs, King at Lv 13 (save) and Lv 12 (new); 505 tests; 12 shots x 7 devices.
       Story timer: first play 110 to 153 min (plan said 60 to 90; Episode 1 measures 96 to 113 the same way).
@@ -141,7 +144,7 @@ Status keys: [ ] todo, [~] in progress, [x] done (merged), [!] blocked.
 - QUEUE DONE 2026-10-23. Heartbeat cron stopped. Waiting for Scott on: Episode 3 (scope and story), the final
       wording of the Episode 2 ending lines (PROGRESS.md 10/23 evening), and whether Court F3 now feels right.
 - Later, if wanted: per-run autosaves (M; the confirm prompt already prevents the loss).
-- [ ] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work.
+- [x] Episode 3: NOT started. Needs Scott's go (scope and story direction) before any design work. (audit 11/10: built and shipped, see Episode 3 below)
 
 - 2026-10-21: Scott: "slow and steady" this week, watching the usage monitor. One background agent at a time;
   get_usage is connected again (weekly 2% at 11:00 after the Tuesday reset).
@@ -155,11 +158,12 @@ third fragment) and `docs/EPISODE3_PLAN.md` (the contract). New field mechanic: 
 permanently crusts slag; reuses the beam tracer). One battle rule: Heat. Lv 13 to 17, planned at 75 minutes.
 Run ONE agent at a time, in order, checking usage before each launch; each step leaves the game publishable
 (everything stays behind `EP3_LIVE = false` until E3-integrate).
-- [ ] Wave 17a: E3-saves (per-run autosave, `newGameEp3`, the switch) -> E3-story -> E3-battle
-- [ ] Wave 17b: E3-tiles -> E3-sprites -> E3-audio
-- [ ] Wave 17c: E3-world -> E3-maps
-- [ ] Wave 17d: E3-scene-ui -> E3-integrate (flips `EP3_LIVE`; publish after the full gate list)
-- [ ] Wave 17e: critic-5 -> play-critic-5 (`docs/briefs/E3-review.md`, read-only) -> E3-fixes
+- [x] Wave 17a: E3-saves (per-run autosave, `newGameEp3`, the switch) -> E3-story -> E3-battle
+- [x] Wave 17b: E3-tiles -> E3-sprites -> E3-audio
+- [x] Wave 17c: E3-world -> E3-maps
+- [x] Wave 17d: E3-scene-ui -> E3-integrate (flips `EP3_LIVE`; publish after the full gate list)
+- [x] Wave 17e: critic-5 -> play-critic-5 (`docs/briefs/E3-review.md`, read-only) -> E3-fixes
+- Audit 11/10: Wave 17 done: E3-integrate 0e9911a, `EP3_LIVE` on in 26582ec (PR #30), polish PRs #31 and #32; shipped 11/3 (see the Episode 4 section). Reviews: CRITIQUE_5, PLAYTEST_REVIEW_5.
 - Decisions for Scott (defaults in EPISODE3_PLAN 13): Garrick as the toll [yes]; grey Bram sprites [yes, shown first];
   quick-start free-slot rule for Episode 3 only [yes]; Episode 4 card wording [placeholder].
 
@@ -219,14 +223,14 @@ Then: flip CAVE_LIVE, the full publish gate list (EXPANSION_SCHEDULE 4) on a qui
   - H6-fixes notes for C4: the tap-prompt room is 771 B, the initial-download room 8.3 KB; the next prose must pay for itself; desktop shots need a quiet machine (seven boot timeouts under load)
 - [x] C2-sprites-boss: cave_props (chest_red, chest_blue, plaque, trapdoor), the Binder's three looks on the Archivore kit with every boss frame, binder_avatar field sprite, cave_b100.js and cave_landing0.js with marks, 36 prefabs each for court, ember and forge plus landings (bands345.js); 18 tests (`docs/briefs/C2-sprites-boss.md`); 10/27 02:50
   - C2-sprites-boss handoffs: foes.js BINDER needs sprite.frame 'binder' and phase sprites 'binder_loose', 'binder_binding' (C3 may set it; foes.js is C3-sim-bot's then); chest tiers red/blue map to chest_red/chest_blue; hall stairs_down must be rewritten from arrivalOf(seed, 1) (placeholder fails mapcheck on purpose); npc hollis at [10,8] and the plaque at [10,4] (C2-story-ui); no timeline head for the Binder (assets/ui not owned, hud falls back); gen.js strews roots down bands 3 to 5 corridors (propose a band corridorDecals field); the builders are standalone, not in build_all.py
-- [~] C2-story-ui launched 10/27 02:55 (weekly usage 68%: from 75% the guard drops to one agent at a time, above 85% none until the Wednesday 9 AM reset)
+- [x] C2-story-ui launched 10/27 02:55 (audit 11/10: done, see C2-story-ui above) (weekly usage 68%: from 75% the guard drops to one agent at a time, above 85% none until the Wednesday 9 AM reset)
 - [x] C3-critic: docs/CRITIQUE_STACKS.md, 25 ranked issues; verdict: five minutes hold (hall 0:11, B1 1:15, first fight 1:23), after B30 probably not (B1 to B30 by hand 124 game minutes, Root Cellars fights 7 rounds, deep floors 10 to 20 minutes, the same six Court foes for sixty floors, the victory loop stuck on the field), a second reading is earned by the machinery but thinly pulled; the 10/27 fixes confirmed except two more generator refusals (612 B54, 687 B58). Five things not to touch: Hollis and the rules, the blue chest and the bank, the hand-made look, Resume, the Binder's phases; 10/28 10:45
   - Fixed by the orchestrator 10/28 11:00: gen.js `layout()` accepts only a layout some dressing proves (612 B54 and 687 B58 build, unchanged floors identical, `tools/cave/scan_floors.mjs` scans a seed range); battle.js `beginVictory` plays the victory loop only while the battle is on top (issue 2, a base-game bug)
   - C4-fixes brief written (`docs/briefs/C4-fixes.md`: issues 1 world half, 3 to 9, 11 to 25, Known 4, 5, 7, 9, 10); launches after C4-uniques reports (loot.js collides)
 - [x] C4-uniques: sixty uniques in three grades (Lesser ilvl 5, Greater 10, Named 16; twenty a grade across every slot; the sixteen folded in; 44 new names, placeholders open to veto; props spread by grade, three guarded hook lines in world.js armBattle); every unique beats the 90th-percentile rolled rare of its grade's level in its slot and every Lesser beats the Episode 2 start piece; grade odds by floor as briefed (B1 85/14/1 to B99 3/17/80); a second blue FLOOR per decade (the generator places one blue chest a floor), so about 14 blue chests a deep run, the first by B9, all sixty seen in a median of 5 deep runs; worn at B95: 33 of 46 Named; --cave --check green but B10 to B99 death rates now under half their targets and the Binder 12.6 rounds (flagged, not retuned: C4-fixes); pack 0.213 MB; tests qa/cave/uniques_*; three old test pins patched (data_pack, story_scenes, ui_stacks); plaque says "n of 61"; BALANCE section 8. 10/28 11:45
   - Fixed by the orchestrator 10/28 11:50 (its gap 5, seed 311 B92): gen.js dressing now skips a chest spot that would cut the stair off and places foes on the walk WITH the chests in it, so the proof cannot fail on either; unchanged floors identical
   - C4-uniques leftovers for C4-fixes: resist stacking past 100 in inventory.js scoring (deep Named heads and charms lose to rolled rares), the Journal line's missing total, the "n of 61" plaque wording; Scott's answer to open call E (10/27, verbatim in DEEP_STACKS_PLAN 13): sixty uniques in three grades with the odds turning over with depth, enough to equip the party in uniques several times over (`docs/briefs/C4-uniques.md`); launch after the Wednesday 10/28 reset, after C3-critic, one agent at a time
-- [~] C4-fixes: LAUNCHED 10/28 12:45 on Opus (`docs/briefs/C4-fixes.md`); then flip CAVE_LIVE, the publish gate list on a quiet machine, Scott's explicit yes
+- [x] C4-fixes: LAUNCHED 10/28 12:45 (audit 11/10: done 94813dc, CAVE_LIVE afd6eab, shipped 10/28) on Opus (`docs/briefs/C4-fixes.md`); then flip CAVE_LIVE, the publish gate list on a quiet machine, Scott's explicit yes
 
 ## Episode 4: The Sunken Keep (status: designed tonight 2026-11-03, building behind `EP4_LIVE` on `scott/ep4-build`)
 Scott asked for a major overnight push after Episode 3 shipped on 11/3. Design by ep4-designer: `docs/story/EPISODE4.md`
@@ -236,11 +240,12 @@ one.") and `docs/EPISODE4_PLAN.md` (the contract). New field mechanic: tide lock
 three marks; pontoons float; high water washes forged seals off for good). One battle rule: Decrees (on the Heat
 counter). Lv 17 to 21, planned at 75 minutes. Everything lives in the lazy `ep4` pack; core changes are the seams of
 plan 13.2, each paid by a core-JS trim. No Suno or Runway tonight. Up to three agents at once, disjoint paths (plan 11).
-- [ ] Wave 4a: E4-pack, E4-story, E4-battle
-- [ ] Wave 4b: E4-tiles, E4-sprites, E4-world
-- [ ] Wave 4c: E4-maps-a, E4-maps-b, E4-audio
-- [ ] Wave 4d: E4-scene-ui, then E4-integrate (flips `EP4_LIVE` on the branch after the full gate list; shipping stays Scott's or Stephen's word)
-- [ ] Wave 4e: critic-6 and play-critic-6 (`docs/briefs/E4-review.md`, read-only), then E4-fixes
+- [x] Wave 4a: E4-pack, E4-story, E4-battle
+- [x] Wave 4b: E4-tiles, E4-sprites, E4-world
+- [x] Wave 4c: E4-maps-a, E4-maps-b, E4-audio
+- [x] Wave 4d: E4-scene-ui, then E4-integrate (flips `EP4_LIVE` on the branch after the full gate list; shipping stays Scott's or Stephen's word)
+- [x] Wave 4e: critic-6 and play-critic-6 (`docs/briefs/E4-review.md`, read-only), then E4-fixes
+- Audit 11/10: Wave 4 done: PR #37, shipped with Episode 5 on 11/9 (live main d93eef5; PROGRESS.md 11/9). Reviews: CRITIQUE_6, PLAYTEST_REVIEW_6.
 - Open for Scott and Stephen (defaults in EPISODE4.md section 10): Lyra's name struck [yes]; the hero's episode with
   Answer [yes]; "Keep this one." [yes]; Vex keeps the Valewyn list and signs "V." [yes]; collision renames (Nessa to
   Hale, Orel to Joss, floor III to The Court of Witnesses) [yes]; Fine Print stays out of Episode 4 for now [yes];
