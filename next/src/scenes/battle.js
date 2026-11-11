@@ -902,7 +902,8 @@ export class BattleScene {
     const { text, color, right, rightColor, rightW, tb } = this.helpView(r);
     HUD.drawHelp(r, text, color, { right, rightColor, rightW });
     if (tb) {
-      const pulse = Math.floor(this.frame / 20) % 2 === 0;
+      // Reduce motion (#82): an armed FLEE and an on AUTO hold their lit colour instead of pulsing.
+      const pulse = HUD.stillHud(r) || Math.floor(this.frame / 20) % 2 === 0;
       const b1 = tb.auto, b2 = tb.speed, b0 = tb.flee;
       const fleeOk = this.menu.state === 'root' && this.menu.fleeCmd && this.menu.fleeCmd.enabled;
       const armed = this.menu.fleeArmed > 0;

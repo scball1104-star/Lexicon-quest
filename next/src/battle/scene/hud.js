@@ -175,6 +175,7 @@ export function drawTimeline(r, order, actors, preview, frame) {
   if (!ui) return;
   const rail = ui.frames.tl_rail;
   if (rail) r.nineSlice(ui.image, [rail.x, rail.y, rail.w, rail.h], [2, 0, 2, 0], TL.x, TL.y + 7, TL.railW, rail.h);
+  frame = steadyFrame(r, frame);   // Reduce motion (#82): the head's glow, its pulse, the marks and the preview hold still
   const glowName = animFrameAt(ui.anims.tl_glow, frame / 60);
   const pulse = Math.floor(frame / 10) % 2 === 0;
   for (let i = 0; i < Math.min(TL.slots, order.length); i++) {
@@ -228,7 +229,7 @@ export function drawPartyStatus(r, party, activeUid, frame, opts = {}) {
     const active = a.uid === activeUid;
     if (active) {
       // Whose turn: a bright pulsing bar, a gold frame and a pointer in the left margin, and a gold name.
-      const pulse = Math.floor(frame / 20) % 2;
+      const pulse = still ? 0 : Math.floor(frame / 20) % 2;   // Reduce motion (#82): the steady gold frame
       drawSelBar(r, L.bar[0], L.bar[1], L.bar[2], { alpha: pulse ? 0.9 : 1 });
       r.strokeRect(L.bar[0] - 1, L.bar[1] - 1, L.bar[2] + 2, 14, pulse ? '#fff7d6' : '#f9d77a');
       r.text('▶', L.bar[0] - 9, L.name[1], { color: 'gold' });
@@ -333,6 +334,8 @@ export const PIPS = {};
 export const STILL_PIP_FRAME = 4;   // (frame >> 2) odd: the hot white core on; (frame >> 3) even: no flicker
 /** Reduce motion (docs/ACCESSIBILITY.md item 2): READY, the shield count, the weakness frame and Heat pips hold steady. */
 export function stillHud(r) { return !!(r && r.settings && r.settings.reduceMotion); }
+/** Reduce motion (#82): the frame a marker draws at, 0 (each marker's lit phase, the bob at rest) when it holds still. */
+export function steadyFrame(r, frame) { return stillHud(r) ? 0 : frame; }
 const PIP = ['..o..', '..oo.', '.oao.', '.oaao', 'oabao', 'oabbo', 'oabbo', '.ooo.'];
 function drawPip(r, x, y, lit, hot, pop, frame) {
   const w = hot && (frame >> 2) % 2;
@@ -364,6 +367,7 @@ export function enemyRowWidth(know) {
 /** Episode 3 glows behind a foe: the Molten Shell's heat halo round the Warden (o = 0), a flare's white heat (o = 1). */
 const HALO = [['#eba14d', '#ffcf5a', '#fff1a8'], ['#fff7d6', '#ffffff', '#ffffff']];
 export function drawHalo(r, a, frame, o = 0) {
+  frame = steadyFrame(r, frame);
   const cx = a.cx, cy = a.cy, p = (frame >> 3) % 2, c = HALO[o], hw = Math.round(a.w / 2), hh = Math.round(a.h / 2);
   r.withAlpha(0.22 + p * 0.08, () => r.ditherEllipse(cx, cy, hw + 8, hh + 6, c[0], 0.5));
   if (!o) r.withAlpha(0.5, () => r.ellipse(cx, cy, hw + 6 + p, hh + 4, c[1], false));
@@ -372,6 +376,7 @@ export function drawHalo(r, a, frame, o = 0) {
 }
 /** Tempered Oath (Episode 3): a ring of light at Bram's feet; with a blow announced, arrows from each ally to him. */
 export function drawOath(r, a, allies, arrows, frame) {
+  frame = steadyFrame(r, frame);
   const rw = Math.round(a.w / 2) + 6 + ((frame >> 4) % 2);
   r.withAlpha(0.85, () => { r.ellipse(a.cx, Math.round(a.y), rw, 4, '#f9d77a', false); r.ellipse(a.cx, Math.round(a.y), rw - 3, 2, '#fff7d6', false); });
   for (let i = 0; i < 4; i++) { const t = (frame + i * 15) % 40; r.withAlpha(0.8 - t / 50, () => r.rect(a.cx - rw + 3 + ((i * 11) % (rw * 2 - 6)), Math.round(a.y) - 2 - t, 1, 2, '#fff7d6')); }
@@ -440,6 +445,7 @@ export function drawTargetArrow(r, actor, frame) {
 }
 export function drawTurnMarker(r, actor, frame) {
   const ui = uiAtlas(r);
+  frame = steadyFrame(r, frame);   // Reduce motion (#82): the ring and the arrow hold still
   // A pulsing gold ring on the floor under the active character's feet, beside the arrow over the head.
   const rw = 9 + (Math.floor(frame / 20) % 2);
   r.withAlpha(0.8, () => { r.rect(actor.cx - rw, Math.round(actor.y) - 1, rw * 2, 1, '#f9d77a'); r.rect(actor.cx - rw + 2, Math.round(actor.y), rw * 2 - 4, 1, '#f9d77a'); });
@@ -451,6 +457,7 @@ export function drawTurnMarker(r, actor, frame) {
 /** Pulsing danger marker over a charging enemy (telegraph), with the turns-until count. */
 export function drawTelegraphMarker(r, actor, frame, nextTurn, minY = 28, row = null) {
   const ui = uiAtlas(r);
+  frame = steadyFrame(r, frame);   // Reduce motion (#82): the "!" stands lit, with no bob
   const bob = Math.floor(frame / 8) % 2;
   // row (touch layout): the foe's weakness row (with its status badges). The "!" stands on a row above the head,
   // and moves beside a row it would otherwise cover.
@@ -492,6 +499,7 @@ export function drawBigBanner(r, text, style, k) {
 
 /** A Kept member sealed in a mirror shard: a faceted glass prism over the sprite with a travelling gleam. */
 export function drawKeptShard(r, actor, frame) {
+  frame = steadyFrame(r, frame);   // Reduce motion (#82): the gleam rests at the top
   const cx = actor.cx;
   const h = actor.h || 40, w = Math.max(18, actor.w || 28);
   const top = Math.round(actor.y - h - 3), bot = Math.round(actor.y + 1);
@@ -520,7 +528,7 @@ export function drawMirrorBracket(r, order, aUid, bUid, frame) {
   // 2 px, ink-outlined, legs into the slots, a glass gem mid-bar; breathes silver to white.
   const x0 = timelineSlotX(lo) + 4, x1 = timelineSlotX(hi) + 14;
   const top = TL.y + 18, bar = TL.y + 23;
-  const pulse = Math.floor(frame / 10) % 2 === 0;
+  const pulse = stillHud(r) || Math.floor(frame / 10) % 2 === 0;   // Reduce motion (#82): steady white
   const ink = '#14101e', col = pulse ? '#e8ecff' : '#b8c2e8', shade = '#7880b0', hi1 = '#ffffff';
   r.rect(x0 - 1, top, 4, bar - top + 3, ink);
   r.rect(x1 - 2, top, 4, bar - top + 3, ink);

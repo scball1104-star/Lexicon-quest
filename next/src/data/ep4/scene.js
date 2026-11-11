@@ -22,7 +22,7 @@
 import { BACKDROPS, BOSS_CARD } from '../../scenes/battle.js';
 import { Planner, FRAMES } from '../../battle/scene/animator.js';
 import { Actor } from '../../battle/scene/actors.js';
-import { PIPS } from '../../battle/scene/hud.js';
+import { PIPS, stillHud, steadyFrame } from '../../battle/scene/hud.js';
 import { SIGNATURE_TECHS } from '../../battle/scene/menu.js';
 import { PAGE_KINDS } from '../../world/closeup.js';
 import { EP4_PAGES } from './pages.js';
@@ -205,7 +205,9 @@ const TAU10 = Math.PI / 5;
 export const isDecree = (id) => !!(ENEMIES[id] && ENEMIES[id].heat && ENEMIES[id].heat.quench === 'fire');
 
 /** The Royal Ward: six writs float in a slow ellipse round the Regent, a pale dithered glow behind. */
+// Reduce motion (#82): every mark below draws at steadyFrame, its lit phase with no bob, orbit or blink.
 export function drawWardHalo(r, a, frame) {
+  frame = steadyFrame(r, frame);
   const cx = a.cx, cy = a.cy, hw = Math.round(a.w / 2) + 8, hh = Math.round(a.h / 2) + 4, p = (frame >> 4) % 2;
   r.withAlpha(0.18 + p * 0.06, () => r.ditherEllipse(cx, cy, hw + 6, hh + 4, C.cream, 0.5));
   r.withAlpha(0.45, () => r.ellipse(cx, cy, hw + 2, hh, C.paper, false));
@@ -217,6 +219,7 @@ export function drawWardHalo(r, a, frame) {
 }
 /** The hero's guard after Answer: a gold ring of script at the feet, motes rising. */
 export function drawAnswered(r, a, frame) {
+  frame = steadyFrame(r, frame);
   const rw = Math.round(a.w / 2) + 6, y = Math.round(a.y), k = (frame >> 3) % 8;
   r.withAlpha(0.9, () => r.ellipse(a.cx, y, rw, 4, C.gold, false));
   for (let i = 0; i < 8; i++) if ((i + k) % 3) { const ang = i * Math.PI / 4 + frame / 40; r.rect(Math.round(a.cx + Math.cos(ang) * rw), Math.round(y + Math.sin(ang) * 4), 2, 1, C.cream); }
@@ -224,6 +227,7 @@ export function drawAnswered(r, a, frame) {
 }
 /** The name a Strike from the Roll is aimed at: a red seal over the head, pulsing. */
 export function drawNamed(r, a, frame) {
+  frame = steadyFrame(r, frame);
   const bob = (frame >> 3) % 2;
   waxSeal(r, a.cx - 11, a.top - 2 - bob, 4);
   if ((frame >> 2) % 3 !== 2) r.rect(a.cx - 12, a.top + 5 - bob, 3, 1, WAX[2]);
@@ -366,7 +370,7 @@ function wrapActor(A) {
   A.tlMark = function (r, x, y, frame) {
     if (!this.statuses || !this.statuses.named || this.ko) return;
     r.rect(x + 10, y - 1, 9, 9, C.ink);
-    waxSeal(r, x + 14, y + 3, 3, (frame >> 3) % 2 ? 1 : 0.8);
+    waxSeal(r, x + 14, y + 3, 3, stillHud(r) || (frame >> 3) % 2 ? 1 : 0.8);
   };
 }
 
