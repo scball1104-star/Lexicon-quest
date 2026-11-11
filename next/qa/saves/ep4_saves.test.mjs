@@ -25,11 +25,12 @@ function ep3CreditsGame(name = 'Sol') {
   return g;
 }
 
-test('EP4_START: Lv 17 at 5,600 EXP, Episodes 1 to 3 done, three credits counters, key items, 2,400 gold, awake at pk_inn', () => {
+// Issue #99 (2026-11-11): the quick start stands at Emberpeak's washout (dawn_stage), where Episode 4 now opens, not in pk_inn.
+test('EP4_START: Lv 17 at 5,600 EXP, Episodes 1 to 3 done, three credits counters, key items, 2,400 gold, at the washout', () => {
   const g = newGameEp4('Quill', { slot: 2 });
-  assert.equal(g.map, 'pk_inn');
-  assert.deepEqual([g.pos.x, g.pos.y], [17, 7]);
-  assert.equal(EP4_START.mark, 'inn_bed');
+  assert.equal(g.map, 'emberpeak');
+  assert.deepEqual([g.pos.x, g.pos.y], [35, 15]);
+  assert.equal(EP4_START.mark, 'dawn_stage');
   assert.equal(g.autosaveSlot, 2);
   assert.equal(g.gold, 2400);
   assert.equal(g.chapter, 4);

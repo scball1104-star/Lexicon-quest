@@ -1,12 +1,7 @@
 // Field main menu (FF6 / Chrono Trigger): party panel on the left, commands on the right, gold/time box,
 // help bar. Sub-screens live in src/ui/screens/*. engine.pushAwait('menu', { page? }) resolves with
 // undefined when closed ({ quit: true } is never returned: Quit resets the engine to the title itself).
-//
-// Touch layout (W4b, W7): the ten commands go in TWO columns of five (column major: Items ... Status, then
-// Journal ... Quit), 30 px rows = 50 css px on the phone, so a thumb never has to aim. The party panel gives up 34
-// px to make room (its gauges are 34 px shorter), the gold/time box sits under the commands down to the screen
-// bottom (y 212) and also names the map, and the help line moves into the bottom of the party panel, which extends
-// to the same edge. Nothing is lost, nothing scrolls.
+// Both layouts, the touch one and the Map row (#97): docs/UI.md, the `menu` row.
 
 import { List, rowHeightFor, touchUi } from '../ui/list.js';
 import { drawWindow, drawIcon, drawDivider, WindowAnim } from '../ui/window.js';
@@ -20,6 +15,7 @@ import { knownSkills } from '../data/party.js';
 import { SKILLS } from '../data/skills.js';
 import { hasFlag } from '../game/state.js';
 import { vowStatus } from '../game/vows.js';
+import { ensurePack, packEnabled, packWanted } from '../game/packs.js';
 import { ItemsScreen } from '../ui/screens/items.js';
 import { SkillsScreen } from '../ui/screens/skills.js';
 import { EquipScreen } from '../ui/screens/equip.js';
@@ -38,6 +34,8 @@ const COMMANDS = [
   { id: 'save', label: 'Save', icon: 'quill' },
   { id: 'quit', label: 'Quit', icon: 'flee' },
 ];
+// #97: the worldmap pack's screen, once that pack is wanted
+const MAP_CMD = { id: 'map', label: 'Map', icon: 'focus', help: 'The world, and where you stand.' };
 
 export const PANEL = { x: 4, y: 4, w: 274, h: 178 };
 export const CMD = { x: 282, y: 4, w: 98, h: 122 };
@@ -60,12 +58,14 @@ export class MenuScene {
     this.anim.open(!!data.instant);
     if (!this.g) { this.dead = true; return; }
     this.touch = touchUi(e);
-    this.L = this.touch ? TOUCH_LAYOUT : { PANEL, CMD, INFO };
+    const cmds = this.cmds = packEnabled('worldmap') && packWanted('worldmap', this.g.flags) ? [...COMMANDS.slice(0, 6), MAP_CMD, ...COMMANDS.slice(6)] : COMMANDS;
+    const L = this.touch ? TOUCH_LAYOUT : { PANEL, CMD, INFO }, gr = cmds.length > 10 ? (this.touch ? 12 : 11) : 0;
+    this.L = { ...L, CMD: { ...L.CMD, h: L.CMD.h + gr }, INFO: { ...L.INFO, y: L.INFO.y + gr, h: L.INFO.h - gr } };
     const magic = this.g.party.some((m) => knownSkills(m).some((id) => SKILLS[id] && SKILLS[id].kind === 'magic'));
-    const items = COMMANDS.map((c) => ({ ...c, disabled: c.id === 'magic' && !magic }));
+    const items = cmds.map((c) => ({ ...c, disabled: c.id === 'magic' && !magic }));
     const { PANEL: P, CMD: C } = this.L;
     if (this.touch) {
-      const rows = TOUCH_CMD_ROWS, rowH = Math.floor((C.h - 12) / rows);
+      const rows = Math.max(TOUCH_CMD_ROWS, Math.ceil(items.length / 2)), rowH = Math.floor((C.h - 12) / rows);
       this.commands = new List({ x: C.x + 5, y: C.y + 6, w: C.w - 10, colW: Math.floor((C.w - 10) / 2), columns: 2, columnMajor: true, rows, rowH, items, index: data.index || 0, textX: 18, iconX: 3, cursorDx: 3 });
     } else {
       this.commands = new List({ x: C.x + 5, y: C.y + 6, w: C.w - 10, rowH: rowHeightFor(e, 11), rows: items.length, items, index: data.index || 0 });
@@ -81,9 +81,9 @@ export class MenuScene {
   get member() { return this.g.party[this.memberIndex] || this.g.party[0]; }
 
   openPage(page, data = {}) {
-    const cmd = COMMANDS.find((c) => c.id === page);
+    const cmd = this.cmds.find((c) => c.id === page);
     if (!cmd) return;
-    this.commands.moveTo(COMMANDS.indexOf(cmd), { silent: true });
+    this.commands.moveTo(this.cmds.indexOf(cmd), { silent: true });
     if (cmd.member) { this.memberIndex = data.member || 0; this.startScreen(cmd.id); }
     else this.run(cmd.id);
   }
@@ -106,6 +106,7 @@ export class MenuScene {
       case 'config': this.mode = 'busy'; e.pushAwait('config').then(() => { this.mode = 'commands'; }); break;
       case 'save': this.mode = 'busy'; ((e.cave && e.cave.menuSave(e, this.g)) || e.pushAwait('loadGame', { mode: 'save' })).then(() => { this.mode = 'commands'; }); break;
       case 'quit': this.quit(); break;
+      case 'map': this.mode = 'busy'; ensurePack('worldmap').then(() => (e.hasScene('worldmap') ? e.pushAwait('worldmap') : e.audio.sfx('buzzer'))).then(() => { this.mode = 'commands'; }); break;
       default: break;
     }
   }
@@ -174,6 +175,13 @@ export class MenuScene {
     const I = this.L.INFO;
     drawWindow(r, I.x, I.y, I.w, I.h);
     const x = I.x + 8, rx = I.x + I.w - 8;
+    const vow = vowStatus(g);
+    if (this.touch && I.h < 36) {   // #97
+      r.text(vow ? (vow.active ? vow.name : 'ended') : fmtTime(g.playtime), x, I.y + 5, { color: vow && vow.active ? 'cream' : 'gray' });
+      r.text(fmtGold(g.gold), rx, I.y + 5, { align: 'right', color: 'gold' });
+      r.text(this.mapTitle, x, I.y + 16, { color: 'gold' });
+      return;
+    }
     const letters = ['tess_letter_1_found', 'tess_letter_2_found', 'tess_letter_3_found'].filter((f) => hasFlag(g, f)).length;
     const quest = hasFlag(g, 'tess_quest_started');
     drawIcon(r, 'gold', x, I.y + 4);
@@ -185,7 +193,6 @@ export class MenuScene {
     };
     // H3 (docs/VOWS.md): the vow carried now takes one row: "Vow" and its name, or "ended" (dim) until the next rest.
     // A name too wide for the key and the gap drops the key (the color still says what it is).
-    const vow = vowStatus(g);
     const vowRow = (i) => {
       const v = vow.active ? vow.name : 'ended', color = vow.active ? 'cream' : 'dim';
       if (r.measure('Vow') + 6 + r.measure(v) <= I.w - 16) row(i, 'Vow', v, color);
@@ -202,8 +209,9 @@ export class MenuScene {
     const lines = [['Time', fmtTime(g.playtime)]];
     lines.push(quest ? ['Letters', `${letters}/3`] : ['Party', String(g.party.length)]);
     if (!vow) lines.push(['Chapter', roman(g.chapter || 1)]);
-    lines.forEach(([k, v], i) => row(i, k, v));
-    if (vow) vowRow(2);
+    const n = I.h < 50 ? 2 : 3;
+    lines.slice(0, vow ? n - 1 : n).forEach(([k, v], i) => row(i, k, v));
+    if (vow) vowRow(n - 1);
   }
 
   draw(r) {
@@ -216,7 +224,7 @@ export class MenuScene {
     drawWindow(r, P.x, P.y, P.w, P.h, { open: k });
     drawWindow(r, C.x, C.y, C.w, C.h, { open: k });
     drawWindow(r, I.x, I.y, I.w, I.h, { open: k });
-    const helpText = (this.mode !== 'busy' && HELP.menu[this.commands.item.id]) || '';
+    const helpText = (this.mode !== 'busy' && (HELP.menu[this.commands.item.id] || this.commands.item.help)) || '';
     if (!this.touch) drawHelpBar(r, helpText, { right: this.mapTitle, open: k });
     if (k < 1) return;
     this.g.party.forEach((m, i) => {

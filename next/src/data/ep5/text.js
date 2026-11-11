@@ -384,7 +384,7 @@ export const EP5_BATTLE_TEXT = {
 // (placeholder wording, Scott's or Stephen's to change: EPISODE5.md section 10.10).
 // ------------------------------------------------------------------------------------------------
 export const END_CARD_EP5 = { text: 'To be continued', sub: 'Episode 6 is not playable yet.', frames: 300, backdrop: 'ep5_dialog_keyart' };
-export const END_CARD_EP4_LIVE = { ...END_CARD_EP4, sub: 'Episode 5 begins in the morning.' };
+export const END_CARD_EP4_LIVE = { ...END_CARD_EP4, sub: 'Episode 5 begins at sea.' };
 export const EPISODE6_CARD = { text: 'Episode 6: The Skybound Isles', sub: 'Above the clouds, the first page waits.' };
 export const END_TITLE_EP5 = { text: 'End of Episode 5', sub: 'The Last Prophecy' };
 

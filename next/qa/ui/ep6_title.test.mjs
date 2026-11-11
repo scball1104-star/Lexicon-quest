@@ -55,7 +55,7 @@ test('live: shown once any base-game slot has ep5_complete, naming the newest; n
 test('the row text matches plan 10.5 and 5.3', () => {
   assert.equal(EP6_ROW_LABEL, 'Episode 6: new party');
   assert.equal(EP6_ROW_HELP, 'A ready party at Lv 25. Your own save stays under Continue.');
-  assert.equal(END_CARD_EP5_LIVE.sub, 'Episode 6 begins in the morning.');
+  assert.equal(END_CARD_EP5_LIVE.sub, 'Episode 6 begins that night.');   // issue #99
   assert.equal(END_CARD_EP5_LIVE.text, END_CARD_EP5.text);
   assert.equal(END_CARD_EP5_LIVE.backdrop, END_CARD_EP5.backdrop);
   for (const s of [EP6_ROW_LABEL, EP6_ROW_HELP, END_CARD_EP5_LIVE.sub]) assert.ok(!/[^\x20-\x7e]/.test(s) && s.length <= 60, `plain ASCII, short: ${s}`);
@@ -84,7 +84,7 @@ test('hooks: credits entry 6 only with text.js CREDITS_EP6; the Episode 5 end ca
     assert.equal(r.installed.includes('endcard5'), EP6_LIVE, 'the end card is left alone while EP6_LIVE is false');
     assert.equal(CREDITS_HANDOFF[6].flag, 'ep6_complete');
     if (!EP6_LIVE) assert.deepEqual(CREDITS_HANDOFF[5].endCard, END_CARD_EP5, 'off: unchanged');
-    assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.');
+    assert.equal(CREDITS_HANDOFF[5].endCard.sub, EP6_LIVE ? 'Episode 6 begins that night.' : 'Episode 6 is not playable yet.');
     assert.deepEqual(QUEST_EXT[0], ['ep6_started', Q6], 'Episode 6 is asked before Episode 5');
     assert.equal(globalThis.LQ_EP6, HOOKS);
     registerHooks(null, { text: { CREDITS_EP6: cards }, quests: { MAIN_QUEST_EP6: Q6 } });
@@ -111,10 +111,10 @@ test('LQ_DEBUG.newGameEp6 picks the run\'s own slot, readies every pack, refuses
     registerHooks(engine, {});
     assert.equal(typeof cmds.newGameEp6, 'function');
     const r = await cmds.newGameEp6('Ada');
-    assert.deepEqual(r, { map: 'ep5_sh_inn', slot: 1 });
+    assert.deepEqual(r, { map: 'ep5_sh_observatory', slot: 1 });   // issue #99: Episode 6 opens in the tower
     assert.equal(engine.game.autosaveSlot, 1);
     assert.equal(engine.game.chapter, 6);
-    assert.deepEqual(resets, [['field', { map: 'ep5_sh_inn', mark: 'inn_bed', dir: 'down' }]]);
+    assert.deepEqual(resets, [['field', { map: 'ep5_sh_observatory', mark: 'obs_stage6', dir: 'down' }]]);
     assert.ok(merged.music.saffron, 'the ep5 audio fragment reached this engine before the field');
     assert.ok(merged.packs && merged.packs.ep4 && merged.packs.ep5, 'the ep4 and ep5 sfx packs are declared on this engine');
     assert.equal(save.exportSlot(1), null, 'nothing written until the field autosaves');
@@ -136,7 +136,7 @@ test('LQ_EP6.start: every pack first, then the game, then the fade; it saves onl
   assert.ok(engine.audio.manifest.music.saffron, 'the ep5 fragment is in before the fade');
   assert.equal(typeof faded, 'function');
   faded();
-  assert.deepEqual(resets, [['field', { map: 'ep5_sh_inn', mark: 'inn_bed', dir: 'down' }]]);
+  assert.deepEqual(resets, [['field', { map: 'ep5_sh_observatory', mark: 'obs_stage6', dir: 'down' }]]);
   assert.equal(save.exportSlot(2), null);
   assert.ok(save.exportSlot(0), 'the other run is still there');
   assert.equal(newGameEp6('X').map, engine.game.map);

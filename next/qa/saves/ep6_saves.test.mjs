@@ -32,12 +32,13 @@ function ep5CreditsGame(name = 'Sol', slot = 0) {
   return g;
 }
 
-test('EP6_START: Lv 25 at 13,300 EXP, Episodes 1 to 5 done, five credits counters, key items, 3,600 gold, awake at ep5_sh_inn', async () => {
+// Issue #99 (2026-11-11): Episode 6 opens in the Armillary Tower at night; the quick start and the Episode 5 credits land there.
+test('EP6_START: Lv 25 at 13,300 EXP, Episodes 1 to 5 done, five credits counters, key items, 3,600 gold, in the Armillary Tower', async () => {
   await registerEp6();   // the ep5 pack's items (the Mask, the Compass, name_fragment_5) are registered first, as the quick start does
   const g = newGameEp6('Quill', { slot: 2 });
-  assert.equal(g.map, 'ep5_sh_inn');
-  assert.deepEqual([g.pos.x, g.pos.y], [17, 7]);
-  assert.equal(EP6_START.mark, 'inn_bed');
+  assert.equal(g.map, 'ep5_sh_observatory');
+  assert.deepEqual([g.pos.x, g.pos.y], [7, 8]);
+  assert.equal(EP6_START.mark, 'obs_stage6');
   assert.equal(g.autosaveSlot, 2);
   assert.equal(g.gold, 3600);
   assert.equal(g.chapter, 6);
@@ -90,7 +91,7 @@ test('every slot full: no quick start, the refusal only, and nothing written', (
   assert.equal(JSON.stringify([...storage._m.entries()].sort()), snap);
 });
 
-test('an Episode 5 credits save loads, rolls the Episode 5 credits with the unchanged end card, wakes at ep5_sh_inn, own slot only', async () => {
+test('an Episode 5 credits save loads, rolls the Episode 5 credits with the live end card, wakes in the Armillary Tower, own slot only', async () => {
   await registerEp6();   // the ep6 pack registered (as ?pack=ep6 would): with EP6_LIVE false it leaves entry 5's end card alone
   const { save, storage } = fresh();
   const g0 = ep5CreditsGame('Sol', 1);
@@ -100,19 +101,19 @@ test('an Episode 5 credits save loads, rolls the Episode 5 credits with the unch
   const has = (f) => !!g.flags[f];
   assert.equal(creditsPending(g, has), 5, 'the Episode 5 credits are due');
   const h = CREDITS_HANDOFF[5];
-  assert.equal(h.map, 'ep5_sh_inn');
-  assert.equal(h.mark, 'inn_bed');
+  assert.equal(h.map, EP6_LIVE ? 'ep5_sh_observatory' : 'ep5_sh_inn');
+  assert.equal(h.mark, EP6_LIVE ? 'obs_stage6' : 'inn_bed');
   if (!EP6_LIVE) assert.deepEqual(h.endCard, END_CARD_EP5, 'the Episode 5 end card is unchanged while EP6_LIVE is false');
-  assert.equal(h.endCard.sub, EP6_LIVE ? 'Episode 6 begins in the morning.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch (E6-integrate flipped it on the branch)');
+  assert.equal(h.endCard.sub, EP6_LIVE ? 'Episode 6 begins that night.' : 'Episode 6 is not playable yet.', 'the Episode 5 end card follows the switch (E6-integrate flipped it on the branch)');
   markCreditsRolled(g, 5);
-  setPosition(g, h.map, 17, 7, 'down');
+  setPosition(g, h.map, ...(EP6_LIVE ? [7, 8] : [17, 7]), 'down');
   assert.equal(creditsPending(g, has), 0, 'no Episode 6 credits entry is due');
   assert.equal(packsToAwait(g.flags).includes('ep6'), EP6_LIVE, 'the wake waits for the ep6 pack only while it is live');
   autosave(save, g);
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
-  assert.equal(save.load(1).map, 'ep5_sh_inn');
+  assert.equal(save.load(1).map, h.map);
   assert.equal(save.load(1).counters.credits5_rolled, 1);
-  assert.ok(!save.load(1).flags.ep6_started, 'nothing here runs ep6_morning (the field does, on the inn wake trigger)');
+  assert.ok(!save.load(1).flags.ep6_started, 'nothing here runs ep6_morning (the field does, on the tower wake trigger)');
 });
 
 test('an Episode 4 save (no ep5_complete) never wants the pack, even with the switch on', () => {

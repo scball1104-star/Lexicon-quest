@@ -11,6 +11,8 @@ import { NEXT, MAP_IDS_EP2, MAP_IDS_EP3, listMapIds, loadAll, loadMap, loadDb, v
 import { flowGrid, traceWater } from '../../tools/maps/quench.mjs';
 import { MAX_BODY } from '../../src/world/ep3/flow.js';
 import { EP3_MAPS_LISTED, EP3_ZONE_ORDER, ZONES } from '../../src/data/encounters.js';
+import { WALL_WALK, WALL_WAKE } from '../../src/data/maps/ep3/hollow_gate.js';
+import { EP3_TILES } from '../../src/data/maps/ep3/_open_tiles.js';
 
 const db = await loadDb();
 const maps = await loadAll();
@@ -105,7 +107,12 @@ test('Hollowmere: the east gate is chained with Episode 2 complete and opens onl
   const before = walk(core, db, { flags: ['ep1_complete', 'ep2_complete', 'nh_restored'] });
   const after = new Set(ep2.reachable);
   const GATE_CELLS = new Set(['42,25', '42,26', '42,27', '42,28']);   // the two gateposts and the chain stand there now
+  // issue #99: the east wall walk's parapets, inner curb and south face stand on Episode 2 grass and shore (its flags and
+  // stair are walkable, reached by the stair from the spur)
+  for (const [t, x, y] of WALL_WALK) if (EP3_TILES.tiles[t].collision === 'solid') GATE_CELLS.add(`${x},${y}`);
   for (const c of before.reachable) if (!GATE_CELLS.has(c)) assert.ok(after.has(c), `cell ${c} still reachable`);
+  for (const [t, x, y] of WALL_WALK) if (EP3_TILES.tiles[t].collision === 'none') assert.ok(after.has(`${x},${y}`), `wall walk ${t} at ${x},${y} reached`);
+  assert.ok(after.has(WALL_WAKE.join(',')), 'wall_wake, where Episode 3 opens, is reached');
   assert.deepEqual(before.unreached, ep2.unreached.filter((id) => byId(core, id)), 'the same Episode 2 events reached');
 });
 

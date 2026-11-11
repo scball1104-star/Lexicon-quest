@@ -6228,7 +6228,7 @@
   },
   {
    "name": "story_ep3_morning",
-   "note": "E3: ep3_morning, the Smith by the guest-room table, Bram reaching for the name (story)",
+   "note": "E3: ep3_morning on the east wall walk at dawn (issue #99), the Smith at the parapet, Bram reaching for the name (story)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
@@ -6958,7 +6958,7 @@
   },
   {
    "name": "story_ep4_morning",
-   "note": "E4: ep4_morning, Ada at the Coal Lantern hearth with the decree that will not dry (story)",
+   "note": "E4: ep4_morning at the washout at first light (issue #99), Ada with the decree that will not dry (story)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
@@ -7434,7 +7434,7 @@
   },
   {
    "name": "story_ep5_morning_letter",
-   "note": "E5: ep5_morning, the star letter close-up at the Floodwatch Inn: three names last night, two this morning (story)",
+   "note": "E5: ep5_morning, the star letter close-up on Yara's deck at night (issue #99): three names last night, two tonight (story)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
@@ -8463,7 +8463,7 @@
   },
   {
    "name": "story_ep6_morning_slip",
-   "note": "E6: ep6_morning, the boarding slip close-up in the Dune Lantern Rest: four seats, three of us (story)",
+   "note": "E6: ep6_morning, the boarding slip close-up in the Armillary Tower at night (issue #99): four seats, three of us (story)",
    "steps": [
     {
      "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
@@ -8489,6 +8489,172 @@
     {
      "assert": "LQ_DEBUG.scene() === \"dialog\"",
      "message": "story_ep6_morning_slip: Bram counts the seats"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "opening_ep3_wall",
+   "note": "Issue #99: Episode 3 opens on Hollowmere's east wall walk at dawn: Wren up the stair, the party on the wall (WORLD_MAP_PLAN 4)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Old fellow walked in at sunrise\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "opening_ep3_wall: Wren on the wall walk"
+    },
+    {
+     "assert": "(LQ_ENGINE.stack.find((s) => s.name === 'field') || {}).mapId === 'nameless_hollow'",
+     "message": "the opening plays on nameless_hollow"
+    }
+   ]
+  },
+  {
+   "name": "opening_ep3_glow",
+   "note": "Issue #99: the Smith turns to the far glow over Emberpeak along the top of the mere (the camera on emberpeak_glow)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp3')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGameEp3",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"It's the Warden\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "opening_ep3_glow: the camera on the glow"
+    },
+    {
+     "assert": "(LQ_ENGINE.stack.find((s) => s.name === 'field') || {}).mapId === 'nameless_hollow'",
+     "message": "the opening plays on nameless_hollow"
+    }
+   ]
+  },
+  {
+   "name": "opening_ep4_washout",
+   "note": "Issue #99: Episode 4 opens at Emberpeak's east-road washout at first light: Ada up the rope with the decree",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp4')",
+     "timeout": 30000
+    },
+    {
+     "call": "newGameEp4",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ]
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"First light at the washout\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "opening_ep4_washout: Ada at the washout"
+    },
+    {
+     "assert": "(LQ_ENGINE.stack.find((s) => s.name === 'field') || {}).mapId === 'emberpeak'",
+     "message": "the opening plays on emberpeak"
+    }
+   ],
+   "query": "&pack=ep4&ep=4"
+  },
+  {
+   "name": "opening_ep5_deck",
+   "note": "Issue #99: Episode 5 opens on Yara's deck at night, mid-crossing: the star letter read under the stars",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp5')",
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { (await import('./src/data/ep5/story.js')).GATE.live = true; return true; })()"
+    },
+    {
+     "call": "newGameEp5",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ],
+     "timeout": 60000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Whose is gone\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "opening_ep5_deck: Bram on the night deck"
+    },
+    {
+     "assert": "(LQ_ENGINE.stack.find((s) => s.name === 'field') || {}).mapId === 'ep5_ship'",
+     "message": "the opening plays on ep5_ship"
+    }
+   ],
+   "query": "&pack=ep4,ep5&ep=5"
+  },
+  {
+   "name": "opening_ep6_tower",
+   "note": "Issue #99: Episode 6 opens in the Armillary Tower at night: the grey bird lands on the great rings with the slip",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { (await import('./src/data/ep6/story.js')).GATE.live = true; return true; })()"
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"A small grey bird drops in\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "opening_ep6_tower: the bird on the rings"
+    },
+    {
+     "assert": "(LQ_ENGINE.stack.find((s) => s.name === 'field') || {}).mapId === 'ep5_sh_observatory'",
+     "message": "the opening plays on ep5_sh_observatory"
     }
    ],
    "query": "&pack=ep5,ep6&ep=6"
@@ -9539,6 +9705,858 @@
     }
    ],
    "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "ui_worldmap",
+   "note": "#97 world map, a save just after Episode 4 at Valewyn (still 1): four regions inked, the south a sketch",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 17,
+       "gold": 4210,
+       "map": "ep4_valewyn",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.here === 'valewyn' && s.regions.F === 'visited' && s.regions.S === 'heard' && s.regions.I === 'unknown'; })()",
+     "message": "Valewyn is here, the south is heard of, the Isles are blank"
+    }
+   ]
+  },
+  {
+   "name": "ui_worldmap_ep1",
+   "note": "#97 world map right after Episode 1: the valley inked, the Hollow and the west a sketch",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 9,
+       "gold": 4210,
+       "map": "willowmere",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.here === 'willowmere' && s.regions.V === 'visited' && s.regions.H === 'heard' && s.regions.E === 'unknown'; })()",
+     "message": "only the valley is inked"
+    }
+   ]
+  },
+  {
+   "name": "ui_worldmap_ep6",
+   "note": "#97 world map after Episode 6 at Zephyr Landing, a town chosen low on the map (the info box moves up)",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep6_zephyr",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "press": "up"
+    },
+    {
+     "frames": 30
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.regions.I === 'visited' && s.regions.N === 'heard' && s.towns.length >= 6; })()",
+     "message": "every region but the North inked"
+    }
+   ]
+  },
+  {
+   "name": "ui_menu_map",
+   "note": "#97 the field menu with the Map row (after Episode 1)",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "eval": "(async () => { const m = await import('./src/game/state.js'); LQ_DEBUG.newGame('Arden', { scene: 'stage', party: ['mira', 'bram'], level: 9, gold: 4210, map: 'willowmere', playtime: 41000, flags: Object.fromEntries(m.EP1_DONE_FLAGS.map((f) => [f, 1])), banner: false }); return true; })()"
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "frames": 5
+    },
+    {
+     "press": "menu"
+    },
+    {
+     "frames": 20
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'menu' && LQ_ENGINE.scene.commands.items.some((i) => i.id === 'map')",
+     "message": "the Map row is there"
+    },
+    {
+     "eval": "(() => { const m = LQ_ENGINE.scene.commands; m.moveTo(m.items.findIndex((i) => i.id === 'map')); return m.index; })()"
+    },
+    {
+     "frames": 6
+    }
+   ]
+  },
+  {
+   "name": "field_worldmap_stone",
+   "note": "#97 a map stone inside Willowmere's gate (lit when the party is near); confirm opens the map",
+   "devices": [
+    "desktop",
+    "phone"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap')",
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const m = await import('./src/game/state.js'); LQ_DEBUG.newGame('Arden', { scene: 'field', party: ['mira', 'bram'], level: 9, map: 'willowmere', pos: { x: 17, y: 27, dir: 'left' }, flags: Object.fromEntries(m.EP1_DONE_FLAGS.map((f) => [f, 1])), banner: false }); LQ_ENGINE.game.counters.credits_rolled = 1; return true; })()"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'field' && LQ_ENGINE.scene.entities && LQ_ENGINE.scene.entities.has('wm_stone_gate') && !LQ_ENGINE.scene.loading",
+     "timeout": 20000
+    },
+    {
+     "frames": 60
+    },
+    {
+     "snap": "stone"
+    },
+    {
+     "press": "left",
+     "frames": 2
+    },
+    {
+     "frames": 30
+    },
+    {
+     "press": "confirm"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap'",
+     "timeout": 8000
+    },
+    {
+     "frames": 30
+    }
+   ]
+  },
+  {
+   "name": "ui_worldmap_still",
+   "note": "#97 Reduce motion: the map snaps to the chosen town (no pan), the marker and the party stand still",
+   "devices": [
+    "desktop"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep6_zephyr",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.ox === 0",
+     "message": "Zephyr Landing needs no pan"
+    },
+    {
+     "press": "up"
+    },
+    {
+     "frames": 2
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.sel === 'saffron' && LQ_DEBUG.state().sceneState.ox === 40",
+     "message": "the view snapped to Saffron Haven at once"
+    }
+   ],
+   "settings": {
+    "reduceMotion": true
+   }
+  },
+  {
+   "name": "ui_worldmap_touch",
+   "note": "#97 touch: tap a label on the map to choose it, tap Back to close",
+   "devices": [
+    "phone"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 9,
+       "gold": 4210,
+       "map": "willowmere",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "tap": [
+      164,
+      84
+     ]
+    },
+    {
+     "frames": 6
+    },
+    {
+     "assert": "LQ_DEBUG.state().sceneState.sel === 'hollowmere'",
+     "message": "a tap on the Hollow's label chose it"
+    },
+    {
+     "snap": "chosen"
+    },
+    {
+     "tap": [
+      332,
+      78
+     ]
+    },
+    {
+     "frames": 10
+    },
+    {
+     "assert": "LQ_DEBUG.scene() !== 'worldmap'",
+     "message": "a tap on Back closed the map"
+    }
+   ]
+  },
+  {
+   "name": "story_xr_bess_spice",
+   "note": "World map wave 5 (#100): an errand. Bess at the Coal Lantern asks for desert spice, a later item for an earlier person (after Episode 5)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "pk_inn",
+      3,
+      6,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "assert": "!!globalThis.LQ_ERRANDS && LQ_ERRANDS.errandState(LQ_ENGINE.game, 'bess_spice') === 'open'",
+     "message": "story_xr_bess_spice: the errand is open after Episode 5"
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', 'xr_bess_spice_ask'); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"desert sells a spice\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_xr_bess_spice: Bess asks"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "field_xr_penny_cart",
+   "note": "World map wave 5 (#100): Penny's travelling cart at Zephyr Landing after Episode 6 (snap 'field'), and her grown stock (the shop)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp6')",
+     "timeout": 90000
+    },
+    {
+     "call": "newGameEp6",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 90000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; const { EP6_FLAGS } = await import('./src/data/ep6/flags.js'); const ks = Object.keys(EP6_FLAGS); for (const f of ks.slice(0, ks.indexOf('ep6_complete') + 1)) g.flags[f] = true; const { CREDITS_HANDOFF } = await import('./src/game/story.js'); for (const h of Object.values(CREDITS_HANDOFF)) g.counters[h.counter] = 1; const { BARKS } = await import('./src/data/text.js'); for (const k of Object.keys(BARKS)) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep6_zephyr",
+      19,
+      18,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'field' && LQ_ENGINE.scene.entities.get('penny_t') && !!LQ_ENGINE.scene.entities.get('penny_t').actor",
+     "message": "field_xr_penny_cart: Penny stands at her cart"
+    },
+    {
+     "snap": "field"
+    },
+    {
+     "eval": "(() => { LQ_ENGINE.push('shop', { shopId: 'travel_cart' }); return true; })()"
+    },
+    {
+     "frames": 60
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === 'shop'",
+     "message": "field_xr_penny_cart: her shop is open"
+    }
+   ],
+   "query": "&pack=ep5,ep6&ep=6"
+  },
+  {
+   "name": "ui_worldmap_errands",
+   "note": "#100 errand marks on the world map after Episode 6 at Valewyn: '!' bubbles at the givers, a '?' on the Flood Road (Nella's rope being fetched), Emberpeak chosen: '! 2 errands open.' in the info box",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep4_valewyn",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1,
+        "xr_nella_rope_started": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('ep4')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('ep4') && !!globalThis.LQ_ERRANDS",
+     "timeout": 30000
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; const i = s.list.items.findIndex((it) => it.id === 'emberpeak'); s.list.moveTo(i, { silent: true }); s.select('emberpeak'); return s.sel; })()"
+    },
+    {
+     "frames": 30
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.errandsOk && s.errands.emberpeak === '!' && s.errands.flood_road === '?' && s.errands.hollowmere === '!' && s.infoLines[0] === '! 2 errands open.'; })()",
+     "message": "the marks and the info line"
+    }
+   ]
+  },
+  {
+   "name": "ui_worldmap_penny",
+   "note": "#100 the world map after Episode 6 at Zephyr Landing: Penny's cart line in the info box, the givers' '!' bubbles",
+   "devices": [
+    "desktop",
+    "phone",
+    "portrait"
+   ],
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('config') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "stage",
+       "party": [
+        "mira",
+        "bram"
+       ],
+       "level": 29,
+       "gold": 4210,
+       "map": "ep6_zephyr",
+       "flags": {
+        "intro_done": 1,
+        "met_mael": 1,
+        "left_town": 1,
+        "archive_entered": 1,
+        "valley_arrived": 1,
+        "ep1_complete": 1,
+        "first_fight_done": 1,
+        "ep2_started": 1,
+        "east_road_arrived": 1,
+        "nh_arrived": 1,
+        "heard_crisis": 1,
+        "court_entered": 1,
+        "nh_restored": 1,
+        "ep2_complete": 1,
+        "ep3_started": 1,
+        "sand_road_arrived": 1,
+        "pk_arrived": 1,
+        "met_veyra": 1,
+        "foundry_entered": 1,
+        "ep3_complete": 1,
+        "ep4_started": 1,
+        "flood_road_arrived": 1,
+        "vw_arrived": 1,
+        "met_regent": 1,
+        "keep_entered": 1,
+        "ep4_complete": 1,
+        "ep5_started": 1,
+        "ship_boarded": 1,
+        "road_landed": 1,
+        "haven_arrived": 1,
+        "star_reading_done": 1,
+        "lab_entered": 1,
+        "ep5_complete": 1,
+        "ep6_started": 1,
+        "ep6_boarded": 1,
+        "airstair_arrived": 1,
+        "zephyr_arrived": 1,
+        "aeris_came": 1,
+        "library_reached": 1,
+        "ep6_complete": 1
+       },
+       "playtime": 41000,
+       "banner": false
+      }
+     ]
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('ep4')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('ep4') && !!globalThis.LQ_ERRANDS",
+     "timeout": 30000
+    },
+    {
+     "eval": "LQ_PACKS.ensurePack('worldmap')"
+    },
+    {
+     "waitFor": "LQ_PACKS.packReady('worldmap') && LQ_DEBUG.commands().includes('worldMap')",
+     "timeout": 30000
+    },
+    {
+     "call": "worldMap"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'worldmap' && LQ_DEBUG.state().sceneState.composed",
+     "timeout": 10000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const s = LQ_DEBUG.state().sceneState; return s.penny === 'zephyr' && s.sel === 'zephyr' && s.infoLines.includes(\"Penny's travelling cart is here.\") && Object.keys(s.bubbles).length >= 3; })()",
+     "message": "Penny's line and the bubbles"
+    }
+   ]
   }
  ]
 }

@@ -21,6 +21,7 @@ A local pre-ship step, not part of CI (`next/qa/run.mjs` does not run it). It ne
 | `title.py` | the tap gate, the Episode 4 row and its asks, `?ep=4`, name entry, the rotate card |
 | `boss.py` | the Inkbound Barrister, from the trigger to the field after the win |
 | `hunt.py` | what bots never do: mashing, keys held across changes, every list row, a shop, a wipe, Touch controls Off |
+| `worldmap.py` | world map travel (#103): Valewyn's stone to Willowmere and back by road, the arrival cell, music, autosave slot; the offline refusal |
 
 On touch the driver runs at 1x: a CDP touch takes about 100 ms to land, and at 2x that is the 18 frames of menu auto-repeat, so
 one press would walk two rows. That is the harness, not the game.

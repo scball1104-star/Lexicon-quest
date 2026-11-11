@@ -24,7 +24,10 @@ import { newGameEp5, EP5_START } from './start.js';
 import { mapsListed, isMissing, register as registerEp5 } from './index.js';
 
 /** The Episode 4 end card once Episode 5 is live (EPISODE5_PLAN 5.3). */
-export const END_CARD_EP4_LIVE = { ...END_CARD_EP4, sub: 'Episode 5 begins in the morning.' };
+export const END_CARD_EP4_LIVE = { ...END_CARD_EP4, sub: 'Episode 5 begins at sea.' };
+/** Where the Episode 4 credits wake the party while Episode 5 is live (issue #99), and where they did before. */
+export const OPENING5 = { map: 'ep5_ship', mark: 'deck_start' };
+export const EP4_WAKE_OFF = { map: 'ep4_vw_inn', mark: 'inn_bed' };
 export const EP5_ROW_LABEL = 'Episode 5: new party';
 export const EP5_ROW_HELP = 'A ready party at Lv 21. Your own save stays under Continue.';
 
@@ -160,6 +163,9 @@ export function register(engine, mods = {}) {
     if (card4Off === undefined) card4Off = CREDITS_HANDOFF[4].endCard;
     CREDITS_HANDOFF[4].endCard = (mods.text && mods.text.END_CARD_EP4_LIVE) || END_CARD_EP4_LIVE;
     installed.push('endcard4');
+    // issue #99: the Episode 4 credits wake the party aboard Yara's ship at night, not in the Floodwatch Inn
+    Object.assign(CREDITS_HANDOFF[4], OPENING5);
+    installed.push('opening5');
   }
   const q = mods.quests && mods.quests.MAIN_QUEST_EP5;
   if (q) { if (!QUEST_EXT.some(([f]) => f === 'ep5_started')) QUEST_EXT.unshift(['ep5_started', q]); installed.push('quest'); }
@@ -177,7 +183,7 @@ export function register(engine, mods = {}) {
 /** Tests: take the global hooks away again and put the Episode 4 end card back (the tables keep entry 5, as a loaded pack's do). */
 export function unregister() {
   if (globalThis.LQ_EP5 === HOOKS) delete globalThis.LQ_EP5;
-  if (card4Off !== undefined && CREDITS_HANDOFF[4]) CREDITS_HANDOFF[4].endCard = card4Off;
+  if (card4Off !== undefined && CREDITS_HANDOFF[4]) Object.assign(CREDITS_HANDOFF[4], { endCard: card4Off }, EP4_WAKE_OFF);
   card4Off = undefined;
   done = false;
 }

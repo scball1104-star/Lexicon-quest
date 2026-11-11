@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   PACKS, ensurePack, packReady, onPackReady, packWanted, packsToAwait, packForMap, packsForMap, awaitPacks, mergeTileFragment,
-  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST, storedAll, startPackWatch, refetchUsed,
+  resetPacks, setPackDefaults, packEnabled, FAIL_TOAST, storedAll, startPackWatch, refetchUsed, packState,
 } from '../../src/game/packs.js';
 
 const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -20,7 +20,7 @@ function mod() {
 }
 
 test('the real table: x1 and x2, the prefix rule, wanted(), the x1 switch is on and the x2 switch is off', () => {
-  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'ep4', 'ep5', 'ep6', 'tier']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09)
+  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'ep4', 'ep5', 'ep6', 'tier', 'worldmap']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09); worldmap: the world map (#97, 2026-11-11)
   assert.equal(PACKS.x1.prefix, 'x1_');
   assert.equal(PACKS.x2.audioPack, 'ep2');
   assert.deepEqual(PACKS.x1.touches, ['valley', 'willowmere', 'archive_f1', 'archive_f2', 'archive_f3']);
@@ -309,4 +309,105 @@ test('refetchUsed (issue #63): a failed fetch or match never rejects, and Node w
     match: async (h) => { if (h.endsWith('a.js')) throw new Error('boom'); return null; }, fetch: async () => { throw new Error('offline'); } });
   assert.equal(r.checked, 2);
   assert.deepEqual(await refetchUsed(), { checked: 0, fetched: 0 }, 'Node: no performance entries of the game, no caches');
+});
+
+// Issue #96 (WORLD_MAP_PLAN 5.2, EP8 13.5): a resume fetches every hard pack it needs at once; registration stays in order.
+const hardDef = (id, hard = true, on = true) => ({ entry: id, prefix: `${id}_`, assets: null, audioPack: null, hard, touches: [], wanted: () => true, enabled: () => on });
+function chain(t, fail = {}) {
+  const started = [], inited = [], gates = {};
+  const dep = (id) => { const ids = Object.keys(t).filter((k) => t[k].hard); const i = ids.indexOf(id); return i > 0 ? ids[i - 1] : null; };
+  const o = { table: t, quiet: true, warm: false, packFiles: null, retryMs: 20 };
+  // each entry is held until its gate opens (its download); its register() awaits the pack before it, as the ep4..ep6 entries do
+  o.importer = (p) => {
+    started.push(p);
+    if (fail[p] > 0) { fail[p]--; return Promise.reject(new Error(`${p}: network`)); }
+    return new Promise((ok) => { gates[p] = () => ok({ register: async () => {
+      const d = dep(p);
+      if (d) { const r = await ensurePack(d, o); if (!r.ok) throw new Error(`${d} did not load`); }
+      inited.push(p); return { id: p, loaded: [], skipped: [] };
+    } }); });
+  };
+  return { o, started, inited, gates };
+}
+const tick = (ms = 5) => new Promise((r) => setTimeout(r, ms));
+
+test('#96: the real table lists the hard packs in chain order (ep3, ep4, ep5, ep6), which the fetch-at-once rule reads', () => {
+  assert.deepEqual(Object.keys(PACKS).filter((id) => PACKS[id].hard), ['ep3', 'ep4', 'ep5', 'ep6']);
+});
+
+test('#96: one ensurePack of the last hard pack starts every hard pack above it at once, and they register in order', async () => {
+  resetPacks();
+  const t = { h1: hardDef('h1'), s1: hardDef('s1', false), h2: hardDef('h2'), h3: hardDef('h3'), s2: hardDef('s2', false) };
+  const c = chain(t);
+  const p3 = ensurePack('h3', c.o);
+  await tick();
+  assert.deepEqual([...c.started].sort(), ['h1', 'h2', 'h3'], 'all three downloads start on the one call; no side pack does');
+  assert.equal(c.started[0], 'h1', 'the first pack of the chain starts first');
+  c.gates.h3(); c.gates.h2();
+  await tick();
+  assert.deepEqual(c.inited, [], 'h3 and h2 arrived first: neither registers before h1');
+  assert.equal(packReady('h2'), false);
+  c.gates.h1();
+  const r = await p3;
+  assert.equal(r.ok, true, JSON.stringify(r));
+  assert.deepEqual(c.inited, ['h1', 'h2', 'h3'], 'registered in dependency order');
+  assert.deepEqual(c.started.length, 3, 'each entry imported once');
+  assert.ok(['h1', 'h2', 'h3'].every(packReady));
+  resetPacks();
+});
+
+test('#96: the first pack of a chain starts nothing else; a switched-off pack above is skipped, never imported', async () => {
+  resetPacks();
+  const t = { h1: hardDef('h1'), h2: hardDef('h2', true, false), h3: hardDef('h3') };
+  const c = chain({ h1: t.h1, h3: t.h3 });
+  c.o.table = t;
+  const p1 = ensurePack('h1', c.o);
+  await tick();
+  assert.deepEqual(c.started, ['h1'], 'nothing below h1 starts');
+  const p3 = ensurePack('h3', c.o);
+  await tick();
+  assert.deepEqual(c.started, ['h1', 'h3'], 'h2 is off: never imported');
+  c.gates.h1(); c.gates.h3();
+  assert.equal((await p1).ok, true); assert.equal((await p3).ok, true);
+  assert.deepEqual(c.inited, ['h1', 'h3']);
+  resetPacks();
+});
+
+test('#96: a bad connection on the first pack of the chain fails it quietly, and the retries bring every pack up in order', { timeout: 10000 }, async () => {
+  resetPacks();
+  const t = { h1: hardDef('h1'), h2: hardDef('h2'), h3: hardDef('h3') };
+  const c = chain(t, { h1: 1 });
+  const p3 = ensurePack('h3', c.o);
+  await tick();
+  assert.equal(packState('h1').last && packState('h1').last.ok, false, 'the first h1 download failed');
+  assert.deepEqual(c.inited, [], 'nothing registered past the failure');
+  // the retries (the next call and the automatic one after retryMs 20): open every gate as it appears
+  for (let i = 0; i < 200 && !['h1', 'h2', 'h3'].every(packReady); i++) { for (const g of Object.values(c.gates)) g(); await tick(10); }
+  assert.ok(['h1', 'h2', 'h3'].every(packReady), 'all three up after the retries');
+  assert.equal((await ensurePack('h3', c.o)).ok, true);
+  assert.deepEqual(c.inited, ['h1', 'h2', 'h3'], 'each registered once, in order');
+  void p3;
+  resetPacks();
+});
+
+test('#96: packs loading at once share one assets/pack_files.json fetch; a later load fetches it fresh', async () => {
+  resetPacks();
+  const t = { h1: hardDef('h1'), h2: hardDef('h2'), h3: hardDef('h3') };
+  const asked = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = (h) => { asked.push(String(h)); return Promise.resolve({ ok: true, json: async () => ({ h1: [], h2: [], h3: [] }) }); };
+  try {
+    const engine = { assets: { url: (p) => `http://lq.test/next/${p}`, base: 'http://lq.test/next/' } };
+    const o = { table: t, engine, quiet: true, warm: false, retryMs: 20, importer: async (p) => ({ register: () => ({ id: p, loaded: [], skipped: [] }) }) };
+    const r = await Promise.all([ensurePack('h3', o), ensurePack('h2', o)]);
+    assert.ok(r.every((x) => x.ok), JSON.stringify(r));
+    assert.ok(['h1', 'h2', 'h3'].every(packReady));
+    assert.deepEqual(asked, ['http://lq.test/next/assets/pack_files.json'], 'one fetch for the three packs');
+    resetPacks();
+    await ensurePack('h1', o);
+    assert.equal(asked.length, 2, 'not kept after it settled: the next load asks again');
+  } finally {
+    globalThis.fetch = real;
+    resetPacks();
+  }
 });

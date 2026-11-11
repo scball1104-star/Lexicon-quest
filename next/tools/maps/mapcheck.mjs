@@ -86,6 +86,11 @@ export async function loadDb() {
     }
   }
   const src = (p) => import(pathToFileURL(path.join(NEXT, 'src', 'data', p)).href);
+  // the ep3 pack's own tiles (the Episode 3 opening's wall walk and far glow, tools/art/tiles/ep3_wall.py): a generated module
+  try {
+    const { EP3_TILES } = await src('maps/ep3/_open_tiles.js');
+    tiles.tiles = { ...EP3_TILES.tiles, ...(tiles.tiles || {}) };
+  } catch (e) { /* not built yet */ }
   const npcs = await src('npcs.js');
   const enc = await src('encounters.js');
   const gstory = await src('../game/story.js');          // X1: the live tables (a pack's register() adds to them)
@@ -867,7 +872,8 @@ export const MAP_IDS_EP2 = ['east_road', 'nameless_hollow', 'nh_hall', 'nh_chape
 export const MAP_IDS_EP3 = ['sand_road', 'emberpeak', 'pk_inn', 'pk_shop', 'pk_smithy', 'pk_bellhouse', 'foundry_f1', 'foundry_f2',
   'foundry_f3', 'foundry_heart'];
 const EVENT_TYPES = new Set(['npc', 'actor', 'door', 'chest', 'sign', 'book', 'object', 'trigger', 'enemy', 'switch', 'plate',
-  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor', 'spout', 'sluice', 'basin']);
+  'block', 'gate', 'locked_door', 'shelf', 'brazier', 'font', 'save', 'ferry', 'light', 'pit', 'pot', 'beam', 'mirror', 'receptor', 'spout', 'sluice', 'basin',
+  'opening_stage']);   // issue #99: the ep3 pack's episode-opening helper (src/data/maps/ep3/_opening.js), no cell of its own
 const GATE_SPRITE_IDS = ['door_locked', 'door_key', 'door_boss', 'door_glass', 'door_glass_key', 'door_vow', 'door_throne', 'x1_gate_culvert', 'x1_gate_barrow',
   'hot_grate', 'ore_lift', 'bell_gate', 'door_crucible'];
 const DOOR_KINDS = new Set(['door', 'stairs', 'mirror', 'fog', 'lift']);

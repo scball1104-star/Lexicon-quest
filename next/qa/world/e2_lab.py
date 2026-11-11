@@ -273,8 +273,10 @@ def case_plumbing(lab):
     lab.run('LQ_DEBUG.pop()')
     lab.page.wait_for_function(f'(() => {{ const f = {FIELD}; return LQ_DEBUG.scene() === "field" && f && f.mapId !== "hero_home" && !f.loading && !LQ_DEBUG.state().transition; }})()', timeout=30000, polling=50)
     where = lab.run(field_js('return [f.mapId, f.leader.tx, f.leader.ty, f.lighting.tintName];'))
-    print('  woke on', where, '(nh_inn, or the test town while nh_inn is not written)')
-    check(where[0] in ('nh_inn', '_testtown'), 'the Episode 2 handoff reloads at nh_inn inn_bed')
+    print('  woke on', where, '(the east wall walk; nh_inn without the ep3 pack; the test town while nh_inn is not written)')
+    # issue #99: with the ep3 pack the handoff wakes the party on Hollowmere's east wall walk (wall_wake), where Episode 3 opens
+    check(where[0] in ('nameless_hollow', 'nh_inn', '_testtown') and (where[0] != 'nameless_hollow' or where[1:3] == [41, 21]),
+          'the Episode 2 handoff reloads on the wall walk (or at nh_inn inn_bed without the ep3 pack)')
 
 
 def case_f1(lab):

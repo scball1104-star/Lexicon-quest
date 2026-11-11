@@ -24,10 +24,11 @@ export const EP4_LOADOUT = { source: 'foundry_heart', plus: { bram: { axe: 'firs
 
 /**
  * Lv 17 at 5,600 EXP, every Episode 1 to 3 main flag plus ep3_complete, the three credits counters, the Episode 1 to 3 key
- * items, 2,400 gold, awake in the Signless Inn at `inn_bed` (pk_inn (17, 7)) so ep4_morning runs (while EP4_LIVE).
+ * items, 2,400 gold, standing at Emberpeak's washout at `dawn_stage` (emberpeak (35, 15), issue #99) so ep4_morning runs
+ * (while EP4_LIVE).
  */
 export const EP4_START = {
-  level: 17, exp: 5600, gold: 2400, map: 'pk_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
+  level: 17, exp: 5600, gold: 2400, map: 'emberpeak', mark: 'dawn_stage', pos: { x: 35, y: 15, dir: 'right' },
   items: { potion: 6, hi_potion: 6, hi_ether: 4, phoenix_feather: 3, silver_salve: 2,
     name_fragment_1: 1, name_fragment_2: 1, name_fragment_3: 1, lantern_of_recall: 1, mirror_sigil: 1 },
   counters: ['credits_rolled', 'credits2_rolled', 'credits3_rolled'],

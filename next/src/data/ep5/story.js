@@ -80,22 +80,26 @@ export const TIPS = {
 // Act I: Valewyn, the letter that lost a name
 // ================================================================================================
 
-// 1. ep4_vw_inn, on enter after the Episode 4 credits (the pack patch's ep5_wake trigger checks credits4_rolled). Six
-// boxes, the letter's close-up by about 0:20, control by about 0:35. Yara is a scene spawn at the long table. Gives
-// star_letter. Sets ep5_morning_done, ep5_started.
-// A save made in the street comes in by the front door: the scene then plays in the taproom on its own marks (the stair up is
-// a door, so the guest-room marks have no path). s.leaderAt is the pack's (field/events.js attach); without it, the guest room.
+// 1. ep5_ship, on deck at night mid-crossing (issue #99, WORLD_MAP_PLAN 4): the Episode 4 credits and the quick start put
+// the party aboard at deck_start, and the map's ep5_wake enter trigger (before ship_enter) runs this; the Floodwatch Inn (an
+// old save's wake room, the pack patch's ep5_wake) moves the party aboard first. Six boxes, the letter's close-up by about
+// 0:20. Yara is a scene spawn by the rail; she goes back to the wheel, where ship_night spawns her. Gives star_letter. Sets
+// ep5_morning_done, ep5_started and ship_boarded (the crossing's own scenes follow: ship_night, ship_bram, ship_fight).
 async function ep5_morning(s) {
-  const at = 'leaderAt' in s ? s.leaderAt() : null;
-  const m = at && at[0] < 13 ? (k) => `${k}_tap` : (k) => k;
-  await spawnYara(s, m('yara_table'), 'down');
+  if (typeof s.mapId === 'string' && s.mapId !== 'ep5_ship') {
+    await s.fade('out', 30);
+    s.warp('ep5_ship', 5, 7, 'right');
+    return;
+  }
+  if ('openingTint' in s) await s.openingTint('sea_night');
+  await spawnYara(s, 'yara_deck', 'right');
   await s.fade('in', 40);
-  await s.walk('hero', m('inn_stage'));
-  await all(s.walk('mira', m('mira_window')), s.walk('bram', m('inn_stage_b')));
-  await s.camera.panTo(m('mira_window'), 20);
+  await s.walk('hero', 'deck_stage');
+  await all(s.walk('mira', 'mira_rail'), s.walk('bram', 'deck_stage_b'));
+  await s.camera.panTo('mira_rail', 20);
   const open = await page(s, 'ep5_letter', 'blank');
   await say(s, 'mira', 'Star ink. It only reads in the dark.');
-  await say(s, 'mira', 'Last night it had three names. This morning, two.');
+  await say(s, 'mira', 'Last night it had three names. Tonight, two.');
   await unpage(s, open);
   await s.music(null);
   await say(s, 'bram', 'Whose is gone?');
@@ -104,14 +108,17 @@ async function ep5_morning(s) {
   await s.emote('hero', '...');
   await s.wait(30);
   await s.give(REWARDS_EP5.letter.item, REWARDS_EP5.letter.qty);   // Mira folds the letter away
-  await s.music('valewyn');
+  await s.music('mystery');
   await s.face('yara_t', 'mira');
-  await say(s, 'yara_t', 'Sel wrote it. She reads names in the sky. She said come before the last night. We sail at dusk.');
+  await say(s, 'yara_t', 'Sel wrote it. She reads names in the sky. She said come before the last night. We raise the coast at dawn.');
   await say(s, 'bram', 'Before the last night of what?');
   await say(s, 'yara_t', "She didn't say. Sel never says the end of things.");
+  await s.walk('yara_t', 'yara_wheel');
+  await s.despawn('yara_t');
   await s.camera.follow('hero');
   await s.setFlag('ep5_morning_done');
   await s.setFlag('ep5_started');
+  await s.setFlag('ship_boarded');
 }
 
 // 3. ep4_valewyn, the berth object ship_berth at the south landing (if: ep5_started). Two boxes, then the dusk the scene

@@ -344,15 +344,20 @@ test('guards: nothing in Episode 3 is reachable with EP3_LIVE false, and nothing
   assert.deepEqual(SCENE_CONDITIONS.ep3_morning, { if: 'ep2_complete', ifNot: 'ep3_morning_done', live: true });
 });
 
-test('ep3_morning words its first look at the Smith for where it plays: the inn by the hearth, the street by the inn wall', async () => {
-  const look = async (mapId) => (await runOnce(scenes.ep3_morning, { flags: EP2_DONE, branchFlags: false, mapId })).log
-    .filter((e) => e.op === 'say' && e.args[0] == null).map((e) => e.args[1]).find((t) => /old man grey with road dust/.test(t));
-  const inn = await look('nh_inn'), out = await look('nameless_hollow');
-  assert.match(inn, /^By the guest-room wall sits/);
-  assert.match(out, /^Against the inn wall sits/);
-  assert.ok(!/hearth/.test(out), 'nothing indoors on the street');
+// Issue #99 (2026-11-11): the morning plays on Hollowmere's east wall walk at dawn, not in the inn. It used to word its first
+// look at the Smith for the inn or the street; now there is one place, and every other arrival is moved there first.
+test('ep3_morning plays on the east wall walk; from the inn it only moves the party up to the wall', async () => {
+  const run = (mapId) => runOnce(scenes.ep3_morning, { flags: EP2_DONE, branchFlags: false, mapId });
+  const wall = await run('nameless_hollow');
+  const look = wall.log.filter((e) => e.op === 'say' && e.args[0] == null).map((e) => e.args[1]).find((t) => /old man grey with road dust/.test(t));
+  assert.match(look, /^Against the parapet sits/);
+  assert.ok(wall.log.some((e) => e.op === 'camera.panTo' && e.args[0] === 'emberpeak_glow'), 'the Smith looks at the glow');
   const { wrap, BOX_COLS } = await import('../../src/data/story/dialogue.js');
-  for (const t of [inn, out]) { assert.ok(wrap(t, BOX_COLS).length <= 3, t); assert.ok(/^[ -~]+$/.test(t) && !t.includes(String.fromCharCode(0x2014))); }
+  assert.ok(wrap(look, BOX_COLS).length <= 3, look); assert.ok(/^[ -~]+$/.test(look) && !look.includes(String.fromCharCode(0x2014)));
+  const inn = await run('nh_inn');
+  assert.deepEqual(inn.log.filter((e) => !['lockInput', 'unlockInput', 'hasFlag'].includes(e.op)).map((e) => e.op), ['fade', 'warp']);
+  assert.deepEqual(inn.log.find((e) => e.op === 'warp').args, ['nameless_hollow', 41, 21, 'up'], 'to wall_wake');
+  assert.ok(!inn.log.some((e) => e.op === 'setFlag'), 'the move sets nothing: the morning plays on arrival');
 });
 
 test('the teaching fight: unavoidable, Heat cured by ice or Break without signage, a loss sets nothing', async () => {
