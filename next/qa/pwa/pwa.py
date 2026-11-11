@@ -5,20 +5,27 @@ Serves the REPO ROOT (so ../assets/... resolves) on a free port and drives headl
   1. loading   a fresh visit throttled to 10 Mbps / 40 ms (docs/PWA.md budget). Captures the loading screen at
                0 %, 50 % and 100 % (the "Tap or press any key" prompt) to qa/pwa/out/<device>-loading-<pct>.png and
                measures time to the first frame, time to the tap prompt and the bytes downloaded by then.
-  2. offline   one online visit (service worker installs and precaches), then the context goes offline and the
-               page is reloaded: the shell, scenes and art must come from the worker and reach the title.
+  2. offline   one online visit (service worker installs and precaches), then the network is really cut (_offline.py:
+               the HTTP cache is cleared, the context goes offline AND the local server drops every request, since
+               set_offline alone lets the worker's own fetches through) and the page is reloaded: the shell, scenes and
+               art must come from the worker and reach the title, and an uncacheable probe must get the worker's 503.
   3. retry     a blocked critical asset shows the retry prompt (qa/pwa/out/desktop-loading-error.png); a press recovers.
   4. update    the update flow with two versions of a generated sw.js (src/core/swUpdate.js): an idle title applies and reloads once;
                a game in progress never reloads and its saves do not change, the title applies it later; a refresh hands over at
                the loading screen; two tabs never reload, closing one lets the title apply; the loop guard holds; stills in qa/out/polish.
   5. debug     ?debug=1 runs must never install a worker (shots.py and every QA harness rely on this).
   6. packoffline  XP-packs: a visit with ?pack=x1,x2 loads both expansion packs (forced on while their switches are off), the
-               worker's runtime cache ends up holding every file in assets/pack_files.json, and after going offline a
-               reload still brings both packs up (ready) from that cache. The pack files were never precached.
+               worker's runtime cache ends up holding every file in assets/pack_files.json, and after the same real cut a
+               reload still brings both packs up (ready) from that cache, and the probe gets 503. The pack files were never
+               precached.
 
   python next/qa/pwa/pwa.py                  all three checks
   python next/qa/pwa/pwa.py --only loading   or: retry, offline, update, debug, packoffline (comma list)
   python next/qa/pwa/pwa.py --mbps 10        throttle for check 1 (0 = unthrottled)
+  python next/qa/pwa/pwa.py --only offline,packoffline --sabotage
+                                             proves the two offline checks can fail: right before the cut, offline deletes the
+                                             runtime cache (the title art refetchUsed put there) and packoffline deletes the pack
+                                             files from it. Both must then FAIL (the run prints a SABOTAGE: line and exits 1).
 
 Writes qa/pwa/out/pwa-report.json (timings and the bytes table). Exit code 1 on any failed check.
 """
@@ -34,6 +41,9 @@ import threading
 import time
 import urllib.parse
 from urllib.parse import urlparse
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import _offline  # noqa: E402  the real network cut (shared with offline_reload.py)
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 NEXT = ROOT / 'next'
@@ -267,6 +277,9 @@ def poll(page, js, timeout=45, step=0.25):
     raise TimeoutError('timed out waiting for: ' + js[:90])
 
 
+SABOTAGE = {'on': False}   # --sabotage: delete what the offline checks need right before the cut, so they must FAIL
+
+
 def check_offline(browser, base, report):
     dev = DEVICES['desktop']
     ctx = new_context(browser, dev)
@@ -284,10 +297,18 @@ def check_offline(browser, base, report):
     poll(page, 'async () => (await caches.keys()).some((n) => n.startsWith("lq-next-shell"))')
     cache_names = page.evaluate('caches.keys()')
     cached = page.evaluate('caches.open(%s).then(c => c.keys()).then(k => k.length)' % json.dumps(next(n for n in cache_names if n.startswith('lq-next-shell'))))
-    ctx.set_offline(True)
-    page.reload(wait_until='load')
+    # Issue #63: this first visit loaded the title art before the worker took control; packs.js refetchUsed() fetches it again
+    # through the worker once the page is controlled. Cut before that finishes and the real cut finds ../assets/art/
+    # environments.webp in no cache (set_offline alone hid this: the worker fetched it from the server). Same wait as
+    # offline_reload.py --first-visit.
+    refetch = poll(page, "() => { const P = window.LQ_PACKS; if (P && !P.refetchState) return { state: 'absent' };"
+                         " const r = P && P.refetchState(); return r && r.state === 'done' ? r : null; }", timeout=60)
+    sabotaged = page.evaluate(_offline.DROP_CACHES_JS, 'lq-next-runtime') if SABOTAGE['on'] else None
+    _offline.cut(ctx, page)
     ok = True
+    probe = None
     try:
+        page.reload(wait_until='load')
         page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
         info = page.evaluate("""() => ({
           controlled: !!navigator.serviceWorker.controller,
@@ -300,14 +321,24 @@ def check_offline(browser, base, report):
         page.wait_for_timeout(600)
         info['scene'] = page.evaluate('window.LQ_ENGINE.scene.name')
         page.screenshot(path=str(OUT / 'desktop-offline-title.png'))
+        probe = _offline.probe(page)
     except Exception as e:  # noqa: BLE001
         ok = False
-        info = {'error': str(e)}
+        info = {'error': str(e).splitlines()[0][:300]}
     if ok and (not info['controlled'] or info['critical'] or info['missing'] or info['scene'] == '_boot'):
         ok = False
+    if ok and not _offline.probe_ok(probe):
+        ok = False
+        info['cut'] = f'network not really cut: the probe answered {probe} (want 503 from the worker)'
+    refused_list = sorted(set(_offline.Cut.refused))
+    refused = len(_offline.Cut.refused)
     ctx.close()
-    report['offline'] = {'ok': ok and not errors, 'scope': scope, 'precached_entries': cached, 'info': info, 'errors': errors}
+    _offline.restore()
+    report['offline'] = {'ok': ok and not errors, 'scope': scope, 'precached_entries': cached, 'info': info, 'errors': errors,
+                         'refetch': refetch, 'probe': probe, 'refused_at_cut': refused, 'refused': refused_list, 'sabotaged': sabotaged}
     print(f"[offline] scope {scope}, {cached} cached entries, offline reload -> {info} {'ok' if ok and not errors else 'FAIL'}")
+    print(f"[offline] refetchUsed {refetch}; real cut: probe {probe}, {refused} requests refused by the server"
+          + (f"; SABOTAGE deleted the caches {sabotaged}" if SABOTAGE['on'] else ''))
     for e in errors:
         print('   ', e)
     return ok and not errors
@@ -339,23 +370,35 @@ def check_packoffline(browser, base, report):
     except TimeoutError:
         cached = 0
     shell = page.evaluate(r"async () => { const names = await caches.keys(); const n = names.find(x => x.startsWith('lq-next-shell')); if (!n) return -1; const c = await caches.open(n); const keys = (await c.keys()).map(r => new URL(r.url).pathname); return keys.filter(k => /\/next\/src\/data\/x[12]\/(?!live)/.test(k) || /\/x[12]_manifest/.test(k)).length; }")
-    ctx.set_offline(True)
-    page.reload(wait_until='load')
+    sabotaged = page.evaluate(_offline.DROP_ENTRIES_JS, ['lq-next-runtime-v1', want]) if SABOTAGE['on'] else None
+    _offline.cut(ctx, page)
     ok = cached == len(want) and shell == 0
     info = {}
+    probe = None
     try:
+        page.reload(wait_until='load')
         page.wait_for_function('window.LQ_ENGINE && window.LQ_ENGINE.bootScene && window.LQ_ENGINE.bootScene.waiting', timeout=60000)
         page.keyboard.press('Enter')
         page.wait_for_function('window.LQ_ENGINE.scene && window.LQ_ENGINE.scene.name !== "_boot"', timeout=60000)
         poll(page, ready_js, timeout=30)
         info = page.evaluate("(ids) => ({ ready: ids.every((i) => window.LQ_PACKS.packReady(i)), controlled: !!navigator.serviceWorker.controller })", ids)
         ok = ok and info['controlled'] and info['ready']
+        probe = _offline.probe(page)
     except Exception as e:  # noqa: BLE001
         ok = False
-        info = {'error': str(e)}
+        info = {'error': str(e).splitlines()[0][:300]}
+    if ok and not _offline.probe_ok(probe):
+        ok = False
+        info['cut'] = f'network not really cut: the probe answered {probe} (want 503 from the worker)'
+    refused_list = sorted(set(_offline.Cut.refused))
+    refused = len(_offline.Cut.refused)
     ctx.close()
-    report['packoffline'] = {'ok': ok and not errors, 'files': len(want), 'runtime_cached': cached, 'in_shell_cache': shell, 'online': online_state, 'offline': info, 'errors': errors}
+    _offline.restore()
+    report['packoffline'] = {'ok': ok and not errors, 'files': len(want), 'runtime_cached': cached, 'in_shell_cache': shell, 'online': online_state, 'offline': info, 'errors': errors,
+                             'probe': probe, 'refused_at_cut': refused, 'refused': refused_list, 'sabotaged': sabotaged}
     print(f"[packoffline] {len(want)} pack files, {cached} in the runtime cache, {shell} in the shell cache; ready online {bool(ready)}; offline reload -> {info} {'ok' if ok and not errors else 'FAIL'}")
+    print(f"[packoffline] real cut: probe {probe}, {refused} requests refused by the server"
+          + (f"; SABOTAGE deleted {sabotaged} pack entries from the runtime cache" if SABOTAGE['on'] else ''))
     for e in errors:
         print('   ', e)
     return ok and not errors
@@ -649,15 +692,18 @@ def main():
     ap.add_argument('--mbps', type=float, default=10.0)
     ap.add_argument('--devices', default='desktop,phone', help='devices for the loading check')
     ap.add_argument('--timeout', type=int, default=420)
+    ap.add_argument('--sabotage', action='store_true', help='delete what offline / packoffline need before the cut: both must FAIL')
     args = ap.parse_args()
     only = {x.strip() for x in args.only.split(',') if x.strip()}
+    SABOTAGE['on'] = args.sabotage
     OUT.mkdir(parents=True, exist_ok=True)
     t = threading.Timer(args.timeout, lambda: (print('FAIL: pwa.py overall timeout', flush=True), os._exit(3)))
     t.daemon = True
     t.start()
+    _offline.install_local_cut(Handler)   # this module's own Handler: run as a script it is __main__.Handler
     server = start_server()
     base = f'http://127.0.0.1:{server.server_port}'
-    report = {'base': base}
+    report = {'base': base, 'sabotage': args.sabotage}
     results = []
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
@@ -678,6 +724,10 @@ def main():
         browser.close()
     (OUT / 'pwa-report.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     print('PWA checks:', 'all passed' if all(results) else 'FAILED')
+    if args.sabotage:
+        hit = {k: report[k]['ok'] for k in ('offline', 'packoffline') if k in report}
+        print('SABOTAGE:', 'the sabotaged checks FAILED, as they must' if hit and not any(hit.values())
+              else f'a sabotaged check still PASSED, so it cannot see a cache miss: {hit}')
     sys.exit(0 if all(results) else 1)
 
 

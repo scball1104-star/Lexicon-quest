@@ -10,7 +10,8 @@
      hits after set_offline), so a worker that fell through to the network would pass. So the cut is real as well: locally
      the server drops every request with no answer (and lists them); with --live the browser runs through a local CONNECT
      tunnel (TLS bytes passed through untouched) that closes every tunnel and refuses new ones. A probe for a pack file no
-     cache can hold must come back 503 from the worker, which proves the worker saw no network.
+     cache can hold must come back 503 from the worker, which proves the worker saw no network. The cut lives in
+     _offline.py, shared with pwa.py check_offline and check_packoffline.
      PASS when: the loading bar reaches the tap prompt and the title draws (canvas not blank); zero page errors and zero
      console errors; no missing assets; the page is still controlled and its one shell cache is named after the
      SHELL_VERSION in sw.js; ensurePack('ep6') resolves ok from the cache; no shell or ep6 request failed. Every failed
@@ -32,9 +33,6 @@ Writes next/qa/pwa/out/offline-reload{,-live}.json and offline-reload-{online,of
 """
 import argparse
 import io
-import select
-import socket
-import socketserver
 import json
 import os
 import pathlib
@@ -52,6 +50,8 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(NEXT / 'qa' / 'world'))
 import pwa       # noqa: E402  the same gzip server the other PWA checks use
 import fieldlab  # noqa: E402  GPU_ARGS / GPU_JS
+import _offline  # noqa: E402  the real network cut, shared with pwa.py check_offline / check_packoffline
+from _offline import Cut, Tunnel, PROBE_JS  # noqa: E402
 
 LIVE = 'https://scball1104-star.github.io/Lexicon-quest'
 OUT = HERE / 'out'
@@ -76,94 +76,6 @@ COVER_JS = """async (lists) => { const c = await caches.open('%s');
 ENSURE_JS = """async () => { const P = window.LQ_PACKS; if (!P) return { error: 'no LQ_PACKS' };
   const r = await Promise.race([P.ensurePack('ep6'), new Promise((ok) => setTimeout(() => ok({ timeout: true }), 30000))]);
   return { result: r, ready: P.packReady('ep6'), state: P.packState('ep6') }; }"""
-
-
-PROBE_JS = """async () => { const u = new URL('assets/ui/ep6_offline_probe_' + Date.now() + '.json', location.href).href;
-  try { const r = await fetch(u, { cache: 'no-store' }); return { status: r.status, sw: !!navigator.serviceWorker.controller }; }
-  catch (e) { return { status: 'fetch failed: ' + e, sw: !!navigator.serviceWorker.controller }; } }"""
-
-
-class Cut:
-    """The network switch. offline=True makes the local server refuse and the tunnel close; refused lists what tried."""
-    offline = False
-    refused = []
-
-
-def install_local_cut():
-    """Wrap pwa.Handler.do_GET: once Cut.offline, every request (keep-alive sockets included) is dropped with no answer."""
-    orig = pwa.Handler.do_GET
-
-    def do_get(self):
-        if Cut.offline:
-            Cut.refused.append(self.path)
-            self.close_connection = True
-            return                      # no status line: the browser sees a network error (ERR_EMPTY_RESPONSE)
-        return orig(self)
-    pwa.Handler.do_GET = do_get
-
-
-class Tunnel(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    """A CONNECT-only proxy on 127.0.0.1 for --live: passes TLS bytes through untouched; cut() closes every tunnel."""
-    daemon_threads = True
-    allow_reuse_address = True
-
-    def __init__(self):
-        self.socks = set()
-        self.lock = threading.Lock()
-        super().__init__(('127.0.0.1', 0), TunnelHandler)
-
-    def cut(self):
-        Cut.offline = True
-        with self.lock:
-            for sk in list(self.socks):
-                try:
-                    sk.close()
-                except OSError:
-                    pass
-            self.socks.clear()
-
-
-class TunnelHandler(socketserver.BaseRequestHandler):
-    def handle(self):
-        c = self.request
-        up = None
-        c.settimeout(20)
-        try:
-            head = b''
-            while b'\r\n\r\n' not in head and len(head) < 8192:
-                chunk = c.recv(4096)
-                if not chunk:
-                    return
-                head += chunk
-            line = head.split(b'\r\n', 1)[0].decode('latin1')
-            parts = line.split()
-            if Cut.offline or len(parts) < 2 or parts[0] != 'CONNECT':
-                Cut.refused.append(line)
-                return
-            host, port = parts[1].rsplit(':', 1)
-            up = socket.create_connection((host, int(port)), timeout=20)
-            with self.server.lock:
-                self.server.socks.update((c, up))
-            c.sendall(b'HTTP/1.1 200 Connection Established\r\n\r\n')
-            c.settimeout(None)
-            up.settimeout(None)
-            pair = {c: up, up: c}
-            while not Cut.offline:
-                r, _, _ = select.select(list(pair), [], [], 1.0)
-                for sk in r:
-                    data = sk.recv(65536)
-                    if not data:
-                        return
-                    pair[sk].sendall(data)
-        except (OSError, ValueError):
-            return
-        finally:
-            for sk in (c, up):
-                if sk is not None:
-                    try:
-                        sk.close()
-                    except OSError:
-                        pass
 
 
 def log(*a):
@@ -283,15 +195,8 @@ def run(args, base, disk_version, want):
         # ---- 3. offline, reload
         # The browser's HTTP cache goes too (Cache Storage stays): GitHub Pages answers with max-age=600, so for ten minutes
         # a worker cache miss is still served from the HTTP cache offline. A player back the next day has no such help.
-        cdp = ctx.new_cdp_session(page)
-        cdp.send('Network.clearBrowserCache')
-        cdp.detach()
         phase['now'] = 'offline'
-        ctx.set_offline(True)
-        if args.tunnel:
-            args.tunnel.cut()
-        else:
-            Cut.offline = True
+        _offline.cut(ctx, page, args.tunnel)
         t1 = time.time()
         page.reload(wait_until='load', timeout=60000)
         st = to_prompt_then_title(page, 60)
@@ -326,11 +231,11 @@ def split_expected(res):
     keep_f = []
     for f in res['failed_requests']['offline']:
         u = f.split(' (')[0]
-        (exp if SW_SCRIPT.search(u) or '/ep6_offline_probe_' in u else keep_f).append(f)
+        (exp if SW_SCRIPT.search(u) or _offline.PROBE_MARK in u else keep_f).append(f)
     keep_e = []
     for e in res['errors']['offline']:
         at = e.rsplit('[at ', 1)[-1].rstrip(']') if '[at ' in e else ''
-        (exp if e.startswith('console.error: Failed to load resource') and (SW_SCRIPT.search(at) or '/ep6_offline_probe_' in at) else keep_e).append(e)
+        (exp if e.startswith('console.error: Failed to load resource') and (SW_SCRIPT.search(at) or _offline.PROBE_MARK in at) else keep_e).append(e)
     res['failed_requests']['offline'] = keep_f
     res['errors']['offline'] = keep_e
     res['expected_offline'] = exp
@@ -387,7 +292,7 @@ def main():
         sw_text = get('sw.js')
         lists = json.loads(get('assets/pack_files.json'))
     else:
-        install_local_cut()
+        _offline.install_local_cut(pwa.Handler)
         server = pwa.start_server()
         base = f'http://127.0.0.1:{server.server_port}'
         sw_text = (NEXT / 'sw.js').read_text(encoding='utf-8')
