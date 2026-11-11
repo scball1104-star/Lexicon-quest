@@ -15,7 +15,7 @@ import { Renderer, GAME_W, GAME_H } from './renderer.js';
 import { Input } from './input.js';
 import { TouchControls } from './touch.js';
 import { createAssets, BASE_URL, animFrameAt } from './assets.js';
-import { createSave, DEFAULT_SETTINGS } from './save.js';
+import { createSave, bootSettings, prefersReducedMotion } from './save.js';
 import { createRng } from './rng.js';
 import { createTweens, ease } from './tween.js';
 import { createFonts, setNamedColors } from './font.js';
@@ -313,10 +313,9 @@ export class Engine {
     this.perf = { interval: [], update: [], draw: [], present: [] };
 
     this.save = createSave({ storage: opts.storage });
-    const saved = this.save.loadSettings();
-    let osReduce = false;
-    try { osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { /* ignore */ }
-    this.settings = { ...DEFAULT_SETTINGS, reduceMotion: osReduce, ...saved };
+    // The raw stored object (no defaults merged in), so only a Reduce motion the player chose overrides the device.
+    this.osReduceMotion = prefersReducedMotion(typeof window !== 'undefined' && window.matchMedia ? (q) => window.matchMedia(q) : null);
+    this.settings = bootSettings(this.save.loadSettings({}), this.osReduceMotion);
     this.rng = createRng(opts.seed ?? ((Date.now() ^ 0x5eed) >>> 0));
     this.tweens = createTweens();
     this.fonts = createFonts();
@@ -356,9 +355,11 @@ export class Engine {
   }
 
   // ---------------------------------------------------------------- settings
-  /** Change one setting: persists it and applies side effects (audio volumes, scale mode, touch). */
+  /** Change one setting: persists it and applies side effects (audio volumes, scale mode, touch). A Reduce motion
+   *  set here is the player's choice and overrides the device from then on (save.js bootSettings). */
   setSetting(key, value) {
     this.settings[key] = value;
+    if (key === 'reduceMotion') this.settings.reduceMotionSet = true;
     this.save.saveSettings(this.settings);
     if (['master', 'music', 'sfx', 'ambience'].includes(key)) this._applyVolumes();
     if (key === 'scaleMode' || key === 'backdrop') this.renderer.resize();
