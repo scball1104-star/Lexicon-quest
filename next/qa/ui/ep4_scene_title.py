@@ -66,13 +66,16 @@ def title(page, slots):
     adv(page, 30)
     check(page.evaluate(ADD_ROW), 'offerRow added the row')
     adv(page, 2)
+    # #88: the quick starts fold into New party...; the rows below are checked in its open list
+    check(page.evaluate("LQ_ENGINE.scene.showQuickStart('ep4')"), 'the New party... list opens on the row')
+    adv(page, 2)
     s = page.evaluate('LQ_DEBUG.state().sceneState')
     check('ep4' in s['items'] and (s['items'].index('ep4') == len(s['items']) - 2 or s['items'][-1] == 'ep4'), f"Episode 4 row listed: {s['labels']}")
     win = s['win']
     check(win['y'] >= 0 and win['y'] + win['h'] <= 216, f"menu window inside the screen: {win}")
     rows = page.evaluate("LQ_ENGINE.scene.menu.items.map((_, i) => LQ_ENGINE.scene.menu.rowRect(i))")
     check(all(r['y'] >= 0 and r['y'] + r['h'] <= 216 for r in rows), 'every row inside the screen')
-    page.evaluate("LQ_ENGINE.scene.menu.moveTo(LQ_ENGINE.scene.menu.items.findIndex((it) => it.id === 'ep4')); true")
+    page.evaluate("LQ_ENGINE.scene.showQuickStart('ep4')")
     adv(page, 4)
     return s
 

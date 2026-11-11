@@ -14,7 +14,7 @@ import { planEvents, unitInfo, totalFrames } from '../battle/scene/animator.js';
 import { createActors, addSummon, sortedActors, ENTER_FRAMES } from '../battle/scene/actors.js';
 import { CommandMenu } from '../battle/scene/menu.js';
 import { applyBattleOutcome, bestiaryForBattle, levelGainRows } from '../battle/scene/rewards.js';
-import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, enemyRowAnchor,
+import { meleeSpot, enemyMeleeSpot, partySlots, summonSlot, REWARD_WIN, LEVEL_WIN, STATUS_WIN, BAND, W, H, cmdWin, HELP_TOUCH_BTNS, HELP_TOUCH_HITS, helpLensRect, enemyRowAnchor,
   touchRowSpot, spriteBox, topBlocks, ENEMY_ROW_H, helpDock } from '../battle/scene/layout.js';
 import { touchUi } from '../ui/list.js';
 
@@ -839,7 +839,16 @@ export class BattleScene {
     if (this.banner) HUD.drawBigBanner(r, this.banner.text, this.banner.style, this.banner.t / this.banner.frames);
     if (this.bossIntro && this.bossIntro.t < this.bossIntro.frames && this.phase !== 'rewards') HUD.drawBossCard(r, this.bossIntro);
     if (this.phase === 'rewards') this.drawRewards(r);
+    if (touch && r.setLens) r.setLens(this.lensRects());
     void e;
+  }
+
+  /** Portrait lens (#88): FLEE / AUTO / x1, then the command window or the open sub-list. */
+  lensRects() {
+    const v = this.engine.renderer && this.engine.renderer.view, m = this.menu;
+    if (!this.touchButtons() || !v || !v.pad) return null;
+    const sub = m.state === 'sub' && m.sub, root = m.state === 'root' && m.root;
+    return [helpLensRect(), ...(root ? [{ ...m.cmdRect, rowH: root.rowH }] : sub ? [{ ...m.subRect, rowH: sub.rowH }] : [])];
   }
 
   /** Where each shown enemy row goes this frame: */

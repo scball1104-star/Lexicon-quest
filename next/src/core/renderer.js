@@ -57,8 +57,12 @@ export function computeLayout(p) {
   }
 
   const w = Math.round(gameW * scale), h = Math.round(gameH * scale);
+  // portrait: the lens pad under the game (ui/firstuse/lens.js); the top margin never takes the controls' room
+  const ctl = (PAD.controls + 2 * PAD.gap) * dpr;
+  const padH = touchMode === 'below' ? Math.max(0, Math.min((p.touch.pad ?? PAD.want) * dpr, availH - h - ctl)) : 0;
+  const rest = availH - h - padH;
   const x = sl + Math.round((availW - w) / 2);
-  const y = st + Math.round((availH - h) * anchorY);
+  const y = st + Math.round(padH ? Math.min(rest * anchorY, Math.max(0, rest - ctl)) : rest * anchorY);
   return {
     scale, x, y, w, h, dpr, devW, devH,
     cssScale: scale / dpr, cssX: x / dpr, cssY: y / dpr, cssW: w / dpr, cssH: h / dpr,
@@ -66,8 +70,13 @@ export function computeLayout(p) {
     integer: Number.isInteger(scale), mode, portrait, touchMode,
     safe: { ...safe },
     bars: { left: x / dpr, right: (devW - x - w) / dpr, top: y / dpr, bottom: (devH - y - h) / dpr },
+    pad: padH ? { x: (sl + 4 * dpr) / dpr, y: (y + h) / dpr + PAD.gap, w: (availW - 8 * dpr) / dpr, h: padH / dpr } : null,
   };
 }
+/** The portrait pad (css px): `want` tall, `controls` left under it for the touch controls. */
+export const PAD = { want: 274, controls: 230, gap: 8 };
+let lensMod = null, lensLoad = null;
+const loadLens = () => lensLoad || (lensLoad = import('../ui/firstuse/lens.js').then((m) => { lensMod = m; }, () => {}));
 
 // ------------------------------------------------------------------ color helpers
 
@@ -150,6 +159,7 @@ export class Renderer {
     this._ambient = null;           // { small, mid, frame }
     this._safe = { l: 0, t: 0, r: 0, b: 0 };
     this._listeners = new Set();
+    this._lens = []; this._lensWant = null; this._lensSig = '';
     this.frame = 0;
     this._initResize();
   }
@@ -211,6 +221,7 @@ export class Renderer {
     if (c.width !== devW || c.height !== devH) { c.width = devW; c.height = devH; this.vctx.imageSmoothingEnabled = false; }
     const changed = JSON.stringify(view) !== JSON.stringify(this.view);
     this.view = view;
+    if (view.pad) loadLens();   // portrait touch: the lens is ready before the first battle
     this._backdropDirty = true;
     if (changed) for (const fn of this._listeners) { try { fn(view); } catch (e) { console.warn(e); } }
   }
@@ -230,7 +241,17 @@ export class Renderer {
   toGame(clientX, clientY) {
     const v = this.view;
     const rect = this.visible.getBoundingClientRect();
-    return { x: (clientX - rect.left - v.cssX) / v.cssScale, y: (clientY - rect.top - v.cssY) / v.cssScale };
+    const cx = clientX - rect.left, cy = clientY - rect.top;
+    for (const L of this._lens) {   // a tap on the portrait lens lands where that part of the game is
+      const dx = cx * v.dpr - L.x, dy = cy * v.dpr - L.y;
+      if (dx >= 0 && dy >= 0 && dx < L.w && dy < L.h) return { x: L.src.x + dx / L.k, y: L.src.y + dy / L.k };
+    }
+    return { x: (cx - v.cssX) / v.cssScale, y: (cy - v.cssY) / v.cssScale };
+  }
+
+  /** This frame's portrait lens: the game rects { x, y, w, h, rowH } a finger needs bigger (ui/firstuse/lens.js). */
+  setLens(rects) {
+    this._lensWant = rects;
   }
 
   // ---------------------------------------------------------------- backdrop
@@ -330,6 +351,7 @@ export class Renderer {
   /** Begin a game frame: resets transform, applies screen shake. */
   beginFrame() {
     const g = this.ctx;
+    this._lensWant = null;
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalAlpha = 1;
     g.globalCompositeOperation = 'source-over';
@@ -396,6 +418,7 @@ export class Renderer {
       g.imageSmoothingEnabled = false;
       g.drawImage(this.canvas, 0, 0, this.W, this.H, v.x, v.y, v.w, v.h);
     }
+    if (lensMod) lensMod.presentLens(this);
   }
 
   // ---------------------------------------------------------------- screen fx

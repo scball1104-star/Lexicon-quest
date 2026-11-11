@@ -13,6 +13,7 @@ export const CMD_COLS = 2;
 export const CMD_ROW_H = 11;
 export const CMD_COL_W = 52;          // glove (16) + the longest label ("Attack", "Defend") + air
 export const TOUCH_CMD_ROW_H = 18;
+export const LENS_SUB_ROW_H = 22;   // portrait sub-list rows: 44 css px in the lens (#88)
 export const STATUS_ROW_H = 17;
 // Touch (W5): the command window grows upward to keep four rows; the sub-list moves up with it.
 export const CMD_WIN_TOUCH = { x: 4, y: 132, w: 126, h: 80 };
@@ -71,6 +72,11 @@ const HELP_HIT_SPAN = (() => {
 })();
 const helpHit = ([x0, x1]) => ({ get x() { return x0 + helpOrigin().x - HELP_WIN.x; }, get y() { return helpOrigin().y - HELP_HIT_PAD; }, w: x1 - x0, h: HELP_WIN.h + 2 * HELP_HIT_PAD });
 export const HELP_TOUCH_HITS = Object.fromEntries(Object.entries(HELP_HIT_SPAN).map(([k, v]) => [k, helpHit(v)]));
+/** The portrait lens strip of those buttons (46 css px tall on a 3x phone). */
+export function helpLensRect() {
+  const h = HELP_TOUCH_HITS, o = helpOrigin();
+  return { x: h.flee.x, y: o.y - 2, w: h.speed.x + h.speed.w - h.flee.x, h: HELP_WIN.h + 4, rowH: HELP_WIN.h + 3 };
+}
 
 // The stage (W4-battle-polish, CRITIQUE C3): one ground plane. An indigo band darkens the lower part of
 // the backdrop (bandY..216, drawn under the sprites, top edge dithered 2 px); every unit's feet sit on ONE

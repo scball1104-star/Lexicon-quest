@@ -19,6 +19,9 @@ Checks:
   battle_log      the idle command window shows the last three lines (enemy turn, victory, level-up)
   bestiary        every enemy has a picture (silhouette when unseen), sheets saved
   hints           name entry shows the A / B tap glyphs and no Enter on touch, the keycaps and Enter on a keyboard
+  battle_portrait portrait (390 x 844): the lens under the game shows FLEE / AUTO / x1 and the command window or the open
+                  sub-list with rows of 44 css px or more, between the game and the controls; taps there reach the buttons
+                  and rows; landscape has no pad and no lens
 """
 import argparse
 import json
@@ -96,7 +99,11 @@ class Rig:
         return self.ev('LQ_DEBUG.state().sceneState')
 
     def battle(self):
-        return self.ev('LQ_DEBUG.state().battle')
+        b = self.ev('LQ_DEBUG.state().battle')
+        if b is not None:   # the portrait lens (core/renderer.js) and the open sub-list, read straight off the engine
+            b.update(self.ev("(() => { const s = LQ_ENGINE.scene, m = s.menu && s.menu.sub; return { lens: LQ_ENGINE.renderer._lens,"
+                             " sub: s.menu && s.menu.state === 'sub' && m ? { index: m.index, rowH: m.rowH, rects: m.items.map((_, i) => m.rowRect(i)) } : null }; })()"))
+        return b
 
     def shot(self, name, crop=True):
         OUT.mkdir(parents=True, exist_ok=True)
@@ -207,6 +214,95 @@ def check_battle_phone(rigs):
     tried = (not gone) and any(a.endswith(':flee') for a in st['battle']['actions'])   # an attempt can fail and the fight goes on
     assert gone or st['battle']['phase'] in ('flee', 'leave') or tried, f'second tap runs away ({st["scene"]}, {st["battle"] and st["battle"]["actions"]})'
     print('      commands:', items)
+
+
+def lens_tap(rig, lens, gx, gy, wait=8):
+    """Tap the game point (gx, gy) where the portrait lens shows it (core/renderer.js placeLens)."""
+    dpr = DEVICES[rig.device]['dpr']
+    for L in lens:
+        s = L['src']
+        if s['x'] <= gx < s['x'] + s['w'] and s['y'] <= gy < s['y'] + s['h']:
+            x, y = (L['x'] + (gx - s['x']) * L['k']) / dpr, (L['y'] + (gy - s['y']) * L['k']) / dpr
+            rig.page.touchscreen.tap(x, y)
+            rig.frames(wait)
+            return x, y
+    raise AssertionError(f'({gx}, {gy}) is not in the lens {[L["src"] for L in lens]}')
+
+
+def clip(a, b):
+    x0, y0 = max(a['x'], b['x']), max(a['y'], b['y'])
+    return {'x': x0, 'y': y0, 'w': max(0, min(a['x'] + a['w'], b['x'] + b['w']) - x0), 'h': max(0, min(a['y'] + a['h'], b['y'] + b['h']) - y0)}
+
+
+def check_battle_portrait(rigs):
+    """Portrait (390 x 844, one game px = one css px): the lens under the game draws FLEE / AUTO / x1 and the command
+    window (or the open sub-list) bigger; every row and button there is 44 css px or more and a tap there reaches it."""
+    d = rigs['portrait']
+    dpr = DEVICES['portrait']['dpr']
+    d.run_shot('battle_command')
+    d.frames(2)
+    b = d.battle()
+    v = d.ev('LQ_DEBUG.view()')
+    assert b['menu'] == 'root' and b['touch'], f'touch root menu ({b["menu"]})'
+    lens = b['lens']
+    assert len(lens) == 2, f'the lens shows the help buttons and the command window ({[L["src"] for L in lens]})'
+    strip, cmd = lens
+    assert cmd['src'] == {k: b['cmdRect'][k] for k in ('x', 'y', 'w', 'h')}, f'the second lens rect is the command window {cmd["src"]}'
+    game_bottom = v['cssY'] + v['cssH']
+    ctrl = d.ev("[...document.querySelectorAll('#lq-touch [data-control]')].filter(e => getComputedStyle(e).display !== 'none')"
+                ".map(e => { const r = e.getBoundingClientRect(); return { name: e.dataset.control, top: r.top, bottom: r.bottom }; })")
+    ctrl_top = min(c['top'] for c in ctrl if c['name'] != 'fullscreen')
+    for L in lens:
+        top, bottom = L['y'] / dpr, (L['y'] + L['h']) / dpr
+        assert top >= game_bottom and bottom <= ctrl_top, f'lens {L["src"]} at {top:.0f}..{bottom:.0f} css sits between the game ({game_bottom:.0f}) and the controls ({ctrl_top:.0f})'
+        assert L['x'] >= 0 and (L['x'] + L['w']) / dpr <= DEVICES['portrait']['width'], f'lens {L["src"]} on screen'
+    sizes = {'command row (canvas)': b['rowH'] * v['cssScale'], 'command row (lens)': b['rowH'] * cmd['k'] / dpr}
+    for k in ('flee', 'auto', 'speed'):
+        c = clip(b['helpHits'][k], strip['src'])
+        sizes[f'{k} (canvas)'] = (b['helpHits'][k]['w'] * v['cssScale'], b['helpHits'][k]['h'] * v['cssScale'])
+        sizes[f'{k} (lens)'] = (c['w'] * strip['k'] / dpr, c['h'] * strip['k'] / dpr)
+        assert min(sizes[f'{k} (lens)']) >= 44, f'{k} in the lens is {sizes[k + " (lens)"]} css px'
+    assert sizes['command row (lens)'] >= 44, f'command rows in the lens {sizes}'
+    d.shot('battle_portrait_lens', crop=False)
+    # x1 through the lens, and back
+    speed0 = d.ev('LQ_DEBUG.settings().battleSpeed')
+    sp = b['helpBtns']['speed']
+    lens_tap(d, lens, sp['x'] + sp['w'] / 2, sp['y'] + sp['h'] / 2, wait=3)
+    assert d.ev('LQ_DEBUG.settings().battleSpeed') != speed0, 'a tap on x1 in the lens changes the speed'
+    lens_tap(d, lens, sp['x'] + sp['w'] / 2, sp['y'] + sp['h'] / 2, wait=3)
+    assert d.ev('LQ_DEBUG.settings().battleSpeed') == speed0, 'and back'
+    # Item through the lens: one tap opens the list, which the lens then shows instead of the commands
+    items = b['menuItems']
+    i_item = items.index('item')
+    lens_tap(d, lens, *center(b['rootRects'][i_item]))
+    st = d.battle()
+    assert st['menu'] == 'sub' and st['menuIndex'] == i_item, f'a tap on Item in the lens opens the Item list ({st["menu"]}, {st["menuIndex"]})'
+    d.frames(2)
+    st = d.battle()
+    sub = st['sub']
+    assert len(st['lens']) == 2 and st['lens'][1]['src']['y'] <= sub['rects'][0]['y'], f'the lens shows the Item list {[L["src"] for L in st["lens"]]}'
+    sizes['sub-list row (canvas)'] = sub['rowH'] * v['cssScale']
+    sizes['sub-list row (lens)'] = sub['rowH'] * st['lens'][1]['k'] / dpr
+    assert sizes['sub-list row (lens)'] >= 44, f'sub-list rows in the lens {sizes}'
+    d.shot('battle_portrait_lens_items', crop=False)
+    if len(sub['rects']) > 1:
+        lens_tap(d, st['lens'], *center(sub['rects'][1]))
+        assert d.battle()['sub']['index'] == 1, 'a tap on the second row in the lens selects it'
+    d.press('cancel')
+    d.frames(2)
+    st = d.battle()
+    assert st['menu'] == 'root' and len(st['lens']) == 2 and st['lens'][1]['src']['y'] == b['cmdRect']['y'], 'back: the lens shows the commands again'
+    # FLEE through the lens arms it
+    fb = b['helpBtns']['flee']
+    lens_tap(d, st['lens'], fb['x'] + fb['w'] / 2, fb['y'] + fb['h'] / 2, wait=3)
+    assert d.battle()['fleeArmed'] > 0, 'a tap on FLEE in the lens arms it'
+    fmt = lambda x: tuple(round(i) for i in x) if isinstance(x, tuple) else round(x)
+    print('      portrait sizes (css px):', {k: fmt(x) for k, x in sizes.items()})
+    # landscape keeps no pad and no lens
+    p = rigs['phone']
+    p.run_shot('battle_command')
+    p.frames(2)
+    assert p.ev('LQ_DEBUG.view().pad') is None and p.battle()['lens'] == [], 'landscape phone: no pad, no lens'
 
 
 def check_battle_desktop(rigs):
@@ -329,6 +425,7 @@ def check_hints(rigs):
 CHECKS = {
     'dialog': check_dialog, 'battle_phone': check_battle_phone, 'battle_desktop': check_battle_desktop,
     'battle_mira': check_battle_mira, 'battle_log': check_battle_log, 'bestiary': check_bestiary, 'hints': check_hints,
+    'battle_portrait': check_battle_portrait,
 }
 
 
@@ -348,7 +445,7 @@ def main():
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True, args=['--autoplay-policy=no-user-gesture-required'])
-        rigs = {'phone': Rig(browser, base, 'phone'), 'desktop': Rig(browser, base, 'desktop')}
+        rigs = {'phone': Rig(browser, base, 'phone'), 'desktop': Rig(browser, base, 'desktop'), 'portrait': Rig(browser, base, 'portrait')}
         for name in names:
             t0 = time.time()
             for r in rigs.values():

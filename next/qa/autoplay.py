@@ -3160,6 +3160,16 @@ class Episode3(Episode):
             b.notes.append(f'resumed from {b.resume} (record 1)')
             b.mark('resume')
             return
+        if 'ep3' not in items and 'ep3' in (ss.get('quick') or []):
+            # #88: Episode 2 and 3 fold into New party...: walk to it and open its list with the keys
+            idx, want = ss.get('index') or 0, items.index('party')
+            for _ in range(abs(want - idx)):
+                b.page.keyboard.press('ArrowDown' if want > idx else 'ArrowUp')
+                b.frames(4)
+            b.page.keyboard.press('KeyZ')
+            b.frames(10)
+            ss = b.scene_state()['ss'] or {}
+            items = ss.get('items') or []
         if 'ep3' not in items:
             raise Fail(f'the title does not offer Episode 3 (items {items})')
         b.shot('title_ep3')
@@ -3981,8 +3991,10 @@ class Episode4(Episode3):
             b.mark('resume')
             return
         # the pack loads behind the title and adds its row (hooks.js HOOKS.title -> title.js offerRow)
-        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep4')); })()", timeout=30000, polling=50)
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.quickStarts && s.quickStarts().includes('ep4')); })()", timeout=30000, polling=50)
         b.frames(6)
+        # #88: two or more quick starts fold into New party...; open its list (the keys then walk it as before)
+        b.js("(() => { const s = LQ_ENGINE.scene; if (!s.menu.items.some(i => i.id === 'ep4')) s.openQuick('ep4'); return true; })()")
         ss = b.scene_state()['ss'] or {}
         items = ss.get('items') or [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
         if 'ep4' not in items:
@@ -4718,8 +4730,10 @@ class Episode5(Episode4):
             b.notes.append(f'resumed from {b.resume} (record 1)')
             b.mark('resume')
             return
-        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep5')); })()", timeout=60000, polling=50)
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.quickStarts && s.quickStarts().includes('ep5')); })()", timeout=60000, polling=50)
         b.frames(6)
+        # #88: two or more quick starts fold into New party...; open its list (the keys then walk it as before)
+        b.js("(() => { const s = LQ_ENGINE.scene; if (!s.menu.items.some(i => i.id === 'ep5')) s.openQuick('ep5'); return true; })()")
         items = [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
         if 'ep5' not in items:
             raise Fail(f'the title does not offer Episode 5 (items {items})')
@@ -5500,8 +5514,10 @@ class Episode6(Episode5):
             b.notes.append(f'resumed from {b.resume} (record 1)')
             b.mark('resume')
             return
-        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.menu && s.menu.items.some(i => i.id === 'ep6')); })()", timeout=60000, polling=50)
+        b.page.wait_for_function("(() => { const s = LQ_ENGINE.scene; return !!(s && s.quickStarts && s.quickStarts().includes('ep6')); })()", timeout=60000, polling=50)
         b.frames(6)
+        # #88: two or more quick starts fold into New party...; open its list (the keys then walk it as before)
+        b.js("(() => { const s = LQ_ENGINE.scene; if (!s.menu.items.some(i => i.id === 'ep6')) s.openQuick('ep6'); return true; })()")
         items = [i['id'] for i in (b.js("LQ_ENGINE.scene.menu.items.map(i => ({ id: i.id }))") or [])]
         if 'ep6' not in items:
             raise Fail(f'the title does not offer Episode 6 (items {items})')

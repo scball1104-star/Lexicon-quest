@@ -193,6 +193,9 @@ a document arriving at breakfast**. Item 1 is an agent fix today; items 2, 3 and
 - **Smallest fix:** show only the quick start for the newest episode the player has not finished in their own save (plus
   New Game, Continue, Fine Print, Config), or fold all of them into one "Start at an episode" row with a sub-list. Scott
   says which.
+- **Status (#88, 2026-11-11):** Scott chose the fold. Two or more quick starts are one "New party…" row that opens them as a
+  list (`src/scenes/title.js`; `docs/UI.md`). After Episode 5 the title is New Game, Continue, Fine Print, New party…, Config,
+  one column.
 
 ### 8. MINOR, phone: the battle toggles are small and touch each other. (S, agent)
 
