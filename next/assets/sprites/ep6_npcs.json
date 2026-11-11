@@ -4,7 +4,7 @@
   24,
   32
  ],
- "layout": "Episode 6 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_cloud_host is npc_innkeeper recoloured for the Cloudhouse Inn; npc_deckhand_b is the second deckhand recolour; npc_aeris_young is Aeris in the memories (dark hair, no compass).",
+ "layout": "Episode 6 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_cloud_host is npc_innkeeper recoloured for the Cloudhouse Inn; npc_deckhand_b is the second deckhand recolour; npc_aeris_young is Aeris in the memories (dark hair, no compass); npc_grey_bird is the Episode 6 opening messenger bird (chars/wm4_bird.py: 1 and 2 are wing beats).",
  "sprites": {
   "npc_aeris": {
    "name": "Aeris",
@@ -212,6 +212,23 @@
   },
   "npc_cloud_host": {
    "name": "The Cloudhouse Host",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down",
+    "left",
+    "right",
+    "up"
+   ]
+  },
+  "npc_grey_bird": {
+   "name": "Bird",
    "cell": [
     24,
     32
@@ -1473,6 +1490,102 @@
   ],
   "npc_cloud_host_up_blink": [
    72,
+   608,
+   24,
+   32
+  ],
+  "npc_grey_bird_down_0": [
+   96,
+   512,
+   24,
+   32
+  ],
+  "npc_grey_bird_down_1": [
+   120,
+   512,
+   24,
+   32
+  ],
+  "npc_grey_bird_down_2": [
+   144,
+   512,
+   24,
+   32
+  ],
+  "npc_grey_bird_down_blink": [
+   168,
+   512,
+   24,
+   32
+  ],
+  "npc_grey_bird_left_0": [
+   96,
+   544,
+   24,
+   32
+  ],
+  "npc_grey_bird_left_1": [
+   120,
+   544,
+   24,
+   32
+  ],
+  "npc_grey_bird_left_2": [
+   144,
+   544,
+   24,
+   32
+  ],
+  "npc_grey_bird_left_blink": [
+   168,
+   544,
+   24,
+   32
+  ],
+  "npc_grey_bird_right_0": [
+   96,
+   576,
+   24,
+   32
+  ],
+  "npc_grey_bird_right_1": [
+   120,
+   576,
+   24,
+   32
+  ],
+  "npc_grey_bird_right_2": [
+   144,
+   576,
+   24,
+   32
+  ],
+  "npc_grey_bird_right_blink": [
+   168,
+   576,
+   24,
+   32
+  ],
+  "npc_grey_bird_up_0": [
+   96,
+   608,
+   24,
+   32
+  ],
+  "npc_grey_bird_up_1": [
+   120,
+   608,
+   24,
+   32
+  ],
+  "npc_grey_bird_up_2": [
+   144,
+   608,
+   24,
+   32
+  ],
+  "npc_grey_bird_up_blink": [
+   168,
    608,
    24,
    32
@@ -3763,6 +3876,182 @@
     "npc_cloud_host_up_0",
     "npc_cloud_host_up_blink",
     "npc_cloud_host_up_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_grey_bird_walk_down": {
+   "frames": [
+    "npc_grey_bird_down_1",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_2",
+    "npc_grey_bird_down_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_grey_bird_idle_down": {
+   "frames": [
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_0",
+    "npc_grey_bird_down_blink",
+    "npc_grey_bird_down_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_grey_bird_walk_left": {
+   "frames": [
+    "npc_grey_bird_left_1",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_2",
+    "npc_grey_bird_left_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_grey_bird_idle_left": {
+   "frames": [
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_0",
+    "npc_grey_bird_left_blink",
+    "npc_grey_bird_left_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_grey_bird_walk_right": {
+   "frames": [
+    "npc_grey_bird_right_1",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_2",
+    "npc_grey_bird_right_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_grey_bird_idle_right": {
+   "frames": [
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_0",
+    "npc_grey_bird_right_blink",
+    "npc_grey_bird_right_0"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  "npc_grey_bird_walk_up": {
+   "frames": [
+    "npc_grey_bird_up_1",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_2",
+    "npc_grey_bird_up_0"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  "npc_grey_bird_idle_up": {
+   "frames": [
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_0",
+    "npc_grey_bird_up_blink",
+    "npc_grey_bird_up_0"
    ],
    "fps": 8,
    "loop": true

@@ -255,7 +255,8 @@ async function playScene(fn, game) {
 
 test('the Episode 2 credits save reaches ep3_morning with EP3_LIVE on, and not with it off', async () => {
   const [label, g] = ep2CreditsFixture();
-  assert.equal(g.map, 'nh_inn', `${label}: the credits wake the party in the Signless Inn`);
+  // an old save sits in the inn (nh_inn), a save from issue #99 on on the east wall walk; both reach the morning
+  assert.ok(['nh_inn', 'nameless_hollow'].includes(g.map), `${label}: the credits woke the party on ${g.map}`);
   assert.ok(g.flags.ep2_complete && !g.flags.ep3_started, label);
   await registerEp3Maps();
   const inn = peekMap('nh_inn');

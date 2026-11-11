@@ -44,21 +44,29 @@ const cut = (fn, cond) => async (s) => {
 // Act I: Hollowmere, one name short
 // ================================================================================================
 
-// 1. nh_inn, on enter after the Episode 2 credits (also on enter of nameless_hollow for saves that left the inn).
-// 14 boxes. The Smith is a scene spawn at the hearth. Sets ep3_morning_done and ep3_started.
+// 1. nameless_hollow, on enter: the east wall walk at dawn (#99; old saves elsewhere are moved to wall_wake first).
+// 14 boxes. Sets ep3_morning_done and ep3_started.
 async function ep3_morning(s) {
-  await s.spawn('smith', { sprite: 'npc_smith', name: 'The Smith', at: 'smith_seat', dir: 'left' });
+  const at = 'leaderAt' in s ? s.leaderAt() : null;
+  if ((typeof s.mapId === 'string' && s.mapId !== 'nameless_hollow') || (at && (at[0] !== 41 || at[1] !== 21))) {
+    await s.fade('out', 30);
+    s.warp('nameless_hollow', 41, 21, 'up');
+    return;
+  }
+  if ('openingTint' in s) await s.openingTint('dawn');
   await s.fade('in', 60);
   await s.emote('hero', 'zzz');
   await s.wait(30);
-  await s.spawn('wren_up', { sprite: 'npc_wren', name: 'Wren', at: 'inn_door' });   // up the stair: the map's Wren keeps the counter
-  await s.walk('wren_up', 'wren_wake');
+  await s.spawn('wren_up', { sprite: 'npc_wren', name: 'Wren', at: 'wall_stair' });
+  await s.walk('wren_up', 'wren_wall');
   await s.face('wren_up', 'hero');
   await say(s, 'wren_up', "Old fellow walked in at sunrise. Asked for Bram by name. Couldn't give me his own.");
-  await s.walk('hero', ['down']);
-  await s.camera.panTo('smith_seat', 40);
-  await narrate(s, `${s.mapId === 'nameless_hollow' ? 'Against the inn wall' : 'By the guest-room wall'} sits an old man grey with road dust, his hands open on his knees as if he has put something down.`);
-  await s.walk('bram', 'smith_seat');
+  await s.spawn('smith', { sprite: 'npc_smith', name: 'The Smith', at: 'wall_stair' });
+  await s.walk('smith', 'smith_wall');
+  await s.face('smith', 'right');
+  await s.face('hero', 'smith');
+  await narrate(s, 'Against the parapet sits an old man grey with road dust, his hands open on his knees as if he has put something down.');
+  await s.walk('bram', 'smith_wall');
   await s.face('bram', 'smith');
   await say(s, 'bram', '...Dad.');
   await s.wait(40);
@@ -73,15 +81,16 @@ async function ep3_morning(s) {
   else await say(s, 'smith', 'Not who. What. I know what.');
   await say(s, 'mira', "I can see his face. I can't find the word for him.");
   await say(s, 'smith', 'It went like this with her. First the sign on the forge. Then the word in your mouth.');
+  await s.camera.panTo('emberpeak_glow', 50);
   await say(s, 'smith', "It's the Warden. It's striking again. I'm going home.");
+  await s.camera.follow('hero');
   await say(s, 'bram', 'Not alone.');
   await say(s, 'smith', 'Never said alone.');
   await s.music('hollowmere');
-  await s.camera.follow('hero');
-  await s.walk('smith', 'inn_door');
+  await s.walk('smith', 'wall_stair');
   await s.despawn('smith');
   await say(s, 'wren_up', "Three more eggs, then. I'll put them in his coat pocket. He won't notice.");
-  await s.walk('wren_up', 'inn_door');
+  await s.walk('wren_up', 'wall_stair');
   await s.despawn('wren_up');
   await s.setFlag('ep3_morning_done');
   await s.setFlag('ep3_started');

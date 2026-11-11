@@ -285,7 +285,7 @@ test('text: 11 banners (the Haven conditional), 3 books, the barks, 12 bestiary 
   for (const c of CREDITS_EP5) for (const l of [c.heading, ...c.lines]) assert.ok(l.length <= 42 && ascii(l), `credit ${l}`);
   for (const s of [END_CARD_EP5.text, END_CARD_EP5.sub, END_CARD_EP4_LIVE.sub, EPISODE6_CARD.text, EPISODE6_CARD.sub]) assert.ok(s.length <= 42 && ascii(s), s);
   assert.equal(END_CARD_EP5.sub, 'Episode 6 is not playable yet.');
-  assert.equal(END_CARD_EP4_LIVE.sub, 'Episode 5 begins in the morning.');
+  assert.equal(END_CARD_EP4_LIVE.sub, 'Episode 5 begins at sea.');   // issue #99: Episode 5 opens on the ship at night
   assert.equal(EPISODE6_CARD.text, 'Episode 6: The Skybound Isles');
   for (const t of Object.values(EP5_BATTLE_TEXT)) assert.ok(t.length <= 80 && fits(t) && ascii(t), t);
   assert.ok(EP5_BATTLE_TEXT.turn_sky_help.length <= 40);

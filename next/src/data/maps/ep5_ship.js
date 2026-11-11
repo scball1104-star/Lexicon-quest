@@ -5,6 +5,9 @@
 // (16..17, 7) with its furled saffron sail overhead; two deck lanterns on the north rail; lashed cloth crates aft and
 // forward; the hatch; the helm at the stern (3,7) with Yara behind it (yara_wheel (2,7), the scene spawn).
 //
+// Issue #99 (WORLD_MAP_PLAN 4): Episode 5 opens here. The Episode 4 credits and the quick start land at deck_start, and the
+// enter trigger ep5_wake (ep5_morning, listed before ship_enter so the letter comes first) plays the star letter at night with
+// Yara by the rail (yara_deck (7,4)); it sets ship_boarded, so ship_night follows on the same arrival.
 // The crossing, west to east and back:
 //   - arrival deck_start (5,7) facing the bow (Valewyn's boat door berth_sail lands here); ship_night on enter puts Mira at
 //     the north rail (mira_rail (9,3)) and sends Bram to the bow (bram_bow (23,6));
@@ -19,6 +22,7 @@
 // its own two foes, so the anchor's flags never hold together (if bram_asked, ifNot bram_asked) and it never stands on
 // the deck: no free fight, no double. No chest, no other enemy.
 import { grid, put, rows, sign, enter, trigger, enemy } from './_kit.js';
+import { STAGE } from './ep3/_opening.js';
 
 const W = 28, H = 14;
 const g = grid(W, H, 'n');
@@ -67,6 +71,9 @@ const decor = [
 
 // ---------------------------------------------------------------- events
 const events = [
+  // issue #99: Episode 5 opens on this deck at night (ep5_morning: the star letter under the stars), before ship_night
+  enter('ep5_wake', 'ep5_morning'),
+  STAGE,
   enter('ship_enter', 'ship_night'),
   trigger('bow_trig', 21, 3, 1, 8, 'ship_bram'),
   trigger('fight_row', 14, 3, 1, 8, 'ship_fight', { if: 'bram_asked' }),
@@ -103,7 +110,7 @@ export default {
   exits: [],
   marks: {
     deck_start: [5, 7], deck_stage: [9, 5], deck_stage_b: [10, 5], mira_rail: [9, 3], bram_bow: [23, 6], bow_stage: [21, 6],
-    yara_wheel: [2, 7], foes_drop: [11, 5], foes_drop_b: [11, 9], gangway: [20, 10],
+    yara_wheel: [2, 7], foes_drop: [11, 5], foes_drop_b: [11, 9], gangway: [20, 10], yara_deck: [7, 4],
   },
   start: { x: 5, y: 7, dir: 'right' },
 };

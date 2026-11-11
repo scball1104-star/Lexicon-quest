@@ -32,7 +32,9 @@ Exactly the Episode 1 API (`STAGING.md` section 1), plus `s.mapId` (read once, b
 - **Chains.** `lyra_memory_3` calls `witness_book`. `paper_regent` calls `regent_after` after the win (also a scene on
   its own, for an enter trigger after a reload). `crown_remembers` calls `ep4_ending` after setting `tide_bell_rung` and
   `vw_restored`. The hooks roll `CREDITS_EP4` after `ep4_complete`, set counter `credits4_rolled`, show `END_CARD_EP4`
-  and wake the party at `ep4_vw_inn` `inn_bed`. While `EP4_LIVE`, the Episode 3 end card is `END_CARD_EP3_LIVE`.
+  and wake the party at `ep4_vw_inn` `inn_bed` (while Episode 5 is live, aboard `ep5_ship` at `deck_start` instead: the ep5
+  pack points it, issue #99). While `EP4_LIVE`, the Episode 3 end card is `END_CARD_EP3_LIVE` and the Episode 3 credits wake
+  the party at `emberpeak` `dawn_stage`.
 - **Tints.** Memories use `dawn` and return to `none` (the keep floors' own tint). `crown_remembers` lifts Valewyn's
   `flood_grey` with `tint('none', 120)`; `ep4_ending` goes to `night`.
 - **Retries.** `barrister` and `paper_regent` set `barrister_tried` / `paper_regent_tried` on the first start; after a
@@ -71,9 +73,15 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
 
 ### Emberpeak and the inn (Act I; ep3 maps patched by the ep4 pack)
 
-- `ep4_morning`, `pk_inn`, enter trigger `ep4_wake` (and the twin on `emberpeak`). Spawns `ada_t` at `ada_hearth`
-  (street variant: `inn_door`) and later `garrick_t` at `garrick_door` (street: `gather_garrick`). Pans to Ada. Music
-  `first_bell` (the map track), `mystery` on "Nobody can.", back to `first_bell`. 12 boxes. Gives `running_decree`.
+- `ep4_morning`, `emberpeak`, the east-road washout at first light (issue #99, `docs/WORLD_MAP_PLAN.md` section 4): the
+  Episode 3 credits and the quick start put the party at `dawn_stage` (35,15), one step west of `east_road_trig`, and the
+  enter trigger `ep4_wake_pk` runs the scene. From `pk_inn` (an old save's wake room, `ep4_wake`) or any other tile in town it
+  fades out and moves the party to `dawn_stage` first (`s.leaderAt` and `s.openingTint` from the ep3 pack's `opening_stage`
+  event). Tint `dawn`, back to `none` at the end. Spawns `ada_t` at `ada_rope` on the drop; Mira and Bram walk to
+  `dawn_mira` and `dawn_bram`; the camera pans to `east_road`; Ada comes up the rope to `ada_brink`. Later `garrick_t` comes
+  out at `inn_door` and walks to `garrick_dawn`. Music `first_bell` (the map track), `mystery` on "Nobody can.", back to
+  `first_bell`. 12 boxes. Gives `running_decree`. The next step east runs `east_road_gate`. (Until issue #99: the inn hearth,
+  `ada_hearth` and `garrick_door`, or the street, `inn_door` and `gather_garrick`; the inn marks stay for old saves.)
 - `east_road_gate`, `emberpeak`, step trigger `east_road_trig` two tiles west of the drop. Spawns `rusk_t` at
   `east_road`, pans there. 2 boxes. The rope ladder and the door appear after it.
 - Farewells (EPISODE4 scene 3) are talk entries on Garrick, Ilya, Sella, Veyra, Rusk, Bess (`npcs.js`), not scenes.

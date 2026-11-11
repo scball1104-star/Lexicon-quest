@@ -240,12 +240,17 @@ test('the switch: with EP4_LIVE false nothing in Episode 4 is reachable; Fine Pr
   assert.ok(ok.set.has('ep4_started'));
 });
 
-test('ep4_morning stages for its map: the inn hearth, or the street by the inn wall', async () => {
+// Issue #99 (2026-11-11): the morning plays at the east-road washout at first light; the inn (an old save's wake room) only
+// moves the party there. It used to stage at the inn hearth or by the inn wall.
+test('ep4_morning plays at the washout; from the inn it only moves the party there', async () => {
   const inn = (await runOnce(scenes.ep4_morning, { flags: EP3_DONE, branchFlags: false, mapId: 'pk_inn' })).log;
   const st = (await runOnce(scenes.ep4_morning, { flags: EP3_DONE, branchFlags: false, mapId: 'emberpeak' })).log;
-  assert.equal(ops(inn, 'spawn')[0].args[1].at, 'ada_hearth');
-  assert.equal(ops(st, 'spawn')[0].args[1].at, 'inn_door');
-  assert.ok(ops(inn, 'give').some((e) => e.args[0] === 'running_decree'));
+  assert.deepEqual(inn.filter((e) => !['lockInput', 'unlockInput', 'hasFlag'].includes(e.op)).map((e) => e.op), ['fade', 'warp']);
+  assert.deepEqual(ops(inn, 'warp')[0].args, ['emberpeak', 35, 15, 'right'], 'to dawn_stage');
+  assert.equal(ops(st, 'spawn')[0].args[1].at, 'ada_rope');
+  assert.ok(ops(st, 'walk').some((e) => e.args[0] === 'ada_t' && e.args[1] === 'ada_brink'), 'Ada comes up over the edge');
+  assert.ok(ops(st, 'give').some((e) => e.args[0] === 'running_decree'));
+  assert.ok(!ops(inn, 'give').length, 'nothing given before the move');
 });
 
 // Each map's track (plan 8.2). A scene that changes the music puts its map's track back before it ends.
@@ -260,7 +265,7 @@ test('music cues follow the cue sheet and return to the map track (plan 8.3)', a
     if (m.length && !lost) assert.equal(m.at(-1), track, `${id} ends on ${m.at(-1)}`);
   }
   const one = async (id, flags, mapId = null) => musics((await runOnce(scenes[id], { flags: [...EP3_DONE, ...flags], branchFlags: false, mapId })).log);
-  assert.deepEqual(await one('ep4_morning', [], 'pk_inn'), ['mystery', 'first_bell']);
+  assert.deepEqual(await one('ep4_morning', [], 'emberpeak'), ['mystery', 'first_bell']);
   assert.deepEqual(await one('vw_view', ['flood_road_arrived']), ['mystery', 'millrace']);
   assert.deepEqual(await one('regent_hall', ['vw_arrived']), ['sorrow', 'valewyn']);
   assert.deepEqual(await one('lyra_memory_1', ['keep_f1_arrived']), ['sorrow', 'sunken_keep']);

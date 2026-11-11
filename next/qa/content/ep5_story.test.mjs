@@ -270,12 +270,17 @@ test('the first five minutes: ep5_morning shows the letter early, Bram asks on t
   const kinds = Object.keys(PAGE_KINDS);
   PAGE_KINDS.ep5_letter = () => ({});
   try {
-    const log = await one('ep5_morning', [], { mapId: 'ep4_vw_inn' });
+    // issue #99: the morning plays on Yara's deck at night (from the Floodwatch Inn it only moves the party aboard)
+    const log = await one('ep5_morning', [], { mapId: 'ep5_ship' });
     const opened = log.findIndex((e) => e.op === 'closeup' && e.args[0] === 'ep5_letter');
     assert.ok(opened >= 0 && says(log.slice(0, opened)).length === 0, 'the letter is the first thing shown');
     assert.deepEqual(log[opened].args[1], { mode: 'blank' });
     assert.ok(says(log).length <= 6);
     assert.ok(ops(log, 'give').some((e) => e.args[0] === 'star_letter'));
+    assert.ok(ops(log, 'setFlag').some((e) => e.args[0] === 'ship_boarded'), 'aboard already: ship_night follows on the same arrival');
+    const inn = await one('ep5_morning', [], { mapId: 'ep4_vw_inn' });
+    assert.deepEqual(ops(inn, 'warp')[0].args, ['ep5_ship', 5, 7, 'right'], 'the old wake room moves the party aboard');
+    assert.ok(!ops(inn, 'setFlag').length && !says(inn).length, 'and plays nothing there');
   } finally { for (const k of Object.keys(PAGE_KINDS)) if (!kinds.includes(k)) delete PAGE_KINDS[k]; }
   const bram = await one('ship_bram', ['ship_arrived']);
   assert.equal(says(bram).length, 3);
@@ -340,7 +345,7 @@ test('the switch: with EP5_LIVE false nothing in Episode 5 is reachable; Fine Pr
 
 // Each map's track (plan 8.2). A scene that changes the music puts its map's track back before it ends.
 const SCENE_TRACK = {
-  ep5_morning: 'valewyn', haven_view: 'ash_road', haven_arrival: 'saffron', star_reading: 'orrery', sel_memory_1: 'labyrinth',
+  ep5_morning: 'mystery', haven_view: 'ash_road', haven_arrival: 'saffron', star_reading: 'orrery', sel_memory_1: 'labyrinth',
   sel_memory_2: 'labyrinth', vex_gallery: 'labyrinth', mirage_knight: 'labyrinth', sel_memory_3: 'mystery', landing_return: 'mystery',
 };
 test('music cues follow the cue sheet and return to the map track (plan 8.3)', async () => {
@@ -350,7 +355,7 @@ test('music cues follow the cue sheet and return to the map track (plan 8.3)', a
     if (m.length && !lost) assert.equal(m.at(-1), track, `${id} ends on ${m.at(-1)}`);
   }
   const mus = async (id, flags) => musics(await one(id, flags));
-  assert.deepEqual(await mus('ep5_morning', []), [null, 'valewyn']);
+  assert.deepEqual(await mus('ep5_morning', []), [null, 'mystery']);   // issue #99: the deck's track (ep5_ship), not Valewyn's
   assert.deepEqual(await mus('haven_view', ['road_landed']), ['mystery', 'ash_road']);
   assert.deepEqual(await mus('haven_arrival', ['road_landed']), [null, 'saffron']);
   assert.deepEqual(await mus('star_reading', ['met_sel']), [null, 'orrery']);

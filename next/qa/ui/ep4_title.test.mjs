@@ -73,9 +73,12 @@ test('hooks: credits entry 4 only with text.js CREDITS_EP4; the Episode 3 end ca
     assert.ok(r.waiting.some((w) => w.startsWith('quest')));
     assert.equal(CREDITS_HANDOFF[4].flag, 'ep4_complete');
     assert.equal(CREDITS_HANDOFF[3].endCard, EP4_LIVE ? END_CARD_EP3_LIVE : END_CARD_EP3, 'off: unchanged; live (E4-integrate): the morning card');
+    // issue #99: while live the Episode 3 credits wake the party at the washout; unregister puts the inn back
+    assert.deepEqual([CREDITS_HANDOFF[3].map, CREDITS_HANDOFF[3].mark], EP4_LIVE ? ['emberpeak', 'dawn_stage'] : ['pk_inn', 'inn_bed']);
     assert.equal(globalThis.LQ_EP4, HOOKS);
   } finally { unregister(); delete CREDITS_HANDOFF[4]; }
   assert.equal(globalThis.LQ_EP4, undefined);
+  assert.deepEqual([CREDITS_HANDOFF[3].map, CREDITS_HANDOFF[3].mark], ['pk_inn', 'inn_bed']);
 });
 
 test('LQ_DEBUG.newGameEp4 picks the run\'s own slot, refuses when every slot is full, and never writes', async () => {
@@ -89,9 +92,9 @@ test('LQ_DEBUG.newGameEp4 picks the run\'s own slot, refuses when every slot is 
     registerHooks(engine, {});
     assert.equal(typeof cmds.newGameEp4, 'function');
     const r = cmds.newGameEp4('Ada');
-    assert.deepEqual(r, { map: 'pk_inn', slot: 1 });
+    assert.deepEqual(r, { map: 'emberpeak', slot: 1 });   // issue #99: Episode 4 opens at the washout
     assert.equal(engine.game.autosaveSlot, 1);
-    assert.deepEqual(resets, [['field', { map: 'pk_inn', mark: 'inn_bed', dir: 'down' }]]);
+    assert.deepEqual(resets, [['field', { map: 'emberpeak', mark: 'dawn_stage', dir: 'down' }]]);
     assert.equal(save.exportSlot(1), null, 'nothing written until the field autosaves');
     for (let n = 1; n <= 3; n++) withGame(save, n);
     assert.equal(cmds.newGameEp4('Ada'), null);

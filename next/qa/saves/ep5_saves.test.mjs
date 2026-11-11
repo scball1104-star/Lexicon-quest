@@ -28,12 +28,13 @@ function ep4CreditsGame(name = 'Sol', slot = 0) {
   return g;
 }
 
-test('EP5_START: Lv 21 at 8,900 EXP, Episodes 1 to 4 done, four credits counters, key items, 3,200 gold, awake at ep4_vw_inn', async () => {
+// Issue #99 (2026-11-11): Episode 5 opens aboard Yara's ship at night; the quick start and the Episode 4 credits land on its deck.
+test('EP5_START: Lv 21 at 8,900 EXP, Episodes 1 to 4 done, four credits counters, key items, 3,200 gold, aboard the ship', async () => {
   await registerEp5();   // the ep4 pack's items (the Seal, the Trident, name_fragment_4) are registered first, as the quick start does
   const g = newGameEp5('Quill', { slot: 2 });
-  assert.equal(g.map, 'ep4_vw_inn');
-  assert.deepEqual([g.pos.x, g.pos.y], [17, 7]);
-  assert.equal(EP5_START.mark, 'inn_bed');
+  assert.equal(g.map, 'ep5_ship');
+  assert.deepEqual([g.pos.x, g.pos.y], [5, 7]);
+  assert.equal(EP5_START.mark, 'deck_start');
   assert.equal(g.autosaveSlot, 2);
   assert.equal(g.gold, 3200);
   assert.equal(g.chapter, 5);
@@ -87,7 +88,7 @@ test('every slot full: no quick start, the refusal only, and nothing written', (
   assert.equal(JSON.stringify([...storage._m.entries()].sort()), snap);
 });
 
-test('an Episode 4 credits save loads, rolls the Episode 4 credits with the unchanged end card, wakes at ep4_vw_inn, own slot only', async () => {
+test('an Episode 4 credits save loads, rolls the Episode 4 credits with the live end card, wakes aboard the ship, own slot only', async () => {
   await registerEp5();
   const { save, storage } = fresh();
   const g0 = ep4CreditsGame('Sol', 1);
@@ -97,19 +98,19 @@ test('an Episode 4 credits save loads, rolls the Episode 4 credits with the unch
   const has = (f) => !!g.flags[f];
   assert.equal(creditsPending(g, has), 4, 'the Episode 4 credits are due');
   const h = CREDITS_HANDOFF[4];
-  assert.equal(h.map, 'ep4_vw_inn');
-  assert.equal(h.mark, 'inn_bed');
-  assert.equal(h.endCard.sub, EP5_LIVE ? 'Episode 5 begins in the morning.' : 'Episode 5 is not playable yet.',
+  assert.equal(h.map, EP5_LIVE ? 'ep5_ship' : 'ep4_vw_inn');
+  assert.equal(h.mark, EP5_LIVE ? 'deck_start' : 'inn_bed');
+  assert.equal(h.endCard.sub, EP5_LIVE ? 'Episode 5 begins at sea.' : 'Episode 5 is not playable yet.',
     'the Episode 4 end card follows the switch (E5-integrate flipped it on the branch)');
   markCreditsRolled(g, 4);
-  setPosition(g, h.map, 17, 7, 'down');
+  setPosition(g, h.map, ...(EP5_LIVE ? [5, 7] : [17, 7]), 'down');
   assert.equal(creditsPending(g, has), 0, 'no Episode 5 credits entry is due');
   assert.equal(packsToAwait(g.flags).includes('ep5'), EP5_LIVE, 'the wake waits for the ep5 pack only while it is live');
   autosave(save, g);
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
-  assert.equal(save.load(1).map, 'ep4_vw_inn');
+  assert.equal(save.load(1).map, h.map);
   assert.equal(save.load(1).counters.credits4_rolled, 1);
-  assert.ok(!save.load(1).flags.ep5_started, 'nothing here runs ep5_morning (the field does, on the next enter of the inn)');
+  assert.ok(!save.load(1).flags.ep5_started, 'nothing here runs ep5_morning (the field does, on the next enter of the deck)');
 });
 
 test('an old save without any Episode 5 field (any slot) loads and autosaves to its own slot only', () => {

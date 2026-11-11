@@ -50,7 +50,10 @@ test('an Episode 4 credits fixture reaches ep5_morning with EP5_LIVE on, and not
   const was = GATE.live;
   try {
     GATE.live = true;
-    const on = await runOnce(scenes.ep5_morning, { flags, branchFlags: false, mapId: 'ep4_vw_inn' });
+    // issue #99: the inn (an old save's wake room) moves the party aboard; the morning plays there
+    const inn = await runOnce(scenes.ep5_morning, { flags, branchFlags: false, mapId: 'ep4_vw_inn' });
+    assert.deepEqual(inn.log.find((e) => e.op === 'warp').args, ['ep5_ship', 5, 7, 'right'], 'from the inn: aboard');
+    const on = await runOnce(scenes.ep5_morning, { flags, branchFlags: false, mapId: 'ep5_ship' });
     const set = on.log.filter((e) => e.op === 'setFlag').map((e) => e.args[0]);
     assert.ok(set.includes('ep5_started') && set.includes('ep5_morning_done'), `live: the morning plays (${set})`);
     assert.ok(on.log.some((e) => e.op === 'give' && e.args[0] === 'star_letter'));
@@ -96,53 +99,33 @@ test('with EP5_LIVE off no wake trigger fires and no ship is drawn; the berth do
   assert.deepEqual([trig.type, trig.script, trig.if, trig.ifNot], ['trigger', 'ep5_board', 'ep5_started', 'ship_boarded']);
 });
 
-test('ep5_morning stages in the room the party is in: the guest room after the credits, the taproom from the street', async () => {
+// Issue #99 (2026-11-11): Episode 5 opens on Yara's deck at night. The morning used to stage in the Floodwatch Inn's guest
+// room or taproom by where the party came in; now the ship is the one place and the inn only moves the party aboard.
+test('ep5_morning plays on the ship at night: the wake trigger comes before ship_night, every mark stands on the deck', async () => {
   await registerMaps();
   const db = await loadDb();
-  const inn = peekMap('ep4_vw_inn');
+  const ship = peekMap('ep5_ship');
   const flags = credits();
-  const grid = buildGrid({ ...withFlags(inn, new Set(flags)), events: [] }, db);
-  const reach = (from) => {
-    const seen = new Set([from.join(',')]), q = [from];
-    while (q.length) {
-      const [x, y] = q.pop();
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
-        if (nx < 0 || ny < 0 || nx >= grid.W || ny >= grid.H || seen.has(k) || grid.code[ny][nx] !== 'none') continue;
-        seen.add(k); q.push([nx, ny]);
-      }
+  const enters = ship.events.filter((e) => e.type === 'trigger' && e.on === 'enter').map((e) => e.script);
+  assert.deepEqual(enters.slice(0, 2), ['ep5_morning', 'ship_night'], 'the letter first, then the crossing on the same arrival');
+  const wake = ship.events.find((e) => e.id === 'ep5_wake');
+  assert.ok(present(wake, new Set(flags)), 'present for the credits fixture');
+  const grid = buildGrid({ ...withFlags(ship, new Set(flags)), events: [] }, db);
+  const marks = new Set();
+  const was = GATE.live;
+  GATE.live = true;
+  try {
+    const on = await runOnce(scenes.ep5_morning, { flags, branchFlags: false, mapId: 'ep5_ship' });
+    for (const e of on.log) {
+      if (e.op === 'walk' && typeof e.args[1] === 'string' && ship.marks[e.args[1]]) marks.add(e.args[1]);
+      if (e.op === 'spawn') marks.add(e.args[1].at);
     }
-    return seen;
-  };
-  // a scene API that records where everyone is sent, with the pack's leaderAt (field/events.js attach)
-  const play = async (at) => {
-    const walks = [];
-    const s = new Proxy({}, {
-      has: (t, k) => k === 'leaderAt',
-      get: (t, k) => {
-        if (k === 'then' || typeof k === 'symbol') return undefined;
-        if (k === 'leaderAt') return () => at;
-        if (k === 'hasFlag') return async (f) => flags.includes(f);
-        if (k === 'mapId') return 'ep4_vw_inn';
-        if (k === 'camera') return { panTo: async (m) => { walks.push(['camera', m]); }, follow: async () => {} };
-        if (k === 'walk') return async (who, m) => { walks.push([who, m]); };
-        if (k === 'spawn') return async (who, o) => { walks.push([who, o.at]); };
-        if (k === 'choice') return async () => 0;
-        return async () => {};
-      },
-    });
-    const was = GATE.live;
-    GATE.live = true;
-    try { await scenes.ep5_morning(s); } finally { GATE.live = was; }
-    return walks;
-  };
-  const guest = await play([17, 7]), tap = await play([10, 10]);
-  assert.deepEqual(guest.map(([, m]) => m), ['yara_table', 'inn_stage', 'mira_window', 'inn_stage_b', 'mira_window']);
-  assert.deepEqual(tap.map(([, m]) => m), ['yara_table_tap', 'inn_stage_tap', 'mira_window_tap', 'inn_stage_b_tap', 'mira_window_tap']);
-  const fromBed = reach(inn.marks.inn_bed), fromDoor = reach([10, 10]);
-  for (const [, m] of guest) assert.ok(fromBed.has(inn.marks[m].join(',')), `${m} ${inn.marks[m]} is reached from the bed`);
-  for (const [, m] of tap) assert.ok(fromDoor.has(inn.marks[m].join(',')), `${m} ${inn.marks[m]} is reached from the front door`);
-  assert.ok(!fromDoor.has(inn.marks.inn_stage.join(',')), 'the guest room is not reached from the taproom (the stair is a door)');
+    const set = on.log.filter((e) => e.op === 'setFlag').map((e) => e.args[0]);
+    assert.deepEqual(set, ['ep5_morning_done', 'ep5_started', 'ship_boarded']);
+  } finally { GATE.live = was; }
+  assert.deepEqual([...marks].sort(), ['deck_stage', 'deck_stage_b', 'mira_rail', 'yara_deck', 'yara_wheel']);
+  for (const m of marks) { const [x, y] = ship.marks[m]; assert.equal(grid.code[y][x], 'none', `${m} (${x},${y}) is deck`); }
+  assert.deepEqual(ship.marks.deck_start, [5, 7], 'the credits and the quick start land on deck_start');
 });
 
 test('the cold first entry: an unpatched inn or Valewyn is re-entered once the patches are registered, only when it matters', async () => {

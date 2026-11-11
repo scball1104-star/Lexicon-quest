@@ -29,7 +29,7 @@ async function creditsFlags() {
 
 test('order trap, both real packs: the ep5 maps register first, then the real ep6 patches land on their modules', async () => {
   const r = await registerMaps();
-  assert.deepEqual(r.patched.sort(), ['ep5_saffron', 'ep5_sh_inn']);
+  assert.deepEqual(r.patched.sort(), ['ep5_saffron', 'ep5_sh_inn', 'ep5_sh_observatory']);   // the last: Episode 6 opens there (issue #99)
   assert.deepEqual(r.loaded, EP6_MAP_IDS, `every Episode 6 map module loads (skipped ${r.skipped})`);
   assert.equal(r.skipped.length, 0);
   assert.equal(mapReport().patchFile, true);
@@ -41,6 +41,9 @@ test('order trap, both real packs: the ep5 maps register first, then the real ep
   for (const e of ep5Inn.events) assert.ok(inn.events.includes(e), `kept ${e.id}`);
   for (const e of ep5Saffron.events) assert.ok(sh.events.includes(e), `kept ${e.id}`);
   assert.deepEqual(sh.ground, ep5Saffron.ground);
+  const tower = peekMap('ep5_sh_observatory');
+  assert.ok(tower.events.some((e) => e.id === 'ep6_wake_obs' && e.on === 'enter' && e.script === 'ep6_morning'), 'the tower runs the morning');
+  for (const m of ['obs_stage6', 'obs_mira6', 'obs_bram6', 'bird_window', 'bird_perch']) assert.ok(tower.marks[m], `tower mark ${m}`);
   assert.equal(await registerMaps(), r, 'idempotent');
 });
 
@@ -56,7 +59,11 @@ test('an Episode 5 credits fixture reaches ep6_morning with EP6_LIVE on, and not
   const was = GATE.live;
   try {
     GATE.live = true;
-    const on = await runOnce(scenes.ep6_morning, { flags, branchFlags: false, mapId: 'ep5_sh_inn' });
+    // issue #99: the inn (an old save's wake room) moves the party up to the tower, where the morning plays
+    const inn = await runOnce(scenes.ep6_morning, { flags, branchFlags: false, mapId: 'ep5_sh_inn' });
+    assert.deepEqual(inn.log.find((e) => e.op === 'warp').args, ['ep5_sh_observatory', 7, 8, 'up'], 'from the inn: to the tower');
+    assert.ok(!inn.log.some((e) => e.op === 'setFlag'), 'and sets nothing there');
+    const on = await runOnce(scenes.ep6_morning, { flags, branchFlags: false, mapId: 'ep5_sh_observatory' });
     const set = on.log.filter((e) => e.op === 'setFlag').map((e) => e.args[0]);
     assert.ok(set.includes('ep6_started') && set.includes('ep6_morning_done'), `live: the morning plays (${set})`);
     assert.ok(on.log.some((e) => e.op === 'give' && e.args[0] === 'boarding_slip'));

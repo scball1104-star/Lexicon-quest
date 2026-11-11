@@ -15,6 +15,7 @@ import { EP4_LIVE } from '../../game/episodes.js';
 import * as STORY from '../../game/story.js';
 import { REWARDS_EP4 } from './quests.js';
 import { EPISODE5_CARD } from './text.js';
+import { standsOn } from '../maps/ep3/_opening.js';
 
 // Speakers with portraits (a missing one draws none). Every tag of the Regent speaks with Lyra's own portrait (`lyra`, ep4_portraits.json: noble_lady aged, E4-fixes-B).
 const PORTRAIT = {
@@ -46,17 +47,27 @@ const cut = (fn, cond) => async (s) => {
 // Act I: Emberpeak, the morning after
 // ================================================================================================
 
-// 1. pk_inn, on enter after the Episode 3 credits (the pack's ep4_wake trigger; also on enter of emberpeak for saves
-// made outside). 12 boxes. Ada and Garrick are scene spawns. Gives running_decree. Sets ep4_morning_done, ep4_started.
+// 1. emberpeak, the east-road washout at first light (issue #99, WORLD_MAP_PLAN 4): the Episode 3 credits and the quick
+// start put the party at dawn_stage (the pack's ep4_wake_pk trigger); pk_inn (an old save's wake room, ep4_wake) and any
+// other spot in town move the party to the washout first. Ada comes up over the edge on the rope. 12 boxes. Ada and
+// Garrick are scene spawns. Gives running_decree. Sets ep4_morning_done, ep4_started. A step east runs east_road_gate.
+export const DAWN_STAGE = [35, 15];
 async function ep4_morning(s) {
-  const street = s.mapId === 'emberpeak';
-  await s.spawn('ada_t', { sprite: 'npc_courier_v', name: 'Ada', at: street ? 'inn_door' : 'ada_hearth', dir: 'left' });
+  if ((typeof s.mapId === 'string' && s.mapId !== 'emberpeak') || !standsOn(s, DAWN_STAGE, true)) {
+    await s.fade('out', 30);
+    s.warp('emberpeak', DAWN_STAGE[0], DAWN_STAGE[1], 'right');
+    return;
+  }
+  if ('openingTint' in s) await s.openingTint('dawn');
+  await s.spawn('ada_t', { sprite: 'npc_courier_v', name: 'Ada', at: 'ada_rope', dir: 'left' });
+  await s.face('hero', 'right');
   await s.fade('in', 60);
-  if (!street) await s.emote('hero', 'zzz');
-  await s.camera.panTo(street ? 'inn_door' : 'ada_hearth', 40);
-  await narrate(s, street
-    ? 'Morning in Emberpeak. A soaked courier stands by the inn wall, holding a paper out to the warm air.'
-    : 'Morning at the Coal Lantern. Bess has the stove roaring. The courier sits at the hearth with a paper on the rail.');
+  await all(s.walk('mira', 'dawn_mira'), s.walk('bram', 'dawn_bram'));
+  await all(s.face('mira', 'right'), s.face('bram', 'right'));
+  await s.camera.panTo('east_road', 40);
+  await narrate(s, 'First light at the washout. A soaked courier climbs up over the edge on a rope, a paper held out to the warm air.');
+  await s.walk('ada_t', 'ada_brink');
+  await s.face('ada_t', 'hero');
   await say(s, 'ada_t', "Three days on the road and it's still wet. Everything the palace sends is wet now. Except the orders.");
   await narrate(s, 'The print runs down the page in grey streaks. One line, in another ink, stays put: "The gates. Please."');
   await say(s, 'mira', "The printed part is running. This line isn't. Different ink. Different hand.");
@@ -70,12 +81,15 @@ async function ep4_morning(s) {
   else await say(s, 'ada_t', "The seal is. That's what scares me.");
   await s.give(REWARDS_EP4.decree.item, REWARDS_EP4.decree.qty);
   await s.music('first_bell');
-  await s.spawn('garrick_t', { sprite: 'npc_smith', name: 'Garrick', at: street ? 'gather_garrick' : 'garrick_door', dir: 'up' });
+  await s.spawn('garrick_t', { sprite: 'npc_smith', name: 'Garrick', at: 'inn_door', dir: 'down' });
+  await s.walk('garrick_t', 'garrick_dawn');
+  await s.face('garrick_t', 'bram');
   await s.camera.follow('hero');
   await say(s, 'garrick_t', "East road's washed out past the ridge. Rusk has rope.");
   await say(s, 'bram', 'Come home after?');
   await say(s, 'garrick_t', "That's my line.");
   await all(s.despawn('garrick_t'), s.despawn('ada_t'));
+  await s.tint('none', 60);
   await s.setFlag('ep4_morning_done');
   await s.setFlag('ep4_started');
 }

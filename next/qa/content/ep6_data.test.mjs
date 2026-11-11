@@ -344,7 +344,7 @@ test('text: 11 banners (Zephyr conditional), 3 books, the barks, 11 bestiary ent
   for (const s of [END_CARD_EP6.text, END_CARD_EP6.sub, END_CARD_EP5_LIVE.sub, EPISODE7_CARD.text, EPISODE7_CARD.sub, END_TITLE_EP6.text,
     END_TITLE_EP6.sub]) assert.ok(s.length <= 42 && ascii(s), s);
   assert.equal(END_CARD_EP6.sub, 'Episode 7 is not playable yet.');
-  assert.equal(END_CARD_EP5_LIVE.sub, 'Episode 6 begins in the morning.');
+  assert.equal(END_CARD_EP5_LIVE.sub, 'Episode 6 begins that night.');   // issue #99: Episode 6 opens in the tower at night
   for (const t of Object.values(EP6_BATTLE_TEXT)) assert.ok(t.length <= 100 && fits(t) && ascii(t), t);
   assert.ok(EP6_BATTLE_TEXT.anchor_help.length <= 40);
   assert.equal(EP6_BATTLE_TEXT.anchor_learn, 'Bram learned Anchor. The party holds through the next gust, and the wind carries them on.');

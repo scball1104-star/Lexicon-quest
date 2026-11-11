@@ -16,7 +16,7 @@ import { isMissing } from '../ep4/index.js';
 export const EP6_MAP_IDS = ['ep6_airstair', 'ep6_zephyr', 'ep6_zl_inn', 'ep6_zl_shop', 'ep6_zl_workshop', 'ep6_zl_charts',
   'ep6_obs_f1', 'ep6_obs_f2', 'ep6_obs_f3', 'ep6_obs_eyrie', 'ep6_library'];
 /** Episode 5 map id -> the patch export of ep6_patches.js that edits it. */
-export const PATCHES = { ep5_sh_inn: 'withEp6Wake', ep5_saffron: 'withSkyBerth' };
+export const PATCHES = { ep5_sh_inn: 'withEp6Wake', ep5_saffron: 'withSkyBerth', ep5_sh_observatory: 'withObsWake' };   // the last: issue #99
 export const PATCH_FILE = '../maps/ep6_patches.js';
 const FILES = [...EP6_MAP_IDS.map((id) => `../maps/${id}.js`), PATCH_FILE];
 

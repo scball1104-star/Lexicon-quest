@@ -13,11 +13,17 @@
 //   - ep4_wake_pk, the twin of the inn's wake trigger (plan 10.2): a save made in the street after the Episode 3 credits
 //     starts ep4_morning on the next arrival (the scene's guards: ep3_complete, not ep4_morning_done, not tier_1, live).
 //   With EP4_LIVE off nothing sets ep4_started or east_road_open, so the drop stays water and the trigger never exists.
-// withEp4Wake(pk_inn): the enter trigger ep4_wake (0,0) for ep4_morning, and the marks ada_hearth (5,4: at the hearth, by
-//   the counter's end) and garrick_door (11,10: inside the door) beside the existing inn_bed.
+//   Issue #99 (WORLD_MAP_PLAN 4): Episode 4 opens here, at the washout at first light. The Episode 3 credits and the quick
+//   start put the party at dawn_stage (35,15), one step west of east_road_trig; the morning's marks: dawn_mira (35,14),
+//   dawn_bram (34,15), ada_rope (38,14) on the drop where Ada comes up, ada_brink (37,14), garrick_dawn (34,14) (Garrick
+//   comes out of the inn door, inn_door (34,13)). `opening_stage` (ep3/_opening.js) gives the scene leaderAt and openingTint.
+// withEp4Wake(pk_inn): the enter trigger ep4_wake (0,0) for ep4_morning (now only an old save's wake room: the scene
+//   moves the party to the washout), and the marks ada_hearth (5,4) and garrick_door (11,10) beside the existing inn_bed.
 // Neither trigger can read the counter credits3_rolled (a trigger's if/ifNot read flags only); both carry if: ep3_complete,
 // and the field rolls the Episode 3 credits the moment ep3_complete is set, so a party never stands in either map with
 // ep3_complete and the credits still to come.
+
+import { STAGE } from './ep3/_opening.js';
 
 const has = (m, id) => (m.events || []).some((e) => e.id === id);
 
@@ -30,12 +36,14 @@ export function withEastRoad(base) {
     { id: 'rope_ladder', type: 'object', x: 39, y: 15, sprite: 'rope_ladder', solid: false, text: 'ep4_rope_ladder', if: OPEN },
     { id: 'east_road_down', type: 'door', x: 39, y: 15, to: ['ep4_flood_road', 1, 15, 'right'], kind: 'door', if: OPEN },
     { id: 'ep4_wake_pk', type: 'trigger', x: 0, y: 0, w: 1, h: 1, script: 'ep4_morning', on: 'enter', if: 'ep3_complete' },
+    STAGE,
   );
   const overlays = [
     ...(base.overlays || []),
     { t: 'cinder_path', x: 38, y: 14, if: OPEN }, { t: 'cinder_path', x: 38, y: 15, if: OPEN }, { t: 'cinder_path', x: 39, y: 15, if: OPEN },
   ];
-  return { ...base, events, overlays, marks: { ...base.marks, east_road_brink: [38, 15] } };
+  return { ...base, events, overlays, marks: { ...base.marks, east_road_brink: [38, 15],
+    dawn_stage: [35, 15], dawn_mira: [35, 14], dawn_bram: [34, 15], ada_rope: [38, 14], ada_brink: [37, 14], garrick_dawn: [34, 14] } };
 }
 
 export function withEp4Wake(base) {

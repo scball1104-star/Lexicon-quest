@@ -29,11 +29,11 @@ export const EP5_LOADOUT = { source: 'ep4_keep_crown', plus: { bram: { spear: 't
 
 /**
  * Lv 21 at 8,900 EXP, every Episode 1 to 4 main flag plus ep4_complete and lyra_named, the four credits counters, the
- * Episode 1 to 4 key items, 3,200 gold, awake in the Floodwatch Inn at `inn_bed` (ep4_vw_inn (17, 7)) so ep5_morning runs
- * (while EP5_LIVE).
+ * Episode 1 to 4 key items, 3,200 gold, aboard Yara's ship at night at `deck_start` (ep5_ship (5, 7), issue #99) so
+ * ep5_morning runs (while EP5_LIVE).
  */
 export const EP5_START = {
-  level: 21, exp: 8900, gold: 3200, map: 'ep4_vw_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
+  level: 21, exp: 8900, gold: 3200, map: 'ep5_ship', mark: 'deck_start', pos: { x: 5, y: 7, dir: 'right' },
   items: { potion: 6, hi_potion: 8, hi_ether: 5, phoenix_feather: 3, silver_salve: 3,
     name_fragment_1: 1, name_fragment_2: 1, name_fragment_3: 1, name_fragment_4: 1, lantern_of_recall: 1, mirror_sigil: 1 },
   counters: ['credits_rolled', 'credits2_rolled', 'credits3_rolled', 'credits4_rolled'],

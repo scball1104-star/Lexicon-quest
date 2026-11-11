@@ -28,6 +28,10 @@ import * as EPISODES from '../../game/episodes.js';
 import * as STORY from '../../game/story.js';
 import { PAGE_KINDS } from '../../world/closeup.js';
 import { REWARDS_EP6 } from './quests.js';
+import { standsOn } from '../maps/ep3/_opening.js';
+
+/** Where Episode 6 opens: the Armillary Tower, by the great rings (ep6_patches.js withObsWake). */
+export const OBS_STAGE = [7, 8];
 import { EPISODE7_CARD, END_TITLE_EP6, EP6_ARC_LINES, EP6_BOSS_CARDS } from './text.js';
 
 // Speakers with portraits (a missing one draws none). Aeris, Pippa and the town have none (plan 9.5); the Scribe has its crop.
@@ -88,16 +92,26 @@ export const TIPS = {
 // Act I: Saffron Haven, the slip with four seats
 // ================================================================================================
 
-// 1. ep5_sh_inn, on enter after the Episode 5 credits (the pack patch's ep6_wake trigger checks credits5_rolled). Five
-// boxes, the slip's close-up by about 0:20, control after Bram's line and Mira's two. Gives boarding_slip. Sets
-// ep6_morning_done, ep6_started. The bird is narration at the sill (no bird sprite exists).
+// 1. ep5_sh_observatory, the Armillary Tower at night (issue #99, WORLD_MAP_PLAN 4): the Episode 5 credits and the quick
+// start put the party at obs_stage6, where Laleh read the sky (the pack patch's ep6_wake_obs trigger); the Dune Lantern Rest (an
+// old save's wake room, ep6_wake) and any other spot move the party up to the rings first. Five boxes, the slip's close-up by
+// about 0:20. The grey bird is a scene spawn (npc_grey_bird): in at the high window, onto the rings, out again. Gives
+// boarding_slip. Sets ep6_morning_done, ep6_started.
 async function ep6_morning(s) {
+  if ((typeof s.mapId === 'string' && s.mapId !== 'ep5_sh_observatory') || !standsOn(s, OBS_STAGE, true)) {
+    await s.fade('out', 30);
+    s.warp('ep5_sh_observatory', OBS_STAGE[0], OBS_STAGE[1], 'up');
+    return;
+  }
+  if ('openingTint' in s) await s.openingTint('night');
   await s.fade('in', 40);
-  await s.walk('hero', 'inn_stage6');
-  await all(s.walk('mira', 'mira_window6'), s.walk('bram', 'inn_stage6_b'));
-  await s.camera.panTo('bird_sill', 20);
+  await all(s.walk('mira', 'obs_mira6'), s.walk('bram', 'obs_bram6'));
+  await s.face('hero', 'up');
+  await s.spawn('bird', { sprite: 'npc_grey_bird', name: 'Bird', at: 'bird_window', dir: 'down', solid: false });
+  await s.camera.panTo('bird_perch', 20);
   await s.sfx('page_flutter');
-  await narrate(s, 'A small grey bird taps at the shutter, a silver ribbon on its leg. Mira unties it.');
+  await s.walk('bird', 'bird_perch', { speed: 'fast' });
+  await narrate(s, 'A small grey bird drops in at the high window and lands on the great rings, a silver ribbon on its leg. Mira unties it.');
   const open = await page(s, 'ep6_slip', 'burned');
   await say(s, 'mira', 'Somebody booked us passage. A week ago.');
   await s.music(null);
@@ -106,7 +120,9 @@ async function ep6_morning(s) {
   await s.face('mira', 'bram');
   await say(s, 'mira', "Then somebody's coming, or somebody's expected.");
   await s.give(REWARDS_EP6.slip.item, REWARDS_EP6.slip.qty);   // Mira folds the slip away
-  await s.music('saffron');
+  await s.walk('bird', 'bird_window', { speed: 'fast' });
+  await s.despawn('bird');
+  await s.music('orrery');
   await say(s, 'mira', 'The Oracle said a sky compass finds the page. This says where the compass is.');
   await s.camera.follow('hero');
   await s.setFlag('ep6_morning_done');

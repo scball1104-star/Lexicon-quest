@@ -19,7 +19,7 @@ const notFound = (p) => Object.assign(new Error(`Cannot find module '${p}' impor
 test('the map list is the eleven ids of plan 2.1, and the two patches are named', () => {
   assert.deepEqual(EP6_MAP_IDS, ['ep6_airstair', 'ep6_zephyr', 'ep6_zl_inn', 'ep6_zl_shop', 'ep6_zl_workshop', 'ep6_zl_charts',
     'ep6_obs_f1', 'ep6_obs_f2', 'ep6_obs_f3', 'ep6_obs_eyrie', 'ep6_library']);
-  assert.deepEqual(PATCHES, { ep5_sh_inn: 'withEp6Wake', ep5_saffron: 'withSkyBerth' });
+  assert.deepEqual(PATCHES, { ep5_sh_inn: 'withEp6Wake', ep5_saffron: 'withSkyBerth', ep5_sh_observatory: 'withObsWake' });
   assert.equal(PATCH_FILE, '../maps/ep6_patches.js');
   for (const id of EP6_MAP_IDS) assert.match(id, /^ep6_/, 'every map id carries the pack prefix');
 });

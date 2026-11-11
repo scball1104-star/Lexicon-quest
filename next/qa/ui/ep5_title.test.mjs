@@ -55,7 +55,7 @@ test('live: shown once any base-game slot has ep4_complete, naming the newest; n
 test('the row text matches plan 10.5 and 5.3', () => {
   assert.equal(EP5_ROW_LABEL, 'Episode 5: new party');
   assert.equal(EP5_ROW_HELP, 'A ready party at Lv 21. Your own save stays under Continue.');
-  assert.equal(END_CARD_EP4_LIVE.sub, 'Episode 5 begins in the morning.');
+  assert.equal(END_CARD_EP4_LIVE.sub, 'Episode 5 begins at sea.');   // issue #99
   assert.equal(END_CARD_EP4_LIVE.text, END_CARD_EP4.text);
   assert.equal(END_CARD_EP4_LIVE.backdrop, END_CARD_EP4.backdrop);
   for (const s of [EP5_ROW_LABEL, EP5_ROW_HELP, END_CARD_EP4_LIVE.sub]) assert.ok(!/[^\x20-\x7e]/.test(s) && s.length <= 60, `plain ASCII, short: ${s}`);
@@ -108,10 +108,10 @@ test('LQ_DEBUG.newGameEp5 picks the run\'s own slot, readies both packs, refuses
     registerHooks(engine, {});
     assert.equal(typeof cmds.newGameEp5, 'function');
     const r = await cmds.newGameEp5('Ada');
-    assert.deepEqual(r, { map: 'ep4_vw_inn', slot: 1 });
+    assert.deepEqual(r, { map: 'ep5_ship', slot: 1 });   // issue #99: Episode 5 opens on the deck
     assert.equal(engine.game.autosaveSlot, 1);
     assert.equal(engine.game.chapter, 5);
-    assert.deepEqual(resets, [['field', { map: 'ep4_vw_inn', mark: 'inn_bed', dir: 'down' }]]);
+    assert.deepEqual(resets, [['field', { map: 'ep5_ship', mark: 'deck_start', dir: 'down' }]]);
     assert.ok(Object.keys(merged.music).length + Object.keys(merged.sfx).length > 0, 'the ep4 audio fragment reached this engine before the field');
     assert.equal(save.exportSlot(1), null, 'nothing written until the field autosaves');
     for (let n = 1; n <= 3; n++) withGame(save, n);
@@ -131,7 +131,7 @@ test('LQ_EP5.start: both packs first, then the game, then the fade; it saves onl
   assert.equal(engine.game.autosaveSlot, 2);
   assert.equal(typeof faded, 'function');
   faded();
-  assert.deepEqual(resets, [['field', { map: 'ep4_vw_inn', mark: 'inn_bed', dir: 'down' }]]);
+  assert.deepEqual(resets, [['field', { map: 'ep5_ship', mark: 'deck_start', dir: 'down' }]]);
   assert.equal(save.exportSlot(2), null);
   assert.ok(save.exportSlot(0), 'the other run is still there');
   assert.equal(newGameEp5('X').map, engine.game.map);

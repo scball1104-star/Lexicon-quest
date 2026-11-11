@@ -13,7 +13,12 @@
 import { registerMap } from '../../../world/maps.js';
 import nameless_hollow from '../nameless_hollow.js';
 import nh_inn from '../nh_inn.js';
-import { withEastGate, withInnMarks } from './hollow_gate.js';
+import { withEastGate, withInnMarks, WALL_WAKE } from './hollow_gate.js';
+import { EP3_TILES } from './_open_tiles.js';
+import './_opening.js';
+import { mergeTileFragment } from '../../../game/packs.js';
+import { CREDITS_HANDOFF } from '../../../game/story.js';
+import { EP3_START } from '../../../game/state.js';
 import sand_road from './sand_road.js';
 import emberpeak from './emberpeak.js';
 import pk_inn from './pk_inn.js';
@@ -29,13 +34,29 @@ export const ID = 'ep3';
 export const MAPS = [sand_road, emberpeak, pk_inn, pk_shop, pk_smithy, pk_bellhouse, foundry_f1, foundry_f2, foundry_f3, foundry_heart];
 export const EP3_MAP_IDS = MAPS.map((m) => m.id);
 
+/**
+ * Issue #99: Episode 3 opens on Hollowmere's east wall walk (hollow_gate.js), not in the inn. The Episode 2 credits handoff
+ * and the Episode 3 quick start land there (both are core tables; the pack points them, as the ep4 pack points the Episode 3
+ * end card), and ep3_morning moves any other arrival (an old save in nh_inn) up to the wall.
+ */
+export function pointOpening() {
+  if (CREDITS_HANDOFF[2]) Object.assign(CREDITS_HANDOFF[2], { map: 'nameless_hollow', mark: 'wall_wake' });
+  Object.assign(EP3_START, { map: 'nameless_hollow', mark: 'wall_wake', pos: { x: WALL_WAKE[0], y: WALL_WAKE[1], dir: 'up' } });
+}
+
 let done = null;
 /** Register the ten maps and the two edited core maps. Idempotent. Resolves { id, loaded, skipped }. */
-export function register() {
+export function register(engine) {
   if (!done) {
     for (const m of MAPS) registerMap(m);
     registerMap(withEastGate(nameless_hollow));
     registerMap(withInnMarks(nh_inn));
+    pointOpening();
+    // the opening's tiles (tools/art/tiles/ep3_wall.py): the pack's own sheet, merged the way a pack manifest's fragment is
+    const assets = engine && engine.assets;
+    const art = assets && typeof assets.loadImage === 'function'
+      ? assets.loadImage('ep3', 'assets/tiles/ep3.png').then(() => { const db = assets.json('tiles', null); if (db) mergeTileFragment(db, EP3_TILES); }, () => {})
+      : null;
     // The field code these maps need (src/world/ep3/, lazy, never precached) rides on the pack: it is imported here, and
     // fetched again once the service worker controls the page (a first visit loads the pack before the worker takes over),
     // so it sits in the worker's runtime cache with the maps and the episode plays offline after one visit even if the
@@ -47,7 +68,7 @@ export function register() {
       const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
       if (sw && !sw.controller && sw.addEventListener) sw.addEventListener('controllerchange', warm, { once: true }); else warm();
     }
-    done = Promise.resolve({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] });
+    done = Promise.resolve(art).then(() => ({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] }));
   }
   return done;
 }

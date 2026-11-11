@@ -97,12 +97,22 @@ Everything in `STAGING.md` section 2 holds: `marks: { name: [x, y] }`, NPC event
 
 ## 3. Scenes, map by map
 
+### `ep5_ship` (issue #99: enter trigger `ep5_wake` before `ship_enter`; mark `yara_deck`)
+
+- `ep5_morning`, on deck at night mid-crossing (issue #99, `docs/WORLD_MAP_PLAN.md` section 4). The Episode 4 credits and
+  the quick start land on `deck_start`; the enter trigger `ep5_wake` runs first. From `ep4_vw_inn` (an old save's wake room:
+  the patch's `ep5_wake` below) it fades out and moves the party aboard (`deck_start`), where it plays. Tint `sea_night`
+  (`s.openingTint`, the ep3 pack's `opening_stage`). Spawns `yara_t` at `yara_deck` by the rail. Fades in; the hero walks to
+  `deck_stage`, Mira to `mira_rail`, Bram to `deck_stage_b`. Pans to `mira_rail`, opens `ep5_letter` (`blank`). Music: the
+  deck's track `mystery`, silence on "Whose is gone?", `mystery` again after the hero's `...` and the letter goes in the bag.
+  6 boxes. Gives `star_letter`. Yara walks to `yara_wheel` and is despawned (`ship_night` spawns her there). Sets
+  `ep5_morning_done`, `ep5_started` and `ship_boarded`, so `ship_night` plays next on the same arrival and `ep5_board` (the
+  Valewyn berth) is only for a save made between the old inn morning and the crossing.
+
 ### `ep4_vw_inn` (patch: trigger `ep5_wake`; marks `yara_table`, `mira_window`, `inn_stage`, `inn_stage_b`, existing `inn_bed`)
 
-- `ep5_morning`, enter trigger `ep5_wake`. Spawns `yara_t` at `yara_table`. Fades in; the hero walks to `inn_stage`, Mira
-  to `mira_window`, Bram to `inn_stage_b` (`inn_stage` two tiles from the window, `inn_stage_b` beside it). Pans to
-  `mira_window`, opens `ep5_letter` (`blank`). Music: the map track `valewyn`, silence on "Whose is gone?", `valewyn`
-  again after the hero's `...` and the letter goes in the bag. 6 boxes. Gives `star_letter`. Yara stays at the table.
+- The old wake room (until issue #99 the morning played here, by the window or in the taproom). `ep5_wake` stays for a save
+  made here after the Episode 4 credits: `ep5_morning` moves the party aboard `ep5_ship`. The marks stay unused.
 
 ### `ep4_valewyn` (patch: `ship_moored`, `ship_berth`, `berth_sail`, `berth_south`; marks `berth_yara`, `berth_stage`, `berth_stage_m`, `berth_stage_b`)
 
