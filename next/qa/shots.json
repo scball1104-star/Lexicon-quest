@@ -5593,12 +5593,18 @@
      "timeout": 8000
     },
     {
+     "advance": 12
+    },
+    {
      "press": "confirm",
      "frames": 1
     },
     {
      "waitFor": "LQ_DEBUG.scene() === 'dialog' && LQ_DEBUG.state().sceneState.done && LQ_DEBUG.state().sceneState.choiceIndex !== null",
      "timeout": 8000
+    },
+    {
+     "advance": 12
     },
     {
      "press": "confirm",
