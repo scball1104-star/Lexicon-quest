@@ -162,13 +162,10 @@ def recolour_glass(a, pid, ox, oy, blank_face=False):
     return out
 
 
-# Bram's Reflection keeps BROWN hair: the committed (and shipped) refl_bram frames in npcs, enemies_battle and
-# enemies_field were drawn from the brown Bram of 10/25, before Bram's grey went on by default (17b7b87, 11/3).
-# Issue #61: this module used to read party_field.png / party_battle.png back from disk, so every build after 11/3
-# saw the grey Bram and quietly redrew his reflection. It now builds the party atlases in memory with the grey
-# pinned here, so the result no longer depends on the flag, the step order or what is on disk. Turning the
-# reflection grey is an art change for Scott and Stephen: set True, rebuild, commit the three atlases.
-REFL_BRAM_GREY = False
+# Bram's Reflection matches Bram's grey hair (Scott, 2026-11-11, issue #89: "turn his hair gray to match"). Until then
+# the shipped refl_bram frames were drawn from the brown Bram of 10/25. Issue #61: this module builds the party atlases
+# in memory with the grey pinned here, so the result does not depend on the flag, the step order or what is on disk.
+REFL_BRAM_GREY = True
 _SHEETS = {}
 
 

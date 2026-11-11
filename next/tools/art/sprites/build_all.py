@@ -9,7 +9,7 @@ previews in tools/art/sprites/out/.
 Reads next/assets/palette.json (W1-tiles) at build time; re-run after palette tweaks.
 Bram's grey beard, temples and crown (E3-sprites, plan 9.2) are ON by default; the one flag is bram_grey.ENABLED, off for a
 build with the environment variable LQ_BRAM_GREY=0 (bram_grey.py also writes the before/after preview). Bram's
-Reflection (refl_bram) stays brown either way: ep2_reflections.REFL_BRAM_GREY (issue #61).
+Reflection (refl_bram) follows ep2_reflections.REFL_BRAM_GREY (grey since issue #89), whatever is on disk (issue #61).
 Later steps read atlases that earlier steps wrote (x1 and ep5 read enemies_field and npcs, ep4 reads portraits), so
 keep the order.
 """
