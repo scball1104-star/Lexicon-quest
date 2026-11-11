@@ -323,6 +323,7 @@
   "src/data/worldmap/field.js",
   "src/data/worldmap/index.js",
   "src/data/worldmap/layout.js",
-  "src/data/worldmap/scene.js"
+  "src/data/worldmap/scene.js",
+  "src/data/worldmap/travel.js"
  ]
 }

@@ -89,17 +89,26 @@ export const MAP_AT = [
 ];
 
 /**
- * The map stones (waystones) at town gates and docks (plan 2.3 item 4): map id -> [{ id, x, y }]. Each cell is plain floor
+ * The map stones (waystones) at town gates and docks (plan 2.3 item 4): map id -> [{ id, x, y, at }]. Each cell is plain floor
  * beside the way in, never on a path a door, an exit or a staged scene needs (qa/worldmap/worldmap.test.mjs walks every map
- * with and without its stones: the same cells stay reachable).
+ * with and without its stones: the same cells stay reachable). `at` [x, y, dir] is where travel lands the party (wave 3): an
+ * open cell beside the stone, facing away from it, with two open cells behind for the followers (the field lines them up
+ * before the stones join the map, so the trail must not cross the stone).
  */
 export const STONES = {
-  willowmere: [{ id: 'wm_stone_gate', x: 15, y: 27 }, { id: 'wm_stone_ferry', x: 43, y: 3 }],
-  nameless_hollow: [{ id: 'wm_stone_gate', x: 16, y: 30 }, { id: 'wm_stone_ferry', x: 14, y: 4 }],
-  emberpeak: [{ id: 'wm_stone_gate', x: 17, y: 29 }],
-  ep4_valewyn: [{ id: 'wm_stone_landing', x: 24, y: 30 }],
-  ep5_saffron: [{ id: 'wm_stone_gate', x: 19, y: 30 }, { id: 'wm_stone_dock', x: 6, y: 26 }],
-  ep6_zephyr: [{ id: 'wm_stone_stair', x: 24, y: 27 }, { id: 'wm_stone_dock', x: 25, y: 6 }],
+  willowmere: [{ id: 'wm_stone_gate', x: 15, y: 27, at: [14, 27, 'up'] }, { id: 'wm_stone_ferry', x: 43, y: 3, at: [43, 4, 'right'] }],
+  x1_downs: [{ id: 'wm_stone_gate', x: 50, y: 22, at: [50, 23, 'left'] }],
+  nameless_hollow: [{ id: 'wm_stone_gate', x: 16, y: 30, at: [15, 30, 'up'] }, { id: 'wm_stone_ferry', x: 14, y: 4, at: [13, 4, 'down'] }],
+  emberpeak: [{ id: 'wm_stone_gate', x: 17, y: 29, at: [17, 28, 'right'] }],
+  ep4_valewyn: [{ id: 'wm_stone_landing', x: 24, y: 30, at: [24, 29, 'right'] }],
+  ep5_saffron: [{ id: 'wm_stone_gate', x: 19, y: 30, at: [19, 29, 'left'] }, { id: 'wm_stone_dock', x: 6, y: 26, at: [7, 26, 'down'] }],
+  ep6_zephyr: [{ id: 'wm_stone_stair', x: 24, y: 27, at: [23, 27, 'up'] }, { id: 'wm_stone_dock', x: 25, y: 6, at: [25, 7, 'right'] }],
+};
+
+/** Each town's own field map (the one its stones stand on): travel's destinations (wave 3). */
+export const TOWN_MAP = {
+  willowmere: 'willowmere', thornfold: 'x1_downs', hollowmere: 'nameless_hollow', emberpeak: 'emberpeak',
+  valewyn: 'ep4_valewyn', saffron: 'ep5_saffron', zephyr: 'ep6_zephyr',
 };
 
 /** The copy of the map screen (player text: no em dashes). */
@@ -111,6 +120,20 @@ export const TEXT = {
   heard: 'Heard of, never seen.',
   walk: 'Walk the roads to get there.',
   back: 'back',
+  // wave 3: travel
+  travel: 'Travel here.',
+  road: 'By road', sea: 'By sea', air: 'By air',
+  going: 'On the road...',
+  offline: 'That road is not ready yet. Try again with a connection.',
+  why: {
+    rumour: 'Heard of, never seen. Walk the roads to get there.',
+    here: 'You are already here.',
+    dungeon: 'The map only shows the way from here. Walk out first.',
+    aboard: 'The ship is under sail. Land first, then travel.',
+    scene: 'Not now.',
+    busy: 'Not now.',
+    locked: 'Walk the roads to get there.',
+  },
 };
 
 // ------------------------------------------------------------------------------------------------- reading the flags

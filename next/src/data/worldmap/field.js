@@ -4,7 +4,7 @@
 // A stone is an event of the pack's own type `worldmap_stone` at a cell of data.js STONES. attach(field) wraps this field's
 // glass.reset (the field calls it right after building a map's entities, on every map load) so the stones of the new map
 // join its entities there, the way Episode 4's attach wraps the same seam (src/data/ep4/field/events.js). A field already
-// standing on a stone map when the pack comes up gets its stones at once (addStones). Interact: the map screen, view only.
+// standing on a stone map when the pack comes up gets its stones at once (addStones). Interact: the map screen (travel from it: ./travel.js, wave 3).
 // The stone is drawn lit while the party stands within two cells of it (the wrapped glass.update reads that per frame).
 
 import { EXT, INTERACT_TYPES } from '../../world/events.js';
