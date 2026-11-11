@@ -22,7 +22,6 @@ const CMD_HELP = {
   defend: 'Halve damage this turn.', swap: 'Switch weapons.', flee: 'Try to run away.',
 };
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-const FLEE_ARM_FRAMES = 72;
 /** While a telegraph's skill has `flag`, `unit` opens on Tech with `skill` first, in gold (packs add theirs; see sig). */
 export const SIGNATURE_TECHS = [{ unit: 'bram', flag: 'turnable', skill: 'tempered_oath' }];
 const CMD_ICON = { attack: 'sword', tech: 'scroll', magic: 'magic', fury: 'fury', combo: 'combo', item: 'bag', defend: 'shield', swap: 'swap', flee: 'flee' };
@@ -45,7 +44,7 @@ export class CommandMenu {
     this.tapArmed = null;
     this.touch = false;
     this.fleeCmd = null;     // the Flee command while the touch layout keeps it out of the grid
-    this.fleeArmed = 0;      // frames left on the FLEE button's "tap again" window
+    this.fleeArmed = 0;      // 1 while the FLEE button is armed (until the second tap or any other menu input)
     this.cmdRect = cmdWin(false);
     this.subRect = subWin(false);
   }
@@ -95,12 +94,13 @@ export class CommandMenu {
     this.showHelp = false;      // the telegraph (if any) owns the help window until the cursor moves
     this.syncHelp();
   }
-  /** Touch FLEE button: the first tap arms it, a second within about a second returns the flee action. */
+  /** Touch FLEE button: the first tap arms it (as moving the cursor onto Flee does on keys), a second tap returns the
+   *  flee action. No clock (#74, docs/ACCESSIBILITY.md item 9): the arm holds until the second tap or another input. */
   fleeTap(audio) {
     if (this.state !== 'root' || !this.fleeCmd) return null;
     if (!this.fleeCmd.enabled) { audio.sfx('buzzer'); this.showHelp = true; this.helpText = this.fleeCmd.reason || 'Cannot flee'; this.helpColor = 'dim'; return null; }
     if (this.fleeArmed > 0) { this.fleeArmed = 0; audio.sfx('confirm'); return { type: 'flee' }; }
-    this.fleeArmed = FLEE_ARM_FRAMES;
+    this.fleeArmed = 1;
     audio.sfx('cursor');
     this.showHelp = true; this.helpText = 'Tap FLEE again to run.'; this.helpColor = 'gold';
     return null;
@@ -230,11 +230,11 @@ export class CommandMenu {
   /** Returns a complete action when the player confirms, else null. */
   update(input, audio) {
     if (this.state === 'closed' || !this.unit) return null;
-    if (this.fleeArmed > 0 && --this.fleeArmed === 0) this.syncHelp();
     if (this.state === 'root') {
       const was = this.root.index, act = this.root.update(input, audio);
       if (this.root.item.blank) this.root.moveTo(this.root.index + (this.root.index > was ? 1 : -1));
       if (this.root.changed) { this.showHelp = true; this.fleeArmed = 0; this.syncHelp(); }
+      else if (act && this.fleeArmed) { this.fleeArmed = 0; this.syncHelp(); }   // a confirm or cancel elsewhere disarms FLEE
       if (act === 'confirm') {
         const it = this.root.item;
         this.lastCmd.set(this.unit.uid, it.id);
