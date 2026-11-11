@@ -5238,8 +5238,8 @@ class Episode5(Episode4):
                   ('lab_f3', self.lab_f3), ('oracle', self.oracle), ('ending', self.ending), ('epilogue5', self.epilogue5)]
         for step_id, fn in phases:
             print(f'-- {step_id}', flush=True)
-            if step_id == 'ep5_morning' and self.has('ship_boarded'):
-                continue                                          # a resumed game past the morning
+            if step_id == 'ep5_morning' and self.has('ship_boarded') and b.settle()['map'] != 'ep5_ship':
+                continue                                          # a resumed game past the morning (issue #99: the morning boards)
             fn()
             if step_id == 'ep5_start':
                 b.js(SKY_LOG_JS)

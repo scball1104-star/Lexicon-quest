@@ -86,6 +86,9 @@
   "src/data/cave/world.js"
  ],
  "ep3": [
+  "assets/tiles/ep3.png",
+  "src/data/maps/ep3/_open_tiles.js",
+  "src/data/maps/ep3/_opening.js",
   "src/data/maps/ep3/_quench.js",
   "src/data/maps/ep3/emberpeak.js",
   "src/data/maps/ep3/foundry_f1.js",

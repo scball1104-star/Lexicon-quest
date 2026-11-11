@@ -44,19 +44,30 @@ export function pointOpening() {
   Object.assign(EP3_START, { map: 'nameless_hollow', mark: 'wall_wake', pos: { x: WALL_WAKE[0], y: WALL_WAKE[1], dir: 'up' } });
 }
 
+/**
+ * The opening's tiles (tools/art/tiles/ep3_wall.py): the pack's own sheet, merged the way a pack manifest's fragment is. Kept
+ * apart from `done`: the ep4 pack's maps.js calls register() with no engine, and that may come first; the art then loads on the
+ * pack loader's own register(engine). The tile entries merge at once; the pack is ready when the sheet has loaded.
+ */
+let art = null;
+export function loadOpeningArt(engine) {
+  const assets = engine && engine.assets;
+  if (art || !assets || typeof assets.loadImage !== 'function') return art;
+  const db = assets.json('tiles', null);
+  if (db) mergeTileFragment(db, EP3_TILES);
+  art = assets.loadImage('ep3', 'assets/tiles/ep3.png').then(() => true, () => false);
+  return art;
+}
+
 let done = null;
 /** Register the ten maps and the two edited core maps. Idempotent. Resolves { id, loaded, skipped }. */
 export function register(engine) {
+  const sheet = loadOpeningArt(engine);
   if (!done) {
     for (const m of MAPS) registerMap(m);
     registerMap(withEastGate(nameless_hollow));
     registerMap(withInnMarks(nh_inn));
     pointOpening();
-    // the opening's tiles (tools/art/tiles/ep3_wall.py): the pack's own sheet, merged the way a pack manifest's fragment is
-    const assets = engine && engine.assets;
-    const art = assets && typeof assets.loadImage === 'function'
-      ? assets.loadImage('ep3', 'assets/tiles/ep3.png').then(() => { const db = assets.json('tiles', null); if (db) mergeTileFragment(db, EP3_TILES); }, () => {})
-      : null;
     // The field code these maps need (src/world/ep3/, lazy, never precached) rides on the pack: it is imported here, and
     // fetched again once the service worker controls the page (a first visit loads the pack before the worker takes over),
     // so it sits in the worker's runtime cache with the maps and the episode plays offline after one visit even if the
@@ -68,9 +79,9 @@ export function register(engine) {
       const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
       if (sw && !sw.controller && sw.addEventListener) sw.addEventListener('controllerchange', warm, { once: true }); else warm();
     }
-    done = Promise.resolve(art).then(() => ({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] }));
+    done = Promise.resolve({ id: ID, loaded: [...EP3_MAP_IDS, 'nameless_hollow', 'nh_inn'], skipped: [] });
   }
-  return done;
+  return sheet ? Promise.all([done, sheet]).then(([r]) => r) : done;
 }
 
 export default register;
