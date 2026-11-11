@@ -313,5 +313,16 @@
   "src/data/tier/text.js",
   "src/data/tier/tier.js",
   "src/data/tier/title.js"
+ ],
+ "worldmap": [
+  "assets/tiles/worldmap.png",
+  "assets/tiles/worldmap_tiles.json",
+  "assets/ui/worldmap_map.png",
+  "assets/worldmap_manifest.json",
+  "src/data/worldmap/data.js",
+  "src/data/worldmap/field.js",
+  "src/data/worldmap/index.js",
+  "src/data/worldmap/layout.js",
+  "src/data/worldmap/scene.js"
  ]
 }
