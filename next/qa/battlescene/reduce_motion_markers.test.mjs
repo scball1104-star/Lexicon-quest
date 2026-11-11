@@ -8,6 +8,7 @@ import * as HUD from '../../src/battle/scene/hud.js';
 import { HELP_TOUCH_BTNS } from '../../src/battle/scene/layout.js';
 import { BattleScene } from '../../src/scenes/battle.js';
 import { Actor } from '../../src/battle/scene/actors.js';
+import { drawCursor } from '../../src/ui/cursor.js';
 
 const { registerData } = await import('../../tools/sim/ep6.mjs');
 registerData();
@@ -133,4 +134,19 @@ test('Episode 6: the Gust pips and ring, the Gust slot\'s quill and star, the ma
   steady('anchor over a braced member', (r, f) => ep6.drawHeadMarks(r, actor({ uid: 'bram', side: 'party', anchor6: true }), gv, f));
   steady('the Scribe\'s ward', (r, f) => ep6.drawWard(r, actor({ id: 'scribe', w: 64, h: 90 }), f));
   steady('the bellows', (r, f) => ep6.drawBellows(r, actor({ id: 'gale_engine', w: 90, h: 90 }), f));
+});
+
+test('the last movers: the target reticle and arrow, the menu glove, the rewards confirm glyph', () => {
+  steady('target reticle', (r, f) => HUD.drawReticle(r, actor(), f));
+  steady('target arrow', (r, f) => HUD.drawTargetArrow(r, actor(), f));
+  // every list draws its glove through drawCursor, with the list's frame or the renderer's
+  steady('menu glove (list frame)', (r, f) => drawCursor(r, 60, 80, { frame: f }));
+  steady('menu glove (renderer frame)', (r, f) => { r.frame = f; drawCursor(r, 60, 80); });
+  const scene = {
+    frame: 0,
+    rewards: { pages: [{ kind: 'main' }], index: 0, t: 30, intro: 0 },
+    summary: { exp: 42, gold: 17, masteryPoints: {}, consumables: [], items: [] },
+    party: () => [],
+  };
+  steady('rewards confirm glyph', (r, f) => { scene.frame = f; BattleScene.prototype.drawRewards.call(scene, r); });
 });

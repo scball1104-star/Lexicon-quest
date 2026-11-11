@@ -431,6 +431,7 @@ export function drawNameTag(r, actor, know, unit, opts = {}) {
 
 export function drawReticle(r, actor, frame, opts = {}) {
   const ui = uiAtlas(r);
+  frame = steadyFrame(r, frame);   // Reduce motion: the reticle holds its first frame
   const name = ui && animFrameAt(ui.anims.reticle, frame / 60);
   const f = name && ui.frames[name];
   const cx = actor.cx, cy = actor.cy;
@@ -439,6 +440,7 @@ export function drawReticle(r, actor, frame, opts = {}) {
 }
 export function drawTargetArrow(r, actor, frame) {
   const ui = uiAtlas(r);
+  frame = steadyFrame(r, frame);   // Reduce motion: the arrow rests, no bob
   const name = ui && animFrameAt(ui.anims.target_arrow, frame / 60);
   const f = name && ui.frames[name];
   if (f) r.sprite(ui, f, actor.cx, actor.top - 4);

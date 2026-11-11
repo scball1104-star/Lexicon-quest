@@ -11,10 +11,10 @@ any failed check or console / page error.
 Checks:
   dialog          window <= 22 % of the screen (3 lines), 1 / 2 / 3 line sizes, flips to the top when the hero or the
                   speaker would be hidden (story_leave_town), stays at the bottom otherwise (story_fading_sign)
-  battle_phone    every command on screen in two columns without Flee, taps select / confirm, the FLEE button arms
+  battle_phone    every command on screen in two columns without Flee, one tap opens a command, the FLEE button arms
                   on the first tap and runs on the second, the touch rows are 18 px (30 css px), the FLEE / AUTO / x1
                   tap targets are 44 css px each way and a tap off the art inside one reaches its button (#82)
-  battle_mira     Mira (Magic, Swap): four rows hold every command on both devices
+  battle_mira     Mira (Magic, Swap): four rows hold every command on touch; the keyboard's ninth (Flee) adds a row
   battle_desktop  two columns incl. Flee, left / right keep the row, up / down stay in the column
   battle_log      the idle command window shows the last three lines (enemy turn, victory, level-up)
   bestiary        every enemy has a picture (silhouette when unseen), sheets saved
@@ -183,17 +183,15 @@ def check_battle_phone(rigs):
     d.tap(fb['x'] + 3, fb['y'] + fb['h'] + 2, wait=3)
     assert d.battle()['fleeArmed'] > 0 and d.battle()['menu'] == 'root', 'a tap under FLEE arms it'
     print('      targets (css px):', {k: (round(hits[k]['w'] * d.css_scale()), round(hits[k]['h'] * d.css_scale())) for k in hits})
-    # Tap Defend (second column): first tap selects, second confirms -> the turn is used.
+    # Tap Item (second column): one tap selects and confirms (the command rows are one-tap since E3-fixes 42be9a8,
+    # 2026-11-03, `tapMode: 'single'` in battle/scene/menu.js; this check used to expect select, then confirm).
     i_item = items.index('item')
     d.tap(*center(b['rootRects'][i_item]))
-    assert d.battle()['menuIndex'] == i_item, 'first tap selects Item'
-    assert d.battle()['menu'] == 'root'
-    d.tap(*center(b['rootRects'][i_item]))
     st = d.battle()
-    assert st['menu'] == 'sub' or st['menu'] == 'root', f'second tap confirms Item ({st["menu"]})'
-    if st['menu'] == 'sub':
-        d.press('cancel')
-    assert d.battle()['menu'] == 'root'
+    assert st['menuIndex'] == i_item, f'the tap lands on Item ({st["menuIndex"]})'
+    assert st['menu'] == 'sub', f'one tap opens the Item list ({st["menu"]})'
+    d.press('cancel')
+    assert d.battle()['menu'] == 'root', 'cancel goes back to the commands'
     # FLEE button: first tap arms, second runs.
     btn = b['helpBtns']['flee']
     d.tap(*center(btn), wait=3)
@@ -235,7 +233,9 @@ def check_battle_desktop(rigs):
 
 
 def check_battle_mira(rigs):
-    """Mira has Magic and a second weapon: the biggest ordinary command list (8 on touch, 8 with Flee on a keyboard)."""
+    """Mira has Magic and a second weapon: the biggest ordinary command list. Touch: 8 in four rows (Flee is the button).
+    Keyboard: 9 with Flee, and the window grows by one row at the top (menu.js, since W7). Combo holds its cell greyed
+    since E3-fixes 42be9a8 (2026-11-03), which made the keyboard count 9; this check used to expect at most 8."""
     for dev in ('phone', 'desktop'):
         d = rigs[dev]
         d.run_shot('battle_break')       # same setup: f1_mites, then step to Mira's turn
@@ -245,7 +245,13 @@ def check_battle_mira(rigs):
         b = d.battle()
         items = b['menuItems']
         assert 'magic' in items, f'{dev}: Mira has Magic {items}'
-        assert len(items) <= 8 and b['menuRows'] == 4, f'{dev}: four rows hold {items}'
+        assert 'combo' in items, f'{dev}: Combo keeps its cell {items}'
+        if dev == 'phone':
+            assert len(items) <= 8 and b['menuRows'] == 4, f'{dev}: four rows hold {items}'
+        else:
+            assert len(items) == 9 and b['menuRows'] == 5, f'{dev}: nine commands on five rows {items} ({b["menuRows"]})'
+            cr = b['cmdRect']
+            assert cr['y'] + cr['h'] == 212 and cr['h'] >= 5 * b['rowH'] + 16, f'{dev}: the window grows upward to hold them {cr}'
         assert ('flee' in items) == (dev == 'desktop'), f'{dev}: Flee in the grid only off touch {items}'
         d.shot(f'battle_mira_{dev}')
         print(f'      {dev} Mira commands:', items)

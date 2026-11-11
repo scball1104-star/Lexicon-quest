@@ -969,7 +969,7 @@ export class BattleScene {
         y += row.sub ? 11 : 12;
         if (row.sub) { r.text(`{c:gray}${row.sub}{/c}`, x + 20, y); y += 11; }
       }
-      if (ui && ui.frames.btn_key_z && Math.floor(this.frame / 20) % 2 === 0) r.text('{i:btn_confirm}', w.x + w.w - 18, w.y + wh - 14);
+      if (ui && ui.frames.btn_key_z && (HUD.stillHud(r) || Math.floor(this.frame / 20) % 2 === 0)) r.text('{i:btn_confirm}', w.x + w.w - 18, w.y + wh - 14);   // Reduce motion: the glyph stays lit
       return;
     }
     if (page.kind === 'level') {

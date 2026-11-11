@@ -8,10 +8,12 @@
 import { animFrameAt } from '../core/assets.js';
 import { uiAtlas } from './window.js';
 
+/** Reduce motion: the glove rests on its first frame (no bob), so `frame` reads as 0. */
+const gloveFrame = (r, frame) => (r && r.settings && r.settings.reduceMotion ? 0 : frame ?? r.frame);
 export function cursorFrameName(r, frame) {
   const ui = uiAtlas(r);
   if (!ui || !ui.anims.cursor) return null;
-  return animFrameAt(ui.anims.cursor, (frame ?? r.frame) / 60);
+  return animFrameAt(ui.anims.cursor, gloveFrame(r, frame) / 60);
 }
 
 export function drawCursor(r, hotX, hotY, o = {}) {
@@ -20,7 +22,7 @@ export function drawCursor(r, hotX, hotY, o = {}) {
   const f = name && ui.frames[name];
   if (f) { r.sprite(ui, f, Math.round(hotX), Math.round(hotY), { alpha: o.alpha }); return; }
   // Fallback: a small white arrow whose tip sits at the hotspot.
-  const bob = Math.floor((o.frame ?? r.frame) / 15) % 2;
+  const bob = Math.floor(gloveFrame(r, o.frame) / 15) % 2;
   r.text('▶', Math.round(hotX) - 7 + bob, Math.round(hotY) - 4, { color: 'white', alpha: o.alpha });
 }
 
