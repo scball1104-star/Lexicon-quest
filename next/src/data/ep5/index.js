@@ -9,7 +9,7 @@
 //    has registered and registers in ORDER, one after the other.
 // 2. The order is
 //        flags, enemies, items, skills, loot, encounters, sky, shops, ai, npcs, quests, text, story, ledger, audio, world,
-//        pages, maps, hooks, start, scene
+//        pages, maps, hooks, start, scene, errands
 //    (`sky` is the Turning Sky on rules.js RULE_EXT, `pages` the close-up kinds, `scene` the battle presentation). `title`
 //    (the title row, E5-scene-ui) is not in it: hooks.js loads it on first use.
 // 3. The audio fragment (src/data/ep5/audio.js) is merged into engine.audio.manifest on every path that brings the pack up,
@@ -25,7 +25,7 @@ import { isMissing, audioFragment, mergeAudio as mergeAudioAs } from '../ep4/ind
 export { isMissing, audioFragment };
 export const ID = 'ep5';
 export const ORDER = ['flags', 'enemies', 'items', 'skills', 'loot', 'encounters', 'sky', 'shops', 'ai', 'npcs', 'quests', 'text',
-  'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene'];
+  'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene', 'errands'];
 
 /** True once register() has finished. */
 export let EP5_READY = false;

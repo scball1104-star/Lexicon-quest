@@ -120,7 +120,7 @@ test('seam 5: an Episode 5 save lands where an Episode 4 one does (Emberpeak eas
 
 test('pack entry: ORDER, missing modules skipped, idempotent, the ep4 pack registered first, maps and hooks run', async () => {
   assert.deepEqual(ep5.ORDER, ['flags', 'enemies', 'items', 'skills', 'loot', 'encounters', 'sky', 'shops', 'ai', 'npcs', 'quests',
-    'text', 'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene']);
+    'text', 'story', 'ledger', 'audio', 'world', 'pages', 'maps', 'hooks', 'start', 'scene', 'errands']);
   assert.ok(!ep5.ORDER.includes('title'), 'title is loaded on first use by hooks.js');
   const p1 = ep5.register();
   const p2 = ep5.register();
