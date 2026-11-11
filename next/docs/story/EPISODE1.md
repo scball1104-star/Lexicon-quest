@@ -56,6 +56,10 @@ the third, a taste of a fight by the fifth.
    Archive have lost the page about the door. She volunteers. Iris, her teacher, refuses, then tries to praise
    her and cannot remember her name. Mira supplies it herself, quietly, then covers with a joke ("I've started
    writing it on my sleeve"). Iris sends her with the party.
+6a. **The ink comes back** [`library_ink`, chained from `mira_joins`, sets `ink_fight_done`; #86, CRITIQUE_9 item 2].
+   The ink that left the forty-one books pulls itself up out of the stacks as two slimes. The hero and Mira, no flee:
+   the second fight, a few minutes after the yard slime and before any town errand. Mira: "That's our ink. The page
+   about the door, and it's come back hungry." After: "Noted: the ink fights back. That's going on my other sleeve."
 7. **Bram joins** [`south_gate`, sets `bram_joined`]. Without Mira, Bram stops the hero: nobody walks that road
    alone. With Mira, Bram decides to come, starts a fond story about his father, and loses Garrick's name mid
    sentence. Sergeant Holt gives it back. Bram: "I lost my mother's name years ago, in the fire at Emberpeak. I

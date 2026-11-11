@@ -349,7 +349,7 @@ async function fountain_faces(s) {
   await say(s, 'elian_f', 'Have we met? You stand like someone I used to wait for.');
   await say(s, 'mira', "I... don't think so.");
   await s.face('elian_f', 'hero');
-  await say(s, 'elian_f', 'Forgive me. Elian. They made me mayor because I was the only one who kept a ledger.');
+  await say(s, 'elian_f', 'Forgive me. Elian. They made me mayor because I was the only one who kept a daybook.');
   await say(s, 'elian_f', "Come to the hall. You'll want to hear this sitting down.");
   await s.walk('elian_f', 'hall_door');
   await s.despawn('elian_f');
@@ -364,7 +364,7 @@ async function elian_hall(s) {
   await say(s, 'elian', 'Fifteen years ago this town lost its name overnight. The next morning, nobody had a reflection.');
   await say(s, 'elian', 'Across the mere, the Court of Mirrors shut its doors. Its king has not been seen since.');
   await say(s, 'elian', 'We remember each other. We simply cannot remember where we are.');
-  await narrate(s, 'Elian opens his ledger. Page after page of names, the same names, written fresh each morning.');
+  await narrate(s, 'Elian opens his daybook. Page after page of names, the same names, written fresh each morning.');
   await say(s, 'elian', 'Every morning I write every name in town. If a name is going to go, I want to see it leave.');
   await say(s, 'elian', 'And two nights ago, at midnight, Sister Anwen heard a bell across the water. Thirteen strokes.');
   await all(s.emote('mira', '!'), s.emote('bram', '!'));
@@ -374,7 +374,7 @@ async function elian_hall(s) {
   await s.take('mael_letter');
   await narrate(s, 'Elian reads the letter. At the blank line where the town should be, he smiles for the first time.');
   await say(s, 'elian', "He couldn't write it either. Good. I'll answer it when I have a name to sign.");
-  await narrate(s, 'He writes Mira, then Bram, then {hero} in his ledger. The last name goes pale while the ink is still wet.');
+  await narrate(s, 'He writes Mira, then Bram, then {hero} in his daybook. The last name goes pale while the ink is still wet.');
   await s.emote('elian', '...');
   // H4 (RESPONSIBILITY_ARC 3.4): the mayor's ledger of true things. 'Only here' is the kind lie; the truth is the
   // hero's own fading, said out loud. Remembered when he signs his reply (elian_letter).
@@ -799,6 +799,8 @@ async function vex_mirror(s) {
   await s.flash('#ffffff', 8);
   await s.despawn('vex');
   await s.music('court');
+  // #86 (CRITIQUE_9 item 3): the first page as a thing in the world, not yet an answer
+  await say(s, 'mira', 'A first page. He said it as if it were somewhere you could go.');
   await s.camera.follow('hero');
   await s.setFlag('vex_met');
 }
@@ -1315,7 +1317,7 @@ export const lines = {
   ],
   sign_nh_hall: [
     { if: NHR, lines: "MAYOR'S HALL, HOLLOWMERE. ELIAN, MAYOR. Underneath, smaller: AND AUREL, WHO WAS KING." },
-    { lines: 'A blank sign over a big blank door. The door has a knocker shaped like a ledger.' },
+    { lines: 'A blank sign over a big blank door. The door has a knocker shaped like a book.' },
   ],
   sign_nh_chapel: [
     { if: NHR, lines: 'CHAPEL OF THE CANDLES. FORTY-ONE LIGHTS AND ONE BELL.' },
@@ -1338,7 +1340,7 @@ export const lines = {
 
   // nh_hall
   elian_desk_note: [
-    { if: 'met_elian', lines: "Elian's desk. The ledger, a cold cup of tea, and a pen worn down to a stub." },
+    { if: 'met_elian', lines: "Elian's desk. The daybook, a cold cup of tea, and a pen worn down to a stub." },
     { lines: 'A note on the mayor\'s desk, in a neat young hand: "At the fountain. Back soon. E."' },
   ],
   hall_mirror: [

@@ -493,6 +493,9 @@ it). The list-writer stirred a month before Episode 1 and has been working faste
 can be read for the first time: "Keep this one." A warm, hurried hand, not the list-writer's. Someone wrote the hero
 into the Book and asked it to keep them.
 
+**#86 (CRITIQUE_9 item 3).** At the charter, after Mira's "This one was in a hurry.": Bram: "Vex's first page. Is that
+this hand too?" Mira: "I don't know. I'd like to." The question Episode 6 answers, asked and left open.
+
 ### What the player knows by the credits
 Lists in one hand have been fed to Keeper machines and Keeper bargains for at least twenty-five years; they take the
 people who could undo them (a smith, a regent). The hero's name is true ink: it holds where forgeries run. Someone in a

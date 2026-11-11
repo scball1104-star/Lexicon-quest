@@ -2660,6 +2660,164 @@
    ]
   },
   {
+   "name": "story_library_ink",
+   "note": "#86: library_ink, the ink that left the books pulls itself up in the reading room: two slimes, the hero and Mira (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "none",
+       "party": [],
+       "flags": {
+        "intro_done": 1,
+        "saw_fading_sign": 1,
+        "met_mael": 1
+       },
+       "banner": false
+      }
+     ]
+    },
+    {
+     "call": "warp",
+     "args": [
+      "library",
+      10,
+      13,
+      "up"
+     ]
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Ink seeps out from under the stacks\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test(s.pageText || '')) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_library_ink: the ink"
+    }
+   ]
+  },
+  {
+   "name": "battle_library_ink",
+   "note": "#86: the second fight, the hero and Mira against two Ink Slimes on the archive stage",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "none",
+       "party": [],
+       "flags": {
+        "intro_done": 1,
+        "saw_fading_sign": 1,
+        "met_mael": 1
+       },
+       "banner": false
+      }
+     ]
+    },
+    {
+     "call": "warp",
+     "args": [
+      "library",
+      10,
+      13,
+      "up"
+     ]
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "eval": "(async () => { for (let i = 0; i < 1500; i++) { if (LQ_ENGINE.stack.some((x) => x.name === 'battle')) return i; const s = LQ_ENGINE.scene; if (s && s.name === 'dialog' && (!s.typing || i % 4 === 0)) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the battle never opened'); })()",
+     "timeout": 60000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "assert": "LQ_ENGINE.stack.some((x) => x.name === 'battle')",
+     "message": "battle_library_ink: the battle"
+    }
+   ]
+  },
+  {
+   "name": "story_bark_fury",
+   "note": "#86: the first-time Fury line on the field after the first fight in which Fury lit (BARKS first_fury)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGame')",
+     "timeout": 20000
+    },
+    {
+     "call": "newGame",
+     "args": [
+      "Arden",
+      {
+       "scene": "none",
+       "flags": {
+        "intro_done": 1,
+        "saw_fading_sign": 1,
+        "met_mael": 1,
+        "mira_joined": 1,
+        "ink_fight_done": 1,
+        "bram_joined": 1,
+        "left_town": 1,
+        "valley_arrived": 1,
+        "first_fight_done": 1
+       },
+       "banner": false,
+       "party": [
+        "mira",
+        "bram"
+       ]
+      }
+     ]
+    },
+    {
+     "call": "warp",
+     "args": [
+      "valley",
+      1,
+      33,
+      "right"
+     ]
+    },
+    {
+     "frames": 60
+    },
+    {
+     "eval": "(() => { const f = LQ_ENGINE.stack.find((s) => s.name === 'field'); f.pendingBarks.push('first_fury'); return true; })()"
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'dialog'",
+     "timeout": 15000
+    },
+    {
+     "frames": 90
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_bark_fury: the line"
+    }
+   ]
+  },
+  {
    "name": "story_south_gate",
    "note": "south_gate: Bram and Holt at the gate posts (story)",
    "steps": [

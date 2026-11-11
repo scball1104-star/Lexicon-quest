@@ -504,8 +504,6 @@ async function obs_f3_arrival(s) {
   if (!(await s.hasFlag('obs_f3_arrived'))) {
     await s.camera.panTo('spire_top', 40);
     await narrate(s, 'The spire climbs through the inside of the storm. A ring of wind runs round it. At the very top, a steady light.');
-    await say(s, 'bram', "There's a light up there.");
-    await say(s, 'mira', "Lightning doesn't stay put.");
     await s.camera.follow('hero');
     await s.setFlag('obs_f3_arrived');
   }
@@ -523,9 +521,7 @@ async function aeris_turns(s) {
   await s.jump('aeris_t');
   await stage(s, 'kestrel_stage');
   await s.camera.follow('hero');
-  await say(s, 'aeris_t', 'I followed the chart home once. Not twice.');
-  await say(s, 'bram', 'Long way, then?');
-  await say(s, 'aeris_t', 'Long way.');
+  await say(s, 'aeris_t', 'I followed the chart home once. Not twice. We go the long way.');
   // the first landing and the Anchor deck are joined only by the ring (no walk path): she takes the Kestrel's rope up
   await spawnAeris(s, 'aeris_wait_1', 'down');
   await s.setFlag('aeris_came');
@@ -536,7 +532,7 @@ async function aeris_turns(s) {
 // and one line from Aeris. Canon words (the Last Pilot Charter), lines new.
 const PLEDGES = {
   pledge_anchor: { n: 1, at: 'anchor', carved: 'Before chasing the horizon, ANCHOR your people.',
-    voice: 'Still here. Still lit.', aeris: 'She always answered the check-call first.' },
+    voice: 'Still here. Still lit.', aeris: null },   // #86 (CRITIQUE_9 item 6): the first lamp is the voice alone
   pledge_listen: { n: 2, at: 'listen', carved: 'LISTEN for those the charts omit.',
     voice: "Somebody's on the stair. I can hear the lamps.", aeris: "Listen for those the charts omit. I didn't." },
   pledge_return: { n: 3, at: 'return', carved: 'Finally RETURN for anyone the sky has abandoned.',
@@ -550,7 +546,7 @@ async function pledge(s, flag) {
   await s.sfx('signal_lamp');
   await narrate(s, `The signal lamp lights by itself. Carved in the stone under it: ${P.carved}`);
   await say(s, 'apprentice_v', P.voice);   // far off, on the wind, from the top of the spire
-  await say(s, 'aeris_t', P.aeris);
+  if (P.aeris) await say(s, 'aeris_t', P.aeris);
   await s.camera.follow('hero');
   await s.setFlag(flag);
 }
@@ -560,7 +556,8 @@ const pledge_return = (s) => pledge(s, 'pledge_return');
 
 // 26. ep6_obs_f3, step trigger fall_trig on the broken causeway between Listen and Return. The set piece of Act IV and
 // Bram's beat: actors, a shake, and the line drawn by the scene (rope helper). The party stops on party_stop_fall, two
-// rows below Vex's edge mark; nobody ever stands off the edge. No humor while he hangs. 15 boxes (budget 16). Sets
+// rows below Vex's edge mark; nobody ever stands off the edge. No humor while he hangs. 10 boxes (budget 16; #86 trimmed 15
+// to 10: the gust is staged, not told; the letter's own words are on the close-up). Sets
 // vex_held, asker_known.
 /** vex_falls: where Vex swings on the line, one cell out from vex_hang (19,13) and one down, over open cloud (ep6_obs_f3). */
 export const VEX_SWING = [20, 14];
@@ -568,7 +565,6 @@ async function vex_falls(s) {
   await spawnVex(s, 'vex_edge', 'up');
   await stage(s, 'party_stop_fall');
   await s.camera.panTo('vex_edge', 30);
-  await narrate(s, 'Vex is ahead of you on the causeway. Then a gust lane snaps sideways, like a sheet in the wind.');
   await s.music(null);
   await s.sfx('gale_gust');
   await s.shake(4, 30);
@@ -579,7 +575,7 @@ async function vex_falls(s) {
   // rope (2 px, pale) runs from Bram's hands across the drop; then Bram pulls him back the way he went
   await s.spawn('vex_k', { sprite: 'npc_vex', name: 'Vex Quill', at: VEX_SWING, dir: 'up' });
   const drawn = await rope(s, 'bram_line', VEX_SWING);
-  await narrate(s, 'Bram sets his spear and throws the line. Vex hangs over nothing on the end of it. The line holds.');
+  await narrate(s, 'A gust snaps sideways and tears Vex off the causeway. Bram throws the line. Vex hangs over nothing on the end of it.');
   await say(s, 'vex_k', 'You want to know who asked. Fine. Pull me up first.');
   if (drawn) {
     await rope(s, 'bram_line', 'vex_hang');
@@ -591,18 +587,15 @@ async function vex_falls(s) {
   await narrate(s, 'Bram pulls. Vex sits on the planks, breathing. He takes a letter from inside his coat.');
   await s.music('mystery');
   const open = await page(s, 'ep6_letter');
-  await narrate(s, "A short letter in a warm, hurried hand: keep a child's first page where no list can read it.");
-  await narrate(s, 'You will be asked for nothing else. Where the name should be, a clean blank. Under it, an open book.');
+  await narrate(s, 'A short letter in a warm, hurried hand. Where the name should be, a clean blank. Under it, an open book.');
   await unpage(s, open);
   await say(s, 'vex_k', "A Keeper wrote that. Somebody took the name off the letter. They couldn't take the letter.");
   await say(s, 'mira', 'Look at the k.');
   await say(s, 'vex_k', "I know. I've looked at that k for a long time.");
-  await say(s, 'vex_k', 'I was fourteen. I mended bindings for the people who write the lists.');
-  await say(s, 'vex_k', 'Nobody had ever asked me for anything.');
-  await say(s, 'bram', 'And you said yes.');
-  await say(s, 'vex_k', 'I said yes. I put it above the clouds, where nothing reads.');
+  await say(s, 'vex_k', 'I was fourteen. I mended bindings for the people who write the lists. Nobody had ever asked me for anything.');
+  await say(s, 'vex_k', 'So I said yes. I put it above the clouds, where nothing reads.');
   await say(s, 'bram', 'You held on to it for years. Somebody should hold on to you.');
-  await narrate(s, 'Vex has nothing to say to that, for once. He gets up, and goes on up the spire ahead of you.');
+  await s.emote('vex_k', '...');   // he has nothing to say to that, for once
   await s.walk('vex_k', 'vex_ahead');
   await s.despawn('vex_k');
   await s.camera.follow('hero');
@@ -619,7 +612,7 @@ async function fifth_voice(s) {
   await s.spawn('apprentice_v', { sprite: 'npc_pippa', name: 'The Signal Apprentice', at: 'pippa_spot', dir: 'down' });
   await spawnAeris(s, 'aeris_beacon', 'up');
   await stage(s, 'beacon_stage');
-  await narrate(s, 'A small platform of stormglass, a ring of empty crates, and a young woman in a signal-jacket, keeping a lamp lit.');
+  // #86 (CRITIQUE_9 item 6): the platform, its crates and the young woman with the lamp are on screen; no narration box
   await s.face('apprentice_v', 'aeris_t');
   await say(s, 'apprentice_v', "I held the light. I kept saying my name to stay awake. Then I couldn't find it.");
   await narrate(s, "Mira takes out Liora's letter. Under the lamp, the name on it holds still.");
@@ -631,7 +624,6 @@ async function fifth_voice(s) {
   await s.sfx('name_restore');
   await s.flash('#fff2d0', 12);
   await say(s, 'aeris_t', '...Pippa. I left you the light.');
-  await say(s, 'pippa_t', "You came back. That's what the light was for.");
   await say(s, 'pippa_t', 'Please remember that we came back for each other.');
   await s.setFlag('pippa_found');
   await s.music('mystery');

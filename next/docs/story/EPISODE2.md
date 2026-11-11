@@ -541,6 +541,9 @@ its way. "A road is harder to lose while someone walks it."
 **The second fragment.** The Hollow's names, the town's name at the top, and, faint, the hero's name, a second
 time. A name is written once in the Book. This one was written twice, in the same hand.
 
+**#86 (CRITIQUE_9 item 3).** After Vex leaves the mirror, Mira: "A first page. He said it as if it were somewhere you
+could go." (It makes the first page a thing in the world; it does not say what it is.)
+
 ### What the player knows by the credits
 The Hollow was the place scratched out on Moth's list: erased fifteen years ago by an earlier list in the same
 hand. The lists come from the First Library and carry the seal of an open, empty book. The hero's name is in two

@@ -406,7 +406,6 @@ export const NPCS = {
       ] },
       { lines: [
         'Mael. Lantern Square. By the well. Go on.',
-        "And if you see Pip, tell him I believe him about the bells. He'll want somebody to.",
       ] },
     ],
   },
@@ -952,20 +951,20 @@ export const NPCS = {
   // The Nameless Hollow (interiors)
   elian: {
     name: 'Elian', sprite: 'npc_elian', portrait: 'elian', map: 'nh_hall', show: { if: 'met_elian' },
-    spot: "Behind the mayor's desk with the ledger (mark elian_desk)", move: 'turn', noReflection: true,
-    about: 'Mayor, about twenty, coat far too big, ledger under his arm. Raised by Anwen. Hidden: Aurel\'s son, the boy Mira promised to come back for.',
+    spot: "Behind the mayor's desk with the daybook (mark elian_desk)", move: 'turn', noReflection: true,
+    about: 'Mayor, about twenty, coat far too big, daybook under his arm. Raised by Anwen. Hidden: Aurel\'s son, the boy Mira promised to come back for.',
     talk: [
       { if: NHR, ifNot: 'letter_answer_started', scene: 'elian_letter' },
       { if: E3END, lines: [
-        'Garrick, at last. Back in the ledger, in ink, third line down. I wrote it four times to be sure.',
+        'Garrick, at last. Back in the daybook, in ink, third line down. I wrote it four times to be sure.',
         'Father says the bell sounded like a man clearing his throat before a long speech. He approves.',
       ] },
       { if: E3, lines: [
-        "I wrote him in my ledger as Bram's father. It's a start.",
+        "I wrote him in my daybook as Bram's father. It's a start.",
         'A name that will not come is still a person. I find that if I keep the page open, it comes back quicker.',
       ] },
       { if: E2END, lines: [
-        'Father sits in the hall every morning and lets me read him the ledger. He says he likes the names.',
+        'Father sits in the hall every morning and lets me read him the daybook. He says he likes the names.',
         'I think he likes being in it. I wrote him in first. Aurel, at the top, in my best hand.',
       ] },
       { if: 'court_entered', lines: [

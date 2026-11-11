@@ -222,7 +222,7 @@ export const X1_TALK_PREPEND = {
     { if: ['downs_arrived', 'archivore_defeated', 'mira_joined'], ifNot: 'list_started', scene: 'list_start' },
     { if: 'rollcall_started', ifNot: 'roll_found', scene: 'iris_roll' },
     { if: 'list_started', ifNot: ['list_done', 'ep1_complete'], lines: [
-      'A rhyme, a name from a ledger, a song for some posts. Three small things. They are the ones that go first.',
+      'A rhyme, a name from an account book, a song for some posts. Three small things. They are the ones that go first.',
     ] },
   ],
   quill: [

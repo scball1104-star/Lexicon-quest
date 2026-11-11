@@ -208,6 +208,7 @@ then "Mara".
     - Mira: "Why help us?" Vex: "I collect things nobody is using. Nobody should use this."
     - Vex: "Your name's on the leaf in there, {hero}. Stamped by a hand I'd very much like to meet."
     - Vex: "Your first page isn't in this fire either. I looked." He is gone; the feather stays.
+    - (#86, CRITIQUE_9 item 3) After Bram's line, Mira: 'He said "either." He's looked in other fires for it, {hero}.'
 
 24. **The three oaths** [`oath_hand`, `oath_heart`, `oath_home`; each runs when the party strikes its wing's anvil,
     which they reach through the wing's quench puzzle; each sets its flag]. Silent but for the strike (`anvil_strike`),

@@ -593,7 +593,7 @@ async function mill_done(s) {
 // 33. library, Iris's talk entry (after the Archivore, with Mira). 4 boxes. Starts Things Not To Forget.
 async function list_start(s) {
   await say(s, 'iris', 'Mira. Come here. My list is complete, and I do not trust a complete list.');
-  await say(s, 'iris', "Three entries more: a shepherd's counting rhyme, the oldest name in a miller's ledger, a hermit's song for his posts.");
+  await say(s, 'iris', "Three entries more: a shepherd's counting rhyme, the oldest name in a miller's books, a hermit's song for his posts.");
   await say(s, 'mira', 'From Thornfold, the mill and the moor. In their own words, not ours.');
   await say(s, 'iris', 'In their own voices. Paper keeps what it is given, if it is given early.');
   await s.setFlag('list_started');
@@ -609,7 +609,7 @@ async function list_rhyme(s) {
 // 35. x1_mill, the mill ledger (book object). 2 boxes. Sets list_ledger.
 async function list_ledger(s) {
   if (!(await s.hasFlag('list_started')) || (await s.hasFlag('list_ledger'))) {
-    await narrate(s, 'Page one of the ledger holds a single name: Ebba Corley. One sack of barley. Paid in eggs.');
+    await narrate(s, 'Page one of the account book holds a single name: Ebba Corley. One sack of barley. Paid in eggs.');
     return;
   }
   await narrate(s, "Thirty years of customers in Hal's blunt hand. Page one holds a single name: Ebba Corley. One sack of barley. Paid in eggs.");

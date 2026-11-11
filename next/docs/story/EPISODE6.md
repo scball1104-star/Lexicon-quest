@@ -208,6 +208,17 @@ The first five minutes (RESPONSIBILITY_ARC section 2: control in 20 seconds, a q
 
 ### Act IV: The Storm Observatory
 
+**Trim, #86 (CRITIQUE_9 item 6, Scott 2026-11-11: "trim it a bit").** F3's main path went from 41 story boxes to 29; the
+beats below are the design, the script is shorter: the arrival is the narration alone (Bram's and Mira's light pair
+cut); the Kestrel is one Aeris box ("I followed the chart home once. Not twice. We go the long way."); the Anchor lamp is
+the voice alone; in `vex_falls` the gust is staged, not told, the letter's words are on its close-up (one narration box
+for the hand, the blank and the open book), Vex's age and "Nobody had ever asked me for anything" are one box, Bram's
+"And you said yes." is cut ("So I said yes. I put it above the clouds, where nothing reads."), and the last narration is
+Vex's "..." emote; in `fifth_voice` the platform's narration (the crates and the young woman with the lamp are on screen) and Pippa's "You came
+back. That's what the light was for." are cut. Every line sections 5
+and 6 hold for Episode 7 and 8 (the Keeper's letter, the lifted name, the k, fourteen, the list-writers, above the
+clouds, Bram holding on, Pippa's name, the truth choice, the Keyhole) is still said (`qa/content/story_pacing.test.mjs`).
+
 15. **The Windward Causeways** [`obs_f1_arrival`, `ep6_obs_f1`, on enter; sets `obs_entered`, `obs_f1_arrived`]. Banner:
     The Storm Observatory / I. The Windward Causeways (canon). Plank decks and stormglass platforms floating on cloud,
     gust lanes streaming between them, mooring posts with ragged pennants, weathervanes on poles. Floor question (arc
