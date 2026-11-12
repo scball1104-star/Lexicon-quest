@@ -1,0 +1,21 @@
+{
+ "image": "ep7_battle_vault.png",
+ "w": 384,
+ "h": 216,
+ "cell": 6,
+ "note": "F1 the Vanishing Steps: environments cell 6, a crop on the frozen cathedral front and its rose window; the cliff under the band calmed",
+ "extraColors": [
+  "#446497",
+  "#5b7dac",
+  "#648eb2",
+  "#8acae5"
+ ],
+ "colors": 44,
+ "source": "environments.webp cell 6",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep7_battle_vault",
+ "fallback": "archive",
+ "meanLuma": 0.3672
+}

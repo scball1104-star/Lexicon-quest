@@ -1,0 +1,70 @@
+{
+ "image": "ep7_battle_stillheart.png",
+ "w": 384,
+ "h": 216,
+ "cell": 6,
+ "note": "the White Phantom: cell 6's aurora sky through the broken roof, two broken ice arches, the heart of ice on its dais, a round white floor (composed over a cell 6 sky crop); frozen and thaw grades; the aurora is a runtime layer",
+ "extraColors": [],
+ "colors": 40,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep7_build.py (stillheart); palette.json plus the ep7 sheet colours (ep7_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep7_battle_stillheart",
+ "fallback": "boss",
+ "meanLuma": 0.4519,
+ "grades": {
+  "frozen": "as composed (the aurora layer over it)",
+  "thaw": {
+   "tone": {
+    "lift": 1.9,
+    "warm": 0.0,
+    "chroma": 1.15,
+    "cast": 0.03,
+    "hue": 0.95
+   },
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "thaw: over rows thaw.rows the Episode 5 DAY_TONE pixel path (src/data/ep5/scene.js dayTone) with thaw.tone (the lift and a warm amber cast, warm 0: no violet turn); cross-fade frozen to thaw over 30 frames when the ward thaws (phase 3). Never a screen or multiply over the frozen grade (CRITIQUE_7 item 1).",
+  "meanLuma": {
+   "frozen": 0.4519,
+   "thaw": 0.5788
+  },
+  "skyLuma": {
+   "frozen": 0.4317,
+   "thaw": 0.664
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ },
+ "aurora": {
+  "color": "#5fd3a2",
+  "color2": "#9062c3",
+  "alpha": 0.16,
+  "frames": 3,
+  "everyFrames": 30,
+  "y": 34,
+  "amp": 9,
+  "period": 46.0,
+  "phase": 0.45,
+  "width": 14,
+  "maxStepLuma": 0.05,
+  "how": "add color (mixed 70/30 with color2 along x) x alpha x exp(-((y - yc(x)) / width)^2) to every sky row, yc(x) = y + amp * sin(x / period + phase * sin(2 pi frame / 3)); frames 0, 1, 2 one every everyFrames game frames; off under reduceMotion (frame 0); never a flash",
+  "rows": [
+   0,
+   118
+  ],
+  "measured": {
+   "maxStepLuma": 0.0462,
+   "maxRiseOverStage": 0.1147,
+   "steps": [
+    0.0242,
+    0.0462,
+    0.0242
+   ]
+  }
+ }
+}
