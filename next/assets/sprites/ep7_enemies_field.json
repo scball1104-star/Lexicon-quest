@@ -1,0 +1,311 @@
+{
+ "image": "ep7_enemies_field.png",
+ "frames": {
+  "rime_wolf_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "rime_wolf_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "snow_wisp_0": [
+   50,
+   0,
+   16,
+   16
+  ],
+  "snow_wisp_1": [
+   67,
+   0,
+   16,
+   16
+  ],
+  "hush_owl_0": [
+   84,
+   0,
+   24,
+   20
+  ],
+  "hush_owl_1": [
+   109,
+   0,
+   24,
+   20
+  ],
+  "crystal_crawler_0": [
+   134,
+   0,
+   16,
+   16
+  ],
+  "crystal_crawler_1": [
+   151,
+   0,
+   16,
+   16
+  ],
+  "frostbound_revenant_0": [
+   168,
+   0,
+   24,
+   24
+  ],
+  "frostbound_revenant_1": [
+   193,
+   0,
+   24,
+   24
+  ],
+  "ice_knight_0": [
+   218,
+   0,
+   24,
+   32
+  ],
+  "ice_knight_1": [
+   0,
+   33,
+   24,
+   32
+  ],
+  "rimed_page_0": [
+   25,
+   33,
+   16,
+   16
+  ],
+  "rimed_page_1": [
+   42,
+   33,
+   16,
+   16
+  ],
+  "pale_lantern_0": [
+   59,
+   33,
+   24,
+   24
+  ],
+  "pale_lantern_1": [
+   84,
+   33,
+   24,
+   24
+  ],
+  "phantom_avatar_0": [
+   109,
+   33,
+   49,
+   51
+  ],
+  "phantom_avatar_1": [
+   159,
+   33,
+   49,
+   51
+  ],
+  "phantom_avatar_back_0": [
+   0,
+   85,
+   49,
+   51
+  ],
+  "phantom_avatar_back_1": [
+   50,
+   85,
+   49,
+   51
+  ]
+ },
+ "anims": {
+  "rime_wolf_idle": {
+   "frames": [
+    "rime_wolf_0",
+    "rime_wolf_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "snow_wisp_idle": {
+   "frames": [
+    "snow_wisp_0",
+    "snow_wisp_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "hush_owl_idle": {
+   "frames": [
+    "hush_owl_0",
+    "hush_owl_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "crystal_crawler_idle": {
+   "frames": [
+    "crystal_crawler_0",
+    "crystal_crawler_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "frostbound_revenant_idle": {
+   "frames": [
+    "frostbound_revenant_0",
+    "frostbound_revenant_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "ice_knight_idle": {
+   "frames": [
+    "ice_knight_0",
+    "ice_knight_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "rimed_page_idle": {
+   "frames": [
+    "rimed_page_0",
+    "rimed_page_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "pale_lantern_idle": {
+   "frames": [
+    "pale_lantern_0",
+    "pale_lantern_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "phantom_avatar_idle": {
+   "frames": [
+    "phantom_avatar_0",
+    "phantom_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "phantom_avatar_back_idle": {
+   "frames": [
+    "phantom_avatar_back_0",
+    "phantom_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "rime_wolf": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "snow_wisp": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "hush_owl": {
+   "size": [
+    24,
+    20
+   ],
+   "origin": [
+    12,
+    19
+   ]
+  },
+  "crystal_crawler": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "frostbound_revenant": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "ice_knight": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "rimed_page": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "pale_lantern": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "phantom_avatar": {
+   "size": [
+    49,
+    51
+   ],
+   "origin": [
+    24,
+    50
+   ]
+  },
+  "phantom_avatar_back": {
+   "size": [
+    49,
+    51
+   ],
+   "origin": [
+    24,
+    50
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Episode 7 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin bottom-centre. Each foe carries its own dark outline (it holds on snow and on the white fade) and a 1 px ice rim inside it (it holds on the dark vault floors), so a FIELD_LOOK entry is not needed. phantom_avatar (front) and phantom_avatar_back (seen from behind, mirrored) are the White Phantom standing over the heart in the Stillheart."
+}
