@@ -1,0 +1,27 @@
+{
+ "image": "ep7_portraits.png",
+ "frames": {
+  "phantom_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "phantom_32": [
+   48,
+   0,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "phantom": {
+   "48": "phantom_48",
+   "32": "phantom_32"
+  }
+ },
+ "sources": {
+  "phantom": "battle frame white_phantom (Outer Frost; 1x crop, E7-sprites)"
+ },
+ "notes": "Episode 7 pack atlas, merged into portraits. phantom: the antler crown, the skull with its cold blue eye sockets and the frozen cloak at the shoulder (48), the skull under the crown (32), cropped at 1x from the Outer Frost battle frame. Nox has no portrait (plan 9.5); hooded_sage is held for the First Keeper."
+}
