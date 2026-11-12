@@ -85,10 +85,10 @@ test('Episode 7 ids are registered, unlisted until the maps exist, and Episodes 
   assert.equal(E7.enemies.EP7_FOES.length, 7);
   for (const id of [...E7.enc.EP7_GROUP_IDS, ...E7.enc.EP7_BOSS_IDS]) assert.ok(ENCOUNTERS[id], id);
   assert.equal(E7.enc.EP7_GROUP_IDS.length, 12);
-  assert.equal(E7.enc.EP7_MAPS_LISTED, false, 'E7-maps-b flips it once the Vault maps exist');
+  assert.equal(E7.enc.EP7_MAPS_LISTED, true, 'the White Road and Vault maps exist: the zones are listed (E7 wave 7c integration)');
   for (const z of E7.enc.EP7_ZONE_ORDER) {
     assert.ok(ZONES[z], z); assert.equal(ZONES[z].episode, 7);
-    assert.ok(!Object.keys(ZONES).includes(z), `${z} stays out of Object.keys(ZONES) until EP7_MAPS_LISTED`);
+    assert.ok(Object.keys(ZONES).includes(z), `${z} is listed in Object.keys(ZONES) once EP7_MAPS_LISTED`);
   }
   for (const z of before.zones) assert.ok(Object.keys(ZONES).includes(z), z);
   assert.equal(JSON.stringify([ZONE_ORDER, EP2_ZONE_ORDER, EP3_ZONE_ORDER]), before.orders);

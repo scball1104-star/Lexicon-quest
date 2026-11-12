@@ -342,6 +342,7 @@
   "assets/ui/ep7_heads.json",
   "assets/ui/ep7_heads.png",
   "src/data/ep7/ai.js",
+  "src/data/ep7/audio.js",
   "src/data/ep7/encounters.js",
   "src/data/ep7/enemies.js",
   "src/data/ep7/field/_testremember.js",
@@ -366,7 +367,19 @@
   "src/data/ep7/start.js",
   "src/data/ep7/story.js",
   "src/data/ep7/text.js",
-  "src/data/ep7/world.js"
+  "src/data/ep7/world.js",
+  "src/data/maps/ep7_palehaven.js",
+  "src/data/maps/ep7_patches.js",
+  "src/data/maps/ep7_ph_armory.js",
+  "src/data/maps/ep7_ph_inn.js",
+  "src/data/maps/ep7_ph_shop.js",
+  "src/data/maps/ep7_ph_watch.js",
+  "src/data/maps/ep7_stillheart.js",
+  "src/data/maps/ep7_vault_f1.js",
+  "src/data/maps/ep7_vault_f2.js",
+  "src/data/maps/ep7_vault_f3.js",
+  "src/data/maps/ep7_waystation.js",
+  "src/data/maps/ep7_white_road.js"
  ],
  "tier": [
   "assets/tier_manifest.json",

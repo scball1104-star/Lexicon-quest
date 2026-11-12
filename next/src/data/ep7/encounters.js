@@ -10,7 +10,7 @@
 import { enc, ENCOUNTERS, ZONES } from '../encounters.js';
 
 /** E7-maps-b (wave 7c): set to true once the Vault maps exist (lists the five zones in ZONES for qa/maps). */
-export const EP7_MAPS_LISTED = false;
+export const EP7_MAPS_LISTED = true;
 
 export const EP7_ZONE_ORDER = ['ep7_white_road', 'ep7_vault_f1', 'ep7_vault_f2', 'ep7_vault_f3', 'ep7_stillheart'];
 
