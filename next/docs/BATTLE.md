@@ -1372,3 +1372,161 @@ Not touched: the Echo Warden, the Other Selves, the Bellows Specter, the Briar A
 Open for Scott: careful HP lost of 30 to 45% with 85%+ careful wins is not reachable through boss stats alone, because of the
 limits above. Getting there would mean telegraphs that hit harder than an ordinary blow may (they are exempt from the one-hit rule),
 or Auto healing later in boss fights. Both are design calls for Scott and Stephen.
+
+## 16. Episode 7: The Vanishing World (E7-battle, wave 7a)
+
+Design: `docs/EPISODE7_PLAN.md` sections 6 and 7. Everything is pack data and pack code (`src/data/ep7/{enemies,encounters,items,loot,shops,
+skills,ai,rime}.js`, each an idempotent `register()` the pack entry calls in its ORDER; `rime` after `encounters` and after the ep6 pack's
+`gale`); no core file changed (`RULE_EXT` is Episode 5's seam). `simulate.mjs --check` passes all seven episodes; `--cave --check` and
+`--tier 1 --check` unchanged.
+
+### 16.1 Enemies (final numbers after tuning)
+
+Every foe is `cold: true`; its cold moves carry `{ keep: 'rime', rime: n }` (the Rime in brackets). Ordinary EXP about 85 to 95 a head;
+`expMul` F1 wisps 0.65, F2 mixed 0.6, every F3 pair 0.85.
+
+| Enemy | Lv | HP | ATK/MAG | DEF/SPR | SPD | Sh | Weak | Resist | EXP / Gold | Moves (telegraph in bold) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Rime Wolf | 28 | 820 | 190/20 | 32/24 | 20 | 2 | fire, spear | ice | 85 / 230 | Bite, Frost Fang (phys 120%) [1]; evade 10% |
+| Snow Wisp | 28 | 690 | 90/180 | 20/34 | 18 | 2 | fire, light | ice, bow | 80 / 220 | Slap, Flurry (party mag 70%) [1] |
+| Hush Owl | 28 | 700 | 185/60 | 26/28 | 22 | 3 | bow, fire | ice | 85 / 230 | Talon, Hush (Silence 25%), Dive (phys 160%); evade 15% |
+| Crystal Crawler | 29 | 680 | 180/20 | 48/26 | 9 | 4 | fire, axe | sword, bow | 90 / 240 | Mandible, Glaze (Protect), Shard Spray (party phys 60%) [1] |
+| Frostbound Revenant | 29 | 720 | 90/195 | 24/40 | 15 | 3 | fire, light | ice, thunder | 90 / 250 | Chill Touch (mag 150%) [1], Grave Cold (Blind 20%), Drain |
+| Hollow Ice Knight | 30 | 860 | 200/40 | 46/30 | 12 | 4 | fire, axe | ice, sword | 95 / 260 | Ice Blade, **Glacier Cleave** (phys 200%, charge) [2] |
+| Rime-Written Page | 30 | 700 | 110/200 | 22/42 | 17 | 3 | fire, light | thunder, ice | 90 / 260 | Margin Cut, Cold Ink (party mag 130%) [1], **Final Line** (mag 200%, charge) |
+| The Pale Lantern | 29 | 1300 | 300/850 | 30/40 | 28 | 7 | fire, light | ice, thunder | 280 / 1600 | Pale Flame (mag 100%) [1], Lamplight Chill (party mag 160%) [1]; **Borrowed Light** (pinned); two Snow Wisps at 50%; immune Silence |
+| The White Phantom | 30 | 3300 | 600/1450 | 34 (x1.4 armored)/32 | 22 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | ice, thunder (phases 1, 2) | 1500 / 1800 | Whiteout Breath (party mag 120%) [1], Icicle Lance (phys 160%) [1]; **Farewell** (pinned); **Stillheart Blizzard** (party mag 210%, charge) [2]; immune Stun, Poison, Blind |
+| The Closed Gate | 30 | 600 | 220/220 | 30/26 | 14 | 3 | axe, fire | ice | 0 / 0 | Bar (phys 90%); Shut on the hero every 3rd turn (Silence 50%) |
+| The Lost Letter | 30 | 540 | 200/220 | 22/28 | 13 | 2 | spear, fire | ice | 0 / 0 | Cold Ink (mag 110%) [1], then Mend: the Phantom +4%, never above the 68% lock |
+
+The Stillheart Sanctum (the tightest ordinary floor): `encounters.js` `V3_POWER` pages 3.5, knight 3.0, mixed 3.8; `V3_SPEED` 1.1, 1.15,
+1.1; `V3_HP` 1.0, 0.7, 1.0. F2's three-foe group carries `hp` 0.8.
+
+**What moved from the plan, and why.**
+- **The bosses** (tougher, not longer). At the plan's numbers careful play won 100% with 10 to 11% HP lost and ignoring every pin cost 0
+  points: the party now has SPD 31 to 37, so a SPD 15 boss acted about twice a fight once Call threw it back. The Lantern: HP 1,900 to
+  1,300, MAG 760 to 850, SPD 15 to 28, Lamplight Chill 60 to 160%, Pale Flame 130 to 100% (spread damage, not one-shot pressure), and a
+  landed Borrowed Light Freezes at x1.7 damage taken (`borrowMult`, the cost of a missed Call; the 8% heal stays the plan's). The
+  Phantom: HP 4,300 to 3,300, ATK 560 to 600, MAG 560 to 1,450, SPD 15 to 22, the Blizzard 170 to 210%, a landed Farewell Stills for 3
+  party turns (`stillTurns`; plan 2). HP only went down, as plan 6.6 asks.
+- **Recall and the Silver Salve do not free a Stilled ally** (16.2): while they did, ignoring every Farewell still won 86%.
+- **Targets.** The Lantern's careful HP-lost floor 20% to 16% and the Phantom's 24% to 17%; the Phantom's round band floor 11 to 10 (a full
+  clear's Lv 31 wins in 11.0). Both floors stay above the Episode 6 counterparts' 13% and 17%, which `toughNotLong` holds. At the plan's
+  floors careful play sat at 85 to 88%, its own floor, with no room for a person (Scott, 11/11: the simulator plays sharper than a person;
+  section 15 met the same ceiling with boss stats alone).
+- **F3.** Rime is what sinks attack-only play (it never Defends, so it Freezes), so a faster floor dropped attack-only under 70% before
+  careful play lost 18%: F3's pressure is ATK and MAG (power 3.0 to 3.8) at SPD x1.1, with Cold Ink party-wide at 130% (plan 90%) for
+  the spread careful play cannot heal away. The knight pair carries 0.7 HP (the Knight resists the hero's sword: attack-only fights it
+  twice as long). F3 pays `expMul` 0.85 (the EXP margin, 16.6).
+- **Gold.** The Courier's Strongbox 1,500 to 1,800 (the 80%-of-fights line had 96 G left at Palehaven). No price moved.
+- **Ids.** `lantern_charm` is an Episode 1 item: the tier 13 Silence charm is `glasswick_charm`. `mend` is Mira's: the Letter's is
+  `letter_mend`. Cold Ink is two skills (`cold_ink`, the Letter's single; `page_cold_ink`, the Page's party-wide).
+
+### 16.2 Rime (`src/data/ep7/rime.js` on `RULE_EXT`)
+
+- A battle has Rime only when a foe is `cold` (`state.rime`, saved with the battle state). No encounter field. Party only: `addRime()`
+  refuses any unit that is not a party member, and nothing a foe does to the party slows that foe.
+- **How a cold move's targets reach the rule.** `RULE_EXT.afterAction` is told who acted, not whom they hit, so it cannot add Rime. The
+  move's effect `{ keep: 'rime', rime: n }` can: `useSkill` applies effects to the members actually hit (a miss is left out) and
+  `applyEffect` hands `keep` to `ai.js special()` with those targets; every Episode 7 script answers `e.rime`. Call takes the same road
+  from the hero's `basic` script (`{ keep: 'rime', rime: 'call' }`, chained like Anchor and Turn the Sky).
+- **Frozen** at 3: `push(u, 1.0)`, Rime 0, no Rime while Frozen, x1.4 damage until it acts. rules.js has no damage-taken hook for a party
+  member, so the x1.4 is two one-turn mods (source `frozen`) on DEF and SPR, sized at the freeze so `DEF_K / (DEF_K + D)` grows exactly
+  x1.4 for that member. `RIME_TUNE` holds the live knobs (`frozenPush`, `frozenMult`).
+- **Shedding.** Defend (a plain Defend: a Guard also sets `defending` but covers someone) sheds all and is Warm until the member's next
+  turn; Ember Tea sheds 1 from every ally (read from `itemsUsed`, party-wide by design); Call sheds all from one ally.
+- **Pins** (Farewell, Borrowed Light): pinned at the end of the owner's turn on the non-hero member with the most Rime (ties: lowest HP
+  share), never while it charges; then its landing turn and `pinGap` (0) clear turns. They land on the owner's next turn. `holdForHero`:
+  at the pin and after every action until the hero has acted, the owner's `next` is held behind the hero's. Call on the target breaks it
+  (its owner a full turn back: two party turns in a row); a Break of the owner cancels it; so does its fall.
+- **Stilled** is built on Episode 2's Kept seal (`statuses.kept`, set directly, so no mirror is drawn): turns skipped, foes cannot target
+  them and party-wide hits pass them by, allies can (Call is `canTargetKept`). They return after `stillTurns` turns of the other members,
+  on Call, or when the source is Broken or falls. The plan's fallback (pushed and covered) is not needed. Recall and a Silver Salve cure
+  Kept, but a farewell is not a mirror: the seal goes back on at once (their heal and Silence cure land) and Auto never aims one at it.
+- **Gates.** `CALL_GATE` runs after Episode 6's `SKILL_GATE` and appends to `state.gated`: Call with no cold foe, "No cold to call
+  through.". No Rime battle has a sky or a wind, so Turn the Sky and Anchor stay gated in every one (tested).
+- Events: `rime` { reason: start, rime }, `rime_add` { target, rime, delta, reason: cold | defend | tea | call | frozen, source },
+  `frozen` { target, reason: rime | borrowed }, `warm` { target, on }, `farewell` { source, target, pinned, skill, moved? } plus a
+  `telegraph` with `farewell: true`, `farewell_broken` { source, target, reason: call | break | gone, skill }, `farewell_land` { source,
+  target, skill }, `stilled` { target, on, source? }, `stilled_end` { target, reason: call | time | break }, `stilled_hold` { target, by }.
+  Message kinds `rime_frozen`, `rime_warm`, `rime_tea`, `call`, `farewell_broken`, `farewell_land`, `stilled`, `stilled_hold`, `no_cold`,
+  `hood`, `ward`, `ward_break`, `blessing`, `shut`, `mend`, `farewell_answer`, `kept_light`.
+
+### 16.3 The Pale Lantern (ai `pale_lantern`) and the White Phantom (ai `white_phantom`)
+
+- **Lantern**: Borrowed Light from its first turn ("The Lantern borrows {target}'s light."); landed, the target Freezes at x1.7 and the
+  Lantern heals 8%. Never the hero ("It cannot hold a kept light."). At 50%, once: two Snow Wisps (reward 0). No flee, flag
+  `lantern_defeated`, backdrop `ep7_battle_hall`. Loot: Borrowed Flame, 1 rare (ilvl 29), 2 Hi-Potions.
+- **Phantom 1 Outer Frost** (HP locked at 68%, DEF x1.4). **2 The Frozen Ward** (from 68%): the Closed Gate and the Lost Letter; 20%
+  damage, shields locked, HP stops at 33%. Both down: "The Frozen Ward thaws!", phase 3, Broken, +25 Fury. **3 Thawlight**: armor gone,
+  weak fire, spear, light, 9 shields, Haste, the Blizzard every 4th turn (the first a turn early). Farewell in every phase, never on the
+  hero, not used when only the hero stands. `phase` events carry `sprite`: `white_phantom`, `white_phantom_ward`, `white_phantom_thaw`.
+  No flee, flag `phantom_defeated`, music `boss_phantom`, backdrop `ep7_battle_stillheart`, `startFury` +20 with `hearth_lit`. Loot:
+  Stillheart Shard, 2 rares (ilvl 30), a Phoenix Feather, 2 Hi-Ethers. Answer on a pin's owner: a plain hit, "A farewell is not a decree."
+
+### 16.4 Auto (`POLICY_EXT`, careful play only)
+
+`ep7Policy` returns null unless the battle has Rime. 1. A pin up: the hero Calls its target (Silenced: an ally uses an Echo Herb on the
+hero first; nobody takes the hero into a combo). 2. A Stilled ally: the hero Calls them. 3. Rime 2 and a cold foe standing: Defend (the
+hero not while a pin is up; Mira not while an ally is under half HP). 4. Two members at Rime 2: one Ember Tea. 5. Against the bosses the
+hero keeps 12 MP for Call. Reckless and attack-only play never Call, Defend for Rime or drink Tea; no policy but attack-only aims Recall
+or a Salve at a Stilled ally. Careful play, 100 fights: the Lantern (Lv 29) 2.08 Borrowed Lights a fight, 99% broken by Call, none
+landed, 0.9 Frozen, the Lantern acting 0.62 times a party round; the Phantom (Lv 30) 2.32 Farewells, 97% broken by Call, 1% by a Break,
+0.25 Frozen, 0.63 Phantom turns a party round (longest wait 3.7 rounds).
+
+### 16.5 Items, loot, shops, the gold line
+
+Tier 13 (ilvl 29) and tier 14 (ilvl 31) as plan 7.2 (the Glasswick Charm for the Lantern Charm); uniques and the Winterwatch set as 7.3,
+every stat a party stat. `white_road_letter` (Episode 6's) gains `descAfter` on `stillheart_restored` from `ep7/items.js`. Affixes: a
+ninth tier at ilvl 29. `RARE_NAME_EXT` gains [29: Rimebound, Wintered, Hearthlit, Northbright, Thawborn]. ZONE_LOOT: the road 28 (0.18),
+F1 29 (0.18), F2 29 (0.19), F3 30 (0.19). Shops: `waystation_pack` (Sol, peddler prices), `northwind` (Maera), `glassice_armory` (Eira;
+the tier 12 weapons too, tier 14 after `vault_f2_done`). `shops.js` `EP7_GOLD_LINE` is the contract the maps place: the Courier's
+Strongbox 1,800, the Winterwatch Provision Cache 1,500, the Lamp Gallery chest 1,200; optional, the Reliquary 450 and the Hearth 400.
+**economy7** (binding): from 4,000, at 100% of the fights with the main chests, 7,170 at Palehaven and 670 left after the two town
+pieces, 10,190 before F3 and 1,090 left after the two tier 14 pieces; at 80% with every chest, 396 and 622 left.
+
+### 16.6 Simulator and the final table
+
+`tools/sim/ep7.mjs`: `registerData()` registers the ep4 to ep7 battle data; two lines in `simulate.mjs` (the `EP7` attach and
+`...EPISODES[7]` in the default zone list; that file stays CRLF). Loadouts as plan 6.6: the road is `ep6_obs_eyrie` plus the Scribe's
+Quill, the Kestrel's Wings and Stormplate Mail; F1 + Rimeplate Mail, Snowveil Robe and `call_learned`; F2 + Winterwatch Boots; F3 +
+Iceglass Sword and Aurora Staff; the Phantom + Borrowed Flame; 2 to 4 Ember Teas. Progression from 17,900, every fight: the road 28 to
+29, F1 29, F2 to 30, F3 30, **the Phantom met at Lv 30 with 20,836 EXP: 527 under Lv 31 (21,363), 385 with elites at their real rate**;
+at 80%, 20,304 (Lv 30). The Sanctum (Lv 30): careful HP lost 18%, attack-only wins 71%.
+
+| Zone | Careful: win / rounds / HP lost | Attack-only: win / rounds |
+|---|---|---|
+| ep7_white_road | 100% / 3.21 / 6% | 100% / 7.13 |
+| ep7_vault_f1 | 100% / 4.02 / 7% | 100% / 9.30 |
+| ep7_vault_f2 | 100% / 4.09 / 6% | 100% / 9.71 |
+| ep7_vault_f3 | 99% / 3.05 / 18% | 71% / 5.41 |
+
+| Boss | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only | Ignoring telegraphs | Sloppy (scratch policy) |
+|---|---|---|---|---|---|
+| **pale_lantern** | 29 | 94% / 8.53 (7.0-10.3) / 17% | 0% / 4.04 | 77% / 6.87 | 86% |
+| **pale_lantern** | 30 | 95% / 8.23 (6.7-10.0) / 16% | 1% / 4.40 | - | - |
+| **white_phantom** | 30 | 92% / 11.30 (8.3-15.7) / 19% | 0% / 5.85 | 45% / 12.66 | 84% |
+| **white_phantom** | 31 | 96% / 10.98 (8.3-15.3) / 14% | 0% / 6.23 | - | - |
+
+`toughNotLong`: the Lantern 8.53 rounds / 17% HP lost / 94% against the Gale Engine's 8.88 / 13%; the Phantom 11.30 / 19% / 92% against
+the Scribe's 14.55 / 17%. (After #87 the Engine reads 8.38 / 18% and the Scribe 13.22 / 22%: both Episode 7 bosses are shorter, and the
+Phantom takes less of the party's HP than today's Scribe.) **Margin for manual play** (the Barrister lesson): careful play sits 9 and 7
+points over the 85% floor. "Sloppy" is a scratch policy for the margin only (careful play that misses one Call in three and never
+Defends for Rime or drinks Tea): it still wins 86% and 84%.
+
+### 16.7 Tests
+
+`qa/battle/ep7_battle.test.mjs` (16): registration and idempotence, Episodes 1 to 6 untouched (an Episode 6 and an Episode 5 boss replay
+bit for bit; Call gated with no cold foe), Rime in every cold battle with Turn the Sky and Anchor gated, cold moves' Rime, Frozen (the
+push, x1.4, the thaw), Defend and Ember Tea, Call, a pin broken and landed, holdForHero, Stilled and its three ends (Recall re-sealed),
+the Break and the hero rule, the Lantern, the Phantom's phases and Blizzard, Auto, the one-hit rule, items and the gold line, purity.
+`qa/battle/ep7_sim.test.mjs` (2): the suite at 100 fights with every check, and the EXP curve.
+
+### 16.8 For the scene (E7-scene-ui)
+
+- Call's target kind is `ally` with `excludeSelf` and `canTargetKept`: the cursor must reach a Stilled ally, who is off the timeline
+  (rules.js `targets()` lists them, and the default is the Stilled ally when there is one). Its `SIGNATURE_TECHS` row is `{ unit: 'hero',
+  flag: 'farewell', skill: 'call_name' }` (the hero's Answer row on `decree` must not float over it).
+- A Stilled member's skipped turn is rules.js `skip` with `reason: 'kept'`: the core animator says "is kept in the mirror." and the
+  timeline greys the head as Kept. Wrap both in a Rime battle. `heroAnswers(b)` (ai.js) says when "{hero} can call her." may show; the
+  Defend row's help in a Rime battle is "Shake off the cold.".

@@ -109,12 +109,12 @@ test('seam 4: an Episode 6 save lands where an Episode 4 or 5 one does (Emberpea
     assert.deepEqual(landing(id), landing('ep5_lab_f2'), `${id} lands as an ep5 map does`);
     assert.equal(landing(id)[0], 'emberpeak');
   }
-  assert.equal(landing('ep7_x'), null);
+  assert.equal(landing('ep8_x'), null);
   assert.equal(landing('ep66_x'), null);
   assert.equal(landing('ep4_vw_inn')[0], 'emberpeak', 'Episode 4 unchanged');
   assert.equal(landing('ep5_saffron')[0], 'emberpeak', 'Episode 5 unchanged');
   assert.equal(landing('pk_inn'), null);
-  assert.match(read('src/game/packFallback.js'), /\/\^ep\[456\]_\/\.test\(id\) \? E/);
+  assert.match(read('src/game/packFallback.js'), /\/\^ep\[4567\]_\/\.test\(id\) \? E/);
 });
 
 test('pack entry: ORDER, missing modules skipped, idempotent, the ep5 pack registered first, maps and hooks run', async () => {

@@ -218,6 +218,47 @@ only once its `EP6_MAPS_LISTED` is true).
   whose content is in this file): the pre-tap load went from 2,443,506 to 2,442,935 wire bytes (seams about +100, trims about
   -670, gzipped); the initial download from 6,663,018 to 6,662,447.
 
+## The ep7 pack (2026-11-12, E7-pack)
+
+`ep7` (prefix `ep7_`, entry `src/data/ep7/index.js`, asset fragment `assets/ep7_manifest.json`, audio pack `ep7`, cap 1.0 MB)
+holds all of Episode 7 (`docs/EPISODE7_PLAN.md` 13): every file under `src/data/ep7/`, `src/data/maps/ep7_*.js` (the eleven
+maps and `ep7_patches.js`), `assets/{tiles,sprites,ui,backdrops}/ep7_*`, `assets/tiles/ep7.png`, and the sounds
+`assets/audio/{sfx,ambience}/ep7_*` (`build_pwa.py` `LAZY_PREFIXES`). Its switch is `EP7_LIVE` in `src/game/episodes.js` (no
+`live.js`), **false** until E7-integrate. `hard: true`, `touches: ['ep6_zl_inn', 'ep6_zl_charts', 'ep6_zephyr']`: the field
+waits for both ep6 and ep7 before loading any of the three. Wanted from `ep6_complete` or `ep7_started` (an Episode 5 save
+never wants it). While `EP7_LIVE` is false nothing is fetched, except with `?pack=ep7` or `?ep=7` (the title hook forces it on;
+the pack adds its row only once its `EP7_MAPS_LISTED` is true).
+
+- **The chain ep3, ep4, ep5, ep6, ep7.** The ep7 entry awaits the ep6 pack (`ensurePack('ep6', { engine })`, then the ep6
+  entry's `register(engine)`) before any ep7 module is evaluated. Only registration is ordered: `ensurePack('ep7')` starts every
+  hard pack above it at once (#96), the title hook starts the ep6 and ep7 fetches at once, and the entry starts its own code (`prefetchCode()`)
+  and map files (`maps.js` `prefetch()`) before it waits. Measured on the phone profile (844x390 at 3x, CPU 4x slower, 10 Mbps
+  and 40 ms; `qa/ui/ep7_saves_headless.py`, 2026-11-12, two runs, two other build agents loading the CPU, the pack a skeleton
+  whose 61 not-yet-written modules and maps answer 404): entry to `ep6_zl_inn` with ep4 to ep7 ready **10.2 s cold, 2.1 to
+  2.4 s warm**. The same profile and hour without ep7 (ep4 to ep6 only, to the same inn): 9.3 to 9.4 s cold, 2.1 to 2.3 s warm.
+  So ep7 adds about 0.8 s cold and 0.1 s warm; the ep4 pack alone takes 7.2 to 7.9 s cold. Plan 3.3's cold target (8 s) is
+  missed by the chain below ep7; the fix is PLAYTEST_REVIEW_8 item 8 (fetch every pack at once on a resume, in the hot file
+  `src/game/packs.js`), which waits for Scott's or Stephen's word.
+- **`register(engine)`.** ORDER `flags, enemies, items, skills, loot, encounters, rime, shops, ai, npcs, quests, text, story,
+  ledger, audio, world, pages, maps, hooks, start, scene`; `title` is loaded on first use by `hooks.js`. A missing module is
+  skipped and reported; a broken one is not swallowed. Idempotent.
+- **Audio.** `src/data/ep7/audio.js` (E7-audio) is merged into `engine.audio.manifest` (never overwriting an id, `pack` as
+  `manifest.packs.ep7`) on every path that brings the pack up. The quick start calls `readyPacks(engine)` (the ep6 hooks'
+  `readyPacks`, so ep4 to ep6 with their fragments, `zephyr` for Act I included, then ep7 the same way) before the fade in.
+  `qa/pwa/precache.test.mjs` resolves sfx ids named under `src/data/ep7/` against the ep7 fragment, then the ep6, ep5 and ep4
+  ones (listed as waiting until `audio.js` exists).
+- **Maps and the order trap.** `src/data/ep7/maps.js` awaits the ep6 maps registry's `register()` first, then registers the
+  eleven maps by a guarded list and patches the registered `ep6_zl_inn` / `ep6_zl_charts` / `ep6_zephyr` with `ep7_patches.js`
+  `withEp7Wake` / `withEp7Charts` / `withNorthBerth` (identity until that file or export exists). `qa/core/ep7_maps_order.test.mjs`.
+- **Hooks** (`src/data/ep7/hooks.js`): `CREDITS_HANDOFF[7]` (from text.js `CREDITS_EP7`; wakes in `ep7_ph_watch` at
+  `watch_cot`), `CREDITS_HANDOFF[6].endCard` = `END_CARD_EP6_LIVE` while live (unchanged while off; the Episode 6 wake never
+  moves), `QUEST_EXT` (Episode 7 first), `globalThis.LQ_EP7` (`title`, `offer`, `start`, `pickRunSlot`), `LQ_DEBUG.newGameEp7`
+  (async), and the cold-entry re-landing on the three patched maps (`relandPatched`, only while live).
+- **Core seams** (plan 13.2): the table entry; `EP7_LIVE`; one title line after Episode 6's (both fetches at once; `LQ_EP7.title`
+  once ep7 has registered, which is after ep6); the landing regex `ep[4567]_` in `packFallback.js`. Paid for by four doc-comment trims in
+  `src/game/packs.js` (`storedAll`, `awaitPacks`, `warm`, `refetchUsed`): the pre-tap load went from 2,451,177 to 2,450,964
+  wire bytes (seams +101, trims -314, gzipped); the initial download from 6,670,715 to 6,670,503.
+
 ## The worldmap pack (2026-11-11, issue #97, WORLD_MAP_PLAN wave 2)
 
 `worldmap` (prefix `worldmap_`, entry `src/data/worldmap/index.js`, asset fragment `assets/worldmap_manifest.json`, no audio

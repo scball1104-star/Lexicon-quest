@@ -74,6 +74,7 @@ def main(argv):
     __import__('ep4').write() if (not argv[1:] or 'ep4' in argv[1:]) else None   # E4 pack sheet: ep4.png + ep4_tiles.json (never tiles.json)
     __import__('ep5').write() if (not argv[1:] or 'ep5' in argv[1:]) else None   # E5 pack sheet: ep5.png + ep5_tiles.json (never tiles.json)
     __import__('ep6').write() if (not argv[1:] or 'ep6' in argv[1:]) else None   # E6 pack sheet: ep6.png + ep6_tiles.json (never tiles.json)
+    __import__('ep7').write() if (not argv[1:] or 'ep7' in argv[1:]) else None   # E7 pack sheet: ep7.png + ep7_tiles.json (never tiles.json)
 
 
 if __name__ == '__main__':

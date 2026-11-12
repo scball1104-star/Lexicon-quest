@@ -1,0 +1,21 @@
+{
+ "image": "ep7_battle_road.png",
+ "w": 384,
+ "h": 216,
+ "cell": 6,
+ "note": "the White Road: environments cell 6, the black pines and the snow on the climb, the lamp posts; the snow under the band calmed to a mid value",
+ "extraColors": [
+  "#5d76ab",
+  "#46608c",
+  "#7187b4",
+  "#9fc4f4"
+ ],
+ "colors": 61,
+ "source": "environments.webp cell 6",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep7_battle_road",
+ "fallback": "valley",
+ "meanLuma": 0.3446
+}

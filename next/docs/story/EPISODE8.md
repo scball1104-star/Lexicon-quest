@@ -667,7 +667,7 @@ Library's last apprentice; has never been let past the Index door.
 **Quinn the Page Runner** [`quinn`] (canon). Twenties, a runner's satchel, loose pages under both arms. Gives the Drifting
 Pages. Canon lines: "Pages drift out of the stacks when nobody is looking." "I carry fresh ink and binding cord between the
 library wings." His third canon line ("The marble letters on the road spell a warning when read backwards.") is **not used**:
-it invites a word puzzle (DESIGN hard rule 2).
+it invites a puzzle about spelling (DESIGN hard rule 2).
 
 **Sorel the Restorer** [`sorel`] (canon). Fifties, a magnifying lens on a cord. Keeps the Glyphsmith Atelier (shop
 `glyphsmith`). Canon lines: "A broken binding can be repaired. A lost name needs a friend." "I restore torn volumes at the
@@ -1029,7 +1029,7 @@ secret ("The original record was deliberately left unfinished so its ending coul
 **Changed, with reasons.**
 - **Word and order puzzles are gone** (DESIGN hard rule 2; Episodes 3 to 7 did the same). F1's three Index Engines cycling
   VOID, NAME, MEMORY, CHOICE with a printed rule, F2's printing plates cycling BLANK, WITNESS, RESTORE, the DESTINY
-  crossword, the evidence pages read in order, and F3's promises read in order are all replaced: the floors open by pop-up
+  name grid, the evidence pages read in order, and F3's promises read in order are all replaced: the floors open by pop-up
   books (plan 5.1), the evidence pages are found in any order, and SEE, SHELTER, CHOOSE are inscriptions, never an order to
   get right. Quinn's "read backwards" line is dropped.
 - **Redaction-ink damage is gone** (no damage tiles: phone players). The void is never a hurting floor. The Concordance's
@@ -1281,7 +1281,7 @@ any of them, 1 and 3 included, and his change wins over a default.
     optional paid items for Scott's own go.
 23. **Renames and drops for canon conflicts:** Tamsin to Elowen (the novel's name), Iona into Ione, Quinn's backwards line
     dropped, Iona's third line held, the memory labels to the engine titles, the Oath bond into Answer, no ink damage, no
-    engines, plates, crossword or ordered pages and promises, "stole" dropped from the LEGACY scene, the LEGACY hero line
+    engines, plates, name grid or ordered pages and promises, "stole" dropped from the LEGACY scene, the LEGACY hero line
     dropped, the root's Episode 7 Eraser line unused. [default: as listed] **[default, pending Stephen]** Each follows a hard
     rule, an id collision or the silent hero.
 24. **Shipping.** Episode 8 is built behind `EP8_LIVE` on a build branch after Episode 7 is merged; E8-integrate flips it on

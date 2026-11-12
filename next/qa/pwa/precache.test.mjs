@@ -26,6 +26,10 @@ const EP5_AUDIO = exists('src/data/ep5/audio.js')
 const EP6_AUDIO = exists('src/data/ep6/audio.js')
   ? await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep6', 'audio.js')).href).then((m) => m.AUDIO || m.default || m)
   : null;
+// Episode 7's the same way (EPISODE7_PLAN 13.3): src/data/ep7/audio.js (E7-audio, wave 7c). null until it exists.
+const EP7_AUDIO = exists('src/data/ep7/audio.js')
+  ? await import(pathToFileURL(path.join(NEXT, 'src', 'data', 'ep7', 'audio.js')).href).then((m) => m.AUDIO || m.default || m)
+  : null;
 
 test('precache: built (not the placeholder), unique, and every entry exists', () => {
   assert.match(sw.version, /^[0-9a-f]{12}$/, 'SHELL_VERSION is a build hash (run python tools/pwa/build_pwa.py)');
@@ -70,8 +74,8 @@ test('audio manifest: core sfx and jingles are precached, pack sfx and music are
   }
   for (const s of srcs(Object.values(a.music || {}))) assert.ok(s.startsWith('..') || !sw.entries.includes(s), `music must not be precached: ${s}`);
   // the ep4, ep5 and ep6 fragments: every file exists and none of it is precached (build_pwa.py LAZY_PREFIXES covers sfx/ep4_,
-  // ambience/ep4_, sfx/ep5_, ambience/ep5_, sfx/ep6_, ambience/ep6_)
-  for (const [pack, frag] of [['ep4', EP4_AUDIO], ['ep5', EP5_AUDIO], ['ep6', EP6_AUDIO]]) if (frag) for (const kind of ['sfx', 'ambience', 'music', 'jingles']) {
+  // ambience/ep4_, sfx/ep5_, ambience/ep5_, sfx/ep6_, ambience/ep6_, sfx/ep7_, ambience/ep7_)
+  for (const [pack, frag] of [['ep4', EP4_AUDIO], ['ep5', EP5_AUDIO], ['ep6', EP6_AUDIO], ['ep7', EP7_AUDIO]]) if (frag) for (const kind of ['sfx', 'ambience', 'music', 'jingles']) {
     for (const s of srcs(Object.values(frag[kind] || {}))) {
       if (s.startsWith('..')) continue;
       assert.ok(exists(s), `${pack} ${kind} file exists: ${s}`);
@@ -96,12 +100,13 @@ test('sfx packs: every pack is declared, loadable by the engine, and every sfx i
   const ep4Ids = new Set();   // ids named under src/data/ep4/: they may resolve in the ep4 pack's audio fragment instead
   const ep5Ids = new Set();   // ids named under src/data/ep5/: the ep5 fragment, or the ep4 one (the ep5 pack brings ep4 up first)
   const ep6Ids = new Set();   // ids named under src/data/ep6/: the ep6 fragment, or the ep5 or ep4 one (the chain comes up first)
+  const ep7Ids = new Set();   // ids named under src/data/ep7/: the ep7 fragment, or the ep6, ep5 or ep4 one (the chain comes up first)
   const walk = (dir) => { for (const f of fs.readdirSync(path.join(NEXT, dir), { withFileTypes: true })) {
     const rel = path.posix.join(dir, f.name);
     if (f.isDirectory()) walk(rel);
     else if (f.name.endsWith('.js')) {
       const t = read(rel);
-      const into = rel.startsWith('src/data/ep4/') ? ep4Ids : rel.startsWith('src/data/ep5/') ? ep5Ids : rel.startsWith('src/data/ep6/') ? ep6Ids : ids;
+      const into = rel.startsWith('src/data/ep4/') ? ep4Ids : rel.startsWith('src/data/ep5/') ? ep5Ids : rel.startsWith('src/data/ep6/') ? ep6Ids : rel.startsWith('src/data/ep7/') ? ep7Ids : ids;
       for (const m of t.matchAll(/sfx\(\s*['"]([a-z0-9_]+)['"]/g)) into.add(m[1]);
       for (const m of t.matchAll(/op:\s*'sfx',\s*id:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
       for (const m of t.matchAll(/sfx:\s*'([a-z0-9_]+)'/g)) into.add(m[1]);
@@ -132,6 +137,13 @@ test('sfx packs: every pack is declared, loadable by the engine, and every sfx i
     else pending6.push(id);
   }
   if (pending6.length) console.log(`# ep6 sfx ids waiting for src/data/ep6/audio.js (E6-audio): ${pending6.join(', ')}`);
+  const pending7 = [];
+  for (const id of ep7Ids) {
+    if (id === 'sfx' || id.endsWith('_') || a.sfx[id]) { if (a.sfx[id]) ids.add(id); continue; }
+    if (EP7_AUDIO) assert.ok(inFrag(EP7_AUDIO, id) || inFrag(EP6_AUDIO, id) || inFrag(EP5_AUDIO, id) || inFrag(EP4_AUDIO, id), `ep7 sfx id ${id} has no entry in src/data/ep7/audio.js, the ep6, ep5 or ep4 fragment or the manifest`);
+    else pending7.push(id);
+  }
+  if (pending7.length) console.log(`# ep7 sfx ids waiting for src/data/ep7/audio.js (E7-audio): ${pending7.join(', ')}`);
   assert.ok(ids.size > 40, `found ${ids.size} referenced sfx ids`);
   const missing = [];
   for (const id of ids) {

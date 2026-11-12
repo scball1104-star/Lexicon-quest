@@ -797,7 +797,7 @@ the village that comes back on the chart.
 **Changed, with reasons.**
 - **Word and order puzzles are gone** (DESIGN hard rule 2; Episodes 3 to 6 did the same). F1's three sun beacons cycling
   OFF, SUNRISE, NOON, DUSK with a printed answer diagram, Oren's testimony that names the settings, F2's light lenses
-  cycling DARK, RECEIVE, REFLECT with a refraction record, the Frostbound Names Crossword, the witness pages read in order
+  cycling DARK, RECEIVE, REFLECT with a refraction record, the Frostbound Names grid, the witness pages read in order
   (a wrong one resets), and F3's three promises spoken in order are all replaced: the floors open by name stones (plan
   5.1), the witness pages are found in any order, and the promises are an inscription the Keeper says at the round door,
   never an answer to get right.
@@ -938,6 +938,47 @@ field in `src/core/input.js`), the event type `namestone` (never `waystone`), th
 
 Reserved for E7-story (wave 7a): what the built script does beyond the beat sheet (deltas only, as EPISODE6 section 9).
 
+Built by E7-story, 2026-11-12 (`src/data/ep7/{flags,npcs,quests,text,story,ledger}.js`, staging in
+`docs/story/STAGING_EP7.md`, tests `qa/content/ep7_story.test.mjs` and `ep7_data.test.mjs`). 36 scenes registered (27 main
+and chained, 7 side, 2 silent), main path 194 boxes (`ep7_morning` 6, `name_under_ice` 12, `whiteout` 8, `listening_bell`
+11, `phantom_after` 16, `whole_page` 15, `doors_reopen` 14). Deltas from section 1:
+
+- **Two scene ids renamed.** Plan 2.5's `road_landing` and `reliquary` are Episode 5 scenes; Episode 7's are `ep7_landing`
+  and `ep7_reliquary` (the Reliquary object's script is `ep7_reliquary`).
+- **Two stone names changed.** Plan 4.7's `ns_hob` and 4.8's `ns_ansel` are `ns_hakon` and `ns_anders`: Hob is
+  Willowmere's innkeeper and Ansel one of Episode 1's lost pilgrims. F1 C's two stones are `ns_sigrid` and `ns_vidar`; F3's
+  are `ns_ylva`, `ns_greta`, `ns_lars`, `ns_anders`, `ns_ida` and the hidden `ns_solveig`. Every float line is "NAME. The
+  road (or Vault) remembers her (or him)."
+- **The opening warps.** `ep7_morning` plays only in the Chart Room on `charts_dawn`; from the inn it fades out and warps
+  there, and the room's own enter trigger (`ep7_wake_charts`, asked of E7-maps-a's patch) runs it, as Episode 6's tower
+  opening does. Five boxes, six when it gives the White Road letter. The chart opens on Aeris's "Look fast."
+- **The flight** is the first box of `ep7_landing`; `ep7_board` is the bible's two lines and does not move the party.
+- **Vex** is the spawn `vex_k` (Episode 2 owns `vex` for the in-glass image), kneeling (`npc_vex_kneel`) at the wall and
+  on the gate step. He walks on ahead after the wall and comes back in at the Watch, the gate, the hearth and the roof.
+- **The Keeper's square record** goes into the Watch at the end of `meet_keeper` and is back by her lamp on a reload; it
+  stands down from `keeper_came`. From `nox_named` she is the record `nox_t` in the Watch, by her stove, where the credits
+  wake the party. In scenes she is the spawn `keeper_t` until the swap.
+- **`keeper_and_vex`** opens on the room (no narration box) to stay at 12; every bible line is kept.
+- **`keeper_comes`** opens the round door from the second landing: she goes on ahead and waits by it, the camera pans up,
+  and the door opens (`stillheart_open`), so the party still crosses the Return landing to reach it.
+- **The Phantom answers each choice** with one new line ("WHAT IS LET GO IS LOST. I LOSE NO ONE." / "NOTHING COMES BACK.
+  THAT IS WHY I KEEP IT."). The Lantern's and the Phantom's intros say their arc lines.
+- **`whole_page`**: Marten is named by the `joined` line itself, then Bram says it; Mira's "Nox." is the last line over the
+  page (`signed`); the page closes and `keeper_t` becomes `nox_t` on the same mark.
+- **`doors_reopen`**: Vex runs in (`vex_run` to `vex_square`) for the carving; the gift is given before Nox's last line.
+- **The Reliquary** opens with the three witness pages (it takes them); without them, Bram's line and nothing else.
+- **New flags** `lantern_tried`, `phantom_tried` (a retried boss intro is the pan, Mira's tip and the card).
+- **Pack helpers** asked of E7-scene-ui: `s.frostBlot(who)`, `s.frostNames(ids, level)`, `s.actorAlpha(id, alpha,
+  frames)`; without them the blot is a plain "..." box and the whiteout is the tint alone. Same boxes either way.
+- **Talk.** While `EP7_LIVE`, an Episode 6 finisher hears "the Chart Room, then the north dock", every older hint on
+  Zephyr Landing's maps waits until the party boards, and Episode 6's last journal step names the inn and the dock. The
+  wall choice changes one banter line on the White Road. Returning-cast guards drop variants that need an Episode 1 to 6
+  flag unset (no Episode 7 save lacks them), which keeps Tess's six old scenes in front of her new lines.
+- **Ledger.** Nox's and Marten's rows are hidden until their names are read; Vex's row (choice 21) is place "The Road",
+  reached at `vex_carved`. No Episode 7 line uses the word "ledger" (Scott, 2026-11-11: one meaning).
+- **Handoffs nobody owns yet:** the Court's empty portrait needs a `court_f2` pack patch to show `ep7_court_portrait` after
+  `nox_named`; the Banner list has 10 (the Stillheart has none: its scenes open on the boss card and the night roof).
+
 ---
 
 ## 10. Choices that are Scott's or Stephen's
@@ -1014,7 +1055,7 @@ his change wins over a default.
     makes those generations himself.
 19. **Renames and drops for canon conflicts:** Corin to Marten, Oren's testimony to Sol, the two Eiras as one, "Nox" held out
     of canon lines until her name returns, "The Winter Nox Could Not End" retitled, four phases to three, no frost damage, no
-    beacons, lenses, crossword, ordered pages or recited promises, the Thawlight Oath bond into a gift and Call, the First
+    beacons, lenses, name grid, ordered pages or recited promises, the Thawlight Oath bond into a gift and Call, the First
     Key dropped, the root's Eraser line unused, and the root's Nox after-clear line not used anywhere in Episode 7 (Episode
     8's first scene says it word for word: EPISODE8 ask 2). [default: as listed] **[Scott 2026-11-11: default]** Each follows
     a hard rule, an id collision or a payoff's order (section 8).

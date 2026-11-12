@@ -86,6 +86,7 @@ export const MAP_AT = [
   [/^ep5_lab_/, 'labyrinth'],
   [/^ep6_airstair$/, 'airstair'],
   [/^ep6_/, 'zephyr'],
+  [/^ep7_/, 'north'],   // Episode 7 (the White Road, Palehaven, the Vault): one point until Palehaven gets its own place and stones
 ];
 
 /**

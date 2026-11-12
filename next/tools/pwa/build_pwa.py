@@ -43,14 +43,15 @@ PACK_ASSET_DIRS = ('tiles', 'sprites', 'ui', 'backdrops')
 # field systems (src/world/ep3/, imported lazily by field.js), and the moving paintings (docs/MEDIA_BUILD.md 5: the clips,
 # their list and src/ui/clips/player.js, imported by ui/keyart.js the first time a painting with a clip is drawn). Left out of the shell
 # list (so the first download does not move) and matched by PACK_PATTERN (so the service worker runtime-caches them).
-# Episode 4's, 5's and 6's sounds (EPISODE4_PLAN 13.1, EPISODE5_PLAN 13.1, EPISODE6_PLAN 13.1): their sfx and ambience ride each
-# pack's audio fragment (src/data/ep4/audio.js, src/data/ep5/audio.js, src/data/ep6/audio.js), not assets/audio/manifest.json,
+# Episode 4's to 7's sounds (EPISODE4_PLAN to EPISODE7_PLAN 13.1): their sfx and ambience ride each
+# pack's audio fragment (src/data/ep4/audio.js to src/data/ep7/audio.js), not assets/audio/manifest.json,
 # so audio_pack_files() cannot see them; the prefixes keep them out of the precache instead.
 # src/ui/firstuse/ (#88): the title's quick start fold and the portrait lens, imported the first time they are needed.
 LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/', 'assets/clips/', 'src/ui/clips/', 'src/ui/firstuse/',
                  'assets/audio/sfx/ep4_', 'assets/audio/ambience/ep4_',
                  'assets/audio/sfx/ep5_', 'assets/audio/ambience/ep5_',
-                 'assets/audio/sfx/ep6_', 'assets/audio/ambience/ep6_')
+                 'assets/audio/sfx/ep6_', 'assets/audio/ambience/ep6_',
+                 'assets/audio/sfx/ep7_', 'assets/audio/ambience/ep7_')
 
 
 def is_lazy(rel):

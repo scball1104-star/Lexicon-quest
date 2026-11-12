@@ -10,6 +10,7 @@ export const EP4_LIVE = true;
 /** Episode 5 (EPISODE5_PLAN 10.5), as EP4_LIVE. */
 export const EP5_LIVE = true;
 export const EP6_LIVE = true;
+export const EP7_LIVE = false;
 
 /** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }

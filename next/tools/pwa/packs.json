@@ -83,6 +83,17 @@
       "ep5_saffron"
     ]
   },
+  "ep7": {
+    "entry": "../data/ep7/index.js",
+    "prefix": "ep7_",
+    "assets": "assets/ep7_manifest.json",
+    "audioPack": "ep7",
+    "touches": [
+      "ep6_zl_inn",
+      "ep6_zl_charts",
+      "ep6_zephyr"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

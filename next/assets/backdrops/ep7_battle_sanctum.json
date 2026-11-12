@@ -1,0 +1,44 @@
+{
+ "image": "ep7_battle_sanctum.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "F3 the Stillheart Sanctum: tall ice pillars rising into the night, the white nave floor (composed); the aurora is a runtime layer",
+ "extraColors": [],
+ "colors": 18,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep7_build.py (sanctum); palette.json plus the ep7 sheet colours (ep7_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep7_battle_sanctum",
+ "fallback": "boss",
+ "meanLuma": 0.4169,
+ "aurora": {
+  "color": "#5fd3a2",
+  "color2": "#9062c3",
+  "alpha": 0.16,
+  "frames": 3,
+  "everyFrames": 30,
+  "y": 34,
+  "amp": 9,
+  "period": 46.0,
+  "phase": 0.45,
+  "width": 14,
+  "maxStepLuma": 0.05,
+  "how": "add color (mixed 70/30 with color2 along x) x alpha x exp(-((y - yc(x)) / width)^2) to every sky row, yc(x) = y + amp * sin(x / period + phase * sin(2 pi frame / 3)); frames 0, 1, 2 one every everyFrames game frames; off under reduceMotion (frame 0); never a flash",
+  "rows": [
+   0,
+   118
+  ],
+  "measured": {
+   "maxStepLuma": 0.0462,
+   "maxRiseOverStage": 0.1147,
+   "steps": [
+    0.0242,
+    0.0462,
+    0.0242
+   ]
+  }
+ }
+}

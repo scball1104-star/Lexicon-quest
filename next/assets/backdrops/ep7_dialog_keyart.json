@@ -1,0 +1,15 @@
+{
+ "image": "ep7_dialog_keyart.png",
+ "w": 384,
+ "h": 216,
+ "cell": 6,
+ "note": "Episode 7 title cards and CREDITS_EP7: cell 6 darkened, vignette",
+ "extraColors": [
+  "#062550",
+  "#274d76",
+  "#3d628b"
+ ],
+ "colors": 43,
+ "source": "environments.webp cell 6",
+ "fallback": "ep6_dialog_keyart"
+}

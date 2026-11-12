@@ -1,0 +1,358 @@
+{
+ "image": "ep7_bosses_battle.png",
+ "frames": {
+  "white_phantom_cast": [
+   0,
+   0,
+   125,
+   143
+  ],
+  "white_phantom_ward_cast": [
+   127,
+   0,
+   139,
+   143
+  ],
+  "white_phantom_thaw_cast": [
+   268,
+   0,
+   127,
+   143
+  ],
+  "white_phantom_idle_1": [
+   0,
+   145,
+   125,
+   128
+  ],
+  "white_phantom_ward_idle_1": [
+   127,
+   145,
+   139,
+   128
+  ],
+  "white_phantom_thaw_idle_1": [
+   268,
+   145,
+   127,
+   128
+  ],
+  "white_phantom_thaw_die_0": [
+   0,
+   275,
+   127,
+   128
+  ],
+  "white_phantom": [
+   129,
+   275,
+   125,
+   127
+  ],
+  "white_phantom_attack": [
+   256,
+   275,
+   129,
+   127
+  ],
+  "white_phantom_die_0": [
+   387,
+   275,
+   125,
+   127
+  ],
+  "white_phantom_ward": [
+   0,
+   405,
+   139,
+   127
+  ],
+  "white_phantom_ward_attack": [
+   141,
+   405,
+   145,
+   127
+  ],
+  "white_phantom_ward_die_0": [
+   288,
+   405,
+   139,
+   127
+  ],
+  "white_phantom_thaw": [
+   0,
+   534,
+   127,
+   127
+  ],
+  "white_phantom_thaw_attack": [
+   129,
+   534,
+   129,
+   127
+  ],
+  "white_phantom_hurt": [
+   260,
+   534,
+   125,
+   125
+  ],
+  "white_phantom_ward_hurt": [
+   0,
+   663,
+   147,
+   125
+  ],
+  "white_phantom_thaw_hurt": [
+   149,
+   663,
+   129,
+   125
+  ],
+  "white_phantom_die_1": [
+   280,
+   663,
+   125,
+   117
+  ],
+  "white_phantom_ward_die_1": [
+   0,
+   790,
+   139,
+   117
+  ],
+  "white_phantom_thaw_die_1": [
+   141,
+   790,
+   127,
+   114
+  ],
+  "white_phantom_die_2": [
+   270,
+   790,
+   125,
+   88
+  ],
+  "white_phantom_ward_die_2": [
+   0,
+   909,
+   139,
+   88
+  ],
+  "white_phantom_thaw_die_2": [
+   141,
+   909,
+   127,
+   84
+  ]
+ },
+ "origin": {
+  "white_phantom": [
+   62,
+   126
+  ],
+  "white_phantom_idle_1": [
+   62,
+   127
+  ],
+  "white_phantom_attack": [
+   64,
+   126
+  ],
+  "white_phantom_hurt": [
+   62,
+   124
+  ],
+  "white_phantom_cast": [
+   62,
+   142
+  ],
+  "white_phantom_die_0": [
+   62,
+   126
+  ],
+  "white_phantom_die_1": [
+   62,
+   116
+  ],
+  "white_phantom_die_2": [
+   62,
+   87
+  ],
+  "white_phantom_ward": [
+   69,
+   126
+  ],
+  "white_phantom_ward_idle_1": [
+   69,
+   127
+  ],
+  "white_phantom_ward_attack": [
+   72,
+   126
+  ],
+  "white_phantom_ward_hurt": [
+   73,
+   124
+  ],
+  "white_phantom_ward_cast": [
+   69,
+   142
+  ],
+  "white_phantom_ward_die_0": [
+   69,
+   126
+  ],
+  "white_phantom_ward_die_1": [
+   69,
+   116
+  ],
+  "white_phantom_ward_die_2": [
+   69,
+   87
+  ],
+  "white_phantom_thaw": [
+   63,
+   126
+  ],
+  "white_phantom_thaw_idle_1": [
+   63,
+   127
+  ],
+  "white_phantom_thaw_attack": [
+   64,
+   126
+  ],
+  "white_phantom_thaw_hurt": [
+   64,
+   124
+  ],
+  "white_phantom_thaw_cast": [
+   63,
+   142
+  ],
+  "white_phantom_thaw_die_0": [
+   63,
+   127
+  ],
+  "white_phantom_thaw_die_1": [
+   63,
+   113
+  ],
+  "white_phantom_thaw_die_2": [
+   63,
+   83
+  ]
+ },
+ "anims": {
+  "white_phantom_idle": {
+   "frames": [
+    "white_phantom",
+    "white_phantom_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "white_phantom_die": {
+   "frames": [
+    "white_phantom_die_0",
+    "white_phantom_die_1",
+    "white_phantom_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "white_phantom_ward_idle": {
+   "frames": [
+    "white_phantom_ward",
+    "white_phantom_ward_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "white_phantom_ward_die": {
+   "frames": [
+    "white_phantom_ward_die_0",
+    "white_phantom_ward_die_1",
+    "white_phantom_ward_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "white_phantom_thaw_idle": {
+   "frames": [
+    "white_phantom_thaw",
+    "white_phantom_thaw_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "white_phantom_thaw_die": {
+   "frames": [
+    "white_phantom_thaw_die_0",
+    "white_phantom_thaw_die_1",
+    "white_phantom_thaw_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "hud": {
+  "white_phantom": {
+   "crown": [
+    10,
+    -126
+   ],
+   "headPx": [
+    -20,
+    37,
+    -126,
+    -101
+   ],
+   "head": [
+    0.336,
+    0.792,
+    0.0,
+    0.197
+   ]
+  },
+  "white_phantom_ward": {
+   "crown": [
+    10,
+    -126
+   ],
+   "headPx": [
+    -20,
+    37,
+    -126,
+    -101
+   ],
+   "head": [
+    0.353,
+    0.763,
+    0.0,
+    0.197
+   ]
+  },
+  "white_phantom_thaw": {
+   "crown": [
+    10,
+    -126
+   ],
+   "headPx": [
+    -20,
+    37,
+    -126,
+    -101
+   ],
+   "head": [
+    0.339,
+    0.787,
+    0.0,
+    0.197
+   ]
+  }
+ },
+ "notes": "Episode 7 pack atlas, merged into bosses_battle. The White Phantom (bosses.png cell 6, 1x, not flipped) in three looks: white_phantom (Outer Frost, as painted), white_phantom_ward (The Frozen Ward: the cloak spread behind it like a door with an iron gate and three letters frozen into it, the crown frosted), white_phantom_thaw (Thawlight: the frost cracking off in plates, the crown dripping, a warm light in the chest). Each has _idle_1, _attack, _hurt, _cast, _die_0..2. The phases name their look: outer_frost -> white_phantom, frozen_ward -> white_phantom_ward, thawlight -> white_phantom_thaw (src/data/ep7/enemies.js; ai.js enterPhase forwards it as `sprite`). `hud`: one anchor per look, the same in all three (CRITIQUE_8 item 1): `crown` is the top of the antler crown above the skull as [dx, dy] from the bottom-centre origin (dy negative, up); `headPx` the crown and skull box [x0, x1, y0, y1] from the origin; `head` the same box as fractions of that look's frame (layout.js HEAD_BOX format)."
+}

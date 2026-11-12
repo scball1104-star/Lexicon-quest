@@ -1,0 +1,966 @@
+{
+ "image": "ep7_enemies_battle.png",
+ "frames": {
+  "ice_knight_cast": [
+   0,
+   0,
+   123,
+   110
+  ],
+  "pale_lantern_cast": [
+   125,
+   0,
+   87,
+   104
+  ],
+  "ice_knight_idle_1": [
+   0,
+   112,
+   97,
+   99
+  ],
+  "ice_knight_die_0": [
+   99,
+   112,
+   97,
+   99
+  ],
+  "ice_knight": [
+   0,
+   213,
+   97,
+   98
+  ],
+  "ice_knight_attack": [
+   99,
+   213,
+   127,
+   98
+  ],
+  "ice_knight_hurt": [
+   0,
+   313,
+   99,
+   96
+  ],
+  "frostbound_revenant_cast": [
+   101,
+   313,
+   87,
+   95
+  ],
+  "pale_lantern": [
+   0,
+   411,
+   89,
+   94
+  ],
+  "pale_lantern_idle_1": [
+   91,
+   411,
+   89,
+   94
+  ],
+  "pale_lantern_die_0": [
+   0,
+   507,
+   89,
+   94
+  ],
+  "pale_lantern_attack": [
+   91,
+   507,
+   113,
+   93
+  ],
+  "pale_lantern_hurt": [
+   0,
+   603,
+   105,
+   92
+  ],
+  "ice_knight_die_1": [
+   107,
+   603,
+   97,
+   90
+  ],
+  "pale_lantern_die_1": [
+   0,
+   697,
+   89,
+   86
+  ],
+  "frostbound_revenant_die_0": [
+   91,
+   697,
+   83,
+   85
+  ],
+  "frostbound_revenant": [
+   0,
+   785,
+   83,
+   83
+  ],
+  "frostbound_revenant_idle_1": [
+   85,
+   785,
+   85,
+   83
+  ],
+  "frostbound_revenant_attack": [
+   0,
+   870,
+   103,
+   82
+  ],
+  "frostbound_revenant_hurt": [
+   105,
+   870,
+   91,
+   82
+  ],
+  "frostbound_revenant_die_1": [
+   0,
+   954,
+   83,
+   78
+  ],
+  "hush_owl_cast": [
+   85,
+   954,
+   77,
+   76
+  ],
+  "hush_owl_attack": [
+   164,
+   954,
+   79,
+   75
+  ],
+  "hush_owl_die_0": [
+   0,
+   1034,
+   71,
+   75
+  ],
+  "ice_knight_die_2": [
+   73,
+   1034,
+   97,
+   73
+  ],
+  "hush_owl": [
+   172,
+   1034,
+   71,
+   72
+  ],
+  "hush_owl_idle_1": [
+   0,
+   1111,
+   73,
+   72
+  ],
+  "hush_owl_hurt": [
+   75,
+   1111,
+   79,
+   70
+  ],
+  "hush_owl_die_1": [
+   156,
+   1111,
+   69,
+   66
+  ],
+  "pale_lantern_die_2": [
+   0,
+   1185,
+   87,
+   64
+  ],
+  "closed_gate_die_0": [
+   89,
+   1185,
+   43,
+   62
+  ],
+  "rime_wolf_idle_1": [
+   134,
+   1185,
+   63,
+   60
+  ],
+  "rime_wolf_die_0": [
+   0,
+   1251,
+   63,
+   60
+  ],
+  "frostbound_revenant_die_2": [
+   65,
+   1251,
+   83,
+   60
+  ],
+  "rime_wolf": [
+   150,
+   1251,
+   63,
+   59
+  ],
+  "rime_wolf_attack": [
+   0,
+   1313,
+   67,
+   59
+  ],
+  "closed_gate": [
+   69,
+   1313,
+   43,
+   58
+  ],
+  "closed_gate_idle_1": [
+   114,
+   1313,
+   43,
+   58
+  ],
+  "closed_gate_attack": [
+   159,
+   1313,
+   47,
+   58
+  ],
+  "closed_gate_hurt": [
+   208,
+   1313,
+   43,
+   58
+  ],
+  "closed_gate_cast": [
+   0,
+   1374,
+   43,
+   58
+  ],
+  "rime_wolf_hurt": [
+   45,
+   1374,
+   69,
+   57
+  ],
+  "snow_wisp_cast": [
+   116,
+   1374,
+   51,
+   57
+  ],
+  "rime_wolf_die_1": [
+   169,
+   1374,
+   63,
+   56
+  ],
+  "closed_gate_die_1": [
+   0,
+   1434,
+   41,
+   53
+  ],
+  "crystal_crawler_idle_1": [
+   43,
+   1434,
+   57,
+   52
+  ],
+  "crystal_crawler_die_0": [
+   102,
+   1434,
+   57,
+   52
+  ],
+  "rimed_page_idle_1": [
+   161,
+   1434,
+   37,
+   52
+  ],
+  "rimed_page_cast": [
+   200,
+   1434,
+   45,
+   52
+  ],
+  "rimed_page_die_0": [
+   0,
+   1489,
+   37,
+   52
+  ],
+  "crystal_crawler": [
+   39,
+   1489,
+   57,
+   51
+  ],
+  "rimed_page_attack": [
+   98,
+   1489,
+   45,
+   51
+  ],
+  "crystal_crawler_attack": [
+   145,
+   1489,
+   69,
+   50
+  ],
+  "snow_wisp_idle_1": [
+   0,
+   1543,
+   49,
+   49
+  ],
+  "crystal_crawler_hurt": [
+   51,
+   1543,
+   59,
+   49
+  ],
+  "rimed_page": [
+   112,
+   1543,
+   37,
+   49
+  ],
+  "rimed_page_hurt": [
+   151,
+   1543,
+   43,
+   49
+  ],
+  "rimed_page_die_1": [
+   196,
+   1543,
+   37,
+   49
+  ],
+  "hush_owl_die_2": [
+   0,
+   1594,
+   67,
+   48
+  ],
+  "crystal_crawler_die_1": [
+   69,
+   1594,
+   57,
+   48
+  ],
+  "snow_wisp": [
+   128,
+   1594,
+   51,
+   47
+  ],
+  "snow_wisp_hurt": [
+   181,
+   1594,
+   53,
+   47
+  ],
+  "snow_wisp_die_0": [
+   0,
+   1644,
+   51,
+   46
+  ],
+  "rime_wolf_die_2": [
+   53,
+   1644,
+   63,
+   44
+  ],
+  "snow_wisp_attack": [
+   118,
+   1644,
+   57,
+   42
+  ],
+  "lost_letter_cast": [
+   177,
+   1644,
+   43,
+   42
+  ],
+  "lost_letter_die_0": [
+   0,
+   1692,
+   39,
+   42
+  ],
+  "snow_wisp_die_1": [
+   41,
+   1692,
+   51,
+   41
+  ],
+  "lost_letter_idle_1": [
+   94,
+   1692,
+   39,
+   40
+  ],
+  "lost_letter_attack": [
+   135,
+   1692,
+   43,
+   40
+  ],
+  "closed_gate_die_2": [
+   180,
+   1692,
+   41,
+   39
+  ],
+  "lost_letter": [
+   0,
+   1736,
+   39,
+   39
+  ],
+  "lost_letter_hurt": [
+   41,
+   1736,
+   43,
+   39
+  ],
+  "crystal_crawler_die_2": [
+   86,
+   1736,
+   57,
+   38
+  ],
+  "rimed_page_die_2": [
+   145,
+   1736,
+   35,
+   38
+  ],
+  "lost_letter_die_1": [
+   182,
+   1736,
+   39,
+   38
+  ],
+  "snow_wisp_die_2": [
+   0,
+   1777,
+   51,
+   32
+  ],
+  "lost_letter_die_2": [
+   53,
+   1777,
+   39,
+   27
+  ]
+ },
+ "origin": {
+  "rime_wolf": [
+   31,
+   58
+  ],
+  "rime_wolf_idle_1": [
+   31,
+   59
+  ],
+  "rime_wolf_attack": [
+   33,
+   58
+  ],
+  "rime_wolf_hurt": [
+   34,
+   56
+  ],
+  "rime_wolf_die_0": [
+   31,
+   59
+  ],
+  "rime_wolf_die_1": [
+   31,
+   55
+  ],
+  "rime_wolf_die_2": [
+   31,
+   43
+  ],
+  "snow_wisp": [
+   25,
+   46
+  ],
+  "snow_wisp_idle_1": [
+   24,
+   48
+  ],
+  "snow_wisp_attack": [
+   28,
+   41
+  ],
+  "snow_wisp_hurt": [
+   26,
+   46
+  ],
+  "snow_wisp_cast": [
+   25,
+   56
+  ],
+  "snow_wisp_die_0": [
+   25,
+   45
+  ],
+  "snow_wisp_die_1": [
+   25,
+   40
+  ],
+  "snow_wisp_die_2": [
+   25,
+   31
+  ],
+  "hush_owl": [
+   35,
+   71
+  ],
+  "hush_owl_idle_1": [
+   36,
+   71
+  ],
+  "hush_owl_attack": [
+   39,
+   74
+  ],
+  "hush_owl_hurt": [
+   39,
+   69
+  ],
+  "hush_owl_cast": [
+   38,
+   75
+  ],
+  "hush_owl_die_0": [
+   35,
+   74
+  ],
+  "hush_owl_die_1": [
+   34,
+   65
+  ],
+  "hush_owl_die_2": [
+   33,
+   47
+  ],
+  "crystal_crawler": [
+   28,
+   50
+  ],
+  "crystal_crawler_idle_1": [
+   28,
+   51
+  ],
+  "crystal_crawler_attack": [
+   34,
+   49
+  ],
+  "crystal_crawler_hurt": [
+   29,
+   48
+  ],
+  "crystal_crawler_die_0": [
+   28,
+   51
+  ],
+  "crystal_crawler_die_1": [
+   28,
+   47
+  ],
+  "crystal_crawler_die_2": [
+   28,
+   37
+  ],
+  "frostbound_revenant": [
+   41,
+   82
+  ],
+  "frostbound_revenant_idle_1": [
+   42,
+   82
+  ],
+  "frostbound_revenant_attack": [
+   51,
+   81
+  ],
+  "frostbound_revenant_hurt": [
+   45,
+   81
+  ],
+  "frostbound_revenant_cast": [
+   43,
+   94
+  ],
+  "frostbound_revenant_die_0": [
+   41,
+   84
+  ],
+  "frostbound_revenant_die_1": [
+   41,
+   77
+  ],
+  "frostbound_revenant_die_2": [
+   41,
+   59
+  ],
+  "ice_knight": [
+   48,
+   97
+  ],
+  "ice_knight_idle_1": [
+   48,
+   98
+  ],
+  "ice_knight_attack": [
+   63,
+   97
+  ],
+  "ice_knight_hurt": [
+   49,
+   95
+  ],
+  "ice_knight_cast": [
+   61,
+   109
+  ],
+  "ice_knight_die_0": [
+   48,
+   98
+  ],
+  "ice_knight_die_1": [
+   48,
+   89
+  ],
+  "ice_knight_die_2": [
+   48,
+   72
+  ],
+  "pale_lantern": [
+   44,
+   93
+  ],
+  "pale_lantern_idle_1": [
+   44,
+   93
+  ],
+  "pale_lantern_attack": [
+   56,
+   92
+  ],
+  "pale_lantern_hurt": [
+   52,
+   91
+  ],
+  "pale_lantern_cast": [
+   43,
+   103
+  ],
+  "pale_lantern_die_0": [
+   44,
+   93
+  ],
+  "pale_lantern_die_1": [
+   44,
+   85
+  ],
+  "pale_lantern_die_2": [
+   43,
+   63
+  ],
+  "rimed_page": [
+   18,
+   48
+  ],
+  "rimed_page_idle_1": [
+   18,
+   51
+  ],
+  "rimed_page_attack": [
+   22,
+   50
+  ],
+  "rimed_page_hurt": [
+   21,
+   48
+  ],
+  "rimed_page_cast": [
+   22,
+   51
+  ],
+  "rimed_page_die_0": [
+   18,
+   51
+  ],
+  "rimed_page_die_1": [
+   18,
+   48
+  ],
+  "rimed_page_die_2": [
+   17,
+   37
+  ],
+  "closed_gate": [
+   21,
+   57
+  ],
+  "closed_gate_idle_1": [
+   21,
+   57
+  ],
+  "closed_gate_attack": [
+   23,
+   57
+  ],
+  "closed_gate_hurt": [
+   21,
+   57
+  ],
+  "closed_gate_cast": [
+   21,
+   57
+  ],
+  "closed_gate_die_0": [
+   21,
+   61
+  ],
+  "closed_gate_die_1": [
+   20,
+   52
+  ],
+  "closed_gate_die_2": [
+   20,
+   38
+  ],
+  "lost_letter": [
+   19,
+   38
+  ],
+  "lost_letter_idle_1": [
+   19,
+   39
+  ],
+  "lost_letter_attack": [
+   21,
+   39
+  ],
+  "lost_letter_hurt": [
+   21,
+   38
+  ],
+  "lost_letter_cast": [
+   21,
+   41
+  ],
+  "lost_letter_die_0": [
+   19,
+   41
+  ],
+  "lost_letter_die_1": [
+   19,
+   37
+  ],
+  "lost_letter_die_2": [
+   19,
+   26
+  ]
+ },
+ "anims": {
+  "rime_wolf_idle": {
+   "frames": [
+    "rime_wolf",
+    "rime_wolf_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "rime_wolf_die": {
+   "frames": [
+    "rime_wolf_die_0",
+    "rime_wolf_die_1",
+    "rime_wolf_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "snow_wisp_idle": {
+   "frames": [
+    "snow_wisp",
+    "snow_wisp_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "snow_wisp_die": {
+   "frames": [
+    "snow_wisp_die_0",
+    "snow_wisp_die_1",
+    "snow_wisp_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "hush_owl_idle": {
+   "frames": [
+    "hush_owl",
+    "hush_owl_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "hush_owl_die": {
+   "frames": [
+    "hush_owl_die_0",
+    "hush_owl_die_1",
+    "hush_owl_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "crystal_crawler_idle": {
+   "frames": [
+    "crystal_crawler",
+    "crystal_crawler_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "crystal_crawler_die": {
+   "frames": [
+    "crystal_crawler_die_0",
+    "crystal_crawler_die_1",
+    "crystal_crawler_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "frostbound_revenant_idle": {
+   "frames": [
+    "frostbound_revenant",
+    "frostbound_revenant_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "frostbound_revenant_die": {
+   "frames": [
+    "frostbound_revenant_die_0",
+    "frostbound_revenant_die_1",
+    "frostbound_revenant_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "ice_knight_idle": {
+   "frames": [
+    "ice_knight",
+    "ice_knight_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "ice_knight_die": {
+   "frames": [
+    "ice_knight_die_0",
+    "ice_knight_die_1",
+    "ice_knight_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "pale_lantern_idle": {
+   "frames": [
+    "pale_lantern",
+    "pale_lantern_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "pale_lantern_die": {
+   "frames": [
+    "pale_lantern_die_0",
+    "pale_lantern_die_1",
+    "pale_lantern_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "rimed_page_idle": {
+   "frames": [
+    "rimed_page",
+    "rimed_page_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "rimed_page_die": {
+   "frames": [
+    "rimed_page_die_0",
+    "rimed_page_die_1",
+    "rimed_page_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "closed_gate_idle": {
+   "frames": [
+    "closed_gate",
+    "closed_gate_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "closed_gate_die": {
+   "frames": [
+    "closed_gate_die_0",
+    "closed_gate_die_1",
+    "closed_gate_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "lost_letter_idle": {
+   "frames": [
+    "lost_letter",
+    "lost_letter_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "lost_letter_die": {
+   "frames": [
+    "lost_letter_die_0",
+    "lost_letter_die_1",
+    "lost_letter_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "white_phantom": "bosses_battle",
+  "white_phantom_ward": "bosses_battle",
+  "white_phantom_thaw": "bosses_battle"
+ },
+ "notes": "Episode 7 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin bottom-centre (the default; the `origin` table agrees). Derived <id>_idle_1, _attack, _hurt, _die_0..2 for every id, _cast for snow_wisp, hush_owl, frostbound_revenant, ice_knight, pale_lantern, rimed_page, closed_gate, lost_letter; anims <id>_idle and <id>_die. Draw 1x, untinted. rime_wolf, snow_wisp, hush_owl, crystal_crawler, ice_knight (enemies.png cells 2, 0, 6, 3, 5, recoloured snow white, ice blue, pine black and aurora violet), frostbound_revenant (cell 7 as painted, the skull redrawn), pale_lantern (cell 1 at 92 px, frost white with a great lantern in the hood, its light cold blue), rimed_page, closed_gate, lost_letter (drawn in code; the Gate and the Letter each stand on their own ground shadow). Every foe carries a dark outline and an ice-blue rim. The White Phantom lives in bosses_battle (see `external`)."
+}

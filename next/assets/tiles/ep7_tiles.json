@@ -1,0 +1,3119 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/ep7.py (python build_tiles.py ep7)",
+ "note": "Episode 7 (ep7 pack) tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each ep7 terrain is drawn below: the fade below every terrain, the floors below the holes. The Kestrel is the ep6 fragment's prop.",
+ "extraColors": [
+  "#56648a",
+  "#8090b2",
+  "#a9b8d0",
+  "#c9d4e3",
+  "#e2e8f0",
+  "#eeede7",
+  "#4c6a99",
+  "#7192c0",
+  "#9db7d8",
+  "#c3cad6",
+  "#2f9e7e",
+  "#5fd3a2",
+  "#a9f2cf"
+ ],
+ "terrainOrder": [
+  "fade",
+  "permafrost",
+  "snowfield",
+  "icebrick",
+  "frostmosaic",
+  "frostbrick",
+  "letter_stone",
+  "nave_ice",
+  "iceglass",
+  "icebridge",
+  "icepath",
+  "frozen_lake",
+  "lake_water"
+ ],
+ "terrainInsertBefore": {
+  "fade": "archive_floor",
+  "permafrost": "stone_floor",
+  "snowfield": "stone_floor",
+  "icebrick": "stone_floor",
+  "frostmosaic": "stone_floor",
+  "frostbrick": "stone_floor",
+  "letter_stone": "stone_floor",
+  "nave_ice": "stone_floor",
+  "iceglass": "stone_floor",
+  "icebridge": "stone_floor",
+  "icepath": "stone_floor"
+ },
+ "terrains": {
+  "fade": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "fill",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 1400
+   },
+   "note": "the void of every Episode 7 map (A1, 2 frames of a slow paper grain, collision void): flat paper white, no edges, no shading, no footprints, so it never reads as walkable snow; the lowest terrain, so every floor over it draws its own lip and front face. E7-world draws the ghost trail on unheld path cells over it",
+   "sheet": "ep7.png",
+   "order": 0
+  },
+  "permafrost": {
+   "x": 0,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     48
+    ],
+    [
+     48,
+     48
+    ],
+    [
+     64,
+     48
+    ],
+    [
+     80,
+     48
+    ]
+   ],
+   "variantWeights": [
+    10,
+    2,
+    2,
+    1
+   ],
+   "note": "dark frozen ground, frost in the cracks (the Vault approach, under eaves)",
+   "sheet": "ep7.png",
+   "order": 11
+  },
+  "snowfield": {
+   "x": 96,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     128,
+     48
+    ],
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ],
+    [
+     192,
+     48
+    ],
+    [
+     208,
+     48
+    ]
+   ],
+   "variantWeights": [
+    40,
+    3,
+    2,
+    2,
+    3,
+    2
+   ],
+   "note": "textured snow ground (wind ripples, drift shadows, sparkle; variants footprints, a twig, a stone, a drift, hare tracks); at least 0.1 luma below the fade on the phone crop",
+   "sheet": "ep7.png",
+   "order": 12
+  },
+  "icebrick": {
+   "x": 224,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ],
+    [
+     288,
+     48
+    ],
+    [
+     304,
+     48
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    1
+   ],
+   "note": "Palehaven's streets: ice-blue brick paving, snow in the joints",
+   "sheet": "ep7.png",
+   "order": 13
+  },
+  "frostmosaic": {
+   "x": 320,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     352,
+     48
+    ],
+    [
+     368,
+     48
+    ],
+    [
+     384,
+     48
+    ],
+    [
+     400,
+     48
+    ]
+   ],
+   "variantWeights": [
+    16,
+    1,
+    2,
+    2
+   ],
+   "note": "the town square's mosaic (variant 1: the aurora-green star inlay for the hearth ring)",
+   "sheet": "ep7.png",
+   "order": 14
+  },
+  "frostbrick": {
+   "x": 416,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     448,
+     48
+    ],
+    [
+     464,
+     48
+    ],
+    [
+     480,
+     48
+    ],
+    [
+     496,
+     48
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    1
+   ],
+   "note": "F1's floor: frost-rimed pale blue brick in running bond (over the fade: never flat white)",
+   "sheet": "ep7.png",
+   "order": 15
+  },
+  "letter_stone": {
+   "x": 0,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     96
+    ],
+    [
+     48,
+     96
+    ],
+    [
+     64,
+     96
+    ],
+    [
+     80,
+     96
+    ],
+    [
+     96,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    3,
+    3,
+    2,
+    1
+   ],
+   "note": "F2's floor: dark flagstones with carved letter niches (the lamp pools are the lighting layer's)",
+   "sheet": "ep7.png",
+   "order": 16
+  },
+  "nave_ice": {
+   "x": 112,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ],
+    [
+     176,
+     96
+    ],
+    [
+     192,
+     96
+    ],
+    [
+     208,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    3,
+    3,
+    2,
+    1
+   ],
+   "note": "F3's floor: the nave's cool white slabs with pillar shadows (variants), the lightest floor under the aurora tint",
+   "sheet": "ep7.png",
+   "order": 17
+  },
+  "iceglass": {
+   "x": 224,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     256,
+     96
+    ],
+    [
+     272,
+     96
+    ],
+    [
+     288,
+     96
+    ],
+    [
+     304,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2,
+    1
+   ],
+   "note": "F1's landings: clear ice with depth, frozen bubbles, a sheen; a thick blue cut edge over the fade",
+   "sheet": "ep7.png",
+   "order": 18
+  },
+  "icebridge": {
+   "x": 320,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     352,
+     96
+    ],
+    [
+     368,
+     96
+    ],
+    [
+     384,
+     96
+    ]
+   ],
+   "variantWeights": [
+    10,
+    2,
+    2
+   ],
+   "note": "an ice span: long slabs, a worn line, a thick arch front",
+   "sheet": "ep7.png",
+   "order": 19
+  },
+  "icepath": {
+   "x": 400,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     432,
+     96
+    ],
+    [
+     448,
+     96
+    ],
+    [
+     464,
+     96
+    ],
+    [
+     480,
+     96
+    ]
+   ],
+   "variantWeights": [
+    16,
+    3,
+    3,
+    2
+   ],
+   "note": "a held path (drawn by E7-world on every held path cell over the fade) and the White Road on firm ground: packed blue-white ice with a line of footprints; at least 0.2 luma below the fade, textured",
+   "sheet": "ep7.png",
+   "order": 20
+  },
+  "frozen_lake": {
+   "x": 0,
+   "y": 144,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "hole",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     144
+    ],
+    [
+     48,
+     144
+    ],
+    [
+     64,
+     144
+    ],
+    [
+     80,
+     144
+    ]
+   ],
+   "variantWeights": [
+    10,
+    2,
+    2,
+    1
+   ],
+   "note": "the frozen lake (hole, collision none: the Kestrel lands on it): grey-blue ice, white cracks, a snow bank shore",
+   "sheet": "ep7.png",
+   "order": 39
+  },
+  "lake_water": {
+   "x": 96,
+   "y": 144,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "flow": "lake",
+   "note": "the frozen lake's open lead (A1, 3 frames, collision water): dark cold water, floes, an ice shelf where it meets anything",
+   "sheet": "ep7.png",
+   "order": 40
+  }
+ },
+ "walls": {
+  "icewall": {
+   "top": [
+    0,
+    192
+   ],
+   "face": [
+    32,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     192
+    ],
+    [
+     144,
+     192
+    ],
+    [
+     160,
+     192
+    ],
+    [
+     176,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E7 wall band (icewall_top) and inner face (icewall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep7_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      0,
+      384
+     ],
+     [
+      32,
+      384
+     ],
+     [
+      64,
+      384
+     ]
+    ],
+    [
+     [
+      96,
+      384
+     ],
+     [
+      128,
+      384
+     ],
+     [
+      160,
+      384
+     ],
+     [
+      192,
+      384
+     ]
+    ],
+    [
+     [
+      224,
+      384
+     ],
+     [
+      256,
+      384
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep7_palehaven": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      0,
+      1,
+      3
+     ]
+    },
+    "ep7_white_road": {
+     "cycle": [
+      0,
+      1,
+      0,
+      3,
+      0,
+      0
+     ]
+    }
+   },
+   "sheet": "ep7.png"
+  },
+  "icewall_out": {
+   "top": [
+    64,
+    192
+   ],
+   "face": [
+    96,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     192
+    ],
+    [
+     208,
+     192
+    ],
+    [
+     224,
+     192
+    ],
+    [
+     240,
+     192
+    ],
+    [
+     256,
+     192
+    ],
+    [
+     272,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (icewall_out_top, no edges) and the outer face under a band's south lip (icewall_out_face)",
+   "sheet": "ep7.png"
+  },
+  "vault_wall": {
+   "top": [
+    0,
+    240
+   ],
+   "face": [
+    32,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     240
+    ],
+    [
+     144,
+     240
+    ],
+    [
+     160,
+     240
+    ],
+    [
+     176,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E7 wall band (vault_wall_top) and inner face (vault_wall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep7_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      240
+     ]
+    ],
+    [
+     [
+      288,
+      384
+     ],
+     [
+      320,
+      384
+     ]
+    ],
+    [
+     [
+      352,
+      384
+     ],
+     [
+      384,
+      384
+     ],
+     [
+      416,
+      384
+     ]
+    ],
+    [
+     [
+      448,
+      384
+     ],
+     [
+      480,
+      384
+     ],
+     [
+      0,
+      416
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep7_vault_f1": {
+     "cycle": [
+      0,
+      1,
+      2,
+      0,
+      3,
+      1,
+      0
+     ]
+    }
+   },
+   "sheet": "ep7.png"
+  },
+  "vault_wall_out": {
+   "top": [
+    64,
+    240
+   ],
+   "face": [
+    96,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     240
+    ],
+    [
+     208,
+     240
+    ],
+    [
+     224,
+     240
+    ],
+    [
+     240,
+     240
+    ],
+    [
+     256,
+     240
+    ],
+    [
+     272,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    10,
+    2,
+    2,
+    1,
+    1,
+    1
+   ],
+   "note": "the beyond (vault_wall_out_top, no edges) and the outer face under a band's south lip (vault_wall_out_face)",
+   "sheet": "ep7.png"
+  },
+  "bell_hall": {
+   "top": [
+    0,
+    288
+   ],
+   "face": [
+    32,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     288
+    ],
+    [
+     144,
+     288
+    ],
+    [
+     160,
+     288
+    ],
+    [
+     176,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E7 wall band (bell_hall_top) and inner face (bell_hall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep7_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      288
+     ]
+    ],
+    [
+     [
+      32,
+      416
+     ],
+     [
+      64,
+      416
+     ]
+    ],
+    [
+     [
+      96,
+      416
+     ],
+     [
+      128,
+      416
+     ]
+    ],
+    [
+     [
+      160,
+      416
+     ],
+     [
+      192,
+      416
+     ]
+    ],
+    [
+     [
+      224,
+      416
+     ],
+     [
+      256,
+      416
+     ],
+     [
+      288,
+      416
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep7_vault_f2": {
+     "cycle": [
+      1,
+      0,
+      2,
+      3,
+      4,
+      0,
+      2
+     ]
+    }
+   },
+   "sheet": "ep7.png"
+  },
+  "bell_hall_out": {
+   "top": [
+    64,
+    288
+   ],
+   "face": [
+    96,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     288
+    ],
+    [
+     208,
+     288
+    ],
+    [
+     224,
+     288
+    ],
+    [
+     240,
+     288
+    ],
+    [
+     256,
+     288
+    ],
+    [
+     272,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (bell_hall_out_top, no edges) and the outer face under a band's south lip (bell_hall_out_face)",
+   "sheet": "ep7.png"
+  },
+  "nave": {
+   "top": [
+    0,
+    336
+   ],
+   "face": [
+    32,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     336
+    ],
+    [
+     144,
+     336
+    ],
+    [
+     160,
+     336
+    ],
+    [
+     176,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E7 wall band (nave_top) and inner face (nave_face), a 2-row face; faceStyles per room (tools/art/tiles/ep7_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      336
+     ]
+    ],
+    [
+     [
+      320,
+      416
+     ],
+     [
+      352,
+      416
+     ],
+     [
+      384,
+      416
+     ]
+    ],
+    [
+     [
+      416,
+      416
+     ],
+     [
+      448,
+      416
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep7_vault_f3": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      1
+     ]
+    },
+    "ep7_stillheart": {
+     "cycle": [
+      1,
+      0,
+      1,
+      2
+     ]
+    }
+   },
+   "sheet": "ep7.png"
+  },
+  "nave_out": {
+   "top": [
+    64,
+    336
+   ],
+   "face": [
+    96,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     336
+    ],
+    [
+     208,
+     336
+    ],
+    [
+     224,
+     336
+    ],
+    [
+     240,
+     336
+    ],
+    [
+     256,
+     336
+    ],
+    [
+     272,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (nave_out_top, no edges) and the outer face under a band's south lip (nave_out_face)",
+   "sheet": "ep7.png"
+  }
+ },
+ "tiles": {
+  "palehaven_far": {
+   "x": 0,
+   "y": 1040,
+   "w": 176,
+   "h": 112,
+   "collision": "none",
+   "note": "176 x 112 decal of Palehaven and its cathedral from environments cell 6 (sky and mountains keyed out, hard alpha, 1 px outline) for the overhead layer at the Icegate (mark palehaven_far)",
+   "sheet": "ep7.png"
+  },
+  "cathedral_far": {
+   "x": 176,
+   "y": 1040,
+   "w": 112,
+   "h": 96,
+   "collision": "none",
+   "frames": [
+    [
+     176,
+     1040
+    ],
+    [
+     288,
+     1040
+    ]
+   ],
+   "frameMs": 3000,
+   "note": "112 x 96 decal of the frozen cathedral (environments cell 6) for the overhead layer on Palehaven's north skyline (mark cathedral_far): frame 0 whole, 1 a dithered quarter gone; swap at most once in 3 s (plan 4.3)",
+   "sheet": "ep7.png"
+  }
+ },
+ "objects": {
+  "namestone": {
+   "rect": [
+    0,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     464,
+     16,
+     32
+    ],
+    [
+     16,
+     464,
+     16,
+     32
+    ],
+    [
+     32,
+     464,
+     16,
+     32
+    ],
+    [
+     48,
+     464,
+     16,
+     32
+    ]
+   ],
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.4,
+    "frames": [
+     1,
+     2,
+     3
+    ]
+   },
+   "flicker": {
+    "frames": [
+     2,
+     3
+    ],
+    "ms": 500
+   },
+   "note": "a name stone (event namestone, outdoors): frames 0 dim (not held), 1 lit (held), 2 and 3 the slow flicker of the OLDEST held stone (cycle 2, 3 at 500 ms); the lamp is on the tile above the cell, so the party never covers it; light only on frames 1 to 3. Solid, faced from ground",
+   "sheet": "ep7.png"
+  },
+  "name_plate": {
+   "rect": [
+    64,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     464,
+     16,
+     32
+    ],
+    [
+     80,
+     464,
+     16,
+     32
+    ],
+    [
+     96,
+     464,
+     16,
+     32
+    ],
+    [
+     112,
+     464,
+     16,
+     32
+    ]
+   ],
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.4,
+    "frames": [
+     1,
+     2,
+     3
+    ]
+   },
+   "flicker": {
+    "frames": [
+     2,
+     3
+    ],
+    "ms": 500
+   },
+   "note": "a name stone indoors (event namestone with sprite name_plate): an iceglass plate on a frost-brick plinth; frames as namestone",
+   "sheet": "ep7.png"
+  },
+  "frost_door": {
+   "rect": [
+    128,
+    464,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     128,
+     464,
+     16,
+     32
+    ],
+    [
+     144,
+     464,
+     16,
+     32
+    ],
+    [
+     160,
+     464,
+     16,
+     32
+    ],
+    [
+     176,
+     464,
+     16,
+     32
+    ]
+   ],
+   "glint": {
+    "frames": [
+     0,
+     1
+    ],
+    "ms": 700
+   },
+   "note": "a frost door (a cell of the remember.frost grid, drawn by E7-world on the frost cell): 0 and 1 solid (cycle at 700 ms while its stone is held), 2 melting (the 16-frame let-go), 3 melted (a wet sheen on the floor). collision none here: the frost grid decides",
+   "sheet": "ep7.png"
+  },
+  "ghost_trail": {
+   "rect": [
+    192,
+    464,
+    16,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     192,
+     464,
+     16,
+     16
+    ],
+    [
+     208,
+     464,
+     16,
+     16
+    ]
+   ],
+   "recipe": {
+    "color": "#c3cad6",
+    "print": [
+     2,
+     3
+    ],
+    "perCell": 4,
+    "at": [
+     [
+      4,
+      2
+     ],
+     [
+      9,
+      6
+     ],
+     [
+      4,
+      10
+     ],
+     [
+      9,
+      14
+     ]
+    ],
+    "period": 16,
+    "horizontal": "swap x and y"
+   },
+   "note": "the ghost trail as art (E7-world draws the same in code on every UNHELD path cell over the fade): frame 0 north-south, 1 east-west; prints 2 x 3 px in #c3cad6, four a cell at period 16",
+   "sheet": "ep7.png"
+  },
+  "listening_bell": {
+   "rect": [
+    0,
+    496,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     496,
+     32,
+     48
+    ],
+    [
+     32,
+     496,
+     32,
+     48
+    ],
+    [
+     64,
+     496,
+     32,
+     48
+    ],
+    [
+     96,
+     496,
+     32,
+     48
+    ]
+   ],
+   "swingFrames": [
+    1,
+    2,
+    3,
+    2
+   ],
+   "swingMs": 320,
+   "note": "the Listening Bell (F2 bell bay, 2 x 3): frame 0 frozen in ice; 1..3 thawed, swinging (cycle 1, 2, 3, 2); Mara's tag hangs from the crown",
+   "sheet": "ep7.png"
+  },
+  "stillheart": {
+   "rect": [
+    128,
+    496,
+    48,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     496,
+     48,
+     64
+    ],
+    [
+     176,
+     496,
+     48,
+     64
+    ],
+    [
+     224,
+     496,
+     48,
+     64
+    ],
+    [
+     272,
+     496,
+     48,
+     64
+    ],
+    [
+     320,
+     496,
+     48,
+     64
+    ],
+    [
+     368,
+     496,
+     48,
+     64
+    ]
+   ],
+   "frozenFrames": [
+    0,
+    1,
+    2
+   ],
+   "thawFrames": [
+    3,
+    4,
+    5
+   ],
+   "ms": 300,
+   "light": {
+    "color": "#b4e4f2",
+    "radius": 4.0
+   },
+   "note": "the heart of ice (the Stillheart, 3 x 4): frames 0..2 frozen with the names drifting (cycle at 300 ms), 3..5 thawed, running bright (after phantom_defeated); the Phantom's avatar stands over it",
+   "sheet": "ep7.png"
+  },
+  "round_door": {
+   "rect": [
+    0,
+    560,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     560,
+     48,
+     48
+    ],
+    [
+     48,
+     560,
+     48,
+     48
+    ]
+   ],
+   "note": "the round door at the top of F3 (3 x 3, door_boss style, set into a 2-row face): 0 closed (no keyhole: the Keeper's hand opens it, story), 1 open; cell (1, 0) is the doorway, its passage decided by the event (if stillheart_open)",
+   "sheet": "ep7.png"
+  },
+  "page_block": {
+   "rect": [
+    96,
+    560,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     560,
+     16,
+     32
+    ],
+    [
+     112,
+     560,
+     16,
+     32
+    ]
+   ],
+   "note": "the ice block with the half page (the Stillheart): 0 frozen, 1 opened",
+   "sheet": "ep7.png"
+  },
+  "crate_dash_ice": {
+   "rect": [
+    128,
+    560,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     560,
+     16,
+     32
+    ],
+    [
+     144,
+     560,
+     16,
+     32
+    ]
+   ],
+   "note": "a crate sealed in cracked ice: 0 cracked (solid; Dash Strike breaks it), 1 broken (decor; the cell opens)",
+   "sheet": "ep7.png"
+  },
+  "winterwatch_cache": {
+   "rect": [
+    160,
+    560,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     160,
+     560,
+     32,
+     32
+    ],
+    [
+     192,
+     560,
+     32,
+     32
+    ]
+   ],
+   "note": "the Winterwatch Provision Cache (F1 E, 2 x 2): 0 closed, 1 open",
+   "sheet": "ep7.png"
+  },
+  "lift_frost": {
+   "rect": [
+    224,
+    560,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Vault's lift (lift_f1_up, lift_f2_down, the F3 stair back): an iceglass cage, the door cell is (0,0)",
+   "sheet": "ep7.png"
+  },
+  "font_thaw": {
+   "rect": [
+    240,
+    560,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.6
+   },
+   "note": "the Thawlight Recovery Basin (rest and save: font_v1, font_v2, font_v2b, font_v3): warm water, steam",
+   "sheet": "ep7.png"
+  },
+  "watch_cots": {
+   "rect": [
+    336,
+    560,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "three cots by the Watch's stove (object watch_cots, a rest, after doors_reopened)",
+   "sheet": "ep7.png"
+  },
+  "star_stair": {
+   "rect": [
+    0,
+    608,
+    48,
+    112
+   ],
+   "anchor": [
+    0,
+    6
+   ],
+   "footprint": [],
+   "overheadRows": 7,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 48,
+    "ms": 320
+   },
+   "note": "the stair of written light (ep7_ending; kept for Episode 8): 3 x 7, all overhead, collision none; steps of glyph-bar handwriting climbing to the upper right, a shimmer running up them",
+   "sheet": "ep7.png"
+  },
+  "keepers_watch": {
+   "rect": [
+    0,
+    736,
+    86,
+    96
+   ],
+   "kind": "building",
+   "note": "the Keeper's Watch (blue stone, the lamp tower, the shuttered window, the open-book plaque); door to ep7_ph_watch",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "lodge_thawlight": {
+   "rect": [
+    86,
+    736,
+    118,
+    96
+   ],
+   "kind": "building",
+   "note": "the Thawlight Lodge (bed sign, fur rolls, smoke); door to ep7_ph_inn",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -4
+    ],
+    [
+     1,
+     -4
+    ],
+    [
+     2,
+     -4
+    ],
+    [
+     3,
+     -4
+    ],
+    [
+     4,
+     -4
+    ],
+    [
+     5,
+     -4
+    ],
+    [
+     6,
+     -4
+    ],
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     6,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     6,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     6,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "armory_glassice": {
+   "rect": [
+    204,
+    736,
+    102,
+    80
+   ],
+   "kind": "building",
+   "note": "the Glass-Ice Armory (hammer sign, the glass furnace, lenses on cords); door to ep7_ph_armory",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     5,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     5,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "shop_northwind": {
+   "rect": [
+    306,
+    736,
+    86,
+    80
+   ],
+   "kind": "building",
+   "note": "Northwind Provisions (kettle sign, drying herbs, a blue awning); door to ep7_ph_shop",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "house_snow_a": {
+   "rect": [
+    392,
+    736,
+    70,
+    64
+   ],
+   "kind": "building",
+   "note": "a Palehaven house (purple slate, smoke)",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "house_snow_b": {
+   "rect": [
+    0,
+    832,
+    86,
+    64
+   ],
+   "kind": "building",
+   "note": "a Palehaven house (green slate)",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     4,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    3,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "waystation_hut": {
+   "rect": [
+    86,
+    832,
+    70,
+    64
+   ],
+   "kind": "building",
+   "note": "the Courier's Waystation on the White Road (the post-horn sign); door to ep7_waystation",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -3
+    ],
+    [
+     1,
+     -3
+    ],
+    [
+     2,
+     -3
+    ],
+    [
+     3,
+     -3
+    ],
+    [
+     0,
+     -2
+    ],
+    [
+     1,
+     -2
+    ],
+    [
+     2,
+     -2
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep7.png"
+  },
+  "returning_hearth": {
+   "rect": [
+    0,
+    896,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     896,
+     32,
+     48
+    ],
+    [
+     32,
+     896,
+     32,
+     48
+    ],
+    [
+     64,
+     896,
+     32,
+     48
+    ],
+    [
+     96,
+     896,
+     32,
+     48
+    ]
+   ],
+   "litFrames": [
+    1,
+    2,
+    3
+   ],
+   "litMs": 180,
+   "light": {
+    "color": "#eba14d",
+    "radius": 4.0,
+    "frames": [
+     1,
+     2,
+     3
+    ]
+   },
+   "note": "the Returning Hearth (object hearth, 2 x 3): frame 0 cold (before hearth_lit or doors_reopened), 1..3 lit (cycle at 180 ms); light only while lit",
+   "sheet": "ep7.png"
+  },
+  "iced_door": {
+   "rect": [
+    128,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     128,
+     896,
+     16,
+     32
+    ],
+    [
+     144,
+     896,
+     16,
+     32
+    ]
+   ],
+   "note": "an iced door (iced_a to iced_f, set over a house's door cell; the door event decides passage): 0 sheathed in ice, the lintel blank; 1 open a crack, the name back on the lintel (doors_reopened)",
+   "sheet": "ep7.png"
+  },
+  "vanishing_mark": {
+   "rect": [
+    160,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     160,
+     896,
+     16,
+     32
+    ],
+    [
+     176,
+     896,
+     16,
+     32
+    ]
+   ],
+   "note": "the Vanishing Mark (a stele): 0 the white hollow eating the ring of names, 1 filled (doors_reopened)",
+   "sheet": "ep7.png"
+  },
+  "crystal": {
+   "rect": [
+    192,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 300
+   },
+   "light": {
+    "color": "#a9f2cf",
+    "radius": 2.4
+   },
+   "note": "an aurora crystal on a pole (canon decor, solid)",
+   "sheet": "ep7.png"
+  },
+  "auroraobelisk": {
+   "rect": [
+    240,
+    896,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "light": {
+    "color": "#a9f2cf",
+    "radius": 2.6
+   },
+   "note": "an aurora obelisk (canon; the Northward Beacon beacon_north can use it), solid",
+   "sheet": "ep7.png"
+  },
+  "frostfire": {
+   "rect": [
+    256,
+    896,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 16,
+    "ms": 200
+   },
+   "light": {
+    "color": "#8af0e8",
+    "radius": 2.8
+   },
+   "note": "a frostfire brazier (cold blue flame), solid",
+   "sheet": "ep7.png"
+  },
+  "snowpine": {
+   "rect": [
+    0,
+    944,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a snow-laden pine (town, canon decor), solid at the foot",
+   "sheet": "ep7.png"
+  },
+  "black_pine": {
+   "rect": [
+    32,
+    944,
+    32,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the White Road's black pine (2 x 4), solid at the foot",
+   "sheet": "ep7.png"
+  },
+  "snowbank": {
+   "rect": [
+    64,
+    944,
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "a snow bank (2 x 1, solid)",
+   "sheet": "ep7.png"
+  },
+  "traveler_wall": {
+   "rect": [
+    96,
+    944,
+    96,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the Traveler's Wall (6 x 3 decor on the road's west side): carved names as texture, one fresh cut high on the right; solid on its two lower rows",
+   "sheet": "ep7.png"
+  },
+  "icegate": {
+   "rect": [
+    192,
+    944,
+    80,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     4,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the South Icegate (5 x 4 arch over the road north to Palehaven): the pillars (columns 0 and 4) solid, the arch overhead, the way through columns 1 to 3",
+   "sheet": "ep7.png"
+  },
+  "post_box": {
+   "rect": [
+    0,
+    1008,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the courier's post box (the waystation; inspect)",
+   "sheet": "ep7.png"
+  },
+  "tally_frame": {
+   "rect": [
+    16,
+    1008,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "note": "the doorframe tally (the waystation, mark tally; close-up ep7_tally): every seventh stroke crossed, a white patch where a name was; set against the inner wall, collision none",
+   "sheet": "ep7.png"
+  },
+  "courier_stove": {
+   "rect": [
+    32,
+    1008,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     32,
+     1008,
+     32,
+     32
+    ],
+    [
+     64,
+     1008,
+     32,
+     32
+    ],
+    [
+     96,
+     1008,
+     32,
+     32
+    ]
+   ],
+   "litFrames": [
+    1,
+    2
+   ],
+   "litMs": 220,
+   "light": {
+    "color": "#eba14d",
+    "radius": 3.0,
+    "frames": [
+     1,
+     2
+    ]
+   },
+   "note": "the waystation stove (object stove; rest and save once lit, text key ep7_stove): 0 cold, 1 and 2 lit (cycle)",
+   "sheet": "ep7.png"
+  }
+ },
+ "overlays": {}
+}

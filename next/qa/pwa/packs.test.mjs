@@ -16,7 +16,7 @@ const ratchet = readJson('qa/pwa/budget_ratchet.json');
 const MB = 1048576;
 // A pack whose switch lives outside src/data/<id>/live.js (ep3: game/episodes.js EP3_LIVE) and whose entry is not
 // src/data/<id>/index.js (ep3: src/data/maps/ep3/index.js, the maps folder the prefix 'ep3/' names).
-const SWITCH = { ep3: 'src/game/episodes.js', ep4: 'src/game/episodes.js', ep5: 'src/game/episodes.js', ep6: 'src/game/episodes.js', worldmap: 'src/game/packs.js' };   // worldmap (#97): always enabled, its row in packs.js is the switch   // ep4 to ep6: EP4_LIVE to EP6_LIVE, no live.js (EPISODE4_PLAN 13.1, EPISODE5_PLAN 13.1, EPISODE6_PLAN 13.1)
+const SWITCH = { ep3: 'src/game/episodes.js', ep4: 'src/game/episodes.js', ep5: 'src/game/episodes.js', ep6: 'src/game/episodes.js', ep7: 'src/game/episodes.js', worldmap: 'src/game/packs.js' };   // worldmap (#97): always enabled, its row in packs.js is the switch   // ep4 to ep6: EP4_LIVE to EP6_LIVE, no live.js (EPISODE4_PLAN 13.1, EPISODE5_PLAN 13.1, EPISODE6_PLAN 13.1)
 const switchOf = (id) => SWITCH[id] || `src/data/${id}/live.js`;
 const entryOf = (id) => path.posix.normalize(path.posix.join('src/game', PACKS[id].entry));
 const wire = (rel) => (/\.(js|json|html|webmanifest)$/.test(rel) ? zlib.gzipSync(fs.readFileSync(path.join(NEXT, rel)), { level: 6 }).length : sizeOf(rel));
@@ -41,7 +41,7 @@ function walk(dir, out = []) {
 }
 
 test('pack table: both packs, and the mirror tools/pwa/packs.json equals it', () => {
-  assert.deepEqual(Object.keys(PACKS).sort(), ['cave', 'ep3', 'ep4', 'ep5', 'ep6', 'tier', 'worldmap', 'x1', 'x2']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09); worldmap: the world map (#97, 2026-11-11)
+  assert.deepEqual(Object.keys(PACKS).sort(), ['cave', 'ep3', 'ep4', 'ep5', 'ep6', 'ep7', 'tier', 'worldmap', 'x1', 'x2']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09); worldmap: the world map (#97, 2026-11-11)
   const mirror = readJson('tools/pwa/packs.json');
   for (const [id, d] of Object.entries(PACKS)) {
     assert.deepEqual(mirror[id], { entry: d.entry, prefix: d.prefix, assets: d.assets, audioPack: d.audioPack, touches: d.touches }, `mirror of ${id}`);
@@ -110,7 +110,7 @@ test('pack wire sizes are inside the caps (code, data and art; audio is budgeted
     lines.push(`${id} ${(total / MB).toFixed(3)} MB of ${cap}`);
     assert.ok(total < cap * MB, `pack ${id} is ${(total / MB).toFixed(2)} MB on the wire, cap ${cap} MB`);
   }
-  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8, cave: 0.8, tier: 0.3, ep3: 0.2, ep4: 1.0, ep5: 1.0, ep6: 1.0, worldmap: 0.3 }, 'the pack caps are fixed');   // worldmap: WORLD_MAP_PLAN 5.3 (about 0.3 MB)
+  assert.deepEqual(ratchet.packCapsMB, { x1: 1.0, x2: 0.8, cave: 0.8, tier: 0.3, ep3: 0.2, ep4: 1.0, ep5: 1.0, ep6: 1.0, ep7: 1.0, worldmap: 0.3 }, 'the pack caps are fixed');   // worldmap: WORLD_MAP_PLAN 5.3 (about 0.3 MB)
   console.log(`# pack sizes: ${lines.join('; ')}`);
 });
 
