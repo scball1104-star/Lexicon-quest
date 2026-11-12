@@ -883,6 +883,7 @@ const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 ({ walk, loadDb, buildGrid } = (await import('./ep4_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));
 ({ walk, loadDb, buildGrid } = (await import('./ep5_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E5-world: sun and shade
 ({ walk, loadDb, buildGrid } = (await import('./ep6_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E6-world: gust lanes
+({ walk, loadDb, buildGrid } = (await import('./ep7_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E7-world: name stones
 
 /**
  * Validate one map. `maps` = { id: module } for door/exit targets (grids built lazily).
