@@ -45,9 +45,9 @@ export const EP7_START = {
     lantern_of_recall: 1, mirror_sigil: 1, sky_compass: 1, white_road_letter: 1 },
   counters: ['credits_rolled', 'credits2_rolled', 'credits3_rolled', 'credits4_rolled', 'credits5_rolled', 'credits6_rolled'],
   members: {
-    hero: { weapon: 'sword', equip: { sword: 'galewing_sword', axe: 'moonsteel_axe', body: 'skysteel_mail', head: 'sunplate_helm', boots: 'cinder_boots', charm: 'kestrel_wings' }, mastery: { sword: 1160, axe: 390 } },
-    mira: { weapon: 'staff', equip: { staff: 'compass_rod', bow: 'kept_promise', body: 'windweave_robe', head: 'soot_hood', charm: 'scribe_quill', boots: 'nomad_wraps' }, mastery: { staff: 890, bow: 370 } },
-    bram: { weapon: 'spear', equip: { spear: 'tidewarden_trident', axe: 'first_bell_hammer', body: 'sunplate_mail', head: 'glass_helm', boots: 'skyhand_boots', charm: 'caravan_compass' }, mastery: { spear: 1160, axe: 390 } },
+    hero: { weapon: 'sword', equip: { sword: 'galewing_sword', axe: 'moonsteel_axe', body: 'skysteel_mail', head: 'sunplate_helm', boots: 'cinder_boots', charm: 'kestrel_wings' }, mastery: { sword: 1200, axe: 400 } },
+    mira: { weapon: 'staff', equip: { staff: 'compass_rod', bow: 'kept_promise', body: 'windweave_robe', head: 'soot_hood', charm: 'scribe_quill', boots: 'nomad_wraps' }, mastery: { staff: 920, bow: 380 } },
+    bram: { weapon: 'spear', equip: { spear: 'tidewarden_trident', axe: 'first_bell_hammer', body: 'stormplate_mail', head: 'glass_helm', boots: 'skyhand_boots', charm: 'caravan_compass' }, mastery: { spear: 1200, axe: 400 } },
   },
 };
 
