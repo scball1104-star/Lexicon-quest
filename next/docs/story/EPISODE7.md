@@ -797,7 +797,7 @@ the village that comes back on the chart.
 **Changed, with reasons.**
 - **Word and order puzzles are gone** (DESIGN hard rule 2; Episodes 3 to 6 did the same). F1's three sun beacons cycling
   OFF, SUNRISE, NOON, DUSK with a printed answer diagram, Oren's testimony that names the settings, F2's light lenses
-  cycling DARK, RECEIVE, REFLECT with a refraction record, the Frostbound Names Crossword, the witness pages read in order
+  cycling DARK, RECEIVE, REFLECT with a refraction record, the Frostbound Names grid, the witness pages read in order
   (a wrong one resets), and F3's three promises spoken in order are all replaced: the floors open by name stones (plan
   5.1), the witness pages are found in any order, and the promises are an inscription the Keeper says at the round door,
   never an answer to get right.
@@ -1055,7 +1055,7 @@ his change wins over a default.
     makes those generations himself.
 19. **Renames and drops for canon conflicts:** Corin to Marten, Oren's testimony to Sol, the two Eiras as one, "Nox" held out
     of canon lines until her name returns, "The Winter Nox Could Not End" retitled, four phases to three, no frost damage, no
-    beacons, lenses, crossword, ordered pages or recited promises, the Thawlight Oath bond into a gift and Call, the First
+    beacons, lenses, name grid, ordered pages or recited promises, the Thawlight Oath bond into a gift and Call, the First
     Key dropped, the root's Eraser line unused, and the root's Nox after-clear line not used anywhere in Episode 7 (Episode
     8's first scene says it word for word: EPISODE8 ask 2). [default: as listed] **[Scott 2026-11-11: default]** Each follows
     a hard rule, an id collision or a payoff's order (section 8).
