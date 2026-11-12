@@ -113,7 +113,7 @@ const events = [
   sign('vault_gate_open', 33, 9, 'ep7_vault_gate', { if: 'vault_open' }),
   sign('cathedral_sign', 29, 8, 'ep7_cathedral_far'),
   door('vault_door', 32, 6, ['ep7_vault_f1', 20, 27, 'up'], { if: 'vault_open' }),
-  door('nave_door', 30, 6, ['ep7_stillheart', 13, 14, 'up'], { if: REO }),
+  door('nave_door', 30, 6, ['ep7_stillheart', 16, 15, 'up'], { if: REO }),
   // signs by the doors
   sign('sign_inn', 7, 16, 'sign_ep7_inn'),
   sign('sign_shop', 38, 17, 'sign_ep7_shop'),

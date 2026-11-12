@@ -954,11 +954,15 @@ async function letters_done(s) {
   await s.take(REWARDS_EP6.dead_letter.item, REWARDS_EP6.dead_letter.qty);
   await say(s, 'piri', 'True courses, all three. The wind reads them right again.');
   await s.give(REWARDS_EP6.letters.item, REWARDS_EP6.letters.qty);
-  await narrate(s, 'In the bottom of the sack Piri finds one more, old and soft at the folds.');
-  await say(s, 'piri', 'Came off a northbound ship years back. Addressed to Willowmere. Nobody flies to Willowmere.');
-  await s.give(REWARDS_EP6.white_road.item, REWARDS_EP6.white_road.qty);
-  await s.setFlag('white_road_letter_get');
-  await say(s, 'piri', "You're going home sometime. Carry it.");
+  // E7-integrate: a finish after the Episode 6 credits leaves the letter to ep7_morning, which hands it over whenever Piri had
+  // not ("Piri sent this up"), so the party never carries two
+  if (!(await s.hasFlag('ep6_complete'))) {
+    await narrate(s, 'In the bottom of the sack Piri finds one more, old and soft at the folds.');
+    await say(s, 'piri', 'Came off a northbound ship years back. Addressed to Willowmere. Nobody flies to Willowmere.');
+    await s.give(REWARDS_EP6.white_road.item, REWARDS_EP6.white_road.qty);
+    await s.setFlag('white_road_letter_get');
+    await say(s, 'piri', "You're going home sometime. Carry it.");
+  }
   await s.setFlag('letters_done');
 }
 

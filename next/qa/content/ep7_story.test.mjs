@@ -451,7 +451,7 @@ test('the switch: with EP7_LIVE false nothing in Episode 7 is reachable; Fine Pr
   const EPISODES = await import('../../src/game/episodes.js');
   const fresh = await import(`../../src/data/ep7/story.js?gate=${Date.now()}`);
   assert.equal(fresh.GATE.live, EPISODES.EP7_LIVE === true);
-  assert.notEqual(EPISODES.EP7_LIVE, true, 'EP7_LIVE stays off in wave 7a');
+  // E7-integrate flipped EP7_LIVE on the branch after the full gate list (plan 12); the guard above holds either way
 });
 
 // Each map's track (plan 8.2). A scene that changes the music puts its map's track back before it ends.

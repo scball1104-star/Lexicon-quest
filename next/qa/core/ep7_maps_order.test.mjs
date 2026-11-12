@@ -95,6 +95,4 @@ test('a broken map module (not a missing one) is not swallowed', async () => {
 });
 
 // Plan 3.4's map cases with the real patches (no trigger or gangway while EP7_LIVE is off, the berth door lands on open ground)
-// need ep7_patches.js (E7-maps-a, wave 7c): E7-integrate turns them on with the real patches and maps.
-test('plan 3.4 with the real patches: no trigger or gangway while EP7_LIVE is off; the berth lands on a walkable cell',
-  { skip: 'pending: src/data/maps/ep7_patches.js and ep7_white_road.js (E7-maps-a, wave 7c); E7-integrate turns this on' }, () => {});
+// are in qa/integrate/ep7_integrate.test.mjs (E7-integrate), with the real patches and maps.

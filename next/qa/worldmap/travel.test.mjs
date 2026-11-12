@@ -151,7 +151,8 @@ test('arrival cells: every town stone has one, on open walkable floor beside the
 
 test('the packs a destination needs: the chain up to it, a prefixed map\'s own pack, Fine Print for a tier_1 save', () => {
   const f6 = save(6).flags;
-  assert.deepEqual(T.packsFor('ep6_zephyr', f6), ['ep3', 'ep4', 'ep5', 'ep6']);
+  // E7-integrate: once EP7_LIVE, an Episode 6 finisher wants ep7 too, whose patches (the north gangway) are on ep6_zephyr
+  assert.deepEqual(T.packsFor('ep6_zephyr', f6), ['ep3', 'ep4', 'ep5', 'ep6', ...(P.packEnabled('ep7') ? ['ep7'] : [])]);
   assert.deepEqual(T.packsFor('ep4_valewyn', f6).filter((p) => p.startsWith('ep')), ['ep3', 'ep4', 'ep5']);
   assert.ok(T.packsFor('emberpeak', save(3).flags).includes('ep3'));
   assert.ok(T.packsFor('nameless_hollow', save(2).flags).includes('x2') || !P.packEnabled('x2'), 'the Mere Country when wanted');

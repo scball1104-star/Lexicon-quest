@@ -24,6 +24,8 @@ import ep4field  # noqa: E402
 import ep5battle  # noqa: E402
 import ep6battle  # noqa: E402
 import ep6field  # noqa: E402
+import ep7battle  # noqa: E402
+import ep7field  # noqa: E402
 import hunt  # noqa: E402
 import menus  # noqa: E402
 import title  # noqa: E402
@@ -31,6 +33,7 @@ import worldmap  # noqa: E402
 from driver import DEVICES, OUT, Play, Stuck  # noqa: E402
 
 MODULES = [('battle', battle), ('menus', menus), ('ep4field', ep4field), ('ep5battle', ep5battle), ('ep6battle', ep6battle), ('ep6field', ep6field),
+           ('ep7battle', ep7battle), ('ep7field', ep7field),
            ('title', title), ('boss', boss), ('hunt', hunt), ('worldmap', worldmap)]
 # The default run skips what a device repeats from another: the same code path, only slower by finger.
 PHONE_SKIP = {'row notice', 'row refused', 'quick start url', 'row sweep', 'config', 'tech magic status', 'every row', 'turn the sky pinned'}
