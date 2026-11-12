@@ -13,8 +13,8 @@
 //      iced_b (25,12) flank the Watch, iced_c (4,23) west, iced_d (38,24) east, iced_e (13,30) and iced_f (31,30) south.
 //   The north end: the Keeper at keeper_lamp (24,12) by her lamp, Torr on the Watch steps (19,12) with his book, the north
 //      gate in the pine rampart (an ice arch, 29..33, 5..8; its passage closed by an iron grille until vault_open), vault_trig
-//      in front of it, and through it the walk to the cathedral's foot: the Vault door (32,5) to ep7_vault_f1 basin and, from
-//      doors_reopened, the nave door (30,5) to ep7_stillheart roof.
+//      in front of it, and through it the walk to the cathedral's foot: the Vault door (32,6) to ep7_vault_f1 basin and, from
+//      doors_reopened, the nave door (30,6) to ep7_stillheart roof.
 //   West: the Thawlight Lodge (3..9, 11..16, door (6,16)) and Mirael's house (3..7, 27..30; Mirael at her door). East:
 //      Northwind Provisions (36..40, 14..17, door (37,17)) and the Glass-Ice Armory (35..40, 28..31, door (37,31)).
 // No foes in town. Every focus mark of STAGING_EP7 sits inside x 12..33, y 7..28 (the camera rule).

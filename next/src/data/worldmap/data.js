@@ -27,7 +27,7 @@ export const REGIONS = {
   F: { name: 'The Flood Country', ep: 4, seen: ['flood_road_arrived', 'vw_arrived'], heard: ['ep3_complete'] },
   S: { name: 'The south', ep: 5, seen: ['road_landed', 'haven_arrived'], heard: ['ep4_complete'] },
   I: { name: 'The Skybound Isles', ep: 6, seen: ['airstair_arrived', 'zephyr_arrived'], heard: ['ep5_complete'] },
-  N: { name: 'The White North', ep: 7, seen: [], heard: ['ep6_complete'] },
+  N: { name: 'The White North', ep: 7, seen: ['road_arrived', 'palehaven_arrived'], heard: ['ep6_complete'] },
 };
 
 /**
@@ -62,6 +62,8 @@ export const PLACES = [
     about: 'The Cloudhouse Inn and the docks in the sky.' },
   { id: 'north', name: 'The White North', region: 'N', seen: [], heard: ['ep6_complete'], label: [-82, -3],
     about: 'White mountains. The Sky Compass points here.' },
+  { id: 'palehaven', name: 'Palehaven', region: 'N', town: true, seen: ['palehaven_arrived'], heard: [], label: [-24, 8],
+    about: 'The Thawlight Lodge and the cold hearth.' },
 ];
 export const PLACE = Object.fromEntries(PLACES.map((p) => [p.id, p]));
 
@@ -86,7 +88,8 @@ export const MAP_AT = [
   [/^ep5_lab_/, 'labyrinth'],
   [/^ep6_airstair$/, 'airstair'],
   [/^ep6_/, 'zephyr'],
-  [/^ep7_/, 'north'],   // Episode 7 (the White Road, Palehaven, the Vault): one point until Palehaven gets its own place and stones
+  [/^ep7_(palehaven|ph_\w+)$/, 'palehaven'],
+  [/^ep7_/, 'north'],   // the rest of Episode 7 (the landing, the White Road, the Vault, the Stillheart)
 ];
 
 /**
@@ -104,12 +107,13 @@ export const STONES = {
   ep4_valewyn: [{ id: 'wm_stone_landing', x: 24, y: 30, at: [24, 29, 'right'] }],
   ep5_saffron: [{ id: 'wm_stone_gate', x: 19, y: 30, at: [19, 29, 'left'] }, { id: 'wm_stone_dock', x: 6, y: 26, at: [7, 26, 'down'] }],
   ep6_zephyr: [{ id: 'wm_stone_stair', x: 24, y: 27, at: [23, 27, 'up'] }, { id: 'wm_stone_dock', x: 25, y: 6, at: [25, 7, 'right'] }],
+  ep7_palehaven: [{ id: 'wm_stone_gate', x: 21, y: 32, at: [22, 32, 'up'] }],   // inside the south gate, west of the avenue
 };
 
 /** Each town's own field map (the one its stones stand on): travel's destinations (wave 3). */
 export const TOWN_MAP = {
   willowmere: 'willowmere', thornfold: 'x1_downs', hollowmere: 'nameless_hollow', emberpeak: 'emberpeak',
-  valewyn: 'ep4_valewyn', saffron: 'ep5_saffron', zephyr: 'ep6_zephyr',
+  valewyn: 'ep4_valewyn', saffron: 'ep5_saffron', zephyr: 'ep6_zephyr', palehaven: 'ep7_palehaven',
 };
 
 /** The copy of the map screen (player text: no em dashes). */

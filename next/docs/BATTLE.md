@@ -1482,8 +1482,12 @@ ninth tier at ilvl 29. `RARE_NAME_EXT` gains [29: Rimebound, Wintered, Hearthlit
 F1 29 (0.18), F2 29 (0.19), F3 30 (0.19). Shops: `waystation_pack` (Sol, peddler prices), `northwind` (Maera), `glassice_armory` (Eira;
 the tier 12 weapons too, tier 14 after `vault_f2_done`). `shops.js` `EP7_GOLD_LINE` is the contract the maps place: the Courier's
 Strongbox 1,800, the Winterwatch Provision Cache 1,500, the Lamp Gallery chest 1,200; optional, the Reliquary 450 and the Hearth 400.
-**economy7** (binding): from 4,000, at 100% of the fights with the main chests, 7,170 at Palehaven and 670 left after the two town
-pieces, 10,190 before F3 and 1,090 left after the two tier 14 pieces; at 80% with every chest, 396 and 622 left.
+**economy7** (binding): from the quick start's 4,400 (4,000 until E7-fixes, 2026-11-12: the quick start now keeps the 300 G floor
+after both buys with room to spare), at 100% of the fights with the main chests, 7,570 at Palehaven and 1,070 left after the two
+town pieces, 10,590 before F3 and 1,490 left after the two tier 14 pieces; at 80% with every chest, 796 and 1,022 left.
+**A real save** is richer than the quick start: an Episode 6 save arrives with about 9,400 G, so about 12,500 at Palehaven, and
+about 4,100 to 5,600 left after the F3 pieces (the review's estimate of a real run; the bare line above, with no other spending,
+gives about 6,000 to 6,500). The binding check stays on the quick start, the poorest way in.
 
 ### 16.6 Simulator and the final table
 

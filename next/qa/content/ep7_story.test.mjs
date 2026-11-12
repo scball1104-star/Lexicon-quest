@@ -47,7 +47,7 @@ export const MAIN_FLAGS = ['ep7_started', 'ep7_boarded', 'road_arrived', 'vex_ca
 const PARTY = ['hero', 'mira', 'bram'];
 const MAP_ACTORS = ['white_phantom'];   // the Phantom's map actor in ep7_stillheart (sprite phantom_avatar, E7-maps-b)
 const EP7_MUSIC = ['palehaven', 'frostbound_vault', 'boss_phantom', 'zephyr'];   // plan 2.7 (zephyr rides the ep6 fragment)
-const EP7_SFX = ['stone_hold', 'stone_letgo', 'frost_seal', 'rime_bite', 'rime_freeze', 'call_cast', 'farewell_read', 'farewell_break'];
+const EP7_SFX = ['stone_hold', 'stone_letgo', 'frost_seal', 'frost_melt', 'rime_bite', 'rime_freeze', 'call_cast', 'farewell_read', 'farewell_break'];
 const EP7_SPRITES = ['npc_aeris', 'npc_vex', 'npc_vex_kneel', 'npc_keeper', 'npc_keeper_young', 'npc_keeper_mid', 'npc_keeper_mother',
   'npc_courier_m', 'rime_wolf'];
 const PAGE_IDS = ['ep7_chart', 'ep7_carving', 'ep7_tally', 'ep7_tag', 'ep7_seventh', 'ep7_page', 'ep7_letter'];

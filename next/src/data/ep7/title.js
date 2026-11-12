@@ -50,6 +50,13 @@ function place(scene, from) {
   const row = from != null ? m.items.splice(from, 1)[0] : { id: ROW_ID, label: EP7_ROW_LABEL };
   const last = m.items.findLastIndex((it) => /^ep\d$/.test(it.id)), cfg = m.items.findIndex((it) => it.id === 'config');
   m.items.splice(last >= 0 ? last + 1 : cfg < 0 ? m.items.length : cfg, 0, row);
+  // the title's quick start fold is in (ui/firstuse/titleQuick.js): it folds the episode rows into one New party row, keeps them in
+  // episode order and lays the menu out itself; laying it out here as well would fight it
+  if (typeof scene.tidyMenu === 'function') {
+    m.index = Math.max(0, m.items.indexOf(cur));
+    scene.tidyMenu();
+    return;
+  }
   const measure = (s) => (e && e.renderer && e.renderer.measure ? e.renderer.measure(s) : String(s).length * 5);
   const L = layoutRows(m.items, m.rowH, measure);
   if (L.columns > 1) foldTitleRows(m.items);

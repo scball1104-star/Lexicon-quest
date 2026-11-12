@@ -23,7 +23,7 @@ const ground = rows([
 
 export default {
   id: 'ep7_waystation', name: "The Courier's Waystation", area: 'interior',
-  music: 'high_moor', ambience: 'snow_wind', tileset: 'interior',
+  music: 'high_moor', ambience: null, tileset: 'interior',   // no wind indoors: an ambience has no volume of its own (MAPS_EP7_A.md 3)
   lighting: { tint: 'none', dark: 0 },
   under: 'wood_floor',
   legend: { '#': 'interior_wood_top', '|': 'interior_wood_face', '.': 'wood_floor', 'C': 'counter' },

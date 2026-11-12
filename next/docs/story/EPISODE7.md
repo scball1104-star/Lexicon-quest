@@ -940,7 +940,7 @@ Reserved for E7-story (wave 7a): what the built script does beyond the beat shee
 
 Built by E7-story, 2026-11-12 (`src/data/ep7/{flags,npcs,quests,text,story,ledger}.js`, staging in
 `docs/story/STAGING_EP7.md`, tests `qa/content/ep7_story.test.mjs` and `ep7_data.test.mjs`). 36 scenes registered (27 main
-and chained, 7 side, 2 silent), main path 194 boxes (`ep7_morning` 6, `name_under_ice` 12, `whiteout` 8, `listening_bell`
+and chained, 7 side, 2 silent), main path 191 boxes (`ep7_morning` 6, `name_under_ice` 9, `whiteout` 8, `listening_bell`
 11, `phantom_after` 16, `whole_page` 15, `doors_reopen` 14). Deltas from section 1:
 
 - **Two scene ids renamed.** Plan 2.5's `road_landing` and `reliquary` are Episode 5 scenes; Episode 7's are `ep7_landing`

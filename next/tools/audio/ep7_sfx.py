@@ -1,4 +1,5 @@
-"""Episode 7 sounds (E7-audio), docs/EPISODE7_PLAN.md 8.4: eight sfx (rime_bite in three pitches) and two ambience beds.
+"""Episode 7 sounds (E7-audio), docs/EPISODE7_PLAN.md 8.4: eight sfx (rime_bite in three pitches) and two ambience beds, and
+frost_melt (E7-fixes): frost_seal's own source, same seed, played backwards before mastering, for the doors that thaw.
 
     python tools/audio/ep7_sfx.py              # render every Episode 7 sound into assets/audio/{sfx,ambience}/ep7_*.wav
     python tools/audio/ep7_sfx.py --only call_cast,frost_seal
@@ -47,9 +48,10 @@ AMB: dict = {}
 STEP = 2.0 ** (2.0 / 12.0)          # a whole step
 
 
-def sfx(id_, group, intent, target=None, tail_db=-48.0, fallback=None, v=0):
+def sfx(id_, group, intent, target=None, tail_db=-48.0, fallback=None, v=0, seed_id=None):
     def deco(fn):
-        REG[id_] = dict(id=id_, fn=fn, group=group, intent=intent, target=target, tail_db=tail_db, fallback=fallback, v=v)
+        REG[id_] = dict(id=id_, fn=fn, group=group, intent=intent, target=target, tail_db=tail_db, fallback=fallback, v=v,
+                        seed_id=seed_id or id_)
         return fn
     return deco
 
@@ -175,6 +177,13 @@ def frost_seal(g, v):
     m.add(kit.thump(140, 90, 0.25, 0.05, 0.001, click=0.1, g=g), 0.93, 0.22)
     m.add(iceglass(hz("A3"), 0.6, g, ring=0.22, beat=0.8, onset_ms=1.5), 0.93, 0.45)
     return verb(m.out, 0.9, 0.16, bright=0.5, predelay=0.01)
+
+
+@sfx("frost_melt", "field", "A frost door thawing: frost_seal's own render (its seed) backwards, so the reverb swells in, the "
+     "glass thump comes early and the crackle thins out and falls as the ice lets go. For the round door opening and the "
+     "iced doors running at dawn.", target=-17.0, tail_db=-48, fallback="ice", seed_id="frost_seal")
+def frost_melt(g, v):
+    return frost_seal(g, v)[::-1].copy()
 
 
 # ============================================================================ Rime (battle)
@@ -358,7 +367,7 @@ def render_sfx(only=None, review=False):
     for id_, r in REG.items():
         if only and id_ not in only:
             continue
-        seed = build.seed_of("ep7_" + id_)
+        seed = build.seed_of("ep7_" + r["seed_id"])
         y = r["fn"](dsp.rng(seed), 0)
         target = r["target"] if r["target"] is not None else build.GROUP_TARGET[r["group"]]
         y, info = build.master(y, dsp.RENDER_SR, build.SFX_SR, target, "window", r["tail_db"])

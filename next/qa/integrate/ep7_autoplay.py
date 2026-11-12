@@ -42,7 +42,7 @@ RIME_LOG_JS = """(async () => {
 })()"""
 
 EP7_FLAG_HINTS = ('ep7_started', 'ep7_morning_done', 'ep7_boarded')
-EP7_SOUNDS = ['palehaven:music', 'frostbound_vault:music', 'boss_phantom:music', 'stone_hold:sfx', 'stone_letgo:sfx', 'frost_seal:sfx',
+EP7_SOUNDS = ['palehaven:music', 'frostbound_vault:music', 'boss_phantom:music', 'stone_hold:sfx', 'stone_letgo:sfx', 'frost_seal:sfx', 'frost_melt:sfx',
               'rime_bite:sfx', 'rime_freeze:sfx', 'call_cast:sfx', 'farewell_read:sfx', 'farewell_break:sfx', 'snow_wind:ambience',
               'vault_hush:ambience']
 # plan 4.10: the main path's stone decisions, by map
@@ -405,7 +405,7 @@ def build(ap):
                 raise Fail('palehaven_arrival did not run')
             g = b.game() or {}
             self.gold_at['Palehaven'] = g.get('gold')
-            b.notes.append(f'gold at Palehaven: {g.get("gold")} G (plan 7.6: 6,880), Lv {self.level()}')
+            b.notes.append(f'gold at Palehaven: {g.get("gold")} G (economy7 binding: 7,570 from the 4,400 quick start), Lv {self.level()}')
             b.mark('palehaven')
 
         def town(self):
@@ -428,12 +428,13 @@ def build(ap):
                         b.notes.append(f'talk {npc} skipped: {e}')
             if not getattr(self, '_shopped7', False):
                 self._shopped7 = True
+                # the two town pieces first (plan 7.6: the 300 G floor is for consumables), then Maera with what is left
+                self.armory(self.TOWN, 'Palehaven')
                 self.ensure_map('ep7_palehaven')
                 b.through('door_shop')
                 self.ensure_map('ep7_ph_shop')
                 b.visit_shop('maera', [('ember_tea', 2), ('hi_ether', 1)])
                 b.through('shop_exit', exact=False)
-                self.armory(self.TOWN, 'Palehaven')
             self.inn_if_hurt(0.8)
             self.ensure_map('ep7_palehaven')
             if not self.has('keeper_told'):
@@ -565,7 +566,7 @@ def build(ap):
             self.ensure_map('ep7_vault_f2')
             self.trigger([(x, 25) for x in range(24, 29)], 'vault_f2_done', 'lift_trig')
             g = b.game() or {}
-            b.notes.append(f'gold before F3: {g.get("gold")} G (plan 7.6: 9,620), Lv {self.level()}')
+            b.notes.append(f'gold before F3: {g.get("gold")} G (economy7 binding: 10,590), Lv {self.level()}')
             if not getattr(self, '_tripped', False):
                 self._tripped = True
                 b.through('lift_f2_down', exact=False)

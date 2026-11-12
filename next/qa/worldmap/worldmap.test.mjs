@@ -75,6 +75,37 @@ test('a save at the end of each episode shows the right map, and the map only ev
   assert.equal(D.placeName(D.PLACE.hollowmere, END[2].flags), 'Hollowmere');
 });
 
+test('Episode 7: Palehaven joins the map once the party walks in, a town in the list, travelable both ways', async () => {
+  const T = await imp('src/data/worldmap/travel.js');
+  const six = END[6].flags;
+  const before = D.mapState({ flags: six, map: 'ep6_zl_inn' });
+  assert.equal(before.places.palehaven, 'unknown', 'never named before the White Road');
+  assert.ok(!before.towns.includes('palehaven'));
+  const road = D.mapState({ flags: { ...six, road_arrived: true }, map: 'ep7_white_road' });
+  assert.equal(road.regions.N, 'visited', 'the White Road inks the North');
+  assert.equal(road.here, 'north');
+  const flags = { ...six, road_arrived: true, palehaven_arrived: true };
+  const g = { flags, map: 'ep7_ph_inn' };
+  const snap = JSON.stringify(g);
+  const st = D.mapState(g);
+  assert.equal(JSON.stringify(g), snap, 'mapState writes nothing');
+  assert.equal(st.places.palehaven, 'visited');
+  assert.equal(st.here, 'palehaven', 'the interiors of Palehaven stand at its point');
+  assert.equal(D.pointOfMap('ep7_palehaven'), 'palehaven');
+  assert.equal(D.pointOfMap('ep7_vault_f1'), 'north', 'the Vault keeps the North point');
+  assert.equal(st.towns.filter((t) => t === 'palehaven').length, 1, 'listed once');
+  // from Palehaven's own map every other town is a trip; from Zephyr's inn Palehaven is one, by air to its gate stone
+  const here = Object.fromEntries(T.destinations({ flags, map: 'ep7_palehaven' }, { from: 'stone', mapId: 'ep7_palehaven', area: 'town', flags }).map((r) => [r.id, r]));
+  assert.equal(here.palehaven.why, 'here');
+  assert.equal(here.zephyr.ok, true, JSON.stringify(here.zephyr));
+  const there = Object.fromEntries(T.destinations({ flags, map: 'ep6_zephyr' }, { from: 'stone', mapId: 'ep6_zephyr', area: 'town', flags }).map((r) => [r.id, r]));
+  assert.equal(there.palehaven.ok, true, JSON.stringify(there.palehaven));
+  assert.equal(there.palehaven.route.mode, 'air');
+  assert.deepEqual(there.palehaven.arrive, { map: 'ep7_palehaven', x: 22, y: 32, dir: 'up', stone: 'wm_stone_gate' });
+  // a save that never saw the White North (an Episode 7 quick start before the landing) does not list it
+  assert.ok(!D.mapState({ flags: { ...six, ep7_started: true }, map: 'ep6_zl_inn' }).towns.includes('palehaven'));
+});
+
 test('quick starts and real old saves read the same way (no save change, nothing written)', async () => {
   const quick = { 2: S.newGameEp2, 3: S.newGameEp3 };
   try { quick[4] = (await imp('src/data/ep4/start.js')).newGameEp4; quick[5] = (await imp('src/data/ep5/start.js')).newGameEp5; quick[6] = (await imp('src/data/ep6/start.js')).newGameEp6; } catch (e) { /* a quick start that needs its pack */ }

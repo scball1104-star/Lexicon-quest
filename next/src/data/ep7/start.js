@@ -35,11 +35,11 @@ export const EP7_LOADOUT = { source: 'ep6_obs_eyrie', plus: { hero: { charm: 'ke
 
 /**
  * Lv 28 at 17,900 EXP, every Episode 1 to 6 main flag plus ep6_complete, compass_restored, isles_restored and
- * white_road_letter_get, the six credits counters, the Episode 1 to 6 key items and the letter, 4,000 gold, in the Cloudhouse
+ * white_road_letter_get, the six credits counters, the Episode 1 to 6 key items and the letter, 4,400 gold (both town pieces with the 300 G floor), in the Cloudhouse
  * Inn at `inn_bed` (ep6_zl_inn (17, 7)) so ep7_morning runs there (while EP7_LIVE) and stages the morning in the Chart Room.
  */
 export const EP7_START = {
-  level: 28, exp: 17900, gold: 4000, map: 'ep6_zl_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
+  level: 28, exp: 17900, gold: 4400, map: 'ep6_zl_inn', mark: 'inn_bed', pos: { x: 17, y: 7, dir: 'down' },
   items: { potion: 6, hi_potion: 8, hi_ether: 6, phoenix_feather: 3, silver_salve: 3, ember_tea: 2,
     name_fragment_1: 1, name_fragment_2: 1, name_fragment_3: 1, name_fragment_4: 1, name_fragment_5: 1, name_fragment_6: 1,
     lantern_of_recall: 1, mirror_sigil: 1, sky_compass: 1, white_road_letter: 1 },
