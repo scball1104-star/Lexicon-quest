@@ -122,8 +122,7 @@ floor decal exists in `ep7_tiles.json`); `phantom_trig` row 16, x 6..27 (if `sti
 Marks: `entry` (16,20), `heart` (16,10), `party_stop` (16,14) `_m` (15,14) `_b` (17,14), `nox_enter` (16,18), `list_spot`
 (16,12), `page_block` (19,11), `roof` (16,15) `_m` (15,15) `_b` (17,15), `nox_roof` (13,13), `vex_rail` (12,15), `aeris_rail`
 (21,15), `stair_foot` (20,9), `square_door` (6,12). Kept for Episode 8: `stair_foot`, the `star_stair` decor, and the arrival
-from Palehaven's `nave_door` (E7-maps-a; it lands on (13,14) in their draft, ground here; `roof` (16,15) is where the scene
-stages the party).
+from Palehaven's `nave_door` (E7-maps-a; E7-integrate moved it onto `roof` (16,15), where the scene stages the party).
 
 ## The lifts and shortcuts (plan 5.4)
 

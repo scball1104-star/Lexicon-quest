@@ -77,11 +77,11 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         # LQ_X1_LIVE=1 / 0: serve src/data/x1/live.js with the switch forced on / off (a local copy, in memory; the file on disk is untouched)
         # LQ_EP3_LIVE=1 / 0: the same for src/game/episodes.js EP3_LIVE (E3-integrate plays Episode 3 before the flip)
-        # LQ_EP4_LIVE=1 / 0: the same for EP4_LIVE in that file (E4-integrate); LQ_EP5_LIVE for EP5_LIVE (E5-integrate); LQ_EP6_LIVE (E6-integrate)
+        # LQ_EP4_LIVE=1 / 0: the same for EP4_LIVE in that file (E4-integrate); LQ_EP5_LIVE for EP5_LIVE (E5-integrate); LQ_EP6_LIVE (E6-integrate); LQ_EP7_LIVE (E7-integrate)
         hits = []
         for env, rel, const in (('LQ_X1_LIVE', 'src/data/x1/live.js', 'X1_LIVE'), ('LQ_EP3_LIVE', 'src/game/episodes.js', 'EP3_LIVE'),
                                 ('LQ_EP4_LIVE', 'src/game/episodes.js', 'EP4_LIVE'), ('LQ_EP5_LIVE', 'src/game/episodes.js', 'EP5_LIVE'),
-                                ('LQ_EP6_LIVE', 'src/game/episodes.js', 'EP6_LIVE')):
+                                ('LQ_EP6_LIVE', 'src/game/episodes.js', 'EP6_LIVE'), ('LQ_EP7_LIVE', 'src/game/episodes.js', 'EP7_LIVE')):
             if os.environ.get(env) and self.path.split('?')[0].endswith('/next/' + rel):
                 hits.append((os.environ[env] != '0', rel, const))
         if hits:
