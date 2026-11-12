@@ -313,6 +313,13 @@
   "src/data/maps/ep6_zl_shop.js",
   "src/data/maps/ep6_zl_workshop.js"
  ],
+ "ep7": [
+  "assets/ep7_manifest.json",
+  "src/data/ep7/hooks.js",
+  "src/data/ep7/index.js",
+  "src/data/ep7/maps.js",
+  "src/data/ep7/start.js"
+ ],
  "tier": [
   "assets/tier_manifest.json",
   "src/data/tier/index.js",

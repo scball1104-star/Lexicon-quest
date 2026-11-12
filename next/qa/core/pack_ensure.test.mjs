@@ -20,7 +20,7 @@ function mod() {
 }
 
 test('the real table: x1 and x2, the prefix rule, wanted(), the x1 switch is on and the x2 switch is off', () => {
-  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'ep4', 'ep5', 'ep6', 'tier', 'worldmap']);   // cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09); worldmap: the world map (#97, 2026-11-11)
+  assert.deepEqual(Object.keys(PACKS), ['x1', 'x2', 'cave', 'ep3', 'ep4', 'ep5', 'ep6', 'ep7', 'tier', 'worldmap']);   // ep7: Episode 7 (2026-11-12, EP7_LIVE off); cave: the Deep Stacks (2026-10-27); tier: Fine Print (2026-10-28); ep3: Episode 3's maps (2026-11-02); ep4: Episode 4 (2026-11-03); ep5: Episode 5 (2026-11-08); ep6: Episode 6 (2026-11-09); worldmap: the world map (#97, 2026-11-11)
   assert.equal(PACKS.x1.prefix, 'x1_');
   assert.equal(PACKS.x2.audioPack, 'ep2');
   assert.deepEqual(PACKS.x1.touches, ['valley', 'willowmere', 'archive_f1', 'archive_f2', 'archive_f3']);
@@ -254,7 +254,7 @@ test('startPackWatch (issue #56): the side packs wait until no hard pack is load
   };
   setPackDefaults({ importer, enabled: true, quiet: true, warm: false, packFiles: null });
   let onScene = null;
-  const flags = { first_fight_done: true, ep1_complete: true, ep2_complete: true, ep3_complete: true, ep4_complete: true, ep5_complete: true };
+  const flags = { first_fight_done: true, ep1_complete: true, ep2_complete: true, ep3_complete: true, ep4_complete: true, ep5_complete: true, ep6_complete: true };
   const engine = { game: { flags }, save: null, on: (name, fn) => { if (name === 'scene') onScene = fn; return () => {}; } };
   const stop = startPackWatch(engine, null);
   try {
@@ -331,8 +331,8 @@ function chain(t, fail = {}) {
 }
 const tick = (ms = 5) => new Promise((r) => setTimeout(r, ms));
 
-test('#96: the real table lists the hard packs in chain order (ep3, ep4, ep5, ep6), which the fetch-at-once rule reads', () => {
-  assert.deepEqual(Object.keys(PACKS).filter((id) => PACKS[id].hard), ['ep3', 'ep4', 'ep5', 'ep6']);
+test('#96: the real table lists the hard packs in chain order (ep3, ep4, ep5, ep6, ep7), which the fetch-at-once rule reads', () => {
+  assert.deepEqual(Object.keys(PACKS).filter((id) => PACKS[id].hard), ['ep3', 'ep4', 'ep5', 'ep6', 'ep7']);
 });
 
 test('#96: one ensurePack of the last hard pack starts every hard pack above it at once, and they register in order', async () => {

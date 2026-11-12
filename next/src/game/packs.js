@@ -3,7 +3,7 @@
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
 import { CAVE_LIVE } from '../data/cave/live.js';
-import { EP3_LIVE, EP4_LIVE, EP5_LIVE, EP6_LIVE } from './episodes.js';
+import { EP3_LIVE, EP4_LIVE, EP5_LIVE, EP6_LIVE, EP7_LIVE } from './episodes.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -26,6 +26,8 @@ export const PACKS = {
          wanted: (f) => !!(f.ep4_complete || f.ep5_started), enabled: () => EP5_LIVE },
   ep6: { entry: '../data/ep6/index.js', prefix: 'ep6_', assets: 'assets/ep6_manifest.json', audioPack: 'ep6', hard: true, touches: ['ep5_sh_inn', 'ep5_saffron'],
          wanted: (f) => !!(f.ep5_complete || f.ep6_started), enabled: () => EP6_LIVE },
+  ep7: { entry: '../data/ep7/index.js', prefix: 'ep7_', assets: 'assets/ep7_manifest.json', audioPack: 'ep7', hard: true, touches: ['ep6_zl_inn', 'ep6_zl_charts', 'ep6_zephyr'],
+         wanted: (f) => !!(f.ep6_complete || f.ep7_started), enabled: () => EP7_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
   worldmap: { entry: '../data/worldmap/index.js', prefix: 'worldmap_', assets: 'assets/worldmap_manifest.json', audioPack: null, touches: [], wanted: (f) => !!f.ep1_complete, enabled: () => true },   // #97
 };
@@ -114,10 +116,7 @@ export function packsForMap(mapId, opts) {
   return Object.entries(tableOf(opts)).filter(([, d]) => m.startsWith(d.prefix) || d.touches.includes(m)).map(([id]) => ({ id }));
 }
 
-/**
- * Wait for these packs, but never longer than `ms`. Resolves to the list of results, or 'timeout'. Never rejects, and
- * resolves at once (synchronously settled) with [] when there is nothing to wait for.
- */
+/** Wait for these packs, at most `ms`: the results, or 'timeout'. Never rejects; [] at once with nothing to wait for. */
 export function awaitPacks(ids, ms = GUARD_MS, opts) {
   const list = (ids || []).filter((id) => packEnabled(id, opts) && !packReady(id));
   if (!list.length) return Promise.resolve([]);
@@ -173,11 +172,7 @@ async function loadFileLists(engine, opts) {
   } catch (e) { return null; }
 }
 
-/**
- * In the browser with the service worker in control: does its cache already hold every one of these URLs? A pack then skips its
- * up-front fetch of them (issue #56: on a slow phone each extra request costs main-thread time). Anything else, a first visit
- * included, answers false and keeps the fetch, so a dropped connection still fails the pack and the retry can run. Never rejects.
- */
+/** Worker in control and every URL in its cache? Then a pack skips its fetch (#56); else false, so a failure can retry. */
 export async function storedAll(hrefs) {
   try {
     const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
@@ -259,8 +254,7 @@ function warm(res, opts) {
   const worker = async () => { while (queue.length) { const f = queue.shift(); try { await fetch(new URL(f, base).href); } catch (e) { /* offline: it will load when used */ } } };
   const go = () => storedAll(queue.map((f) => new URL(f, base).href)).then((all) => { if (!all) for (let i = 0; i < 3; i++) worker(); });
   const idle = () => { if (typeof requestIdleCallback === 'function') requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 1500); };
-  // Only a fetch that passes through the service worker lands in its runtime cache. On a first visit the worker installs a few
-  // seconds after the game is playable, so wait for it to take control (at most 30 s), then warm.
+  // first visit: warm once the worker controls the page (at most 30 s), so the fetches land in its cache
   const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : null;
   if (sw && !sw.controller && typeof sw.addEventListener === 'function' && opts.swWait !== false) {
     let started = false;
@@ -270,11 +264,7 @@ function warm(res, opts) {
   } else idle();
 }
 
-/**
- * Issue #63: on a first visit the worker takes control seconds after the game is playable, so what loaded before then (title art
- * and music, early sounds, pack_files.json, the ep3 maps ep4 imports) missed its cache. Fetch again through it each same-origin
- * game file this visit used that no cache holds, three at a time, low priority. Never rejects. deps: tests.
- */
+/** #63: refetch through the worker each same-origin file this first visit used that no cache holds. Never rejects. deps: tests. */
 export async function refetchUsed(deps = {}) {
   const out = { checked: 0, fetched: 0 };
   try {
