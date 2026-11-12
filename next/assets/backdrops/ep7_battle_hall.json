@@ -1,0 +1,17 @@
+{
+ "image": "ep7_battle_hall.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "F2 the Hall of Borrowed Light and the Pale Lantern: a dark hall of letter niches, a few lit, two lamp pools, a dark letter-stone floor (composed)",
+ "extraColors": [],
+ "colors": 30,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep7_build.py (hall); palette.json plus the ep7 sheet colours (ep7_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep7_battle_hall",
+ "fallback": "archive",
+ "meanLuma": 0.1756
+}
