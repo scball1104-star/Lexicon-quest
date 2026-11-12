@@ -745,3 +745,119 @@ To write a new track: copy a file in `tools/music/songs/`, build a `Song`, add t
 (`c4/0.5` note with duration in beats, `r/1` rest, `[c4 e4 g4]/2` chord, `@0.7` velocity, `.` staccato,
 `_` legato, `^` accent) or `track.add(beat, 'c4', dur, vel)`. Add its id to `ALL` in `render.py` and to
 `TRACKS` in the test.
+
+## Episode 7: three more tracks (E7-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops). Plan: `docs/EPISODE7_PLAN.md` 8. Files are `assets/audio/music/ep7_<id>.mp3` (+ sidecar), songs
+`tools/music/songs/ep7_*.py`; render with `python tools/music/render.py ep7_palehaven ep7_frostbound_vault ep7_boss_phantom --wav`.
+Like Episodes 4 to 6, they are NOT in `render.py`'s `ALL`, in `build.py`'s `MUSIC_IDS` or in `assets/audio/manifest.json`:
+Episode 7 audio reaches the game only through the pack fragment `src/data/ep7/audio.js` (plan 13.3), whose `volume` brings each
+decoded MP3 to -16 LUFS (measured -16.44 on all three). `python tools/audio/ep7_review.py` decodes each MP3 and draws the loop
+seams and the bell's motif (`tools/audio/out/ep7/seams.png`, `motif.png`; `levels.json`); `python tools/audio/ep7_sfx.py
+--review` draws the sound pairs (`pairs.png`). `verify_decode.py` measured a 0-sample lag in headless Chromium for all three.
+No Suno: everything is composed in code.
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `palehaven` | The Thawing Hearth | D Dorian | 72, 4/4 | 28 | 0.060 s to 93.393 s | 93.49 s | `hollowmere` |
+| `frostbound_vault` | The Vanishing Steps | A Aeolian | 66, 4/4 | 24 | 0.060 s to 87.333 s | 87.43 s | `hollow` |
+| `boss_phantom` | The White Phantom | F minor | 132, 4/4 | 60 | 0.060 s to 109.151 s | 109.25 s | `boss_king` |
+
+### The Palehaven tune, the iceglass bell and the cello (`tools/music/songs/ep7_theme.py`)
+Eight bars of 4/4 in scale degrees, opening with the complete motif (0 4 5 3, D A B G in D Dorian, the B the Dorian sixth), its
+fourth note held over the bar line and left ringing under the reply (A F E). `palehaven` plays it in D Dorian in its B sections;
+`boss_phantom` quotes it in F minor with every value doubled by `tune_aug` (one tune bar becomes two boss bars, so the town's song
+keeps its own slow pace, frozen under the drive). The module holds the song-local instruments (synth.py is untouched).
+`IceglassBell` is a struck glass bar heard from very far away, the Listening Bell's voice: a soft mallet landing hard (a felt
+thump and a 4 ms raised-cosine onset, the upper partials a few ms slower to speak), three inharmonic partials at 1, 2.76 and 5.4
+of the fundamental with their own long decays (the fundamental about 4 s), each top partial split into two modes a fraction of
+a hertz apart so they beat slowly, the top rolled off and a breath of band noise on the strike for distance. It is the opposite
+of Episode 6's attack-less wind harp. `damp` stops the bar by hand a set time after the gate (the stopped bell). `Cello` is a
+bowed solo line (a saw with a faint second bow stroke, formants near 250, 600 and 1500 Hz, delayed slow vibrato, bow noise on
+the attack); a short bow makes it the boss's spiccato. `MuffledDrum` is a felt-wrapped bass drum with a crunch of snow on top.
+`python tools/music/songs/ep7_theme.py` checks the bars, the motif's intervals (D A B G, exactly 0 +7 +9 +5), the B over G,
+the held notes against their chords and the boss's re-barring (one motif note each half bar, F C Db Bb in F minor).
+
+### How Episode 7 wears the name motif
+- **palehaven**: the iceglass bell, D5 A5 B5 G5, bars 1-2, the G never damped, ringing on while the cello replies under it, A3
+  F3 E3. Decoded from the MP3 (`motif.png`), the strongest pitch per beat of bars 1-2 is 587, 880, 988, then 785 Hz for five
+  beats. Bar 5 repeats it an octave down and softer, bar 25 brings it back for the turn home. In B and B' the tune has the same
+  four notes on the bell, the rest on the cello, then on the piano.
+- **frostbound_vault**: the cello, augmented to a bar a note, from the third of the key so the intervals stay exact in A Aeolian:
+  C3 G3 A3 F3 (bars 1-4); the iceglass bell answers each note two beats late, two octaves up. B moves the pair onto G (G2 D3 E3
+  C3). C states it on C again and holds the F, the fourth note, from bar 20 to the loop: the motif left open. The stopped bell
+  (an E6 struck on beat 2 of bars 8, 16 and 24 and damped a third of a second later) is the Keeper's hands on the bronze.
+- **boss_phantom**: the high strings with the low brass two octaves under, from the third of F minor: Ab3 Eb4 F4 Db4 in half
+  notes, the Db held into the Db chord (bars 1 and 9). In B the Palehaven quote in F minor: its motif notes on the iceglass bell
+  (F4 C5 Db5 Bb4, the warm Dorian sixth gone minor), the rest on the high strings with the horn under them. C climbs the motif
+  from Ab, Bb and C (each keeping the scale's own sixth) and states it fortissimo. Bars 59-60, the last before the loop, are F
+  major: the bell plays F5 C6 D6 Bb5 and lets the Bb fall to A, the major third, ringing until the loop takes it back to F minor.
+
+### palehaven: The Thawing Hearth (ep7_palehaven and ep7_ph_*, doors_reopen, the Episode 7 credits; loops)
+The root region-7 brief for the tracker: a warm solo cello, sparse piano, glass bells, airy sustained strings, quiet snow and
+aurora with melancholy hope. The cold is in the instruments, the mode and the space, not a stock cliche (no sleigh bells, no wind
+effect): an open D-A fifth with no third under the whole A section, the bell far off in a long dark hall (room 0.92, 5 s), the
+strings high and thin, a faint glass shimmer every second bar (the aurora). The warmth arrives with the Dorian B when the doors
+open in B. A (1-8) the held fifth, the motif and the cello's reply and slow line (F G A, B, down to D). B (9-16) the tune: Dm,
+Em7, F, G, G/B, F, Am7-C, Dm; the cello sings it, pads take the third, the piano's rising thirds (beats 3-4 of even bars) are
+answered by the bell a bar later. B' (17-24) the tune on the piano, the bell's motif over it, the cello's countermelody, the low
+strings warm on the roots: the hearth. T (25-28) Dm, Em7, C, Dm: the motif once more, the cello alone on D. Instruments:
+iceglass bell, cello, piano, strings, strings_high, strings_low, glasspad.
+
+### frostbound_vault: The Vanishing Steps (ep7_vault_f1, ep7_vault_f2; loops)
+The plan's brief: a low cello drone that never quite resolves (a second cello under ep6's `Swell`: the fifth A2 E3, whose E leans
+up to F for one bar in four, and in C the root walks off to F2 and G2 and does not come home before the loop does), the motif on
+the cello augmented with the bell's echo, footsteps in snow (the muffled drum on 1 and 3, a lighter step on the and of 4 every
+second bar) and the stopped bell every 8 bars. A (1-8) the motif on C, the cello's low answer (5-8). B (9-16) the motif on G,
+the high strings very high and thin. C (17-24) the drone walks, a faint choir, the motif on C with its F held to the loop.
+Instruments: cello, cello drone, iceglass bell (echo and stopped), strings_high, choir, muffled drum. Room 0.93, 5.5 s.
+
+### boss_phantom: The White Phantom (the Phantom's battle; loops)
+4/4 at 132. The drive: the cello section in spiccato eighths (root, root, fifth, root, octave, root, fifth, third), timpani on 1
+and 3, bass; the choir pad; the music box: the iceglass bell set short and close (ring 0.8 s), eighths arching over the chord,
+the top note ringing longer. A (1-16) Fm, Db, Bbm, C, Fm, Db, Eb, C (two bars each): the strings' motif with its answers.
+B (17-32) the Palehaven quote: Fm, Gm7b5, Ab, Bbm, Bbm/Db, Ab, Cm7-Eb, Fm (two bars per tune bar); the music box stops and the
+drive thins for it. C (33-48) Fm, Bbm, Db, Eb, Fm, Db, Bbm, C: the motif climbs (33, 37, 41) and lands fortissimo (45), timpani
+pickups. R (49-58) C and Db over a C pedal: the strings climb, the choir rises, a timpani roll (57-58). M (59-60) F major on the
+bell. A soft cymbal roll lifts into each section. Instruments: cello (spiccato), strings_low, strings_high, brass, horn, iceglass
+bell (melody and music box), choir, lowdrum, cymbal (ep6_theme), bass.
+
+### Sounds (plan 8.4), `tools/audio/ep7_sfx.py`
+Not registered in `sfx_defs.REG`, as Episodes 4 to 6: the script masters with `build.master` and writes
+`assets/audio/sfx/ep7_<id>.wav` (22.05 kHz mono) and `assets/audio/ambience/ep7_<id>.wav` (16 kHz mono, seamless); `--review`
+draws waveform and spectrogram sheets and the pairs sheet into `tools/audio/out/ep7/`. All pack `ep7`, lazy (`LAZY_PREFIXES`):
+runtime-cached, outside the precache and outside the pack's 1.0 MB code-and-art cap. The ep7 sfx and ambience add 1.12 MB, so
+`qa/audio/manifest.test.mjs`'s total cap (12.5 MB, not E7-audio's file) has to move to 13.5 MB, as Episodes 4 to 6 moved it.
+The field sounds speak with the score's iceglass bell (the same three partials and slow beat), so a name stone sounds like a
+far note of the Listening Bell. The core ids are reused, never redefined: `bell_thirteenth` (the Listening Bell thawed is tuned
+to the thirteenth bell), `bell_toll`, `ice`, `name_restore`.
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `stone_hold` | 1.07 s | `crystal_hit` | one iceglass note (D5, the motif's root) and a crackle of ice settling outward, darkening as it spreads |
+| `stone_letgo` | 0.89 s | `debuff` | a soft falling sigh of snow, the bell note reversed under it, loose snow sifting |
+| `frost_seal` | 1.65 s | `ice` | a rising crackle of ice locking with the creak of ice under stress, then a low glass thump (A3) as it seals |
+| `rime_bite` | 0.29 s | `debuff` | one pip: a short dry frost crackle and a tiny glass tick on E6 |
+| `rime_bite_2` | 0.30 s | `debuff` | the second pip: the same a whole step up (F#6) |
+| `rime_bite_3` | 0.28 s | `debuff` | the third pip: two whole steps up (G#6) |
+| `rime_freeze` | 0.63 s | `ice` | a hard glassy snap and a short ring of a glass bar (B6) sagging a little as it fades |
+| `call_cast` | 1.71 s | `buff` | a warm wordless tone rising D5 to A5 (the motif's first step), the A coming back twice off the far drifts |
+| `farewell_read` | 2.13 s | `telegraph` | a long low hush that swells, a thin high whistle over it wavering and sliding flat, unresolved |
+| `farewell_break` | 1.85 s | `glass_break` | ice cracking open (a snap, a low split, crackle running off), a warm D major chord rising out of it, settling up into tune |
+
+Told apart on purpose (`pairs.png`): call_cast against core `kept` (two warm tones and an echo, centroid 1004 Hz, against a
+bright held chime with rising glides at 2631 Hz; band-profile similarity 0.30); farewell_break against Episode 6's
+`rewrite_break`, Episode 5's `prophecy_break` and Episode 4's `decree_void` (a low warm chord out of ice, centroid 347 Hz,
+against paper and one tone at 864 Hz, rising glass glides at 4182 Hz and a fixed glass arpeggio at 2490 Hz; similarity 0.69,
+0.09, 0.08); rime_freeze against core `ice` (one snap and a single sagging glass ring, against a staggered cluster of crystal
+partials lasting a second; 0.54); stone_hold against `stone_name` and `chime_post` (a long iceglass note at 587 Hz with the slow
+beat, against a stone knock at 293 Hz and two short wooden strikes at 881 Hz; 0.67, 0.75). The pip pitches read on the tick:
+rime_bite's dominant is 1318 Hz, rime_bite_3's 1661 Hz (two whole steps). The story plays `frost_seal` forward for the round door
+opening too (plan 8.3 asks for it reversed; the engine has no reverse play and no id was named for it).
+
+Ambience: `snow_wind` (10 s, fallback `moor_wind`; the White Road, Palehaven, the Chart Room's north window at 0.2): a soft
+steady wind over snow (lower than `sky_wind`) with a fine snow hiss riding the gusts, a pine creak twice a loop, once a far glass
+chime. `vault_hush` (10 s, fallback `archive_hush`; the Vault, the Stillheart): a deep hush, four drips a loop that freeze as
+they land (a drop, then a tiny tick of ice), a low hum of ice (two tones whose periods divide the loop), and a far bell-like
+groan on glass partials once a loop, so every 10 s (inside the plan's 10 to 14).
