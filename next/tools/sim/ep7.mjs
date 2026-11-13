@@ -42,10 +42,10 @@ export function registerData() {
 
 export { EP7_ZONE_ORDER };
 /**
- * The Episode 7 quick start's EXP and gold (plan 6.1 and 7.6: 17,900 EXP, Lv 28; 4,000 gold). E7-pack's src/data/ep7/start.js
+ * The Episode 7 quick start's EXP and gold (plan 6.1 and 7.6: 17,900 EXP, Lv 28; 4,400 gold, 4,000 until E7-fixes). src/data/ep7/start.js
  * (EP7_START) is read when it exists; until then the plan's numbers stand in.
  */
-let START = { exp: 17900, gold: 4000 };
+let START = { exp: 17900, gold: 4400 };
 try {
   const m = await import('../../src/data/ep7/start.js');
   if (m && m.EP7_START && m.EP7_START.exp) START = { exp: m.EP7_START.exp, gold: m.EP7_START.gold ?? START.gold };

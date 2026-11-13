@@ -16,7 +16,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { NEXT, loadAll, loadDb, validate, buildGrid, walk, eventCells, withFlags } from '../../tools/maps/mapcheck.mjs';
-import { analyse as analyseRaw, PLAN_BUDGET, TOTAL_BUDGET } from '../../tools/maps/ep7_check.mjs';
+import { analyse as analyseRaw, PLAN_BUDGET, TOTAL_BUDGET, MAIN_FLAGS } from '../../tools/maps/ep7_check.mjs';
 import { compile } from '../../src/data/ep7/field/remember.js';
 
 await (await import('../../src/data/ep7/index.js')).register();
@@ -220,6 +220,18 @@ test('plan 4.10: the critical path of each floor within its decisions (F1 4, F2 
     ['ns_ylva', 'ns_greta', 'ns_anders', 'ns_ylva_3', 'ns_ida']);
 });
 
+test('the stone search under every main-path flag set (MAIN_FLAGS): only the events present, 0 errors, the same decisions', () => {
+  const want = { ep7_white_road: 4, ep7_vault_f1: 4, ep7_vault_f2: 3, ep7_vault_f3: 5 };
+  for (const [id, sets] of Object.entries(MAIN_FLAGS)) {
+    for (const [name, flags] of [['no flags', []], ...Object.entries(sets)]) {
+      const a = analyseRaw(maps[id], db, { flags });
+      assert.deepEqual(a.errors, [], `${id} [${name}]`);
+      assert.equal(a.report.stones.decisions, want[id], `${id} [${name}]: decisions`);
+      assert.equal(a.report.stones.stranded, 0, `${id} [${name}]: stranded`);
+    }
+  }
+});
+
 test('the optional reads: F1 side gallery 1 (Oskar, with Liesl held), F2 Reliquary 2 (Tuva and Kell); the Road Home needs the Lantern', () => {
   // F1: from the Liesl landing holding Arvo and Liesl, one read reaches the boots' gallery
   const f1 = maps.ep7_vault_f1;
@@ -246,9 +258,15 @@ test('no state strands the party: under the real story flags every reachable sta
 });
 
 test('every chest of my maps is reachable in some state (the Lantern for the Road Home, the Dash crates broken)', () => {
+  // no flags means none set (an `if` chest is absent), so a chest gated on a story flag is checked under that flag too
+  const PAGES = ['page_door_found', 'page_flame_found', 'page_lost_found', 'reliquary_open'];
+  const sets = { ep7_vault_f1: [[], ['streets_started']], ep7_vault_f2: [[], PAGES], ep7_vault_f3: [[]] };
   for (const id of FLOORS) {
-    const r = analyse(maps[id], db, { lantern: true, keys: KEYS }).report;
-    for (const e of maps[id].events.filter((x) => x.type === 'chest')) assert.ok(!r.unreached.includes(e.id), `${id}: ${e.id}`);
+    const runs = sets[id].map((flags) => ({ flags: new Set(flags), r: analyseRaw(maps[id], db, { flags, lantern: true, keys: KEYS }).report }));
+    const on = (e, f) => [].concat(e.if || []).every((x) => f.has(x)) && [].concat(e.ifNot || []).every((x) => !f.has(x));
+    for (const e of maps[id].events.filter((x) => x.type === 'chest')) {
+      assert.ok(runs.some(({ flags, r }) => on(e, flags) && !r.unreached.includes(e.id)), `${id}: ${e.id}`);
+    }
   }
   const rel = analyse(maps.ep7_vault_f2, db, { flags: [...F2, 'page_door_found', 'page_flame_found', 'page_lost_found', 'reliquary_open'] }).report;
   assert.ok(!rel.unreached.includes('chest_reliquary') && !rel.unreached.includes('book_keeper'), 'the Reliquary chest once opened');

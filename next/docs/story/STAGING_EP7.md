@@ -186,7 +186,7 @@ optional pack helpers. Details that matter here:
   (section 1); the swap `keeper_t` to `nox_t` on `hearth_n`; `name_restore` and a warm flash; `palehaven` on Nox's first
   line. 15 boxes (budget 18). Chains `doors_reopen`.
 - `doors_reopen`: straight after (or on its own after a reload). Fade out, dawn; Nox (`nox_t`) at `hearth_n`, Aeris
-  (`aeris_t`) at `aeris_square`, the party on `hearth_s`; pan to `iced_a` (the doors run: `frost_seal`), `palehaven` from
+  (`aeris_t`) at `aeris_square`, the party on `hearth_s`; pan to `iced_a` (the doors run: `frost_melt`), `palehaven` from
   the first open door, pan to `hearth` (Nox reads the letter; `brazier_light`, the hearth catches, or flares if lit). The
   letter close-up; Vex runs in from `vex_run` to `vex_square`; the carving close-up (`whole`); Nox's gift (`open_gate` on
   `told_nox`, else `kept_lamp`). 14 boxes (budget 16). Takes `white_road_letter`.
@@ -247,7 +247,7 @@ optional pack helpers. Details that matter here:
 - `keeper_comes`: step trigger `keeper_trig` at the top of the Remember landing (if `keeper_memory_3`). Footsteps; the
   Keeper (`keeper_t`) spawns at `keeper_stair` and walks to `keeper_wait_1`; the party stages on `remember_stage`. The
   main truth choice. She then stands at `keeper_wait_3` by the round door (a spawn), the camera pans to `round_door`,
-  `frost_seal` plays (the door opening) and `stillheart_open` is set. 9 to 10 boxes.
+  `frost_melt` plays (the door thawing open) and `stillheart_open` is set. 9 to 10 boxes.
 - Focus marks, `ep7_vault_f3` (34 x 40: x 12 to 21, y 7 to 32): `memory3_spot`, `memory3_stage`, `memory3_bell`,
   `nave_dark`, `remember_stage`, `keeper_wait_1`, `round_door`, `keeper_wait_3`. (`round_door` at y 1 to 5 in the plan
   is under 7 from the top: give the door its landing at y 7 or below, or the pans to it clamp.)
@@ -322,8 +322,9 @@ No Episode 7 event may name an Episode 1 text key (PLAYTEST_REVIEW_8 item 7); `q
 Two handoffs nobody's brief owns yet (for the orchestrator): **the Court's empty portrait** (EPISODE7 choice 5) needs a
 pack patch of `court_f2` that points the `portrait_keeper` frame at `ep7_court_portrait` once `nox_named` is set (an object
 on the same cell, `if: nox_named`, text `ep7_court_portrait`; the Episode 2 scene stays as it is before); and **Piri's
-Dead Letters** still gives a `white_road_letter` if a player finishes it after `ep7_morning` gave one (harmless: the
-letter is a key item taken once in `doors_reopen`).
+Dead Letters** gave a second `white_road_letter` to a player who finished it after `ep7_morning` gave one. **Fixed**
+(E7-integrate): `letters_done` (src/data/ep6/story.js) gives the letter only before `ep6_complete`; after the credits
+`ep7_morning` hands it over when `white_road_letter_get` is unset, so the party never carries two.
 
 ## 7. Contracts for the other agents
 
@@ -354,4 +355,4 @@ letter is a key item taken once in `doors_reopen`).
   `phantom`.
 - **E7-audio.** Cues used: `zephyr`, `high_moor`, `palehaven`, `frostbound_vault`, `mystery`, `sorrow`, `triumph`,
   `battle`, `boss_phantom`; sfx `ice`, `rime_bite`, `call_cast`, `brazier_light`, `gate_open`, `bell_toll`,
-  `bell_thirteenth`, `name_restore`, `frost_seal`, `footstep_stone`, `boss_die`, `chest_open`, `level_up_sparkle`.
+  `bell_thirteenth`, `name_restore`, `frost_seal`, `frost_melt`, `footstep_stone`, `boss_die`, `chest_open`, `level_up_sparkle`.

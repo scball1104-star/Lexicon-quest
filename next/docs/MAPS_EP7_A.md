@@ -92,7 +92,7 @@ north across (15, 24..21) to (16,20); east along y 20 to `waystation_door` (24,2
 stove from `saw_sevens`); back out, west to (16,20), north to `icegate_trig` (y 13), north through the arch to the exit (y 10).
 Optional: Ilka from (18,35) facing down with Bo held (before Nyx), then west along y 35 to the chest (6,35) and back.
 
-## 3. `ep7_waystation` (14 x 10, interior, `high_moor` + `snow_wind`): fits one screen, exempt from the camera rule
+## 3. `ep7_waystation` (14 x 10, interior, `high_moor`, no ambience): fits one screen, exempt from the camera rule
 
 | What | Cells |
 |---|---|
@@ -170,5 +170,7 @@ Watch marks: `keeper_chair` (5,5), `watch_stage` (5,7) (_m 4, _b 6), `vex_door` 
   (plan 4.6's `basin`); `nave_door` targets `ep7_stillheart` (16,15), the real `roof` (E7-integrate moved it from the guess (13,14)).
 - **E7-world:** `ep7_stone_dim` and `ep7_stone_lit` are not read by any map event (the namestone event has no text field); snowfall
   needs a field particle kind (no map field exists for it).
-- **E7-audio / E7-pack:** the Watch's music after `doors_reopened` (`palehaven` 0.6) needs a flag-driven track; the map says
-  `mystery`. The Waystation's 0.5 / 0.4 volumes are not expressible in a map module.
+- **E7-audio / E7-pack:** the Watch's music is flag-driven (E7-fixes, 2026-11-12): `palehaven` from `doors_reopened`, `mystery`
+  before (the plan's 0.6 volume is not expressible; the track plays at its own level). The Waystation's 0.5 / 0.4 volumes are
+  not expressible in a map module either, so it plays `high_moor` at its own level with no ambience, the way every other
+  interior does (`ambience: null`): no wind indoors.

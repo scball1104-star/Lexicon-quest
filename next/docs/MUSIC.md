@@ -838,6 +838,7 @@ to the thirteenth bell), `bell_toll`, `ice`, `name_restore`.
 | `stone_hold` | 1.07 s | `crystal_hit` | one iceglass note (D5, the motif's root) and a crackle of ice settling outward, darkening as it spreads |
 | `stone_letgo` | 0.89 s | `debuff` | a soft falling sigh of snow, the bell note reversed under it, loose snow sifting |
 | `frost_seal` | 1.65 s | `ice` | a rising crackle of ice locking with the creak of ice under stress, then a low glass thump (A3) as it seals |
+| `frost_melt` | 1.89 s | `ice` | frost_seal's own render (its seed) backwards: the reverb swells in, the thump comes early, the crackle thins and falls as the ice lets go |
 | `rime_bite` | 0.29 s | `debuff` | one pip: a short dry frost crackle and a tiny glass tick on E6 |
 | `rime_bite_2` | 0.30 s | `debuff` | the second pip: the same a whole step up (F#6) |
 | `rime_bite_3` | 0.28 s | `debuff` | the third pip: two whole steps up (G#6) |
@@ -853,8 +854,9 @@ against paper and one tone at 864 Hz, rising glass glides at 4182 Hz and a fixed
 0.09, 0.08); rime_freeze against core `ice` (one snap and a single sagging glass ring, against a staggered cluster of crystal
 partials lasting a second; 0.54); stone_hold against `stone_name` and `chime_post` (a long iceglass note at 587 Hz with the slow
 beat, against a stone knock at 293 Hz and two short wooden strikes at 881 Hz; 0.67, 0.75). The pip pitches read on the tick:
-rime_bite's dominant is 1318 Hz, rime_bite_3's 1661 Hz (two whole steps). The story plays `frost_seal` forward for the round door
-opening too (plan 8.3 asks for it reversed; the engine has no reverse play and no id was named for it).
+rime_bite's dominant is 1318 Hz, rime_bite_3's 1661 Hz (two whole steps). The doors that thaw (the round door
+opening in `keeper_comes`, the iced doors running in `doors_reopen`) play `frost_melt`, the reversed copy plan 8.3 asks for,
+rendered by `tools/audio/ep7_sfx.py --only frost_melt` (E7-fixes); `frost_seal` stays the sound of a frost door forming.
 
 Ambience: `snow_wind` (10 s, fallback `moor_wind`; the White Road, Palehaven, the Chart Room's north window at 0.2): a soft
 steady wind over snow (lower than `sky_wind`) with a fine snow hiss riding the gusts, a pine creak twice a loop, once a far glass

@@ -145,6 +145,7 @@ PLACES = {
     'labyrinth': (32, 24, 'labyrinth'),
     'zephyr': (17, 21, 'skyport'),
     'north': (10, 1, None),
+    'palehaven': (13, 3, None),     # Episode 7's town: a point in the snow below the peaks, no glyph of its own yet
 }
 # Points the party can stand between places (roads, the deck of a ship): id -> cell. No glyph.
 POINTS = {'valley': (10, 9), 'east_road': (16, 11), 'sand_road': (24, 10), 'flood_road': (31, 10), 'sea_lane': (31, 19),

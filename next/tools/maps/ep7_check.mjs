@@ -46,6 +46,25 @@ const HALF_PHONE = [12, 6];
 /** Plan 4.10: main-path stone decisions per map (16 in all). */
 export const PLAN_BUDGET = { ep7_white_road: 4, ep7_vault_f1: 4, ep7_vault_f2: 3, ep7_vault_f3: 5 };
 export const TOTAL_BUDGET = 16;
+/**
+ * The main-path story flags each stone map is played under (the real run's, at that map; qa/maps/ep7_a_maps.test.mjs and
+ * ep7_b_maps.test.mjs use the same sets). The CLI runs every set when no flags are given.
+ */
+const EP6_DONE = ['ep6_complete', 'isles_restored', 'beacon_lit', 'library_reached', 'scribe_defeated', 'compass_restored',
+  'zephyr_arrived', 'met_aeris', 'charts_seen', 'anchor_learned', 'windward_pass', 'ep5_complete', 'ep4_complete', 'ep3_complete',
+  'ep2_complete', 'ep1_complete', 'mira_joined', 'bram_joined'];
+const ROAD = [...EP6_DONE, 'ep7_morning_done', 'ep7_started', 'ep7_boarded', 'road_arrived'];
+const ROAD_ON = [...ROAD, 'vex_carved', 'road_fight_done', 'first_stone_read'];
+const F1 = ['vault_open', 'vault_entered', 'vault_f1_arrived'];
+const F2 = [...F1, 'keeper_memory_1', 'stillheart_key_found', 'vault_f1_done', 'vault_f2_arrived'];
+const F2_WON = [...F2, 'keeper_memory_2', 'bell_found', 'lantern_defeated'];
+const F3 = [...F2_WON, 'vault_f2_done', 'vault_f3_arrived'];
+export const MAIN_FLAGS = {
+  ep7_white_road: { road: ROAD, 'road on': ROAD_ON },
+  ep7_vault_f1: { F1, 'F1 back': [...F1, 'keeper_memory_1', 'streets_started'] },
+  ep7_vault_f2: { F2, 'F2 won': F2_WON, 'F2 done': [...F2_WON, 'vault_f2_done'] },
+  ep7_vault_f3: { F3, 'F3 open': [...F3, 'keeper_memory_3', 'keeper_came', 'stillheart_open'] },
+};
 const READ_COST = 1000;      // a read outweighs any walk: the solution is the fewest decisions, then the shortest walk
 const BEHIND = 6;
 const LOOP_RATIO = 1.3;
@@ -109,20 +128,22 @@ function run(map, db, opts) {
   const m = compile(map) || compile({ ...map, remember: { capacity: 2, paths: null } });
   errors.push(...m.errors);
   const { W, N } = m, HH = m.H;
-  const grid = H.buildGrid(map, db);
   const bare = H.buildGrid({ ...map, events: [] }, db);
   const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < HH;
   const idx = (x, y) => y * W + x;
   const xyOf = (i) => `${i % W},${(i / W) | 0}`;
   const rule = (i) => m.owner[i] >= 0 || m.frostOwner[i] >= 0;
   const events = map.events || [];
-  const flags = opts.flags ? new Set(opts.flags) : null;
+  // the story flags of the save searched: none given means none set (an `if` event is absent, an `ifNot` one stands), so the
+  // grid, the cells and the search are those of a save with exactly these flags (an absent closed door never blocks)
+  const flags = new Set(opts.flags || []);
   const storyOk = (e) => {
-    for (const f of toList(e.if)) if (flags && !flags.has(f)) return false;
-    for (const f of toList(e.ifNot)) if (flags && flags.has(f)) return false;
+    for (const f of toList(e.if)) if (!flags.has(f)) return false;
+    for (const f of toList(e.ifNot)) if (flags.has(f)) return false;
     return true;
   };
   const evs = events.filter(storyOk);
+  const grid = H.buildGrid({ ...map, events: evs }, db);
   const byCell = new Map();
   for (const e of evs) for (const [x, y] of cellsOf(e)) { const k = `${x},${y}`; if (!byCell.has(k)) byCell.set(k, []); byCell.get(k).push(e); }
   const evAt = (x, y) => byCell.get(`${x},${y}`) || [];
@@ -413,9 +434,9 @@ function run(map, db, opts) {
     const k = Math.floor(node / N), i = node - k * N;
     for (const e of touchCells.get(i) || []) if (!first.has(e.id)) first.set(e.id, k);
   }
-  for (const e of events) {
-    const present = storyOk(e);
-    const k = present ? (e.on === 'enter' ? k0 : first.has(e.id) ? first.get(e.id) : null) : null;
+  // an event absent under these flags is not on this save's map at all (mapcheck.walk drops it the same way): not unreached
+  for (const e of evs) {
+    const k = e.on === 'enter' ? k0 : first.has(e.id) ? first.get(e.id) : null;
     report.events.push({ id: e.id, type: e.type, reached: k != null, at: k != null ? nameOf(k) : null });
     if (k == null) report.unreached.push(e.id);
     else report.stones.firstAt[e.id] = nameOf(k);
@@ -475,16 +496,22 @@ async function main() {
   if (id === tests.TEST_REMEMBER.id) map = tests.TEST_REMEMBER;
   else map = await mc.loadMap(id);
   if (!hasRemember(map)) { console.log(`${id}: no name stones, nothing to check`); return; }
-  const a = analyse(map, db, fl ? { flags: fl.split(',').filter(Boolean) } : {});
-  const r = a.report, gerr = mc.buildGrid(map, db).errors.filter((e) => !a.errors.includes(e));
-  const all = [...gerr, ...a.errors];
-  const st = r.stones;
-  console.log(`${id}: ${all.length} errors, ${st.states} states, ${st.nodes} nodes, unreached: ${r.unreached.join(' ') || 'none'}`);
-  for (const e of all) console.log('  ERROR ' + e);
-  if (r.log.length) console.log('  walk: ' + r.log.join('; '));
-  if (st.decisions != null) console.log(`  decisions: ${st.decisions}${st.budget != null ? ` of ${st.budget} (plan 4.10)` : ' (no plan figure)'}; walk ${st.steps} cells, straight route ${st.straight}; reads: ${st.solution.join(' ') || 'none'}`);
-  else console.log('  decisions: not counted (no remember.goal)');
-  if (st.panned.length) console.log(`  the read pans to ${st.panned.length} cells: ${st.panned.slice(0, 12).join(' ')}${st.panned.length > 12 ? ' ...' : ''}`);
-  process.exit(all.length ? 1 : 0);
+  // no flags given: the bare map (no flags set), then every main-path flag set of this map (MAIN_FLAGS)
+  const runs = fl ? [[fl, fl.split(',').filter(Boolean)]] : [['no flags', []], ...Object.entries(MAIN_FLAGS[id] || {})];
+  let bad = 0;
+  for (const [name, flags] of runs) {
+    const a = analyse(map, db, { flags });
+    const r = a.report, gerr = mc.buildGrid(map, db).errors.filter((e) => !a.errors.includes(e));
+    const all = [...gerr, ...a.errors];
+    const st = r.stones;
+    bad += all.length;
+    console.log(`${id} [${name}]: ${all.length} errors, ${st.states} states, ${st.nodes} nodes, unreached: ${r.unreached.join(' ') || 'none'}`);
+    for (const e of all) console.log('  ERROR ' + e);
+    if (r.log.length) console.log('  walk: ' + r.log.join('; '));
+    if (st.decisions != null) console.log(`  decisions: ${st.decisions}${st.budget != null ? ` of ${st.budget} (plan 4.10)` : ' (no plan figure)'}; walk ${st.steps} cells, straight route ${st.straight}; reads: ${st.solution.join(' ') || 'none'}`);
+    else console.log('  decisions: not counted (no remember.goal)');
+    if (st.panned.length) console.log(`  the read pans to ${st.panned.length} cells: ${st.panned.slice(0, 12).join(' ')}${st.panned.length > 12 ? ' ...' : ''}`);
+  }
+  process.exit(bad ? 1 : 0);
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch((e) => { console.error(e); process.exit(1); });

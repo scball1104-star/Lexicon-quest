@@ -24,7 +24,8 @@ export const ROUTE_MIN = 120, ROUTE_MAX = 180, CUT_HOLD = 36;
 export const PACK_WAIT_MS = 8000;
 
 // The ways between the painting's points (layout.js POINTS): one road network, the sea lane Yara's ship sails (Episode 5) and
-// the Airstair up to the Isles. Air travel (the Kestrel) ignores it and flies straight.
+// the Airstair up to the Isles, and the Kestrel's way north from Zephyr to Palehaven (Episode 7: there is no road). Air travel
+// (the Kestrel) ignores it and flies straight.
 export const WAYS = [
   ['willowmere', 'valley', 'road'], ['willowmere', 'thornfold', 'road'], ['valley', 'archive', 'road'],
   ['valley', 'east_road', 'road'], ['east_road', 'hollowmere', 'road'], ['hollowmere', 'court', 'road'],
@@ -32,6 +33,7 @@ export const WAYS = [
   ['emberpeak', 'flood_road', 'road'], ['flood_road', 'valewyn', 'road'], ['valewyn', 'keep', 'road'],
   ['valewyn', 'sea_lane', 'sea'], ['sea_lane', 'caravan_road', 'sea'], ['caravan_road', 'saffron', 'road'],
   ['saffron', 'labyrinth', 'road'], ['saffron', 'airstair', 'road'], ['airstair', 'zephyr', 'road'],
+  ['zephyr', 'palehaven', 'air'],
 ];
 
 /** Maps aboard a vehicle mid-crossing: the story's own crossing, so the map is view only there (plan 2.3 item 5). */

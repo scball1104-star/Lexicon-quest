@@ -118,7 +118,7 @@ const maps = fs.readdirSync(path.join(NEXT, 'src', 'data', 'maps')).filter((n) =
 for (const f of maps) scan(fs.readFileSync(path.join(NEXT, 'src', 'data', 'maps', f), 'utf8'));
 for (const [kind, ids] of Object.entries(called)) for (const id of ids) assert.ok(resolves(kind, id), `ep7 code calls ${kind} '${id}', which nothing defines`);
 // the ids E7-story, E7-world and E7-battle name are among the calls
-for (const id of ['rime_bite', 'call_cast', 'frost_seal', 'stone_hold', 'stone_letgo', 'rime_freeze', 'farewell_read', 'farewell_break']) {
+for (const id of ['rime_bite', 'call_cast', 'frost_seal', 'frost_melt', 'stone_hold', 'stone_letgo', 'rime_freeze', 'farewell_read', 'farewell_break']) {
   assert.ok(called.sfx.has(id), `the ep7 code calls sfx '${id}'`);
 }
 for (const id of ['palehaven', 'frostbound_vault', 'boss_phantom']) assert.ok(called.music.has(id), `the story or battles call music '${id}'`);

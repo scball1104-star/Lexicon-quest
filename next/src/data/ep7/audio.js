@@ -29,6 +29,7 @@ export const sfx = {
   stone_hold: { ...S('stone_hold', 1.071, 'field', 'crystal_hit'), maxVoices: 2 },
   stone_letgo: S('stone_letgo', 0.89, 'field', 'debuff'),
   frost_seal: S('frost_seal', 1.653, 'field', 'ice'),
+  frost_melt: S('frost_melt', 1.888, 'field', 'ice'),   // frost_seal's own render backwards: a door thawing (E7-fixes)
   rime_bite: { ...S('rime_bite', 0.285, 'magic', 'debuff'), maxVoices: 3 },
   rime_bite_2: { ...S('rime_bite_2', 0.295, 'magic', 'debuff'), maxVoices: 3 },
   rime_bite_3: { ...S('rime_bite_3', 0.279, 'magic', 'debuff'), maxVoices: 3 },

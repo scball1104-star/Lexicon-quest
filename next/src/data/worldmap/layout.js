@@ -46,6 +46,7 @@ export const POINTS = {
   labyrinth: [260, 196],
   zephyr: [140, 172],
   north: [84, 12],
+  palehaven: [108, 28],
   valley: [84, 76],
   east_road: [132, 92],
   sand_road: [196, 84],

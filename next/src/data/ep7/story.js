@@ -178,13 +178,12 @@ async function ep7_landing(s) {
 
 // 5. ep7_white_road, step trigger wall_trig at the Traveler's Wall (LEGACY "The Name Under Ice", kept and staged). Vex
 // kneels at vex_wall with his back to the party, which stops on wall_stop two rows below. The first truth choice (the H4
-// pattern: small and honest, never a locked route). 12 boxes. Gives valewyn_list. Sets vex_carved, valewyn_list_get, and
-// told_vex or spared_vex.
+// pattern: small and honest, never a locked route). 9 boxes (12 until E7-fixes trimmed it: the first fight comes sooner).
+// Gives valewyn_list. Sets vex_carved, valewyn_list_get, and told_vex or spared_vex.
 async function name_under_ice(s) {
   await spawnVex(s, 'vex_wall', 'up', 'npc_vex_kneel');
   await stage(s, 'wall_stop');
   await s.camera.panTo('vex_wall', 30);
-  await narrate(s, 'A wall of clear ice by the road, cut with hundreds of names. Most are pale. Half of them are gone.');
   await say(s, 'vex_k', 'Travelers carve their names here going up. So the road knows to bring them back down.');
   await s.music(null);
   await s.sfx('ice');   // the first cut of the knife
@@ -203,10 +202,8 @@ async function name_under_ice(s) {
     await say(s, 'vex_k', 'Liar. Kind one.');
   }
   await spawnVex(s, 'vex_wall', 'down');   // he gets up off the ice
-  await narrate(s, 'He takes a folded list from his coat: cheap paper, the cold hand, the seal of the empty book.');
-  await say(s, 'vex_k', "Valewyn's. I told you there was a name on it I wasn't ready to hand anyone.");
-  await narrate(s, 'At the top of it, his own name, as half gone as the carving.');
-  await say(s, 'vex_k', "Mine. Take it. I'm tired of carrying it.");
+  await narrate(s, "He takes Valewyn's list from his coat, the seal of the empty book on it. At the top, his own name, half gone.");
+  await say(s, 'vex_k', "That's the name I wasn't ready to hand anyone. Mine. Take it. I'm tired of carrying it.");
   await s.give(REWARDS_EP7.valewyn_list.item, REWARDS_EP7.valewyn_list.qty);
   await s.setFlag('valewyn_list_get');
   await say(s, 'mira', 'When did they write you down?');
@@ -635,7 +632,7 @@ async function keeper_comes(s) {
   await s.setFlag('keeper_came');
   await spawnKeeper(s, 'keeper_wait_3', 'up');   // she goes on up ahead, lamp first
   await s.camera.panTo('round_door', 40);
-  await s.sfx('frost_seal');
+  await s.sfx('frost_melt');   // the door thaws open (frost_seal backwards)
   await narrate(s, 'At the round door she puts her bare hand on the ice. It has no keyhole. It knows her hand, and it opens.');
   await s.setFlag('stillheart_open');
   await s.camera.follow('hero');
@@ -805,7 +802,7 @@ async function doors_reopen(s) {
   await s.camera.panTo('iced_a', 0);
   await s.music(null);
   await s.fade('in', 60);
-  await s.sfx('frost_seal');
+  await s.sfx('frost_melt');   // the iced doors run at dawn
   await narrate(s, 'Dawn. The iced doors are wet and running. One by one, names come back onto the lintels.');
   await s.music('palehaven');
   await narrate(s, 'People come out into the square and say names to each other, out loud, like a greeting.');

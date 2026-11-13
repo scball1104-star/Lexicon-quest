@@ -30,7 +30,7 @@ const REO = 'doors_reopened';
 
 export default {
   id: 'ep7_ph_watch', name: "The Keeper's Watch", area: 'interior',
-  music: 'mystery', ambience: null, tileset: 'interior',
+  music: [{ if: REO, id: 'palehaven' }, { id: 'mystery' }], ambience: null, tileset: 'interior',
   lighting: { tint: 'none', dark: 0.2 },
   under: 'stone_floor',
   legend: { '#': 'interior_stone_top', '|': 'interior_stone_face', '.': 'stone_floor' },
