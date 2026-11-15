@@ -411,3 +411,66 @@ test('#96: packs loading at once share one assets/pack_files.json fetch; a later
     resetPacks();
   }
 });
+
+// E7-packs (2026-11-15): a chain of hard packs with art. Starting each pack's art beside its code was measured slower on the phone
+// profile (docs/PWA_PACKS.md, the ep7 pack) and not kept; these pin what any such change must keep: a failed manifest or register()
+// fails the pack and retries, the tile fragments merge in table order, and a clash keeps the first id and is logged.
+function artChain(failArt = {}) {
+  const t = { h1: { ...hardDef('h1'), assets: 'assets/h1_manifest.json' }, h2: { ...hardDef('h2'), assets: 'assets/h2_manifest.json' } };
+  const c = chain(t);
+  const log = [];
+  const db = { terrains: {}, tiles: {}, objects: {}, terrainOrder: [] };
+  const frags = { h1_tiles: { terrains: { shared: { by: 'h1' } }, terrainOrder: ['shared', 'one'] }, h2_tiles: { terrains: { shared: { by: 'h2' }, two: {} }, terrainOrder: ['two'] } };
+  const loaded = new Set();
+  c.o.engine = { assets: {
+    loadPackManifest: async (p) => {
+      const id = p.slice(7, 9);
+      log.push(`art:${id}`);
+      if (failArt[id] > 0) { failArt[id]--; throw new Error(`${p}: 404`); }
+      loaded.add(`${id}_tiles`);
+      return { done: 1, total: 1, failed: [] };
+    },
+    has: (k) => loaded.has(k),
+    json: (k) => (k === 'tiles' ? db : frags[k]),
+  } };
+  return { ...c, log, db };
+}
+
+test('E7-packs: a manifest that fails still fails its pack (quietly), the pack below is not held, and the retry brings it up', { timeout: 10000 }, async () => {
+  resetPacks();
+  const c = artChain({ h2: 1 });
+  const p2 = ensurePack('h2', c.o);
+  await tick();
+  c.gates.h1(); c.gates.h2();
+  const r = await p2;
+  assert.equal(r.ok, false);
+  assert.deepEqual(r.failed, ['manifest:assets/h2_manifest.json']);
+  assert.ok(packReady('h1') && !packReady('h2'), 'h1 is up; h2 is not ready');
+  assert.deepEqual(c.db.terrainOrder, ['shared', 'one'], 'nothing of h2 merged');
+  for (let i = 0; i < 200 && !packReady('h2'); i++) { for (const g of Object.values(c.gates)) g(); await tick(10); }
+  assert.ok(packReady('h2'), 'the automatic retry loads it');
+  assert.deepEqual(c.db.terrainOrder, ['shared', 'one', 'two'], 'h1 merged first');
+  assert.equal(c.db.terrains.shared.by, 'h1', 'a clash keeps the first id');
+  assert.ok(packState('h2').errors.includes('tile ids already defined (kept): terrains.shared'), 'and the clash is logged');
+  resetPacks();
+});
+
+test('E7-packs: a failed register() fails the pack and merges none of its tiles, and it retries', { timeout: 10000 }, async () => {
+  resetPacks();
+  const c = artChain();
+  const inner = c.o.importer;
+  let n = 0;   // the first h2 entry arrives, but its register() throws
+  c.o.importer = (p) => (p === 'h2' && n++ === 0 ? Promise.resolve({ register: async () => { throw new Error('h2: broken'); } }) : inner(p));
+  const p2 = ensurePack('h2', c.o);
+  await tick();
+  c.gates.h1();
+  const r = await p2;
+  assert.equal(r.ok, false);
+  assert.deepEqual(r.failed, ['entry:h2']);
+  assert.equal((await ensurePack('h1', c.o)).ok, true);
+  assert.deepEqual(c.db.terrainOrder, ['shared', 'one'], 'its tiles are not merged for a failed pack');
+  for (let i = 0; i < 200 && !packReady('h2'); i++) { for (const g of Object.values(c.gates)) g(); await tick(10); }
+  assert.ok(packReady('h2'));
+  assert.deepEqual(c.db.terrainOrder, ['shared', 'one', 'two']);
+  resetPacks();
+});

@@ -94,7 +94,7 @@ const withPages = async (fn) => {
   try { return await fn(); } finally { for (const k of Object.keys(PAGE_KINDS)) if (!kinds.includes(k)) delete PAGE_KINDS[k]; }
 };
 
-test('scene and line ids are new across Episodes 1 to 6 and the X1, X2, cave and tier packs; 36 registered, twice is clean', async () => {
+test('scene and line ids are new across Episodes 1 to 6 and the X1, X2, cave and tier packs; 37 registered, twice is clean', async () => {
   const STORY = await import('../../src/game/story.js');
   for (const mod of ['../../src/data/x1/index.js', '../../src/data/x2/index.js', '../../src/data/cave/story.js', '../../src/data/tier/index.js']) {
     try { const m = await import(mod); await (m.register || m.default)(); } catch (e) { /* a pack that cannot load in node registers nothing */ }
@@ -113,8 +113,8 @@ test('scene and line ids are new across Episodes 1 to 6 and the X1, X2, cave and
   assert.deepEqual(registerScenes(), { scenes: [], lines: [], conditions: [] }, 'registering twice collides with nothing');
   for (const id of Object.keys(scenes)) assert.equal(STORY.SCENES[id], scenes[id]);
   const n = Object.keys(scenes).length;
-  assert.equal(n, 36, `built scenes: ${n} (plan 2.5: 27 main and chained, 7 side, 2 silent)`);
-  assert.equal(SIDE.length, 7);
+  assert.equal(n, 37, `built scenes: ${n} (plan 2.5: 27 main and chained, 7 side, 2 silent; E7-packs: court_keeper7, side)`);
+  assert.equal(SIDE.length, 8);
   assert.equal(SILENT.length, 2);
   assert.equal(n - SIDE.length - SILENT.length, 27);
   for (const id of [...SIDE, ...SILENT]) assert.ok(scenes[id], id);
@@ -150,7 +150,9 @@ test('scene conditions exist for every scene, use declared flags, and only ep7_m
 test('every flag a scene sets or checks is declared; every main flag is set by a scene', () => {
   const set = new Set();
   for (const id of Object.keys(RUNS)) for (const e of allOps(id)) {
-    if (e.op === 'setFlag') { set.add(e.args[0]); assert.ok(e.args[0] in EP7_FLAGS, `${id}: setFlag ${e.args[0]} is not an Episode 7 flag`); }
+    // court_keeper7 (E7-packs) runs Episode 2's own portrait_keeper scene by id: those three flags are Episode 2's
+    const ep2 = id === 'court_keeper7' && ['portraits_started', 'portrait_keeper_seen', 'remembrance_open'].includes(e.args[0]) && e.args[0] in FLAGS;
+    if (e.op === 'setFlag') { set.add(e.args[0]); assert.ok(e.args[0] in EP7_FLAGS || ep2, `${id}: setFlag ${e.args[0]} is not an Episode 7 flag`); }
     if (e.op === 'hasFlag') assert.ok(KNOWN(e.args[0]), `${id}: hasFlag ${e.args[0]}`);
   }
   for (const f of MAIN_FLAGS) assert.ok(set.has(f), `no scene sets ${f}`);

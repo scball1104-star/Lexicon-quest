@@ -195,6 +195,10 @@ optional pack helpers. Details that matter here:
 - The side talk scenes `hearth_start` (Eira at `hearth_w`, chains her own witness, `testimony_eira`), `testimony_mirael`
   (Mirael at `mirael_door`), `streets_start` and `streets_done` (Torr at `torr_steps`) stage nobody: one NPC, two or three
   boxes. `testimony_sol` runs from either of Sol's records (`sol` on the road, `sol_waystation` at the counter).
+- `court_keeper7` (E7-packs, 2026-11-15): the Keeper's frame in `court_f2` (Episode 2) once `nox_named` is set, the object
+  `court_keeper7` of `ep7_patches.js` `withCourtPortrait`. Stages nobody. If `portrait_keeper_seen` is not set it first runs
+  Episode 2's own `portrait_keeper` scene by id (two boxes, three more if it opens the Remembrance Cache), then one box,
+  `ep7_court_portrait`; already seen, the one box.
 - Focus marks, `ep7_palehaven` (46 x 36: x 12 to 33, y 7 to 28): `gate_stage`, `bryn_gate`, `hearth`, `hearth_n`,
   `hearth_s`, `hearth_e`, `hearth_w`, `iced_a`, `aeris_square`, `vex_square`, `keeper_lamp`, `keeper_stage`, `watch_door`,
   `vault_gate`, `gate_keeper`, `north_gate_stage`, `vex_step`. (The south gate itself may sit on the bottom edge: stage
@@ -319,8 +323,8 @@ No Episode 7 event may name an Episode 1 text key (PLAYTEST_REVIEW_8 item 7); `q
 | `mirael` | `ep7_palehaven` `mirael_door` | always | talk entry `testimony_mirael`; two line sets |
 | `ep7_innkeeper` | `ep7_ph_inn` `counter` | always | inn, 140 gold; sprite `npc_north_watchkeeper` (the `npc_innkeeper` recolor, plan 9.2) |
 
-Two handoffs nobody's brief owns yet (for the orchestrator): **the Court's empty portrait** (EPISODE7 choice 5) needs a
-pack patch of `court_f2` that points the `portrait_keeper` frame at `ep7_court_portrait` once `nox_named` is set (an object
+Two handoffs nobody's brief owns yet (for the orchestrator): **the Court's empty portrait** (EPISODE7 choice 5; **done**
+by E7-packs 2026-11-15 as `withCourtPortrait` and the scene `court_keeper7` above) needs a pack patch of `court_f2` that points the `portrait_keeper` frame at `ep7_court_portrait` once `nox_named` is set (an object
 on the same cell, `if: nox_named`, text `ep7_court_portrait`; the Episode 2 scene stays as it is before); and **Piri's
 Dead Letters** gave a second `white_road_letter` to a player who finished it after `ep7_morning` gave one. **Fixed**
 (E7-integrate): `letters_done` (src/data/ep6/story.js) gives the letter only before `ep6_complete`; after the credits

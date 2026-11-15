@@ -33,7 +33,7 @@ import * as STORY from '../../game/story.js';
 import { PAGE_KINDS } from '../../world/closeup.js';
 import { standsOn } from '../maps/ep3/_opening.js';
 import { REWARDS_EP7 } from './quests.js';
-import { EPISODE8_CARD, END_TITLE_EP7, EP7_ARC_LINES, EP7_BOSS_CARDS } from './text.js';
+import { EPISODE8_CARD, END_TITLE_EP7, EP7_ARC_LINES, EP7_BOSS_CARDS, EP7_LINES } from './text.js';
 
 /**
  * Where Episode 7 opens: the Chart Room (ep6_zl_charts), mark charts_dawn, two tiles below Aeris at the skychart table
@@ -953,6 +953,16 @@ async function streets_done(s) {
   await s.setFlag('streets_done');
 }
 
+// Hollowmere, court_f2 (E7-packs): the Keeper's frame after nox_named (ep7_patches.js withCourtPortrait, object court_keeper7).
+// A party that never looked at it in Episode 2 first gets Episode 2's own portrait_keeper scene, run by id from the registry
+// (its text, Mira's line, portrait_keeper_seen, and remembrance_open when it is the third), so the Remembrance Cache still
+// opens; then the Episode 7 line. Already seen: the line alone.
+async function court_keeper7(s) {
+  const ep2 = STORY.sceneById('portrait_keeper');
+  if (ep2 && !(await s.hasFlag('portrait_keeper_seen'))) await ep2(s);
+  await narrate(s, EP7_LINES.ep7_court_portrait.find((e) => e.if === 'nox_named').lines);
+}
+
 // ------------------------------------------------------------------------------------------------
 // Scene registry. Every flag is declared in flags.js. `ep7_morning` needs the switch (live) and not Fine Print; every other
 // chain bottoms out at ep7_started, which only ep7_morning sets.
@@ -996,6 +1006,7 @@ export const SCENE_CONDITIONS = {
   hearth_light: { if: 'hearth_started' },
   streets_start: { if: 'palehaven_arrived', ifNot: 'streets_started' },
   streets_done: { if: STREETS, ifNot: 'streets_done' },
+  court_keeper7: { if: 'nox_named' },
 };
 
 const RAW = {
@@ -1005,13 +1016,14 @@ const RAW = {
   vault_f1_arrival, keeper_memory_1, vault_f1_lift, vault_f2_arrival, keeper_memory_2, listening_bell, pale_lantern,
   vault_f2_lift, ep7_reliquary, vault_f3_arrival, keeper_memory_3, keeper_comes,
   phantom, phantom_after, whole_page, doors_reopen, ep7_ending,
-  hearth_start, testimony_mirael, testimony_sol, hearth_light, streets_start, streets_done,
+  hearth_start, testimony_mirael, testimony_sol, hearth_light, streets_start, streets_done, court_keeper7,
 };
 
 export const scenes = Object.fromEntries(Object.entries(RAW).map(([id, fn]) => [id, cut(fn, SCENE_CONDITIONS[id])]));
 
 /** The side scenes (plan 2.5) and the silent lift steps; everything else in `scenes` is main or chained. */
-export const SIDE = ['hearth_start', 'testimony_mirael', 'testimony_sol', 'hearth_light', 'ep7_reliquary', 'streets_start', 'streets_done'];
+export const SIDE = ['hearth_start', 'testimony_mirael', 'testimony_sol', 'hearth_light', 'ep7_reliquary', 'streets_start', 'streets_done',
+  'court_keeper7'];
 export const SILENT = ['vault_f1_lift', 'vault_f2_lift'];
 // The main-path scenes in story order, for the box-budget and playthrough tests (the chained phantom_after and doors_reopen
 // are counted on their own, and stopped at the chain point inside the scene that chains them).
