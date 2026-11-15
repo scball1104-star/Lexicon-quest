@@ -239,6 +239,17 @@ the pack adds its row only once its `EP7_MAPS_LISTED` is true).
   So ep7 adds about 0.8 s cold and 0.1 s warm; the ep4 pack alone takes 7.2 to 7.9 s cold. Plan 3.3's cold target (8 s) is
   missed by the chain below ep7; the fix is PLAYTEST_REVIEW_8 item 8 (fetch every pack at once on a resume, in the hot file
   `src/game/packs.js`), which waits for Scott's or Stephen's word.
+- **Art beside the code: measured, not kept (E7-packs, 2026-11-15).** `attempt()` loads a pack's art
+  (`assets.loadPackManifest`) only after its `register()`, which for ep5 to ep7 waits on the pack below. Starting each manifest at
+  the top of `attempt()`, beside the code, was measured on the same phone profile (`qa/ui/ep7_saves_headless.py` `part_timing()`,
+  EP7 live, every module and map written, nothing else run beside it by this session, three runs each, entry to `ep6_zl_inn` with ep4 to ep7 ready,
+  cold / warm in s): **before 11.48 to 11.72 / 2.89 to 3.08; art at the top 12.17 to 12.57 / 2.67 to 3.03** (Fact). It is slower
+  cold: the ep5 to ep7 art (about 1.4 MB) shares the 10 Mbps line with the ep4 pack's own load, which is the critical path (ep4
+  ready at 8.2 to 8.3 s before, 9.4 to 9.6 s after). A second form, each pack's art starting once the hard pack below is ready
+  (`onPackReady`), measured **11.60 to 11.62 / 2.62 to 3.04**: no gain. Neither shipped; `attempt()` is unchanged. The cold entry
+  is held by the ep4 pack's register (import and register one module at a time) on the shared line, not by the art.
+  `qa/core/pack_ensure.test.mjs` (E7-packs) pins what any such change must keep: a failed manifest or `register()` fails the pack
+  and retries, tiles merge in table order, a clash keeps the first id and is logged.
 - **`register(engine)`.** ORDER `flags, enemies, items, skills, loot, encounters, rime, shops, ai, npcs, quests, text, story,
   ledger, audio, world, pages, maps, hooks, start, scene`; `title` is loaded on first use by `hooks.js`. A missing module is
   skipped and reported; a broken one is not swallowed. Idempotent.
@@ -250,6 +261,11 @@ the pack adds its row only once its `EP7_MAPS_LISTED` is true).
 - **Maps and the order trap.** `src/data/ep7/maps.js` awaits the ep6 maps registry's `register()` first, then registers the
   eleven maps by a guarded list and patches the registered `ep6_zl_inn` / `ep6_zl_charts` / `ep6_zephyr` with `ep7_patches.js`
   `withEp7Wake` / `withEp7Charts` / `withNorthBerth` (identity until that file or export exists). `qa/core/ep7_maps_order.test.mjs`.
+  It also patches one Episode 2 map, `court_f2` (`CORE_PATCHES`, `withCourtPortrait`, E7-packs 2026-11-15): the Keeper's frame
+  reads `ep7_court_portrait` once `nox_named` is set, applied over the core module. `court_f2` is deliberately **not** in the
+  pack's `touches`: the field and `loadMap` wait for every enabled hard pack that touches a map, wanted or not, so an Episode 2
+  player would wait at the Court for the whole ep3 to ep7 chain (up to 8 s on a phone). Only a cold Continue of a save standing in
+  `court_f2` after `nox_named`, before the pack is up, sees the Episode 2 frame until the next entry. `qa/maps/ep7_court_portrait.test.mjs`.
 - **Hooks** (`src/data/ep7/hooks.js`): `CREDITS_HANDOFF[7]` (from text.js `CREDITS_EP7`; wakes in `ep7_ph_watch` at
   `watch_cot`), `CREDITS_HANDOFF[6].endCard` = `END_CARD_EP6_LIVE` while live (unchanged while off; the Episode 6 wake never
   moves), `QUEST_EXT` (Episode 7 first), `globalThis.LQ_EP7` (`title`, `offer`, `start`, `pickRunSlot`), `LQ_DEBUG.newGameEp7`

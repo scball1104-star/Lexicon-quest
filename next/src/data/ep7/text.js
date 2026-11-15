@@ -226,10 +226,10 @@ export const EP7_LINES = {
   ep7_broken_roof: 'The broken roof of the nave, and the aurora through it, moving slowly.',
   ep7_star_stair: 'A stair of written light going up into the sky. Every step is a line of handwriting, too bright to read.',
 
-  // Hollowmere (court_f2, the Court of Mirrors): the empty portrait after nox_named (EPISODE7 open choice 5; the pack patch that
-  // points the frame at this line is listed in STAGING_EP7 section 6)
+  // Hollowmere (court_f2, the Court of Mirrors): the empty portrait after nox_named (EPISODE7 open choice 5; ep7_patches.js
+  // withCourtPortrait). The frame is still drawn empty (no filled keeper portrait in the art), so the line says so.
   ep7_court_portrait: [
-    { if: 'nox_named', lines: 'A KEEPER IN THE COURT. The frame has a face in it again: an old woman with a lamp, looking north.' },
+    { if: 'nox_named', lines: 'A KEEPER IN THE COURT. Still empty. But now you know whose frame it is: Nox, keeping her Watch far to the north.' },
     { lines: 'A KEEPER IN THE COURT. The frame is empty. Not blank: empty, right through to the wall behind it.' },
   ],
 };

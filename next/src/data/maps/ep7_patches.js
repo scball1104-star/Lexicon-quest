@@ -1,5 +1,5 @@
-// Episode 7's edits to three Episode 6 maps (EPISODE7_PLAN 3), applied by the ep7 pack (src/data/ep7/maps.js) to the modules
-// the ep6 pack registered (after awaiting it: the order trap of plan 3.3). Pure: each takes the registered module and returns
+// Episode 7's edits to three Episode 6 maps (EPISODE7_PLAN 3) and one Episode 2 map, applied by the ep7 pack (src/data/ep7/maps.js)
+// to the modules the ep6 pack registered (after awaiting it: the order trap of plan 3.3). Pure: each takes the registered module and returns
 // a new one; the input is never mutated, and a second call returns its input. The ep6_patches.js pattern: every Episode 6
 // cell, overlay, decor entry, event and mark stays where it was; the patch only adds. Exact cells in docs/MAPS_EP7_A.md 1.
 // No named export here is a map: tools/maps list this file only to skip it.
@@ -25,6 +25,12 @@
 //   lake_landing (15,74) (if ep7_boarded). Marks for ep7_board: aeris_gangway7 (19,5), vex_seat (23,5) at the Kestrel's
 //   rail, gangway7 (21,7) with gangway7_m (20,7) and gangway7_b (22,7), two rows below and beside both speakers.
 //   north_dock (22,5), where isles_return and the White Road's kestrel_back land, is untouched.
+// withCourtPortrait(court_f2) (E7-packs, 2026-11-15; STAGING_EP7 section 6): the Keeper's empty frame portrait_keeper (37,8),
+//   2 x 2, gets ifNot nox_named (its only change), and court_keeper7 on the same cells, if nox_named, runs the ep7 scene
+//   court_keeper7 (story.js: Episode 2's portrait_keeper scene first if it was never seen, so the Remembrance Cache still opens,
+//   then ep7_court_portrait).
+//   No filled keeper portrait exists in the art, so the sprite stays portrait_keeper_empty and the line says the frame is still
+//   empty. Before nox_named the Court is exactly Episode 2's. Applied over the core module (not a touched map: see maps.js).
 import { STAGE } from './ep3/_opening.js';
 
 const has = (m, id) => (m.events || []).some((e) => e.id === id);
@@ -74,5 +80,17 @@ export function withNorthBerth(base) {
       { id: 'berth_white_road', type: 'door', x, y, to: ['ep7_white_road', LAKE_LANDING[0], LAKE_LANDING[1], 'up'], kind: 'boat', sprite: 'gangway', if: 'ep7_boarded' },
     ],
     marks: { ...base.marks, aeris_gangway7: [19, 5], vex_seat: [23, 5], gangway7: [21, 7], gangway7_m: [20, 7], gangway7_b: [22, 7] },
+  };
+}
+
+export function withCourtPortrait(base) {
+  const old = base && base.id === 'court_f2' && !has(base, 'court_keeper7') && (base.events || []).find((e) => e.id === 'portrait_keeper');
+  if (!old) return base;
+  return {
+    ...base,
+    events: [
+      ...base.events.map((e) => (e === old ? { ...e, ifNot: 'nox_named' } : e)),
+      { id: 'court_keeper7', type: 'object', x: old.x, y: old.y, w: old.w, h: old.h, sprite: old.sprite, script: 'court_keeper7', text: 'ep7_court_portrait', if: 'nox_named' },
+    ],
   };
 }
