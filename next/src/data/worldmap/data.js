@@ -95,7 +95,7 @@ export const MAP_AT = [
 ];
 
 /**
- * The map stones (waystones) at town gates and docks (plan 2.3 item 4): map id -> [{ id, x, y, at }]. Each cell is plain floor
+ * The map stones (waystones) at town gates, docks and the ship's deck (plan 2.3 item 4): map id -> [{ id, x, y, at }]. Each cell is plain floor
  * beside the way in, never on a path a door, an exit or a staged scene needs (qa/worldmap/worldmap.test.mjs walks every map
  * with and without its stones: the same cells stay reachable). `at` [x, y, dir] is where travel lands the party (wave 3): an
  * open cell beside the stone, facing away from it, with two open cells behind for the followers (the field lines them up
@@ -110,6 +110,8 @@ export const STONES = {
   ep5_saffron: [{ id: 'wm_stone_gate', x: 19, y: 30, at: [19, 29, 'left'] }, { id: 'wm_stone_dock', x: 6, y: 26, at: [7, 26, 'down'] }],
   ep6_zephyr: [{ id: 'wm_stone_stair', x: 24, y: 27, at: [23, 27, 'up'] }, { id: 'wm_stone_dock', x: 25, y: 6, at: [25, 7, 'right'] }],
   ep7_palehaven: [{ id: 'wm_stone_gate', x: 21, y: 32, at: [22, 32, 'up'] }],   // inside the south gate, west of the avenue
+  // Yara's deck (Scott, 2026-11-15: stones on the decks too). Aboard, the map is view only (travel.js ABOARD): no town lands here.
+  ep5_ship: [{ id: 'wm_stone_deck', x: 15, y: 10, at: [15, 9, 'left'] }],
 };
 
 /** Each town's own field map (the one its stones stand on): travel's destinations (wave 3). */

@@ -43,6 +43,10 @@ The player may still break it by hand; the vow just ends. The simulator calls `p
 `restFlow` in `src/world/events.js`: "Rest here?" (Rest / Not now), the heal and its toast, the landmark's bark, then
 the vow row, then "Record your journey here?". The vow row (`vowRow`):
 
+**Maxed weapons (Scott, 2026-11-15, "Go with all 4").** A kept vow pays `payWeapon(member)`: the current weapon unless it is
+fully mastered (`MASTERY_XP` cap), else the least-mastered weapon type the member can use that is not. When every one is maxed it
+pays one `hi_ether` (`VOW_SPILL_ITEM`) with the line `VOW_TEXT.paidItem`. A vow is never paid with nothing.
+
 1. `settleVow(game)`. A kept vow pays first: the reward box ("Vow kept: No fleeing." and the mastery line) then one party
    line (Bram or Mira, in character, two boxes in all). H6: beside the boxes the member's card shows the weapon's mastery
    bar filling by the points paid (`field.keptBar`, `drawKeptBar`; the reward carries `before` and `after`). A broken vow says its one line. An untested vow (no battle

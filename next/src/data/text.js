@@ -813,6 +813,7 @@ export const VOW_TEXT = {
   active: 'Vow: {name}',
   kept: 'Vow kept: {name}.',
   paid: '{member}: {weapon} mastery +{n}.',
+  paidItem: 'Every weapon is mastered. The vow leaves a {item} instead.',
   learned: '{skill} learned!',
   capped: 'Five vows have paid this chapter. This one is its own reward.',
 };
