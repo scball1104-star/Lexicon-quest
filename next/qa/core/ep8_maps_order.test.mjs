@@ -93,6 +93,44 @@ test('a broken map module (not a missing one) is not swallowed', async () => {
   assert.equal(isMissing(new SyntaxError('Unexpected token'), '/ep8_stair.js'), false);
 });
 
-// Plan 3.4's map cases with the real patches (no trigger or stair door while EP8_LIVE is off, the stair door on a walkable cell)
-// need ep8_patches.js (E8-maps-a, wave 8c) and the field system: E8-integrate turns them on in qa/integrate/ep8_*.
-test('plan 3.4 with the real patches', { skip: 'needs src/data/maps/ep8_patches.js (E8-maps-a, wave 8c); E8-integrate turns it on' }, () => {});
+// Plan 3.4's map cases with the real patches (src/data/maps/ep8_patches.js): with the ep7 pack alone the two maps are Episode
+// 7's modules; applied on what the ep7 registry holds they are patched; with EP8_LIVE off no trigger fires (the wake scene's
+// guard) and no stair door exists; the stair door lands on a walkable cell of the Stair.
+test('plan 3.4 with the real patches', async () => {
+  const P8 = await import('../../src/data/maps/ep8_patches.js');
+  const STORY8 = await import('../../src/data/ep8/story.js');
+  const { EP8_LIVE } = await import('../../src/game/episodes.js');
+  const { loadDb, buildGrid } = await import('../../tools/maps/mapcheck.mjs');
+  const { runOnce } = await import('../content/_harness.mjs');
+  const stair = (await import('../../src/data/maps/ep8_stair.js')).default;
+  // the ep7 registry alone: Episode 7's own modules
+  for (const [id, mod] of Object.entries(ORIG)) { registerMap(mod); assert.equal(peekMap(id), mod, `${id} unpatched with ep7 only`); }
+  // the real patches on what it registered
+  for (const [id, name] of Object.entries(PATCHES)) {
+    assert.equal(applyPatch(id, P8[name]), true, `${id}: ${name} applies`);
+    const now = peekMap(id);
+    for (const e of ORIG[id].events) assert.ok(now.events.includes(e), `${id}: kept ${e.id}`);
+    for (const [k, v] of Object.entries(ORIG[id].marks || {})) assert.deepEqual(now.marks[k], v, `${id}: mark ${k} unchanged`);
+    assert.equal(applyPatch(id, P8[name]), false, `${id}: a second patch is the identity`);
+  }
+  const watch = peekMap('ep7_ph_watch'), still = peekMap('ep7_stillheart');
+  const wake = watch.events.find((e) => e.id === 'ep8_wake');
+  const door = still.events.find((e) => e.id === 'stair_up');
+  assert.ok(wake && door, 'patched with both');
+  // EP8_LIVE off, an Episode 7 finisher: the trigger is present, its scene does nothing; the stair door is absent
+  assert.equal(EP8_LIVE, false);
+  assert.equal(STORY8.GATE.live, false);
+  const flags = new Set(['ep7_complete', 'doors_reopened', 'mira_joined', 'bram_joined']);
+  const has = (f) => flags.has(f);
+  const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+  const live = (e) => toList(e.if).every(has) && !toList(e.ifNot).some(has);
+  assert.equal(live(wake), true);
+  const r = await runOnce(STORY8.scenes[wake.script], { set: new Set(flags), branchFlags: false });
+  assert.ok(!r.log.some((e) => e.op === 'lockInput' || e.op === 'setFlag'), 'no trigger fires while the switch is off');
+  for (const id of ['stair_up', 'stair_door_look', 'ep8_roof_enter']) assert.equal(live(still.events.find((e) => e.id === id)), false, `${id} absent`);
+  // the stair door lands on a walkable cell
+  assert.equal(door.to[0], 'ep8_stair');
+  const db = await loadDb();
+  const grid = buildGrid({ ...stair, events: [] }, db);
+  assert.equal(grid.code[door.to[2]][door.to[1]], 'none', `the stair door lands on walkable ground (${door.to[1]},${door.to[2]})`);
+});

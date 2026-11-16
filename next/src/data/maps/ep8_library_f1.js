@@ -136,7 +136,7 @@ const events = [
   enemy('e_gw', 10, 20, 'catalog_wraith', 'e8l1_wraiths', 'patrol', { path: ['right', 'right', 'left', 'left'] }),
   enemy('e_gm', 27, 20, 'index_hound', 'e8l1_mixed', 'guard'),
   // ---- C: The Wall Behind
-  popbook('pb_ember', 'c', 33, 8, { sprite: 'popbook_realm', name: 'ep8_realm_ember' }),
+  popbook('pb_ember', 'c', 33, 8, { sprite: 'popbook_realm', name: 'ep8_realm_emberpeak' }),
   enemy('e_cw', 35, 13, 'gnawing_bookworm', 'e8l1_worms', 'guard'),
   // ---- D: The Side Alcove (optional)
   popbook('pb_d', 'd', 6, 18),

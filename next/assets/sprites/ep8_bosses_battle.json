@@ -175,20 +175,20 @@
    127,
    94
   ],
-  "eraser_die_2": [
+  "eraser_truths_die_2": [
    258,
    1195,
+   153,
+   91
+  ],
+  "eraser_die_2": [
+   0,
+   1315,
    127,
    90
   ],
-  "eraser_truths_die_2": [
-   0,
-   1315,
-   153,
-   90
-  ],
   "eraser_silence_die_2": [
-   155,
+   129,
    1315,
    127,
    89
@@ -257,7 +257,7 @@
   ],
   "eraser_truths_die_2": [
    76,
-   89
+   90
   ],
   "eraser_remembers": [
    63,

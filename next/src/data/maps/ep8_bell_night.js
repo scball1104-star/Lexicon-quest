@@ -9,8 +9,8 @@
 //   marks: the cold open's stair_foot (12,36) = story.js BELL_FOOT, bells (12,4), top (12,6); plus mira_beam (10,4) and
 //     bram_beam (14,4) on the bell beam (the belfry floor under the bells), and keep_one (12,4), the beam's carved words.
 //   keep_one (12,4): the bell beam's decal KEEP ONE, an inspect (ep8_keep_one) between the two of them.
-//   party: 'solo' (map contract, STAGING_EP8 section 2): the followers do not climb, the cold open's solo climb. The field has
-//     no such switch yet; E8-scene-ui or E8-world owns honoring it (a stub field until then).
+//   party: 'solo' (map contract, STAGING_EP8 section 2): the followers do not climb, the cold open's solo climb. Honored by
+//     the pack (src/data/ep8/field/solo.js): the followers leave the field here, game.party is untouched.
 import BELL from './bell_tower.js';
 import { TOLL_STEPS, TOP_STEP } from './bell_tower.js';
 import { trigger, enter, sign } from './_kit.js';

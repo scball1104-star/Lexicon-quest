@@ -1,7 +1,7 @@
 // E8-pack (EPISODE8_PLAN 10): no Episode 8 path ever writes a save slot that holds another run. Pure node tests over a fake
 // storage; the real FieldScene.autosave is called unbound, as qa/saves/ep7_saves.test.mjs does for Episode 7. Plan 10.9's cases
-// that need the real story (ep8_morning, last_choice, Talk's steps), the maps and the pop-up books are listed at the end as
-// pending, each with the agent and wave that brings what it needs; E8-integrate turns them on.
+// on the real story (ep8_morning on and off, Fine Print, last_choice, Talk's steps), the patched Watch, the Library maps and
+// the pop-up books are at the end.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSave } from '../../src/core/save.js';
@@ -227,12 +227,218 @@ test('handoff8: null without credits, the plan 5.3 shape with them, text.js END_
   assert.equal(handoff8(null, { CREDITS_EP8: cards, END_CARD_EP8: own }).endCard, own);
 });
 
-// Plan 10.9's cases that need what later waves write. Each names the agent and wave; E8-integrate turns them on.
-const PENDING = [
-  ['an Episode 7 credits fixture reaches ep8_morning with EP8_LIVE on, and not with it off', 'src/data/ep8/story.js (E8-story, 8a) and the ep7_ph_watch patch (E8-maps-a, 8c)'],
-  ['a Fine Print save (tier_1) never reaches ep8_morning', 'src/data/ep8/story.js (E8-story, 8a)'],
-  ['a save on a pop-up book bridge cell reloads on ground, able to walk', 'src/data/ep8/field/popbooks.js (E8-world, 8b) and the Library maps (E8-maps-b, 8c)'],
-  ['an ep8_complete fixture never runs last_choice again', 'src/data/ep8/story.js last_choice and its guard (E8-story, 8a)'],
-  ['a fixture saved after eraser_defeated and before ep8_complete reaches ep8_complete by Talk\'s steps', 'the story, the Talk table and ep8_bell_night (E8-story 8a, E8-maps-a 8c)'],
-];
-for (const [name, needs] of PENDING) test(name, { skip: `needs ${needs}; E8-integrate turns it on` }, () => {});
+// Plan 10.9's cases on the real story, patches, maps and book system (E8-seams turned them on). Each runs the shipped scene
+// functions through the content harness's recording API (qa/content/_harness.mjs runOnce: flags only, no branching).
+const P8 = await import('../../src/data/maps/ep8_patches.js');
+const STORY8 = await import('../../src/data/ep8/story.js');
+const { runOnce } = await import('../content/_harness.mjs');
+const { MAIN_QUEST_EP8 } = await import('../../src/data/ep8/quests.js');
+const { currentStep, pickChat, aimFor } = await import('../../src/data/quests.js');
+const ep7WatchMod = (await import('../../src/data/maps/ep7_ph_watch.js')).default;
+
+const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+const live = (e, has) => toList(e.if).every(has) && !toList(e.ifNot).some(has);
+const flagList = (g) => Object.keys(g.flags).filter((f) => g.flags[f]);
+/** Run one shipped scene on a game's flags (the guards included); the game's flags take the scene's writes. */
+async function play(id, g, mapId = g.map) {
+  const set = new Set(flagList(g));
+  const r = await runOnce(STORY8.scenes[id], { set, branchFlags: false, mapId });
+  for (const f of Object.keys(g.flags)) if (!set.has(f)) delete g.flags[f];
+  for (const f of set) g.flags[f] = true;
+  const warp = r.log.filter((e) => e.op === 'warp').pop();
+  return { log: r.log, ran: r.log.some((e) => e.op === 'lockInput'), warp: warp ? warp.args[0] : null };
+}
+async function withLive(on, fn) { const was = STORY8.GATE.live; STORY8.GATE.live = on; try { return await fn(); } finally { STORY8.GATE.live = was; } }
+/** An Episode 7 credits save after the credits rolled, reloaded from a slot and woken at the Watch (CREDITS_HANDOFF[7]). */
+function wokenAtWatch(extra = []) {
+  const { save } = fresh();
+  const g0 = ep7CreditsGame('Sol', 1);
+  for (const f of extra) g0.flags[f] = true;
+  save.save(1, serialize(g0), saveMeta(g0));
+  const g = deserialize(save.load(1));
+  markCreditsRolled(g, 7);
+  setPosition(g, 'ep7_ph_watch', 14, 5, 'down');
+  return g;
+}
+
+test('an Episode 7 credits fixture reaches ep8_morning with EP8_LIVE on, and not with it off', async () => {
+  const watch = P8.withEp8Wake(ep7WatchMod);
+  const trig = watch.events.find((e) => e.id === 'ep8_wake');
+  assert.deepEqual([trig.type, trig.on, trig.script], ['trigger', 'enter', 'ep8_morning']);
+  // off: the shipped switch (EP8_LIVE false): the trigger is there, its scene refuses, nothing is set
+  assert.equal(EP8_LIVE, false);
+  const off = wokenAtWatch();
+  assert.ok(live(trig, (f) => !!off.flags[f]), 'the wake trigger is live on an Episode 7 finisher');
+  const r0 = await withLive(false, () => play('ep8_morning', off));
+  assert.equal(r0.ran, false, 'EP8_LIVE off: ep8_morning does not run');
+  assert.ok(!off.flags.ep8_started && !off.flags.ep8_morning_done);
+  // on: the scene runs once, starts Episode 8 and gives Vex's note; the trigger is then spent
+  const on = wokenAtWatch();
+  const r1 = await withLive(true, () => play('ep8_morning', on));
+  assert.equal(r1.ran, true, 'EP8_LIVE on: ep8_morning runs');
+  assert.ok(on.flags.ep8_started && on.flags.ep8_morning_done);
+  assert.ok(r1.log.some((e) => e.op === 'give' && e.args[0] === 'vex_note'));
+  assert.equal(live(trig, (f) => !!on.flags[f]), false, 'the wake trigger is spent');
+  const r2 = await withLive(true, () => play('ep8_morning', on));
+  assert.equal(r2.ran, false, 'never twice');
+  // and the save it then writes is its own slot only
+  const { save, storage } = fresh();
+  on.autosaveSlot = 1;
+  autosave(save, on);
+  assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
+  assert.ok(save.load(1).flags.ep8_started);
+});
+
+test('a Fine Print save (tier_1) never reaches ep8_morning', async () => {
+  const g = wokenAtWatch(['tier_1']);
+  const trig = P8.withEp8Wake(ep7WatchMod).events.find((e) => e.id === 'ep8_wake');
+  assert.ok(live(trig, (f) => !!g.flags[f]), 'the map trigger reads ep7_complete only');
+  const r = await withLive(true, () => play('ep8_morning', g));
+  assert.equal(r.ran, false, 'the scene guard refuses tier_1 even with the switch on');
+  assert.ok(!g.flags.ep8_started);
+  assert.ok(!packsToAwait(g.flags).includes('ep8'));
+});
+
+test('a save on a pop-up book bridge cell reloads on ground, able to walk', async () => {
+  const { TileMap } = await import('../../src/world/tilemap.js');
+  const EV = await import('../../src/world/events.js');
+  const { Silverglass } = await import('../../src/world/silverglass.js');
+  const { mergeTileFragment } = await import('../../src/game/packs.js');
+  const { attach } = await import('../../src/data/ep8/field/events.js');
+  const { ensureArt } = await import('../../src/data/ep8/field/art.js');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const json = (p) => JSON.parse(fs.readFileSync(path.join(NEXT, p), 'utf8'));
+  const db = json('assets/tiles/tiles.json');
+  mergeTileFragment(db, json('assets/tiles/ep8_tiles.json'));
+  const mod = (await import('../../src/data/maps/ep8_library_f1.js')).default;
+  const ctx = new Proxy({}, { get: (t, k) => (k in t ? t[k] : () => {}), set: (t, k, v) => { t[k] = v; return true; } });
+  const warn = console.warn;
+  console.warn = () => {};
+  /** The field woken on this game (the real FieldScene methods; loadMap's order: party, entities, the books' reset). */
+  function wake(game) {
+    const engine = {
+      assets: { json: () => db, has: () => false, atlas: () => null, img: () => ({ width: 1, height: 1 }), setImage() {} },
+      renderer: { createLayer: (w, h) => ({ w, h, ctx, canvas: {} }), W: 384, H: 216, ctx },
+      audio: { sfx() {} }, input: { pressed: () => false, held: () => false, heldDir: () => null }, settings: {}, stack: [],
+      after: (n, fn) => fn(), waitFrames: async () => {},
+    };
+    const f = Object.create(FieldScene.prototype);
+    Object.assign(f, { engine, name: 'field', game, actors: [], entities: new Map(), byTile: new Map(), enterTriggers: [], inputLocked: 0,
+      frame: 0, sessionGone: new Set(), dungeonGone: new Map(), reentryGone: new Map(), warned: new Set(), mapId: mod.id, lantern: 0 });
+    f.hasFlag = (k) => !!game.flags[k];
+    f.warnOnce = () => {};
+    ensureArt(db, engine);
+    f.map = new TileMap(engine, mod, { hasFlag: f.hasFlag });
+    f.particles = { sparkle() {} };
+    f.camera = { snapTo() {}, visible: () => true };
+    f.lighting = { dark: 0, tintName: 'none', draw() {} };
+    f.glass = new Silverglass(f);
+    attach(f);
+    f.rebuildParty(game.pos.x, game.pos.y, game.pos.dir);
+    EV.buildEntities(f);
+    f.glass.reset();
+    return f;
+  }
+  try {
+    // a page cell over the void that the books' arrival state leaves uncovered: a bridge when it was saved, void on reload
+    const g0 = newGameEp8('Wren', { slot: 2 });
+    for (const fl of ['library_open', 'lib_f1_arrived']) g0.flags[fl] = true;
+    setPosition(g0, mod.id, mod.start.x, mod.start.y, 'up');
+    const probe = wake(g0);
+    const B = probe.books, m = B.m;
+    assert.ok(B.active, 'F1 has its books');
+    const cell = [...B.origCode.keys()].find((i) => B.overVoid(i) && B.codeFor(i) === 'void');
+    assert.ok(cell != null, 'a bridge cell that is void on arrival');
+    const [bx, by] = [cell % m.W, (cell / m.W) | 0];
+    // saved standing on it (the book was open then), to its own slot, and reloaded
+    const { save, storage } = fresh();
+    setPosition(g0, mod.id, bx, by, 'up');
+    save.save(2, serialize(g0), saveMeta(g0));
+    const g = deserialize(save.load(2));
+    assert.deepEqual([g.map, g.pos.x, g.pos.y], [mod.id, bx, by]);
+    const f = wake(g);
+    const L = f.leader;
+    assert.ok(f.books.rescued, 'the books rescued the party');
+    assert.notDeepEqual([L.tx, L.ty], [bx, by], 'not left on the void');
+    assert.equal(f.map.codeAt(L.tx, L.ty), 'none', 'on ground');
+    assert.ok(Math.abs(L.tx - bx) + Math.abs(L.ty - by) <= 6, 'the nearest ground, near where it stood');
+    assert.deepEqual([g.pos.x, g.pos.y], [L.tx, L.ty], 'the position the next save writes is the ground cell');
+    const steps = ['up', 'down', 'left', 'right'].filter((d) => {
+      const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d];
+      return f.canStep(L, L.tx, L.ty, L.tx + dx, L.ty + dy, d) === true;
+    });
+    assert.ok(steps.length > 0, 'able to walk');
+    autosave(save, g);
+    assert.deepEqual([...storage._m.keys()], ['lq-next-slot-2'], 'its own slot only');
+    assert.deepEqual([save.load(2).pos.x, save.load(2).pos.y], [L.tx, L.ty]);
+  } finally { console.warn = warn; }
+});
+
+test('an ep8_complete fixture never runs last_choice again', async () => {
+  for (const ending of ['ending_return', 'ending_choose']) {
+    const g = endedGame('Wren', 1);
+    for (const f of ['keeper_named', 'page_shelved', 'scriptorium_open']) g.flags[f] = true;
+    delete g.flags.ending_return;
+    g.flags[ending] = true;
+    const before = JSON.stringify(g.flags);
+    const r = await withLive(true, () => play('last_choice', g));
+    assert.equal(r.ran, false, `${ending}: last_choice is guarded off`);
+    assert.ok(!r.log.some((e) => e.op === 'choice'), 'no choice offered');
+    assert.equal(JSON.stringify(g.flags), before, 'no flag changes');
+    // and no scene of the pack offers the endings to an ended save (every ending scene has its own done flag)
+    const labels = new Set(Object.values(STORY8.ENDINGS).map((e) => e.label));
+    for (const id of STORY8.STORY_IDS) {
+      const h = JSON.parse(JSON.stringify(g));
+      const rr = await withLive(true, () => play(id, h));
+      assert.ok(!rr.log.some((e) => e.op === 'choice' && e.args[0].some((o) => labels.has(typeof o === 'string' ? o : o && o.label))), `${id} offers no ending`);
+      assert.ok(!(ending === 'ending_return' ? h.flags.ending_choose : h.flags.ending_return), `${id}: the chosen ending stays the only one`);
+    }
+  }
+});
+
+test('a fixture saved after eraser_defeated and before ep8_complete reaches ep8_complete by Talk\'s steps', async () => {
+  const LATE = ['ep8_started', 'ep8_morning_done', 'ep8_roofed', 'stair_arrived', 'scriptorium_arrived', 'read_learned', 'library_open',
+    'library_f1_done', 'sentry_defeated', 'library_f2_done', 'name_told', 'eraser_defeated', 'lexicon_restored', 'keeper_named',
+    'ending_return', 'page_shelved', 'scriptorium_open'];
+  // the two places such a save can be written: the square after scriptorium_open, and the bell tower copy after home_reached
+  for (const [mapId, x, y, extra] of [['ep8_scriptorium', 23, 26, []], ['ep8_bell_night', 12, 36, ['home_reached']]]) {
+    const { save, storage } = fresh();
+    const g0 = newGameEp8('Wren', { slot: 1 });
+    // every main step before Home done (its own done flags), as a save written at that point has them
+    const before = MAIN_QUEST_EP8.steps.slice(0, MAIN_QUEST_EP8.steps.findIndex((st) => st.id === 'home')).flatMap((st) => toList(st.done));
+    for (const f of [...LATE, ...before, ...extra]) g0.flags[f] = true;
+    setPosition(g0, mapId, x, y, 'up');
+    save.save(1, serialize(g0), saveMeta(g0));
+    const g = deserialize(save.load(1));
+    assert.equal(g.map, mapId);
+    const has = (f) => !!g.flags[f];
+    const order = ['home', ...STORY8.TOLL_IDS, 'thirteenth_name'];
+    let where = g.map, n = 0;
+    while (!g.flags.ep8_complete && n++ < 20) {
+      // Talk names the next step on this map: the home step, its aim and a line
+      const step = currentStep(has, MAIN_QUEST_EP8);
+      assert.equal(step.id, 'home', `${mapId}: Talk is on the home step`);
+      assert.ok(aimFor(step, has), 'with an aim');
+      const chat = pickChat(step.chat, has, where);
+      assert.ok(chat && chat.lines.length, `${mapId}: Talk has a line on ${where}`);
+      // the one scene its guards allow next (the field's trigger for it is on the map the step names)
+      const next = order.find((id) => {
+        const c = STORY8.SCENE_CONDITIONS[id];
+        return toList(c.if).every(has) && !toList(c.ifNot).some(has);
+      });
+      assert.ok(next, `${mapId}: a scene is always next (${flagList(g).slice(-3).join(' ')})`);
+      const r = await play(next, g, where);
+      assert.equal(r.ran, true, `${next} ran`);
+      if (r.warp) where = r.warp;
+    }
+    assert.ok(g.flags.ep8_complete, `${mapId}: the ending finishes`);
+    assert.ok(g.flags.ending_return && !g.flags.ending_choose, 'the chosen ending is unchanged');
+    assert.equal(currentStep(has, MAIN_QUEST_EP8).id, 'epilogue8', 'Talk moves on to the post-game');
+    setPosition(g, where, 12, 36, 'up');
+    autosave(save, g);
+    assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1'], 'its own slot only');
+  }
+});

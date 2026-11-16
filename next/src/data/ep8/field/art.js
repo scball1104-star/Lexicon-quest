@@ -1,7 +1,11 @@
 // Code-drawn art for pop-up books (E8-world, docs/EPISODE8_PLAN.md 4, 5.1 and 9.1). Never in the first download (ep8 pack).
 //
-// 1. Stand-ins. E8-tiles owns the real pieces (assets/tiles/ep8.png, ep8_tiles.json: the terrains `void_violet` and the floor
-//    kits, the objects `popbook` and `popbook_realm`, the page 9-slice). ensureArt(db, engine, map) adds a code-drawn stand-in
+// The game draws E8-tiles' sheet (assets/tiles/ep8.png, ep8_tiles.json): the terrains, the books `popbook`, `popbook_ew`,
+// `popbook_realm`, `popbook_realm_ew` (bookSprite), the 9-slices `page_bridge`, `page_wall`, `page_ghost` and the 7 frames of
+// `realm_model` (./system.js realTiles, through paintSliceCell), and the Dash stacks' `drawer_stack_dash` (DRAWER_TILES). What
+// follows is only the fallback for a tile database without that fragment (node tests, a tool):
+//
+// 1. Stand-ins. ensureArt(db, engine, map) adds a code-drawn stand-in
 //    for every id below that the tile database does NOT have yet (after the pack's fragment merged; never replaces an id), on
 //    the small sheet `ep8_books_fallback`, registered as an image. So props, collision and frames always exist.
 //      void_violet   terrain, collision `void`, the lowest in terrainOrder: flat violet with at most a faint grain. It must
@@ -11,7 +15,7 @@
 //                    phase p (0 shut, 1 and 2 opening, 3 open): frame 4c + p. Two ribbons on both long sides, a gilt edge.
 //      ep8w_book_ew  16x32 (a 1 x 2 book), the same frames turned a quarter.
 //    The book ids are E8-world's own (`ep8w_`), used only when E8-tiles has no `popbook` of that orientation (bookSprite()).
-// 2. Code textures for the system (./system.js): the page bridge (cream paper, 1 px ink edge, glyph bars, a 2 px shadow onto
+// 2. Code textures for the system (./system.js) when the sheet's pieces are missing: the page bridge (cream paper, 1 px ink edge, glyph bars, a 2 px shadow onto
 //    the void), the standing page wall (a cap over the cell above), the dotted gold ghost, the seven realm models, the motes.
 //    PAL below is the recipe the contrast check measures.
 
@@ -41,6 +45,27 @@ const L = {
   ep8w_book_ew: Array.from({ length: 16 }, (_, f) => [128 + (f % 8) * 16, Math.floor(f / 8) * 32, 16, 32]),
 };
 export const FALLBACK_OBJECTS = Object.keys(L);
+
+/**
+ * The Library's Dash stacks. A map's `object` with `breakable` and sprite `drawer_stack_dash` (E8-tiles' cracked drawer stack,
+ * frames 0 cracked and 1 broken) would draw as the core breakable art of its kind (the cliff crack): core breakables are
+ * 16 x 32 tiles, not objects. ensureArt adds the two frames as tiles of that shape (DRAWER_TILES), and ./events.js puts them
+ * on the stacks' cells (drawerStacks). Collision as the core pair: cracked solid, broken open.
+ */
+export const DRAWER_OBJECT = 'drawer_stack_dash';
+export const DRAWER_TILES = { whole: 'ep8_drawer_stack', broken: 'ep8_drawer_stack_broken' };
+function drawerTiles(db) {
+  const o = db.objects && db.objects[DRAWER_OBJECT];
+  if (!o || !Array.isArray(o.frames) || o.frames.length < 2) return [];
+  const added = [];
+  [[DRAWER_TILES.whole, 0, 'solid'], [DRAWER_TILES.broken, 1, 'none']].forEach(([id, f, collision]) => {
+    if (db.tiles[id]) return;
+    const [x, y, w, h] = o.frames[f];
+    db.tiles[id] = { x, y, w, h, collision, sheet: o.sheet, note: `E8-world: frame ${f} of ${DRAWER_OBJECT} as a breakable's tile` };
+    added.push(id);
+  });
+  return added;
+}
 export const FALLBACK_TERRAINS = ['void_violet', 'marble_page'];
 
 function objectDef(id) {
@@ -57,12 +82,15 @@ function terrainDef(id) {
 }
 
 /**
- * The prop id for a book of this axis: the event's own `sprite`, else E8-tiles' `popbook_ns` / `popbook_ew`, else its
- * `popbook` when that object's footprint has this orientation, else the stand-in.
+ * The prop id for a book of this axis: the event's own `sprite`, else (a realm book) E8-tiles' `popbook_realm` /
+ * `popbook_realm_ew`, else its `popbook_ns` / `popbook_ew`, else its `popbook` when that object's footprint has this
+ * orientation, else the stand-in.
  */
-export function bookSprite(db, axis, ev = null) {
+export function bookSprite(db, axis, ev = null, realm = false) {
   const O = (db && db.objects) || {};
   if (ev && ev.sprite && O[ev.sprite]) return ev.sprite;
+  if (realm && axis === 'ew' && O.popbook_realm_ew) return 'popbook_realm_ew';
+  if (realm && axis === 'ns' && O.popbook_realm) return 'popbook_realm';
   if (O[`popbook_${axis}`]) return `popbook_${axis}`;
   const p = O.popbook;
   if (p && Array.isArray(p.footprint) && p.footprint.length === 2) {
@@ -82,8 +110,9 @@ export function ensureArt(db, engine = null, map = null) {
   if (!db) return [];
   db.objects = db.objects || {};
   db.terrains = db.terrains || {};
+  db.tiles = db.tiles || {};
   db.terrainOrder = db.terrainOrder || [];
-  const added = [];
+  const added = drawerTiles(db);
   for (const id of FALLBACK_OBJECTS) if (!db.objects[id]) { db.objects[id] = objectDef(id); added.push(id); }
   for (const id of FALLBACK_TERRAINS) if (!db.terrains[id]) { db.terrains[id] = terrainDef(id); added.push(id); }
   if (!db.terrainOrder.includes('void_violet')) db.terrainOrder.unshift('void_violet');
@@ -267,6 +296,23 @@ export function paintWallCell(g, ox, oy, mask, seed = 0, lines = 'h') {
   if (!(mask & NB.W)) R(g, ox, oy, 1, 22, P.ink);
   if (!(mask & NB.E)) R(g, ox + 15, oy, 1, 22, P.ink);
 }
+
+/**
+ * One 16 x 16 cell of an E8-tiles 9-slice (`page_bridge`, `page_wall`, `page_ghost`: 48 x 48, 16 px slices) for a neighbour
+ * mask: four 8 x 8 quadrants, each from the edge slice where that side has no neighbour of the run, else from the middle. So a
+ * run of any shape keeps its outline on its open sides only. t: the tile definition { x, y, nineSlice }; img: its sheet.
+ */
+export function paintSliceCell(g, img, t, mask, ox = 0, oy = 0) {
+  const S = t.nineSlice || 16, h = S / 2;
+  for (const [qx, qy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+    const col = qx === 0 ? (mask & NB.W ? 1 : 0) : (mask & NB.E ? 1 : 2);
+    const row = qy === 0 ? (mask & NB.N ? 1 : 0) : (mask & NB.S ? 1 : 2);
+    g.drawImage(img, t.x + col * S + qx * h, t.y + row * S + qy * h, h, h, ox + qx * h, oy + qy * h, h, h);
+  }
+}
+/** The shipped sheet's piece ids the system draws from (E8-tiles, assets/tiles/ep8_tiles.json). */
+export const SHEET_TILES = { bridge: 'page_bridge', wall: 'page_wall', ghost: 'page_ghost' };
+export const REALM_OBJECT = 'realm_model';
 
 /** The ghost's dots along one edge of a cell: 2 x 2 gold with a dark pixel under and right, every 4 px. */
 export function paintGhostEdge(g, ox, oy, side) {

@@ -284,7 +284,7 @@ A `popbook` event's `text` field is the key; its float line names the realm once
 | Map | Event, text key |
 |---|---|
 | `ep8_stair` | `pb_willow` `ep8_realm_willowmere` (Gap A) |
-| `ep8_library_f1` | `pb_hollow` `ep8_realm_hollow` (E, the northern shelf), `pb_ember` `ep8_realm_ember` (C) |
+| `ep8_library_f1` | `pb_hollow` `ep8_realm_hollow` (E, the northern shelf), `pb_ember` `ep8_realm_emberpeak` (C) |
 | `ep8_library_f2` | `pb_valewyn` `ep8_realm_valewyn` (B), `pb_desert` `ep8_realm_desert` (C) |
 | `ep8_library_f3` | `pb_isles` `ep8_realm_isles` (SHELTER), `pb_north` `ep8_realm_north` (SHELTER's pair) |
 

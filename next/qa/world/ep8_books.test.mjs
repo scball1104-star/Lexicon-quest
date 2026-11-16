@@ -37,6 +37,9 @@ const ctx = new Proxy({}, { get: (t, k) => (k in t ? t[k] : () => {}), set: (t, 
 const T = TEST_BOOKS;
 const M = compile(T);
 const W = T.ground[0].length;
+// the pack registers E8-story's text (barks, realm lines) before the world, as index.js does
+const story = await import('../../src/data/ep8/text.js');
+story.register();
 world.register();
 const VOID = (x, y) => (T.legend[T.ground[y][x]] === 'void_violet' ? 'void' : 'none');
 const ix = (x, y) => y * W + x;
@@ -645,10 +648,19 @@ test('art: stand-ins fill only missing ids (E8-tiles wins); the void is void and
   assert.ok(ribbonOf(T, 'p') > 0);
 });
 
-test('barks: the plan\'s first-time lines (text.js wins where it has them); the test map is registered', () => {
-  for (const id of ['first_open', 'first_wall', 'first_side', 'first_pair', 'would_fold']) assert.ok(BARKS[id], id);
-  for (const [id, v] of Object.entries(world.BOOK_BARKS)) for (const b of v) for (const l of b.lines) assert.ok(!/\u2014/.test(l.text), `${id}: no em dash`);
-  assert.equal(world.BOOK_BARKS.first_pair[0].lines[0].text, 'Two books, one page. Only one of them gets to stand.');
+test('barks: the book barks and realm lines are E8-story\'s (text.js), the world keeps no copy; the test map is registered', async () => {
+  assert.equal(world.BOOK_BARKS, undefined, 'no placeholder barks in world.js');
+  for (const id of world.BOOK_BARK_IDS) {
+    assert.equal(BARKS[id], story.EP8_BARKS[id], id);
+    for (const b of BARKS[id]) for (const l of b.lines) assert.ok(!/\u2014/.test(l.text), `${id}: no em dash`);
+  }
+  // every realm a map may name has its line under the key the field reads by default (ep8_realm_<realm>)
+  const { LINES } = await import('../../src/game/story.js');
+  for (const realm of ['willowmere', 'hollow', 'emberpeak', 'valewyn', 'desert', 'isles', 'north']) {
+    const key = `ep8_realm_${realm}`;
+    assert.ok(Object.values(story.EP8_REALMS).some((r) => r.key === key), key);
+    assert.equal(typeof LINES[key], 'string', key);
+  }
   assert.deepEqual(world.TEST_MAP_IDS, ['ep8_testbooks']);
   assert.ok(EV.EXT.popbook && EV.INTERACT_TYPES.has('popbook'));
 });
@@ -713,8 +725,18 @@ test('mapcheck: no solution reads out of order into a softlock: every reachable 
 });
 
 test('mapcheck: the camera rule reads STAGING_EP8 focus marks; a loop home is caught', () => {
-  const md = 'Focus marks, `ep8_fx` (the test): `near`, `mid` and `far`.\n';
+  // STAGING_EP8's own format: "(W x H: band): `mark` (x, y: left, right, top, bottom), ..." over wrapped lines, a note's name
+  // in parentheses is not a mark, and the list ends at the next bullet
+  const md = '- Focus marks, `ep8_fx` (40 x 30: x 12 to 27, y 7 to 22): `near` (3, 15: 3, 36, 15, 14), `mid`\n'
+    + '  (20, 15: 20, 19, 15, 14), `far` (20, 2: 20, 19, 2, 27). (`trig` at y 1 is a trigger, not a focus.)\n- `other` (1, 1)\n';
   assert.deepEqual(ck.focusMarks('ep8_fx', md), ['near', 'mid', 'far']);
+  // the real file: every map with a focus line yields its marks (the old pattern matched none of them)
+  for (const [id, first] of [['ep8_stair', 'foot_stage'], ['ep8_scriptorium', 'codex'], ['ep8_library_f1', 'crossing'],
+    ['ep8_library_f2', 'pair'], ['ep8_library_f3', 'memory_c_spot'], ['ep8_last_word', 'lectern']]) {
+    const marks = ck.focusMarks(id);
+    assert.ok(marks.length >= 5 && marks[0] === first, `${id}: ${marks.join(' ')}`);
+  }
+  assert.ok(!ck.focusMarks('ep8_stair').includes('margin'), 'a note is not a mark');
   const map = { id: 'ep8_fx', ground: Array(30).fill('_'.repeat(40)), marks: { near: [3, 15], mid: [20, 15], far: [20, 2] } };
   const c = ck.cameraRule(map, md);
   assert.equal(c.margins.length, 3);
@@ -726,4 +748,61 @@ test('mapcheck: the camera rule reads STAGING_EP8 focus marks; a loop home is ca
   const trail = [{ i: 2, read: { id: 'pa', k: 0 } }, ...Array.from({ length: 18 }, (_, k) => ({ i: 3 + k })), { i: 9, read: { id: 'pa', k: 0 } }];
   assert.deepEqual(ck.loopHome(trail, (i) => i), [{ id: 'pa', behind: 11 }]);
   assert.deepEqual(ck.loopHome([{ i: 2, read: { id: 'pa', k: 0 } }, { i: 8 }, { i: 2, read: { id: 'pa', k: 0 } }], (i) => i), [], 'six back: allowed');
+});
+
+// ---------------------------------------------------------------- E8-seams: the shipped sheet's shapes, the solo bell night
+test('E8-tiles\' ew books stand on their own cells: the prop anchor puts the footprint on the book (not one row up)', async () => {
+  const { propAnchor } = await import('../../src/data/ep8/field/events.js');
+  const ew = { footprint: [[0, 0], [0, -1]], anchor: [0, 2] }, ns = { footprint: [[0, 0], [1, 0]], anchor: [0, 1] };
+  assert.deepEqual(propAnchor(ew, 7, 16), [7, 17], 'popbook_ew is anchored on its lower cell');
+  assert.deepEqual(propAnchor(ns, 33, 8), [33, 8]);
+  assert.deepEqual(propAnchor(null, 3, 4), [3, 4]);
+  // on a real TileMap with the shipped fragment's popbook_ew: the prop's cells are the book's cells
+  const EP8T = JSON.parse(fs.readFileSync(path.join(NEXT, 'assets', 'tiles', 'ep8_tiles.json'), 'utf8'));
+  const db = { ...TILES, objects: { ...TILES.objects, popbook_ew: EP8T.objects.popbook_ew, popbook_realm_ew: EP8T.objects.popbook_realm_ew } };
+  assert.equal(bookSprite(db, 'ew'), 'popbook_ew');
+  assert.equal(bookSprite(db, 'ew', null, true), 'popbook_realm_ew', 'a realm book takes the realm sprite');
+  const [ax, ay] = propAnchor(db.objects.popbook_ew, 5, 6);
+  const cells = db.objects.popbook_ew.footprint.map(([dx, dy]) => [ax + dx, ay + dy]).sort((a, b) => a[1] - b[1]);
+  assert.deepEqual(cells, [[5, 6], [5, 7]]);
+});
+
+test('the Dash stacks get their own art: drawer_stack_dash\'s two frames as 16 x 32 breakable tiles', async () => {
+  const { DRAWER_TILES } = await import('../../src/data/ep8/field/art.js');
+  const EP8T = JSON.parse(fs.readFileSync(path.join(NEXT, 'assets', 'tiles', 'ep8_tiles.json'), 'utf8'));
+  const db = { tiles: {}, objects: { drawer_stack_dash: { ...EP8T.objects.drawer_stack_dash } }, terrains: {}, terrainOrder: [] };
+  const added = ensureArt(db);
+  assert.ok(added.includes(DRAWER_TILES.whole) && added.includes(DRAWER_TILES.broken));
+  assert.deepEqual([db.tiles[DRAWER_TILES.whole].w, db.tiles[DRAWER_TILES.whole].h, db.tiles[DRAWER_TILES.whole].collision], [16, 32, 'solid']);
+  assert.equal(db.tiles[DRAWER_TILES.broken].collision, 'none');
+  assert.deepEqual([db.tiles[DRAWER_TILES.broken].x, db.tiles[DRAWER_TILES.broken].y], EP8T.objects.drawer_stack_dash.frames[1].slice(0, 2));
+  assert.equal(db.tiles[DRAWER_TILES.whole].sheet, 'ep8.png');
+  assert.deepEqual(ensureArt(db).filter((id) => id.startsWith('ep8_drawer')), [], 'idempotent');
+});
+
+test('the bell night is solo: the hero alone on the field, followers hidden, the party itself untouched and back on the next map', async () => {
+  const { isSolo, soloParty } = await import('../../src/data/ep8/field/solo.js');
+  const bell = (await import('../../src/data/maps/ep8_bell_night.js')).default;
+  assert.ok(isSolo(bell), 'ep8_bell_night says party: solo');
+  const f = makeField({ ...T, party: 'solo' });
+  assert.deepEqual(f.followers, [], 'no followers on a solo map');
+  assert.deepEqual(f.actors.filter((a) => a.kind === 'party').map((a) => a.id), [f.leader.id]);
+  assert.equal(f.game.party.length, 3, 'game.party is never touched');
+  const saved = JSON.parse(JSON.stringify(serialize(f.game)));
+  assert.equal(saved.party.length, 3, 'the save keeps the whole party');
+  // walking: nobody follows
+  await tap(f, 'down');
+  assert.deepEqual(f.followers, []);
+  // a member rejoining mid-map (rebuildParty with no position) stays hidden too
+  f.rebuildParty();
+  assert.deepEqual(f.followers, []);
+  // the next map (not solo): loadMap drops every actor, rebuildParty makes the followers again
+  f.map.mod = T;
+  for (const a of f.actors.slice()) f.removeActor(a);
+  f.rebuildParty(T.start.x, T.start.y, 'up');
+  assert.equal(f.followers.length, 2, 'Mira and Bram follow again');
+  assert.equal(soloParty(f), 0, 'not solo: nothing hidden');
+  // an ordinary map is never touched
+  const g = makeField(T);
+  assert.equal(g.followers.length, 2);
 });

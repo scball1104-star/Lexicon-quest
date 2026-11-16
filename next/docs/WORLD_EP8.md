@@ -8,10 +8,11 @@ Episode 8's one field mechanic, built as a pure rule plus a pack-side system (pl
 | `src/data/ep8/field/popbooks.js` | the rule, pure (node-tested) |
 | `src/data/ep8/field/system.js` | `Books`: collision override, read, animation, ghost, drawing, lights, rescue |
 | `src/data/ep8/field/events.js` | the `popbook` event on `EXT`, `attach(field)`, `LQ_DEBUG.books / readBook / setBooks / booksOpen` |
-| `src/data/ep8/field/art.js` | stand-ins (`void_violet`, `marble_page`, `ep8w_book_ns`, `ep8w_book_ew`), page, wall, ghost, realm and mote textures |
+| `src/data/ep8/field/art.js` | the sheet pieces' ids, the 9-slice cell compositor (`paintSliceCell`), the Dash stacks' tiles (`DRAWER_TILES`), the motes; stand-ins and code textures only for a database without E8-tiles' fragment (node) |
+| `src/data/ep8/field/solo.js` | the `party: 'solo'` map contract (the bell night): followers off the field, `game.party` untouched |
 | `src/data/ep8/field/light.js` | the tints `rubout` and `violet` |
 | `src/data/ep8/field/_testbooks.js` | the fixture map `ep8_testbooks` |
-| `src/data/ep8/world.js` | registers the tints, the barks, the test map; attaches to every field |
+| `src/data/ep8/world.js` | registers the tints and the test map; attaches to every field (the barks and realm lines are E8-story's `text.js`) |
 | `tools/maps/ep8_check.mjs` | mapcheck's book search (one line in `mapcheck.mjs`) |
 | `qa/world/ep8_books.test.mjs`, `qa/world/ep8_lab.py` | tests and the browser lab (shots in `qa/world/ep8_out/`) |
 
@@ -25,7 +26,20 @@ Episode 8's one field mechanic, built as a pure rule plus a pack-side system (pl
   (its own or its pair's bridge under the leader, a follower, or a cell being stepped from), `onto_actor` (an NPC, a foe or
   a trigger in the new pages). A short end is `side` (bark `first_side` once).
 - Deterministic: no randomness, no timers, no damage tiles. Reset to `start` on every entry. **No save field.** A save on a
-  bridge (or on a cell `start` walls) wakes on the nearest ground.
+  bridge (or on a cell `start` walls) wakes on the nearest ground (qa/saves/ep8_saves.test.mjs, on `ep8_library_f1`).
+
+## The art (E8-tiles' sheet, `assets/tiles/ep8.png`)
+
+- Books: `popbook` (ns) and `popbook_ew`, a realm book `popbook_realm` / `popbook_realm_ew` (an event's `sprite` wins); frame
+  ribbon x 4 + (0 shut, 1 and 2 opening, 3 open). The `_ew` books are anchored on their lower cell (footprint [0, 0], [0, -1]):
+  the event's (x, y) is the book's top cell and `propAnchor` puts the footprint there (they drew one row high before).
+- Pages: the 9-slices `page_bridge` (over void; its south slices carry the drop shadow), `page_wall` (on floor; one cell, its
+  face in the south slices) and `page_ghost` (the dotted outline), each cell composed from four 8 x 8 quadrants by its
+  neighbour mask. Realm models: `realm_model`'s 7 frames (willowmere, hollow, emberpeak, valewyn, desert, isles, north),
+  centred on the open book's page span, standing on its middle row.
+- The Dash stacks: a breakable `object` with sprite `drawer_stack_dash` draws its two frames (cracked, broken) as the 16 x 32
+  tiles `ep8_drawer_stack` / `ep8_drawer_stack_broken` in place of the core cliff crack (`drawerStacks`, on every map reset
+  and on the break). Collision as the core pair.
 
 ## The block (what map agents write)
 
@@ -73,21 +87,25 @@ present under the flags searched; no flags means none set. Reported: `panned`, `
 | far change | over 6 tiles and off screen: `reveal()` pan, confirm skips |
 | rule timing (40 x 40, 6 books) | a read 0.006 ms, compile + full sweep 0.37 ms |
 | browser (phone, GPU) | update 0.1 ms, draw at most 1 ms, read 0.2 ms, motes 0.1 ms a frame (budget 0.5) |
-| page vs void | 0.683 (floor 0.35) |
-| void below floor | 0.516 (floor 0.12), void sd 0.003 (flat) |
-| ghost vs void | 0.718 (floor 0.15) |
-| ghost outline vs floor | 0.334 mean (gold +0.203, its dark edge -0.508) |
-| wall vs floor | 0.273 (floor 0.15) |
+| page vs void | 0.573 (floor 0.35) |
+| void below floor | 0.536 (floor 0.12), void sd 0.002 (flat) |
+| ghost vs void | 0.699 (floor 0.15) |
+| ghost outline vs floor | 0.279 mean (gold +0.161, its dark edge -0.496) |
+| wall vs floor | 0.151 (floor 0.15): the closest pair; a lighter floor than `marble_page` would fail it |
 | motes | 3 frames, one every 30 game frames, +0.028 luma per frame at most (limit 0.03), paused under `rubout`, off under reduceMotion |
 | `rubout` floor | 0.477 (min 0.22); `violet` at dark 0.2: 0.474 |
 
-Measured on the stand-in art (`qa/world/ep8_lab.py`, phone 844x390): re-run once E8-tiles' sheet lands.
+Measured on E8-tiles' shipped sheet (`qa/world/ep8_lab.py`, phone 844x390, `ep8_testbooks` on `marble_page`, 2026-11-16,
+E8-seams). The stand-in figures were page 0.683, void 0.516, ghost 0.718, outline 0.334, wall 0.273.
 
-## Stubs and ids waiting on other agents
+## Joined with the other agents (E8-seams, 2026-11-16)
 
-- Tiles (E8-tiles): `void_violet`, `marble_page`, `popbook` (`popbook_ns` / `popbook_ew`, or `popbook` with a matching
-  footprint; frames shut, opening x2, open), `popbook_realm`. Stand-ins fill only ids the fragment lacks.
-- Text (E8-story): barks `first_open first_wall first_side first_pair would_fold` (plan words used until `BARKS` has them);
-  realm lines `ep8_realm_<realm>` (fallback: the plan's Willowmere line, else the realm's name).
+- Tiles (E8-tiles): every piece above is the shipped sheet's; the stand-ins never draw in the game.
+- Text (E8-story): the barks `first_open first_wall first_side first_pair would_fold` and the realm lines
+  `ep8_realm_<realm>` (the realm ids of the block, `ep8_realm_emberpeak` included) live in `src/data/ep8/text.js`; the field
+  reads an event's `name` or `text` key, else `ep8_realm_<realm>`.
 - Audio (E8-audio): sfx `page_open`, `page_fold`; core `buzzer`.
-- Open item (plan 5.2): the Listen inspect on `bell_tower` is not built here.
+- The camera rule reads STAGING_EP8's real line format (`` `mark` (x, y: left, right, top, bottom) ``); every focus mark of the
+  twelve maps passes.
+- Open item (plan 5.2): the Listen inspect on `bell_tower` waits: it needs `bell_tower` on the ep8 pack's `touches` (a core
+  line in `src/game/packs.js`) and a no-flag replay scene from E8-story.

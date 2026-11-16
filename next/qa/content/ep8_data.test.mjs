@@ -272,8 +272,9 @@ test('side quests: givers, rewards, counters, journal and Talk fallbacks; pushed
   assert.deepEqual([REWARDS_EP8.gift_truth.item, REWARDS_EP8.gift_kind.item], ['binders_awl', 'riverwater_thread']);
 });
 
-test('text: 9 banners (the Scriptorium conditional), 3 books with the canon Charter, the barks, 11 bestiary entries naming their erasing', () => {
-  assert.equal(Object.keys(EP8_BANNERS).length, 9);
+test('text: 10 banners (the Scriptorium conditional, the Last Word by its name alone), 3 books with the canon Charter, the barks, 11 bestiary entries naming their erasing', () => {
+  assert.equal(Object.keys(EP8_BANNERS).length, 10);
+  assert.deepEqual(EP8_BANNERS.ep8_last_word, { title: 'The Last Word' });
   for (const [id, bn] of Object.entries(EP8_BANNERS)) { assert.equal(BANNERS[id], bn); assert.ok(bn.title.length <= 34 && (!bn.sub || bn.sub.length <= 34), id); }
   assert.deepEqual(EP8_BANNERS.ep8_scriptorium.states, [{ if: 'scriptorium_open', title: 'The Scriptorium', sub: 'An Open Library' }]);
   assert.deepEqual(Object.keys(EP8_BOOKS).sort(), ['concordance_folio', 'keeper_hid', 'living_charter']);

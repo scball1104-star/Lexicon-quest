@@ -14,8 +14,9 @@
 
 import { EXT, INTERACT_TYPES } from '../../../world/events.js';
 import { Books, ribbonOf } from './system.js';
-import { ensureArt, bookSprite } from './art.js';
+import { ensureArt, bookSprite, DRAWER_OBJECT, DRAWER_TILES } from './art.js';
 import { covered } from './popbooks.js';
+import { soloWrap } from './solo.js';
 
 INTERACT_TYPES.add('popbook');
 
@@ -26,10 +27,11 @@ EXT.popbook = {
     ensureArt(map.db, field.engine, map);
     const B = map.mod && map.mod.popbooks && map.mod.popbooks.books && map.mod.popbooks.books[ev.book];
     const axis = B && B.axis === 'ew' ? 'ew' : 'ns';
-    const t = bookSprite(map.db, axis, ev);
+    const t = bookSprite(map.db, axis, ev, !!(B && B.realm));
     if (!map.db.objects || !map.db.objects[t]) { field.warnOnce('ep8book:' + t, `unknown object "${t}" (${ent.id})`); return; }
     ent.ribbon = ribbonOf(map.mod, ev.book);
-    ent.prop = map.addProp({ t, x: ent.x, y: ent.y, state: 0, id: ent.id, kind: 'event', solid: true });
+    const [ax, ay] = propAnchor(map.db.objects[t], ent.x, ent.y);
+    ent.prop = map.addProp({ t, x: ax, y: ay, state: 0, id: ent.id, kind: 'event', solid: true });
     // both cells of the book answer to confirm (facing either half reads it)
     for (const [x, y] of ent.prop.cells) {
       if (!ent.cells.some((c) => c[0] === x && c[1] === y)) ent.cells.push([x, y]);
@@ -40,6 +42,16 @@ EXT.popbook = {
   },
   interact: (field, ent) => (field.books ? field.books.readBook(ent) : null),
 };
+
+/**
+ * The anchor cell that puts an object's footprint on the book's cells, whose top-left is (x, y). E8-tiles' `popbook_ew` and
+ * `popbook_realm_ew` are anchored on their lower cell (footprint [0, 0], [0, -1]): anchored on the event's cell they stood one
+ * row too high. Any footprint: its smallest dx, dy lands on (x, y).
+ */
+export function propAnchor(obj, x, y) {
+  const fp = (obj && Array.isArray(obj.footprint) && obj.footprint.length) ? obj.footprint : [[0, 0]];
+  return [x - Math.min(...fp.map((c) => c[0])), y - Math.min(...fp.map((c) => c[1]))];
+}
 
 export function attach(field) {
   if (!field || field.books) return field && field.books;
@@ -52,7 +64,7 @@ export function attach(field) {
     obj[name] = f;
     return orig;
   };
-  wrap(field.glass, 'reset', (o) => { o(); s.reset(); });
+  wrap(field.glass, 'reset', (o) => { o(); s.reset(); drawerStacks(field); });
   wrap(field.glass, 'update', (o) => { o(); s.update(); });
   wrap(field.glass, 'drawBeams', (o, r, t) => { s.drawLow(r, t); o(r, t); });
   wrap(field.lighting, 'draw', (o, r, cam, lights, lanternAt) => { o(r, cam, lights, lanternAt); s.drawLine(r, cam); });
@@ -60,8 +72,44 @@ export function attach(field) {
   wrap(field, 'collectLights', (o) => { const out = o(); return s.active ? out.concat(s.lights()) : out; });
   wrap(field, 'hiddenInkNear', (o) => o() || s.inkNear());
   wrap(field, 'debugState', (o) => ({ ...o(), books: s.debugState() }));
+  soloWrap(field);
   installDebug(field);
   return s;
+}
+
+/**
+ * The Library's Dash stacks in their own art (art.js DRAWER_TILES): every breakable `object` with sprite `drawer_stack_dash`
+ * gets the cracked or broken drawer stack in place of the core art of its `breakable` kind, now and whenever the core puts its
+ * art there again (Dash Strike breaking it calls map.setTile). Per map: the map's setTile is wrapped once. Returns the ids.
+ */
+export function drawerStacks(field) {
+  const map = field && field.map;
+  if (!map || !field.entities || typeof map.setTile !== 'function') return [];
+  ensureArt(map.db, field.engine, map);
+  if (!map.db.tiles || !map.db.tiles[DRAWER_TILES.whole]) return [];
+  const at = new Map();
+  for (const ent of field.entities.values()) {
+    if (ent && ent.type === 'object' && ent.ev && ent.ev.breakable && ent.ev.sprite === DRAWER_OBJECT) at.set(`${ent.x},${ent.y}`, ent);
+  }
+  if (!at.size) return [];
+  const tileFor = (ent) => (ent.state === 'broken' ? DRAWER_TILES.broken : DRAWER_TILES.whole);
+  if (!map.setTile.ep8) {
+    const orig = map.setTile.bind(map);
+    const w = function (x, y, id) {
+      const ent = w.stacks.get(`${x},${y}`);
+      return orig(x, y, ent && id !== tileFor(ent) && !String(id).startsWith('ep8_') ? tileFor(ent) : id);
+    };
+    w.ep8 = true;
+    map.setTile = w;
+  }
+  map.setTile.stacks = at;
+  for (const ent of at.values()) {
+    const id = tileFor(ent);
+    if ((map.overlays[ent.y][ent.x] || [])[0] === id) continue;
+    map.setTile(ent.x, ent.y, id);
+    if (map.inBounds(ent.x, ent.y + 1)) { map.recomputeCell(ent.x, ent.y + 1); map.applyTallTiles(ent.x, ent.y); map.repaint(ent.x, ent.y, ent.x, ent.y + 1); }
+  }
+  return [...at.values()].map((e) => e.id);
 }
 
 function installDebug(field) {

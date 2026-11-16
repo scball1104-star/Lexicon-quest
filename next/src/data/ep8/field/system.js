@@ -18,7 +18,7 @@
 // State: reset to the authored `start` on every arrival (the entities are rebuilt). No new save field.
 
 import { compile, initial, read, changed, covered, sideOf, openDir, describe, AXES, SHUT } from './popbooks.js';
-import { ensureArt, PAL, NB, MOTES, BOOK_FRAMES, REALM_MODELS, paintBridgeCell, paintShadow, paintWallCell, paintGhostEdge, paintRealm, paintMotes, SHEET } from './art.js';
+import { ensureArt, PAL, NB, MOTES, BOOK_FRAMES, REALM_MODELS, paintBridgeCell, paintShadow, paintWallCell, paintGhostEdge, paintRealm, paintMotes, paintSliceCell, SHEET, SHEET_TILES, REALM_OBJECT } from './art.js';
 import { TILE } from '../../../world/tilemap.js';
 import { setPosition, markOpened, isOpened } from '../../../game/state.js';
 import { LINES } from '../../../game/story.js';
@@ -35,11 +35,9 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 const round3 = (v) => Math.round(v * 1000) / 1000;
 /** Kinds of actor that never stand on a page cell (scene actors and the party follow the map's collision). */
 const KEEP_OFF = new Set(['enemy', 'npc']);
-/** The realm names a float line falls back to while text.js has no `ep8_realm_<realm>` key (E8-story's). */
+/** The realm names a float line falls back to if text.js has no `ep8_realm_<realm>` key (E8-story's EP8_REALMS has all seven). */
 export const REALM_NAMES = { willowmere: 'WILLOWMERE', hollow: 'THE HOLLOW', emberpeak: 'EMBERPEAK', valewyn: 'VALEWYN', desert: 'THE DESERT',
   isles: 'THE ISLES', north: 'THE NORTH' };
-/** The one realm line the plan gives word for word (4.11); the others wait on E8-story's keys. */
-const PLAN_REALM_LINES = { willowmere: 'WILLOWMERE. The willow stands up out of the page.' };
 
 /**
  * The ribbon colour of a book (0 ivory, 1 crimson, 2 teal, 3 azure): ivory unpaired; each palimpsest pair its own colour, in
@@ -250,15 +248,16 @@ export class Books {
     return out;
   }
 
-  /** The float line of a realm book (its text key, else the plan's words, else the realm's name). */
+  /** The float line of a realm book: its event's `name` (or `text`) key, else `ep8_realm_<realm>` (E8-story's), else the name. */
   realmLine(k, ent) {
     const d = this.m.def[k];
     if (!d.realm) return null;
-    const key = (ent && ent.ev && ent.ev.name) || `ep8_realm_${d.realm}`;
+    const ev = ent && ent.ev;
+    const key = (ev && (ev.name || ev.text)) || `ep8_realm_${d.realm}`;
     const v = LINES[key];
     if (typeof v === 'string') return v;
     if (Array.isArray(v) && v.length) return typeof v[0] === 'string' ? v[0] : v[0] && v[0].text;
-    return PLAN_REALM_LINES[d.realm] || `${REALM_NAMES[d.realm] || d.realm.toUpperCase()}.`;
+    return `${REALM_NAMES[d.realm] || d.realm.toUpperCase()}.`;
   }
 
   /** One float line over a book (or the leader): a dark plate with cream text, drawn after the lighting. 90 frames. */
@@ -477,11 +476,19 @@ export class Books {
   }
 
   // ------------------------------------------------------------------ drawing
+  /**
+   * The cell textures, built once a field: from E8-tiles' sheet (the 9-slices `page_bridge`, `page_wall`, `page_ghost` and
+   * the 7 frames of `realm_model`) when the tile database has them and the sheet image has loaded, else the code-drawn
+   * stand-ins of ./art.js (node, a database without the fragment). `real` says which.
+   */
   ensureTiles() {
     if (this.tiles) return this.tiles;
     const r = this.f.engine.renderer;
     if (!r || !r.createLayer) return null;
     const mk = (w, h, paint) => { const L = r.createLayer(w, h); if (L.ctx && typeof L.ctx.fillRect === 'function') paint(L.ctx); return L; };
+    const real = this.realTiles(mk);
+    if (real === false) return null;          // the sheet is still loading: draw nothing this frame, build on a later one
+    if (real) { this.tiles = real; return real; }
     const bridge = { h: [], v: [] }, wall = { h: [], v: [] };
     for (let n = 0; n < 16; n++) {
       bridge.h.push(mk(TILE, TILE, (g) => paintBridgeCell(g, 0, 0, n, 'h', n)));
@@ -493,8 +500,29 @@ export class Books {
     for (let k = 0; k < MOTES.frames; k++) motes.push(mk(MOTES.pattern, MOTES.pattern, (g) => paintMotes(g, k)));
     const realms = {};
     for (const id of REALM_MODELS) realms[id] = mk(14, 16, (g) => paintRealm(g, 1, 1, id));
-    this.tiles = { bridge, wall, motes, realms };
+    this.tiles = { bridge, wall, motes, realms, real: false };
     return this.tiles;
+  }
+
+  /** The textures from E8-tiles' sheet: null when the database lacks a piece (stand-ins), false while the image loads. */
+  realTiles(mk) {
+    const map = this.f.map, db = map && map.db, T = db && db.tiles, O = db && db.objects;
+    if (!T || !O || !Object.values(SHEET_TILES).every((id) => T[id] && T[id].nineSlice) || !O[REALM_OBJECT]) return null;
+    const img = typeof map.sheet === 'function' ? map.sheet(T[SHEET_TILES.bridge].sheet || 'ep8.png') : null;
+    if (!img) return null;
+    if (img.complete === false || !(img.width > 0)) return false;
+    let drawable = true;
+    const slices = (id) => Array.from({ length: 16 }, (_, n) => mk(TILE, TILE, (g) => { if (typeof g.drawImage === 'function') paintSliceCell(g, img, T[id], n); else drawable = false; }));
+    const bridge = slices(SHEET_TILES.bridge), wall = slices(SHEET_TILES.wall), ghost = slices(SHEET_TILES.ghost);
+    if (!drawable) return null;
+    const motes = [];
+    for (let k = 0; k < MOTES.frames; k++) motes.push(mk(MOTES.pattern, MOTES.pattern, (g) => paintMotes(g, k)));
+    const ro = O[REALM_OBJECT], realms = {};
+    (ro.realms || REALM_MODELS).forEach((id, k) => {
+      const fr = (ro.frames || [])[k];
+      if (fr) realms[id] = mk(fr[2], fr[3], (g) => g.drawImage(img, fr[0], fr[1], fr[2], fr[3], 0, 0, fr[2], fr[3]));
+    });
+    return { bridge: { h: bridge, v: bridge }, wall: { h: wall, v: wall }, ghost, motes, realms, real: true };
   }
 
   /** The neighbour mask of a page cell: which neighbours are showing pages of the same book (look > 0) of the same kind. */
@@ -575,6 +603,7 @@ export class Books {
       if (a <= 0) continue;
       const ax = m.def[m.owner[i]].axis;
       blit(T.bridge[ax === 'ns' ? 'h' : 'v'][this.nbMask(i, lookFn)], x * TILE, y * TILE, a);
+      if (T.real) continue;   // the sheet's south slices carry the 2 px shadow
       const below = i + m.W, right = i + 1;
       const shadowOn = (j, jx, jy) => jx < m.W && jy < m.H && !(this.isPage(j) && lookFn(j) > 0 && this.overVoid(j)) && (this.isPage(j) ? this.overVoid(j) : map.base[jy][jx] === 'void');
       if (shadowOn(below, x, y + 1)) { g.globalAlpha = 0.85 * a; paintShadow(g, x * TILE, (y + 1) * TILE, true); g.globalAlpha = 1; }
@@ -588,9 +617,11 @@ export class Books {
       if (a <= 0) continue;
       const L = T.wall[m.def[m.owner[i]].axis === 'ns' ? 'h' : 'v'][this.nbMask(i, lookFn)];
       if (!L || !L.canvas) continue;
-      const hgt = Math.max(2, Math.round(22 * a));
-      // rising: the whole block squashed to its height so far, standing on the floor line
-      if (typeof g.drawImage === 'function') g.drawImage(L.canvas, 0, 0, TILE, 22, x * TILE, y * TILE + 16 - hgt, TILE, hgt);
+      // rising: the whole block squashed to its height so far, standing on the floor line (the stand-in is 22 tall, its cap
+      // over the cell above; the sheet's wall is one cell, its face in the south slices)
+      const full = T.real ? TILE : 22;
+      const hgt = Math.max(2, Math.round(full * a));
+      if (typeof g.drawImage === 'function') g.drawImage(L.canvas, 0, 0, TILE, full, x * TILE, y * TILE + 16 - hgt, TILE, hgt);
     }
     // 4. the realm models, standing up from the middle of an open realm book's pages
     for (let k = 0; k < m.books.length; k++) {
@@ -604,6 +635,14 @@ export class Books {
       const a = lookFn(mid);
       if (a <= 0) continue;
       const mx = (mid % m.W), my = (mid / m.W) | 0;
+      if (T.real) {
+        // the sheet's model (32 x 32, its base on its bottom row), centred on the page span and standing on its middle (ns:
+        // the cells mid, mid + 1 side by side; ew: mid over mid + W, the base near the lower one's foot)
+        const R = T.realms[d.realm], w = (R && R.canvas && R.canvas.width) || 32, h = (R && R.canvas && R.canvas.height) || 32;
+        const cx = d.axis === 'ns' ? mx * TILE + TILE : mx * TILE + TILE / 2, base = d.axis === 'ns' ? (my + 1) * TILE : (my + 2) * TILE - 4;
+        blit(R, Math.round(cx - w / 2), base - h, a);
+        continue;
+      }
       const px = d.axis === 'ns' ? mx * TILE + 16 - 7 : mx * TILE + 1, py = d.axis === 'ns' ? my * TILE - 2 : my * TILE + 16 - 2;
       blit(T.realms[d.realm], px, py, a);
     }
@@ -620,6 +659,11 @@ export class Books {
           g.globalAlpha = 1;
         }
         const out = (dx, dy) => { const nx = x + dx, ny = y + dy; return nx < 0 || ny < 0 || nx >= m.W || ny >= m.H || !gh.set.has(ny * m.W + nx); };
+        if (T.real) {
+          const n = (out(0, -1) ? 0 : NB.N) | (out(0, 1) ? 0 : NB.S) | (out(-1, 0) ? 0 : NB.W) | (out(1, 0) ? 0 : NB.E);
+          blit(T.ghost[n], x * TILE, y * TILE);
+          continue;
+        }
         if (out(0, -1)) paintGhostEdge(g, x * TILE, y * TILE, 'N');
         if (out(0, 1)) paintGhostEdge(g, x * TILE, y * TILE, 'S');
         if (out(-1, 0)) paintGhostEdge(g, x * TILE, y * TILE, 'W');

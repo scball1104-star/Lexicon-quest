@@ -5,9 +5,10 @@ falls from the upper left as on every other boss.
 
   eraser            Closed Book: as painted, held to the master palette (black and ink robes lit violet, the pages cream,
                     the face the brightest white on the body), the face redrawn clean and empty so it reads at phone size
-  eraser_truths     The Rejected Truths: the robes spread behind it like the two covers of a book (violet leather with
-                    gilt corners, standing out past the robe on both sides), and in their folds the two things it
-                    refused: a small grey hooded figure (Grief) low on the left, a page with a door (Change) low on the right
+  eraser_truths     The Rejected Truths: the robes spread behind it like the two covers of an open book (violet leather
+                    in ordered dither, the gilt edge, the cream page block along the fore-edge and the foot, a tooled
+                    panel, gilt corner protectors), and on each a tipped-in page with one thing it refused: a small grey
+                    hooded figure (Grief) on the left, a page with a door ajar on gold light (Change) on the right
   eraser_remembers  The Keeper Remembers: the old face half drawn in gold lines through the white (a brow, an eye, the
                     line of the nose, half a mouth, the cheek), the other half still blank
   eraser_silence    The Last Silence: the robes from the waist down torn into blank pages (cream sheets with nothing on
@@ -212,89 +213,175 @@ def blank_pages(a, frac=0.58, seed=3):
     return out
 
 
-def covers(a):
-    """the robes spread like two book covers: two tall violet leather boards opening out from the shoulders to the
-    floor on either side (drawn over the robe's outer folds, never over the hood, the face or the middle of the body),
-    each with a gilt rule inside its edge, gilt corner pieces and a dark inner edge where it hinges at the spine"""
+BAYER4 = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], np.float32) / 16.0
+LEATHER = ['shadow:0', 'roof_purple:1', 'roof_purple:2', 'cloth_purple:3', 'cloth_purple:4']
+
+
+def board_masks(a):
+    """the two boards (left, right): a cover each, hinged at the shoulders beside the body and opening out to the floor"""
     H, W = a.shape[:2]
-    out = a.copy()
     fx, fy = face_xy()
     cx = fx + len(FACE[0]) // 2
     top = fy + 22
     bot = H - 5
-    boards = []
+    out = []
     for side in (-1, 1):
         bd = np.zeros((H, W), bool)
+        inner = np.full(H, -1, np.int32)
+        outer = np.full(H, -1, np.int32)
         for y in range(top, bot + 1):
             t = (y - top) / float(bot - top)
-            inner = cx + side * (16 + int(round(10 * t)))
-            outer = cx + side * (24 + int(round(48 * t)))
-            lo, hi = min(inner, outer), max(inner, outer)
-            bd[y, max(1, lo):min(W - 1, hi + 1)] = True
-        boards.append((side, bd))
-    for side, bd in boards:
-        p = np.pad(bd, 1)
-        border = bd & ~(p[:-2, 1:-1] & p[2:, 1:-1] & p[1:-1, :-2] & p[1:-1, 2:])
-        body = bd & ~border
-        pi = np.pad(body, 1)
-        rule = body & ~(pi[:-2, 1:-1] & pi[2:, 1:-1] & pi[1:-1, :-2] & pi[1:-1, 2:])
-        for y, x in zip(*np.nonzero(body)):
-            f = (x * 2 + y * 3) % 11
-            ref = 'roof_purple:2' if f < 5 else ('roof_purple:1' if f < 9 else 'cloth_purple:3')
-            out[y, x, :3] = col(ref); out[y, x, 3] = 1
-        for y, x in zip(*np.nonzero(rule)):
-            out[y, x, :3] = col('gold:3' if side < 0 else 'gold:2')
-        for y, x in zip(*np.nonzero(border)):
-            out[y, x, :3] = col('shadow:0'); out[y, x, 3] = 1
-        # the lit outer edge of the left board, the shadowed one of the right (the light is upper left)
-        ys, xs = np.nonzero(bd)
-        # gilt corner pieces at the board's low outer corner and its top outer corner
-        for (yy, pick) in ((bot - 1, 'outer'), (top + 1, 'outer')):
-            row = np.nonzero(bd[yy])[0]
-            if not len(row):
-                continue
-            xo = row.min() + 1 if side < 0 else row.max() - 1
-            for dy in range(-1, 2):
-                for dx in range(0, 4):
-                    xx = xo + (dx if side < 0 else -dx)
-                    y2 = yy + dy
-                    if 0 <= y2 < H and 0 <= xx < W and bd[y2, xx] and (dx < 2 or dy == 0):
-                        out[y2, xx, :3] = col('gold:4' if dx == 0 or dy == 0 else 'gold:3')
+            # the outer edge bows a little (a board under its own weight), the inner edge follows the robe
+            xi = cx + side * (16 + int(round(10 * t)))
+            xo = cx + side * (24 + int(round(48 * t - 5 * np.sin(np.pi * t))))
+            lo, hi = max(1, min(xi, xo)), min(W - 2, max(xi, xo))
+            bd[y, lo:hi + 1] = True
+            inner[y], outer[y] = xi, xo
+        out.append((side, bd, inner, outer, top, bot))
     return out
 
 
-GRIEF_SMALL = ['...kkkk...',
-               '..kWWWWk..',
-               '.kWWkkWWk.',
-               '.kWkkkkWk.',
-               '.kWkikkWk.',
-               'kWWkkkkWWk',
-               'kWwWWwWWwk',
-               'kwWwWWwWwk',
-               'kWwkwWwkwk',
-               'kwWwWwWwWk',
-               '.k.k.k.k..']
-CHANGE_SMALL = ['kkkkkkkk.',
-                'kPPPPPPkk',
-                'kPPPPPPPk',
-                'kPPkkkPPk',
-                'kPkvvvkPk',
-                'kPkvvGkPk',
-                'kPkvvGkPk',
-                'kPkvvGkPk',
-                'kPkvvGkPk',
-                'kPkvvGkPk',
-                'kkkkkkkkk']
+def covers(a):
+    """the robes spread like the two covers of an open book, behind the figure's outer folds (never over the hood, the
+    face or the middle of the body): violet leather lit from the upper left (ordered dither, no hatching), a dark hinge
+    where each board meets the robe, the gilt edge, the cream page block showing along the fore-edge and the foot (three
+    stacked leaves), a tooled panel with gilt corner stops, and gilt corner protectors at the outer corners"""
+    H, W = a.shape[:2]
+    out = a.copy()
+    for side, bd, inner, outer, top, bot in board_masks(a):
+        ys, xs = np.nonzero(bd)
+        lit = side < 0
+        for y, x in zip(ys, xs):
+            t = (y - top) / float(bot - top)
+            d_out = abs(x - outer[y])
+            d_in = abs(x - inner[y])
+            d_bot = bot - y
+            d_top = y - top
+            e = min(d_out, d_bot, d_top)
+            ref = None
+            if e == 0 or d_in == 0:
+                ref = 'shadow:0'
+            elif d_top == 1 and d_out > 1:
+                ref = 'gold:4' if lit else 'gold:3'
+            elif e == 1:
+                ref = ('gold:4' if (lit and d_out == 1) else 'gold:3') if d_bot > 1 else 'gold:2'
+            elif d_top > 1 and 2 <= min(d_out, d_bot) <= 4:
+                # the page block: three leaves, the middle one shaded, a gap every few px along the edge
+                k = min(d_out, d_bot)
+                run = y if d_out <= d_bot else x
+                if k == 3:
+                    ref = 'stone_warm:4' if (run % 7) else 'stone_warm:3'
+                else:
+                    ref = ('metal:3' if lit and k == 2 else 'stone_warm:5') if (run % 9) else 'stone_warm:4'
+            elif d_top > 1 and min(d_out, d_bot) == 5:
+                ref = 'gold:2'
+            elif d_in <= 2:
+                ref = 'ink:1' if d_in == 1 else 'roof_purple:1'
+            else:
+                # leather: lighter high and toward the lit side, a soft fall-off at the hinge
+                across = min(1.0, d_in / 14.0)
+                v = (0.62 if lit else 0.42) + 0.28 * (1 - t) - 0.12 * (1 - across) + (0.06 if lit else -0.04) * (1 - d_out / 40.0)
+                # the tooled panel: a dark blind rule 4 px inside the page block
+                if min(d_out, d_bot, max(0, d_in - 3)) == 9 and d_top > 9:
+                    ref = 'roof_purple:1'
+                else:
+                    lv = max(0.0, min(0.999, v)) * (len(LEATHER) - 2) + 1
+                    n = int(lv)
+                    if (lv - n) > BAYER4[y % 4, x % 4]:
+                        n += 1
+                    ref = LEATHER[min(len(LEATHER) - 1, n)]
+            out[y, x, :3] = col(ref)
+            out[y, x, 3] = 1
+        # gilt corner stops on the tooled panel and corner protectors at the outer corners
+        for (yy, k) in ((bot, 7), (top, 6)):
+            xo = outer[yy] if outer[yy] >= 0 else None
+            if xo is None:
+                continue
+            for dy in range(0, k):
+                for dx in range(0, k):
+                    if dx + dy >= k:
+                        continue
+                    y2 = yy - dy if yy == bot else yy + dy
+                    x2 = xo - side * dx
+                    if not (0 <= y2 < H and 0 <= x2 < W and bd[y2, x2]):
+                        continue
+                    edge = dx == 0 or dy == 0
+                    if dx + dy == k - 1:
+                        c = 'shadow:0'
+                    elif edge:
+                        c = 'shadow:0' if (dx == 0 and dy == 0) else ('gold:4' if (lit or dy == 0) else 'gold:3')
+                    else:
+                        c = 'gold:4' if dx + dy == 1 else ('gold:3' if (dx + dy) % 3 else 'gold:2')
+                    out[y2, x2, :3] = col(c)
+                    out[y2, x2, 3] = 1
+    return out
+
+
+# The two truths it refused, each on a cream page tipped into its cover: Grief (a small grey hooded figure, head bowed,
+# one cold tear) on the left board, Change (a page with a door standing ajar on gold light) on the right.
+GRIEF_ICON = ['....kkkk....',
+              '...kWWWWk...',
+              '..kWWWWWWk..',
+              '..kWkkkkWk..',
+              '..kWkkkiWk..',
+              '..kWWkkkWk..',
+              '.kWWWWWWWWk.',
+              '.kWwWWWWwWk.',
+              'kWWwWWWWwWWk',
+              'kWwwWWWWwwWk',
+              'kWwwwWWwwwWk',
+              'kkkkkkkkkkkk']
+CHANGE_ICON = ['kkkkkkkkk...',
+               'kPPPPPPPPkk.',
+               'kPPPPPPPPpPk',
+               'kPPkkkkkPPPk',
+               'kPPkGGvvkPPk',
+               'kPPkGGvvkPPk',
+               'kPPkGgvvkPPk',
+               'kPPkGGvvkPPk',
+               'kPPkGGvvkPPk',
+               'kPPkGgvvkPPk',
+               'kPPPPPPPPPPk',
+               'kkkkkkkkkkkk']
+PLATE_W, PLATE_H = 18, 18
+
+
+def plate(a, x0, y0, icon, legend, lit):
+    """a cream page tipped into the cover: dark edge, a gilt frame, a shaded right and foot, the icon centred"""
+    H, W = a.shape[:2]
+    for j in range(PLATE_H):
+        for i in range(PLATE_W):
+            y, x = y0 + j, x0 + i
+            if not (0 <= y < H and 0 <= x < W):
+                continue
+            e = min(i, j, PLATE_W - 1 - i, PLATE_H - 1 - j)
+            if e == 0:
+                c = 'shadow:0'
+            elif e == 1:
+                c = 'gold:4' if (lit and (i == 1 or j == 1)) else 'gold:3' if (i == 1 or j == 1) else 'gold:2'
+            elif i >= PLATE_W - 3 or j >= PLATE_H - 3:
+                c = 'stone_warm:4'
+            else:
+                c = 'stone_warm:5'
+            a[y, x, :3] = col(c)
+            a[y, x, 3] = 1
+    ih, iw = len(icon), len(icon[0])
+    return stamp(a, icon, legend, x0 + (PLATE_W - iw) // 2, y0 + (PLATE_H - ih) // 2)
 
 
 def truths_in_folds(a):
-    """Grief (left) and Change (right), small, in the folds of the spread robes at about knee height"""
-    H, W = a.shape[:2]
-    fx, fy = face_xy()
-    y = int(H * 0.68)
-    a = stamp(a, GRIEF_SMALL, {'k': 'shadow:0', 'W': 'stone_cool:4', 'w': 'stone_cool:3', 'i': 'ice:2'}, fx - 40, y)
-    a = stamp(a, CHANGE_SMALL, {'k': 'shadow:0', 'P': 'stone_warm:5', 'G': 'gold:4', 'v': 'hair_violet:2'}, fx + 44, y - 2)
-    return a
+    """Grief (left) and Change (right) on their pages, set into the covers at about knee height"""
+    out = a
+    for side, bd, inner, outer, top, bot in board_masks(a):
+        y = top + int(round(0.6 * (bot - top)))
+        mid = (inner[y] + outer[y]) // 2 + side * 2
+        x0, y0 = mid - PLATE_W // 2, y - PLATE_H // 2
+        if side < 0:
+            out = plate(out, x0, y0, GRIEF_ICON, {'k': 'shadow:0', 'W': 'stone_cool:4', 'w': 'stone_cool:3', 'i': 'ice:2'}, True)
+        else:
+            out = plate(out, x0, y0, CHANGE_ICON, {'k': 'shadow:0', 'P': 'stone_warm:5', 'p': 'stone_warm:3', 'G': 'gold:4',
+                                                    'g': 'gold:5', 'v': 'hair_violet:2'}, False)
+    return out
 
 
 _CACHE = {}

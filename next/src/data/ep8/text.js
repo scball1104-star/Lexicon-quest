@@ -18,8 +18,8 @@ const m = (text) => ({ who: 'mira', text });
 const b = (text) => ({ who: 'bram', text });
 
 // ------------------------------------------------------------------------------------------------
-// Banners (plan 2.1): 9, the Scriptorium's with a second state. The Last Word and the bell night have none: their scenes
-// open on the Librarian and on the dark stair, and a banner over either would talk over the picture.
+// Banners (plan 2.1): 10, the Scriptorium's with a second state. The Last Word's is its name alone (plan 2.1); the bell
+// night has none: its scene opens on the dark stair, and a banner would talk over the picture.
 // ------------------------------------------------------------------------------------------------
 export const EP8_BANNERS = {
   ep8_stair: { title: 'The Stair of Written Light', sub: 'Up to the Library' },
@@ -32,16 +32,18 @@ export const EP8_BANNERS = {
   ep8_library_f1: { title: 'The First Library', sub: 'I. The Catalog of Lost Lives' },
   ep8_library_f2: { title: 'The First Library', sub: 'II. The Palimpsest Galleries' },
   ep8_library_f3: { title: 'The First Library', sub: 'III. The Unwritten Page' },
+  ep8_last_word: { title: 'The Last Word' },
 };
 
 // ------------------------------------------------------------------------------------------------
-// The seven realm books (plan 4.11): a float line names each once when it opens. Map event ids are pb_<realm>; the
-// popbook event's `text` field is the key. Flavor only: nothing is solved by a name (DESIGN hard rule 2).
+// The seven realm books (plan 4.11): a float line names each once when it opens. Map event ids are pb_<realm>; each key
+// is ep8_realm_<realm>, the realm id of the map's popbooks block (willowmere hollow emberpeak valewyn desert isles north),
+// which is the key E8-world's field reads by default (an event's `name` or `text` may name another). Flavor only: nothing is solved by a name (DESIGN hard rule 2).
 // ------------------------------------------------------------------------------------------------
 export const EP8_REALMS = {
   pb_willow: { key: 'ep8_realm_willowmere', text: 'WILLOWMERE. The willow stands up out of the page.' },
   pb_hollow: { key: 'ep8_realm_hollow', text: 'HOLLOWMERE. A paper mirror stands up, and shows nobody.' },
-  pb_ember: { key: 'ep8_realm_ember', text: 'EMBERPEAK. A paper forge stands up, a little bell in its roof.' },
+  pb_ember: { key: 'ep8_realm_emberpeak', text: 'EMBERPEAK. A paper forge stands up, a little bell in its roof.' },
   pb_valewyn: { key: 'ep8_realm_valewyn', text: 'VALEWYN. A paper keep stands up out of paper water.' },
   pb_desert: { key: 'ep8_realm_desert', text: 'THE DESERT. A paper armillary stands up and turns, once.' },
   pb_isles: { key: 'ep8_realm_isles', text: 'THE ISLES. A paper Kestrel stands up, sails full.' },

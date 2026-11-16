@@ -61,8 +61,7 @@ test('my four maps validate clean (mapcheck with the ep8 pack: book authoring, s
     assert.ok(maps[id], `${id} exists`);
     const r = validate(maps[id], db, maps);
     assert.deepEqual(r.errors.filter((e) => !transitional(e)), [], `${id}: ${r.errors.join('; ')}`);
-    // the Last Word's banner is E8-story's (text.js EP8_BANNERS); tolerated until it lands
-    assert.deepEqual(r.warnings.filter((w) => !(id === 'ep8_last_word' && /no banner/.test(w))), [], `${id} warnings`);
+    assert.deepEqual(r.warnings, [], `${id} warnings`);
     for (const row of maps[id].ground) assert.equal(row.length, maps[id].ground[0].length, `${id} rectangular`);
   }
   assert.deepEqual([maps.ep8_library_f1.ground[0].length, maps.ep8_library_f1.ground.length], [40, 30]);
@@ -261,7 +260,7 @@ test('the named events STAGING_EP8 section 2 asks of these maps, with their flag
   for (const o of ['great_lexicon', 'first_shelf', 'star_dome']) assert.equal(byId(maps.ep8_last_word, o)?.type, 'object', o);
   for (const d of ['word_down', 'square_return']) assert.equal(byId(maps.ep8_last_word, d)?.type, 'door', d);
   // the realm books, by their STAGING ids and text keys (section 4)
-  const realms = { ep8_library_f1: { pb_hollow: 'ep8_realm_hollow', pb_ember: 'ep8_realm_ember' },
+  const realms = { ep8_library_f1: { pb_hollow: 'ep8_realm_hollow', pb_ember: 'ep8_realm_emberpeak' },
     ep8_library_f2: { pb_valewyn: 'ep8_realm_valewyn', pb_desert: 'ep8_realm_desert' },
     ep8_library_f3: { pb_isles: 'ep8_realm_isles', pb_north: 'ep8_realm_north' } };
   for (const [id, list] of Object.entries(realms)) for (const [ev, key] of Object.entries(list)) {

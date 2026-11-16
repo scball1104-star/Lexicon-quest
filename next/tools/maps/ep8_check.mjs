@@ -132,13 +132,20 @@ function staging() {
   }
   return stagingText;
 }
-/** The focus marks STAGING_EP8.md lists for a map ("Focus marks, `<map>` (...): `a`, `b`"), or [] (no file, no line). */
+/**
+ * The focus marks STAGING_EP8.md lists for a map, or [] (no file, no line). The line reads
+ * "Focus marks, `<map>` (W x H: band): `a` (x, y: left, right, top, bottom), `b` (x, y: ...)." and runs to the next bullet,
+ * heading or blank line. A mark is a backticked name followed by " (" (its cell); a name in a note ("(`margin` at y 5 is a
+ * trigger ...)") is not one.
+ */
 export function focusMarks(mapId, text = staging()) {
   if (!text) return [];
-  const flat = text.replace(/\n\s*/g, ' ');
-  const re = new RegExp('Focus marks, `' + mapId + '`[^:]*: ((?:`\\w+`(?:,? (?:and )?)?)+)');
-  const m = re.exec(flat);
-  return m ? [...m[1].matchAll(/`(\w+)`/g)].map((x) => x[1]) : [];
+  const at = text.indexOf('Focus marks, `' + mapId + '`');
+  if (at < 0) return [];
+  const rest = text.slice(at);
+  const end = rest.search(/\n\s*(?:- |#)|\n\s*\n/);
+  const seg = (end < 0 ? rest : rest.slice(0, end)).replace(/\s+/g, ' ');
+  return [...new Set([...seg.matchAll(/`(\w+)` \(/g)].map((x) => x[1]).filter((n) => n !== mapId))];
 }
 /** The camera margin of every focus mark of a map: { errors, margins: [{ mark, x, y, sides, ends, ok }] }. */
 export function cameraRule(map, text = staging()) {

@@ -422,6 +422,7 @@
   "src/data/ep8/field/events.js",
   "src/data/ep8/field/light.js",
   "src/data/ep8/field/popbooks.js",
+  "src/data/ep8/field/solo.js",
   "src/data/ep8/field/system.js",
   "src/data/ep8/flags.js",
   "src/data/ep8/hooks.js",
