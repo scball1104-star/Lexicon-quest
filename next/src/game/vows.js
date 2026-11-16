@@ -4,7 +4,7 @@
 
 import { VOWS, VOW_BY_ID, VOW_REWARD, VOW_PAID_CAP, VOW_INTRO } from '../data/vows.js';
 import { CONSUMABLES } from '../data/items.js';
-import { grantMastery } from '../data/party.js';
+import { grantMastery, PARTY, MASTERY_XP } from '../data/party.js';
 import { SKILLS } from '../data/skills.js';
 import { VOW_TEXT } from '../data/text.js';
 
@@ -102,8 +102,25 @@ export function rewardPoints(chapter = 1) {
   return VOW_REWARD[c];
 }
 
+/** The item a kept vow pays when every weapon of the member is fully mastered. */
+export const VOW_SPILL_ITEM = 'hi_ether';
+
 /**
- * At a rest: a kept vow pays once (mastery points on the current weapon of the first `to` member here, else the leader; at
+ * The weapon a kept vow's mastery goes to (Scott, 2026-11-15): the member's current weapon unless it is fully mastered, else
+ * the least-mastered weapon type the member can use that is not; null when every one is maxed.
+ */
+export function payWeapon(member) {
+  const cap = MASTERY_XP[MASTERY_XP.length - 1];
+  const m = member.mastery || {};
+  const cur = member.weapon || Object.keys(m)[0] || null;
+  if (cur && (m[cur] || 0) < cap) return cur;
+  const types = (PARTY[member.id] && PARTY[member.id].weapons) || Object.keys(m);
+  const open = types.filter((t) => (m[t] || 0) < cap).sort((a, b) => (m[a] || 0) - (m[b] || 0));
+  return open[0] || null;
+}
+
+/**
+ * At a rest: a kept vow pays once (mastery points via payWeapon on the first `to` member here, else the leader; at
  * most VOW_PAID_CAP paid per chapter), a broken one says its line, an untested one (no battle since) is carried unchanged.
  * Returns { kind: 'kept'|'broken'|'carried', vow, reward, text, line } or null.
  */
@@ -122,17 +139,23 @@ export function settleVow(g) {
   const member = def.to.map((id) => (g.party || []).find((m) => m.id === id)).find(Boolean) || (g.party || [])[0] || null;
   let reward = null;
   if (member && vowsPaid(g, chapter) < VOW_PAID_CAP) {
-    const weapon = member.weapon || Object.keys(member.mastery || {})[0] || null;
+    const weapon = payWeapon(member);
     if (weapon) {
       const points = rewardPoints(chapter), before = (member.mastery || {})[weapon] || 0;
       const out = grantMastery(member, weapon, points);
       reward = { to: member.id, name: member.name, weapon, points, before, after: member.mastery[weapon], level: { from: out.from, to: out.to }, unlocked: out.unlocked };
+    } else if (member.weapon || Object.keys(member.mastery || {}).length) {
+      // Every weapon the member can use is fully mastered (Scott, 2026-11-15): the vow pays a small item instead of nothing.
+      g.items = g.items || {};
+      g.items[VOW_SPILL_ITEM] = Math.min(99, (g.items[VOW_SPILL_ITEM] || 0) + 1);
+      reward = { to: member.id, name: member.name, weapon: null, item: VOW_SPILL_ITEM, points: 0, level: { from: 0, to: 0 }, unlocked: [] };
     }
   }
   g.vowsKept.push({ id: def.id, chapter, paid: !!reward });
   g.vow = null;
   const lines = [fill(VOW_TEXT.kept, { name: def.name })];
-  if (reward) {
+  if (reward && reward.item) lines.push(fill(VOW_TEXT.paidItem, { item: (CONSUMABLES[reward.item] || {}).name || reward.item }));
+  else if (reward) {
     lines.push(fill(VOW_TEXT.paid, { member: reward.name, weapon: reward.weapon, n: reward.points }));
     const learned = reward.unlocked.map((id) => (SKILLS[id] ? SKILLS[id].name : id));
     if (learned.length) lines.push(fill(VOW_TEXT.learned, { skill: learned.join(', ') }));

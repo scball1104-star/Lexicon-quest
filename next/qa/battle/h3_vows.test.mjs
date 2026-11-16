@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VOWS, VOW_BY_ID, VOW_REWARD, VOW_PAID_CAP } from '../../src/data/vows.js';
-import { offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem, rewardPoints, vowsPaid, vowForbids, takeVowIntro } from '../../src/game/vows.js';
+import { payWeapon, VOW_SPILL_ITEM, offerVows, takeVow, vowEvent, vowBattleEvents, settleVow, vowLine, vowStatus, activeVow, isHealingItem, rewardPoints, vowsPaid, vowForbids, takeVowIntro } from '../../src/game/vows.js';
 import { BattleScene } from '../../src/scenes/battle.js';
 import { partyAction } from '../../src/battle/ai.js';
 import { VOW_TEXT } from '../../src/data/text.js';
@@ -390,4 +390,34 @@ test('H6: the first offer is explained once per save; Walk the road names no lam
   assert.equal(vowEvent(v, { type: 'flee' }, engine), true);
   assert.deepEqual(log, [['Vow ended: No fleeing.', 'orange']], 'in battle: the log window');
   assert.deepEqual(toasts, [], 'no toast over the help line and the timeline');
+});
+
+// Scott, 2026-11-15 ("Go with all 4"): a vow paid on a fully mastered weapon is not wasted.
+test('a kept vow skips a maxed weapon: the least-mastered other weapon gets the points', () => {
+  const cap = MASTERY_XP[MASTERY_XP.length - 1];
+  const g = game({ battles: 2 });
+  const hero = g.party.find((m) => m.id === 'hero');
+  hero.weapon = 'sword'; hero.mastery = { sword: cap, axe: 30 };
+  assert.equal(payWeapon(hero), 'axe');
+  takeVow(g, 'no_flee'); fought(g);
+  const k = settleVow(g);
+  assert.equal(k.reward.weapon, 'axe'); assert.equal(hero.mastery.sword, cap); assert.equal(hero.mastery.axe, 34);
+  assert.ok(fits(k.text));
+});
+
+test('a kept vow on a member with every weapon maxed pays one small item', () => {
+  const cap = MASTERY_XP[MASTERY_XP.length - 1];
+  const g = game({ battles: 2 });
+  const hero = g.party.find((m) => m.id === 'hero');
+  hero.weapon = 'sword'; hero.mastery = { sword: cap, axe: cap };
+  assert.equal(payWeapon(hero), null);
+  const had = (g.items || {})[VOW_SPILL_ITEM] || 0;
+  takeVow(g, 'no_flee'); fought(g);
+  const k = settleVow(g);
+  assert.equal(k.reward.item, VOW_SPILL_ITEM); assert.equal(g.items[VOW_SPILL_ITEM], had + 1);
+  assert.ok(CONSUMABLES[VOW_SPILL_ITEM]);
+  assert.equal(k.text, `Vow kept: No fleeing.
+${VOW_TEXT.paidItem.replace('{item}', CONSUMABLES[VOW_SPILL_ITEM].name)}`);
+  assert.ok(fits(k.text));
+  assert.deepEqual(g.vowsKept.at(-1), { id: 'no_flee', chapter: 1, paid: true });
 });
