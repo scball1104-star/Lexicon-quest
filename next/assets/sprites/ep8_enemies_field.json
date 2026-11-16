@@ -1,0 +1,311 @@
+{
+ "image": "ep8_enemies_field.png",
+ "frames": {
+  "index_hound_0": [
+   0,
+   0,
+   24,
+   24
+  ],
+  "index_hound_1": [
+   25,
+   0,
+   24,
+   24
+  ],
+  "margin_imp_0": [
+   50,
+   0,
+   16,
+   16
+  ],
+  "margin_imp_1": [
+   67,
+   0,
+   16,
+   16
+  ],
+  "paper_crane_0": [
+   84,
+   0,
+   24,
+   20
+  ],
+  "paper_crane_1": [
+   109,
+   0,
+   24,
+   20
+  ],
+  "gnawing_bookworm_0": [
+   134,
+   0,
+   16,
+   16
+  ],
+  "gnawing_bookworm_1": [
+   151,
+   0,
+   16,
+   16
+  ],
+  "catalog_wraith_0": [
+   168,
+   0,
+   24,
+   24
+  ],
+  "catalog_wraith_1": [
+   193,
+   0,
+   24,
+   24
+  ],
+  "inkbound_librarian_0": [
+   218,
+   0,
+   24,
+   32
+  ],
+  "inkbound_librarian_1": [
+   0,
+   33,
+   24,
+   32
+  ],
+  "struck_page_0": [
+   25,
+   33,
+   16,
+   16
+  ],
+  "struck_page_1": [
+   42,
+   33,
+   16,
+   16
+  ],
+  "unnamed_sentry_0": [
+   59,
+   33,
+   24,
+   32
+  ],
+  "unnamed_sentry_1": [
+   84,
+   33,
+   24,
+   32
+  ],
+  "eraser_avatar_0": [
+   109,
+   33,
+   54,
+   49
+  ],
+  "eraser_avatar_1": [
+   164,
+   33,
+   54,
+   49
+  ],
+  "eraser_avatar_back_0": [
+   0,
+   83,
+   54,
+   49
+  ],
+  "eraser_avatar_back_1": [
+   55,
+   83,
+   54,
+   49
+  ]
+ },
+ "anims": {
+  "index_hound_idle": {
+   "frames": [
+    "index_hound_0",
+    "index_hound_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "margin_imp_idle": {
+   "frames": [
+    "margin_imp_0",
+    "margin_imp_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "paper_crane_idle": {
+   "frames": [
+    "paper_crane_0",
+    "paper_crane_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "gnawing_bookworm_idle": {
+   "frames": [
+    "gnawing_bookworm_0",
+    "gnawing_bookworm_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "catalog_wraith_idle": {
+   "frames": [
+    "catalog_wraith_0",
+    "catalog_wraith_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "inkbound_librarian_idle": {
+   "frames": [
+    "inkbound_librarian_0",
+    "inkbound_librarian_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "struck_page_idle": {
+   "frames": [
+    "struck_page_0",
+    "struck_page_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "unnamed_sentry_idle": {
+   "frames": [
+    "unnamed_sentry_0",
+    "unnamed_sentry_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  "eraser_avatar_idle": {
+   "frames": [
+    "eraser_avatar_0",
+    "eraser_avatar_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  "eraser_avatar_back_idle": {
+   "frames": [
+    "eraser_avatar_back_0",
+    "eraser_avatar_back_1"
+   ],
+   "fps": 2,
+   "loop": true
+  }
+ },
+ "sprites": {
+  "index_hound": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "margin_imp": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "paper_crane": {
+   "size": [
+    24,
+    20
+   ],
+   "origin": [
+    12,
+    19
+   ]
+  },
+  "gnawing_bookworm": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "catalog_wraith": {
+   "size": [
+    24,
+    24
+   ],
+   "origin": [
+    12,
+    23
+   ]
+  },
+  "inkbound_librarian": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "struck_page": {
+   "size": [
+    16,
+    16
+   ],
+   "origin": [
+    8,
+    15
+   ]
+  },
+  "unnamed_sentry": {
+   "size": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ]
+  },
+  "eraser_avatar": {
+   "size": [
+    54,
+    49
+   ],
+   "origin": [
+    27,
+    48
+   ]
+  },
+  "eraser_avatar_back": {
+   "size": [
+    54,
+    49
+   ],
+   "origin": [
+    27,
+    48
+   ]
+  }
+ },
+ "facing": "left",
+ "notes": "Episode 8 pack atlas, merged into enemies_field. Frames face LEFT (flip for right), 2-frame idle, origin bottom-centre. Each foe carries its own dark outline (it holds on the cream parchment and the white page) and a 1 px gold rim inside it (it holds on the violet void and the dark ink floors), so a FIELD_LOOK entry is not needed. eraser_avatar (front) and eraser_avatar_back (seen from behind, mirrored) are the Eraser as the figure on the stair: the empty white face under the hood, a sleeve trailing from the robe."
+}

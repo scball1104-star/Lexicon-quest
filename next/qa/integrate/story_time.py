@@ -42,6 +42,12 @@ records (next/qa/out/autoplay/<prefix>-report.json and <prefix>-dialog.log, the 
                                                               count checked against 16 (optional reads timed, not counted), the
                                                               end at the Episode 7 credits and the first fight e7w_first after
                                                               ep7_morning
+    python next/qa/integrate/story_time.py desktop-ep8        Episode 8 (E8-integrate): pop-up books by decisions, never steps (the
+                                                              bot's "read pb_<book> on <map>" notes: one per read, a close and a
+                                                              pair swap each counting one; 0.5 to 1 min each, EPISODE8_PLAN 4.10),
+                                                              the main-path count checked against 16, the end at the end title
+                                                              (mark ep8_end_title: the credits excluded, plan 12) and the first
+                                                              fight e8s_first after ep8_morning
 """
 import json
 import pathlib
@@ -55,7 +61,8 @@ QUENCH_MORE, TIDE_MORE = (60, 120), (18, 36)
 # E5-integrate (EPISODE5_PLAN 12): a sun and shade decision (an hour chosen by name, or one Shove sequence) is real thinking each
 # time (no cycling past a mark), so every further one costs as much as the first: 0.5 to 1 minute
 SHADE_MORE = (30, 60)
-# E7-integrate (EPISODE7_PLAN 4.10): a stone read is one decision, 0.5 to 1 minute each (the plan's 8 to 16 minutes for 16)
+# E7-integrate (EPISODE7_PLAN 4.10): a stone read is one decision, 0.5 to 1 minute each (the plan's 8 to 16 minutes for 16);
+# E8-integrate (EPISODE8_PLAN 4.10): a book read the same (a close counts, a pair swap is one read)
 STONE_S = (30, 60)
 STONE_BUDGET = 16
 EQUIP_PROMPT = re.compile(r'Equip the .*\?$')
@@ -85,7 +92,7 @@ def main(prefix):
     chars = sum(len(p) for p in pages)
     dialogue_s = sum(max(len(p) / READ_CPS, len(p) / TYPE_CPS) + PRESS_S for p in pages)
     timing = [t for t in report.get('timing') or [] if t['step'] != 'boot']        # boot is before the save loads
-    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'ep5_credits_done', 'ep6_credits_done', 'ep7_credits_done', 'epilogue')), timing[-1] if timing else None)
+    end = next((t for t in timing if t['step'] in ('ep2_credits_done', 'ep3_credits_done', 'ep4_credits_done', 'ep5_credits_done', 'ep6_credits_done', 'ep7_credits_done', 'ep8_end_title', 'epilogue')), timing[-1] if timing else None)
     field_s = (end['game_s'] - timing[0]['game_s']) if len(timing) > 1 else 0
     # the bot's own pages pass in about 4 frames each (instant text): take them out of its field time
     field_s = max(0.0, field_s - len(pages) * 4 / 60)
@@ -107,7 +114,7 @@ def main(prefix):
                 kinds.pop(p, None)
             kinds[name] = actions
     # E7: every read note is one decision (optional ones are timed too; only the main path counts against the budget)
-    reads = [n for n in report.get('notes', []) if re.match(r'read ns_\S+ on ', n)]
+    reads = [n for n in report.get('notes', []) if re.match(r'read (ns|pb)_\S+ on ', n)]   # E7 stones, E8 books
     main_reads = [n for n in reads if not n.endswith('(optional)')]
     if reads:
         kinds['stones'] = None
@@ -132,7 +139,7 @@ def main(prefix):
             m = re.match(r'read \S+ on (\S+):', n)
             by_map[m.group(1)] = by_map.get(m.group(1), 0) + 1
         verdict = 'within' if len(main_reads) <= STONE_BUDGET else 'OVER'
-        print(f'  stone decisions: main path {len(main_reads)} ({verdict} the budget of {STONE_BUDGET}) {by_map}; optional {len(reads) - len(main_reads)}; '
+        print(f'  {"book" if any(n.startswith("read pb_") for n in reads) else "stone"} decisions: main path {len(main_reads)} ({verdict} the budget of {STONE_BUDGET}) {by_map}; optional {len(reads) - len(main_reads)}; '
               f'{stone_lo / 60:.1f}..{stone_hi / 60:.1f} min of the puzzle time')
     if prefix.split('-')[1:2] == ['ep3']:
         episode3(report, dialog, battles)
@@ -144,6 +151,8 @@ def main(prefix):
         episode3(report, dialog, battles, morning='ep6_morning', first_enc='e6a_first')
     elif prefix.split('-')[1:2] == ['ep7']:
         episode3(report, dialog, battles, morning='ep7_morning', first_enc='e7w_first')
+    elif prefix.split('-')[1:2] == ['ep8']:
+        episode3(report, dialog, battles, morning='ep8_morning', first_enc='e8s_first')
     return 0
 
 

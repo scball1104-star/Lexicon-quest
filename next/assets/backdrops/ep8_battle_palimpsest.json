@@ -1,0 +1,17 @@
+{
+ "image": "ep8_battle_palimpsest.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "F2 the Palimpsest Galleries and the Unnamed Sentry: walls of pages written over pages, lamp niches, two lamp pools on a vellum floor (composed)",
+ "extraColors": [],
+ "colors": 27,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep8_build.py (palimpsest); palette.json plus the ep8 sheet colours (ep8_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep8_battle_palimpsest",
+ "fallback": "archive",
+ "meanLuma": 0.4372
+}

@@ -90,6 +90,8 @@ export const MAP_AT = [
   [/^ep6_/, 'zephyr'],
   [/^ep7_(palehaven|ph_\w+)$/, 'palehaven'],
   [/^ep7_/, 'north'],   // the rest of Episode 7 (the landing, the White Road, the Vault, the Stillheart)
+  [/^ep8_bell_night$/, 'willowmere'],   // Episode 8's night in the bell tower
+  [/^ep8_/, 'north'],   // Episode 8: the Stair, the Scriptorium and the Library lie past the Stillheart (no place of their own yet)
 ];
 
 /**

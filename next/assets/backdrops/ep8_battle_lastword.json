@@ -1,0 +1,60 @@
+{
+ "image": "ep8_battle_lastword.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "the Eraser: environments cell 7's luminous open book over the violet void and its ring of floating books; violet and gold grades; the white-out is a runtime overlay",
+ "extraColors": [
+  "#72508d",
+  "#785253",
+  "#634377",
+  "#442c66"
+ ],
+ "colors": 64,
+ "source": "environments.webp cell 7",
+ "bandY": 118,
+ "bandAlpha": 0.46,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep8_battle_lastword",
+ "fallback": "boss",
+ "meanLuma": 0.2677,
+ "grades": {
+  "violet": "as composed",
+  "gold": {
+   "tone": {
+    "lift": 1.8,
+    "warm": 0.0,
+    "chroma": 1.12,
+    "cast": 0.045,
+    "hue": 1.05
+   },
+   "rows": [
+    0,
+    118
+   ]
+  },
+  "how": "gold: over rows gold.rows the Episode 5 DAY_TONE pixel path (src/data/ep5/scene.js dayTone) with gold.tone (the lift and a warm amber cast, warm 0: no violet turn); cross-fade violet to gold over 30 frames when the ward breaks (phase 3). Never a screen or multiply over the violet grade.",
+  "meanLuma": {
+   "violet": 0.2677,
+   "gold": 0.3734
+  },
+  "skyLuma": {
+   "violet": 0.2981,
+   "gold": 0.4886
+  },
+  "measured": "phone crop (the 384 x 216 screen scaled by 1.806, nearest: the same mean), band drawn"
+ },
+ "whiteout": {
+  "color": "#fff7d6",
+  "alpha": 0.1747,
+  "frames": 30,
+  "holdFrames": 12,
+  "capLuma": 0.15,
+  "how": "over the gold grade: lerp every pixel toward color by alpha * t (t 0..1 over frames, then hold, then back over frames); alpha is set here so the brightest rise anywhere is at most capLuma; never a flash",
+  "measured": {
+   "maxRiseLuma": 0.147,
+   "maxStepLuma": 0.0049,
+   "over": "the gold grade, band drawn"
+  }
+ }
+}

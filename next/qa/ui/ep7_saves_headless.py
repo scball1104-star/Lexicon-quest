@@ -1,12 +1,17 @@
 """E7-pack headless check (not part of node qa/run.mjs: one browser job at a time, run by hand). The ep6 script's shape.
 
-With EP7_LIVE false (as the pack ships in wave 7a):
+Read from src/game/episodes.js, so it runs end to end on both sides of the switch (E8-pack, 2026-11-15: Episode 7 is live).
+With EP7_LIVE false (as the pack shipped in wave 7a):
   1. Boot and the title fetch nothing of the ep7 pack (no request under src/data/ep7/, for an ep7_ map or for an ep7_ asset;
      no LQ_EP7; packEnabled('ep7') false).
   2. An Episode 6 credits save that owns slot 2 (slots 0 and 1 hold another run), loaded as Continue does, rolls the Episode 6
      credits with the UNCHANGED end card ("Episode 7 is not playable yet."), wakes at ep6_zl_inn, and autosaves to slot 2 only:
      slots 0 and 1 byte for byte intact, slot 3 empty; still no ep7 request.
   3. Zero console errors.
+With EP7_LIVE true: 1. boot and the title still fetch nothing of the ep7 pack (no save wants it yet; packEnabled('ep7') true);
+  2. the same save rolls the credits with the live end card ("Episode 7 begins in the morning."), wakes at ep6_zl_inn, the ep7
+     pack comes up for it, ep7_morning moves the party to the Chart Room (ep6_zl_charts), and every autosave goes to slot 2 only;
+  3. zero console errors.
 Then, with the pack forced on (forcePack('ep7'), as ?pack=ep7 does) on the phone profile (844x390 at 3x, touch, CPU slowed 4x,
 10 Mbps with 40 ms latency, GPU on), the time from a field reset into ep6_zl_inn until the inn is up with the ep4 to ep7 packs
 ready (the chain ep3, ep4, ep5, ep6, ep7): cold (a fresh browser profile) and warm (the same profile, reloaded). Plan 3.3 target:
@@ -32,6 +37,8 @@ EP7_REQ = re.compile(r'/src/data/ep7/|/src/data/maps/ep7_|/ep7_[^/]*$')
 COUNTERS5 = ['credits_rolled', 'credits2_rolled', 'credits3_rolled', 'credits4_rolled', 'credits5_rolled']
 NOT_YET = re.compile(r'/next/src/data/(ep7/[a-z]+|maps/ep7_[a-z0-9_]+)\.js$')
 PACKS = ('ep4', 'ep5', 'ep6', 'ep7')
+LIVE = bool(re.search(r'^export const EP7_LIVE = true;$', (NEXT / 'src' / 'game' / 'episodes.js').read_text(encoding='utf-8'), re.M))
+WAKE_MAPS = ('ep6_zl_inn', 'ep6_zl_charts') if LIVE else ('ep6_zl_inn',)
 
 
 def flags_of(rel, name):
@@ -86,7 +93,7 @@ def part_saves():
         ep7 = [u for u in requests if EP7_REQ.search(u)]
         check(not ep7, f'no ep7 pack request at boot and on the title ({ep7[:3]})')
         check(lab.run('typeof globalThis.LQ_EP7') == 'undefined', 'LQ_EP7 is not installed')
-        check(lab.run("(async () => (await import('/next/src/game/packs.js')).packEnabled('ep7'))()") is False, "packEnabled('ep7') is false")
+        check(lab.run("(async () => (await import('/next/src/game/packs.js')).packEnabled('ep7'))()") is LIVE, f"packEnabled('ep7') is {LIVE} (EP7_LIVE)")
 
         # --- an Episode 6 credits save in slot 2
         lab.run("localStorage.clear()")
@@ -114,24 +121,30 @@ def part_saves():
           return g.autosaveSlot; })(%s)""" % json.dumps({'data': data}))
         check(slot == 2, 'the save loads with its own autosaveSlot 2')
         lab.page.wait_for_function(
-            '() => { const f = LQ_ENGINE.stack.find(sc => sc.name === "field"); return !!f && f.map && f.map.id === "ep6_zl_inn" && !f.loading && !LQ_DEBUG.state().transition; }',
-            timeout=90000, polling=50)
+            '(maps) => { const f = LQ_ENGINE.stack.find(sc => sc.name === "field"); return !!f && f.map && maps.includes(f.map.id) && !f.loading && !LQ_DEBUG.state().transition; }',
+            arg=list(WAKE_MAPS[-1:] if LIVE else WAKE_MAPS), timeout=90000, polling=50)
         lab.frames(30)
         seen = lab.run('window.__seen')
         print('  seen', json.dumps(seen)[:300])
         check([s[0] for s in seen][:2] == ['credits', 'titleCard'], 'the Episode 6 credits rolled, then the end card')
         card = seen[1][1]
-        check(card['text'] == 'To be continued' and card['sub'] == 'Episode 7 is not playable yet.', f'the Episode 6 end card is unchanged ({card["sub"]})')
+        sub = 'Episode 7 begins in the morning.' if LIVE else 'Episode 7 is not playable yet.'
+        check(card['text'] == 'To be continued' and card['sub'] == sub, f'the Episode 6 end card follows EP7_LIVE ({card["sub"]})')
         lab.frames(30)
         after = [lab.run(SLOT % n) for n in range(4)]
         check(after[0] == before[0] and after[1] == before[1], 'slots 0 and 1 are byte for byte intact')
         check(after[3] is None, 'slot 3 stays empty')
         s2 = json.loads(after[2]) if after[2] else None
-        check(s2 and s2['data']['map'] == 'ep6_zl_inn' and s2['data']['autosaveSlot'] == 2 and s2['data']['counters'].get('credits6_rolled') == 1,
-              'slot 2 holds the run, awake at ep6_zl_inn, credits6_rolled set')
-        check(not s2['data']['flags'].get('ep7_started'), 'ep7_morning did not run')
+        check(s2 and s2['data']['map'] in WAKE_MAPS and s2['data']['autosaveSlot'] == 2 and s2['data']['counters'].get('credits6_rolled') == 1,
+              f"slot 2 holds the run, awake at {s2 and s2['data']['map']}, credits6_rolled set")
         ep7 = [u for u in requests if EP7_REQ.search(u)]
-        check(not ep7, f'still no ep7 pack request after the credits ({ep7[:3]})')
+        if LIVE:
+            check(s2['data']['map'] == 'ep6_zl_charts', 'ep7_morning moved the party to the Chart Room (the ep7 patch on the inn fired)')
+            check(lab.run("(async () => (await import('/next/src/game/packs.js')).packReady('ep7'))()") is True, 'the ep7 pack came up for the wake')
+            check(len(ep7) > 0, f'the ep7 pack was fetched for the wake ({len(ep7)} requests)')
+        else:
+            check(not s2['data']['flags'].get('ep7_started'), 'ep7_morning did not run')
+            check(not ep7, f'still no ep7 pack request after the credits ({ep7[:3]})')
         print('  shot', save_shot(lab, 'ep7_saves_inn_after_ep6_credits'))
         if lab.errors:
             print('\n'.join(lab.errors))

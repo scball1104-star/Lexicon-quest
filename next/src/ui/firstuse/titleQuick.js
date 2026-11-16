@@ -18,7 +18,7 @@ export function titleMenuLayout(n, rowH, tw) {
   const bottomFor = (rows) => (rows > 3 && rowH > 11 ? 210 : 196);
   let columns = 1, rows = n;
   if (bottomFor(rows) - (rows * rowH + 13) < LOGO_FLOOR) { columns = 2; rows = Math.ceil(n / 2); }
-  const colW = Math.max(94, tw + 22);
+  const colW = Math.max(94, tw + 30);
   const w = columns === 1 ? Math.max(100, tw + 34) : colW * 2 + 12;
   const h = rows * rowH + 13;
   return { columns, rows, colW, win: { x: columns === 1 ? Math.round(192 - w / 2) : 20, y: bottomFor(rows) - h, w, h } };

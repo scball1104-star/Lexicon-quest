@@ -185,7 +185,8 @@ test('total synthesized audio stays small', () => {
   // Episode 5 adds ~0.97 MB of sfx and one ambience bed (pack ep5, lazy, never precached), so it moves to 11.5 MB.
   // Episode 6 adds ~1.11 MB (nine sfx and two ambience beds, pack ep6, lazy, never precached), so it moves to 12.5 MB.
   // Episode 7 adds ~1.12 MB (ten sfx and two ambience beds, pack ep7, lazy, never precached), so it moves to 13.5 MB.
-  assert.ok(total < 13.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
+  // Episode 8 adds ~0.82 MB (eight sfx, one ambience bed, pack ep8, lazy; its music is streamed, not counted here): 14.5 MB.
+  assert.ok(total < 14.5e6, `total ${(total / 1e6).toFixed(2)} MB`);
 });
 
 test('Episode 2 music: the five tracks have fallbacks and loop points (composed: the 60 ms guard; a Suno Pro replacement: measured)', () => {

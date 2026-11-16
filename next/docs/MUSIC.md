@@ -863,3 +863,150 @@ steady wind over snow (lower than `sky_wind`) with a fine snow hiss riding the g
 chime. `vault_hush` (10 s, fallback `archive_hush`; the Vault, the Stillheart): a deep hush, four drips a loop that freeze as
 they land (a drop, then a tiny tick of ice), a low hum of ice (two tones whose periods divide the loop), and a far bell-like
 groan on glass partials once a loop, so every 10 s (inside the plan's 10 to 14).
+
+## Episode 8: four more tracks (E8-audio)
+
+Composed and rendered the same way (same tracker and mix bus, -16 LUFS integrated before encoding, true peak at or under -1 dBFS,
+60 ms guard loops). Plan: `docs/EPISODE8_PLAN.md` 8. Files are `assets/audio/music/ep8_<id>.mp3` (+ sidecar), songs
+`tools/music/songs/ep8_*.py`; render with `python tools/music/render.py ep8_scriptorium_town ep8_first_library ep8_boss_eraser
+ep8_the_last_word --wav`. Like Episodes 4 to 7, they are NOT in `render.py`'s `ALL`, in `build.py`'s `MUSIC_IDS` or in
+`assets/audio/manifest.json`: Episode 8 audio reaches the game only through the pack fragment `src/data/ep8/audio.js` (plan 13.3),
+whose `volume` brings each decoded loop to its target (measured -16.44 on all four; the Last Silence -18.44 against -18).
+`python tools/audio/ep8_review.py` decodes each MP3 and draws every loop seam, the violin's motif and the Last Silence's piano
+roll (`tools/audio/out/ep8/seams.png`, `motif.png`, `ep8_boss_eraser_silence_pianoroll.png`; `levels.json`);
+`python tools/audio/ep8_sfx.py --review` draws the sound pairs (`pairs.png`); `python tools/music/songs/ep8_theme.py --preview`
+draws the violin against the other instruments (`violin_preview.png`, `violin_detail.png`). No Suno: everything is composed in
+code (the region-8 Suno brief was the tracker's brief; a real recording stays plan 9.5, Scott's call).
+
+| id | title | key | BPM / meter | bars | loop | length | fallback |
+|---|---|---|---|---|---|---|---|
+| `scriptorium_town` | The Unfinished Street | G Lydian | 88, 4/4 | 34 | 0.060 s to 92.787 s | 92.89 s | `willowmere` |
+| `first_library` | The Catalog of Lost Lives | D Dorian | 76, 4/4 | 28 | 0.060 s to 88.481 s | 88.58 s | `archive` |
+| `boss_eraser` | The Eraser | C minor | 136, 4/4 | 64 | 0.060 s to 113.001 s | 141.50 s (file) | `boss_king` |
+| `boss_eraser_silence` | The Eraser (The Last Silence) | C minor | 136, 4/4 | 16 | 113.161 s to 141.396 s (`start` 113.161) | same file | `boss_eraser` |
+| `the_last_word` | Every Name | E major | 80, 4/4 | 88 | 0.060 s to 264.060 s | 264.16 s | `title` |
+
+Sizes: 1.86, 1.77, 2.83 and 5.28 MB (160 kbps). `the_last_word` is over the 3.5 MB a track the earlier episodes kept to, because
+it is 264 s long; it is played once, at the credits, and streams through an audio element until decoded.
+
+### The Scriptorium tune and the violin (`tools/music/songs/ep8_theme.py`)
+Eight bars of 4/4 in scale degrees, four two-bar phrases, opening with the complete motif (0 4 5 3, G D E C in G, exactly 0 +7 +9
++5), the C held five beats into bar 2. Every C in the tune is a phrase's last note, so `tune(finished=False)` (each phrase's
+last note left out, its beats silent) never sings the fourth degree: the A sections of the town are G Lydian (A/G, the Lydian II
+over the tonic, no C natural anywhere) until the B sections finish the phrases on the natural C over Cmaj7. `boss_eraser`
+quotes it in C minor at half speed with the last two notes of every phrase cut (`cut=2`); `the_last_word` plays it finished in
+E. The module holds the song-local violin (synth.py is untouched). `Violin`: a band-limited saw whose level and brightness
+follow a bow-pressure curve (an S-curve swell into the note, and on long notes a gentle rise and fall through it), vibrato that
+arrives after the note starts (0.32 s by default, then a 0.45 s ramp, about 13 cents, never on short notes), a grain of rosin
+on the attack (gone in about 80 ms) and a faint bow hiss tied to the pressure, and a violin body (resonances near 280 and 470
+Hz, a dip near 1.4 kHz, the bridge hill near 2.6 kHz). No vowel formant: it reads aloud without being a voice. The preview
+sheet sets it beside core `strings_high`, core `fiddle`, Episode 7's cello, the wind harp, the oud, the iceglass bell and the
+music box (attack to 90 percent 0.16 s against the fiddle's 0.41 and the strings' 0.61; centroid of the held C 694 Hz against
+the fiddle's 1006). `python tools/music/songs/ep8_theme.py` checks the bars, the motif's intervals, that the unfinished tune
+has no C, and the chord tables.
+
+### How Episode 8 wears the name motif
+- **scriptorium_town**: the violin, G4 D5 E5 and the C5 held five beats over the harpsichord, bars 17-18 and 25-26 (an octave
+  up). Decoded (`motif.png`), the strongest pitch per beat of bars 17-18 is 392, 587, 658, then 523 Hz for five beats. In A and
+  A' (bars 1-16) the same tune is unfinished: the motif stops on its third note, G D E, and where the C belongs the celesta lets
+  fall a quiet C#6, the Lydian fourth (decoded bars 1-2: 392, 587, 660, then no C). The turnaround (33-34) has the celesta play
+  G D E and stop, into bar 1.
+- **first_library**: the violin, augmented to a bar a note, D4 A4 B4 G4 (bars 1-4, the B the Dorian sixth over G/B); the celesta
+  answers each note two beats late, two octaves up. B moves the pair onto G (G4 D5 E5 C5); C turns it over, the inverted guise
+  D5 A4 G4 B4. Every 8 bars one instrument drops out for a bar and comes back: the harpsichord in bar 8, the low pads in bar
+  16, the pizzicato heartbeat and the bass in bar 24.
+- **boss_eraser**: the high strings with the low brass an octave under, from the third of C minor: Eb4 Bb4 C5 Ab4 in half
+  notes, the Ab held into the Ab chord (bars 1 and 9). In B the Scriptorium quote on the violin (the town's instrument) with the
+  horn under it, its phrase ends rubbed out: where the cut notes belong the melody stops, the ostinato and the harpsichord stop
+  for two beats, and a dry stab of low brass and timpani lands. C climbs the motif from Eb, F and G and states it fortissimo.
+  M (61-64): the violin plays Eb Bb C and the fourth note is rubbed out again, into the loop. The Last Silence loop: the violin
+  alone over a C pedal tries the motif three times and is cut off each time, then on its last bar plays it whole in its tonic
+  guise, C5 G5 A5 F5, the F carried into the loop.
+- **the_last_word**: every episode's instrument in turn, each opening its eight-bar station with E B C# A in E major and keeping
+  its own gesture: the music box (Episode 1, `archive`), the horn (Episode 2, `hollowmere`), the dulcimer with the A struck on a
+  bell (Episode 3, `emberpeak` and `first_bell`), the celesta with the A held across the bar line (Episode 4, `valewyn`), the oud
+  with the A bent down onto G# as the harmony lands on E (Episode 5, `saffron`), the wind harp over Amaj7#11 (Episode 6,
+  `zephyr`), the iceglass bell left ringing while Episode 7's cello replies under it (`palehaven`); then the violin alone, a roll
+  call (each of the seven gives one note of the name), the full ensemble, and the violin alone at the end.
+
+### scriptorium_town: The Unfinished Street (ep8_scriptorium and ep8_sc_*, first_word, last_page, scriptorium_open; loops)
+The root region-8 brief for the tracker: celesta, harpsichord, solo violin, deep luminous pads and a gentle orchestral pulse.
+A (1-8) G, A/G, Em7, A/G, G/B, Bm7, Em7-A/G, Dsus4: the unfinished tune, the harpsichord's eighths in a low-high arch, the glass
+pad and strings, pizzicato on 1 and 3, a soft drum every two bars. A' (9-16) the same, the celesta answering in the gaps, the
+high strings in. B (17-24) G, Cmaj7, Em7, Am7-D7sus4, G/B, Am7-C, Cmaj7-D7sus4, G: the tune finished, the low strings and the
+bass. B' (25-32) the finished tune an octave up, the celesta doubling the motif two octaves over it, the choir's breath under
+the held C. T (33-34) G, Dsus4. Instruments: violin, harpsichord, celesta, glass pad, strings, strings_high, strings_low, choir,
+pizz, lowdrum, bass. Room 0.9, 4.4 s.
+
+### first_library: The Catalog of Lost Lives (ep8_library_f1, ep8_library_f2; loops)
+The harpsichord ostinato: three beats of eighths over the chord, then on beat 4 four sixteenths up and back (a page lifted and
+turned), every bar. A (1-8) Dm, Am7, G/B, G, Dm, F, C, Asus4. B (9-16) G, Dm, C, Am7, Dm, Em7, F, Asus4, the high strings very
+quiet above. C (17-24) Dm, F/A, C, G, Dm, C, Em7, Asus4: the inverted motif, a faint choir, the violin climbing to A5. T (25-28)
+Dm, C/D, G/D, Asus4/D: the violin rests; the harpsichord and the celesta's echoes alone. Instruments: violin, celesta,
+harpsichord, strings_low, glass pad, strings_high, choir, pizz, bass. Room 0.92, 5.0 s.
+
+### boss_eraser: The Eraser (the Eraser's battle; two loops in one file)
+4/4 at 136. The drive: Episode 7's song-local cello in spiccato eighths (imported from `ep7_theme`, unchanged), timpani on 1 and
+3, the harpsichord in running sixteenths, the choir and the bass. A (1-16) Cm, Ab, Fm, G, Cm, Ab, Db, G (two bars each). B (17-32)
+the Scriptorium quote, cut: Cm, Fm7, Abmaj7, Dm7b5-G7sus4, Ab, Cm, Fm7-Ab, Cm (one tune bar = two bars). C (33-48) the climb.
+R (49-60) a G pedal (G, Ab/G, then Cm/G, G), the choir rising, a timpani roll. M (61-64) Cm. A soft cymbal swell into 17, 33, 49
+and 61. Instruments: cello ostinato, harpsichord, strings_low, strings_high, brass, horn, violin, choir, lowdrum, cymbal (ep6),
+bass. **The Last Silence** (phase 4, plan 6.5) is a second loop of 16 bars after the first in the same MP3, rendered by the
+tracker as its own loop (both seams sample-continuous) and normalized to -18 LUFS, two LU under the battle: a C and G pedal in
+the low strings, a very soft choir, a heartbeat on the timpani, the violin alone. The fragment's `boss_eraser_silence` plays it:
+the same `src`, `start` = `loopStart` = the second loop. The scene switches with `audio.music('boss_eraser_silence', { fade:
+1.2 })` when phase 4 begins; the buffer is already decoded, so nothing waits on the network.
+
+### the_last_word: Every Name (CREDITS_EP8, the end title of thirteenth_name; loops)
+4/4 at 80, 88 bars (264 s; two passes cover a long credits). I (1-4) Eadd9, A, E, Bsus4: strings, harp, a celesta glint. S1 to
+S7 (5-60) the seven stations, eight bars each: the motif (bars 1-2, the A held under it by the high strings), the instrument's
+answer (3-4), the violin reading the name back, quiet (5-8); odd stations E, A, C#m7, B7sus4-B, A, E/G#, F#m7-B7sus4, E, even
+stations opening on C#m7; bar 2 takes the episode's colour (Amaj7 for the celesta, E for the oud's bend, Amaj7#11 for the wind
+harp). S8 (61-68) the violin's motif alone, its answer, and the roll call over it (music box E6, horn E4, dulcimer E5, celesta
+E6, oud E4, wind harp E4, iceglass E5, one every two beats), a timpani roll into F. F (69-84) the Scriptorium tune finished, in
+E, twice (E, Amaj7, C#m7, F#m7-B7sus4, E/G#, F#m7-A, Amaj7-B7sus4, E): violin, high strings and horn, choir, harp, timpani; the
+second time the violin an octave up and the music box, celesta, iceglass bell and dulcimer on the motif notes. C (85-88) the
+violin alone: E B C# A, the A falling to G#, then B G# and a last E. Instruments: violin, music box, horn, dulcimer, bell,
+celesta, oud (ep5), wind harp (ep6), iceglass bell and cello (ep7), strings, strings_high, strings_low, harp, choir, lowdrum,
+cymbal (ep6), bass. The music test reads `CREDITS_EP8` when E8-story's file exists and asserts that two passes cover its scroll
+at the credits scene's speed (0.55 px a frame, 44 px gaps, a 4 s hold); until then it checks the plan's 5 minutes.
+
+### Sounds (plan 8.4), `tools/audio/ep8_sfx.py`
+Not registered in `sfx_defs.REG`, as Episodes 4 to 7: the script masters with `build.master` and writes
+`assets/audio/sfx/ep8_<id>.wav` (22.05 kHz mono) and `assets/audio/ambience/ep8_<id>.wav` (16 kHz mono, seamless); `--review`
+draws waveform and spectrogram sheets and the pairs sheet into `tools/audio/out/ep8/`. All pack `ep8`, lazy (`LAZY_PREFIXES`).
+The ep8 sfx and ambience add 0.82 MB (816,410 bytes), so `qa/audio/manifest.test.mjs`'s total cap (13.5 MB, not E8-audio's file;
+the total with Episode 8 is 14.28 MB) has to move to 14.5 MB, as Episodes 4 to 7 moved it. Reused, never redefined:
+`bell_toll`, `bell_thirteenth`, `name_restore`, `kept`, Episode 4's Answer sounds; ambience `sky_wind` (ep6).
+
+| id | length | fallback | what it is |
+|---|---|---|---|
+| `page_open` | 0.98 s | `page_flutter` | a leather spine's low creak and a soft knock as the cover lifts, a flutter of pages rising (slow and low to fast and bright), a soft paper thump as they stand |
+| `page_fold` | 0.71 s | `page_flutter` | page_open's flutter (its own seed) rendered backwards, the pages falling fast to slow, then a cover's soft clap (the engine cannot reverse a buffer, so it is its own file) |
+| `rub_out` | 0.57 s | `debuff` | three short dry strokes of rubber on paper (a grating friction band with grit) and a small puff of breath |
+| `ink_slide` | 0.51 s | `defend` | a soft wet slide (a resonant sweep falling 1.4 kHz to 380 Hz through filtered noise) and a bright tick (A7) at its end |
+| `read_cast` | 1.71 s | `buff` | a plain bowed tone, no formant, reading a rising line G4 B4 D5 E5 with speech-like glides, the last note lifting a little |
+| `unwrite_read` | 2.13 s | `telegraph` | a low erasing hush in strokes (a broad rubber three times a second) and a faint beating whine over it, creeping up, unresolved |
+| `unwrite_break` | 1.50 s | `glass_break` | a sheet of paper snapping taut (a crack, a low thwap, a few scraps) and a warm G major chord bowed all at once, steady in pitch |
+| `silence_gather` | 3.15 s | `telegraph` | a thin white tone (a pure sine with a breath of air) rising a fifth from E6, swelling in and thinning away with no hard end |
+
+`silence_gather` is also the jingle `silence_gather` (the same file): a scene plays the Last Silence's charge with
+`audio.jingle('silence_gather', { duckMusic: 0.3 })`, so the music system ducks the music to 0.3 and the ambience to half for its
+length and brings both back over half a second, never a sudden loud return (the photosensitivity rule's audio twin).
+
+Told apart on purpose (`pairs.png`; the sheet prints centroid, band-profile similarity and the correlation of the level over
+time): read_cast against core `kept` (a bowed four-note line at 943 Hz against a bright chime with rising glides at 2631 Hz;
+similarity 0.56) and Episode 7's `call_cast` (a legato harmonic-rich line against two separate sine tones and far echoes, 1004
+Hz; 0.70); unwrite_break against `decree_void` (2490 Hz glass arpeggio; 0.34), `prophecy_break` (4182 Hz rising glass glides;
+0.30), `rewrite_break` (a quill snap, a paper tear and one gliding tone at 864 Hz; 0.80) and `farewell_break` (ice cracking and a
+sine chord gliding up from flat, 347 Hz; 0.88): a steady bowed chord at 647 Hz, between and unlike them; rub_out against core
+`ice` (crystal partials at 2803 Hz; 0.56) and `ink_gurgle` (the sound of Episode 6's Smudge: wet bubbles at 193 Hz; 0.58): dry
+broadband strokes at 1579 Hz; page_open against core `door_open` and `page_flutter` (similar bands, 0.92 and 0.94, but a
+different shape in time: an accelerating run of flaps ending in a thump, level correlation 0.07 and 0.28). unwrite_read and
+Episode 7's farewell_read share a band (0.98) by design (both telegraphs are a low hush with a high line), and differ in time:
+the erasing strokes three times a second and a whine at 2.5 kHz against a smooth swell and a whistle at 1.5 kHz sliding flat.
+
+Ambience: `library_hush` (10 s, fallback `archive_hush`; the Index, the First Library, the Last Word): a vast room's hush (a
+wide soft air, deeper and longer than `archive_hush`, no drips), pages turning far off twice a loop, a slow creak of a tall
+shelf once, and once a candle guttering (a flame's soft flutter and two tiny pops), in a 3.2 s reverb. Seam step 0.009 against
+a p99 step of 0.035.

@@ -48,7 +48,7 @@ const ep3Ids = () => (fs.existsSync(EP3_DIR) ? fs.readdirSync(EP3_DIR).filter((f
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 export function listMapIds() {
-  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !/^ep[4-7]_patches\.js$/.test(f)).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
+  return [...fs.readdirSync(MAPS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_') && !/^ep[4-8]_patches\.js$/.test(f)).map((f) => f.slice(0, -3)), ...ep3Ids()].sort();
 }
 
 export async function loadMap(id, { unpatched = false } = {}) {
@@ -884,6 +884,7 @@ const DIR_NAMES = new Set(['up', 'down', 'left', 'right']);
 ({ walk, loadDb, buildGrid } = (await import('./ep5_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E5-world: sun and shade
 ({ walk, loadDb, buildGrid } = (await import('./ep6_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E6-world: gust lanes
 ({ walk, loadDb, buildGrid } = (await import('./ep7_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E7-world: name stones
+({ walk, loadDb, buildGrid } = (await import('./ep8_check.mjs')).install({ walk, loadDb, buildGrid, EVENT_TYPES, GATE_SPRITE_IDS, DOOR_KINDS, eventCells, tileCode }));   // E8-world: pop-up books
 
 /**
  * Validate one map. `maps` = { id: module } for door/exit targets (grids built lazily).

@@ -67,6 +67,15 @@ field's live stones. Every Farewell and Borrowed Light is logged with how it end
 
     python next/qa/autoplay.py --episode 7 [--start new] [--device phone] [--all-fights] [--from-all]
 
+Episode 8 (E8-integrate, EPISODE8_PLAN 12; the route is qa/integrate/ep8_autoplay.py): the same two starts from
+<device>-ep7-credits-save.json (built from the last finished Episode 7 game). Pop-up books follow the map agents' reported reads
+(docs/MAPS_EP8_A.md, MAPS_EP8_B.md): each read is one confirm on a named book from a named cell, with the open directions checked on
+the field's live books. Every Unwrite and Last Silence is logged with how it ended. One ending a run (--ending return | choose; a
+run from a save before last_choice with --resume); --choose c1 takes F3's other CHOOSE book; --postgame walks north again after the
+wake. Writes <device>-ep8-* files.
+
+    python next/qa/autoplay.py --episode 8 [--start new] [--device phone] [--all-fights] [--ending choose] [--choose c1] [--postgame]
+
 Output (next/qa/out/autoplay/): <device>-NNNN-<label>.png every 30 s and on every map change,
 <device>-dialog.log (every dialogue line), <device>-report.json (timing table, battles, warnings).
 Episode 2 runs write <device>-ep2-* files instead. Exit code 1 on any console error, page error, engine error,
@@ -164,9 +173,19 @@ FIELD_JS = """() => {
     for (let i = 0; i < St.m.N; i++) if (St.m.owner[i] >= 0 || St.m.frostOwner[i] >= 0) { const x = i % W, y = Math.floor(i / W); cells.push([x, y, f.map.collisionAt(x, y)]); }
     stones = { held: St.held(), cells, busy: !!St.busy || !!St.anim || !!St.revealing, reads: St.reads, refusals: St.refusals, lastRead: St.lastRead };
   }
+  // E8: pop-up books: every page cell with the collision it has now (a bridge is floor, a wall solid); an open, a fold or a pan is busy
+  let books = null;
+  const Bk = f.books;
+  if (Bk && Bk.active && Bk.m) {
+    const W = f.map.w, cells = [], open = {};
+    for (let i = 0; i < Bk.m.N; i++) if (Bk.m.owner[i] >= 0) { const x = i % W, y = Math.floor(i / W); cells.push([x, y, f.map.collisionAt(x, y)]); }
+    Bk.m.books.forEach((id, k) => { open[id] = Bk.state[k] || '-'; });
+    books = { state: Bk.state, open, describe: Bk.m.books.map((id) => id + ':' + open[id]).join(' '), cells, busy: !!Bk.busy || !!Bk.anim || !!Bk.revealing,
+      reads: Bk.reads, refusals: Bk.refusals, lastRead: Bk.lastRead };
+  }
   return { map: f.map.id, frame: f.frame, leader: L ? { x: L.tx, y: L.ty, dir: L.dir, moving: L.moving } : null,
     locked: f.inputLocked, warp: !!f.pendingWarp, loading: !!f.loading, running: f.cutscene ? f.cutscene.running : null,
-    lantern: f.lantern, ents, actors, bridges, crust, tide, shade, wind, stones, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
+    lantern: f.lantern, ents, actors, bridges, crust, tide, shade, wind, stones, books, dead: !!f.dead, transition: !!E.transition, prompt: f.prompt ? f.prompt.ent.id : null,
     busy: !!(f.abilities && f.abilities.busy) };
 }"""
 
@@ -508,7 +527,7 @@ class Bot:
                 calm = 0
                 continue
             f = self.field()
-            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy') and not (f.get('shade') or {}).get('busy') and not (f.get('wind') or {}).get('busy') and not (f.get('stones') or {}).get('busy'):
+            if f and not f['locked'] and not f['warp'] and not f['loading'] and not f['running'] and not f['transition'] and f['leader'] and not f['leader']['moving'] and f['frame'] >= 14                     and not (f.get('tide') or {}).get('busy') and not (f.get('shade') or {}).get('busy') and not (f.get('wind') or {}).get('busy') and not (f.get('stones') or {}).get('busy') and not (f.get('books') or {}).get('busy'):
                 calm += 1
                 if calm >= 2:
                     return f
@@ -591,6 +610,7 @@ class Bot:
         live = {(x, y): c for x, y, c in ((f.get('tide') or {}).get('cells') or [])}     # E4: water, floats, seals right now
         live.update({(x, y): c for x, y, c in ((f.get('shade') or {}).get('cells') or [])})   # E5: running sand is water right now
         live.update({(x, y): c for x, y, c in ((f.get('stones') or {}).get('cells') or [])})  # E7: a held path is floor, frost solid, now
+        live.update({(x, y): c for x, y, c in ((f.get('books') or {}).get('cells') or [])})   # E8: a page over void is floor, over floor solid, now
         revealed = self.revealed.get(f['map'], set())       # E5-fixes A8: a faint bridge the Lantern lit (the Starwright Bow's)
 
         def passable(x, y, d):
@@ -6686,12 +6706,16 @@ def main(argv):
     ap.add_argument('--wrong-order', action='store_true')
     ap.add_argument('--headed', action='store_true')
     ap.add_argument('--resume', default=None, help='a <device>-last-game.json from an earlier run: seeded as record 1 and loaded through Continue')
-    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4, 5, 6, 7],
+    ap.add_argument('--episode', type=int, default=1, choices=[1, 2, 3, 4, 5, 6, 7, 8],
                     help='3: Episode 3 (E3-integrate); --start save = Continue on the Episode 2 credits save in record 1, new = the quick start with that save in slot 0; '
                          '4: Episode 4 (E4-integrate), the same two starts from the Episode 3 credits save; '
                          '5: Episode 5 (E5-integrate), the same two starts from the Episode 4 credits save; '
                          '6: Episode 6 (E6-integrate), the same two starts from the Episode 5 credits save; '
-                         '7: Episode 7 (E7-integrate), the same two starts from the Episode 6 credits save')
+                         '7: Episode 7 (E7-integrate), the same two starts from the Episode 6 credits save; '
+                         '8: Episode 8 (E8-integrate), the same two starts from the Episode 7 credits save')
+    ap.add_argument('--ending', default='return', choices=['return', 'choose'], help='Episode 8: the final choice this run makes (one per save)')
+    ap.add_argument('--choose', default='c2', choices=['c1', 'c2'], help='Episode 8: the CHOOSE book F3 is crossed by')
+    ap.add_argument('--postgame', action='store_true', help='Episode 8: after the wake, the walk north to the Last Word, save and reload')
     ap.add_argument('--tier', type=int, default=None, choices=[1], help='Fine Print (tier_1): Episode 1 from a carried Episode 2 record (docs/TIER.md)')
     ap.add_argument('--phases', default=None, help='complete route: run only these phases (comma list; qa/integrate/autoplay_x1.py PHASES), after --resume loads')
     ap.add_argument('--x1', action='store_true', help='X1 (The Wider Valley) on in a local copy (live.js served with X1_LIVE true); the regular route then proves the main path is unchanged')
@@ -6780,6 +6804,23 @@ def main(argv):
                 return 2
         if a.start == 'new':
             seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
+    E8 = None
+    if a.episode == 8 and not a.tier:
+        sys.path.insert(0, str(HERE / 'integrate'))
+        import ep8_autoplay
+        E8 = ep8_autoplay.build(sys.modules[__name__])
+        tag, ep3 = ('-ep8' + ('-new' if a.start == 'new' else '') + ('-from-all' if a.from_all else '') + ('-all' if a.all_fights else '') +
+                    ('-choose' if a.ending == 'choose' else '') + ('-c1' if a.choose == 'c1' else '') + ('-post' if a.postgame else '')), True
+        for env in ('LQ_EP4_LIVE', 'LQ_EP5_LIVE', 'LQ_EP6_LIVE', 'LQ_EP7_LIVE', 'LQ_EP8_LIVE'):
+            os.environ[env] = '1'             # episodes.js served with EP4 to EP8_LIVE forced on (a local copy of the switch)
+        if not resume:
+            try:
+                resume = str(E8.fixture(a.device, '-all' if a.from_all else ''))
+            except Fail as e:
+                print(e)
+                return 2
+        if a.start == 'new':
+            seed_slot = 0                     # slot 0 holds a finished game: the quick start must take slot 1 and touch nothing else
     if a.episode == 3 and not a.tier:
         tag, ep3 = '-ep3' + ('-new' if a.start == 'new' else ''), True
         if not resume:
@@ -6812,6 +6853,12 @@ def main(argv):
             ep.run()
         elif a.episode == 7:
             ep = E7.Episode7(bot, side=not a.no_side, until=a.until, start=a.start)
+            if a.all_fights:
+                ep.ZONE_EXP = {}
+                ep.once = True
+            ep.run()
+        elif a.episode == 8:
+            ep = E8.Episode8(bot, side=not a.no_side, until=a.until, start=a.start, ending=a.ending, choose=a.choose, postgame=a.postgame)
             if a.all_fights:
                 ep.ZONE_EXP = {}
                 ep.once = True

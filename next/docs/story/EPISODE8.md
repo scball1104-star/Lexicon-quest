@@ -1186,7 +1186,53 @@ Episode 8 uses: map ids `ep8_*`; encounter prefixes `e8s_` (the Stair), `e8l1_`,
 
 ## 9. Build notes
 
-Reserved for E8-story (wave 8a): what the built script does beyond the beat sheet (deltas only, as EPISODE6 section 9).
+Written by E8-story (wave 8a), 2026-11-15: what the built script (`src/data/ep8/`) does beyond or apart from the beat
+sheet. Deltas only; staging is `STAGING_EP8.md`. Every choice of section 11 but 1 and 3 is still the default pending Stephen
+(STAGING_EP8 section 8 lists the scenes that hang on each).
+
+**Ids renamed or added (Scott and Stephen will be told).**
+- `f1_arrived`, `f2_arrived`, `f3_arrived` (plan 2.2) are **`lib_f1_arrived`, `lib_f2_arrived`, `lib_f3_arrived`**: Episode 1
+  already owns the plain three (the Rootbound Archive's floors, `src/data/quests.js`), so the plan's ids would have skipped
+  the Library's arrival scenes on every save. A content test now checks every Episode 8 flag against every older flag.
+- New flags: `sentry_tried`, `eraser_tried` (a retried boss intro is short, Episode 7's pattern) and `ep8_toll_1` to
+  `ep8_toll_12` (the bell night's twelve steps, the cold open's shape). The toll steps are twelve more registered scripts
+  beside the 37 story scenes, as Episode 1's are beside its scenes.
+- New record `vex8` (Vex on the bindery step after the end, a Ledger alias of `vex`); new scene speakers `scribe_m`,
+  `traveler_m`, `mira_beam`, `bram_beam`; new prop sprites `prop_ep8_bundle`, `prop_ep8_blanket` (plan 9.2 named no ids).
+- The plan's `nox_table8` is not needed: Nox sits at Episode 7's `keeper_chair` and the party stands on `watch_stage`.
+- The final journal has two last steps, `epilogue8` and `epilogue8c`, one per ending (a step's journal is one string).
+
+**Beat sheet changes, and why.**
+- `ep8_morning` has no opening narration (six boxes: Nox twice, the note, Bram, Mira, Nox); the light through the shutter
+  is the picture. Mira's "Then we're second." comes before Nox's "I'm coming to the top."
+- `stair_arrival` drops its narration (the steps are the picture): three boxes.
+- `first_book` sets `first_book_read` itself (the lesson scene); E8-world's `first_open` bark follows the real open.
+- Nox says "I haven't stood in a street that reads in twenty-six years." in `scriptorium_arrival`, at the gate, then waits by
+  the Codex (the beat sheet put it outside the Index, where no scene stands).
+- `library_door` needs `elowen_met` as well as `card_read`: the register is the clue `the_name` pays ("The one in her
+  register"), so the door waits for Elowen and Talk names her.
+- The Librarian's record leaves on `librarian_met` (the plan said `library_open`): he goes up through his door.
+- `keeper_memory_c` keeps all four pictures in 16 boxes: the desk and its warnings are one box, the pen and the eraser are
+  his one line ("I can't write you back. I can't rub you out."), and the oldest page's sentence is one narration box while
+  the camera holds on it.
+- `the_name` says "The vault fire." where the beat sheet had "The fire." (the house rule).
+- `last_choice` asks at most twice in one run (each with its confirm); after two Nos nothing is set and the lectern's trigger
+  asks again. The cancel answer of every choice is its last option, so a cancel is always the confirm's No.
+- The witness line's "fewer" sentence is two boxes (the canon words, split at the comma).
+- `home` is one scene in two places: the stair, the roof and the flight on black, then `s.goto` to `hero_home` (E8-scene-ui)
+  with Hazel walking up to the hero; without the helper, Hazel's door is on black too. It ends with a warp to
+  `ep8_bell_night`.
+- `thirteenth_name` runs twice: on enter (no box: night, Mira and Bram on the beam) and on the top step after the twelfth
+  toll (the thirteenth, the name, the card, the end title). Without E8-scene-ui's `s.tollName` the name is one gold
+  narration box, never the hero speaking.
+- `END_CARD_EP8` keeps the plan's words in two lines within 42 characters: "Every road is open." / "The Deep Stacks wait under
+  the library."; the end title is `END_TITLE_EP8` ("Lexicon Quest" / "The End").
+- The credits' makers card copies Episodes 1 to 7 ("Scott Ball"); whether the novel's co-author is credited is Scott's and
+  Stephen's call, not the script's.
+
+**Box count.** 215 boxes on the main path (budget about 215), every scene inside its budget (`ep8_morning` 6,
+`elowen_scriptorium` 14, `keeper_memory_c` 16, `the_name` 16, `eraser` 14, `eraser_after` 17, `last_page` 15,
+`scriptorium_open` 13, `home` 9). Fifteen boxes before the first fight.
 
 ---
 
