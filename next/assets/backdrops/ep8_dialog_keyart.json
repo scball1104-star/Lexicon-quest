@@ -1,0 +1,16 @@
+{
+ "image": "ep8_dialog_keyart.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "Episode 8 title cards and the end title: cell 7 darkened, vignette",
+ "extraColors": [
+  "#5a321f",
+  "#271347",
+  "#431b09",
+  "#442965"
+ ],
+ "colors": 46,
+ "source": "environments.webp cell 7",
+ "fallback": "ep7_dialog_keyart"
+}

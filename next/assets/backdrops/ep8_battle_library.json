@@ -1,0 +1,21 @@
+{
+ "image": "ep8_battle_library.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "F1 the Catalog of Lost Lives: environments cell 7, a crop on the lit shelves of the right-hand tower; the floor under the band calmed",
+ "extraColors": [
+  "#835d95",
+  "#7a5356",
+  "#6e4c6e",
+  "#432d66"
+ ],
+ "colors": 63,
+ "source": "environments.webp cell 7",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep8_battle_library",
+ "fallback": "archive",
+ "meanLuma": 0.3239
+}
