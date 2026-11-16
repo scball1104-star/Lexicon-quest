@@ -123,11 +123,11 @@ const events = [
   object('archive_obj', 38, 12, 'shelf_a', { script: 'uncensored_archive' }),
   sign('archive_sign', 37, 11, 'ep8_archive_shelf', { solid: false }),
   chest('chest_archive', 37, 13, 'gold', { gold: 500, item: 'hi_ether', qty: 3, if: 'archive_open' }),
-  book('book_keeper_hid', 38, 13, 'keeper_hid', { if: 'archive_open' }),
+  book('book_keeper_hid', 38, 11, 'keeper_hid', { if: 'archive_open' }),   // north of the shelf: (38,13) is walled in by it and the chest
   light('lamp_d', 34, 11, 3.5), light('lamp_archive', 38, 12, 2.5),
   // ---- E: The Seal Gallery
   fountain('font_l2b', 28, 16),
-  chest('chest_gallery', 30, 21, 'iron', { gold: 1500, item: 'hi_potion', qty: 1 }),
+  chest('chest_gallery', 30, 21, 'iron', { gold: 1700, item: 'hi_potion', qty: 1 }),   // EP8_GOLD_LINE's Seal Gallery chest
   lift('lift_back', 30, 15, ['ep8_library_f2', 6, 25, 'down'], { ifNot: 'library_f2_done' }),        // down to the Overwritten Stair
   lift('lift_l2_down', 30, 15, ['ep8_library_f1', 22, 26, 'up'], { if: 'library_f2_done' }),         // the shortcut down (the fountain)
   enemy('e_em', 29, 12, 'inkbound_librarian', 'e8l2_mixed', 'guard'),

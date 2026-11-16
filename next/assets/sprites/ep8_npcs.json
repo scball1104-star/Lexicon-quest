@@ -4,7 +4,7 @@
   24,
   32
  ],
- "layout": "Episode 8 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_librarian is the Librarian (hood up, the face in shadow in every frame); npc_first_keeper is the same man with the hood back (white hair, gold eyes, the book clasp); npc_first_keeper_m his memory self (dark hair greying), npc_first_keeper_m_bundle the same carrying the baby bundle; npc_elowen is Elowen (grey at the temples, ink to the wrists, a quill behind her ear) and npc_elowen_m her younger self sitting up in an infirmary bed with the bundle (every direction shows the bed); npc_nurse_m holds the empty blanket; npc_ep8_innkeeper and npc_ep8_shopkeeper are npc_innkeeper and npc_shopkeeper recoloured. Props prop_ep8_bundle and prop_ep8_blanket are single 16x16 frames (bottom-centre).",
+ "layout": "Episode 8 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. npc_librarian is the Librarian (hood up, the face in shadow in every frame); npc_first_keeper is the same man with the hood back (white hair, gold eyes, the book clasp); npc_first_keeper_m his memory self (dark hair greying), npc_first_keeper_m_bundle the same carrying the baby bundle; npc_elowen is Elowen (grey at the temples, ink to the wrists, a quill behind her ear) and npc_elowen_m her younger self sitting up in an infirmary bed with the bundle (every direction shows the bed); npc_nurse_m holds the empty blanket; npc_ep8_innkeeper and npc_ep8_shopkeeper are npc_innkeeper and npc_shopkeeper recoloured. Props prop_ep8_bundle and prop_ep8_blanket are single 16x16 frames (bottom-centre), and each is also a one-direction 24x32 actor cell <id>_down_0 (the 16x16 drawing on its bottom centre).",
  "sprites": {
   "npc_librarian": {
    "name": "The Librarian",
@@ -276,6 +276,34 @@
     "left",
     "right",
     "up"
+   ]
+  },
+  "prop_ep8_bundle": {
+   "name": "A Baby",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down"
+   ]
+  },
+  "prop_ep8_blanket": {
+   "name": "A Blanket",
+   "cell": [
+    24,
+    32
+   ],
+   "origin": [
+    12,
+    31
+   ],
+   "dirs": [
+    "down"
    ]
   }
  },
@@ -1822,11 +1850,23 @@
    16,
    16
   ],
+  "prop_ep8_bundle_down_0": [
+   0,
+   784,
+   24,
+   32
+  ],
   "prop_ep8_blanket": [
    16,
    768,
    16,
    16
+  ],
+  "prop_ep8_blanket_down_0": [
+   24,
+   784,
+   24,
+   32
   ]
  },
  "anims": {

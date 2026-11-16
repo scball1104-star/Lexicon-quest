@@ -1618,8 +1618,9 @@ exports `miraReads(b)` and `heroAnswers(b)` for the hint lines; `enemies.js` exp
 Tier 15 (ilvl 32) and 16 (ilvl 33) as plan 7.2; uniques and the Margin-Walker set as 7.3 (every stat a party stat); affix tier 10 at ilvl
 32; `RARE_NAME_EXT` [32: Inkbound, Gilt, Margined, Lettered, Firstwritten]; ZONE_LOOT as 7.5. Shops `bibliotheca`, `glyphsmith` (tier 14
 weapons too; tier 16 after `library_f2_done`), `quinn_satchel` (peddler). `EP8_GOLD_LINE`: the Satchel 2,000, the Catalog shelf chest
-1,500, the Seal Gallery chest 1,700; optional 450 and 500. **economy8** (binding, the quick start's 4,300): at 100% with the main chests
-7,810 at the Scriptorium, 710 left after the town pieces, 11,160 before F3, 1,260 left; at 80% with every chest 408 and 798 left. **A real
+1,500, the Seal Gallery chest 1,700 (F2's `chest_gallery`); optional the Uncensored Archive strongbox on F2 500 and the Concordance
+in the Scriptorium 500. **economy8** (binding, the quick start's 4,300): at 100% with the main chests
+7,810 at the Scriptorium, 710 left after the town pieces, 11,160 before F3, 1,260 left; at 80% with every chest 408 and 848 left. **A real
 save:** the Episode 7 quick-start chain ends with 5,360 G (4,478 at 80%) and a real run is about 5,000 G richer (16.5), so a real save
 arrives with about 8,960 to 10,360: 5,370 to 6,770 left after the town pieces (a third and fourth piece), 5,920 to 7,320 after the F3
 pieces, never the whole Atelier (71,500; checked). The binding line stays on the quick start, the poorest way in.

@@ -60,7 +60,7 @@ const POSTGAME_CHAT = [
   { map: SC_MAPS, ifNot: 'drift_started', lines: [m('Quinn, at the South Margin gate. Some of his pages drifted off.')] },
   { map: [...SC_MAPS, ...LIBRARY], ifNot: 'archive_open', lines: [
     m("The Archive, in the Galleries' side rooms. Three evidence pages, any order."),
-    b('The great door in the square goes straight to the Last Word now. The lifts still run.'),
+    b('The side door by the great door goes straight to the Last Word now. The lifts still run.'),
   ] },
   { map: 'willowmere', lines: [
     m("The trapdoor in the library still goes down. The Deep Stacks don't end where we stopped."),

@@ -1,9 +1,9 @@
 // E8-integrate (EPISODE8_PLAN 3, 10, 12): the seams the autoplay route walks over, in pure node (no browser), as E7-integrate's
 // ep7_integrate.test.mjs: an Episode 7 credits fixture reaches ep8_morning only with the switch on; an ended save never runs an
 // ending scene again (the post-game walk back into the Last Word); the return route's doors land on open ground; the endings are
-// exclusive and permanent. Three seams found by the bot in files E8-seams owns are kept here as `todo` tests (reported, never
-// hidden; they turn green when the owner fixes them): Nox left in front of the Library door, the Librarian removed before his walk,
-// and the Seal Gallery chest paying less than the gold line says. Its own file: the map registries are memoized per process.
+// exclusive and permanent. Three seams the bot found are checked here (E8-fixes made them pass): nobody left in front of the
+// Library door, the Librarian walks out before his flag hides him, and the gold line pays what the floor pays. Its own file: the
+// map registries are memoized per process.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { peekMap } from '../../src/world/maps.js';
@@ -12,6 +12,7 @@ import { register as registerEp8 } from '../../src/data/ep8/index.js';
 import { scenes, GATE, SCENE_CONDITIONS, ENDINGS } from '../../src/data/ep8/story.js';
 import { newGameEp8 } from '../../src/data/ep8/start.js';
 import { EP8_GOLD_LINE } from '../../src/data/ep8/shops.js';
+import { REWARDS_EP8 } from '../../src/data/ep8/quests.js';
 import { loadDb, buildGrid, withFlags, present } from '../../tools/maps/mapcheck.mjs';
 import { runOnce } from '../content/_harness.mjs';
 import scriptorium from '../../src/data/maps/ep8_scriptorium.js';
@@ -112,7 +113,7 @@ test('the return route: the lexicon door, the stair lifts, the square return and
   assert.deepEqual(stair.events.find((e) => e.id === 'lift_foot').to.slice(0, 3), ['ep8_stair', 23, 13], 'the page lift skips every book');
 });
 
-test('seam (E8-seams, story.js library_door): the scene leaves nobody on the cell in front of the Library door', { todo: 'Nox stays on nox_gate (23,9), the only way to library_door (23,8); the bot leaves the square by the Index door and comes back' }, async () => {
+test('seam (story.js library_door): the scene leaves nobody on the cell in front of the Library door', async () => {
   const flags = ENDED.slice(0, ENDED.indexOf('elowen_met') + 1);
   const r = await runOnce(scenes.library_door, { flags, branchFlags: false, mapId: 'ep8_scriptorium' });
   const spawned = r.log.filter((e) => e.op === 'spawn').map((e) => e.args[0]);
@@ -122,21 +123,34 @@ test('seam (E8-seams, story.js library_door): the scene leaves nobody on the cel
   assert.deepEqual(front, [door.x, door.y + 1], 'nox_gate is the cell in front of the door');
   for (const id of spawned) {
     const at = r.log.find((e) => e.op === 'spawn' && e.args[0] === id).args[1].at;
-    if (at === 'nox_gate') assert.ok(gone.includes(id) || r.log.some((e) => e.op === 'walk' && e.args[0] === id), `${id} is left standing on nox_gate`);
+    if (at === 'nox_gate') assert.ok(gone.includes(id), `${id} is left standing on nox_gate`);
   }
+  assert.ok(spawned.includes('nox_t'), 'Nox opens the door');
 });
 
-test('seam (E8-seams, story.js meet_librarian): the Librarian walks out before librarian_met hides his map NPC', { todo: 'librarian_met is set before s.walk/despawn of ep8_librarian: the NPC (show ifNot librarian_met) is gone, the walk and despawn warn "no actor"' }, async () => {
+test('seam (story.js meet_librarian): the Librarian walks out before librarian_met hides his map NPC', async () => {
   const flags = ENDED.slice(0, ENDED.indexOf('read_learned') + 1);
   const r = await runOnce(scenes.meet_librarian, { flags, branchFlags: false, mapId: 'ep8_sc_index' });
   const at = (pred) => r.log.findIndex(pred);
   const met = at((e) => e.op === 'setFlag' && e.args[0] === 'librarian_met');
   const walk = at((e) => e.op === 'walk' && e.args[0] === 'ep8_librarian');
-  assert.ok(walk >= 0 && met > walk, `librarian_met (op ${met}) after his walk (op ${walk})`);
+  const gone = at((e) => e.op === 'despawn' && e.args[0] === 'ep8_librarian');
+  assert.ok(walk >= 0 && met > walk && met > gone && gone > walk, `librarian_met (op ${met}) after his walk (op ${walk}) and despawn (op ${gone})`);
 });
 
-test('seam (E8-seams, the F2 map and the gold line): the Seal Gallery chest pays what EP8_GOLD_LINE (and economy8) counts', { todo: 'chest_gallery pays 1,500 G; EP8_GOLD_LINE says 1,700 (BATTLE 17.4): the sim proves a line 200 G richer than the floor' }, () => {
-  const chest = libF2.events.find((e) => e.id === 'chest_gallery');
-  const line = EP8_GOLD_LINE.mainChests.find(([m]) => m === 'ep8_library_f2');
-  assert.equal(chest.gold, line[2]);
+test('seam (the maps and the gold line): every chest and reward EP8_GOLD_LINE (and economy8) counts pays exactly that, where it says', async () => {
+  await registerMaps();
+  // [map, the line's name] -> what pays it: a chest event on that map, or a scene reward
+  const PAYS = {
+    'ep8_stair:the Forgotten Traveler Satchel': () => peekMap('ep8_stair').events.find((e) => e.id === 'satchel').gold,
+    'ep8_library_f1:the Catalog shelf chest': () => peekMap('ep8_library_f1').events.find((e) => e.id === 'chest_cache').gold,
+    'ep8_library_f2:the Seal Gallery chest': () => libF2.events.find((e) => e.id === 'chest_gallery').gold,
+    'ep8_library_f2:the Uncensored Archive strongbox': () => libF2.events.find((e) => e.id === 'chest_archive').gold,
+    'ep8_scriptorium:the Concordance': () => REWARDS_EP8.concordance.gold,
+  };
+  const all = [...EP8_GOLD_LINE.mainChests, ...EP8_GOLD_LINE.optionalChests];
+  assert.deepEqual(all.map(([m, n]) => `${m}:${n}`).sort(), Object.keys(PAYS).sort(), 'the line names exactly these');
+  for (const [m, n, g] of all) assert.equal(PAYS[`${m}:${n}`](), g, `${n} (${m})`);
+  const conc = await runOnce(scenes.concordance_light, { flags: [...ENDED, 'concordance_started', 'testimony_ione', 'testimony_fen', 'testimony_elowen'], branchFlags: false });
+  assert.ok(conc.log.some((e) => e.op === 'give' && e.args[0] === 'gold' && e.args[1] === REWARDS_EP8.concordance.gold), 'the Concordance gives its gold');
 });

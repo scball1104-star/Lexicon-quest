@@ -32,7 +32,9 @@ and EPISODE8_PLAN.md 9.2. Ages read (CRITIQUE_6 item 10: where a character ages,
   npc_ep8_shopkeeper  the Archive Keeper: npc_shopkeeper recoloured (an ink-blue robe trimmed gold, a cream turban)
 
 Props (single 16 x 16 frames, origin bottom-centre): prop_ep8_bundle (the baby bundle: fine grey infirmary wool, a pale
-linen tag at one corner) and prop_ep8_blanket (the nurse's empty blanket, folded flat with its tag).
+linen tag at one corner) and prop_ep8_blanket (the nurse's empty blanket, folded flat with its tag). Each is also an actor
+cell (E8-fixes): the same 16 x 16 drawing at the bottom centre of a 24 x 32 cell, `<id>_down_0`, one direction, in the
+`sprites` table, so a cutscene spawn of the prop resolves (world/actors.js resolveSprite needs `<id>_down_0`).
 
 The Scriptorium palette: violet, cream paper, ink black and warm gold.
 
@@ -347,7 +349,7 @@ def build(write=True):
     rects, anims = {}, {}
     per = 3
     rows = (len(blocks) + per - 1) // per
-    sheet = blank(per * 96, rows * 128 + 16)
+    sheet = blank(per * 96, rows * 128 + 16 + 32)
     for bi, (nid, fr) in enumerate(blocks.items()):
         bx, by = (bi % per) * 96, (bi // per) * 128
         i = 0
@@ -366,8 +368,14 @@ def build(write=True):
         props[pid] = im
         sheet[py:py + 16, i * 16:(i + 1) * 16] = im
         rects[pid] = [i * 16, py, 16, 16]
+        # the actor cell: one direction (a prop never turns), the drawing on the cell's bottom centre (origin [12,31])
+        ax, ay = i * 24, py + 16
+        sheet[ay + 16:ay + 32, ax + 4:ax + 20] = im
+        rects[f'{pid}_down_0'] = [ax, ay, 24, 32]
     names = {nid: (EP8_NPCS[nid]['name'] if nid in EP8_NPCS else 'A Young Keeper') for nid in blocks}
     sprites = {nid: {'name': names[nid], 'cell': [24, 32], 'origin': [12, 31], 'dirs': DIRS} for nid in blocks}
+    for pid, name in (('prop_ep8_bundle', 'A Baby'), ('prop_ep8_blanket', 'A Blanket')):
+        sprites[pid] = {'name': name, 'cell': [24, 32], 'origin': [12, 31], 'dirs': ['down']}
     meta = {'image': 'ep8_npcs.png', 'cell': [24, 32],
             'layout': 'Episode 8 pack atlas, merged into npcs. Humanoid blocks (3 per band, rows down,left,right,up x cols '
                       'stand,stepA,stepB,blink). No atlas `origin`: every frame uses the default bottom-centre [12,31]. '
@@ -377,7 +385,8 @@ def build(write=True):
                       'Elowen (grey at the temples, ink to the wrists, a quill behind her ear) and npc_elowen_m her younger '
                       'self sitting up in an infirmary bed with the bundle (every direction shows the bed); npc_nurse_m holds '
                       'the empty blanket; npc_ep8_innkeeper and npc_ep8_shopkeeper are npc_innkeeper and npc_shopkeeper '
-                      'recoloured. Props prop_ep8_bundle and prop_ep8_blanket are single 16x16 frames (bottom-centre).',
+                      'recoloured. Props prop_ep8_bundle and prop_ep8_blanket are single 16x16 frames (bottom-centre), and each '
+                      'is also a one-direction 24x32 actor cell <id>_down_0 (the 16x16 drawing on its bottom centre).',
             'sprites': sprites, 'frames': rects, 'anims': anims}
     if write:
         import anim_atlas as AA

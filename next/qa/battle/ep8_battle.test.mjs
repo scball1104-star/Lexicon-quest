@@ -129,6 +129,8 @@ test('battles with no erasing foe have no Erasure: an Episode 7 and an Episode 4
   assert.equal(JSON.stringify(lists), ep7Cmds, 'the same commands as before Episode 8 registered');
   assert.equal(typeof RULE_EXT.commands, 'function');
   assert.ok(RULE_EXT.commands.ep8Erasure);
+  // rules.js calls RULE_EXT.commands and then each entry's own: Erasure is on the first only, so it marks a build once (E8-fixes)
+  assert.deepEqual(RULE_EXT.filter((h) => h && h.commands).map((h) => h.id), [], 'no RULE_EXT entry has a commands hook of its own');
   // Read Aloud is gated with no erasing foe
   const m = b.unit('mira');
   assert.ok(!m.skills.includes('read_aloud'));

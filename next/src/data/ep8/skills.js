@@ -97,8 +97,8 @@ export const EP8_SKILLS = {
     help: 'The empty face turns to you. Rubs out.', fx: 'ink_lance', sfx: 'rub_out' }),
   margin_sweep: foe({ id: 'margin_sweep', name: 'Margin Sweep', target: 'enemies', formula: 'mag', power: 75, effects: [E], erasing: true,
     help: 'The margins sweep the party. Rubs out.', fx: 'ink_wave', sfx: 'rub_out' }),
-  // A charge every 3rd Eraser turn in the last phase. Answer (the hero) breaks it; a Break cancels it; Defend halves it and the ink
-  // slides off. Landed: party mag 180%, and every non-hero member's last command rubbed out. `last_silence: true` names it for the
+  // A charge every 2nd Eraser turn in the last phase (enemies.js silenceEvery). Answer (the hero) breaks it; a Break cancels it;
+  // Defend halves it and the ink slides off. Landed: party mag 180%, and every non-hero member's last command rubbed out. `last_silence: true` names it for the
   // hero's SIGNATURE_TECHS row (Answer, usable). Neither `answerable` nor `decree` nor `telegraphSfx` (Episode 4's wraps: header).
   last_silence: foe({ id: 'last_silence', name: 'The Last Silence', target: 'enemies', formula: 'mag', power: 180, last_silence: true, holdForHero: true,
     effects: [{ keep: 'erasure', erasure: 'silence' }], erasing: true,

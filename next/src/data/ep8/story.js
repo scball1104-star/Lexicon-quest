@@ -363,9 +363,9 @@ async function meet_librarian(s) {
   await s.face('ep8_librarian', 'hero');
   await s.give(REWARDS_EP8.reader_card.item, REWARDS_EP8.reader_card.qty);
   await say(s, 'ep8_librarian', 'The Library is closed to new names. I have a last page to see to.');
-  await s.setFlag('librarian_met');
   await s.walk('ep8_librarian', 'back_door');
   await s.despawn('ep8_librarian');
+  await s.setFlag('librarian_met');   // after his walk: the flag hides his map NPC (show ifNot librarian_met)
   await s.music(null);
   const open = await page(s, 'ep8_card', 'card');
   await narrate(s, 'Mira reads her card: Welcome, readers. Please return what you borrow. A stamp in the corner.');
@@ -440,6 +440,8 @@ async function library_door(s) {
   await say(s, 'nox_t', "I couldn't go in, before. A Keeper with no name can't. I have mine back.");
   await s.face('nox_t', 'up');
   await s.sfx('gate_open');
+  await s.walk('nox_t', ['up']);   // she goes in first: nobody is left on nox_gate, the only cell in front of the door
+  await s.despawn('nox_t');
   await s.setFlag('library_open');
   await s.camera.follow('hero');
 }
@@ -684,6 +686,8 @@ async function the_name(s) {
   await s.camera.panTo('ink_door', 20);
   await s.sfx('door_unlock');
   await narrate(s, 'The Original Ink Key turns in the Original Ink Keyhole. Its bow is cracked. The door opens on gold light.');
+  await s.walk('nox_t', ['up']);   // she goes through first: nox_key is the only cell in front of ink_door (eraser spawns her again)
+  await s.despawn('nox_t');
   await s.camera.follow('hero');
   await s.setFlag('name_told');
 }
@@ -935,24 +939,32 @@ async function scriptorium_open(s) {
   await say(s, 'nox_t', "I'll stay a while. Somebody should keep him honest.");
   await s.title('The Scriptorium', { sub: 'An Open Library', frames: 160 });
   await s.camera.follow('hero');
+  // the scene's records go before the flag (ep7_ending's way): the First Keeper off the Index door, Nox off its step, and
+  // vex_k off vex_step, where the flag puts the vex8 NPC
+  for (const id of ['first_keeper', 'nox_t', 'vex_k']) await s.despawn(id);
   await s.setFlag('scriptorium_open');
 }
 
 // 29. ep8_scriptorium, step trigger home_trig at the South Margin gate (if: scriptorium_open; Talk names it). The scene owns
 // the time and place: the stair down and the roof on black, the flight, Hazel at the door of hero_home (s.goto when E8-scene-ui
 // has it; without it the door is on black too), the third truth choice. Ends on the bell night (warp to ep8_bell_night's
-// foot). 9 boxes (10 on black). Sets home_reached, and told_hazel or spared_hazel.
+// foot). 9 boxes (10 on black). Sets home_reached, and told_hazel or spared_hazel. Started on hero_home (a reload after the
+// goto's autosave, by ep8_patches.js withHomeDoor) it skips the flight and begins at the door.
 async function home(s) {
-  await s.music(null);
-  await s.fade('out', 60);
-  await narrate(s, 'Down the stair of light, every line of it written again. On the Stillheart roof, the Kestrel is waiting.');
-  await say(s, 'aeris_t', "Told you I'd be here.");
-  await s.music('triumph');
-  await narrate(s, 'The Kestrel flies south at sunset, over the realms. Every one of them is on the map again.');
-  await narrate(s, 'She sets down in Willowmere Valley in the dusk.');
-  const door = 'goto' in s;
+  // already home: a save written by the goto below, reloaded (the hero_home patch's enter trigger runs this): no flight again
+  const here = s.mapId === 'hero_home';
+  if (!here) {
+    await s.music(null);
+    await s.fade('out', 60);
+    await narrate(s, 'Down the stair of light, every line of it written again. On the Stillheart roof, the Kestrel is waiting.');
+    await say(s, 'aeris_t', "Told you I'd be here.");
+    await s.music('triumph');
+    await narrate(s, 'The Kestrel flies south at sunset, over the realms. Every one of them is on the map again.');
+    await narrate(s, 'She sets down in Willowmere Valley in the dusk.');
+  }
+  const door = here || 'goto' in s;
   if (door) {
-    await s.goto('hero_home', HOME_DOOR[0], HOME_DOOR[1], 'up');
+    if (!here) await s.goto('hero_home', HOME_DOOR[0], HOME_DOOR[1], 'up');
     await s.tint('dusk', 0);
     await s.spawn('hazel', { sprite: 'npc_parent', name: 'Hazel', at: 'hazel_start', dir: 'down' });
     await s.fade('in', 40);

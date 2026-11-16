@@ -44,8 +44,10 @@ const events = [
   object('great_lexicon', 12, 7, 'great_lexicon', { w: 4, state: 0, text: 'ep8_great_lexicon', ifNot: 'lexicon_restored' }),
   object('great_lexicon_open', 12, 7, 'great_lexicon', { w: 4, state: 3, text: 'ep8_great_lexicon', if: 'lexicon_restored', ifNot: 'page_shelved' }),
   object('great_lexicon_last', 12, 7, 'great_lexicon', { w: 4, state: 6, text: 'ep8_great_lexicon', if: 'page_shelved' }),
-  object('star_dome', 11, 5, 'star_dome', { solid: false, state: 0, text: 'ep8_star_dome', ifNot: 'eighth_star' }),
-  object('star_dome_lit', 11, 5, 'star_dome', { solid: false, state: 3, text: 'ep8_star_dome', if: 'eighth_star' }),
+  // the dome is overhead art on the wall band (11..17, rows 2..5); its cells (w 7, h 2) reach row 6, so the line is read facing up
+  // from the dais floor below it (11,7), (16,7), (17,7). The art still stands at (11,5): w and h are the event's cells only
+  object('star_dome', 11, 5, 'star_dome', { w: 7, h: 2, solid: false, state: 0, text: 'ep8_star_dome', ifNot: 'eighth_star' }),
+  object('star_dome_lit', 11, 5, 'star_dome', { w: 7, h: 2, solid: false, state: 3, text: 'ep8_star_dome', if: 'eighth_star' }),
   object('lectern_obj', 15, 8, 'lectern', { text: 'ep8_lectern' }),
   object('first_shelf', 13, 12, 'ep8_first_shelf', { w: 3, state: 0, text: 'ep8_first_shelf', ifNot: 'page_shelved' }),
   object('first_shelf_full', 13, 12, 'ep8_first_shelf', { w: 3, state: 1, text: 'ep8_first_shelf', if: 'page_shelved' }),

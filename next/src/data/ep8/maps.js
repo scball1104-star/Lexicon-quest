@@ -13,11 +13,18 @@
 import { registerMap, peekMap } from '../../world/maps.js';
 import { storedAll } from '../../game/packs.js';
 import { isMissing } from '../ep4/index.js';
+import hero_home from '../maps/hero_home.js';
 
 export const EP8_MAP_IDS = ['ep8_stair', 'ep8_scriptorium', 'ep8_sc_inn', 'ep8_sc_shop', 'ep8_sc_atelier', 'ep8_sc_index',
   'ep8_library_f1', 'ep8_library_f2', 'ep8_library_f3', 'ep8_last_word', 'ep8_bell_night'];
 /** Episode 7 map id -> the patch export of ep8_patches.js that edits it (plan 3: 1 and 2). */
 export const PATCHES = { ep7_ph_watch: 'withEp8Wake', ep7_stillheart: 'withStairDoor' };
+/**
+ * Core map id -> [the module, the patch export] (E8-fixes: home's reload at the door). Not in the pack's `touches`, for the
+ * reason ep7/maps.js gives for CORE_PATCHES: the field would hold every Episode 1 player at hero_home's door for this pack.
+ * Registered over the core module (or what a pack registered for it), so loadMap finds it once this pack is up.
+ */
+export const CORE_PATCHES = { hero_home: [hero_home, 'withHomeDoor'] };
 export const PATCH_FILE = '../maps/ep8_patches.js';
 const FILES = [...EP8_MAP_IDS.map((id) => `../maps/${id}.js`), PATCH_FILE];
 
@@ -86,11 +93,16 @@ async function run(opts) {
   const P = (await patchP) || {};
   const patched = [];
   for (const [id, name] of Object.entries(PATCHES)) if (applyPatch(id, P[name] || identity)) patched.push(id);
-  report = { loaded, skipped, patched, patchFile: Object.values(PATCHES).some((n) => typeof P[n] === 'function') };
+  const patchedCore = [];
+  for (const [id, [mod, name]] of Object.entries(CORE_PATCHES)) {
+    const base = peekMap(id) || mod, out = typeof P[name] === 'function' ? P[name](base) : base;
+    if (out && out !== base) { registerMap(out); patchedCore.push(id); }
+  }
+  report = { loaded, skipped, patched, patchedCore, patchFile: Object.values(PATCHES).some((n) => typeof P[n] === 'function') };
   return report;
 }
 
-/** Register the maps and the patches. Idempotent. Resolves { loaded, skipped, patched, patchFile }. opts.importer: tests. */
+/** Register the maps and the patches. Idempotent. Resolves { loaded, skipped, patched, patchedCore, patchFile }. opts.importer: tests. */
 export function register(engine, mods, opts = {}) {
   if (!done) done = run(opts).catch((e) => { done = null; throw e; });
   return done;

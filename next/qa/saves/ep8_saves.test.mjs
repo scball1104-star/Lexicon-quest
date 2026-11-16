@@ -440,3 +440,50 @@ test('a fixture saved after eraser_defeated and before ep8_complete reaches ep8_
     assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1'], 'its own slot only');
   }
 });
+
+test('a save written at hero_home by the goto in home (scriptorium_open, no home_reached) reloads into home at the door and reaches ep8_complete', async () => {
+  await registerEp8();
+  await (await import('../../src/data/ep8/maps.js')).register();
+  const { peekMap } = await import('../../src/world/maps.js');
+  const LATE = ['ep8_started', 'ep8_morning_done', 'ep8_roofed', 'stair_arrived', 'scriptorium_arrived', 'read_learned', 'library_open',
+    'library_f1_done', 'sentry_defeated', 'library_f2_done', 'name_told', 'eraser_defeated', 'lexicon_restored', 'keeper_named',
+    'ending_choose', 'page_shelved', 'scriptorium_open'];
+  const { save, storage } = fresh();
+  const g0 = newGameEp8('Wren', { slot: 1 });
+  const before = MAIN_QUEST_EP8.steps.slice(0, MAIN_QUEST_EP8.steps.findIndex((st) => st.id === 'home')).flatMap((st) => toList(st.done));
+  for (const f of [...LATE, ...before]) g0.flags[f] = true;
+  // the field's autosave on the goto's map change: on hero_home, just inside the door, the scene not finished
+  setPosition(g0, 'hero_home', STORY8.HOME_DOOR[0], STORY8.HOME_DOOR[1], 'up');
+  autosave(save, g0);
+  const g = deserialize(save.load(1));
+  assert.deepEqual([g.map, g.pos.x, g.pos.y], ['hero_home', ...STORY8.HOME_DOOR]);
+  const has = (f) => !!g.flags[f];
+  // the patched hero_home (ep8_patches.js withHomeDoor) runs home on enter for exactly this save
+  const enterHome = peekMap('hero_home').events.filter((e) => e.type === 'trigger' && e.on === 'enter' && e.script === 'home');
+  assert.equal(enterHome.length, 1, 'one enter trigger runs home on hero_home');
+  assert.ok(live(enterHome[0], has), 'and it is live for the reloaded save');
+  // home, started on hero_home: no flight again, Hazel at the door, then the warp to the bell night
+  let r = await play('home', g, 'hero_home');
+  assert.equal(r.ran, true, 'home runs');
+  assert.ok(!r.log.some((e) => e.op === 'say' && e.args[0] === 'aeris_t'), 'no second flight (no Aeris on the roof)');
+  assert.ok(r.log.some((e) => e.op === 'spawn' && e.args[0] === 'hazel'), 'Hazel at the door');
+  assert.ok(g.flags.home_reached && (g.flags.told_hazel || g.flags.spared_hazel), 'home_reached and the truth choice');
+  assert.equal(r.warp, 'ep8_bell_night', 'on to the bell night');
+  assert.ok(!live(enterHome[0], has), 'the trigger is gone once home is reached');
+  // the bell night: twelve tolls, then the thirteenth
+  for (const id of [...STORY8.TOLL_IDS, 'thirteenth_name']) {
+    r = await play(id, g, 'ep8_bell_night');
+    assert.equal(r.ran, true, `${id} ran`);
+  }
+  assert.ok(g.flags.ep8_complete, 'the ending finishes');
+  assert.ok(g.flags.ending_choose && !g.flags.ending_return, 'the chosen ending is unchanged');
+  setPosition(g, 'ep8_bell_night', 12, 36, 'up');
+  autosave(save, g);
+  assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1'], 'its own slot only');
+  // Episodes 1 to 7 never see it: no Episode 8 flag on an earlier save, and the core module (the pack off) has no such trigger
+  for (const flags of [EP1_DONE_FLAGS, [...EP7_DONE_FLAGS]]) {
+    const h = (f) => flags.includes(f);
+    assert.ok(!live(enterHome[0], h), 'an Episodes 1 to 7 save: the trigger is not live');
+  }
+  assert.ok(!heroHome.events.some((e) => e.script === 'home'), 'the core hero_home (EP8_LIVE off: the pack never patches it) has none');
+});

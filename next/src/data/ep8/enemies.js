@@ -8,7 +8,7 @@
 //   ai 'erasing'         basic + the charge rule + the Erasure bridge; every ordinary Episode 8 foe and the Sentry's Struck-Out Pages
 //   ai 'unnamed_sentry'  Strike Out, Cancel, Unwrite pinned (holdForMira), two Struck-Out Pages at 50%
 //   ai 'eraser'          four phases, HP locks at 70% and 26%, the Erasure Ward (Grief and Change; 12% damage, shields locked, HP
-//                        floor 32%), the Keeper Remembers (+30 Fury, Broken a turn), the Last Silence every 3rd turn (one telegraph at
+//                        floor 32%), the Keeper Remembers (+30 Fury, Broken a turn), the Last Silence every 2nd turn (one telegraph at
 //                        a time), Unwrite in phases 1 to 3
 //   ai 'rejected_truth'  Grief (Weep Ink: the Eraser +5% a turn, never above the 70% lock; Rub Out) and Change (Stand In: rules.js cover
 //                        over the Eraser; Turn the Page)

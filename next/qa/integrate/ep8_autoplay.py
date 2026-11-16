@@ -40,8 +40,10 @@ ERASE_LOG_JS = """(async () => {
       if (ev && ['unwrite_pin', 'unwrite_broken', 'unwrite_land', 'silence_broken', 'rub', 'unwritten', 'read', 'erasure'].includes(ev.type)) {
         window.__lqErase.push({ type: ev.type, enc, reason: ev.reason || null, skill: ev.skill || null, moved: !!ev.moved,
           target: name(ev.target), command: ev.command || null });
-      } else if (ev && ev.type === 'message' && ev.kind === 'silence' && /quiet/.test(ev.text || '')) {
-        window.__lqErase.push({ type: 'silence', enc });
+      } else if (ev && ev.type === 'message' && ev.kind === 'silence' && ev.text === 'The page goes quiet.') {
+        window.__lqErase.push({ type: 'silence', enc });   // a Last Silence gathers (ai.js planSilence), never "will not fall in the quiet"
+      } else if (ev && ev.type === 'action_start' && ev.action && ev.action.skill === 'last_silence') {
+        window.__lqErase.push({ type: 'silence_land', enc });   // it landed: the charge ran as the skill itself
       }
       return emit(ev);
     };
@@ -59,9 +61,6 @@ EP8_SOUNDS = ['scriptorium_town:music', 'first_library:music', 'boss_eraser:musi
 # plan 4.10: the main path's book decisions, by map
 BUDGET = {'ep8_stair': 4, 'ep8_library_f1': 4, 'ep8_library_f2': 4, 'ep8_library_f3': 4}
 EP8_START = {'level': 31, 'exp': 22200, 'gold': 4300}
-# staging warnings from seams in files E8-seams owns (reported in the run's notes, never hidden): meet_librarian sets librarian_met
-# before the Librarian walks out, so the map's NPC (show: ifNot librarian_met) is gone when the walk and the despawn look for him
-KNOWN_SEAM_WARNINGS = ('no actor "ep8_librarian"',)
 ENDING_LABEL = {'return': 'Return every stolen name', 'choose': 'Let each person choose'}
 
 
@@ -495,14 +494,9 @@ def build(ap):
             b.mark('library_door')
             f = b.settle()
             if f['map'] == 'ep8_scriptorium':
-                # SEAM (story.js library_door, E8-seams): the scene leaves Nox (nox_t) standing on nox_gate (23,9), the one cell in front of
-                # the Library door; a player must leave the square and come back. The bot does that by the Index door and logs it.
-                if any(a['id'] == 'nox_t' and (a['x'], a['y']) == (23, 9) for a in f['actors']):
-                    b.notes.append('SEAM library_door: Nox stays on nox_gate (23,9) in front of the Library door after the scene; out by the Index door and back')
-                    b.through('door_index')
-                    self.ensure_map('ep8_sc_index')
-                    b.through('index_exit', exact=False)
-                    self.ensure_map('ep8_scriptorium')
+                # nox_gate (23,9) is the one cell in front of the Library door: the scene walks Nox in, nobody stays on it
+                if any(a['id'] == 'nox_t' for a in f['actors']):
+                    raise Fail('library_door left Nox standing in the square (nox_gate is the only way to the Library door)')
                 b.through('library_door', exact=False)
             self.ensure_map('ep8_library_f1')
             b.settle(max_s=900)
@@ -685,10 +679,11 @@ def build(ap):
                 return
             f = b.settle()
             if f['map'] == 'ep8_library_f3':
+                # nox_key (17,8) is the one cell in front of the ink door: the_name walks Nox through it, before any reload
+                if any(a['id'] == 'nox_t' for a in f['actors']):
+                    raise Fail('the_name left Nox standing on the landing (nox_key is the only way to the ink door)')
                 self.keep('the ink door', reserve=0, frac=0.9)
                 b.notes.append(f'into the Last Word with {self.ethers()} Ethers, {b.items().get("fresh_ink", 0)} Fresh Ink, Lv {self.level()}')
-                self.round_trip('before the Eraser')
-                self.ensure_map('ep8_library_f3')
             prefer = [ENDING_LABEL[self.ending], 'Yes.']
             for attempt in range(5):
                 f = b.settle(prefer=prefer)
@@ -696,6 +691,10 @@ def build(ap):
                     b.through('ink_door', exact=False)
                 self.ensure_map('ep8_last_word')
                 if attempt == 0:
+                    # the checkpoint reload, at the Last Word's entry: on F3 a rest at font_l3 leaves the party below the books,
+                    # and a reload there puts every book back at its start, so the ink door has no route
+                    self.round_trip('before the Eraser')
+                    self.ensure_map('ep8_last_word')
                     b.mark('eraser')
                 b.notes.append(f'Eraser attempt {attempt + 1}: Lv {self.level()}')
                 self.level_at['Eraser'] = [m.get('level') for m in ((b.game() or {}).get('party') or [])]
@@ -724,10 +723,15 @@ def build(ap):
                 landed = sum(1 for e in ev if e['type'] == 'unwrite_land')
                 sil = sum(1 for e in ev if e['type'] == 'silence')
                 sil_end = collections.Counter(e.get('reason') for e in ev if e['type'] == 'silence_broken')
+                sil_land = sum(1 for e in ev if e['type'] == 'silence_land')
+                fights = max(1, sum(1 for e in ev if e['type'] == 'start'))
                 rubs = collections.Counter(f'{e.get("target")}:{e.get("command")}' for e in ev if e['type'] == 'rub')
                 reads = collections.Counter(e.get('target') for e in ev if e['type'] == 'read')
-                b.notes.append(f'{enc}: Unwrites {pins} (ended {dict(ended)}, landed {landed}); Last Silences {sil} (ended {dict(sil_end)}, '
-                               f'landed {max(0, sil - sum(sil_end.values()))}); Read Aloud casts on {dict(reads)}; rubs {dict(rubs)}')
+                answered = sil_end.get('answer', 0)
+                rate = f'{round(100 * answered / sil)}%' if sil else 'n/a'
+                b.notes.append(f'{enc}: Unwrites {pins} (ended {dict(ended)}, landed {landed}); Last Silences {sil} over {fights} fight(s), '
+                               f'{sil / fights:.1f} a fight (ended {dict(sil_end)}, landed {sil_land}, answered {rate}); '
+                               f'Read Aloud casts on {dict(reads)}; rubs {dict(rubs)}')
 
         def ending8(self):
             b = self.b
@@ -896,10 +900,7 @@ def build(ap):
                 'erase': self.erase_log()}, indent=1), encoding='utf-8')
             if self.has('ep8_complete'):
                 warn = {w for w in b.warnings if re.search(r'unknown .*\bid\b|unknown (object|target|sprite|map|item|npc|encounter|scene)|no actor|no path|no scene', w, re.I)}
-                seams = sorted(w for w in warn if any(k in w for k in KNOWN_SEAM_WARNINGS))
-                if seams:
-                    b.notes.append(f'SEAM warnings (reported, not a bot failure): {seams}')
-                bad = sorted(warn - set(seams))
+                bad = sorted(warn)
                 if bad:
                     raise Fail(f'{len(bad)} unknown-id or staging warnings: {bad[:6]}')
                 b.notes.append('warnings: no "unknown ... id", "no actor", "no path" or "no scene" line in the run')

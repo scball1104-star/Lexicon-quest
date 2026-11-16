@@ -13,9 +13,10 @@
 //                   Truths (from 70%): Grief and Change; while either stands the Erasure Ward holds (12% damage taken, shields locked,
 //                   HP stops at 32%). Both gone: 3 The Keeper Remembers: armor down, weak fire, the party +30 Fury, the Eraser Broken a
 //                   turn; Margin Sweep at most every 3rd turn; HP locked at 26%. 4 The Last Silence (below 26%): Haste, the Last
-//                   Silence every 3rd Eraser turn (a charge; Answer breaks it: the Eraser a full turn back and Broken; a Break cancels
-//                   it). One telegraph at a time: nothing is pinned while the Silence charges, the Silence never starts while a pin is
-//                   up, and no new pin or Silence comes on the Eraser's turn after one breaks. Unwrite in every phase between.
+//                   Silence every 2nd Eraser turn (enemies.js silenceEvery; a charge; Answer breaks it: the Eraser a full turn
+//                   back and Broken; a Break cancels it). One telegraph at a time: nothing is pinned while the Silence charges,
+//                   the Silence never starts while a pin is up, and no new pin or Silence comes on the Eraser's turn after one
+//                   breaks. Unwrite in every phase between.
 //   rejected_truth  Grief: Rub Out, then Weep Ink (the Eraser +5% of its HP, never above the 70% lock). Change: Turn the Page; Stand In
 //                   (rules.js cover: single-target hits aimed at the Eraser strike Change while it stands and is not Broken).
 //

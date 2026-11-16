@@ -50,8 +50,8 @@ gallery door), a1/a2 (the side galleries). `start: { y: 'n', a2: 's' }`.
 | A. Overwritten Stair | e 2..9 x 23..28; neck 4..5,22 | arrival/start (5,27) up from F1's `lift_up`; `lift_down` (3,24) to F1 (29,4); **font `font_l2` (7..8,24)**; `lift_back` lands (6,25) |
 | B. The Pair | west gallery 2..7 x 14..21, notch (8,15); island 11..16 x 10..19, notch (12,9) | Valewyn **v** ew (7,16) len 3, bridge 8..10 x 16..17; **w** ns (13,10) len 3, bridge 13..14 x 7..9; `memory_b_trig` (11..16,15); foes `e_bm` mixed patrol (4,19), `e_bc` cranes (15,18) |
 | C. The Wrong Version | landing 11..22 x 3..6, notch (23,6); corridor 26..38 x 3..5, door step 27..29,6, notch (27,7) | desert **x** ew (22,4) len 3, bridge 23..25 x 4..5; **y** ns (28,6) len 3: start open north, a wall 28..29 x 3..5 across the corridor; read from the north it bridges 28..29 x 7..9 down to the Seal Gallery |
-| D. Side Galleries (optional) | notch (33,6); gallery 33..35 x 8..16; lip 36,8..9, notch (36,7); Archive alcove 37..38 x 8..13 | **a1** ns (34,5) len 2, bridge 34..35 x 6..7; **a2** ns (37,8) len 2: start south (a wall 37..38 x 9..10 in the alcove mouth), read from the south it bridges 37..38 x 6..7 back up; `page_names` (33,10), `page_order` (35,12), `page_correction` (33,15) wood `evidence_page` with their flags; `chest_d` wood `hi_potion` x2 (35,16); `archive_obj` (38,12, `uncensored_archive`); `chest_archive` gold 500 + `hi_ether` x3 (37,13) and `book_keeper_hid` (38,13), both if `archive_open`; foe `e_sl` librarian (34,13) |
-| E. Seal Gallery | strip 27..30 x 10..21; joint 26,19..21; arena 18..25 x 11..21 | **font `font_l2b` (28..29,16)**; landing (28,17) for F1's `lift_l1_up` and F3's `lift_down`; `chest_gallery` iron **1,500 gold** + `hi_potion` (30,21); one cage (30,15): `lift_back` to A (6,25) while not `library_f2_done`, then `lift_l2_down` to F1 (22,26); `sentry_figure` actor (22,13, ifNot `sentry_defeated`); `sentry_trig` (25,19..21) `unnamed_sentry`; `lift_trig` (22,12) `library_f2_lift` and `lift_up` (22,11) to F3 (17,36), both after `sentry_defeated`; foe `e_em` mixed (29,12) |
+| D. Side Galleries (optional) | notch (33,6); gallery 33..35 x 8..16; lip 36,8..9, notch (36,7); Archive alcove 37..38 x 8..13 | **a1** ns (34,5) len 2, bridge 34..35 x 6..7; **a2** ns (37,8) len 2: start south (a wall 37..38 x 9..10 in the alcove mouth), read from the south it bridges 37..38 x 6..7 back up; `page_names` (33,10), `page_order` (35,12), `page_correction` (33,15) wood `evidence_page` with their flags; `chest_d` wood `hi_potion` x2 (35,16); `archive_obj` (38,12, `uncensored_archive`); `chest_archive` gold 500 + `hi_ether` x3 (37,13) and `book_keeper_hid` (38,11, north of the shelf, below a2's pages), both if `archive_open`; foe `e_sl` librarian (34,13) |
+| E. Seal Gallery | strip 27..30 x 10..21; joint 26,19..21; arena 18..25 x 11..21 | **font `font_l2b` (28..29,16)**; landing (28,17) for F1's `lift_l1_up` and F3's `lift_down`; `chest_gallery` iron **1,700 gold** + `hi_potion` (30,21); one cage (30,15): `lift_back` to A (6,25) while not `library_f2_done`, then `lift_l2_down` to F1 (22,26); `sentry_figure` actor (22,13, ifNot `sentry_defeated`); `sentry_trig` (25,19..21) `unnamed_sentry`; `lift_trig` (22,12) `library_f2_lift` and `lift_up` (22,11) to F3 (17,36), both after `sentry_defeated`; foe `e_em` mixed (29,12) |
 
 Solution: v from (6,16) right; w from (13,11) up (v folds behind, harmlessly: everyone is on the island); x from (21,5)
 right (y folds, the corridor opens); y from (28,5) down, step on at (27,7) (x folds behind). Optional: a1 from (34,4) down
@@ -80,7 +80,8 @@ Ground: `m` `scriptmosaic` (an ellipse round 13.5, 14), `g` `goldscript` dais 9.
 none (the scene sets it), ambience `library_hush`. No books, no foes.
 
 `great_lexicon` object (12,7, w 4: states 0 / 3 / 6 by `lexicon_restored`, `page_shelved`), `star_dome` object (11,5, an
-overhead piece on the wall band, states 0 / 3 by `eighth_star`), `lectern_obj` (15,8), `first_shelf` object (13,12, w 3,
+overhead piece on the wall band, states 0 / 3 by `eighth_star`; its event cells are w 7, h 2 (11..17 x 5..6) so its line is
+read facing up from the dais floor at (11,7), (16,7) or (17,7)), `lectern_obj` (15,8), `first_shelf` object (13,12, w 3,
 states 0 / 1 by `page_shelved`); `word_down` stairs (13..15,21) to F3 (17,9), **always present** so a lost fight (the party
 wakes at the entry, the map's arrival) can walk out to rest; `eraser_trig` (3..24,17) `eraser` (if `name_told`, ifNot
 `eraser_defeated`); enter triggers `lw_after`, `lw_choice`, `lw_page`; `lectern_trig` (13..15,10) `last_choice` (if
@@ -110,7 +111,7 @@ none. `qa/maps/ep8_b_maps.test.mjs` parses the paragraph itself and asserts ever
 Fonts: `font_l1` F1 (22..23,25), stand (22,26); `font_l2` F2 (7..8,24), stand (7,25); `font_l2b` F2 (28..29,16), stand
 (28,17); `font_l3` F3 (20..21,36), stand (20,37). Enemies match `ZONES` (E8-battle): F1 wraiths 2, worms 1, mixed 2; F2
 librarian 1, cranes 1, mixed 2 and the Sentry (`sentry_trig`); F3 pages 2, librarian 2, mixed 1; the Last Word the Eraser
-(`eraser_trig`). Gold line (7.6): F1 `chest_cache` 1,500, F2 `chest_gallery` 1,500, both on the main path.
+(`eraser_trig`). Gold line (7.6): F1 `chest_cache` 1,500, F2 `chest_gallery` 1,700, both on the main path.
 
 ## Brightness (stand-in grades of `qa/maps/ep8_b_preview.py`, mean frame luma)
 

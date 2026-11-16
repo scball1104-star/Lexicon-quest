@@ -123,7 +123,10 @@ export const EP8_LINES = {
     { if: 'library_open', lines: "The Library's great door, open. The seal is an open book with nothing written in it." },
     { lines: "The Library's great door: a seal as tall as a house, an open book with nothing written in it." },
   ],
-  ep8_lexicon_door: 'A door straight up to the Last Word. The Library leaves it open now.',
+  ep8_lexicon_door: [
+    { if: 'page_shelved', lines: 'A door straight up to the Last Word. The Library leaves it open now.' },
+    { lines: 'A door straight up to the Last Word. It is shut.' },
+  ],
   sign_ep8_inn: "THE KEEPER'S QUIET ROOMS. BEDS UNDER BOOKS.",
   sign_ep8_shop: 'BIBLIOTHECA SUPPLIES. INK, CORD AND WHAT A READER NEEDS.',
   sign_ep8_atelier: 'THE GLYPHSMITH ATELIER. TORN VOLUMES RESTORED.',

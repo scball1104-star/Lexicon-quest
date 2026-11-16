@@ -22,14 +22,14 @@
 //   for the member's next ERASURE_TUNE.rubTurns (2) turns; a second rub of the same command resets it to 2; at most RUB_MAX (2) at once
 //   (a third replaces the oldest). A member who Defended takes none ("The ink slides off."). Counts fall at the end of each of the
 //   member's own turns (a skipped turn counts).
-// - THE COMMANDS (seam 5 calls the hook as (state, unit, out, ctx); ctx is unused). erasureCommands() marks a rubbed row disabled with reason 'Rubbed out', `help` "Rubbed out. Try something else.",
+// - THE COMMANDS (seam 5 calls the RULE_EXT.commands hook once a build as (state, unit, out, ctx); ctx is unused). erasureCommands() marks a rubbed row disabled with reason 'Rubbed out', `help` "Rubbed out. Try something else.",
 //   `rubbed: { left, max }` (the scene's two pips) and every sub-entry disabled. A rubbed Magic row stays open with only Read Aloud lit
 //   (Read Aloud is never rubbed out). An Unwritten member has every row but Defend disabled (reason 'Unwritten'), Read Aloud included.
 //   rules.js validate() checks sub-entries but not the Attack row, so Auto and the simulator's policies read commandsOf() (ai.js).
 // - UNWRITE. pin() puts an Unwrite on a non-hero member (holdForMira: its owner's turn is held behind Mira's next one); it lands on its
 //   owner's next turn (land()): the member is Unwritten for ERASURE_TUNE.unwrittenTurns (2) turns and takes ERASURE_TUNE.unwrittenMult
-//   (x1.3) damage. rules.js has no damage-taken hook for a party member, so the x1.3 is two mods (source 'unwritten') on DEF and SPR,
-//   sized so DEF_K / (DEF_K + D) grows by exactly x1.3 for that member (Episode 7's Frozen method). Ends: Read Aloud ('read'), its
+//   (x1.8, UNWRITTEN_MULT; the plan's x1.3 moved in tuning) damage. rules.js has no damage-taken hook for a party member, so the
+//   multiplier is two mods (source 'unwritten') on DEF and SPR, sized so DEF_K / (DEF_K + D) grows by exactly that much for that member (Episode 7's Frozen method). Ends: Read Aloud ('read'), its
 //   turns ('turns'), a Break or the fall of its owner ('break').
 // - READ ALOUD (`{ keep: 'erasure', erasure: 'read' }`, Mira's, any member including herself): every rubbed command returns, Unwritten
 //   ends, the member acts sooner (push -0.25, clamped as Episode 6); a pinned Unwrite on them breaks and its owner is thrown back a
@@ -213,7 +213,7 @@ export function unwrittenMult(d, mult = ERASURE_TUNE.unwrittenMult) {
   const want = (DEF_K + d) / mult - DEF_K;
   return Math.max(0.01, Math.min(1, want / Math.max(1, d)));
 }
-/** A landed Unwrite: every command but Defend out for two turns, x1.3 damage taken. */
+/** A landed Unwrite: every command but Defend out for two turns, x1.8 damage taken (ERASURE_TUNE.unwrittenMult). */
 export function unwrite(ctx, t, source) {
   const S = ctx.state.erasure;
   if (!S || !t || t.side !== 'party' || !t.alive || t.id === HERO || S.unwritten[t.uid]) return false;
@@ -457,8 +457,8 @@ export const ERASURE_RULE = {
     }
     snapAll(ctx);
   },
-  /** E8-pack's seam 5 calls (state, unit, out, ctx) on RULE_EXT.commands and on each RULE_EXT entry; idempotent, so both are safe. */
-  commands(state, u, out, ctx) { return erasureCommands(state, u, out, ctx); },
+  // No `commands` here: E8-pack's seam 5 calls RULE_EXT.commands and then each entry's own, so Erasure's rows are marked by the one
+  // RULE_EXT.commands hook installCommands() puts on the array (E8-fixes: an entry hook as well ran erasureCommands twice a build).
 };
 
 // ----------------------------------------------------------------------------- Read Aloud with no erasing foe

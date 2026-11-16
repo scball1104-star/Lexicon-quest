@@ -19,6 +19,7 @@ import path from 'node:path';
 import { NEXT, loadAll, loadDb, validate, buildGrid, eventCells, present } from '../../tools/maps/mapcheck.mjs';
 import { analyse, PLAN_BUDGET, PLAN_OPTIONAL, CAMERA } from '../../tools/maps/ep8_check.mjs';
 import { compile, AXES } from '../../src/data/ep8/field/popbooks.js';
+import { EP8_GOLD_LINE } from '../../src/data/ep8/shops.js';
 
 await (await import('../../src/data/ep8/index.js')).register();
 const db = await loadDb();
@@ -255,6 +256,11 @@ test('the named events STAGING_EP8 section 2 asks of these maps, with their flag
   assert.equal(chest('ep8_library_f1', 'ink_key_found').item, 'ink_key');
   for (const f of ['page_names_found', 'page_order_found', 'page_correction_found']) assert.ok(chest('ep8_library_f2', f), f);
   assert.equal(byId(maps.ep8_library_f2, 'chest_archive').if, 'archive_open');
+  // the gold line (plan 7.6, ep7_b_maps' check): the chests EP8_GOLD_LINE names on these maps hold exactly its gold (E8-fixes)
+  const line = Object.fromEntries([...EP8_GOLD_LINE.mainChests, ...EP8_GOLD_LINE.optionalChests].map(([w, name, g]) => [`${w}:${name}`, g]));
+  assert.equal(byId(maps.ep8_library_f1, 'chest_cache').gold, line['ep8_library_f1:the Catalog shelf chest'], 'F1: the Catalog shelf chest');
+  assert.equal(byId(maps.ep8_library_f2, 'chest_gallery').gold, line['ep8_library_f2:the Seal Gallery chest'], 'F2: the Seal Gallery chest');
+  assert.equal(byId(maps.ep8_library_f2, 'chest_archive').gold, line['ep8_library_f2:the Uncensored Archive strongbox'], 'F2: the Archive strongbox');
   assert.equal(byId(maps.ep8_library_f3, 'ink_door').if, 'name_told');
   assert.equal(byId(maps.ep8_library_f3, 'keyhole').ifNot, 'name_told');
   for (const o of ['great_lexicon', 'first_shelf', 'star_dome']) assert.equal(byId(maps.ep8_last_word, o)?.type, 'object', o);

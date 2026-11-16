@@ -14,8 +14,9 @@ export const EP8_GOLD_LINE = {
   // [where, chest, gold] on the main path, in route order
   mainChests: [['ep8_stair', 'the Forgotten Traveler Satchel', 2000], ['ep8_library_f1', 'the Catalog shelf chest', 1500],
     ['ep8_library_f2', 'the Seal Gallery chest', 1700]],
-  // optional gold: the Palimpsest reading room (F2, 450) and the Uncensored Archive's strongbox (the Archive side story, 500)
-  optionalChests: [['ep8_library_f2', 'the Palimpsest reading room', 450], ['ep8_scriptorium', 'the Uncensored Archive strongbox', 500]],
+  // optional gold: the Uncensored Archive's strongbox (F2's chest_archive, the Archive side story, 500) and the Concordance (the
+  // Scriptorium side story's reward, REWARDS_EP8.concordance, 500)
+  optionalChests: [['ep8_library_f2', 'the Uncensored Archive strongbox', 500], ['ep8_scriptorium', 'the Concordance', 500]],
   townPieces: ['vellum_plate', 'glyphweave_robe'],        // bought on arrival at the Scriptorium (after the Stair)
   preF3Pieces: ['quillsteel_sword', 'lexicon_staff'],     // bought after library_f2_done, before F3
   spare: 300,                                             // each buy-point keeps this much for consumables
