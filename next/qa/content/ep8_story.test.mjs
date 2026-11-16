@@ -56,7 +56,7 @@ const EP8_MUSIC = ['scriptorium_town', 'first_library', 'boss_eraser', 'the_last
 const EP8_SFX = ['page_open', 'page_fold', 'rub_out', 'ink_slide', 'read_cast', 'unwrite_read', 'unwrite_break', 'silence_gather'];
 const EP8_SPRITES = ['npc_keeper', 'npc_vex', 'npc_vex_kneel', 'npc_aeris', 'npc_parent', 'npc_scholar', 'mira', 'bram', 'index_hound',
   'eraser_avatar', 'npc_librarian', 'npc_first_keeper', 'npc_first_keeper_m', 'npc_elowen_m', 'npc_nurse_m', 'npc_rootbound_keeper_m',
-  'prop_baby_bundle', 'prop_empty_blanket'];
+  'prop_ep8_bundle', 'prop_ep8_blanket'];
 const PAGE_IDS = ['ep8_note', 'ep8_card', 'ep8_seal', 'ep8_first_word', 'ep8_could_not', 'ep8_shelf', 'ep8_last_page'];
 const TINTS = ['none', 'dawn', 'dusk', 'night', 'rubout', 'violet'];   // rubout, violet: the pack tints (E8-world, plan 5.2)
 const KNOWN = (f) => f in FLAGS || f === 'tier_1';   // tier_1: the Fine Print pack's flag (src/data/tier)

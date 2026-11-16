@@ -169,6 +169,7 @@ test('the ids the Episode 8 data names resolve (skipped until E8-battle and E8-s
   const npBase = read('assets/sprites/npcs.json');
   const packs = ['ep5', 'ep6', 'ep7'].map((k) => `assets/sprites/${k}_npcs.json`).filter(exists).map(read);
   const efBase = read('assets/sprites/enemies_field.json');
+  const party = read('assets/sprites/party_field.json');   // mira, bram: the party walk in scenes
   if (exists('src/data/ep8/enemies.js')) {
     const mod = await import(pathToFileURL(path.join(NEXT, 'src/data/ep8/enemies.js')).href);
     const table = mod.EP8_ENEMIES || mod.ENEMIES || mod.default || {};
@@ -183,7 +184,8 @@ test('the ids the Episode 8 data names resolve (skipped until E8-battle and E8-s
   const src = srcs.map((p) => fs.readFileSync(path.join(NEXT, p), 'utf8')).join('\n');
   for (const id of new Set([...src.matchAll(/sprite:\s*'([a-z0-9_]+)'/g)].map((m) => m[1]))) {
     const ok = np.frames[`${id}_down_0`] || npBase.frames[`${id}_down_0`] || packs.some((p) => p.frames[`${id}_down_0`]) ||
-      ef.frames[`${id}_0`] || efBase.frames[`${id}_0`] || eb.frames[id] || np.frames[id];
+      ef.frames[`${id}_0`] || efBase.frames[`${id}_0`] || eb.frames[id] || np.frames[id] ||
+      Object.keys(party.frames).some((f) => f.startsWith(`${id}_`));
     assert.ok(ok, `sprite ${id}`);
   }
 });

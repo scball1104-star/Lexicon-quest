@@ -228,8 +228,8 @@ owns (the roof to the Stair, home to the bell night), and four optional pack hel
 - `keeper_memory_c`: `memory_c_trig` on the first landing. Nox at `nox_landing`, the party on `memory_c_stage`; the memory
   in at `memory_c_spot`. Four pictures, each a pan: the desk (`first_keeper_m` at `mc_desk`); the vault (`mc_vault`, the
   smoke under a door; he walks to `mc_stand`; the page `run`); the infirmary (`mc_bed`: `elowen_m` and the baby bundle
-  `bundle_m`, sprite `prop_baby_bundle`, at `mc_bed_bundle`; the blot; the nurse `nurse_m` at `mc_nurse` with the empty
-  blanket `blanket_m`, sprite `prop_empty_blanket`, at `mc_nurse_blanket`); the stair (`mc_stand`, the bundle at
+  `bundle_m`, sprite `prop_ep8_bundle`, at `mc_bed_bundle`; the blot; the nurse `nurse_m` at `mc_nurse` with the empty
+  blanket `blanket_m`, sprite `prop_ep8_blanket`, at `mc_nurse_blanket`); the stair (`mc_stand`, the bundle at
   `mc_stand_bundle`; his line; the page `note`); the camera holds on the oldest page (`mc_oldest`) 60 frames before its
   box. The memory out (`mystery`). The vault fire is smoke under a door and a lamp glow, never people in it; nobody in
   the pictures is hurt. 16 boxes.
@@ -406,7 +406,7 @@ can change in one place:
 - **E8-tiles.** The page kinds, modes and steps of section 1; the words over each page are the narration boxes of the scene.
 - **E8-sprites.** Spawned sprites: `npc_keeper`, `npc_vex`, `npc_vex_kneel`, `npc_aeris`, `npc_parent`, `npc_scholar`,
   `mira`, `bram`, `index_hound` (field), `eraser_avatar`, `npc_librarian`, `npc_first_keeper`, `npc_first_keeper_m`,
-  `npc_elowen_m`, `npc_nurse_m`, `npc_rootbound_keeper_m`, `prop_baby_bundle`, `prop_empty_blanket` (the two prop ids are
+  `npc_elowen_m`, `npc_nurse_m`, `npc_rootbound_keeper_m`, `prop_ep8_bundle`, `prop_ep8_blanket` (the two prop ids are
   E8-story's names for plan 9.2's bundle and empty blanket); records: `npc_elowen`, `npc_ione`, `npc_fen`, `npc_quinn`,
   `npc_sorel`, `npc_arun`, `npc_meya`; portraits `first_keeper`, `eraser`.
 - **E8-audio.** Cues used: `palehaven`, `orrery`, `mystery`, `scriptorium_town`, `first_library`, `sorrow`, `triumph`,

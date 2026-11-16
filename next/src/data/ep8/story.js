@@ -625,16 +625,16 @@ async function keeper_memory_c(s) {
   // 3. The infirmary
   await s.camera.panTo('mc_bed', 30);
   await s.spawn('elowen_m', { sprite: 'npc_elowen_m', name: 'A Young Keeper', at: 'mc_bed', dir: 'down' });
-  await s.spawn('bundle_m', { sprite: 'prop_baby_bundle', name: 'A Baby', at: 'mc_bed_bundle', dir: 'down' });
+  await s.spawn('bundle_m', { sprite: 'prop_ep8_bundle', name: 'A Baby', at: 'mc_bed_bundle', dir: 'down' });
   await narrate(s, 'The eleventh hour, in the infirmary. A young Keeper in a bed by the window holds a baby, and says its name.');
   await blot(s, 'elowen_m');   // the memory's sound drops out on the name
   await s.despawn('bundle_m');
   await s.spawn('nurse_m', { sprite: 'npc_nurse_m', name: 'A Nurse', at: 'mc_nurse', dir: 'down' });
-  await s.spawn('blanket_m', { sprite: 'prop_empty_blanket', name: 'A Blanket', at: 'mc_nurse_blanket', dir: 'down' });
+  await s.spawn('blanket_m', { sprite: 'prop_ep8_blanket', name: 'A Blanket', at: 'mc_nurse_blanket', dir: 'down' });
   await narrate(s, 'Then the ink reaches her line. A nurse stands holding an empty grey blanket. Nobody in the room remembers why.');
   // 4. The stair
   await s.camera.panTo('mc_stand', 30);
-  await s.spawn('bundle_m', { sprite: 'prop_baby_bundle', name: 'A Baby', at: 'mc_stand_bundle', dir: 'down' });
+  await s.spawn('bundle_m', { sprite: 'prop_ep8_bundle', name: 'A Baby', at: 'mc_stand_bundle', dir: 'down' });
   await narrate(s, 'In the vault, at the foot of the Concordance, a baby is crying in the smoke. He carries it up to his desk.');
   await say(s, 'first_keeper_m', "I can't write you back. I can't rub you out.");
   open = await page(s, 'ep8_could_not', 'note');

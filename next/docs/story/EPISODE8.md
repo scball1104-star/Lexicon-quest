@@ -1198,7 +1198,7 @@ sheet. Deltas only; staging is `STAGING_EP8.md`. Every choice of section 11 but 
   `ep8_toll_12` (the bell night's twelve steps, the cold open's shape). The toll steps are twelve more registered scripts
   beside the 37 story scenes, as Episode 1's are beside its scenes.
 - New record `vex8` (Vex on the bindery step after the end, a Ledger alias of `vex`); new scene speakers `scribe_m`,
-  `traveler_m`, `mira_beam`, `bram_beam`; new prop sprites `prop_baby_bundle`, `prop_empty_blanket` (plan 9.2 named no ids).
+  `traveler_m`, `mira_beam`, `bram_beam`; new prop sprites `prop_ep8_bundle`, `prop_ep8_blanket` (plan 9.2 named no ids).
 - The plan's `nox_table8` is not needed: Nox sits at Episode 7's `keeper_chair` and the party stands on `watch_stage`.
 - The final journal has two last steps, `epilogue8` and `epilogue8c`, one per ending (a step's journal is one string).
 
