@@ -19,7 +19,7 @@
 //   rejected_truth  Grief: Rub Out, then Weep Ink (the Eraser +5% of its HP, never above the 70% lock). Change: Turn the Page; Stand In
 //                   (rules.js cover: single-target hits aimed at the Eraser strike Change while it stands and is not Broken).
 //
-// Every `phase` event carries `sprite` (the Eraser's four looks: eraser, eraser_truths, eraser_keeper, eraser_silence). Messages of kind
+// Every `phase` event carries `sprite` (the Eraser's four looks: eraser, eraser_truths, eraser_remembers, eraser_silence). Messages of kind
 // 'ward', 'ward_break', 'blessing', 'stand_in', 'weep', 'faceplate', 'no_unwrite', 'silence', 'silence_hint', 'silence_broken'.
 
 import { SCRIPTS, POLICY_EXT, PARTY_POLICIES, competentPolicy } from '../../battle/ai.js';

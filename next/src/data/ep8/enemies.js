@@ -13,7 +13,7 @@
 //   ai 'rejected_truth'  Grief (Weep Ink: the Eraser +5% a turn, never above the 70% lock; Rub Out) and Change (Stand In: rules.js cover
 //                        over the Eraser; Turn the Page)
 // Flavors are first-pass lines (E8-story owns the bestiary text); sprites are pack atlas frames named by id (E8-sprites), the
-// Eraser's four looks `eraser`, `eraser_truths`, `eraser_keeper`, `eraser_silence` (each `phase` event carries its `sprite`).
+// Eraser's four looks `eraser`, `eraser_truths`, `eraser_remembers`, `eraser_silence` (each `phase` event carries its `sprite`).
 
 import { enemy, ENEMIES } from '../enemies.js';
 
@@ -125,7 +125,7 @@ export const EP8_ENEMIES = {
       { id: 'rejected_truths', name: 'The Rejected Truths', at: 0.70, floor: 0.32, weak: ['spear', 'bow'], resist: ['ice'], shields: 8,
         summon: ['truth_grief', 'truth_change'], sprite: 'eraser_truths',
         text: 'The robes spread like two covers. Grief and Change step out of the folds.' },
-      { id: 'keeper_remembers', name: 'The Keeper Remembers', at: 0.32, weak: ['fire'], resist: ['ice'], shields: 8, sprite: 'eraser_keeper',
+      { id: 'keeper_remembers', name: 'The Keeper Remembers', at: 0.32, weak: ['fire'], resist: ['ice'], shields: 8, sprite: 'eraser_remembers',
         text: 'Gold lines draw half a face through the white. Something in it remembers.' },
       { id: 'last_silence', name: 'The Last Silence', at: 0.26, weak: ['fire'], resist: ['ice'], shields: 8, haste: true, sprite: 'eraser_silence',
         moves: [{ skill: 'margin_sweep', weight: 60 }, { skill: 'rub_out', weight: 40 }],

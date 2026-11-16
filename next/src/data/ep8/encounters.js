@@ -70,7 +70,7 @@ const BOSSES = {
 export const EP8_ZONES = {
   ep8_stair: { id: 'ep8_stair', name: 'The Stair of Written Light', level: [31, 31], backdrop: 'ep8_battle_stair', music: 'battle', episode: 8,
     plan: [['e8s_first', 1], ['e8s_hounds', 1], ['e8s_cranes', 1]] },
-  ep8_library_f1: { id: 'ep8_library_f1', name: 'The Catalog of Lost Lives', level: [31, 32], backdrop: 'ep8_battle_catalog', music: 'battle', episode: 8,
+  ep8_library_f1: { id: 'ep8_library_f1', name: 'The Catalog of Lost Lives', level: [31, 32], backdrop: 'ep8_battle_library', music: 'battle', episode: 8,
     plan: [['e8l1_wraiths', 2], ['e8l1_worms', 1], ['e8l1_mixed', 2]] },
   ep8_library_f2: { id: 'ep8_library_f2', name: 'The Palimpsest Galleries', level: [32, 33], backdrop: 'ep8_battle_palimpsest', music: 'battle', episode: 8,
     plan: [['e8l2_librarian', 1], ['e8l2_cranes', 1], ['e8l2_mixed', 2], ['unnamed_sentry', 1]] },

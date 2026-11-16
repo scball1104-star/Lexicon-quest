@@ -333,7 +333,7 @@ test('the Eraser: locks at 70% and 26%, the ward (12%, floor 32%, Grief capped a
   assert.equal(e.ai.phase, 3);
   assert.equal(e.charging && e.charging.skill, 'last_silence', 'the first Last Silence gathers as the phase opens');
   // every phase forwards its look (enterPhase trap)
-  assert.deepEqual(E8.enemies.ERASER_LOOKS, ['eraser', 'eraser_truths', 'eraser_keeper', 'eraser_silence']);
+  assert.deepEqual(E8.enemies.ERASER_LOOKS, ['eraser', 'eraser_truths', 'eraser_remembers', 'eraser_silence']);
   for (const k of Object.keys(E8.enemies.HUD_ROWS)) assert.ok(ENEMIES[k] && E8.enemies.HUD_ROWS[k].looks.length, k);
   assert.equal(E8.enemies.HUD_ROWS.eraser.anchor, 'hood');
   assert.deepEqual(E8.enemies.HUD_ROWS.eraser.looks, E8.enemies.ERASER_LOOKS);

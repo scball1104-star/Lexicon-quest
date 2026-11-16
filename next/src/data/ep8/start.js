@@ -45,9 +45,9 @@ export const EP8_START = {
     name_fragment_7: 1, lantern_of_recall: 1, mirror_sigil: 1, sky_compass: 1 },
   counters: ['credits_rolled', 'credits2_rolled', 'credits3_rolled', 'credits4_rolled', 'credits5_rolled', 'credits6_rolled', 'credits7_rolled'],
   members: {
-    hero: { weapon: 'sword', equip: { sword: 'iceglass_sword', axe: 'moonsteel_axe', body: 'rimeplate_mail', head: 'sunplate_helm', boots: 'cinder_boots', charm: 'open_gate' }, mastery: { sword: 1360, axe: 440 } },
-    mira: { weapon: 'staff', equip: { staff: 'aurora_staff', bow: 'kept_promise', body: 'snowveil_robe', head: 'soot_hood', charm: 'stillheart_shard', boots: 'nomad_wraps' }, mastery: { staff: 1040, bow: 420 } },
-    bram: { weapon: 'spear', equip: { spear: 'tidewarden_trident', axe: 'first_bell_hammer', body: 'stormplate_mail', head: 'glass_helm', boots: 'winterwatch_boots', charm: 'borrowed_flame' }, mastery: { spear: 1360, axe: 440 } },
+    hero: { weapon: 'sword', equip: { sword: 'iceglass_sword', axe: 'moonsteel_axe', body: 'rimeplate_mail', head: 'sunplate_helm', boots: 'cinder_boots', charm: 'open_gate' }, mastery: { sword: 1400, axe: 450 } },
+    mira: { weapon: 'staff', equip: { staff: 'aurora_staff', bow: 'kept_promise', body: 'snowveil_robe', head: 'soot_hood', charm: 'stillheart_shard', boots: 'nomad_wraps' }, mastery: { staff: 1070, bow: 430 } },
+    bram: { weapon: 'spear', equip: { spear: 'tidewarden_trident', axe: 'first_bell_hammer', body: 'stormplate_mail', head: 'glass_helm', boots: 'winterwatch_boots', charm: 'borrowed_flame' }, mastery: { spear: 1400, axe: 450 } },
   },
 };
 
