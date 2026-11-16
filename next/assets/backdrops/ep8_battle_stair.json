@@ -1,0 +1,17 @@
+{
+ "image": "ep8_battle_stair.png",
+ "w": 384,
+ "h": 216,
+ "cell": 7,
+ "note": "the Stair of Written Light: environments cell 7's violet sky and its floating books, steps of gold handwriting composed over it climbing right, one step rubbed out",
+ "extraColors": [],
+ "colors": 65,
+ "source": "environments.webp cell 7",
+ "composed": "tools/art/backdrops/ep8_build.py (stair_steps over a cell 7 sky crop)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep8_battle_stair",
+ "fallback": "ep7_battle_road",
+ "meanLuma": 0.2762
+}

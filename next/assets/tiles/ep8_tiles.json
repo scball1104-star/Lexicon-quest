@@ -1,0 +1,3234 @@
+{
+ "version": 1,
+ "tileSize": 16,
+ "generator": "next/tools/art/tiles/ep8.py (python build_tiles.py ep8)",
+ "note": "Episode 8 (ep8 pack) tile fragment: merged into the live tile database by ensurePack; never appended to tiles.json. terrainInsertBefore names the existing terrain each ep8 terrain is drawn below: the void below every terrain, the floors below the holes; the ink canal last.",
+ "extraColors": [
+  "#2c1d55",
+  "#20143f",
+  "#f5ecd4",
+  "#e6d8b4",
+  "#c9b88f",
+  "#d4cce2",
+  "#bdb3d0",
+  "#9a8fb6",
+  "#aca4bc",
+  "#9a92ad",
+  "#a8a098",
+  "#8f8781",
+  "#78706c",
+  "#615958"
+ ],
+ "terrainOrder": [
+  "void_violet",
+  "script_step",
+  "marble_page",
+  "letterpath",
+  "scriptmosaic",
+  "parchment",
+  "vellum",
+  "blank_page",
+  "goldscript",
+  "ink_canal"
+ ],
+ "terrainInsertBefore": {
+  "void_violet": "archive_floor",
+  "script_step": "stone_floor",
+  "marble_page": "stone_floor",
+  "letterpath": "stone_floor",
+  "scriptmosaic": "stone_floor",
+  "parchment": "stone_floor",
+  "vellum": "stone_floor",
+  "blank_page": "stone_floor",
+  "goldscript": "stone_floor"
+ },
+ "terrains": {
+  "void_violet": {
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "fill",
+   "collision": "void",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 2000
+   },
+   "note": "the void of the Stair and the Library (A1, 2 identical flat frames, collision void): flat violet, no edges, no texture, no grain, never walkable-looking and never Episode 7's white; the lowest terrain, so every floor over it draws its own lip and front face. The slow gold motes are E8-world's layer",
+   "sheet": "ep8.png",
+   "order": 0
+  },
+  "script_step": {
+   "x": 0,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     48
+    ],
+    [
+     48,
+     48
+    ],
+    [
+     64,
+     48
+    ],
+    [
+     80,
+     48
+    ],
+    [
+     96,
+     48
+    ]
+   ],
+   "variantWeights": [
+    20,
+    3,
+    2,
+    2,
+    1
+   ],
+   "note": "the Stair of Written Light: each row a step of gold handwriting (glyph bars, never letters) on amber, a riser shadow under it; at least 0.12 luma over the void",
+   "sheet": "ep8.png",
+   "order": 11
+  },
+  "marble_page": {
+   "x": 112,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     144,
+     48
+    ],
+    [
+     160,
+     48
+    ],
+    [
+     176,
+     48
+    ],
+    [
+     192,
+     48
+    ]
+   ],
+   "variantWeights": [
+    40,
+    1,
+    1,
+    3
+   ],
+   "note": "the Scriptorium's paving: lilac-white marble page-stones with ruled lines and grey veins",
+   "sheet": "ep8.png",
+   "order": 12
+  },
+  "letterpath": {
+   "x": 208,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     240,
+     48
+    ],
+    [
+     256,
+     48
+    ],
+    [
+     272,
+     48
+    ],
+    [
+     288,
+     48
+    ]
+   ],
+   "variantWeights": [
+    14,
+    2,
+    2,
+    2
+   ],
+   "note": "the script-road (Arun's candle posts stand along it): warm setts, a gold sett now and then",
+   "sheet": "ep8.png",
+   "order": 13
+  },
+  "scriptmosaic": {
+   "x": 304,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     336,
+     48
+    ],
+    [
+     352,
+     48
+    ],
+    [
+     368,
+     48
+    ],
+    [
+     384,
+     48
+    ]
+   ],
+   "variantWeights": [
+    16,
+    1,
+    2,
+    2
+   ],
+   "note": "the square round the Living Codex (variant 1: the gold star of the Codex ring)",
+   "sheet": "ep8.png",
+   "order": 14
+  },
+  "parchment": {
+   "x": 400,
+   "y": 48,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     432,
+     48
+    ],
+    [
+     448,
+     48
+    ],
+    [
+     464,
+     48
+    ],
+    [
+     480,
+     48
+    ],
+    [
+     496,
+     48
+    ]
+   ],
+   "variantWeights": [
+    14,
+    2,
+    2,
+    2,
+    1
+   ],
+   "note": "F1, the Catalog of Lost Lives: warm parchment squares, ink rules, gold seams",
+   "sheet": "ep8.png",
+   "order": 15
+  },
+  "goldscript": {
+   "x": 0,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     32,
+     96
+    ],
+    [
+     48,
+     96
+    ],
+    [
+     64,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    2,
+    2
+   ],
+   "note": "gold inlay script on dark amber (canon): F1's landings, the Stair's reading desk, the Last Word dais",
+   "sheet": "ep8.png",
+   "order": 18
+  },
+  "vellum": {
+   "x": 80,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     112,
+     96
+    ],
+    [
+     128,
+     96
+    ],
+    [
+     144,
+     96
+    ],
+    [
+     160,
+     96
+    ]
+   ],
+   "variantWeights": [
+    12,
+    3,
+    2,
+    2
+   ],
+   "note": "F2, the Palimpsest Galleries: grey vellum written over twice (the old lines faint under the new)",
+   "sheet": "ep8.png",
+   "order": 16
+  },
+  "blank_page": {
+   "x": 176,
+   "y": 96,
+   "w": 32,
+   "h": 48,
+   "autotile": "A2",
+   "kind": "fill",
+   "collision": "none",
+   "variants": [
+    [
+     208,
+     96
+    ],
+    [
+     224,
+     96
+    ],
+    [
+     240,
+     96
+    ],
+    [
+     256,
+     96
+    ]
+   ],
+   "variantWeights": [
+    14,
+    2,
+    2,
+    2
+   ],
+   "note": "F3, the Unwritten Page: lavender-white blank pages, faint rules; at least 0.12 luma under the page cream",
+   "sheet": "ep8.png",
+   "order": 17
+  },
+  "ink_canal": {
+   "x": 0,
+   "y": 144,
+   "w": 32,
+   "h": 48,
+   "autotile": "A1",
+   "kind": "hole",
+   "collision": "water",
+   "variants": [],
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 260
+   },
+   "flow": "canal",
+   "note": "the Scriptorium's ink canal (A1, 3 frames, collision water): black-violet ink, gold glints, a marble kerb",
+   "sheet": "ep8.png",
+   "order": 37
+  }
+ },
+ "walls": {
+  "inkwall": {
+   "top": [
+    0,
+    192
+   ],
+   "face": [
+    32,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     192
+    ],
+    [
+     144,
+     192
+    ],
+    [
+     160,
+     192
+    ],
+    [
+     176,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E8 wall band (inkwall_top) and inner face (inkwall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep8_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      192
+     ]
+    ],
+    [
+     [
+      0,
+      432
+     ],
+     [
+      32,
+      432
+     ]
+    ],
+    [
+     [
+      64,
+      432
+     ],
+     [
+      96,
+      432
+     ],
+     [
+      128,
+      432
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep8_stair": {
+     "cycle": [
+      0,
+      1,
+      0,
+      0,
+      2
+     ]
+    },
+    "ep8_last_word": {
+     "cycle": [
+      1,
+      0,
+      2,
+      0
+     ]
+    },
+    "ep8_scriptorium": {
+     "cycle": [
+      0,
+      2,
+      0,
+      1
+     ]
+    }
+   },
+   "sheet": "ep8.png"
+  },
+  "inkwall_out": {
+   "top": [
+    64,
+    192
+   ],
+   "face": [
+    96,
+    192
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     192
+    ],
+    [
+     208,
+     192
+    ],
+    [
+     224,
+     192
+    ],
+    [
+     240,
+     192
+    ],
+    [
+     256,
+     192
+    ],
+    [
+     272,
+     192
+    ]
+   ],
+   "topVariantWeights": [
+    10,
+    2,
+    2,
+    1,
+    1,
+    1
+   ],
+   "note": "the beyond (inkwall_out_top, no edges) and the outer face under a band's south lip (inkwall_out_face)",
+   "sheet": "ep8.png"
+  },
+  "drawer_wall": {
+   "top": [
+    0,
+    240
+   ],
+   "face": [
+    32,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     240
+    ],
+    [
+     144,
+     240
+    ],
+    [
+     160,
+     240
+    ],
+    [
+     176,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E8 wall band (drawer_wall_top) and inner face (drawer_wall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep8_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      240
+     ]
+    ],
+    [
+     [
+      160,
+      432
+     ],
+     [
+      192,
+      432
+     ],
+     [
+      224,
+      432
+     ]
+    ],
+    [
+     [
+      256,
+      432
+     ],
+     [
+      288,
+      432
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep8_library_f1": {
+     "cycle": [
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      1
+     ]
+    }
+   },
+   "sheet": "ep8.png"
+  },
+  "drawer_wall_out": {
+   "top": [
+    64,
+    240
+   ],
+   "face": [
+    96,
+    240
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     240
+    ],
+    [
+     208,
+     240
+    ],
+    [
+     224,
+     240
+    ],
+    [
+     240,
+     240
+    ],
+    [
+     256,
+     240
+    ],
+    [
+     272,
+     240
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    3,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (drawer_wall_out_top, no edges) and the outer face under a band's south lip (drawer_wall_out_face)",
+   "sheet": "ep8.png"
+  },
+  "palimpsest_wall": {
+   "top": [
+    0,
+    288
+   ],
+   "face": [
+    32,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     288
+    ],
+    [
+     144,
+     288
+    ],
+    [
+     160,
+     288
+    ],
+    [
+     176,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E8 wall band (palimpsest_wall_top) and inner face (palimpsest_wall_face), a 2-row face; faceStyles per room (tools/art/tiles/ep8_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      288
+     ]
+    ],
+    [
+     [
+      320,
+      432
+     ],
+     [
+      352,
+      432
+     ]
+    ],
+    [
+     [
+      384,
+      432
+     ],
+     [
+      416,
+      432
+     ]
+    ],
+    [
+     [
+      448,
+      432
+     ],
+     [
+      480,
+      432
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep8_library_f2": {
+     "cycle": [
+      1,
+      0,
+      3,
+      2,
+      0,
+      1,
+      0
+     ]
+    }
+   },
+   "sheet": "ep8.png"
+  },
+  "palimpsest_wall_out": {
+   "top": [
+    64,
+    288
+   ],
+   "face": [
+    96,
+    288
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     288
+    ],
+    [
+     208,
+     288
+    ],
+    [
+     224,
+     288
+    ],
+    [
+     240,
+     288
+    ],
+    [
+     256,
+     288
+    ],
+    [
+     272,
+     288
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    2,
+    1,
+    1
+   ],
+   "note": "the beyond (palimpsest_wall_out_top, no edges) and the outer face under a band's south lip (palimpsest_wall_out_face)",
+   "sheet": "ep8.png"
+  },
+  "shelf_shaft": {
+   "top": [
+    0,
+    336
+   ],
+   "face": [
+    32,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     336
+    ],
+    [
+     144,
+     336
+    ],
+    [
+     160,
+     336
+    ],
+    [
+     176,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E8 wall band (shelf_shaft_top) and inner face (shelf_shaft_face), a 2-row face; faceStyles per room (tools/art/tiles/ep8_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      336
+     ]
+    ],
+    [
+     [
+      0,
+      464
+     ],
+     [
+      32,
+      464
+     ],
+     [
+      64,
+      464
+     ]
+    ],
+    [
+     [
+      96,
+      464
+     ],
+     [
+      128,
+      464
+     ],
+     [
+      160,
+      464
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep8_library_f3": {
+     "cycle": [
+      0,
+      2,
+      0,
+      1,
+      0
+     ]
+    }
+   },
+   "sheet": "ep8.png"
+  },
+  "shelf_shaft_out": {
+   "top": [
+    64,
+    336
+   ],
+   "face": [
+    96,
+    336
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     336
+    ],
+    [
+     208,
+     336
+    ],
+    [
+     224,
+     336
+    ],
+    [
+     240,
+     336
+    ],
+    [
+     256,
+     336
+    ],
+    [
+     272,
+     336
+    ]
+   ],
+   "topVariantWeights": [
+    10,
+    2,
+    2,
+    1,
+    1,
+    1
+   ],
+   "note": "the beyond (shelf_shaft_out_top, no edges) and the outer face under a band's south lip (shelf_shaft_out_face)",
+   "sheet": "ep8.png"
+  },
+  "book_tower": {
+   "top": [
+    0,
+    384
+   ],
+   "face": [
+    32,
+    384
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     128,
+     384
+    ],
+    [
+     144,
+     384
+    ],
+    [
+     160,
+     384
+    ],
+    [
+     176,
+     384
+    ]
+   ],
+   "topVariantWeights": [
+    8,
+    2,
+    2,
+    1
+   ],
+   "note": "E8 wall band (book_tower_top) and inner face (book_tower_face), a 2-row face; faceStyles per room (tools/art/tiles/ep8_kit.py)",
+   "faceStyles": [
+    [
+     [
+      32,
+      384
+     ]
+    ],
+    [
+     [
+      192,
+      464
+     ],
+     [
+      224,
+      464
+     ]
+    ]
+   ],
+   "faceStyleByMap": {
+    "ep8_scriptorium": {
+     "cycle": [
+      0,
+      1,
+      0,
+      0,
+      1
+     ]
+    }
+   },
+   "sheet": "ep8.png"
+  },
+  "book_tower_out": {
+   "top": [
+    64,
+    384
+   ],
+   "face": [
+    96,
+    384
+   ],
+   "collision": "solid",
+   "topVariants": [
+    [
+     192,
+     384
+    ],
+    [
+     208,
+     384
+    ],
+    [
+     224,
+     384
+    ],
+    [
+     240,
+     384
+    ],
+    [
+     256,
+     384
+    ],
+    [
+     272,
+     384
+    ]
+   ],
+   "topVariantWeights": [
+    10,
+    2,
+    2,
+    1,
+    1,
+    1
+   ],
+   "note": "the beyond (book_tower_out_top, no edges) and the outer face under a band's south lip (book_tower_out_face)",
+   "sheet": "ep8.png"
+  }
+ },
+ "tiles": {
+  "page_bridge": {
+   "x": 0,
+   "y": 656,
+   "w": 48,
+   "h": 48,
+   "collision": "none",
+   "nineSlice": 16,
+   "note": "pages over the void (a bridge): 9-slice of 16 px slices; cream, a 1 px ink edge, a 2 px shadow onto the void inside the south slices",
+   "sheet": "ep8.png"
+  },
+  "page_wall": {
+   "x": 48,
+   "y": 656,
+   "w": 48,
+   "h": 48,
+   "collision": "solid",
+   "nineSlice": 16,
+   "note": "pages standing on floor (a wall): 9-slice of 16 px slices; the stacked page edges on top, the front face and a 2 px shadow on the south slices",
+   "sheet": "ep8.png"
+  },
+  "page_ghost": {
+   "x": 96,
+   "y": 656,
+   "w": 48,
+   "h": 48,
+   "collision": "none",
+   "nineSlice": 16,
+   "note": "the dotted gold ghost of pages-to-be (or of cells that will clear): 9-slice outline, two-tone dashes",
+   "recipe": {
+    "color": "#f9d77a",
+    "under": "#482826",
+    "dash": [
+     2,
+     4
+    ],
+    "inset": 1,
+    "how": "round the outline of the cells, inset 1 px: pixels where (x + y) % 4 < 2 are gold, with the under colour on the pixel below each (south)"
+   },
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_n_l": {
+   "x": 0,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_n_l recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_n_m": {
+   "x": 16,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_n_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_n_r": {
+   "x": 32,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_n_r recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_s_l": {
+   "x": 48,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_s_l recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_s_m": {
+   "x": 64,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_s_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_s_r": {
+   "x": 80,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_h_s_r recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_arch_l": {
+   "x": 96,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "the canal's marble bridge: the core bridge_stone_h_arch_l recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_arch_m": {
+   "x": 112,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "the canal's marble bridge: the core bridge_stone_h_arch_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_h_arch_r": {
+   "x": 128,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "water",
+   "note": "the canal's marble bridge: the core bridge_stone_h_arch_r recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_n_w": {
+   "x": 144,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_n_w recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_n_m": {
+   "x": 160,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_n_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_n_e": {
+   "x": 176,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_n_e recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_m_w": {
+   "x": 192,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_m_w recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_m_m": {
+   "x": 208,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_m_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_m_e": {
+   "x": 224,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_m_e recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_s_w": {
+   "x": 240,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_s_w recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_s_m": {
+   "x": 256,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_s_m recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "marble_bridge_v_s_e": {
+   "x": 272,
+   "y": 1280,
+   "w": 16,
+   "h": 16,
+   "collision": "none",
+   "note": "the canal's marble bridge: the core bridge_stone_v_s_e recoloured to marble and ink (same layout rules)",
+   "sheet": "ep8.png"
+  },
+  "library_far": {
+   "x": 0,
+   "y": 1296,
+   "w": 176,
+   "h": 128,
+   "collision": "none",
+   "note": "176 x 128 decal of the First Library's luminous book and its ring from environments cell 7 (the violet sky keyed out, hard alpha, 1 px ink outline) for the overhead layer at the Stair's top (mark library_far)",
+   "sheet": "ep8.png"
+  },
+  "library_cliff": {
+   "x": 176,
+   "y": 1296,
+   "w": 112,
+   "h": 128,
+   "collision": "none",
+   "note": "112 x 128 decal of the cliff of shelves from environments cell 7 (sky keyed out) for the overhead layer at the Scriptorium's north end (mark library_cliff)",
+   "sheet": "ep8.png"
+  }
+ },
+ "objects": {
+  "popbook": {
+   "rect": [
+    0,
+    512,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     512,
+     32,
+     32
+    ],
+    [
+     32,
+     512,
+     32,
+     32
+    ],
+    [
+     64,
+     512,
+     32,
+     32
+    ],
+    [
+     96,
+     512,
+     32,
+     32
+    ],
+    [
+     128,
+     512,
+     32,
+     32
+    ],
+    [
+     160,
+     512,
+     32,
+     32
+    ],
+    [
+     192,
+     512,
+     32,
+     32
+    ],
+    [
+     224,
+     512,
+     32,
+     32
+    ],
+    [
+     256,
+     512,
+     32,
+     32
+    ],
+    [
+     288,
+     512,
+     32,
+     32
+    ],
+    [
+     320,
+     512,
+     32,
+     32
+    ],
+    [
+     352,
+     512,
+     32,
+     32
+    ],
+    [
+     384,
+     512,
+     32,
+     32
+    ],
+    [
+     416,
+     512,
+     32,
+     32
+    ],
+    [
+     448,
+     512,
+     32,
+     32
+    ],
+    [
+     480,
+     512,
+     32,
+     32
+    ]
+   ],
+   "axis": "ns",
+   "ribbons": [
+    "gold",
+    "teal",
+    "blue",
+    "green"
+   ],
+   "states": [
+    "shut",
+    "opening_a",
+    "opening_b",
+    "open"
+   ],
+   "note": "a pop-up book, 2 x 1 (axis ns: read from the north or south long side): frame = ribbon * 4 + state; state 0 shut, 1 and 2 opening (1 for the first 8 of the 16 open frames, 2 for the last 8; the fold runs 2, 1 over 12), 3 open (lying flat); ribbon 0 gold (unpaired), 1 teal, 2 blue, 3 green (a palimpsest pair shares one ribbon; its covers carry a ghost of writing)",
+   "sheet": "ep8.png"
+  },
+  "popbook_realm": {
+   "rect": [
+    0,
+    544,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     544,
+     32,
+     32
+    ],
+    [
+     32,
+     544,
+     32,
+     32
+    ],
+    [
+     64,
+     544,
+     32,
+     32
+    ],
+    [
+     96,
+     544,
+     32,
+     32
+    ],
+    [
+     128,
+     544,
+     32,
+     32
+    ],
+    [
+     160,
+     544,
+     32,
+     32
+    ],
+    [
+     192,
+     544,
+     32,
+     32
+    ],
+    [
+     224,
+     544,
+     32,
+     32
+    ],
+    [
+     256,
+     544,
+     32,
+     32
+    ],
+    [
+     288,
+     544,
+     32,
+     32
+    ],
+    [
+     320,
+     544,
+     32,
+     32
+    ],
+    [
+     352,
+     544,
+     32,
+     32
+    ],
+    [
+     384,
+     544,
+     32,
+     32
+    ],
+    [
+     416,
+     544,
+     32,
+     32
+    ],
+    [
+     448,
+     544,
+     32,
+     32
+    ],
+    [
+     480,
+     544,
+     32,
+     32
+    ]
+   ],
+   "axis": "ns",
+   "ribbons": [
+    "gold",
+    "teal",
+    "blue",
+    "green"
+   ],
+   "states": [
+    "shut",
+    "opening_a",
+    "opening_b",
+    "open"
+   ],
+   "note": "a pop-up book, 2 x 1 (axis ns: read from the north or south long side), a realm book: a gilt medallion on the cover: frame = ribbon * 4 + state; state 0 shut, 1 and 2 opening (1 for the first 8 of the 16 open frames, 2 for the last 8; the fold runs 2, 1 over 12), 3 open (lying flat); ribbon 0 gold (unpaired), 1 teal, 2 blue, 3 green (a palimpsest pair shares one ribbon; its covers carry a ghost of writing)",
+   "sheet": "ep8.png"
+  },
+  "popbook_ew": {
+   "rect": [
+    0,
+    576,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     576,
+     16,
+     48
+    ],
+    [
+     16,
+     576,
+     16,
+     48
+    ],
+    [
+     32,
+     576,
+     16,
+     48
+    ],
+    [
+     48,
+     576,
+     16,
+     48
+    ],
+    [
+     64,
+     576,
+     16,
+     48
+    ],
+    [
+     80,
+     576,
+     16,
+     48
+    ],
+    [
+     96,
+     576,
+     16,
+     48
+    ],
+    [
+     112,
+     576,
+     16,
+     48
+    ],
+    [
+     128,
+     576,
+     16,
+     48
+    ],
+    [
+     144,
+     576,
+     16,
+     48
+    ],
+    [
+     160,
+     576,
+     16,
+     48
+    ],
+    [
+     176,
+     576,
+     16,
+     48
+    ],
+    [
+     192,
+     576,
+     16,
+     48
+    ],
+    [
+     208,
+     576,
+     16,
+     48
+    ],
+    [
+     224,
+     576,
+     16,
+     48
+    ],
+    [
+     240,
+     576,
+     16,
+     48
+    ]
+   ],
+   "axis": "ew",
+   "ribbons": [
+    "gold",
+    "teal",
+    "blue",
+    "green"
+   ],
+   "states": [
+    "shut",
+    "opening_a",
+    "opening_b",
+    "open"
+   ],
+   "note": "a pop-up book, 1 x 2 (axis ew: read from the west or east long side): frame = ribbon * 4 + state; state 0 shut, 1 and 2 opening (1 for the first 8 of the 16 open frames, 2 for the last 8; the fold runs 2, 1 over 12), 3 open (lying flat); ribbon 0 gold (unpaired), 1 teal, 2 blue, 3 green (a palimpsest pair shares one ribbon; its covers carry a ghost of writing)",
+   "sheet": "ep8.png"
+  },
+  "popbook_realm_ew": {
+   "rect": [
+    256,
+    576,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     256,
+     576,
+     16,
+     48
+    ],
+    [
+     272,
+     576,
+     16,
+     48
+    ],
+    [
+     288,
+     576,
+     16,
+     48
+    ],
+    [
+     304,
+     576,
+     16,
+     48
+    ],
+    [
+     320,
+     576,
+     16,
+     48
+    ],
+    [
+     336,
+     576,
+     16,
+     48
+    ],
+    [
+     352,
+     576,
+     16,
+     48
+    ],
+    [
+     368,
+     576,
+     16,
+     48
+    ],
+    [
+     384,
+     576,
+     16,
+     48
+    ],
+    [
+     400,
+     576,
+     16,
+     48
+    ],
+    [
+     416,
+     576,
+     16,
+     48
+    ],
+    [
+     432,
+     576,
+     16,
+     48
+    ],
+    [
+     448,
+     576,
+     16,
+     48
+    ],
+    [
+     464,
+     576,
+     16,
+     48
+    ],
+    [
+     480,
+     576,
+     16,
+     48
+    ],
+    [
+     496,
+     576,
+     16,
+     48
+    ]
+   ],
+   "axis": "ew",
+   "ribbons": [
+    "gold",
+    "teal",
+    "blue",
+    "green"
+   ],
+   "states": [
+    "shut",
+    "opening_a",
+    "opening_b",
+    "open"
+   ],
+   "note": "a pop-up book, 1 x 2 (axis ew: read from the west or east long side), a realm book: frame = ribbon * 4 + state; state 0 shut, 1 and 2 opening (1 for the first 8 of the 16 open frames, 2 for the last 8; the fold runs 2, 1 over 12), 3 open (lying flat); ribbon 0 gold (unpaired), 1 teal, 2 blue, 3 green (a palimpsest pair shares one ribbon; its covers carry a ghost of writing)",
+   "sheet": "ep8.png"
+  },
+  "realm_model": {
+   "rect": [
+    0,
+    624,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     624,
+     32,
+     32
+    ],
+    [
+     32,
+     624,
+     32,
+     32
+    ],
+    [
+     64,
+     624,
+     32,
+     32
+    ],
+    [
+     96,
+     624,
+     32,
+     32
+    ],
+    [
+     128,
+     624,
+     32,
+     32
+    ],
+    [
+     160,
+     624,
+     32,
+     32
+    ],
+    [
+     192,
+     624,
+     32,
+     32
+    ]
+   ],
+   "realms": [
+    "willowmere",
+    "hollow",
+    "emberpeak",
+    "valewyn",
+    "desert",
+    "isles",
+    "north"
+   ],
+   "note": "the seven realm books' paper models (frame = index in realms): drawn by E8-world centred on an open realm book's page span, base on its middle row, over the pages and under actors, only while open. Flavor only: nothing is solved by a name (DESIGN hard rule 2)",
+   "sheet": "ep8.png"
+  },
+  "restoring_fountain": {
+   "rect": [
+    0,
+    704,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 420
+   },
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.6
+   },
+   "note": "the Restoring Fountain of Names (canon; rest and save: font_l1, font_l2, font_l2b, font_l3): a marble basin of shining ink, pages and gold letters rising",
+   "sheet": "ep8.png"
+  },
+  "reading_desk": {
+   "rect": [
+    96,
+    704,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 500
+   },
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.4
+   },
+   "note": "the Stair's reading desk (rest and save, text key ep8_desk): a lectern, an open book, its lamp lit",
+   "sheet": "ep8.png"
+  },
+  "drawer_stack_dash": {
+   "rect": [
+    192,
+    704,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     192,
+     704,
+     16,
+     32
+    ],
+    [
+     208,
+     704,
+     16,
+     32
+    ]
+   ],
+   "note": "a cracked drawer stack: 0 cracked (solid; Dash Strike breaks it), 1 broken (decor; the cell opens)",
+   "sheet": "ep8.png"
+  },
+  "lift_page": {
+   "rect": [
+    224,
+    704,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [],
+   "overheadRows": 0,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "note": "the Library's lift (lift_l1_up, lift_l2_down, the lift ups): a brass cage, the door cell is (0,0)",
+   "sheet": "ep8.png"
+  },
+  "ink_door": {
+   "rect": [
+    0,
+    736,
+    48,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     0,
+     736,
+     48,
+     48
+    ],
+    [
+     48,
+     736,
+     48,
+     48
+    ]
+   ],
+   "note": "the Original Ink Keyhole door (F3, 3 x 3, door_boss style, set into a 2-row face): 0 closed (needs ink_key), 1 open; cell (1, 0) is the doorway, its passage decided by the event",
+   "sheet": "ep8.png"
+  },
+  "ep8_first_shelf": {
+   "rect": [
+    96,
+    736,
+    48,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     736,
+     48,
+     32
+    ],
+    [
+     144,
+     736,
+     48,
+     32
+    ]
+   ],
+   "note": "the first shelf at the dais's foot (map object first_shelf; the art id is prefixed: Episode 6 owns first_shelf): 0 one empty place, 1 filled (page_shelved)",
+   "sheet": "ep8.png"
+  },
+  "great_lexicon": {
+   "rect": [
+    0,
+    784,
+    64,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     784,
+     64,
+     48
+    ],
+    [
+     64,
+     784,
+     64,
+     48
+    ],
+    [
+     128,
+     784,
+     64,
+     48
+    ],
+    [
+     192,
+     784,
+     64,
+     48
+    ],
+    [
+     256,
+     784,
+     64,
+     48
+    ],
+    [
+     320,
+     784,
+     64,
+     48
+    ],
+    [
+     384,
+     784,
+     64,
+     48
+    ]
+   ],
+   "shutFrames": [
+    0,
+    1,
+    2
+   ],
+   "openFrames": [
+    3,
+    4,
+    5
+   ],
+   "lastFrame": 6,
+   "ms": 520,
+   "light": {
+    "color": "#f9d77a",
+    "radius": 4.5
+   },
+   "note": "the great open book on the dais (4 x 3): 0..2 shut and glowing (cycle at 520 ms), 3..5 open with names rising (cycle), 6 open at the last page (empty)",
+   "sheet": "ep8.png"
+  },
+  "star_dome": {
+   "rect": [
+    0,
+    832,
+    112,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [],
+   "overheadRows": 4,
+   "doorAt": null,
+   "collision": "none",
+   "kind": "piece",
+   "frames": [
+    [
+     0,
+     832,
+     112,
+     64
+    ],
+    [
+     112,
+     832,
+     112,
+     64
+    ],
+    [
+     224,
+     832,
+     112,
+     64
+    ],
+    [
+     336,
+     832,
+     112,
+     64
+    ],
+    [
+     0,
+     896,
+     112,
+     64
+    ],
+    [
+     112,
+     896,
+     112,
+     64
+    ]
+   ],
+   "turnFrames": [
+    0,
+    1,
+    2
+   ],
+   "eighthFrames": [
+    3,
+    4,
+    5
+   ],
+   "ms": 1600,
+   "note": "the star dome (overhead, 7 x 4, collision none): 0..2 seven stars with their signs turning slowly toward an eighth with none (cycle at 1600 ms); 3..5 the same with the eighth lit and its sign the counter-seal (after eighth_star)",
+   "sheet": "ep8.png"
+  },
+  "tower_index": {
+   "rect": [
+    0,
+    976,
+    86,
+    96
+   ],
+   "kind": "building",
+   "note": "the First Library Index (a card-drawer sign, wide); door to ep8_sc_index",
+   "anchor": [
+    0,
+    5
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ]
+   ],
+   "overheadRows": 4,
+   "doorAt": [
+    2,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "tower_atelier": {
+   "rect": [
+    86,
+    976,
+    54,
+    80
+   ],
+   "kind": "building",
+   "note": "the Glyphsmith Atelier (a quill sign); door to ep8_sc_atelier",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "tower_bibliotheca": {
+   "rect": [
+    140,
+    976,
+    54,
+    80
+   ],
+   "kind": "building",
+   "note": "Bibliotheca Supplies (a bottle sign); door to ep8_sc_shop",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "tower_house_b": {
+   "rect": [
+    194,
+    976,
+    38,
+    80
+   ],
+   "kind": "building",
+   "note": "a Scriptorium book-tower house",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "tower_quiet_rooms": {
+   "rect": [
+    232,
+    976,
+    54,
+    80
+   ],
+   "kind": "building",
+   "note": "the Keeper's Quiet Rooms (a bed sign); door to ep8_sc_inn",
+   "anchor": [
+    0,
+    4
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 3,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "tower_house_a": {
+   "rect": [
+    286,
+    976,
+    38,
+    64
+   ],
+   "kind": "building",
+   "note": "a Scriptorium book-tower house (low)",
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": [
+    0,
+    0
+   ],
+   "collision": "solid",
+   "sheet": "ep8.png"
+  },
+  "living_codex": {
+   "rect": [
+    0,
+    1072,
+    32,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 600
+   },
+   "light": {
+    "color": "#f9d77a",
+    "radius": 3.0
+   },
+   "note": "the Living Codex (object codex, 2 x 3, inscription): a great open book on a pedestal, gold script shimmering slowly",
+   "sheet": "ep8.png"
+  },
+  "concordance": {
+   "rect": [
+    96,
+    1072,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     1072,
+     32,
+     32
+    ],
+    [
+     128,
+     1072,
+     32,
+     32
+    ],
+    [
+     160,
+     1072,
+     32,
+     32
+    ],
+    [
+     192,
+     1072,
+     32,
+     32
+    ]
+   ],
+   "closedFrame": 0,
+   "litFrames": [
+    1,
+    2,
+    3
+   ],
+   "litMs": 480,
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.6,
+    "frames": [
+     1,
+     2,
+     3
+    ]
+   },
+   "note": "the Concordance folio (object folio): 0 closed; 1..3 open and lit (after concordance_lit; cycle at 480 ms), then a rest and save (text key ep8_folio)",
+   "sheet": "ep8.png"
+  },
+  "library_gate": {
+   "rect": [
+    224,
+    1072,
+    48,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ],
+   "overheadRows": 0,
+   "doorAt": [
+    1,
+    0
+   ],
+   "collision": "solid",
+   "kind": "door",
+   "frames": [
+    [
+     224,
+     1072,
+     48,
+     64
+    ],
+    [
+     272,
+     1072,
+     48,
+     64
+    ],
+    [
+     320,
+     1072,
+     48,
+     64
+    ]
+   ],
+   "note": "the First Library's great door (object library_gate, 3 x 4, set into a 2-row face): 0 closed, the empty seal; 1 open (library_open); 2 open, the seal with one line (page_shelved). Cell (1, 0) is the doorway",
+   "sheet": "ep8.png"
+  },
+  "half_sign_a": {
+   "rect": [
+    0,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     0,
+     1136,
+     16,
+     32
+    ],
+    [
+     16,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign a (sign_a): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "half_sign_b": {
+   "rect": [
+    32,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     32,
+     1136,
+     16,
+     32
+    ],
+    [
+     48,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign b (sign_b): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "half_sign_c": {
+   "rect": [
+    64,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     64,
+     1136,
+     16,
+     32
+    ],
+    [
+     80,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign c (sign_c): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "half_sign_d": {
+   "rect": [
+    96,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     96,
+     1136,
+     16,
+     32
+    ],
+    [
+     112,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign d (sign_d): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "half_sign_e": {
+   "rect": [
+    128,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     128,
+     1136,
+     16,
+     32
+    ],
+    [
+     144,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign e (sign_e): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "half_sign_f": {
+   "rect": [
+    160,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     160,
+     1136,
+     16,
+     32
+    ],
+    [
+     176,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "note": "half-sign f (sign_f): 0 the word stops halfway, 1 finished (scriptorium_open); a picture and glyph bars, never a word",
+   "sheet": "ep8.png"
+  },
+  "candle_post": {
+   "rect": [
+    192,
+    1136,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "frames": [
+    [
+     192,
+     1136,
+     16,
+     32
+    ],
+    [
+     208,
+     1136,
+     16,
+     32
+    ],
+    [
+     224,
+     1136,
+     16,
+     32
+    ],
+    [
+     240,
+     1136,
+     16,
+     32
+    ]
+   ],
+   "litFrames": [
+    1,
+    2,
+    3
+   ],
+   "litMs": 400,
+   "light": {
+    "color": "#f9d77a",
+    "radius": 2.2,
+    "frames": [
+     1,
+     2,
+     3
+    ]
+   },
+   "note": "Arun's candle post on the script-road: 0 dark, 1..3 lit (cycle at 400 ms)",
+   "sheet": "ep8.png"
+  },
+  "bindery_stall": {
+   "rect": [
+    0,
+    1168,
+    96,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     1,
+     -1
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -1
+    ],
+    [
+     4,
+     -1
+    ],
+    [
+     5,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the Scriptorium's register house (object stall, 6 x 4): Elowen's desk and register under the awning, the bindery behind, the infirmary door, the line of grey blankets with linen tags; solid on its two lower rows",
+   "sheet": "ep8.png"
+  },
+  "margin_arch": {
+   "rect": [
+    96,
+    1168,
+    80,
+    64
+   ],
+   "anchor": [
+    0,
+    3
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     4,
+     -1
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "the South Margin gate (5 x 4 arch at the top of the Stair): the pillars (columns 0 and 4) solid, the arch overhead, the way through columns 1 to 3",
+   "sheet": "ep8.png"
+  },
+  "booktower": {
+   "rect": [
+    0,
+    1232,
+    16,
+    48
+   ],
+   "anchor": [
+    0,
+    2
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 2,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "booktower (canon decor, 1 x 3), solid at its foot",
+   "sheet": "ep8.png"
+  },
+  "quill": {
+   "rect": [
+    16,
+    1232,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "quill (canon decor): a giant quill in a gold inkpot, solid",
+   "sheet": "ep8.png"
+  },
+  "goldscroll": {
+   "rect": [
+    32,
+    1232,
+    16,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "note": "goldscroll (canon decor): a gold scroll on a stand, solid",
+   "sheet": "ep8.png"
+  },
+  "pagefountain": {
+   "rect": [
+    48,
+    1232,
+    32,
+    32
+   ],
+   "anchor": [
+    0,
+    1
+   ],
+   "footprint": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ],
+   "overheadRows": 1,
+   "doorAt": null,
+   "collision": "solid",
+   "kind": "prop",
+   "anim": {
+    "frames": [
+     0,
+     1,
+     2,
+     1
+    ],
+    "frameDx": 32,
+    "ms": 500
+   },
+   "note": "pagefountain (canon decor, 2 x 2): a basin throwing up loose pages, solid",
+   "sheet": "ep8.png"
+  }
+ },
+ "overlays": {}
+}

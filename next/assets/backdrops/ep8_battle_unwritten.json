@@ -1,0 +1,17 @@
+{
+ "image": "ep8_battle_unwritten.png",
+ "w": 384,
+ "h": 216,
+ "cell": null,
+ "note": "F3 the Unwritten Page: great blank pages standing in the violet void, a white page floor (composed)",
+ "extraColors": [],
+ "colors": 19,
+ "source": "composed",
+ "composed": "tools/art/backdrops/ep8_build.py (unwritten); palette.json plus the ep8 sheet colours (ep8_kit.EXTRA)",
+ "bandY": 118,
+ "bandAlpha": 0.44,
+ "bandNote": "not baked: the battle scene fills rows bandY..216 with indigo #14101e at bandAlpha under the sprites",
+ "backdropId": "ep8_battle_unwritten",
+ "fallback": "boss",
+ "meanLuma": 0.4978
+}
