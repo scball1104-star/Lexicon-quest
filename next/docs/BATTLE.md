@@ -1297,7 +1297,7 @@ Turn the Sky against a Rewrite, Turn the Sky with no sky, the Engine, the Scribe
 
 - `src/battle/rules.js` doItem(): hand the item's target to `RULE_EXT` (`h.item(ctx, user, it, target)`), so a Ballast Stone braces the ally
   it is used on (today: its user).
-- `src/battle/rules.js` commands(): a `RULE_EXT` `commands(ctx, unit, list)` filter, so Turn the Sky with no sky could stay listed and
+- `src/battle/rules.js` commands(): a `RULE_EXT` `commands(state, unit, list, ctx)` filter (built in Episode 8, E8-pack seam 5: called on `RULE_EXT.commands` and on each entry), so Turn the Sky with no sky could stay listed and
   disabled ("No sky to turn.") without the scene's wrap (today: `SKILL_GATE` plus `gateCommands`).
 
 ## 15. Main bosses: tougher, not longer (#87, 2026-11-11)
@@ -1395,7 +1395,7 @@ Every foe is `cold: true`; its cold moves carry `{ keep: 'rime', rime: n }` (the
 | Hollow Ice Knight | 30 | 860 | 200/40 | 46/30 | 12 | 4 | fire, axe | ice, sword | 95 / 260 | Ice Blade, **Glacier Cleave** (phys 200%, charge) [2] |
 | Rime-Written Page | 30 | 700 | 110/200 | 22/42 | 17 | 3 | fire, light | thunder, ice | 90 / 260 | Margin Cut, Cold Ink (party mag 130%) [1], **Final Line** (mag 200%, charge) |
 | The Pale Lantern | 29 | 1300 | 300/850 | 30/40 | 28 | 7 | fire, light | ice, thunder | 280 / 1600 | Pale Flame (mag 100%) [1], Lamplight Chill (party mag 160%) [1]; **Borrowed Light** (pinned); two Snow Wisps at 50%; immune Silence |
-| The White Phantom | 30 | 3300 | 600/1450 | 34 (x1.4 armored)/32 | 22 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | ice, thunder (phases 1, 2) | 1500 / 1800 | Whiteout Breath (party mag 120%) [1], Icicle Lance (phys 160%) [1]; **Farewell** (pinned); **Stillheart Blizzard** (party mag 210%, charge) [2]; immune Stun, Poison, Blind |
+| The White Phantom | 30 | 3300 | 600/1450 | 34 (x1.4 armored)/32 | 22 (+ Haste in phase 3) | 8 / 8 / 9 | by phase | ice, thunder (phases 1, 2) | 1500 / 1800 | Whiteout Breath (party mag 120%) [1], Icicle Lance (phys 160%) [1]; **Farewell** (pinned); **Stillheart Blizzard** (party mag 190%, charge) [2]; immune Stun, Poison, Blind |
 | The Closed Gate | 30 | 600 | 220/220 | 30/26 | 14 | 3 | axe, fire | ice | 0 / 0 | Bar (phys 90%); Shut on the hero every 3rd turn (Silence 50%) |
 | The Lost Letter | 30 | 540 | 200/220 | 22/28 | 13 | 2 | spear, fire | ice | 0 / 0 | Cold Ink (mag 110%) [1], then Mend: the Phantom +4%, never above the 68% lock |
 
@@ -1509,14 +1509,20 @@ at 80%, 20,304 (Lv 30). The Sanctum (Lv 30): careful HP lost 18%, attack-only wi
 |---|---|---|---|---|---|
 | **pale_lantern** | 29 | 94% / 8.53 (7.0-10.3) / 17% | 0% / 4.04 | 77% / 6.87 | 86% |
 | **pale_lantern** | 30 | 95% / 8.23 (6.7-10.0) / 16% | 1% / 4.40 | - | - |
-| **white_phantom** | 30 | 92% / 11.30 (8.3-15.7) / 19% | 0% / 5.85 | 45% / 12.66 | 84% |
-| **white_phantom** | 31 | 96% / 10.98 (8.3-15.3) / 14% | 0% / 6.23 | - | - |
+| **white_phantom** | 30 | 92% / 11.30 (8.3-15.7) / 19% | 0% / 5.85 | 45% / 12.67 | 84% |
+| **white_phantom** | 31 | 97% / 10.98 (8.3-15.3) / 14% | 0% / 6.23 | - | - |
 
 `toughNotLong`: the Lantern 8.53 rounds / 17% HP lost / 94% against the Gale Engine's 8.88 / 13%; the Phantom 11.30 / 19% / 92% against
 the Scribe's 14.55 / 17%. (After #87 the Engine reads 8.38 / 18% and the Scribe 13.22 / 22%: both Episode 7 bosses are shorter, and the
 Phantom takes less of the party's HP than today's Scribe.) **Margin for manual play** (the Barrister lesson): careful play sits 9 and 7
 points over the 85% floor. "Sloppy" is a scratch policy for the margin only (careful play that misses one Call in three and never
 Defends for Rime or drinks Tea): it still wins 86% and 84%.
+
+**2026-11-15 (Scott: "clean up the other loose ends"):** the Phantom softened a little, Stillheart Blizzard 210% to 190%
+(`src/data/ep7/skills.js`). Fresh `simulate.mjs --check` (400 fights a row), before / after: Lv 30 careful 92% / 11.30 rounds / 19% HP
+lost both times, attack-only 0% / 5.85 both, ignoring telegraphs 45% / 12.66 -> 45% / 12.67; Lv 31 careful 96% -> 97%, 10.98 rounds,
+14%. The Blizzard is almost always Defended or Broken by careful play, so the change shows mostly in a missed one. Every floor holds
+(careful 85%+, attack-only 0%, HP lost 19% above the Scribe's 17%); the table above has the after numbers.
 
 ### 16.7 Tests
 
@@ -1534,3 +1540,122 @@ the Break and the hero rule, the Lantern, the Phantom's phases and Blizzard, Aut
 - A Stilled member's skipped turn is rules.js `skip` with `reason: 'kept'`: the core animator says "is kept in the mirror." and the
   timeline greys the head as Kept. Wrap both in a Rime battle. `heroAnswers(b)` (ai.js) says when "{hero} can call her." may show; the
   Defend row's help in a Rime battle is "Shake off the cold.".
+
+## 17. Episode 8: The Last Word (E8-battle, wave 8a)
+
+Design: `docs/EPISODE8_PLAN.md` sections 6 and 7. Everything is pack data and pack code (`src/data/ep8/{enemies,encounters,items,loot,
+shops,skills,ai,erasure}.js`, each an idempotent `register()`; `erasure` after `encounters` and after the ep7 pack's `rime`). The only
+core contact is E8-pack's seam 5 (`RULE_EXT.commands`, called as `(state, unit, out, ctx)`); `erasure.js` installs a chained hook there
+and carries the same function as a rule entry; it is idempotent, so a double call is harmless. `simulate.mjs --check` passes all eight
+episodes (238,300 battles, 1,139 s); `--cave --check` and `--tier 1 --check` unchanged ("All cave targets met"; tier 238 rows, 0 fails).
+
+### 17.1 Enemies (final numbers after tuning) and what moved from the plan
+
+Every foe is `erasing: true`; [E] moves carry `{ keep: 'erasure', erasure: 'rub' }`. Ordinary foes are the plan's 6.2 rows unchanged
+(HP, stats, EXP 90 to 100, gold 250 to 280). `expMul` 0.65 on the F1 and F2 three-foe groups, 0.6 on F3's.
+
+| Boss | Lv | HP | ATK/MAG | SPD | Moves |
+|---|---|---|---|---|---|
+| The Unnamed Sentry | 32 | 1,650 (plan 2,300) | 330/1,300 (780) | 38 (15) | Strike Out (mag 150%) [E], Cancel (party mag 125%) [E], **Unwrite** (pinned); two Struck-Out Pages at 50% |
+| The Eraser | 33 | 2,700 (5,600) | 640/1,790 (640) | 38 (16) | Rub Out (mag 100%) [E], Margin Sweep (party mag 75%) [E]; **Unwrite**; **The Last Silence** (party mag 180%, charge, rubs every non-hero member) |
+| Grief / Change | 33 | 440 / 400 (640 / 600) | 200/240, 220/230 | 14 / 13 | Rub Out, Weep Ink (+5%, capped at the 70% lock) / Turn the Page (party 80%) [E], Stand In |
+
+- **Tougher, not longer.** At the plan's numbers careful play won 100% with 7% (Sentry) and 16% (Eraser) HP lost: an Episode 8 party has
+  SPD 30 to 39, so a SPD 15 boss acted 0.27 times a party round. HP only went down; MAG and SPD went up.
+- **The cost of a missed Read Aloud** (plan knob order: Unwritten damage first). Unwritten takes x1.8 (`ERASURE_TUNE.unwrittenMult`; plan
+  x1.3), and a landed Unwrite also pushes its target back a full turn (`unwritePush`), heals its owner (`unwriteHeal`: Sentry 15%, Eraser
+  6%) and draws 90% of the owner's single-target moves (`unwrittenFocus`). At x1.3 alone an Unwritten member just Defended, and ignoring
+  every pin cost 0 points.
+- **The Last Silence.** Held for the hero (`holdForHero` on the skill: it never lands before the hero's next turn); the first gathers as
+  phase 4 opens, the next as soon as a Break ends (`silenceOnRecover`), every 2nd Eraser turn otherwise (plan 3rd); in phase 4 HP stops
+  at 4% until two have been drawn (`finalBreaths`; at the floor the Eraser stands out of a Break and draws the next at once). Without
+  this a short last phase met one Silence.
+- **F3**, the Unwritten Page: `L3_POWER` pages 3.3, Librarian 3.5, mixed 3.0; `L3_SPEED` 1.1; `L3_HP` 1.05, 0.6, 0.58. Margin Line is
+  party-wide at 75% (plan single 120%): the spread careful play cannot heal away (Episode 7's Cold Ink lesson). F2's crane group carries
+  `hp` 0.8, its Librarian pair 0.85.
+- **Targets moved:** the Eraser's HP-lost floor 26% to 17% and its band floor 11 to 10 (careful win and HP lost trade one for one past
+  the Scribe's 17%: Episode 7's ceiling again, section 15). The Sentry keeps the plan's 20 to 28%.
+- **Gold:** the Forgotten Traveler Satchel 1,700 to 2,000 (the 80% line had 108 G left at the Scriptorium). No price moved.
+- **Ids:** `gnaw` is Episode 1's: the Bookworm's is `worm_gnaw`; `fetch` is `hound_fetch`; `hound_bite`, `imp_smear`, `worm_curl` keep
+  plain words off the shared list.
+
+### 17.2 Erasure (`src/data/ep8/erasure.js`)
+
+- A battle has Erasure only when a foe is `erasing` (`state.erasure`). Party only; the hero is never rubbed out or Unwritten ("The ink
+  will not take on {hero}.", once a battle, kind `ink_refused`).
+- **The last command** is read from the state an action leaves (rules.js tells a rule who acted, not what they did): an item, a plain
+  Defend, a Guard (Tech), a weapon swap, Fury spent, two actors (Combo), a weapon use with or without an MP change (Tech or Attack), MP
+  spent with no weapon use (Magic for Mira, Tech for the others), an Appraise. A skipped turn reads nothing.
+- **Rub out:** that command (Attack, Tech, Magic or Item only) for the member's next 2 turns; a second rub resets it to 2; at most 2 at
+  once (a third replaces the oldest); a Defend slides it ("The ink slides off."). Counts fall at the end of the member's own turns.
+- **Commands:** a rubbed row is `enabled: false`, reason `Rubbed out`, help "Rubbed out. Try something else.", `rubbed: { left, max }`;
+  a rubbed Magic row stays open with only Read Aloud lit; an Unwritten member has only Defend. rules.js `validate()` does not check the
+  Attack row, so Auto and the simulator keep to `commandsOf()`.
+- **Unwrite** (`pin`, `holdForMira`, `land`), **Read Aloud** (`{ keep: 'erasure', erasure: 'read' }`: every rub returns, Unwritten ends,
+  a quarter turn sooner, a pin on them breaks and its owner is a full turn back), **Fresh Ink** (every count falls by one, read from
+  `itemsUsed`), **READ_GATE** ("Nothing to read back." with no erasing foe, in `state.gated` with `group: 'magic'`). No Episode 8 battle
+  has a sky, a wind or a cold foe: Turn the Sky, Anchor and Call stay gated in each (tested).
+- **Events:** `erasure`, `rub` { target, command, left, reset, reason, source }, `rub_end` { target, command, reason: turns | read | ink |
+  replaced | fall }, `ink_slide`, `unwrite_pin` { source, target, moved? } plus a `telegraph` with `unwrite: true`, `unwrite_land`,
+  `unwritten`, `unwritten_end` { reason: read | turns | break }, `unwrite_broken` { reason: read | break }, `read` { actor, target },
+  `silence_broken` { source, reason: answer | break }.
+- **Episode 4's wraps** (read 2026-11-15): `answerHook` runs only from Episode 4 scripts; the scene planner keys on `telegraphSfx`,
+  `answerable`, a decree foe as actor and a cancel reason of `answer`. `unwrite` and `last_silence` carry none of them, and the Eraser
+  cancels the Silence with reason `answered`: nothing of Episode 4 fires (tested).
+
+### 17.3 Auto (`POLICY_EXT`, careful play only) and the signature rows
+
+1. A pin: Mira reads its target (nobody spends her turn on a combo meanwhile). 2. The Last Silence: the hero Answers (nor the hero's).
+3. An ally Unwritten: Mira reads them; Mira with her own Magic rubbed and a heal due reads herself. 4. Variety: Mira keeps Magic, Bram
+keeps Tech when they will need it next and an erasing foe acts first. 5. Fresh Ink with two members rubbed and nobody under half HP.
+6. Mira keeps 12 MP. 7. Against the bosses, Mira's Mending Rain at 65% for two members. Reckless play only keeps to legal rows;
+attack-only Attacks, or Defends when Attack is rubbed out (`PARTY_POLICIES.naive`, wrapped). `skills.js` exports `EP8_SIGNATURE_TECHS`
+(`{ mira, unwrite, read_aloud }`, `{ hero, last_silence, answer, usable }`) and `registerSignatures(list)` for E8-scene-ui; `ai.js`
+exports `miraReads(b)` and `heroAnswers(b)` for the hint lines; `enemies.js` exports `ERASER_LOOKS` and `HUD_ROWS` for the row test.
+
+### 17.4 Items, loot, shops, the gold line
+
+Tier 15 (ilvl 32) and 16 (ilvl 33) as plan 7.2; uniques and the Margin-Walker set as 7.3 (every stat a party stat); affix tier 10 at ilvl
+32; `RARE_NAME_EXT` [32: Inkbound, Gilt, Margined, Lettered, Firstwritten]; ZONE_LOOT as 7.5. Shops `bibliotheca`, `glyphsmith` (tier 14
+weapons too; tier 16 after `library_f2_done`), `quinn_satchel` (peddler). `EP8_GOLD_LINE`: the Satchel 2,000, the Catalog shelf chest
+1,500, the Seal Gallery chest 1,700; optional 450 and 500. **economy8** (binding, the quick start's 4,300): at 100% with the main chests
+7,810 at the Scriptorium, 710 left after the town pieces, 11,160 before F3, 1,260 left; at 80% with every chest 408 and 798 left. **A real
+save:** the Episode 7 quick-start chain ends with 5,360 G (4,478 at 80%) and a real run is about 5,000 G richer (16.5), so a real save
+arrives with about 8,960 to 10,360: 5,370 to 6,770 left after the town pieces (a third and fourth piece), 5,920 to 7,320 after the F3
+pieces, never the whole Atelier (71,500; checked). The binding line stays on the quick start, the poorest way in.
+
+### 17.5 Simulator and the final table
+
+`tools/sim/ep8.mjs` (two lines in `simulate.mjs`, CRLF kept: the attach and `...EPISODES[8]` in the default list; exports `LOADOUTS`,
+whose `ep8_stair` is E8-pack's quick-start party). Loadouts as plan 6.6 (the Stair: `ep7_stillheart` + the Stillheart Shard on Mira and
+the Open Gate on the hero). Progression from 22,200: the Stair 31, F1 31 to 32, F2 32 to 33, F3 33, **the Eraser met at Lv 33 with
+25,688 EXP: 743 under Lv 34, 570 with elites counted**; at 80%, 25,054. The Unwritten Page: careful HP lost 21%, attack-only wins 79%.
+
+| Zone | Careful: rounds / HP lost (win 100% throughout) | Attack-only: win / rounds |
+|---|---|---|
+| ep8_stair | 3.01 to 3.31 / 3 to 8% | 100% / 7.6 to 10.1 |
+| ep8_library_f1 | 3.40 to 4.62 / 3 to 10% | 100% / 8.2 to 14.4 |
+| ep8_library_f2 | 3.92 to 4.29 / 3 to 12% | 100% / 11.3 to 13.5 |
+| ep8_library_f3 | 2.66 to 3.38 / 12 to 27% | 74 to 84% / 8.6 to 9.0 |
+
+| Boss | Lv | Careful: win / rounds (p10-p90) / HP lost | Attack-only | Ignoring telegraphs |
+|---|---|---|---|---|
+| **unnamed_sentry** | 32 | 89% / 8.79 (7.0-11.3) / 23% | 0% / 3.23 | 76% / 9.14 |
+| **unnamed_sentry** | 33 | 94% / 8.68 (6.7-11.3) / 19% | 0% / 3.65 | - |
+| **eraser** | 33 | 87% / 12.26 (9.0-15.3) / 17% | 0% / 4.28 | 3% / 11.49 |
+| **eraser** | 34 | 94% / 11.77 (9.0-14.7) / 11% | 0% / 4.59 | - |
+
+`toughNotLong`: the Sentry 8.79 rounds / 23% / 89% against the Gale Engine's 8.88 / 13%; the Eraser 12.26 / 17% (just over) / 87%
+against the Scribe's 14.55 / 17%, all four phases inside it. `readShare` and `telegraphCount` (careful, 100 fights): the Sentry 2.56
+Unwrites a fight, 91% read back, 2% landed, acting 0.52 times a party round; the Eraser 3.09 Unwrites, 97% read back, 2.00 Last Silences
+in each fight that reaches the last phase (99% do), 67% answered, 14% landed, acting 0.72 times a party round. No foe is ever rubbed out
+and the hero never is. **Margin:** the Eraser's careful win and HP lost sit 2 points and under 1 point over their floors.
+
+### 17.6 Tests
+
+`qa/battle/ep8_battle.test.mjs` (14): registration and idempotence, Episodes 1 to 7 untouched (an Episode 7 and an Episode 4 boss replay
+bit for bit; their commands deep-equal with the hook), Erasure in every Episode 8 battle with the gates, the rub's every clause, the
+bridge and the act rate, Read Aloud from a rubbed Magic row and on Mira herself, the pin and holdForMira, Unwritten and its three ends,
+Fresh Ink, the Eraser's locks, ward, adds, Keeper and four looks, the Last Silence and Answer (one telegraph at a time, no Episode 4
+flag), Auto, the one-hit rule, items and the gold line, purity. `qa/battle/ep8_sim.test.mjs` (2): the suite (ordinary at 100, the bosses
+at 400 on the CLI's seeds) with every check, and the EXP curve.

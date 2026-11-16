@@ -92,7 +92,7 @@ export const EP7_SKILLS = {
     telegraph: 'The Phantom turns to {target}. It is saying goodbye.', telegraphSfx: 'farewell_read',
     help: 'Pinned on one of us. Call them.', fx: 'devour', sfx: 'farewell_read' }),
   // A charge every 4th Phantom turn in Thawlight: Defend halves it (and sheds as always); Break cancels; Call does not stop it.
-  stillheart_blizzard: foe({ id: 'stillheart_blizzard', name: 'Stillheart Blizzard', target: 'enemies', formula: 'mag', power: 210, types: ['ice'],
+  stillheart_blizzard: foe({ id: 'stillheart_blizzard', name: 'Stillheart Blizzard', target: 'enemies', formula: 'mag', power: 190, types: ['ice'],
     effects: [rime(2)], telegraph: "The cold gathers in the Phantom's cloak...", help: 'The whole cold at once. Defend or Break.',
     fx: 'ink_wave_big', sfx: 'rime_freeze' }),
   // The Closed Gate: Shut on the hero every 3rd turn (it closes the mouth that can call), Bar between
