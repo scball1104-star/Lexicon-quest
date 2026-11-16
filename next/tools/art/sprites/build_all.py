@@ -40,6 +40,7 @@ def steps():
         ('ep5', lambda: __import__('ep5_build').build()),
         ('ep6', lambda: __import__('ep6_build').build()),
         ('ep7', lambda: __import__('ep7_build').build()),
+        ('ep8', lambda: __import__('ep8_build').build()),
     ]
 
 

@@ -1,0 +1,44 @@
+{
+ "image": "ep8_portraits.png",
+ "frames": {
+  "first_keeper_48": [
+   0,
+   0,
+   48,
+   48
+  ],
+  "eraser_48": [
+   48,
+   0,
+   48,
+   48
+  ],
+  "first_keeper_32": [
+   96,
+   0,
+   32,
+   32
+  ],
+  "eraser_32": [
+   0,
+   48,
+   32,
+   32
+  ]
+ },
+ "portraits": {
+  "first_keeper": {
+   "48": "first_keeper_48",
+   "32": "first_keeper_32"
+  },
+  "eraser": {
+   "48": "eraser_48",
+   "32": "eraser_32"
+  }
+ },
+ "sources": {
+  "first_keeper": "hooded_sage (portraits.webp cell 7), the built frames copied unchanged (E8-sprites)",
+  "eraser": "battle frame eraser (Closed Book; 1x crop, E8-sprites)"
+ },
+ "notes": "Episode 8 pack atlas, merged into portraits. first_keeper: the hooded_sage portrait held since Episode 1 (the elderly hooded librarian, violet robe, pale face, gold eyes, book clasp), its built 48 and 32 frames copied pixel for pixel under the id the Episode 8 data names; shown only from eraser_after on (the twist in order). eraser: the empty white face under the hood with the ring above and the robe at the shoulder (48), the face and hood (32), cropped at 1x from the Closed Book battle frame."
+}

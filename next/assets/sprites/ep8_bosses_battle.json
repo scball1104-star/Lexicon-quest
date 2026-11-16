@@ -1,0 +1,473 @@
+{
+ "image": "ep8_bosses_battle.png",
+ "frames": {
+  "eraser_cast": [
+   0,
+   0,
+   127,
+   143
+  ],
+  "eraser_truths_cast": [
+   129,
+   0,
+   153,
+   143
+  ],
+  "eraser_remembers_cast": [
+   284,
+   0,
+   127,
+   143
+  ],
+  "eraser_silence_cast": [
+   0,
+   145,
+   127,
+   143
+  ],
+  "eraser_die_0": [
+   129,
+   145,
+   127,
+   132
+  ],
+  "eraser_remembers_die_0": [
+   258,
+   145,
+   127,
+   132
+  ],
+  "eraser_silence_die_0": [
+   0,
+   290,
+   127,
+   131
+  ],
+  "eraser_idle_1": [
+   129,
+   290,
+   127,
+   129
+  ],
+  "eraser_truths_idle_1": [
+   258,
+   290,
+   153,
+   129
+  ],
+  "eraser_truths_die_0": [
+   0,
+   423,
+   153,
+   129
+  ],
+  "eraser_remembers_idle_1": [
+   155,
+   423,
+   127,
+   129
+  ],
+  "eraser_silence_idle_1": [
+   284,
+   423,
+   127,
+   129
+  ],
+  "eraser": [
+   0,
+   554,
+   127,
+   128
+  ],
+  "eraser_attack": [
+   129,
+   554,
+   129,
+   128
+  ],
+  "eraser_truths": [
+   260,
+   554,
+   153,
+   128
+  ],
+  "eraser_truths_attack": [
+   0,
+   684,
+   153,
+   128
+  ],
+  "eraser_remembers": [
+   155,
+   684,
+   127,
+   128
+  ],
+  "eraser_remembers_attack": [
+   284,
+   684,
+   129,
+   128
+  ],
+  "eraser_silence": [
+   0,
+   814,
+   127,
+   128
+  ],
+  "eraser_silence_attack": [
+   129,
+   814,
+   129,
+   128
+  ],
+  "eraser_hurt": [
+   260,
+   814,
+   135,
+   126
+  ],
+  "eraser_truths_hurt": [
+   0,
+   944,
+   155,
+   126
+  ],
+  "eraser_remembers_hurt": [
+   157,
+   944,
+   135,
+   126
+  ],
+  "eraser_silence_hurt": [
+   294,
+   944,
+   135,
+   126
+  ],
+  "eraser_die_1": [
+   0,
+   1072,
+   127,
+   121
+  ],
+  "eraser_remembers_die_1": [
+   129,
+   1072,
+   127,
+   121
+  ],
+  "eraser_truths_die_1": [
+   258,
+   1072,
+   153,
+   118
+  ],
+  "eraser_silence_die_1": [
+   0,
+   1195,
+   127,
+   118
+  ],
+  "eraser_remembers_die_2": [
+   129,
+   1195,
+   127,
+   94
+  ],
+  "eraser_die_2": [
+   258,
+   1195,
+   127,
+   90
+  ],
+  "eraser_truths_die_2": [
+   0,
+   1315,
+   153,
+   90
+  ],
+  "eraser_silence_die_2": [
+   155,
+   1315,
+   127,
+   89
+  ]
+ },
+ "origin": {
+  "eraser": [
+   63,
+   127
+  ],
+  "eraser_idle_1": [
+   63,
+   128
+  ],
+  "eraser_attack": [
+   64,
+   127
+  ],
+  "eraser_hurt": [
+   67,
+   125
+  ],
+  "eraser_cast": [
+   63,
+   142
+  ],
+  "eraser_die_0": [
+   63,
+   131
+  ],
+  "eraser_die_1": [
+   63,
+   120
+  ],
+  "eraser_die_2": [
+   63,
+   89
+  ],
+  "eraser_truths": [
+   76,
+   127
+  ],
+  "eraser_truths_idle_1": [
+   76,
+   128
+  ],
+  "eraser_truths_attack": [
+   76,
+   127
+  ],
+  "eraser_truths_hurt": [
+   77,
+   125
+  ],
+  "eraser_truths_cast": [
+   76,
+   142
+  ],
+  "eraser_truths_die_0": [
+   76,
+   128
+  ],
+  "eraser_truths_die_1": [
+   76,
+   117
+  ],
+  "eraser_truths_die_2": [
+   76,
+   89
+  ],
+  "eraser_remembers": [
+   63,
+   127
+  ],
+  "eraser_remembers_idle_1": [
+   63,
+   128
+  ],
+  "eraser_remembers_attack": [
+   64,
+   127
+  ],
+  "eraser_remembers_hurt": [
+   67,
+   125
+  ],
+  "eraser_remembers_cast": [
+   63,
+   142
+  ],
+  "eraser_remembers_die_0": [
+   63,
+   131
+  ],
+  "eraser_remembers_die_1": [
+   63,
+   120
+  ],
+  "eraser_remembers_die_2": [
+   63,
+   93
+  ],
+  "eraser_silence": [
+   63,
+   127
+  ],
+  "eraser_silence_idle_1": [
+   63,
+   128
+  ],
+  "eraser_silence_attack": [
+   64,
+   127
+  ],
+  "eraser_silence_hurt": [
+   67,
+   125
+  ],
+  "eraser_silence_cast": [
+   63,
+   142
+  ],
+  "eraser_silence_die_0": [
+   63,
+   130
+  ],
+  "eraser_silence_die_1": [
+   63,
+   117
+  ],
+  "eraser_silence_die_2": [
+   63,
+   88
+  ]
+ },
+ "anims": {
+  "eraser_idle": {
+   "frames": [
+    "eraser",
+    "eraser_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "eraser_die": {
+   "frames": [
+    "eraser_die_0",
+    "eraser_die_1",
+    "eraser_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "eraser_truths_idle": {
+   "frames": [
+    "eraser_truths",
+    "eraser_truths_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "eraser_truths_die": {
+   "frames": [
+    "eraser_truths_die_0",
+    "eraser_truths_die_1",
+    "eraser_truths_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "eraser_remembers_idle": {
+   "frames": [
+    "eraser_remembers",
+    "eraser_remembers_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "eraser_remembers_die": {
+   "frames": [
+    "eraser_remembers_die_0",
+    "eraser_remembers_die_1",
+    "eraser_remembers_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "eraser_silence_idle": {
+   "frames": [
+    "eraser_silence",
+    "eraser_silence_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "eraser_silence_die": {
+   "frames": [
+    "eraser_silence_die_0",
+    "eraser_silence_die_1",
+    "eraser_silence_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "hud": {
+  "eraser": {
+   "hood": [
+    1,
+    -116
+   ],
+   "headPx": [
+    -4,
+    13,
+    -116,
+    -98
+   ],
+   "head": [
+    0.465,
+    0.598,
+    0.086,
+    0.227
+   ]
+  },
+  "eraser_truths": {
+   "hood": [
+    1,
+    -116
+   ],
+   "headPx": [
+    -4,
+    13,
+    -116,
+    -98
+   ],
+   "head": [
+    0.471,
+    0.582,
+    0.086,
+    0.227
+   ]
+  },
+  "eraser_remembers": {
+   "hood": [
+    1,
+    -116
+   ],
+   "headPx": [
+    -4,
+    13,
+    -116,
+    -98
+   ],
+   "head": [
+    0.465,
+    0.598,
+    0.086,
+    0.227
+   ]
+  },
+  "eraser_silence": {
+   "hood": [
+    1,
+    -116
+   ],
+   "headPx": [
+    -4,
+    13,
+    -116,
+    -98
+   ],
+   "head": [
+    0.465,
+    0.598,
+    0.086,
+    0.227
+   ]
+  }
+ },
+ "notes": "Episode 8 pack atlas, merged into bosses_battle. The Eraser (bosses.png cell 7, 1x, not flipped) in four looks: eraser (Closed Book, as painted: black and violet robes, the empty white face, the floating pages), eraser_truths (The Rejected Truths: the robes spread like two book covers, Grief and Change small in the folds), eraser_remembers (The Keeper Remembers: the face half drawn in gold lines), eraser_silence (The Last Silence: the robes torn to blank pages, the face a white glare, the pages stopped). Each has _idle_1, _attack, _hurt, _cast, _die_0..2. The phases name their look (E8-battle's enemies.js `sprite`; ai.js enterPhase forwards it). `hud`: one anchor per look, the same in all four (CRITIQUE_8 item 1): `hood` is the top of the hood over the face's left edge (the top-left of the body; the dark ring above is not counted) as [dx, dy] from the bottom-centre origin (dy negative, up); `headPx` the hood and face box [x0, x1, y0, y1] from the origin; `head` the same box as fractions of that look's packed frame (layout.js HEAD_BOX format)."
+}
