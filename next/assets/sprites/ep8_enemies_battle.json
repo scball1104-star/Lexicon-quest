@@ -1,0 +1,1114 @@
+{
+ "image": "ep8_enemies_battle.png",
+ "frames": {
+  "unnamed_sentry_cast": [
+   0,
+   0,
+   139,
+   122
+  ],
+  "unnamed_sentry_cracked_cast": [
+   0,
+   124,
+   139,
+   122
+  ],
+  "unnamed_sentry_die_0": [
+   141,
+   124,
+   107,
+   114
+  ],
+  "unnamed_sentry_cracked_die_0": [
+   0,
+   248,
+   107,
+   113
+  ],
+  "unnamed_sentry_idle_1": [
+   109,
+   248,
+   107,
+   111
+  ],
+  "unnamed_sentry_cracked_idle_1": [
+   0,
+   363,
+   107,
+   111
+  ],
+  "inkbound_librarian_cast": [
+   109,
+   363,
+   123,
+   110
+  ],
+  "unnamed_sentry": [
+   0,
+   476,
+   107,
+   110
+  ],
+  "unnamed_sentry_attack": [
+   109,
+   476,
+   139,
+   110
+  ],
+  "unnamed_sentry_cracked": [
+   0,
+   588,
+   107,
+   110
+  ],
+  "unnamed_sentry_cracked_attack": [
+   109,
+   588,
+   139,
+   110
+  ],
+  "unnamed_sentry_hurt": [
+   0,
+   700,
+   109,
+   108
+  ],
+  "unnamed_sentry_cracked_hurt": [
+   111,
+   700,
+   109,
+   108
+  ],
+  "unnamed_sentry_die_1": [
+   0,
+   810,
+   107,
+   103
+  ],
+  "unnamed_sentry_cracked_die_1": [
+   109,
+   810,
+   107,
+   103
+  ],
+  "inkbound_librarian_idle_1": [
+   0,
+   915,
+   97,
+   99
+  ],
+  "inkbound_librarian": [
+   99,
+   915,
+   97,
+   98
+  ],
+  "inkbound_librarian_attack": [
+   0,
+   1016,
+   127,
+   98
+  ],
+  "inkbound_librarian_die_0": [
+   129,
+   1016,
+   97,
+   98
+  ],
+  "inkbound_librarian_hurt": [
+   0,
+   1116,
+   99,
+   96
+  ],
+  "inkbound_librarian_die_1": [
+   101,
+   1116,
+   97,
+   91
+  ],
+  "catalog_wraith_cast": [
+   0,
+   1214,
+   71,
+   82
+  ],
+  "unnamed_sentry_die_2": [
+   73,
+   1214,
+   107,
+   81
+  ],
+  "unnamed_sentry_cracked_die_2": [
+   0,
+   1298,
+   107,
+   80
+  ],
+  "paper_crane_cast": [
+   109,
+   1298,
+   77,
+   76
+  ],
+  "paper_crane_die_0": [
+   0,
+   1380,
+   71,
+   76
+  ],
+  "catalog_wraith_die_0": [
+   73,
+   1380,
+   71,
+   76
+  ],
+  "paper_crane_attack": [
+   146,
+   1380,
+   79,
+   75
+  ],
+  "catalog_wraith": [
+   0,
+   1458,
+   71,
+   74
+  ],
+  "catalog_wraith_idle_1": [
+   73,
+   1458,
+   71,
+   74
+  ],
+  "catalog_wraith_attack": [
+   146,
+   1458,
+   87,
+   73
+  ],
+  "paper_crane": [
+   0,
+   1534,
+   71,
+   72
+  ],
+  "paper_crane_idle_1": [
+   73,
+   1534,
+   73,
+   72
+  ],
+  "catalog_wraith_hurt": [
+   148,
+   1534,
+   81,
+   72
+  ],
+  "inkbound_librarian_die_2": [
+   0,
+   1608,
+   97,
+   72
+  ],
+  "paper_crane_die_1": [
+   99,
+   1608,
+   67,
+   71
+  ],
+  "paper_crane_hurt": [
+   168,
+   1608,
+   79,
+   70
+  ],
+  "catalog_wraith_die_1": [
+   0,
+   1682,
+   71,
+   68
+  ],
+  "index_hound_die_0": [
+   73,
+   1682,
+   63,
+   64
+  ],
+  "index_hound_idle_1": [
+   138,
+   1682,
+   63,
+   60
+  ],
+  "index_hound": [
+   0,
+   1752,
+   63,
+   59
+  ],
+  "index_hound_attack": [
+   65,
+   1752,
+   67,
+   59
+  ],
+  "truth_change_die_0": [
+   134,
+   1752,
+   31,
+   59
+  ],
+  "index_hound_hurt": [
+   167,
+   1752,
+   69,
+   57
+  ],
+  "margin_imp_cast": [
+   0,
+   1813,
+   51,
+   57
+  ],
+  "gnawing_bookworm_die_0": [
+   53,
+   1813,
+   57,
+   55
+  ],
+  "truth_change": [
+   112,
+   1813,
+   31,
+   55
+  ],
+  "truth_change_idle_1": [
+   145,
+   1813,
+   31,
+   55
+  ],
+  "truth_change_attack": [
+   178,
+   1813,
+   35,
+   55
+  ],
+  "truth_change_hurt": [
+   215,
+   1813,
+   35,
+   55
+  ],
+  "truth_change_cast": [
+   0,
+   1872,
+   33,
+   55
+  ],
+  "index_hound_die_1": [
+   35,
+   1872,
+   63,
+   54
+  ],
+  "catalog_wraith_die_2": [
+   100,
+   1872,
+   71,
+   54
+  ],
+  "paper_crane_die_2": [
+   173,
+   1872,
+   67,
+   52
+  ],
+  "gnawing_bookworm_idle_1": [
+   0,
+   1929,
+   57,
+   52
+  ],
+  "struck_page_cast": [
+   59,
+   1929,
+   45,
+   52
+  ],
+  "struck_page_die_0": [
+   106,
+   1929,
+   43,
+   52
+  ],
+  "margin_imp_die_0": [
+   151,
+   1929,
+   51,
+   51
+  ],
+  "gnawing_bookworm": [
+   0,
+   1983,
+   57,
+   51
+  ],
+  "struck_page_attack": [
+   59,
+   1983,
+   45,
+   51
+  ],
+  "gnawing_bookworm_attack": [
+   106,
+   1983,
+   69,
+   50
+  ],
+  "struck_page_idle_1": [
+   177,
+   1983,
+   43,
+   50
+  ],
+  "truth_grief_cast": [
+   0,
+   2036,
+   39,
+   50
+  ],
+  "truth_change_die_1": [
+   41,
+   2036,
+   31,
+   50
+  ],
+  "margin_imp_idle_1": [
+   74,
+   2036,
+   49,
+   49
+  ],
+  "margin_imp_die_1": [
+   125,
+   2036,
+   51,
+   49
+  ],
+  "gnawing_bookworm_hurt": [
+   178,
+   2036,
+   59,
+   49
+  ],
+  "gnawing_bookworm_die_1": [
+   0,
+   2088,
+   57,
+   49
+  ],
+  "truth_grief_die_0": [
+   59,
+   2088,
+   39,
+   48
+  ],
+  "margin_imp": [
+   100,
+   2088,
+   51,
+   47
+  ],
+  "margin_imp_hurt": [
+   153,
+   2088,
+   53,
+   47
+  ],
+  "struck_page": [
+   208,
+   2088,
+   43,
+   47
+  ],
+  "struck_page_hurt": [
+   0,
+   2139,
+   45,
+   47
+  ],
+  "struck_page_die_1": [
+   47,
+   2139,
+   39,
+   47
+  ],
+  "truth_grief_idle_1": [
+   88,
+   2139,
+   39,
+   47
+  ],
+  "truth_grief": [
+   129,
+   2139,
+   39,
+   46
+  ],
+  "truth_grief_attack": [
+   170,
+   2139,
+   39,
+   46
+  ],
+  "truth_grief_hurt": [
+   211,
+   2139,
+   41,
+   46
+  ],
+  "index_hound_die_2": [
+   0,
+   2188,
+   63,
+   45
+  ],
+  "truth_grief_die_1": [
+   65,
+   2188,
+   39,
+   45
+  ],
+  "margin_imp_attack": [
+   106,
+   2188,
+   57,
+   42
+  ],
+  "truth_change_die_2": [
+   165,
+   2188,
+   31,
+   40
+  ],
+  "gnawing_bookworm_die_2": [
+   198,
+   2188,
+   57,
+   39
+  ],
+  "margin_imp_die_2": [
+   0,
+   2235,
+   51,
+   35
+  ],
+  "truth_grief_die_2": [
+   53,
+   2235,
+   39,
+   35
+  ],
+  "struck_page_die_2": [
+   94,
+   2235,
+   39,
+   34
+  ]
+ },
+ "origin": {
+  "index_hound": [
+   31,
+   58
+  ],
+  "index_hound_idle_1": [
+   31,
+   59
+  ],
+  "index_hound_attack": [
+   33,
+   58
+  ],
+  "index_hound_hurt": [
+   34,
+   56
+  ],
+  "index_hound_die_0": [
+   31,
+   63
+  ],
+  "index_hound_die_1": [
+   31,
+   53
+  ],
+  "index_hound_die_2": [
+   31,
+   44
+  ],
+  "margin_imp": [
+   25,
+   46
+  ],
+  "margin_imp_idle_1": [
+   24,
+   48
+  ],
+  "margin_imp_attack": [
+   28,
+   41
+  ],
+  "margin_imp_hurt": [
+   26,
+   46
+  ],
+  "margin_imp_cast": [
+   25,
+   56
+  ],
+  "margin_imp_die_0": [
+   25,
+   50
+  ],
+  "margin_imp_die_1": [
+   25,
+   48
+  ],
+  "margin_imp_die_2": [
+   25,
+   34
+  ],
+  "paper_crane": [
+   35,
+   71
+  ],
+  "paper_crane_idle_1": [
+   36,
+   71
+  ],
+  "paper_crane_attack": [
+   39,
+   74
+  ],
+  "paper_crane_hurt": [
+   39,
+   69
+  ],
+  "paper_crane_cast": [
+   38,
+   75
+  ],
+  "paper_crane_die_0": [
+   35,
+   75
+  ],
+  "paper_crane_die_1": [
+   33,
+   70
+  ],
+  "paper_crane_die_2": [
+   33,
+   51
+  ],
+  "gnawing_bookworm": [
+   28,
+   50
+  ],
+  "gnawing_bookworm_idle_1": [
+   28,
+   51
+  ],
+  "gnawing_bookworm_attack": [
+   34,
+   49
+  ],
+  "gnawing_bookworm_hurt": [
+   29,
+   48
+  ],
+  "gnawing_bookworm_die_0": [
+   28,
+   54
+  ],
+  "gnawing_bookworm_die_1": [
+   28,
+   48
+  ],
+  "gnawing_bookworm_die_2": [
+   28,
+   38
+  ],
+  "catalog_wraith": [
+   35,
+   73
+  ],
+  "catalog_wraith_idle_1": [
+   35,
+   73
+  ],
+  "catalog_wraith_attack": [
+   43,
+   72
+  ],
+  "catalog_wraith_hurt": [
+   40,
+   71
+  ],
+  "catalog_wraith_cast": [
+   35,
+   81
+  ],
+  "catalog_wraith_die_0": [
+   35,
+   75
+  ],
+  "catalog_wraith_die_1": [
+   35,
+   67
+  ],
+  "catalog_wraith_die_2": [
+   35,
+   53
+  ],
+  "inkbound_librarian": [
+   48,
+   97
+  ],
+  "inkbound_librarian_idle_1": [
+   48,
+   98
+  ],
+  "inkbound_librarian_attack": [
+   63,
+   97
+  ],
+  "inkbound_librarian_hurt": [
+   49,
+   95
+  ],
+  "inkbound_librarian_cast": [
+   61,
+   109
+  ],
+  "inkbound_librarian_die_0": [
+   48,
+   97
+  ],
+  "inkbound_librarian_die_1": [
+   48,
+   90
+  ],
+  "inkbound_librarian_die_2": [
+   48,
+   71
+  ],
+  "unnamed_sentry": [
+   53,
+   109
+  ],
+  "unnamed_sentry_idle_1": [
+   53,
+   110
+  ],
+  "unnamed_sentry_attack": [
+   69,
+   109
+  ],
+  "unnamed_sentry_hurt": [
+   54,
+   107
+  ],
+  "unnamed_sentry_cast": [
+   69,
+   121
+  ],
+  "unnamed_sentry_die_0": [
+   53,
+   113
+  ],
+  "unnamed_sentry_die_1": [
+   53,
+   102
+  ],
+  "unnamed_sentry_die_2": [
+   53,
+   80
+  ],
+  "unnamed_sentry_cracked": [
+   53,
+   109
+  ],
+  "unnamed_sentry_cracked_idle_1": [
+   53,
+   110
+  ],
+  "unnamed_sentry_cracked_attack": [
+   69,
+   109
+  ],
+  "unnamed_sentry_cracked_hurt": [
+   54,
+   107
+  ],
+  "unnamed_sentry_cracked_cast": [
+   69,
+   121
+  ],
+  "unnamed_sentry_cracked_die_0": [
+   53,
+   112
+  ],
+  "unnamed_sentry_cracked_die_1": [
+   53,
+   102
+  ],
+  "unnamed_sentry_cracked_die_2": [
+   53,
+   79
+  ],
+  "struck_page": [
+   21,
+   46
+  ],
+  "struck_page_idle_1": [
+   21,
+   49
+  ],
+  "struck_page_attack": [
+   22,
+   50
+  ],
+  "struck_page_hurt": [
+   22,
+   46
+  ],
+  "struck_page_cast": [
+   22,
+   51
+  ],
+  "struck_page_die_0": [
+   21,
+   51
+  ],
+  "struck_page_die_1": [
+   19,
+   46
+  ],
+  "struck_page_die_2": [
+   19,
+   33
+  ],
+  "truth_grief": [
+   19,
+   45
+  ],
+  "truth_grief_idle_1": [
+   19,
+   46
+  ],
+  "truth_grief_attack": [
+   19,
+   45
+  ],
+  "truth_grief_hurt": [
+   20,
+   45
+  ],
+  "truth_grief_cast": [
+   19,
+   49
+  ],
+  "truth_grief_die_0": [
+   19,
+   47
+  ],
+  "truth_grief_die_1": [
+   19,
+   44
+  ],
+  "truth_grief_die_2": [
+   19,
+   34
+  ],
+  "truth_change": [
+   15,
+   54
+  ],
+  "truth_change_idle_1": [
+   15,
+   54
+  ],
+  "truth_change_attack": [
+   17,
+   54
+  ],
+  "truth_change_hurt": [
+   17,
+   54
+  ],
+  "truth_change_cast": [
+   16,
+   54
+  ],
+  "truth_change_die_0": [
+   15,
+   58
+  ],
+  "truth_change_die_1": [
+   15,
+   49
+  ],
+  "truth_change_die_2": [
+   15,
+   39
+  ]
+ },
+ "anims": {
+  "index_hound_idle": {
+   "frames": [
+    "index_hound",
+    "index_hound_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "index_hound_die": {
+   "frames": [
+    "index_hound_die_0",
+    "index_hound_die_1",
+    "index_hound_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "margin_imp_idle": {
+   "frames": [
+    "margin_imp",
+    "margin_imp_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "margin_imp_die": {
+   "frames": [
+    "margin_imp_die_0",
+    "margin_imp_die_1",
+    "margin_imp_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "paper_crane_idle": {
+   "frames": [
+    "paper_crane",
+    "paper_crane_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "paper_crane_die": {
+   "frames": [
+    "paper_crane_die_0",
+    "paper_crane_die_1",
+    "paper_crane_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "gnawing_bookworm_idle": {
+   "frames": [
+    "gnawing_bookworm",
+    "gnawing_bookworm_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "gnawing_bookworm_die": {
+   "frames": [
+    "gnawing_bookworm_die_0",
+    "gnawing_bookworm_die_1",
+    "gnawing_bookworm_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "catalog_wraith_idle": {
+   "frames": [
+    "catalog_wraith",
+    "catalog_wraith_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "catalog_wraith_die": {
+   "frames": [
+    "catalog_wraith_die_0",
+    "catalog_wraith_die_1",
+    "catalog_wraith_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "inkbound_librarian_idle": {
+   "frames": [
+    "inkbound_librarian",
+    "inkbound_librarian_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "inkbound_librarian_die": {
+   "frames": [
+    "inkbound_librarian_die_0",
+    "inkbound_librarian_die_1",
+    "inkbound_librarian_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "unnamed_sentry_idle": {
+   "frames": [
+    "unnamed_sentry",
+    "unnamed_sentry_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "unnamed_sentry_die": {
+   "frames": [
+    "unnamed_sentry_die_0",
+    "unnamed_sentry_die_1",
+    "unnamed_sentry_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "unnamed_sentry_cracked_idle": {
+   "frames": [
+    "unnamed_sentry_cracked",
+    "unnamed_sentry_cracked_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "unnamed_sentry_cracked_die": {
+   "frames": [
+    "unnamed_sentry_cracked_die_0",
+    "unnamed_sentry_cracked_die_1",
+    "unnamed_sentry_cracked_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "struck_page_idle": {
+   "frames": [
+    "struck_page",
+    "struck_page_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "struck_page_die": {
+   "frames": [
+    "struck_page_die_0",
+    "struck_page_die_1",
+    "struck_page_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "truth_grief_idle": {
+   "frames": [
+    "truth_grief",
+    "truth_grief_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "truth_grief_die": {
+   "frames": [
+    "truth_grief_die_0",
+    "truth_grief_die_1",
+    "truth_grief_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  },
+  "truth_change_idle": {
+   "frames": [
+    "truth_change",
+    "truth_change_idle_1"
+   ],
+   "fps": 1.6667,
+   "loop": true
+  },
+  "truth_change_die": {
+   "frames": [
+    "truth_change_die_0",
+    "truth_change_die_1",
+    "truth_change_die_2"
+   ],
+   "fps": 15,
+   "loop": false
+  }
+ },
+ "facing": "right",
+ "external": {
+  "eraser": "bosses_battle",
+  "eraser_truths": "bosses_battle",
+  "eraser_remembers": "bosses_battle",
+  "eraser_silence": "bosses_battle"
+ },
+ "rows": {
+  "unnamed_sentry": {
+   "feet": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    -53,
+    53,
+    -109,
+    0
+   ]
+  },
+  "unnamed_sentry_cracked": {
+   "feet": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    -53,
+    53,
+    -109,
+    0
+   ]
+  },
+  "truth_grief": {
+   "feet": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    -19,
+    17,
+    -45,
+    0
+   ]
+  },
+  "truth_change": {
+   "feet": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    -15,
+    15,
+    -54,
+    0
+   ]
+  }
+ },
+ "notes": "Episode 8 pack atlas, merged into enemies_battle. Base frame <id> facing RIGHT, origin bottom-centre (the default; the `origin` table agrees). Derived <id>_idle_1, _attack, _hurt, _die_0..2 for every id, _cast for margin_imp, paper_crane, catalog_wraith, inkbound_librarian, unnamed_sentry(_cracked), struck_page, truth_grief, truth_change; anims <id>_idle and <id>_die. Draw 1x, untinted. index_hound, margin_imp, paper_crane, gnawing_bookworm, catalog_wraith, inkbound_librarian (enemies.png cells 2, 0, 6, 3, 1, 5, recoloured ink black, violet, cream paper and gold), unnamed_sentry (cell 5, gilt over ink, a blank faceplate) and unnamed_sentry_cracked (its 50% look: the faceplate cracked), struck_page, truth_grief, truth_change (drawn in code; Grief and Change stand on their own ground shadow). Every foe carries a dark outline and a gold rim. `rows`: for the foes whose HUD row sits under their feet, `feet` [dx, dy] from the origin (the origin itself) and `bodyPx` [x0, x1, y0, y1] of the opaque body from the origin, for the row-placement test (CRITIQUE_8 item 1: rows at least 12 internal px from any party sprite). The Eraser lives in bosses_battle (see `external`)."
+}
