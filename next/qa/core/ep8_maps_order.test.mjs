@@ -117,15 +117,18 @@ test('plan 3.4 with the real patches', async () => {
   const wake = watch.events.find((e) => e.id === 'ep8_wake');
   const door = still.events.find((e) => e.id === 'stair_up');
   assert.ok(wake && door, 'patched with both');
-  // EP8_LIVE off, an Episode 7 finisher: the trigger is present, its scene does nothing; the stair door is absent
-  assert.equal(EP8_LIVE, false);
-  assert.equal(STORY8.GATE.live, false);
+  // EP8_LIVE off, an Episode 7 finisher: the trigger is present, its scene does nothing; the stair door is absent (the story's
+  // switch follows the core one; with EP8_LIVE flipped on the branch the off case is the story's GATE set off for this check)
+  assert.equal(STORY8.GATE.live, EP8_LIVE === true);
+  const gateWas = STORY8.GATE.live;
+  STORY8.GATE.live = false;
   const flags = new Set(['ep7_complete', 'doors_reopened', 'mira_joined', 'bram_joined']);
   const has = (f) => flags.has(f);
   const toList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
   const live = (e) => toList(e.if).every(has) && !toList(e.ifNot).some(has);
   assert.equal(live(wake), true);
-  const r = await runOnce(STORY8.scenes[wake.script], { set: new Set(flags), branchFlags: false });
+  let r;
+  try { r = await runOnce(STORY8.scenes[wake.script], { set: new Set(flags), branchFlags: false }); } finally { STORY8.GATE.live = gateWas; }
   assert.ok(!r.log.some((e) => e.op === 'lockInput' || e.op === 'setFlag'), 'no trigger fires while the switch is off');
   for (const id of ['stair_up', 'stair_door_look', 'ep8_roof_enter']) assert.equal(live(still.events.find((e) => e.id === id)), false, `${id} absent`);
   // the stair door lands on a walkable cell

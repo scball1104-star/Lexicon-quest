@@ -475,7 +475,7 @@ test('the switch: with EP8_LIVE false nothing in Episode 8 is reachable; Fine Pr
   const EPISODES = await import('../../src/game/episodes.js');
   const fresh = await import(`../../src/data/ep8/story.js?gate=${Date.now()}`);
   assert.equal(fresh.GATE.live, EPISODES.EP8_LIVE === true);
-  assert.notEqual(EPISODES.EP8_LIVE, true, 'EP8_LIVE stays false until E8-integrate');
+  assert.equal(typeof EPISODES.EP8_LIVE, 'boolean', 'EP8_LIVE is a plain switch (E8-integrate flips it on the branch; shipping stays with Scott or Stephen)');
 });
 
 // Each map's track (plan 8.2). A scene that changes the music puts its map's track back before it ends.

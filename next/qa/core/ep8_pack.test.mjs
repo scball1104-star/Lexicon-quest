@@ -24,7 +24,7 @@ const NEXT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const read = (rel) => fs.readFileSync(path.join(NEXT, rel), 'utf8');
 const exists = (rel) => fs.existsSync(path.join(NEXT, rel));
 
-test('pack table: the ep8 entry is exactly plan 13.2 seam 1, behind EP8_LIVE (false)', () => {
+test('pack table: the ep8 entry is exactly plan 13.2 seam 1, behind EP8_LIVE', () => {
   const d = PACKS.ep8;
   assert.ok(d, 'PACKS.ep8');
   assert.equal(d.entry, '../data/ep8/index.js');
@@ -38,9 +38,9 @@ test('pack table: the ep8 entry is exactly plan 13.2 seam 1, behind EP8_LIVE (fa
   assert.equal(d.wanted({ ep8_started: true }), true);
   assert.equal(d.wanted({ ep6_complete: true, ep7_started: true }), false, 'an Episode 7 run before its credits does not want it');
   assert.equal(d.enabled(), EP8_LIVE);
-  assert.equal(EP8_LIVE, false, 'seam 2: the switch stays off until E8-integrate flips it on the branch');
+  assert.equal(typeof EP8_LIVE, 'boolean', 'seam 2: the switch (E8-integrate flips it on the branch; shipping stays with Scott or Stephen)');
   assert.equal(EP7_LIVE, true);
-  assert.match(read('src/game/episodes.js'), /^export const EP8_LIVE = false;$/m);
+  assert.match(read('src/game/episodes.js'), /^export const EP8_LIVE = (true|false);$/m);
   // ep7 comes first in the table, so packForMap still names ep7 for the two shared maps; packsForMap names both
   for (const id of ['ep7_ph_watch', 'ep7_stillheart']) {
     assert.equal(packForMap(id).id, 'ep7');
@@ -61,12 +61,15 @@ test('nothing is fetched while EP8_LIVE is false: ensurePack skips without impor
   resetPacks();
   let calls = 0;
   const r = await ensurePack('ep8', { importer: async () => { calls++; return {}; }, quiet: true });
-  assert.equal(r.skipped, true, 'the real switch, off: skipped');
-  assert.equal(calls, 0, 'the entry was not imported');
-  assert.equal(packEnabled('ep8'), false);
+  assert.equal(packEnabled('ep8'), EP8_LIVE);
+  if (!EP8_LIVE) {
+    assert.equal(r.skipped, true, 'the real switch, off: skipped');
+    assert.equal(calls, 0, 'the entry was not imported');
+  }
+  resetPacks();   // live, the stub import above made the pack ready: the waits below are asked of a fresh table
   const done7 = { ep7_complete: true, ep6_complete: true, ep5_complete: true, ep4_complete: true, ep3_complete: true, ep2_complete: true, ep1_complete: true };
-  assert.ok(!packsToAwait(done7).includes('ep8'), 'an Episode 7 finisher does not wait for the pack while it is off');
-  assert.ok(!packsToAwait({ ep8_started: true }).includes('ep8'));
+  assert.equal(packsToAwait(done7).includes('ep8'), EP8_LIVE, 'an Episode 7 finisher waits for the pack only while live');
+  assert.equal(packsToAwait({ ep8_started: true }).includes('ep8'), EP8_LIVE);
   assert.ok(packsToAwait(done7, { enabled: true }).includes('ep8'), 'and does once the switch is on');
   const done6 = { ...done7, ep7_complete: false };
   assert.ok(!packsToAwait(done6, { enabled: true }).includes('ep8'), 'an Episode 6 save (no ep7_complete) never wants the pack');
@@ -146,8 +149,8 @@ test('pack entry: ORDER, missing modules skipped, idempotent, the ep7 pack regis
   assert.ok(CREDITS_HANDOFF[7], 'the ep7 hooks ran before the ep8 hooks');
   assert.ok(globalThis.LQ_EP8 && typeof globalThis.LQ_EP8.title === 'function' && typeof globalThis.LQ_EP8.start === 'function'
     && typeof globalThis.LQ_EP8.offer === 'function');
-  assert.deepEqual(CREDITS_HANDOFF[7].endCard, END_CARD_EP7, 'EP8_LIVE false: the Episode 7 end card is unchanged');
-  assert.equal(CREDITS_HANDOFF[7].endCard.sub, 'Episode 8 is not playable yet.');
+  if (!EP8_LIVE) assert.deepEqual(CREDITS_HANDOFF[7].endCard, END_CARD_EP7, 'EP8_LIVE false: the Episode 7 end card is unchanged');
+  assert.equal(CREDITS_HANDOFF[7].endCard.sub, EP8_LIVE ? 'Episode 8 begins in the morning.' : 'Episode 8 is not playable yet.', 'the Episode 7 end card follows the switch');
   assert.deepEqual([CREDITS_HANDOFF[7].map, CREDITS_HANDOFF[7].mark], ['ep7_ph_watch', 'watch_cot'], 'the Episode 7 wake never moves (plan 3)');
   assert.equal(ep8.EP8_MAPS_LISTED, ep8.mapsListed());
   if (!exists('src/data/ep8/encounters.js')) assert.equal(ep8.EP8_MAPS_LISTED, false, 'no encounters.js yet: the maps are not listed');

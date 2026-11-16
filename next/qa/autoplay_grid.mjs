@@ -35,6 +35,11 @@ if (id === 'emberpeak' || id === 'pk_inn') {
   const P = await import('../src/data/maps/ep4_patches.js');
   map = id === 'emberpeak' ? P.withEastRoad(map) : P.withEp4Wake(map);
 }
+// Episode 8 (E8-integrate): the ep8 pack patches two Episode 7 maps (the Watch's wake trigger, the Stillheart's stair door)
+if (id === 'ep7_ph_watch' || id === 'ep7_stillheart') {
+  const P = await import('../src/data/maps/ep8_patches.js');
+  map = id === 'ep7_ph_watch' ? P.withEp8Wake(map) : P.withStairDoor(map);
+}
 const gated = new Set();
 for (const o of [...(map.overlays || []), ...(map.overhead || [])]) {
   for (const k of ['if', 'ifNot']) for (const f of [].concat(o[k] || [])) gated.add(f);
@@ -57,5 +62,6 @@ if (process.argv.includes('--ascii')) {
     id: map.id, W: g.W, H: g.H, code: g.code, faint: g.faint, errors: g.errors,
     events: map.events || [], marks: map.marks || {}, exits: map.exits || [], start: map.start || null,
     pitTo: map.pitTo || null, area: map.area, gated: [...gated].sort(),
+    popbooks: map.popbooks || null,   // Episode 8 (E8-integrate): the books' block, for the bot's authored-start check after a reload
   }));
 }

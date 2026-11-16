@@ -11686,6 +11686,1471 @@
     }
    ],
    "query": "&pack=ep6,ep7&ep=7"
+  },
+  {
+   "name": "story_ep8_morning_note",
+   "note": "E8: ep8_morning in the Keeper's Watch, Vex's note close-up: Gone up first (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { (await import('./src/data/ep8/story.js')).GATE.live = true; return true; })()"
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"A folded scrap\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep8_morning_note: Vex's note"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_ep8_roof",
+   "note": "E8: ep8_roof, the Stillheart roof by day: Aeris by the Kestrel, Nox at the first step (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep7_stillheart",
+      16,
+      15,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Are you frightened\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_ep8_roof: Nox at the stair"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_stair_first_rub",
+   "note": "E8: the Stair's teaching fight (two Index Hounds): a party command rubbed out, the smudge and its pips",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_stair\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 31;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e8s_first",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((Object.values(S.rub || {}).some((r) => r && r.length))) return i; if (open) LQ_DEBUG.battleAct(({ type: 'attack', target: s.b.units().find(u => u.side === 'enemy' && u.alive).uid })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "Object.values(LQ_ENGINE.scene.b.state.erasure.rub).some((r) => r && r.length)",
+     "message": "a command is rubbed out"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_rubbed_row",
+   "note": "E8: a member's turn with a rubbed row in the command menu (smudged, greyed, its help)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_stair\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 31;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "e8s_first",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((open && ((S.rub || {})[s.b.current().uid] || []).length > 0)) return i; if (open) LQ_DEBUG.battleAct(({ type: 'attack', target: s.b.units().find(u => u.side === 'enemy' && u.alive).uid })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 12
+    },
+    {
+     "assert": "((LQ_ENGINE.scene.b.state.erasure.rub || {})[LQ_ENGINE.scene.b.current().uid] || []).length > 0",
+     "message": "the member at the menu has a rubbed row"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "field_ep8_gap_a",
+   "note": "E8: Gap A on the Stair: the Willowmere book read from the south, its pages a bridge, the willow standing up",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_stair",
+      15,
+      45,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 200
+    },
+    {
+     "eval": "(async () => { const r = await LQ_DEBUG.readBook(\"pb_willow\"); if (!r || !r.ok) throw new Error('the read was refused: ' + JSON.stringify(r && r.state && r.state.lastRead)); for (let i = 0; i < 200; i++) { await new Promise((ok) => setTimeout(ok, 40)); const s = LQ_DEBUG.books(); if (s && !s.busy && s.anim == null && LQ_DEBUG.scene() === 'field') return s.describe; } throw new Error('the read never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const o = LQ_DEBUG.books().open, w = {\"a\": \"n\"}; return Object.keys(w).every((k) => o[k] === w[k]); })()",
+     "message": "the willow is open north"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "field_ep8_gap_c_wall",
+   "note": "E8: Gap C from the reading desk: the book open south, a bridge over the lower void and a wall of pages on the island",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_stair",
+      15,
+      27,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 220
+    },
+    {
+     "assert": "(() => { const o = LQ_DEBUG.books().open, w = {\"c\": \"s\"}; return Object.keys(w).every((k) => o[k] === w[k]); })()",
+     "message": "Gap C stands open south (authored)"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_rubbed_steps",
+   "note": "E8: rubbed_steps by the reading desk: the faceless figure walking down, the steps going blank (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_stair",
+      15,
+      28,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"rubbed_steps\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"goes blank behind\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_rubbed_steps: the figure"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_south_margin",
+   "note": "E8: south_margin, the top gate: the Scriptorium below and the First Library filling the sky (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_stair",
+      17,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"south_margin\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Below the gate, a street of book towers\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_south_margin: the Library"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_first_word",
+   "note": "E8: first_word in the square: Meya's one word lifting off with the half-signs (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_scriptorium",
+      23,
+      26,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"first_word\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"word goes with them\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_first_word: the word rubbed out"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_meet_librarian_card",
+   "note": "E8: meet_librarian at the Index, the reader's card close-up with the desk's stamp (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_sc_index",
+      9,
+      12,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"meet_librarian\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Mira reads her card\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_meet_librarian_card: the card"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_elowen_seal",
+   "note": "E8: elowen_scriptorium at the register house: the blanket tag, a key across an open book (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_scriptorium",
+      18,
+      23,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"elowen_scriptorium\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Grey infirmary blankets\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_elowen_seal: the tag"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "field_ep8_library_f1_crossing",
+   "note": "E8: F1 the Catalog of Lost Lives: book a read from the gallery, its bridge to the island",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_library_f1",
+      21,
+      19,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 220
+    },
+    {
+     "eval": "(async () => { const r = await LQ_DEBUG.readBook(\"pb_a\"); if (!r || !r.ok) throw new Error('the read was refused: ' + JSON.stringify(r && r.state && r.state.lastRead)); for (let i = 0; i < 200; i++) { await new Promise((ok) => setTimeout(ok, 40)); const s = LQ_DEBUG.books(); if (s && !s.busy && s.anim == null && LQ_DEBUG.scene() === 'field') return s.describe; } throw new Error('the read never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const o = LQ_DEBUG.books().open, w = {\"a\": \"n\"}; return Object.keys(w).every((k) => o[k] === w[k]); })()",
+     "message": "book a is open north"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "field_ep8_library_f2_pair",
+   "note": "E8: F2 the Palimpsest Galleries: the pair, w read on the island and Valewyn folding behind",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_library_f2",
+      13,
+      11,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 220
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.setBooks({\"v\": \"e\"}); return true; })()"
+    },
+    {
+     "frames": 20
+    },
+    {
+     "eval": "(async () => { const r = await LQ_DEBUG.readBook(\"pb_w\"); if (!r || !r.ok) throw new Error('the read was refused: ' + JSON.stringify(r && r.state && r.state.lastRead)); for (let i = 0; i < 200; i++) { await new Promise((ok) => setTimeout(ok, 40)); const s = LQ_DEBUG.books(); if (s && !s.busy && s.anim == null && LQ_DEBUG.scene() === 'field') return s.describe; } throw new Error('the read never settled'); })()",
+     "timeout": 20000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "(() => { const o = LQ_DEBUG.books().open, w = {\"w\": \"n\", \"v\": \"-\"}; return Object.keys(w).every((k) => o[k] === w[k]); })()",
+     "message": "w open north, Valewyn folded"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_sentry_unwrite",
+   "note": "E8: the Unnamed Sentry pins an Unwrite on a member: the grey ribbon, the hint line, Mira's turn to read",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_library_f2\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 32;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "unnamed_sentry",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((open && !!S.pin)) return i; if (open) LQ_DEBUG.battleAct(({ type: 'attack', target: s.b.units().find(u => u.side === 'enemy' && u.alive).uid })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "!!LQ_ENGINE.scene.b.state.erasure.pin",
+     "message": "an Unwrite is pinned"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "field_ep8_library_f3_choose",
+   "note": "E8: F3 the Unwritten Page, CHOOSE: the two books, either one reaching the keyhole",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_library_f3",
+      17,
+      15,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 240
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"field\"",
+     "message": "field_ep8_library_f3_choose: the field is on top"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_keeper_memory_c",
+   "note": "E8: keeper_memory_c on the first landing: the infirmary, a young Keeper says a name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_library_f3",
+      17,
+      33,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"keeper_memory_c\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"A young Keeper in a bed by the window\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_keeper_memory_c: the infirmary"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_the_name",
+   "note": "E8: the_name at the keyhole: Nox says the name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_library_f3",
+      17,
+      10,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"the_name\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"It's their first name\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_the_name: Nox"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_last_margin",
+   "note": "E8: eraser, the Last Word: Vex up the gallery stair with the first page, whole (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_last_word",
+      14,
+      18,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"eraser\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Mended your bindings\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_last_margin: Vex"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_eraser_unwrite",
+   "note": "E8: the Eraser (the Closed Book) pins an Unwrite: the ribbon, the hint line, Mira's turn to read",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_last_word\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 33;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "eraser",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((open && !!S.pin && s.b.current().id === 'mira')) return i; if (open) LQ_DEBUG.battleAct(({ type: 'attack', target: s.b.units().find(u => u.side === 'enemy' && u.alive).uid })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "!!LQ_ENGINE.scene.b.state.erasure.pin",
+     "message": "an Unwrite is pinned"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_eraser_ward",
+   "note": "E8: the Eraser, the Rejected Truths: Grief and Change in the front row, rows under their feet",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_last_word\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 33;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "eraser",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; const u = s.b.units().find(u => u.id === 'eraser'); u.hp = Math.floor(u.maxHp * 0.70) + 6; return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((s.b.units().filter(u => (u.id === 'truth_grief' || u.id === 'truth_change') && u.alive).length > 0 && open)) return i; if (open) LQ_DEBUG.battleAct((window.__pa(s.b, 'competent') || { type: 'defend' })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 40
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.units().some(u => (u.id === 'truth_grief' || u.id === 'truth_change') && u.alive)",
+     "message": "the Truths stand"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_eraser_remembers",
+   "note": "E8: the Eraser, the Keeper Remembers: the Truths broken, the stage on its gold grade",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_last_word\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 33;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "eraser",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; const u = s.b.units().find(u => u.id === 'eraser'); u.hp = Math.floor(u.maxHp * 0.70) + 6; return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((s.b.units().filter(u => (u.id === 'truth_grief' || u.id === 'truth_change') && u.alive).length > 0 && open)) return i; if (open) LQ_DEBUG.battleAct((window.__pa(s.b, 'competent') || { type: 'defend' })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 40
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; for (const u of s.b.units().filter(u => (u.id === 'truth_grief' || u.id === 'truth_change') && u.alive)) { u.hp = 1; u.shields = 0; } return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((s.b.units().filter(u => (u.id === 'truth_grief' || u.id === 'truth_change') && u.alive).length === 0 && s.st8 && s.st8.k >= 1 && open)) return i; if (open) LQ_DEBUG.battleAct((window.__pa(s.b, 'competent') || { type: 'defend' })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 20
+    },
+    {
+     "assert": "LQ_ENGINE.scene.st8 && LQ_ENGINE.scene.st8.k >= 1",
+     "message": "the gold grade is in"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "battle_eraser_silence",
+   "note": "E8: the Eraser, the Last Silence charging on the hero's turn: the dim, the charge bar, Answer",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "eval": "(async () => {\n  const g = LQ_ENGINE.game;\n  const { LOADOUTS } = await import('./tools/sim/ep8.mjs'), { memberMax } = await import('./src/game/state.js');\n  const L = LOADOUTS[\"ep8_last_word\"];\n  for (const m of g.party) {\n    const r = L[m.id];\n    m.weapon = r.weapon; m.equip = { ...Object.fromEntries(Object.keys(m.equip).map((k) => [k, null])), ...r.equip };\n    m.mastery = { ...m.mastery, ...r.mastery }; m.level = 33;\n    const s = memberMax(m); m.hp = s.hp; m.mp = s.mp;\n  }\n  g.items = { ...L.inventory };\n  for (const f of L.flags || []) g.flags[f] = true;\n  g.flags.read_learned = true;\n  window.__pa = (await import('./src/battle/ai.js')).partyAction;\n  LQ_DEBUG.settings({ autoBattle: false, battleSpeed: 1, battleCursor: 'last' });\n  return true;\n})()",
+     "timeout": 60000
+    },
+    {
+     "eval": "LQ_DEBUG.setSpeed(0)"
+    },
+    {
+     "call": "battle",
+     "args": [
+      "eraser",
+      {
+       "seed": 3,
+       "noElite": true,
+       "canFlee": false
+      }
+     ]
+    },
+    {
+     "advance": 90
+    },
+    {
+     "eval": "(() => { for (const u of LQ_ENGINE.scene.b.units()) if (u.side === 'party') { u.maxHp = Math.max(u.maxHp, 9999); u.hp = u.maxHp; } return true; })()"
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; const u = s.b.units().find(u => u.id === 'eraser'); u.hp = Math.floor(u.maxHp * 0.26) + 6; return true; })()"
+    },
+    {
+     "eval": "(() => { for (let i = 0; i < 8000; i++) { const s = LQ_ENGINE.scene; if (!s || s.name !== 'battle' || !s.b) return -2; const S = s.b.state.erasure || { rub: {}, unwritten: {} }; const b = LQ_DEBUG.state().battle; const open = !!(b && b.menu !== 'closed' && !b.fast); if ((open && s.b.current().id === 'hero' && s.b.living('enemy').some(u => u.charging && u.charging.skill === 'last_silence'))) return i; if (open) LQ_DEBUG.battleAct((window.__pa(s.b, 'competent') || { type: 'defend' })); LQ_DEBUG.advance(5); } return -1; })()"
+    },
+    {
+     "advance": 30
+    },
+    {
+     "assert": "LQ_ENGINE.scene.b.living('enemy').some(u => u.charging && u.charging.skill === 'last_silence')",
+     "message": "the Last Silence charges"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_eraser_after",
+   "note": "E8: eraser_after: the white face cracks, the old man under it (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_last_word",
+      14,
+      14,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Under it is an old man's face\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_eraser_after: the face"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_last_choice",
+   "note": "E8: last_choice at the lectern: How do they go back? (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_last_word",
+      14,
+      14,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"How do they go back\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_last_choice: the question"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_last_page_star",
+   "note": "E8: last_page, the dome: the eighth star lights and takes a sign (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\", \"ending_return\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_last_word",
+      14,
+      14,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"the eighth star lights\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_last_page_star: the star"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_scriptorium_open",
+   "note": "E8: scriptorium_open at dusk: every half-word finishes, the candles lit (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\", \"ending_return\", \"page_shelved\", \"night_read\", \"eighth_star\", \"hero_kept\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_scriptorium",
+      23,
+      9,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Every half-word on every sign finishes itself\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_scriptorium_open: the signs"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_home_hazel",
+   "note": "E8: home, the door of the house at dusk: Hazel asks (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\", \"ending_return\", \"page_shelved\", \"night_read\", \"eighth_star\", \"hero_kept\", \"scriptorium_open\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_scriptorium",
+      23,
+      31,
+      "down"
+     ],
+     "timeout": 30000
+    },
+    {
+     "frames": 160
+    },
+    {
+     "eval": "(() => { LQ_DEBUG.call('scene', \"home\"); return true; })()"
+    },
+    {
+     "eval": "(async () => { const rx = new RegExp(\"Did you find them\"); for (let i = 0; i < 1500; i++) { const s = LQ_ENGINE.scene; if (s && s.name === 'dialog') { if (!s.typing && rx.test((s.pageText || '').replace(/\\s+/g, ' '))) return i; if (!s.typing || i % 4 === 0) LQ_DEBUG.press('confirm', 1); } else if (s && (s.name === 'choice' || s.name === 'titleCard')) LQ_DEBUG.press('confirm', 1); await new Promise(r => setTimeout(r, 40)); } throw new Error('the line never showed: ' + rx); })()",
+     "timeout": 60000
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"dialog\"",
+     "message": "story_home_hazel: Hazel"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "story_thirteenth_name",
+   "note": "E8: thirteenth_name on the bell night: the thirteenth bell, the hero's name (story)",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\", \"ending_return\", \"page_shelved\", \"night_read\", \"eighth_star\", \"hero_kept\", \"scriptorium_open\", \"told_hazel\", \"home_reached\", \"ep8_toll_1\", \"ep8_toll_2\", \"ep8_toll_3\", \"ep8_toll_4\", \"ep8_toll_5\", \"ep8_toll_6\", \"ep8_toll_7\", \"ep8_toll_8\", \"ep8_toll_9\", \"ep8_toll_10\", \"ep8_toll_11\", \"ep8_toll_12\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "call": "warp",
+     "args": [
+      "ep8_bell_night",
+      12,
+      7,
+      "up"
+     ],
+     "timeout": 30000
+    },
+    {
+     "waitFor": "(() => { const f = LQ_ENGINE.stack.find(s => s.name === 'field'); const c = f && f.er8f && f.er8f.cap; return !!(c && c.gold); })()",
+     "timeout": 30000
+    },
+    {
+     "frames": 40
+    },
+    {
+     "assert": "LQ_ENGINE.game.flags.ep8_toll_12 && !LQ_ENGINE.game.flags.ep8_complete",
+     "message": "the thirteenth is tolling, the name shown"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "ui_credits_ep8",
+   "note": "E8: the whole game's credits (CREDITS_EP8) scrolling",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "call": "newGameEp8",
+     "args": [
+      "Arden",
+      {
+       "slot": 0,
+       "scene": "none"
+      }
+     ],
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { const g = LQ_ENGINE.game; for (const f of [\"ep8_morning_done\", \"ep8_started\", \"afraid_yes\", \"ep8_roofed\", \"stair_arrived\", \"first_rub_done\", \"first_book_read\", \"eraser_seen\", \"saw_scriptorium\", \"scriptorium_arrived\", \"read_learned\", \"librarian_met\", \"card_read\", \"told_elowen\", \"elowen_met\", \"library_open\", \"library_entered\", \"lib_f1_arrived\", \"keeper_memory_a\", \"ink_key_found\", \"library_f1_done\", \"lib_f2_arrived\", \"keeper_memory_b\", \"sentry_tried\", \"sentry_defeated\", \"library_f2_done\", \"lib_f3_arrived\", \"keeper_memory_c\", \"beginning_seen\", \"name_told\", \"eraser_tried\", \"vex_arrived\", \"answered_yes\", \"eraser_defeated\", \"lexicon_restored\", \"fragment8_get\", \"keeper_named\", \"ending_return\", \"page_shelved\", \"night_read\", \"eighth_star\", \"hero_kept\", \"scriptorium_open\", \"told_hazel\", \"home_reached\", \"ep8_toll_1\", \"ep8_toll_2\", \"ep8_toll_3\", \"ep8_toll_4\", \"ep8_toll_5\", \"ep8_toll_6\", \"ep8_toll_7\", \"ep8_toll_8\", \"ep8_toll_9\", \"ep8_toll_10\", \"ep8_toll_11\", \"ep8_toll_12\", \"ep8_complete\"]) g.flags[f] = true;  const { BARKS } = await import('./src/data/text.js'); for (const k of [...Object.keys(BARKS), ...[\"first_open\", \"first_wall\", \"first_side\", \"first_pair\", \"would_fold\"]]) g.counters['bark:' + k] = 1; return true; })()"
+    },
+    {
+     "frames": 5
+    },
+    {
+     "eval": "(async () => { const { CREDITS_HANDOFF } = await import('./src/game/story.js'); const h = CREDITS_HANDOFF[8]; if (!h) throw new Error('no CREDITS_HANDOFF[8]'); LQ_DEBUG.engine.push('credits', { cards: h.cards, music: h.music, episode: 8 }); return true; })()"
+    },
+    {
+     "frames": 260
+    },
+    {
+     "assert": "LQ_DEBUG.scene() === \"credits\"",
+     "message": "ui_credits_ep8: the credits"
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
+  },
+  {
+   "name": "ui_title_ep8",
+   "note": "E8: the title with an Episode 7 finish in slot 0: the Episode 8 row offered, its help line beside it",
+   "steps": [
+    {
+     "waitFor": "LQ_DEBUG.engine.hasScene('field') && LQ_DEBUG.commands().includes('newGameEp8')",
+     "timeout": 150000
+    },
+    {
+     "eval": "(async () => { await LQ_DEBUG.newGameEp8('Arden', { slot: 0, scene: 'none' }); const g = LQ_ENGINE.game; for (const f of ['ep8_started', 'ep8_morning_done']) delete g.flags[f]; const meta = { name: g.heroName, level: g.party[0].level, map: g.map, playtime: 36000, chapter: g.chapter, gold: g.gold, party: g.party.map((m) => m.id) }; LQ_ENGINE.save.save(0, JSON.parse(JSON.stringify(g)), meta); LQ_ENGINE.game = null; LQ_ENGINE.reset('title'); return true; })()",
+     "timeout": 150000
+    },
+    {
+     "waitFor": "LQ_DEBUG.scene() === 'title' && !!LQ_ENGINE.scene.menu && ((LQ_ENGINE.scene.quickStarts && LQ_ENGINE.scene.quickStarts().includes('ep8')) || LQ_ENGINE.scene.menu.items.some(i => i.id === 'ep8'))",
+     "timeout": 60000
+    },
+    {
+     "eval": "(() => { const s = LQ_ENGINE.scene; if (s.showQuickStart) s.showQuickStart('ep8'); return true; })()"
+    },
+    {
+     "frames": 90
+    }
+   ],
+   "query": "&pack=ep7,ep8&ep=8"
   }
  ]
 }

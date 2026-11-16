@@ -104,7 +104,14 @@ def part_saves():
         check(s2 and s2['data']['map'] == 'ep7_ph_watch' and s2['data']['autosaveSlot'] == 2 and s2['data']['counters'].get('credits7_rolled') == 1,
               'slot 2 holds the run, awake in the Keeper\'s Watch, credits7_rolled set')
         f = lab.run('(() => { const f = LQ_ENGINE.stack.find(sc => sc.name === "field"); return [f.leader.tx, f.leader.ty]; })()')
-        check(f == [14, 5], f'the party wakes at watch_cot (14, 5): {f}')
+        if LIVE:
+            # live, the wake trigger runs ep8_morning at once and stages the party on Episode 7's watch_stage (E8-integrate)
+            lab.page.wait_for_function("(() => { const f = LQ_ENGINE.stack.find(sc => sc.name === 'field'); "
+                                       "return !!(f && f.cutscene && f.cutscene.running) || LQ_DEBUG.scene() === 'dialog' || !!LQ_ENGINE.game.flags.ep8_started; })()",
+                                       timeout=60000, polling=100)
+            check(True, f'EP8_LIVE: ep8_morning runs on the wake (the party staged at {f})')
+        else:
+            check(f == [14, 5], f'the party wakes at watch_cot (14, 5): {f}')
         if not LIVE:
             check(not s2['data']['flags'].get('ep8_started'), 'ep8_morning did not run')
             ep8 = [u for u in requests if EP8_REQ.search(u)]

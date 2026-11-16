@@ -49,8 +49,7 @@ test('live: shown once any base-game slot has ep7_complete, naming the newest; n
   assert.equal(o.slot, 3);
   assert.equal(o.name, 'Wren');
   assert.equal(ep8Offer(save, '', { live: false }).show, false, 'off: nothing, whatever the saves hold');
-  assert.equal(EP8_LIVE, false);
-  assert.equal(ep8Offer(save, '').show, false, 'the real switch is off');
+  assert.equal(ep8Offer(save, '').show, EP8_LIVE, 'the real switch decides');
 });
 
 test('the row text matches plan 5.3 and 10.5', () => {
@@ -79,9 +78,9 @@ test('hooks: credits entry 8 only with CREDITS_EP8; the Episode 7 end card stays
   const r = registerHooks(null, { credits: { CREDITS_EP8: cards }, quests: { MAIN_QUEST_EP8: Q8 } });
   try {
     assert.ok(r.installed.includes('credits8') && r.installed.includes('quest'));
-    assert.equal(r.installed.includes('endcard7'), false, 'the end card is left alone while EP8_LIVE is false');
+    assert.equal(r.installed.includes('endcard7'), EP8_LIVE, 'the end card is left alone while EP8_LIVE is false');
     assert.equal(CREDITS_HANDOFF[8].flag, 'ep8_complete');
-    assert.deepEqual(CREDITS_HANDOFF[7].endCard, END_CARD_EP7, 'off: unchanged');
+    if (!EP8_LIVE) assert.deepEqual(CREDITS_HANDOFF[7].endCard, END_CARD_EP7, 'off: unchanged');
     assert.deepEqual([CREDITS_HANDOFF[7].map, CREDITS_HANDOFF[7].mark], ['ep7_ph_watch', 'watch_cot'], 'the Episode 7 wake never moves');
     assert.deepEqual(QUEST_EXT[0], ['ep8_started', Q8], 'Episode 8 is asked before Episode 7');
     assert.equal(globalThis.LQ_EP8, HOOKS);
@@ -109,7 +108,7 @@ test('hooks: credits entry 8 only with CREDITS_EP8; the Episode 7 end card stays
 test('relandPatched does nothing while EP8_LIVE is false, and only on the two patched maps', () => {
   const field = (mapId, flags) => ({ name: 'field', mapId, map: { mod: {} }, game: { flags }, leader: { tx: 1, ty: 1, dir: 'down' }, warpTo() { this.warped = true; } });
   const f = field('ep7_ph_watch', { ep7_complete: true });
-  assert.equal(relandPatched({ stack: [f], scene: f }, 0), false, 'the real switch, off: never');
+  if (!EP8_LIVE) assert.equal(relandPatched({ stack: [f], scene: f }, 0), false, 'the real switch, off: never');
   assert.equal(relandPatched({ stack: [f], scene: f }, 0, false), false);
   assert.ok(!f.warped);
   const g = field('ep7_palehaven', { ep7_complete: true });

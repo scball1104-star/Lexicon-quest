@@ -7,7 +7,7 @@ export const EP4_LIVE = true;
 export const EP5_LIVE = true;
 export const EP6_LIVE = true;
 export const EP7_LIVE = true;
-export const EP8_LIVE = false;
+export const EP8_LIVE = true;
 
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 

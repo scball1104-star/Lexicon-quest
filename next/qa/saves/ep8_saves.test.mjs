@@ -117,14 +117,13 @@ test('an Episode 7 credits save loads, rolls the Episode 7 credits with the unch
   assert.equal(creditsPending(g, has), 7, 'the Episode 7 credits are due');
   const h = CREDITS_HANDOFF[7];
   assert.deepEqual([h.map, h.mark], ['ep7_ph_watch', 'watch_cot'], 'the Episode 7 wake is unchanged (plan 3: the Watch fires the morning)');
-  assert.equal(EP8_LIVE, false);
-  assert.deepEqual(h.endCard, END_CARD_EP7, 'the Episode 7 end card is unchanged while EP8_LIVE is false');
-  assert.equal(h.endCard.sub, 'Episode 8 is not playable yet.');
+  if (!EP8_LIVE) assert.deepEqual(h.endCard, END_CARD_EP7, 'the Episode 7 end card is unchanged while EP8_LIVE is false');
+  assert.equal(h.endCard.sub, EP8_LIVE ? 'Episode 8 begins in the morning.' : 'Episode 8 is not playable yet.', 'the Episode 7 end card follows the switch');
   markCreditsRolled(g, 7);
   assert.equal(g.counters.credits7_rolled, 1);
   setPosition(g, h.map, 14, 5, 'down');
   assert.equal(creditsPending(g, has), 0, 'no Episode 8 credits entry is due');
-  assert.equal(packsToAwait(g.flags).includes('ep8'), false, 'the wake does not wait for the ep8 pack while it is off');
+  assert.equal(packsToAwait(g.flags, { enabled: false }).includes('ep8'), false, 'the wake does not wait for the ep8 pack while it is off');
   assert.equal(packsToAwait(g.flags, { enabled: true }).includes('ep8'), true, 'and does once it is live');
   autosave(save, g);
   assert.deepEqual([...storage._m.keys()], ['lq-next-slot-1']);
@@ -265,8 +264,7 @@ test('an Episode 7 credits fixture reaches ep8_morning with EP8_LIVE on, and not
   const watch = P8.withEp8Wake(ep7WatchMod);
   const trig = watch.events.find((e) => e.id === 'ep8_wake');
   assert.deepEqual([trig.type, trig.on, trig.script], ['trigger', 'enter', 'ep8_morning']);
-  // off: the shipped switch (EP8_LIVE false): the trigger is there, its scene refuses, nothing is set
-  assert.equal(EP8_LIVE, false);
+  // off (the switch as it shipped until E8-integrate; withLive(false) after the flip): the trigger is there, its scene refuses
   const off = wokenAtWatch();
   assert.ok(live(trig, (f) => !!off.flags[f]), 'the wake trigger is live on an Episode 7 finisher');
   const r0 = await withLive(false, () => play('ep8_morning', off));
@@ -296,7 +294,7 @@ test('a Fine Print save (tier_1) never reaches ep8_morning', async () => {
   const r = await withLive(true, () => play('ep8_morning', g));
   assert.equal(r.ran, false, 'the scene guard refuses tier_1 even with the switch on');
   assert.ok(!g.flags.ep8_started);
-  assert.ok(!packsToAwait(g.flags).includes('ep8'));
+  assert.ok(!packsToAwait(g.flags, { enabled: false }).includes('ep8'), 'off: no pack wait');
 });
 
 test('a save on a pop-up book bridge cell reloads on ground, able to walk', async () => {
