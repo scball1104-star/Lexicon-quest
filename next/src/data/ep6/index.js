@@ -90,7 +90,7 @@ export function prefetchCode() {
   const out = new Set();
   const hrefs = ORDER.map((n) => new URL(`./${n}.js`, import.meta.url).href);
   // every module already in the worker's cache: none can answer 404 and import() reads them from there, so fetch none
-  return storedAll(hrefs).then((all) => (all ? out : Promise.all(hrefs.map((h, i) => fetch(h)
+  return storedAll(hrefs).then((all) => (all ? out : Promise.all(hrefs.map((h, i) => fetch(h, { cache: 'force-cache' })
     .then((r) => { if (r.status === 404) out.add(ORDER[i]); }, () => {}))).then(() => out)));
 }
 

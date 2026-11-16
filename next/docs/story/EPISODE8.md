@@ -77,7 +77,7 @@ hero's answer, without a speech: they answer to it, and the old man answers for 
 and the eighth closes the campaign. Episode 8 ends the main story, rolls the whole game's credits, and leaves every road,
 Fine Print, the Deep Stacks, the Ledger and the Vows open after the end.
 
-**Target length.** First play **70 to 100 minutes, planned at 84** (the episodes before were 60 to 90, planned at 72 to 75).
+**Target length.** No fixed target (Scott, 2026-11-16: dropped). Measured by the bot at 64 to 88 minutes; planned at 84 (the episodes before were 60 to 90, planned at 72 to 75).
 The finale earns the extra twelve minutes in one place only: its ending (section 1, Act VI, about 11 minutes of scenes that
 pay eight episodes). The playable part keeps Episode 7's density: 16 pop-up decisions on the main path (plan 4.10), 17
 ordinary fights plus the scripted first, at most 12 boxes per main scene (eight set pieces excepted), about 215 boxes on the
@@ -1317,7 +1317,7 @@ any of them, 1 and 3 included, and his change wins over a default.
 19. **Fine Print and Episode 8.** Fine Print does not enter Episode 8 (`ep8_morning` needs `not tier_1`) and its unlock stays
     `ep3_complete`. [default: base game only] **[default, pending Stephen]** The same call as Episodes 4 to 7; whether Fine
     Print should later reach every episode is a separate issue.
-20. **The pacing number: 70 to 100 minutes, planned at 84.** [default: 84] **[default, pending Stephen]** The finale's extra
+20. **The pacing number: no fixed target (Scott, 2026-11-16, dropped the 70 to 100 band; measured 64 to 88).** The finale's extra
     minutes are the ending's; the playable part keeps Episode 7's density.
 21. **Cards.** Episode 8's title card "Episode 8: The Last Word / The lists were written here." (Episode 7 applied ask 1); the
     end title "Lexicon Quest / The End"; the cold open's card plus "This one was kept." [default: as written] **[default,
@@ -1347,7 +1347,8 @@ any of them, 1 and 3 included, and his change wins over a default.
     2026-11-11, Scott: "open them in a different room") [default: the Watch] **[default, pending Stephen]**
 29. **Bosses are tougher, not longer** (new 2026-11-11, Scott: "tougher, not necessarily longer"): the Unnamed Sentry and the
     Eraser keep Episode 6's rounds bands at most and take more of the party's HP (plan 6.4 to 6.6). [default: as the plan]
-    **[default, pending Stephen]**
+    Scott, 2026-11-16: the Eraser stays as shipped. Careful win from the quick start is 86.5% against the 85% floor; the
+    quick start gets no extra gear and the HP-lost measure is unchanged.
 
 **A direction to keep open, not a choice here.** Scott, 2026-11-11: "Each episode really just expands the world map",
 places revisitable, travel around, "like Final Fantasy". A separate world-map proposal is coming. Episode 8 keeps every place

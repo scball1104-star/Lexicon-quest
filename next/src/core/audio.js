@@ -403,11 +403,17 @@ export function createAudio(options = {}) {
     return (Array.isArray(e.src) ? e.src : [e.src]).filter(Boolean).map(urlOf);
   }
 
+  // No worker in control: two audio downloads at a time until uncap() (packs.js, once the hard packs are up), so a pack's
+  // code is never queued behind the whole sfx set (docs/PWA_PACKS.md, Load8)
+  let busy = 0, cap = 2;
+  const slotQ = [];
+  const slot = () => (busy < cap || hasWindow() && navigator.serviceWorker && navigator.serviceWorker.controller ? (busy++, Promise.resolve()) : new Promise((ok) => slotQ.push(ok)));
+  const unslot = () => { const n = slotQ.shift(); if (n) n(); else busy--; };
   function fetchRaw(url) {
     if (raw.has(url)) return raw.get(url);
     let p;
     if (typeof fetch !== 'function') p = Promise.reject(new Error('fetch unavailable'));
-    else p = fetch(url).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); });
+    else p = slot().then(() => fetch(url, { priority: 'low' })).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); }).finally(unslot);
     p = p.catch((e) => {
       failed.add(url);
       raw.delete(url);
@@ -1028,6 +1034,7 @@ export function createAudio(options = {}) {
     getVolumes,
     preload,
     loadPack,
+    uncap() { cap = 1e9; while (slotQ.length) { busy++; slotQ.shift()(); } },
     // extras
     setMuted,
     stopAll,
