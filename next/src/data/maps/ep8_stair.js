@@ -19,7 +19,7 @@
 //      from the west bridges east (20..22, 39..40; step on from (20,38)) to the side ledge (23..26, 37..41) and its iron chest
 //      (25,39): Quinn's page #1 if drift_started, else a Hi-Ether. 1 optional decision. The cranes (19,30) on the far side.
 //   The reading desk (10..20, 26..31). The desk (18..19, 26): rest and save, its own key ep8_desk. The gold chest, the
-//      Forgotten Traveler Satchel (10,30): 1,700 gold. rubbed_trig (10..20, 27) runs rubbed_steps: the figure at eraser_far
+//      Forgotten Traveler Satchel (10,30): 2,000 gold (E8-battle EP8_GOLD_LINE). rubbed_trig (10..20, 27) runs rubbed_steps: the figure at eraser_far
 //      (15,14) walks down to eraser_low (15,18) on the high stair and back; from eraser_seen its line stays blank.
 //   Gap C (void 24..25 and 19..20, the island 12..17, 21..23): Lesson C, pages are walls too. pb_c (book c, ns at 14..15, 22,
 //      length 3) STARTS OPEN to the south: its pages bridge the lower gap (24..25) from the desk landing and stand as a wall
@@ -88,7 +88,7 @@ const events = [
   enemy('e_e8s_cranes', 19, 30, 'paper_crane', 'e8s_cranes', 'wander', { radius: 1 }),
   // the reading desk: rest and save (its own key), the satchel, the figure on the stair
   { id: 'desk_save', type: 'font', x: 18, y: 26, w: 2, h: 1, text: 'ep8_desk', sprite: 'reading_desk', safe: true },
-  chest('satchel', 10, 30, 'gold', { gold: 1700 }),
+  chest('satchel', 10, 30, 'gold', { gold: 2000 }),
   trigger('rubbed_trig', 10, 27, 11, 1, 'rubbed_steps', { if: 'first_book_read', ifNot: 'eraser_seen' }),
   // Gap C: the book that starts open as a wall
   { id: 'pb_c', type: 'popbook', book: 'c', x: 14, y: 22 },

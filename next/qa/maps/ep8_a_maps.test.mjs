@@ -242,7 +242,7 @@ test('the Stair: enemies against ZONES.ep8_stair.plan, the chests, the save poin
   if (ZONES.ep8_stair) assert.deepEqual(Object.fromEntries(ZONES.ep8_stair.plan), count);
   const first = byId(S, 'e_e8s_first');
   assert.ok(!live(first, new Set(STAIR)) && !live(first, new Set(STAIR_ON)), 'the scripted fight\'s anchor is never present');
-  assert.equal(byId(S, 'satchel').gold, 1700);
+  assert.equal(byId(S, 'satchel').gold, 2000);   // E8-battle's EP8_GOLD_LINE (BATTLE.md 17)
   assert.deepEqual([byId(S, 'chest_foot').tier, byId(S, 'chest_ledge').tier, byId(S, 'satchel').tier], ['wood', 'iron', 'gold']);
   assert.equal(byId(S, 'chest_ledge_page').flag, 'drift_1_found');
   assert.equal(byId(S, 'desk_save').text, 'ep8_desk');

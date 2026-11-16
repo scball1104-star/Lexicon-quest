@@ -68,10 +68,10 @@ const EP7_DONE = ['ep7_complete', 'doors_reopened', 'ep6_complete', 'ep5_complet
 const STAIR = [...EP7_DONE, 'ep8_morning_done', 'ep8_started', 'ep8_roofed', 'stair_arrived'];
 const STAIR_ON = [...STAIR, 'first_rub_done', 'first_book_read', 'eraser_seen'];
 const F1 = [...STAIR_ON, 'saw_scriptorium', 'scriptorium_arrived', 'read_learned', 'librarian_met', 'card_read', 'elowen_met',
-  'library_open', 'library_entered', 'f1_arrived'];
-const F2 = [...F1, 'keeper_memory_a', 'ink_key_found', 'library_f1_done', 'f2_arrived'];
+  'library_open', 'library_entered', 'lib_f1_arrived'];
+const F2 = [...F1, 'keeper_memory_a', 'ink_key_found', 'library_f1_done', 'lib_f2_arrived'];
 const F2_WON = [...F2, 'keeper_memory_b', 'sentry_defeated'];
-const F3 = [...F2_WON, 'library_f2_done', 'f3_arrived'];
+const F3 = [...F2_WON, 'library_f2_done', 'lib_f3_arrived'];
 export const MAIN_FLAGS = {
   ep8_stair: { stair: STAIR, 'stair on': STAIR_ON },
   ep8_library_f1: { F1, 'F1 back': [...F1, 'keeper_memory_a', 'ink_key_found'] },

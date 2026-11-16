@@ -86,7 +86,7 @@ function turnTo(b, uid) {
 /** Mira (or anyone) performs `a` on her own turn (after turnTo). */
 function act(b, uid, a) { turnTo(b, uid); return b.perform(a); }
 
-test('Episode 8 ids are registered, unlisted until the maps exist, and Episodes 1 to 7 are untouched', () => {
+test('Episode 8 ids are registered, listed now that the maps exist, and Episodes 1 to 7 are untouched', () => {
   for (const id of [...E8.enemies.EP8_FOES, ...E8.enemies.EP8_BOSSES, ...E8.enemies.EP8_ADDS]) {
     assert.ok(ENEMIES[id] && !before.enemies.has(id), id);
     assert.equal(ENEMIES[id].erasing, true, `${id} is erasing`);
@@ -94,12 +94,12 @@ test('Episode 8 ids are registered, unlisted until the maps exist, and Episodes 
   for (const id of Object.keys(E8.skills.EP8_SKILLS)) assert.ok(SKILLS[id] && !before.skills.has(id), id);
   for (const id of [...E8.enc.EP8_GROUP_IDS, ...E8.enc.EP8_BOSS_IDS]) assert.ok(ENCOUNTERS[id], id);
   assert.equal(E8.enc.EP8_GROUP_IDS.length, 12);
-  assert.equal(E8.enc.EP8_MAPS_LISTED, false);
+  assert.equal(E8.enc.EP8_MAPS_LISTED, true, 'E8-maps-b built the five zones (wave 8c)');
   for (const z of E8.enc.EP8_ZONE_ORDER) {
     assert.ok(ZONES[z], z);
-    assert.ok(!Object.keys(ZONES).includes(z), `${z} stays out of Object.keys(ZONES) until the maps exist`);
+    assert.ok(Object.keys(ZONES).includes(z), `${z} is listed now that its map exists`);
   }
-  assert.deepEqual(Object.keys(ZONES), before.zones);
+  assert.deepEqual(Object.keys(ZONES), [...before.zones, ...E8.enc.EP8_ZONE_ORDER.filter((z) => !before.zones.includes(z))], 'only the Episode 8 zones join the list');
   assert.equal(JSON.stringify(ENEMIES.white_phantom), before.phantom);
   assert.equal(JSON.stringify(SKILLS.answer), before.answer, "Answer's data is unchanged (Episode 8 gives it a job, not a new row)");
   assert.equal(Object.keys(SHOPS).length, before.shops + 3);

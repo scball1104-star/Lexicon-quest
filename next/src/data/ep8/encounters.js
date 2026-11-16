@@ -11,7 +11,7 @@
 import { enc, ENCOUNTERS, ZONES } from '../encounters.js';
 
 /** E8-maps-b (wave 8c): set to true once the Library maps exist (lists the five zones in ZONES for qa/maps). */
-export const EP8_MAPS_LISTED = false;
+export const EP8_MAPS_LISTED = true;
 
 export const EP8_ZONE_ORDER = ['ep8_stair', 'ep8_library_f1', 'ep8_library_f2', 'ep8_library_f3', 'ep8_last_word'];
 
