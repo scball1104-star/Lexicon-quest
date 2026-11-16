@@ -65,6 +65,7 @@ test('refusals: a dungeon from the menu row, the Deep Stacks, a scene, a busy fi
   assert.deepEqual(all({ area: 'town', scene: true }), ['scene']);
   assert.deepEqual(all({ area: 'town', busy: true }), ['busy']);
   assert.deepEqual(all({ area: 'field', mapId: 'ep5_ship' }), ['aboard'], 'mid-crossing on the ship');
+  assert.deepEqual(all({ area: 'field', mapId: 'ep5_ship', from: 'stone' }), ['aboard'], 'the deck stone (Scott, 2026-11-15) opens the map view only');
   assert.deepEqual(all({ area: 'field', from: 'menu' }), ['ok'], 'a road or the open field: travel');
   assert.deepEqual(all({ area: 'interior', from: 'menu' }), ['ok'], 'an inn or a shop: travel');
   for (const k of ['rumour', 'here', 'dungeon', 'aboard', 'scene', 'busy', 'locked']) assert.ok(D.TEXT.why[k], `a line for ${k}`);
