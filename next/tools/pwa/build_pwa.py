@@ -51,7 +51,8 @@ LAZY_PREFIXES = ('assets/backdrops/paint_', 'src/world/ep3/', 'assets/clips/', '
                  'assets/audio/sfx/ep4_', 'assets/audio/ambience/ep4_',
                  'assets/audio/sfx/ep5_', 'assets/audio/ambience/ep5_',
                  'assets/audio/sfx/ep6_', 'assets/audio/ambience/ep6_',
-                 'assets/audio/sfx/ep7_', 'assets/audio/ambience/ep7_')
+                 'assets/audio/sfx/ep7_', 'assets/audio/ambience/ep7_',
+                 'assets/audio/sfx/ep8_', 'assets/audio/ambience/ep8_')
 
 
 def is_lazy(rel):

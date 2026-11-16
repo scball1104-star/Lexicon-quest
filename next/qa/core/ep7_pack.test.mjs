@@ -52,7 +52,7 @@ test('pack table: the ep7 entry is exactly plan 13.2 seam 1, behind EP7_LIVE', (
   assert.ok(!exists('src/data/ep7/live.js'), 'no live.js: the switch is in episodes.js and nothing of the pack is precached');
   const order = Object.keys(PACKS);
   assert.ok(order.indexOf('ep6') < order.indexOf('ep7'), 'ep6 before ep7 in the table (the hard chain)');
-  assert.deepEqual(order.filter((id) => PACKS[id].hard), ['ep3', 'ep4', 'ep5', 'ep6', 'ep7']);
+  assert.deepEqual(order.filter((id) => PACKS[id].hard), ['ep3', 'ep4', 'ep5', 'ep6', 'ep7', 'ep8']);   // ep8: E8-pack
 });
 
 test('nothing is fetched while EP7_LIVE is false: ensurePack skips without importing, the call sites do not wait for it', async () => {
@@ -120,11 +120,11 @@ test('seam 4: an Episode 7 save lands where an Episode 4 to 6 one does (Emberpea
     assert.deepEqual(landing(id), landing('ep6_obs_f2'), `${id} lands as an ep6 map does`);
     assert.equal(landing(id)[0], 'emberpeak');
   }
-  assert.equal(landing('ep8_x'), null);
+  assert.equal(landing('ep9_x'), null);
   assert.equal(landing('ep77_x'), null);
   for (const id of ['ep4_vw_inn', 'ep5_saffron', 'ep6_zephyr']) assert.equal(landing(id)[0], 'emberpeak', `${id} unchanged`);
   assert.equal(landing('pk_inn'), null);
-  assert.match(read('src/game/packFallback.js'), /\/\^ep\[4567\]_\/\.test\(id\) \? E/);
+  assert.match(read('src/game/packFallback.js'), /\/\^ep\[45678\]_\/\.test\(id\) \? E/);
 });
 
 test('pack entry: ORDER, missing modules skipped, idempotent, the ep6 pack registered first, maps and hooks run', async () => {

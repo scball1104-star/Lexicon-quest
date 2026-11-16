@@ -275,6 +275,64 @@ the pack adds its row only once its `EP7_MAPS_LISTED` is true).
   `src/game/packs.js` (`storedAll`, `awaitPacks`, `warm`, `refetchUsed`): the pre-tap load went from 2,451,177 to 2,450,964
   wire bytes (seams +101, trims -314, gzipped); the initial download from 6,670,715 to 6,670,503.
 
+## The ep8 pack (2026-11-15, E8-pack)
+
+`ep8` (prefix `ep8_`, entry `src/data/ep8/index.js`, asset fragment `assets/ep8_manifest.json`, audio pack `ep8`, cap 1.0 MB)
+holds all of Episode 8 (`docs/EPISODE8_PLAN.md` 13): every file under `src/data/ep8/`, `src/data/maps/ep8_*.js` (the eleven
+maps and `ep8_patches.js`), `assets/{tiles,sprites,ui,backdrops}/ep8_*`, `assets/tiles/ep8.png`, and the sounds
+`assets/audio/{sfx,ambience}/ep8_*` (`build_pwa.py` `LAZY_PREFIXES`). Its switch is `EP8_LIVE` in `src/game/episodes.js`,
+**false** until E8-integrate. `hard: true`, `touches: ['ep7_ph_watch', 'ep7_stillheart']`: the field waits for both ep7 and ep8
+before loading either. Wanted from `ep7_complete` or `ep8_started` (an Episode 6 save never wants it). While `EP8_LIVE` is false
+nothing is fetched, except with `?pack=ep8` or `?ep=8` (the title hook forces it on; the pack adds its row only once its
+`EP8_MAPS_LISTED` is true). No core map is touched: the credits wake at `hero_home` is a `goto`, and `ep8_bell_night` is a
+copy of `bell_tower` with its own id.
+
+- **The chain ep3 to ep8.** The ep8 entry awaits the ep7 pack (`ensureEp7`: `ensurePack('ep7', { engine })`, then the ep7
+  entry's `register(engine)`) before any ep8 module is evaluated; `ensurePack('ep8')` starts every hard pack above it at once
+  (#96), and the entry starts its own code (`prefetchCode()`) and map files (`maps.js` `prefetch()`) before it waits.
+- **`register(engine)`.** ORDER `flags, enemies, items, skills, loot, encounters, erasure, shops, ai, npcs, quests, text,
+  credits, story, ledger, audio, world, pages, maps, hooks, start, scene`; `title` is loaded on first use by `hooks.js`. A
+  missing module is skipped and reported; a broken one is not swallowed. Idempotent.
+- **Audio.** `src/data/ep8/audio.js` (E8-audio) is merged into the engine's manifest (never overwriting an id, `pack` as
+  `manifest.packs.ep8`) on every path that brings the pack up. The quick start calls `readyPacks(engine)` (the ep7 hooks'
+  `readyPacks`, so ep4 to ep7 with their fragments: `sky_wind` for the Stair, `palehaven` for Act I) before the fade in.
+  `qa/pwa/precache.test.mjs` resolves sfx ids named under `src/data/ep8/` against the ep8 fragment, then the ep7 to ep4 ones.
+- **Maps and the order trap.** `src/data/ep8/maps.js` starts every map import at once, awaits the ep7 maps registry's
+  `register()`, then registers the eleven maps by a guarded list and patches the registered `ep7_ph_watch` / `ep7_stillheart`
+  with `ep8_patches.js` `withEp8Wake` / `withStairDoor` (identity until that file or export exists). Both orders are tested:
+  `qa/core/ep8_maps_order.test.mjs` (ep8 first) and `ep8_maps_order_b.test.mjs` (ep7 first).
+- **Hooks** (`src/data/ep8/hooks.js`): `CREDITS_HANDOFF[8]` (from `credits.js` `CREDITS_EP8`; wakes at `hero_home` `bed`,
+  music `the_last_word`, counter `credits8_rolled`, `END_CARD_EP8` from text.js or the plan's stand-in), `CREDITS_HANDOFF[7].endCard`
+  = `END_CARD_EP7_LIVE` while live (unchanged while off), `QUEST_EXT` (Episode 8 first), `globalThis.LQ_EP8` (`title`, `offer`,
+  `start`, `pickRunSlot`), `LQ_DEBUG.newGameEp8` (async), the cold-entry re-landing on the two patched maps (only while live).
+- **Core seams** (plan 13.2): the table entry; `EP8_LIVE`; one title line after Episode 7's; the landing regex `ep[45678]_`;
+  and in `src/battle/rules.js` commands(), one call point before it returns: `for (const h of [RULE_EXT, ...RULE_EXT]) if
+  (h.commands) h.commands(state, u, out, ctx);` (a rule pushed on `RULE_EXT` with a `commands` member, or the plan's literal
+  `RULE_EXT.commands`; it may edit the rows in place). With no hook every Episode 1 to 7 fight builds exactly the rows it built
+  before (`qa/core/ep8_commands.test.mjs` against `ep8_commands_fixture.json`, written without the line). Paid for by
+  doc-comment trims in `src/game/episodes.js`: the pre-tap load went from 2,450,963 to 2,450,860 wire bytes and the initial
+  download from 6,670,501 to 6,670,398 (seams +155, trims -470, the cold-load change below +212, gzipped).
+- **The cold load (Scott approved the fix in `packs.js`, 2026-11-15).** Traced on the phone profile (`qa/ui/ep8_saves_headless.py
+  --trace`, entry to `ep7_ph_watch`, ep4 to ep7): nothing of any pack's code starts before `assets/pack_files.json` arrives, at
+  about 2.7 s (it queues behind the entry's audio on the test server's six HTTP/1.1 connections; a high fetch priority did not
+  move it). From then on the ep4 to ep7 code, about 530 requests, shares the line: ep4's 119 finish at 9.0 s, interleaved with
+  ep5 to ep7's, and ep4 registers one module at a time behind them (ready at 8.1 to 8.9 s). So the ep4 pack waits on its own
+  code's place in the queue, not on its art (which starts only after register) or on pack_files.json alone. The change in
+  `attempt()`: the code prefetch of a hard pack with more than one unready hard pack below it goes at `priority: 'low'` (ep3 and
+  ep4 go `high`), and once a pack's code is fetched (or found in the worker's cache) and a worker controls the page, every module
+  gets a `<link rel="modulepreload">`, so the browser parses them all at once and each `import()` only evaluates. Without a
+  controlling worker nothing is preloaded (a failed modulepreload would poison the module map, the trap the up-front fetch
+  avoids). Measured, three runs each, interleaved, same machine state (two other build agents running), cold / warm in s:
+  **before 11.17 to 12.26 / 3.04 to 3.34; after 8.98 to 10.25 / 2.44 to 3.15** (Fact; the after arm then reran as shipped:
+  9.61 to 10.04 / 2.53 to 2.80). The high priority on `pack_files.json` alone measured no gain and was not kept. The
+  ep8 chain (ep8 forced on, its 62 not-yet-written modules and maps answering 404) to the same Watch, as shipped: 9.08 to 11.07 /
+  2.59 to 3.05. Plan 3.3's 8 s cold target is still missed; what is left is the request count on the test server's HTTP/1.1
+  line (GitHub Pages serves HTTP/2) and pack_files.json's 2.7 s.
+- **Saves.** `qa/saves/ep8_saves.test.mjs` (plan 10.9: the quick start's own slot, all slots full, the Episode 7 credits wake,
+  an Episode 6 save never wanting the pack, the ended save at `hero_home` `bed` writing only its slot, Fine Print's carry), with
+  the cases that need the story, maps and books pending for E8-integrate; `qa/saves/ep8_pack_fallback.test.mjs`;
+  `qa/ui/ep8_saves_headless.py` (an Episode 7 credits save in a browser, and the timing).
+
 ## The worldmap pack (2026-11-11, issue #97, WORLD_MAP_PLAN wave 2)
 
 `worldmap` (prefix `worldmap_`, entry `src/data/worldmap/index.js`, asset fragment `assets/worldmap_manifest.json`, no audio

@@ -383,6 +383,13 @@
   "src/data/maps/ep7_waystation.js",
   "src/data/maps/ep7_white_road.js"
  ],
+ "ep8": [
+  "assets/ep8_manifest.json",
+  "src/data/ep8/hooks.js",
+  "src/data/ep8/index.js",
+  "src/data/ep8/maps.js",
+  "src/data/ep8/start.js"
+ ],
  "tier": [
   "assets/tier_manifest.json",
   "src/data/tier/index.js",

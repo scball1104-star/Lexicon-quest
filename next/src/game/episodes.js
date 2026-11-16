@@ -1,24 +1,17 @@
-// The episode switch and the quick-start slot choice (E3-saves, EPISODE3_PLAN section 10). Pure: no DOM, no engine.
-// `episodeOffers(save, search)` says which title rows to show; `pickRunSlot(save)` says where an Episode 3 quick start
-// may save without ever touching another run.
+// The episode switches, the title offers and the quick-start slot choice (EPISODE3_PLAN 10). Pure.
 import * as encounters from '../data/encounters.js';
 
-/** The master switch. While false: ep3_morning never runs, the sand gate stays chained, no Episode 3 row on the title. */
+// While a switch is false its pack is not fetched and nothing of it shows (`?ep=N` aside). docs/PWA_PACKS.md.
 export const EP3_LIVE = true;
-/** Episode 4 (EPISODE4_PLAN 10.5): the ep4 pack is not fetched and nothing of it shows while false (`?ep=4` aside). */
 export const EP4_LIVE = true;
-/** Episode 5 (EPISODE5_PLAN 10.5), as EP4_LIVE. */
 export const EP5_LIVE = true;
 export const EP6_LIVE = true;
 export const EP7_LIVE = true;
+export const EP8_LIVE = false;
 
-/** True once E3-battle/E3-maps list the Episode 3 zones in encounters.js (`EP3_MAPS_LISTED`); until then `?ep=3` shows nothing. */
 export function ep3MapsListed() { return encounters.EP3_MAPS_LISTED === true; }
 
-/**
- * The title menu folded into two columns (the phone, with many rows): Config moves up in front of the episode rows, so those
- * stay together in one column. In place, idempotent, and only with two or more episode rows.
- */
+/** The phone's two-column title: Config moves in front of two or more episode rows. In place, idempotent. */
 export function foldTitleRows(items) {
   const ep = items.findIndex((it) => /^ep\d$/.test(it.id)), at = items.findIndex((it) => it.id === 'config');
   if (ep >= 0 && at > ep && items.filter((it) => /^ep\d$/.test(it.id)).length > 1) items.splice(ep, 0, ...items.splice(at, 1));
@@ -33,7 +26,7 @@ function urlEp(search) {
   try { return new URLSearchParams(search || '').get('ep'); } catch (err) { return null; }
 }
 
-/** The newest save (slots 0..n) whose flags include `flag`: { slot, at, name } or null. */
+/** The newest save with `flag`: { slot, at, name } or null. */
 export function newestWith(save, flag) {
   let best = null;
   const last = save && Number.isFinite(save.slots) ? save.slots : 3;
@@ -48,18 +41,13 @@ export function newestWith(save, flag) {
   return best;
 }
 
-/** { show, url, name, slot }: Episode 2 is offered; the newest `ep1_complete` save names the hero. Pure. */
 export function ep2Offer(save, search = '') {
   const url = urlEp(search) === '2';
   const best = newestWith(save, 'ep1_complete');
   return { show: url || !!best, url, name: best ? best.name : null, slot: best ? best.slot : null };
 }
 
-/**
- * Both quick-start offers: { ep2, ep3 }. `ep2` is exactly ep2Offer. `ep3.show` is true when the switch is live and any
- * slot has `ep2_complete`, or with `?ep=3` once the Episode 3 maps are listed (a developer entry). `opts.live` and
- * `opts.mapsListed` override the module switches (tests). Pure.
- */
+/** { ep2, ep3 }: ep3 shows when live and a slot has ep2_complete, or with ?ep=3 once listed. opts: tests. */
 export function episodeOffers(save, search = '', opts = {}) {
   const live = opts.live != null ? !!opts.live : EP3_LIVE;
   const listed = opts.mapsListed != null ? !!opts.mapsListed : ep3MapsListed();
@@ -72,7 +60,7 @@ export function episodeOffers(save, search = '', opts = {}) {
   };
 }
 
-/** True when slot n holds anything (a readable game or unreadable bytes: both are someone's save). */
+/** Slot n holds anything (unreadable bytes are someone's save too). */
 function occupied(save, n) {
   try {
     if (typeof save.exists === 'function') return !!save.exists(n);
@@ -80,11 +68,7 @@ function occupied(save, n) {
   } catch (err) { return true; }
 }
 
-/**
- * Where an Episode 3 quick start may save its run (plan 10.3). Slot 0 if empty; else the first empty manual slot with
- * a one-line notice; else a refusal. It never offers Replace and never names an occupied slot. Pure.
- *   { ok: true, slot: 0, notice: null } | { ok: true, slot: n, notice } | { ok: false, slot: null, notice }
- */
+/** A quick start's own slot: 0 if empty, else the first empty one with a notice, else a refusal. Never an occupied slot. */
 export function pickRunSlot(save) {
   if (!save) return { ok: false, slot: null, notice: SLOTS_FULL_NOTICE };
   if (!occupied(save, 0)) return { ok: true, slot: 0, notice: null };

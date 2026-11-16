@@ -46,7 +46,7 @@ export const REFLECT_PHYS = 0.5;  // Echo Warden Bulwark: the attacker takes hal
 export const BOSS_INTERRUPT_DELAY = 0.35;
 export const OATH_HAMMER = 0.5;   // Episode 3: the share of a Last Hammer that Bram takes when his Tempered Oath turns it
 export const SPLIT_EXP = 0.25;
-/** Pack rules: docs/PWA_PACKS.md, the ep5 pack. */
+/** Pack rules: docs/PWA_PACKS.md, the ep5 pack; commands(state, unit, list, ctx) edits a party member's command rows. */
 export const RULE_EXT = [];
 
 // ------------------------------------------------------------------------------- rng
@@ -836,6 +836,7 @@ export function createBattle(cfg = {}) {
     out.push({ id: 'swap', name: 'Swap', label: other ? `Swap: ${cap(other)}` : 'Swap', weapon: other || null,
       enabled: !!other, reason: other ? null : 'No second weapon' });
     out.push({ id: 'flee', name: 'Flee', enabled: !!state.options.canFlee, reason: state.options.canFlee ? null : 'Cannot flee' });
+    for (const h of [RULE_EXT, ...RULE_EXT]) if (h.commands) h.commands(state, u, out, ctx);
     return out;
   }
 

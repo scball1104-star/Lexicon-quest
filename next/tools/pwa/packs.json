@@ -94,6 +94,16 @@
       "ep6_zephyr"
     ]
   },
+  "ep8": {
+    "entry": "../data/ep8/index.js",
+    "prefix": "ep8_",
+    "assets": "assets/ep8_manifest.json",
+    "audioPack": "ep8",
+    "touches": [
+      "ep7_ph_watch",
+      "ep7_stillheart"
+    ]
+  },
   "tier": {
     "entry": "../data/tier/index.js",
     "prefix": "tier_",

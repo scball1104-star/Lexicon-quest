@@ -3,7 +3,7 @@
 import { X1_LIVE } from '../data/x1/live.js';
 import { X2_LIVE } from '../data/x2/live.js';
 import { CAVE_LIVE } from '../data/cave/live.js';
-import { EP3_LIVE, EP4_LIVE, EP5_LIVE, EP6_LIVE, EP7_LIVE } from './episodes.js';
+import { EP3_LIVE, EP4_LIVE, EP5_LIVE, EP6_LIVE, EP7_LIVE, EP8_LIVE } from './episodes.js';
 
 export const PACKS = {
   x1: { entry: '../data/x1/index.js', prefix: 'x1_', assets: 'assets/x1_manifest.json', audioPack: 'x1',
@@ -28,6 +28,8 @@ export const PACKS = {
          wanted: (f) => !!(f.ep5_complete || f.ep6_started), enabled: () => EP6_LIVE },
   ep7: { entry: '../data/ep7/index.js', prefix: 'ep7_', assets: 'assets/ep7_manifest.json', audioPack: 'ep7', hard: true, touches: ['ep6_zl_inn', 'ep6_zl_charts', 'ep6_zephyr'],
          wanted: (f) => !!(f.ep6_complete || f.ep7_started), enabled: () => EP7_LIVE },
+  ep8: { entry: '../data/ep8/index.js', prefix: 'ep8_', assets: 'assets/ep8_manifest.json', audioPack: 'ep8', hard: true, touches: ['ep7_ph_watch', 'ep7_stillheart'],
+         wanted: (f) => !!(f.ep7_complete || f.ep8_started), enabled: () => EP8_LIVE },
   tier: { entry: '../data/tier/index.js', prefix: 'tier_', assets: 'assets/tier_manifest.json', audioPack: null, touches: [], wanted: (flags) => !!flags.tier_1, enabled: () => true },   // Fine Print
   worldmap: { entry: '../data/worldmap/index.js', prefix: 'worldmap_', assets: 'assets/worldmap_manifest.json', audioPack: null, touches: [], wanted: (f) => !!f.ep1_complete, enabled: () => true },   // #97
 };
@@ -202,9 +204,12 @@ async function attempt(id, def, opts) {
       const code = lists0 && Array.isArray(lists0[id]) ? lists0[id].filter((f) => f.startsWith(dir) && f.endsWith('.js')) : [];
       const base = engine && engine.assets ? engine.assets.base : new URL('../../', import.meta.url).href;
       const hrefs = /^https?:/.test(base) ? code.map((f) => new URL(f, base).href) : [];
+      // E8-pack (cold entry): the chain's lowest pack fetches first; then, from the worker's cache, parse every module at once
+      const t = tableOf(opts), ids = Object.keys(t), priority = ids.slice(0, ids.indexOf(id)).filter((d) => t[d].hard && packEnabled(d, opts) && !packReady(d)).length > 1 ? 'low' : 'high';
       if (hrefs.length && !(await storedAll(hrefs))) {
-        await Promise.all(hrefs.map(async (h, i) => { const r = await fetch(h); if (!r.ok) throw new Error(`${code[i]}: ${r.status}`); }));
+        await Promise.all(hrefs.map(async (h, i) => { const r = await fetch(h, { priority }); if (!r.ok) throw new Error(`${code[i]}: ${r.status}`); }));
       }
+      if (typeof document !== 'undefined' && navigator.serviceWorker && navigator.serviceWorker.controller) for (const h of hrefs) document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'modulepreload', href: h }));
     }
     const mod = await importer(def.entry);
     if (mod && typeof mod.register === 'function') reg = await mod.register(engine);
