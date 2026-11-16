@@ -333,6 +333,54 @@ copy of `bell_tower` with its own id.
   the cases that need the story, maps and books pending for E8-integrate; `qa/saves/ep8_pack_fallback.test.mjs`;
   `qa/ui/ep8_saves_headless.py` (an Episode 7 credits save in a browser, and the timing).
 
+## The cold load to the Episode 8 entry (2026-11-16, Load8)
+
+Measured with `qa/ui/ep8_saves_headless.py --skip-saves --chain ep8` (phone profile, CPU 4x, 10 Mbps and 40 ms, GPU on; the
+Keeper's Watch with ep4 to ep8 ready; EP8_LIVE on). Two servers: **standard** is `qa/pwa/pwa.py`'s server as the script uses
+it (HTTP/1.1, six connections, `Cache-Control: no-cache` and no validator on gzipped text, so every second request of a file
+downloads it again); **Pages-like** is the same server answering `Cache-Control: max-age=600` as GitHub Pages does (checked on
+the live site 2026-11-16: `max-age=600`, an ETag and Last-Modified), so a module fetched once is read from the HTTP cache by
+its `import()`. Pages also serves HTTP/2, which neither server does (not measured).
+
+- **What the trace showed (Fact).** The test presses past the tap prompt and opens the save at once, as a quick player does.
+  At that moment about 100 audio downloads from the boot are still queued (the core sfx, the `media` pack, the title music
+  twice: the decode fetch and the streaming element), and `main.js` adds the ep2 and ep3 sfx packs (about 1 MB) on the field
+  scene. All were fetched at the default (high) priority, so `pack_files.json` and every pack's code waited about 2.6 s
+  behind them. With the audio at low priority the ep5 to ep8 code (low, as E8-pack set it) still queued behind the audio,
+  and the Episode 3 tile sheet (`assets/tiles/ep3.png`, an image, low priority) held the ep3 pack, and so the whole chain,
+  until about 6.8 s. The service worker's precache runs in the same window but does not show in the page's timings.
+- **Kept:**
+  1. `src/core/audio.js` `fetchRaw`: every audio download at `priority: 'low'`, and, while no worker controls the page, at most
+     two at once (a small queue) until `uncap()`. Music still starts at once through its streaming element.
+  2. `src/game/packs.js`: when the last loading hard pack comes up, `engine.audio.uncap()` lifts that limit.
+  3. `src/game/packs.js` `attempt()`: the `<link rel="modulepreload">` for a pack's code is added after its code fetch even
+     when no worker controls the page (first visit), so the modules are parsed in parallel instead of one `import()` at a
+     time. The fetch still comes first; a failed preload after it can poison the module map exactly as the `import()` it
+     replaces could, no more.
+  4. `src/data/ep5..ep8/index.js` `prefetchCode()`: `cache: 'force-cache'`. It only reads the status (the 404 set), and
+     packs.js has just fetched the same files, so it no longer downloads them a second time on a server that sends no-cache.
+  Cost before the tap prompt: about +370 gzipped bytes (audio.js +288, packs.js +82, each file gzip -6); `precache.test.mjs`
+  still passes the 2.34 MiB ratchet. `sw.js` moved from version 4f118761dd7d to 8fd05abb1820 (core files changed); the
+  precache list itself is unchanged (348 entries).
+- **Measured, not kept:** images at high fetch priority (`assets.js` `loadImage`): it freed the ep3 sheet before the queue
+  limit existed, but with the limit it measured no gain (leaving it out was as fast or faster), so the core was left
+  unchanged. Lowering the worker's precache fetches to low priority (`sw.js`): no change. Fetching each hard pack's code only
+  after the pack below it (strict chain order, all high): slower (10.9 to 11.4 s), the lower packs' `import()` requests and
+  art then queued behind the higher packs' code. All code at high priority with the old ep3/ep4 split removed: slower
+  (11.0 to 11.9 s) for the same reason.
+- **Result, interleaved with HEAD in the same sessions (cold / warm in s, median and range):**
+
+| server | HEAD 6d39b8d | Load8 |
+|---|---|---|
+| standard (14 / 6 runs) | 9.65 (9.30 to 10.02) / 2.86 (2.55 to 3.12) | 8.42 (7.49 to 9.01) / 2.73 (2.57 to 2.86) |
+| Pages-like (20 / 6 runs) | 9.36 (9.14 to 9.68) / 2.59 (2.24 to 2.73) | 6.17 (5.88 to 6.53) / 2.81 (2.67 to 2.88) |
+
+  Plan 3.3's 8 s cold target is met on the Pages-like server and missed on the standard one, where each module is still
+  downloaded twice (its fetch, then its `import()` or preload): about 440 requests on six connections. The Pages-like warm
+  entry is about 0.2 s slower (still under 3 s): the test reloads as soon as the code is cached, while audio the limit held
+  back is still arriving through the worker. Getting the standard server under 8 s needs fewer requests per pack (one bundle
+  per pack, a build step the project does not have) or a timing server that caches as Pages does.
+
 ## The worldmap pack (2026-11-11, issue #97, WORLD_MAP_PLAN wave 2)
 
 `worldmap` (prefix `worldmap_`, entry `src/data/worldmap/index.js`, asset fragment `assets/worldmap_manifest.json`, no audio

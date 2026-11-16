@@ -209,7 +209,7 @@ async function attempt(id, def, opts) {
       if (hrefs.length && !(await storedAll(hrefs))) {
         await Promise.all(hrefs.map(async (h, i) => { const r = await fetch(h, { priority }); if (!r.ok) throw new Error(`${code[i]}: ${r.status}`); }));
       }
-      if (typeof document !== 'undefined' && navigator.serviceWorker && navigator.serviceWorker.controller) for (const h of hrefs) document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'modulepreload', href: h }));
+      if (typeof document !== 'undefined') for (const h of hrefs) document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'modulepreload', href: h }));
     }
     const mod = await importer(def.entry);
     if (mod && typeof mod.register === 'function') reg = await mod.register(engine);
@@ -318,6 +318,9 @@ export function ensurePack(id, opts = {}) {
       const waiters = s.waiters.splice(0);
       for (const fn of waiters) { try { fn(id); } catch (e) { console.warn('[packs] onPackReady', e); } }
       warm(res, opts);
+      // Load8: the last hard pack up lifts the audio download limit (src/core/audio.js uncap)
+      const t = tableOf(opts);
+      if (def.hard && engine && engine.audio && engine.audio.uncap && !Object.keys(t).some((d) => t[d].hard && state[d] && state[d].promise && !state[d].ready)) engine.audio.uncap();
     } else {
       s.promise = null;                       // the next call tries again
       if (!toasted) { toasted = true; say(engine, FAIL_TOAST); }
